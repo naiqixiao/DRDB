@@ -2,9 +2,9 @@ const mysql = require("mysql");
 
 const con = mysql.createConnection({
   host: "localhost",
-  user: "******",
-  password: "******",
-  database: "******",
+  user: "admin",
+  password: "password",
+  database: "DRDB",
   debug: false,
   multipleStatements: true
 });

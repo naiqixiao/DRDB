@@ -1,10 +1,12 @@
 .DS_Store
 node_modules
 index.html
+app.html
 SequelizeTest.js
-api/models/DRDB_Seq.js
+sequelizeAuto.js
+
 api/models/DRDB_SQL.js
-api/models/DRDB.js
+api/models/DRDB_Seq.js
 
 
 # local env files
