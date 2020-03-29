@@ -1,0 +1,75 @@
+const express = require("express");
+const app = express();
+
+const bodyParser = require("body-parser");
+const morgan = require("morgan");
+
+app.use(morgan("dev"));
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
+    return res.status(200).json({});
+  }
+  next();
+});
+
+// Routers
+const userRoutes = require("./api/routes/user");
+
+const familyRoutes = require("./api/routes/family");
+const childRoutes = require("./api/routes/child");
+const conversationRoutes = require("./api/routes/conversation");
+
+const studyRoutes = require("./api/routes/study");
+const appointmentRoutes = require("./api/routes/appointment");
+const personnelRoutes = require("./api/routes/personnel");
+const labRoutes = require("./api/routes/lab");
+const experimenterRoutes = require("./api/routes/experimenter");
+
+const calRoutes = require("./api/routes/calendar");
+
+
+app.use("/user", userRoutes);
+
+app.use("/family", familyRoutes);
+app.use("/child", childRoutes);
+app.use("/conversation", conversationRoutes);
+
+app.use("/study", studyRoutes);
+app.use("/appointment", appointmentRoutes);
+app.use("/personnel", personnelRoutes);
+app.use("/lab", labRoutes);
+app.use("/experimenter", experimenterRoutes);
+
+app.use("/cal", calRoutes);
+
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
+
+// Error handling
+app.use((req, res, next) => {
+  const error = new Error("Not found.");
+  error.status = 404;
+  next(error);
+});
+
+app.use((error, req, res, next) => {
+  res.status(error.status || 500);
+  res.json({
+    error: {
+      message: error.message
+    }
+  });
+});
+
+module.exports = app;
