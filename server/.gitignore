@@ -2,9 +2,9 @@
 node_modules
 index.html
 SequelizeTest.js
-/api/models/DRDB_Seq.js
-/api/models/DRDB_SQL.js
-/api/models/DRDB.js
+./api/models/DRDB_Seq.js
+./api/models/DRDB_SQL.js
+./api/models/DRDB.js
 
 
 # local env files
