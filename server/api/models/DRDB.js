@@ -6,7 +6,6 @@ const sequelize = new Sequelize("DRDB", "admin", "password", {
   dialect: "mysql",
   logging: false,
   define: {
-    // timestamps: false,
     freezeTableName: true
   },
   timeZone: "America/Toronto",
