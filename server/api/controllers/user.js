@@ -68,6 +68,7 @@ exports.login = asyncHandler(async (req, res) => {
   res.send({
     message: "Auth succsessful.",
     user: personnel.Email,
+    userID: personnel.id,
     lab: personnel.FK_Lab,
     token: token,
     studies: personnel.Lab.Studies

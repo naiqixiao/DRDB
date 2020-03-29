@@ -10,6 +10,7 @@ export default new Vuex.Store({
   state: {
     token: null,
     user: null,
+    userID: null,
     lab: null,
     studies: null,
     isUserLoggedIn: false
@@ -21,6 +22,9 @@ export default new Vuex.Store({
     },
     setUser(state, user) {
       state.user = user;
+    },
+    setUserID(state, userID) {
+      state.userID = userID;
     },
     setLab(state, lab) {
       state.lab = lab;
@@ -35,6 +39,9 @@ export default new Vuex.Store({
     },
     setUser({ commit }, user) {
       commit("setUser", user);
+    },
+    setUserID({ commit }, userID) {
+      commit("setUserID", userID);
     },
     setLab({ commit }, lab) {
       commit("setLab", lab);

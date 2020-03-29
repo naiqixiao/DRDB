@@ -32,28 +32,7 @@ exports.create = asyncHandler(async (req, res) => {
   var newAppointmentInfo = req.body;
 
   if (newAppointmentInfo.Status == "Confirmed") {
-    const study = await model.study.findOne({
-      attributes: ["StudyName"],
-      where: { id: newAppointmentInfo.FK_Study }
-    });
-
-    newAppointmentInfo.summary =
-      study.StudyName +
-      ", Family: " +
-      newAppointmentInfo.FK_Family +
-      ", Child: " +
-      newAppointmentInfo.FK_Child;
-
-    // const child = await model.child.findOne({
-    //   attributes: ["DoB"],
-    //   where: { id: newAppointmentInfo.FK_Child }
-    // });
-
-    // newAppointmentInfo.AgeByParticipation = Math.floor(
-    //   (new Date(newAppointmentInfo.AppointmentTime) - new Date(child.DoB)) /
-    //     (1000 * 3600 * 24)
-    // );
-
+    
     // Create a calendar event
     const calEvent = await google.calendar.events.insert({
       calendarId: "primary",
@@ -63,8 +42,6 @@ exports.create = asyncHandler(async (req, res) => {
 
     newAppointmentInfo.calendarEventId = calEvent.data.id;
     newAppointmentInfo.eventURL = calEvent.data.htmlLink;
-  } else {
-    newAppointmentInfo.AgeByParticipation = 9999;
   }
 
   const appointment = await model.appointment.create(newAppointmentInfo, {
@@ -72,7 +49,7 @@ exports.create = asyncHandler(async (req, res) => {
   });
 
   res.status(200).send(appointment);
-  console.log("appointment created " + appointment.id);
+  // console.log("appointment created " + JSON.stringify(appointment));
 });
 
 // Retrieve appointments from the database.

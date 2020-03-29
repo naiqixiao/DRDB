@@ -48,6 +48,7 @@
         <ChildInfo
           :Children="queryString.Children"
           :familyId="parseInt(queryString.id)"
+          @CreateAppointment="updateAppointment($event)"
         ></ChildInfo>
       </v-col>
       <v-col cols="12" lg="3" md="4">
@@ -72,14 +73,22 @@
         </v-data-table>
 
         <v-textarea
-          id="conv"
           label="Conversation with parents"
           outlined
           filled
           no-resize
-          rows="4"
+          rows="3"
+          solo
+          v-model="conv"
+          :disabled="!parseInt(queryString.id)"
         ></v-textarea>
-        <v-btn color="purple" text @click="submitConversation">submit</v-btn>
+        <v-btn
+          color="purple"
+          text
+          :disabled="!parseInt(queryString.id) && conv.length > 5"
+          @click="submitConversation"
+          >submit</v-btn
+        >
       </v-col>
     </v-row>
     <v-row class="grey lighten-5" style="height: 400px;" justify="start" dense>
@@ -100,8 +109,6 @@ import AppointmentTable from "@/components/AppointmentTable";
 import family from "@/services/family";
 import conversation from "@/services/conversation";
 
-import moment from "moment";
-
 export default {
   components: {
     DateDisplay,
@@ -110,6 +117,7 @@ export default {
   },
   data() {
     return {
+      conv: "",
       page: null,
       NofFamily: 0,
       Families: [],
@@ -128,9 +136,6 @@ export default {
     //   this.queryString = {};
     // },
     async search() {
-      var a = moment(new Date());
-      console.log(a.toISOString(true));
-
       try {
         const Result = await family.search(this.queryString);
         this.NofFamily = Result.data.length;
@@ -155,29 +160,32 @@ export default {
         }
       }
     },
+
     nextPage() {
       this.queryString = this.Families[this.page - 1];
     },
+
     previousPage() {
       this.queryString = this.Families[this.page - 1];
     },
+
     async submitConversation() {
-      var textareaConversation = document.getElementById("conv");
       const newConversation = {
         FK_Family: this.queryString.id,
-        Conversation: textareaConversation.value,
-        Time: new Date()
+        Conversation: this.conv,
+        Time: new Date().toISOString()
       };
 
       try {
         await conversation.create(newConversation);
-        console.log("Conversation added!");
-        textareaConversation.value = "";
+        this.conv = ""
         this.queryString.Conversations.push(newConversation);
+        console.log("Conversation added!");
       } catch (error) {
         console.log("Conversation failed!");
       }
     },
+
     async deleteItem(item) {
       const index = this.queryString.Conversations.indexOf(item);
       if (
@@ -189,6 +197,32 @@ export default {
           console.log("conversation deleted.");
         } catch (error) {
           console.log(error);
+        }
+      }
+    },
+
+    async updateAppointment() {
+      try {
+        const Result = await family.search(this.queryString);
+        this.NofFamily = Result.data.length;
+        if (this.NofFamily > 0) {
+          // console.log("the family is: " + JSON.stringify(Result.data));
+
+          this.page = 1;
+          this.Families = Result.data;
+          this.queryString = this.Families[this.page - 1];
+        } else {
+          alert("no family can be found");
+          this.page = 0;
+          this.queryString = {};
+        }
+        // this.searchMode == false;
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login"
+          });
         }
       }
     }

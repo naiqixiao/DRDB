@@ -27,6 +27,8 @@
                   <v-date-picker
                     v-model="studyDate"
                     show-current
+                    :min="earliestDate"
+                    :max="latestDate"
                   ></v-date-picker>
                 </v-col>
                 <v-col cols="12" lg="3">
@@ -72,7 +74,8 @@
 
     <template v-slot:item.Completed="{ item }">
       <v-checkbox
-        class="mx-7"
+        dense
+        class="mr-0 pa-0"
         v-model="item.Completed"
         @change="updateAppointment(item, 'Completed')"
       ></v-checkbox>
@@ -99,7 +102,16 @@ export default {
     return {
       dialog: false,
       editedIndex: -1,
-      editedItem: {},
+      editedItem: {
+        Study: {
+          MinAge: 6,
+          MaxAge: 18
+        },
+        Child: {
+          Name: null,
+          DoB: new Date()
+        }
+      },
       studyDate: null,
       studyTime: "09:00AM",
       studyTimeSlots: [
@@ -174,7 +186,16 @@ export default {
     close() {
       this.dialog = false;
       setTimeout(() => {
-        this.editedItem = {};
+        this.editedItem = {
+          Study: {
+            MinAge: 6,
+            MaxAge: 18
+          },
+          Child: {
+            Name: null,
+            DoB: new Date()
+          }
+        };
         this.editedIndex = -1;
       }, 300);
     },
@@ -196,7 +217,7 @@ export default {
           timeZone: "America/Toronto"
         };
 
-        console.log(JSON.stringify(this.editedItem));
+        // console.log(JSON.stringify(this.editedItem));
 
         await appointment.update(this.editedItem);
 
@@ -234,6 +255,50 @@ export default {
 
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
+    },
+    earliestDate: function() {
+      if (
+        moment(new Date())
+          .add(1, "days")
+          .isSameOrAfter(
+            moment(this.editedItem.Child.DoB).add(
+              Math.floor(this.editedItem.Study.MinAge * 30.5),
+              "days"
+            )
+          )
+      ) {
+        return moment(new Date())
+          .add(1, "days")
+          .toISOString(true);
+      } else {
+        return moment(this.editedItem.Child.DoB)
+          .add(Math.floor(this.editedItem.Study.MinAge * 30.5), "days")
+          .toISOString(true);
+      }
+    },
+    latestDate: function() {
+      // if (
+      //   moment(new Date())
+      //     .add(1, "days")
+      //     .isSameOrAfter(
+      //       moment(this.editedItem.Child.DoB).add(
+      //         Math.floor(this.editedItem.Study.MaxAge * 30.5),
+      //         "days"
+      //       )
+      //     )
+      // ) {
+      //   return moment(this.editedItem.Child.DoB)
+      //     .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
+      //     .toISOString(true);
+      // } else {
+      //   return moment(new Date())
+      //     .add(1, "days")
+      //     .toISOString(true);
+      // }
+
+      return moment(this.editedItem.Child.DoB)
+        .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
+        .toISOString(true);
     }
   },
   watch: {

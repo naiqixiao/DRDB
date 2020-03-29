@@ -57,6 +57,7 @@ export default {
         });
         this.$store.dispatch("setToken", response.data.token);
         this.$store.dispatch("setUser", response.data.user);
+        this.$store.dispatch("setUserID", response.data.userID);
         this.$store.dispatch("setLab", response.data.lab);
         this.$store.dispatch("setStudies", response.data.studies);
         this.$router.push({

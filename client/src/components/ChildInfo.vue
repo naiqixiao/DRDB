@@ -55,13 +55,83 @@
         </v-dialog>
       </div>
 
+      <div>
+        <v-dialog
+          v-model="dialogSchedule"
+          max-width="1200px"
+          :retain-focus="false"
+        >
+          <v-card>
+            <v-card-title class="headline">Schedule a study</v-card-title>
+            <template>
+              <v-container fluid>
+                <v-row
+                  class="grey lighten-5"
+                  style="height: 600px;"
+                  justify="space-around"
+                >
+                  <v-col cols="12" lg="5">
+                    <v-card-title class="headline">{{
+                      editedItem.Name
+                    }}</v-card-title>
+                    <AgeDisplay :DoB="editedItem.DoB" />
+
+                    <v-select
+                      :items="PotentialStudies[editedIndex]"
+                      :item-value="'id'"
+                      :item-text="'StudyName'"
+                      v-model="selectedStudy"
+                      return-object
+                      filled
+                      label="Elegible Studies"
+                    ></v-select>
+                    <!-- <h3>{{ selectedStudy ? selectedStudy.StudyName + selectedStudy.MinAge : "" }}</h3> -->
+                    <v-select
+                      :items="Responses"
+                      v-model="response"
+                      filled
+                      label="Parents' response"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" lg="5">
+                    <v-date-picker
+                      v-model="studyDate"
+                      show-current
+                      :min="earliestDate"
+                      :max="latestDate"
+                    ></v-date-picker>
+                  </v-col>
+                  <v-col cols="12" lg="3">
+                    <v-combobox
+                      v-model="studyTime"
+                      :items="studyTimeSlots"
+                      label="Study time"
+                    ></v-combobox>
+                    <!-- <h3>{{ studyDateTime }}</h3> -->
+                  </v-col>
+                </v-row>
+              </v-container>
+            </template>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="CloseSchedule"
+                >Cancel</v-btn
+              >
+              <v-btn color="green darken-1" text @click="CreateAppointment"
+                >Confirm</v-btn
+              >
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
+
       <v-card class="mx-auto" max-width="350px" max-height="300px">
         <v-card-title>{{ child.Name }}</v-card-title>
 
         <v-card-subtitle justify="start">
           <AgeDisplay :DoB="child.DoB" />
         </v-card-subtitle>
-        <v-list-item-title class="headline mb-3">{{
+        <!-- <v-list-item-title class="headline mb-3">{{
           UniquePreviousStudies[index]
         }}</v-list-item-title>
         <v-list-item-title class="headline mb-1">{{
@@ -69,11 +139,13 @@
         }}</v-list-item-title>
         <v-list-item-title class="headline mb-1">{{
           PotentialStudies[index]
-        }}</v-list-item-title>
-
+        }}</v-list-item-title> -->
         <v-card-actions>
           <v-btn text @click.stop="EditChild(child, index)">Edit</v-btn>
-          <v-btn text :disabled="ElegibleStudies[index].length == 0"
+          <v-btn
+            text
+            :disabled="PotentialStudies[index].length < 1"
+            @click.stop="Schedule(child, index)"
             >Schedule</v-btn
           >
         </v-card-actions>
@@ -90,6 +162,9 @@ import AgeDisplay from "@/components/AgeDisplay";
 import child from "@/services/child";
 import store from "@/store";
 
+import appointment from "@/services/appointment";
+import moment from "moment";
+
 export default {
   components: {
     AgeDisplay
@@ -101,11 +176,16 @@ export default {
   data() {
     return {
       dialog: false,
+      dialogSchedule: false,
       editedIndex: -1,
+      selectedStudy: {
+        MinAge: 6,
+        MaxAge: 18
+      },
       editedItem: {
         Name: null,
         Sex: null,
-        DoB: null,
+        DoB: (new Date()).toISOString(),
         FK_Family: this.familyId,
         Age: null,
         Hearingloss: 0,
@@ -119,7 +199,7 @@ export default {
       defaultItem: {
         Name: null,
         Sex: null,
-        DoB: null,
+        DoB: (new Date()).toISOString(),
         FK_Family: this.familyId,
         Age: null,
         Hearingloss: 0,
@@ -130,7 +210,32 @@ export default {
         BirthWeight: null,
         Appointments: []
       },
-      queryString: {},
+      Responses: ["Confirmed", "Left a message", "Rejected"],
+      response: null,
+      studyDate: null,
+      studyTime: "09:00AM",
+      studyTimeSlots: [
+        "08:30AM",
+        "09:00AM",
+        "09:30AM",
+        "10:00AM",
+        "10:30AM",
+        "11:00AM",
+        "11:30AM",
+        "12:00PM",
+        "12:30PM",
+        "01:00PM",
+        "01:30PM",
+        "02:00PM",
+        "02:30PM",
+        "03:00PM",
+        "03:30PM",
+        "04:00PM",
+        "04:30PM",
+        "05:00PM",
+        "05:30PM",
+        "06:00PM"
+      ],
       Sex: ["F", "M"],
       rules: {
         required: value => !!value || "Required.",
@@ -195,6 +300,65 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
       }, 300);
+    },
+
+    async Schedule(child, index) {
+      this.editedIndex = index;
+      this.editedItem = Object.assign({}, child);
+      this.dialogSchedule = true;
+    },
+
+    async CreateAppointment() {
+      var newAppointmentInfo = {
+        AppointmentTime: moment(this.studyDateTime).toISOString(true),
+        Status: this.response,
+        FK_Study: this.selectedStudy.id,
+        summary:
+          this.selectedStudy.StudyName +
+          ", Family: " +
+          this.editedItem.FK_Family +
+          ", Child: " +
+          this.editedItem.id,
+        FK_Family: this.editedItem.FK_Family,
+        FK_Child: this.editedItem.id,
+        ScheduledBy: store.state.userID,
+        location: "Psychology Building, McMaster University",
+        start: {
+          dateTime: moment(this.studyDateTime).toISOString(true),
+          timeZone: "America/Toronto"
+        },
+        end: {
+          dateTime: moment(this.studyDateTime)
+            .add(1, "h")
+            .toISOString(true),
+          timeZone: "America/Toronto"
+        },
+        attendees: [
+          {
+            email: "g.jaeger0226@gmail.com" // will change to experiments' emails later.
+          }
+        ]
+      };
+
+      const newAppointment = await appointment.create(newAppointmentInfo);
+
+      this.Children[this.editedIndex].Appointments.push({
+        FK_Study: newAppointment.data.FK_Study
+      });
+
+      console.log("New appointment scheduled!");
+
+      this.$emit("CreateAppointment");
+
+      this.CloseSchedule();
+    },
+
+    CloseSchedule() {
+      this.dialogSchedule = false;
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      }, 300);
     }
   },
   computed: {
@@ -234,17 +398,83 @@ export default {
 
         previousStudies = Array.from(new Set(previousStudies));
 
-        PotentialStudies[i] = elegibleStudy.filter(
+        let potentialStudyIds = elegibleStudy.filter(
           study => !previousStudies.includes(study)
         );
+
+        var PotentialStudyList = store.state.studies.filter(study =>
+          potentialStudyIds.includes(study.id)
+        );
+
+        PotentialStudies.push(PotentialStudyList);
       }
 
       return PotentialStudies;
+    },
+
+    studyDateTime: function() {
+      var StudyTimeString = this.studyTime.slice(0, 5);
+      var AMPM = this.studyTime.slice(5, 7);
+      var StudyHour = StudyTimeString.split(":")[0];
+      var StudyMin = StudyTimeString.split(":")[1];
+
+      switch (AMPM) {
+        case "PM":
+          if (parseInt(StudyHour) < 12) {
+            StudyHour = parseInt(StudyHour) + 12;
+          }
+          break;
+
+        case "AM":
+          StudyHour = parseInt(StudyHour);
+          break;
+      }
+
+      StudyMin = parseInt(StudyMin);
+      var studyDateTime =
+        new Date(this.studyDate).getTime() +
+        StudyHour * 3600 * 1000 +
+        StudyMin * 60000 +
+        new Date(this.studyDate).getTimezoneOffset() * 60000;
+
+      studyDateTime = new Date(studyDateTime);
+      return studyDateTime;
+    },
+
+    earliestDate: function() {
+      if (
+        moment(new Date())
+          .add(1, "days")
+          .isSameOrAfter(
+            moment(this.editedItem.DoB).add(
+              Math.floor(this.selectedStudy.MinAge * 30.5),
+              "days"
+            )
+          )
+      ) {
+        return moment(new Date())
+          .add(1, "days")
+          .toISOString(true);
+      } else {
+        return moment(this.editedItem.DoB)
+          .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
+          .toISOString(true);
+      }
+    },
+
+    latestDate: function() {
+      return moment(this.editedItem.DoB)
+        .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
+        .toISOString(true);
     }
   },
   watch: {
     dialog(val) {
       val || this.close();
+    },
+
+    dialogSchedule(val) {
+      val || this.CloseSchedule();
     }
   }
 };

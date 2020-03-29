@@ -132,7 +132,7 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.appointment,
         include: [
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName"] }
+          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
         ]
       }
     ]
