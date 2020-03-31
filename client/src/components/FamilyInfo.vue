@@ -188,8 +188,8 @@ export default {
         { label: "Postal Code", field: "Address" },
         { label: "Email", field: "Email" },
         { label: "Phone", field: "Phone" },
-        { label: "Mother's Name", field: "NameMom" },
-        { label: "Father's Name", field: "NameDad" }
+        { label: "Mother's Name", field: "NameMom", rules: ["name"] },
+        { label: "Father's Name", field: "NameDad", rules: ["name"] }
       ],
       otherInfo: [
         {

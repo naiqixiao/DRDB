@@ -85,7 +85,6 @@
                       filled
                       label="Elegible Studies"
                     ></v-select>
-                    <!-- <h3>{{ selectedStudy ? selectedStudy.StudyName + selectedStudy.MinAge : "" }}</h3> -->
                     <v-select
                       :items="Responses"
                       v-model="response"
@@ -107,7 +106,6 @@
                       :items="studyTimeSlots"
                       label="Study time"
                     ></v-combobox>
-                    <!-- <h3>{{ studyDateTime }}</h3> -->
                   </v-col>
                 </v-row>
               </v-container>
@@ -266,7 +264,7 @@ export default {
         BirthWeight: null,
         Appointments: []
       },
-      Responses: ["Confirmed", "Left a message", "Rejected"],
+      Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
       studyDate: null,
       studyTime: "09:00AM",
@@ -316,7 +314,6 @@ export default {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.FK_Family = this.familyId;
-      console.log(this.editedItem);
       this.dialogNewChild = true;
     },
 
@@ -373,46 +370,74 @@ export default {
     },
 
     async createAppointment() {
-      var newAppointmentInfo = {
-        AppointmentTime: moment(this.studyDateTime).toISOString(true),
-        Status: this.response,
-        FK_Study: this.selectedStudy.id,
-        summary:
-          this.selectedStudy.StudyName +
-          ", Family: " +
-          this.editedItem.FK_Family +
-          ", Child: " +
-          this.editedItem.id,
-        FK_Family: this.editedItem.FK_Family,
-        FK_Child: this.editedItem.id,
-        ScheduledBy: store.state.userID,
-        location: "Psychology Building, McMaster University",
-        start: {
-          dateTime: moment(this.studyDateTime).toISOString(true),
-          timeZone: "America/Toronto"
-        },
-        end: {
-          dateTime: moment(this.studyDateTime)
-            .add(1, "h")
-            .toISOString(true),
-          timeZone: "America/Toronto"
-        },
-        attendees: [
-          {
-            email: "g.jaeger0226@gmail.com" // will change to experiments' emails later.
+      var newAppointmentInfo = {};
+
+      switch (this.response) {
+        case "Comfirmed":
+          newAppointmentInfo = {
+            AppointmentTime: moment(this.studyDateTime).toISOString(true),
+            Status: this.response,
+            FK_Study: this.selectedStudy.id,
+            summary:
+              this.selectedStudy.StudyName +
+              ", Family: " +
+              this.editedItem.FK_Family +
+              ", Child: " +
+              this.editedItem.id,
+            FK_Family: this.editedItem.FK_Family,
+            FK_Child: this.editedItem.id,
+            ScheduledBy: store.state.userID,
+            location: "Psychology Building, McMaster University",
+            start: {
+              dateTime: moment(this.studyDateTime).toISOString(true),
+              timeZone: "America/Toronto"
+            },
+            end: {
+              dateTime: moment(this.studyDateTime)
+                .add(1, "h")
+                .toISOString(true),
+              timeZone: "America/Toronto"
+            },
+            attendees: [
+              {
+                email: "g.jaeger0226@gmail.com" // will change to experiments' emails later.
+              }
+            ]
+          };
+
+          break;
+
+        default:
+          newAppointmentInfo = {
+            AppointmentTime: null,
+            Status: this.response,
+            FK_Study: this.selectedStudy.id,
+            FK_Family: this.editedItem.FK_Family,
+            FK_Child: this.editedItem.id,
+            ScheduledBy: store.state.userID
+          };
+
+          if (
+            this.response === "Left a message" ||
+            this.response === "Interested"
+          ) {
+            newAppointmentInfo.Status = "TBD";
           }
-        ]
-      };
+          break;
+      }
+      try {
+        const newAppointment = await appointment.create(newAppointmentInfo);
 
-      const newAppointment = await appointment.create(newAppointmentInfo);
+        this.Children[this.editedIndex].Appointments.push({
+          FK_Study: newAppointment.data.FK_Study
+        });
 
-      this.Children[this.editedIndex].Appointments.push({
-        FK_Study: newAppointment.data.FK_Study
-      });
+        console.log("New appointment scheduled!");
 
-      console.log("New appointment scheduled!");
-
-      this.$emit("CreateAppointment");
+        this.$emit("CreateAppointment");
+      } catch (error) {
+        console.log(error.response);
+      }
 
       this.closeSchedule();
     },
@@ -422,6 +447,9 @@ export default {
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
+        response = null;
+        studyDate = null;
+        studyTime = "09:00AM";
       }, 300);
     },
 

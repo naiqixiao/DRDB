@@ -200,6 +200,8 @@ export default {
           }
         };
         this.editedIndex = -1;
+        studyDate = null;
+        studyTime = "09:00AM";
       }, 300);
     },
 

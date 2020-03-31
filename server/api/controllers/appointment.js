@@ -32,7 +32,6 @@ exports.create = asyncHandler(async (req, res) => {
   var newAppointmentInfo = req.body;
 
   if (newAppointmentInfo.Status == "Confirmed") {
-    
     // Create a calendar event
     const calEvent = await google.calendar.events.insert({
       calendarId: "primary",
@@ -44,11 +43,16 @@ exports.create = asyncHandler(async (req, res) => {
     newAppointmentInfo.eventURL = calEvent.data.htmlLink;
   }
 
-  const appointment = await model.appointment.create(newAppointmentInfo, {
-    include: [model.family, model.child, model.study]
-  });
+  try {
+    const appointment = await model.appointment.create(newAppointmentInfo, {
+      include: [model.family, model.child, model.study]
+    });
 
-  res.status(200).send(appointment);
+    res.status(200).send(appointment);
+  } catch (error) {
+    throw error;
+  }
+
   // console.log("appointment created " + JSON.stringify(appointment));
 });
 
@@ -232,8 +236,6 @@ exports.update = asyncHandler(async (req, res) => {
     console.log("Appointment update error:" + error);
   }
 });
-
-
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
