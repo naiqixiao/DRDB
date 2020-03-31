@@ -1,11 +1,17 @@
 <template>
-  <div>
-    <v-navigation-drawer v-model="drawer" absolute temporary width="200">
-      <v-list nav dense>
+  <v-app>
+    <v-navigation-drawer
+      app
+      v-model="drawer"
+      temporary
+      width="250"
+      :clipped="$vuetify.breakpoint.lgAndUp"
+    >
+
+      <v-list dense>
         <v-list-item
           v-for="nav in navs"
           :key="nav.label"
-          router
           :to="nav.address"
         >
           <v-list-item-action>
@@ -16,9 +22,23 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
+      <template v-slot:prepend>
+        <div class="pa-2">
+          <!-- <v-space name="space"></v-space> -->
+
+        </div>
+      </template>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block>Logout</v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar app color="teal" clipped-right dark>
+      
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
@@ -29,7 +49,7 @@
     <v-content>
       <router-view />
     </v-content>
-  </div>
+  </v-app>
 </template>
 
 <script>

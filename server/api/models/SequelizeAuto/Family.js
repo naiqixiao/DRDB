@@ -27,45 +27,19 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       RaceMom: {
-        type: DataTypes.ENUM(
-          "Indian",
-          "Asian",
-          "African",
-          "Hispanic",
-          "Caucasian",
-          "Arabic"
-        ),
+        type: DataTypes.STRING(10),
         allowNull: true
       },
       RaceDad: {
-        type: DataTypes.ENUM(
-          "Indian",
-          "Asian",
-          "African",
-          "Hispanic",
-          "Caucasian",
-          "Arabic"
-        ),
+        type: DataTypes.STRING(10),
         allowNull: true
       },
       LanguageMom: {
-        type: DataTypes.ENUM(
-          "English",
-          "French",
-          "Chinese",
-          "Spanish",
-          "Indian"
-        ),
+        type: DataTypes.STRING(10),
         allowNull: true
       },
       LanguageDad: {
-        type: DataTypes.ENUM(
-          "English",
-          "French",
-          "Chinese",
-          "Spanish",
-          "Indian"
-        ),
+        type: DataTypes.STRING(10),
         allowNull: true
       },
       EnglishPercent: {
@@ -97,12 +71,7 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: true
       },
       RecruitmentMethod: {
-        type: DataTypes.ENUM(
-          "Hospital",
-          "Events",
-          "SocialMedia",
-          "PreviousParticipation"
-        ),
+        type: DataTypes.STRING(30),
         allowNull: true
       },
       CreatedBy: {

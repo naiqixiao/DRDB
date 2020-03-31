@@ -225,7 +225,6 @@ exports.update = asyncHandler(async (req, res) => {
       }
     );
 
-    // console.log(JSON.stringify(updatedAppointment));
     res.status(200).send(updatedAppointment);
 
     console.log("Appointment Information Updated.");
@@ -233,6 +232,8 @@ exports.update = asyncHandler(async (req, res) => {
     console.log("Appointment update error:" + error);
   }
 });
+
+
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {

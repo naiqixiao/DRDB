@@ -167,7 +167,7 @@ export default {
             await appointment.update(item);
             console.log("study completed!");
           } catch (error) {
-            console.log(error);
+            console.log(error.response);
           }
           break;
 
@@ -175,9 +175,12 @@ export default {
           item.Status = status;
           try {
             await appointment.update(item);
+            item.AppointmentTime = null;
+            item.updatedAt = new Date().toISOString();
+
             console.log("appointment updated!");
           } catch (error) {
-            console.log(error);
+            console.log(error.response);
           }
           break;
       }
@@ -201,30 +204,34 @@ export default {
     },
 
     async save() {
-      if (this.editedIndex > -1) {
-        this.editedItem.Status = "Confirmed";
-        this.editedItem.AppointmentTime = moment(
-          this.studyDateTime
-        ).toISOString(true);
-        this.editedItem.start = {
-          dateTime: moment(this.studyDateTime).toISOString(true),
-          timeZone: "America/Toronto"
-        };
-        this.editedItem.end = {
-          dateTime: moment(this.studyDateTime)
-            .add(1, "h")
-            .toISOString(true),
-          timeZone: "America/Toronto"
-        };
+      try {
+        if (this.editedIndex > -1) {
+          this.editedItem.Status = "Confirmed";
+          this.editedItem.AppointmentTime = moment(
+            this.studyDateTime
+          ).toISOString(true);
+          this.editedItem.start = {
+            dateTime: moment(this.studyDateTime).toISOString(true),
+            timeZone: "America/Toronto"
+          };
+          this.editedItem.end = {
+            dateTime: moment(this.studyDateTime)
+              .add(1, "h")
+              .toISOString(true),
+            timeZone: "America/Toronto"
+          };
 
-        // console.log(JSON.stringify(this.editedItem));
+          await appointment.update(this.editedItem);
 
-        await appointment.update(this.editedItem);
+          this.editedItem.updatedAt = new Date().toISOString();
 
-        Object.assign(this.Appointments[this.editedIndex], this.editedItem);
+          Object.assign(this.Appointments[this.editedIndex], this.editedItem);
+        }
+
+        this.close();
+      } catch (error) {
+        console.log(error.response);
       }
-
-      this.close();
     }
   },
   computed: {
@@ -277,25 +284,6 @@ export default {
       }
     },
     latestDate: function() {
-      // if (
-      //   moment(new Date())
-      //     .add(1, "days")
-      //     .isSameOrAfter(
-      //       moment(this.editedItem.Child.DoB).add(
-      //         Math.floor(this.editedItem.Study.MaxAge * 30.5),
-      //         "days"
-      //       )
-      //     )
-      // ) {
-      //   return moment(this.editedItem.Child.DoB)
-      //     .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
-      //     .toISOString(true);
-      // } else {
-      //   return moment(new Date())
-      //     .add(1, "days")
-      //     .toISOString(true);
-      // }
-
       return moment(this.editedItem.Child.DoB)
         .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
         .toISOString(true);

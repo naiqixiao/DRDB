@@ -20,7 +20,7 @@ export default {
       var formatedDate = "";
       switch (format) {
         case "long":
-          formatedDate = moment(date).format("MMM D (ddd), YYYY [at] hA");
+          formatedDate = moment(date).format("MMM D (ddd), YYYY [at] h:mmA");
           break;
 
         default:

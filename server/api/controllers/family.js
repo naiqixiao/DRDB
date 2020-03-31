@@ -31,33 +31,41 @@ const asyncHandler = require("express-async-handler");
 exports.create = asyncHandler(async (req, res) => {
   var newFamilyInfo = req.body;
 
-  const newFamily = await model.family.create(newFamilyInfo, {
-    include: [model.conversations, model.child, model.appointment]
-  });
-
-  // update sinbing table
-  if (newFamily.Children.length > 1) {
-    const Children = await model.child.findAll({
-      attributes: ["id"],
-      where: { FK_Family: newFamily.id }
-    });
-
-    var siblings = [];
-
-    for (var i = 0; i < Children.length; i++) {
-      var childId = Children[i].id;
-
-      Children.forEach(sibling => {
-        if (sibling.id != childId) {
-          siblings.push({ FK_Child: childId, Sibling: sibling.id });
-        }
-      });
-    }
-
-    await model.sibling.bulkCreate(siblings);
+  if (newFamilyInfo.id) {
+    delete newFamilyInfo["id"];
   }
 
-  res.status(200).send(newFamily);
+  try {
+    const newFamily = await model.family.create(newFamilyInfo, {
+      include: [model.conversations, model.child, model.appointment]
+    });
+
+    res.status(200).send(newFamily);
+  } catch (error) {
+    throw error;
+  }
+
+  // update sinbing table
+  // if (newFamily.Children.length > 1) {
+  //   const Children = await model.child.findAll({
+  //     attributes: ["id"],
+  //     where: { FK_Family: newFamily.id }
+  //   });
+
+  //   var siblings = [];
+
+  //   for (var i = 0; i < Children.length; i++) {
+  //     var childId = Children[i].id;
+
+  //     Children.forEach(sibling => {
+  //       if (sibling.id != childId) {
+  //         siblings.push({ FK_Child: childId, Sibling: sibling.id });
+  //       }
+  //     });
+  //   }
+
+  //   await model.sibling.bulkCreate(siblings);
+  // }
 });
 
 // batch upload families
@@ -141,15 +149,10 @@ exports.search = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
-// Update a Tutorial by the id in the request
+// Update a family by the id in the request
 exports.update = asyncHandler(async (req, res) => {
-  var ID = req.query.id;
+  var ID = req.body.id;
   var updatedFamilyInfo = req.body;
-
-  // prevent change id.
-  if (updatedFamilyInfo.id) {
-    delete updatedFamilyInfo["id"];
-  }
 
   const family = await model.family.update(updatedFamilyInfo, {
     where: { id: ID },
@@ -159,7 +162,7 @@ exports.update = asyncHandler(async (req, res) => {
   console.log("Family Information Updated!");
 });
 
-// Delete a Tutorial with the specified id in the request
+// Delete a family with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const family = await model.family.destroy({
     where: req.query

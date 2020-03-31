@@ -67,7 +67,7 @@
               <v-container fluid>
                 <v-row
                   class="grey lighten-5"
-                  style="height: 600px;"
+                  style="height: 600px"
                   justify="space-around"
                 >
                   <v-col cols="12" lg="5">
@@ -114,10 +114,10 @@
             </template>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="CloseSchedule"
+              <v-btn color="green darken-1" text @click="closeSchedule"
                 >Cancel</v-btn
               >
-              <v-btn color="green darken-1" text @click="CreateAppointment"
+              <v-btn color="green darken-1" text @click="createAppointment"
                 >Confirm</v-btn
               >
             </v-card-actions>
@@ -131,17 +131,8 @@
         <v-card-subtitle justify="start">
           <AgeDisplay :DoB="child.DoB" />
         </v-card-subtitle>
-        <!-- <v-list-item-title class="headline mb-3">{{
-          UniquePreviousStudies[index]
-        }}</v-list-item-title>
-        <v-list-item-title class="headline mb-1">{{
-          ElegibleStudies[index]
-        }}</v-list-item-title>
-        <v-list-item-title class="headline mb-1">{{
-          PotentialStudies[index]
-        }}</v-list-item-title> -->
         <v-card-actions>
-          <v-btn text @click.stop="EditChild(child, index)">Edit</v-btn>
+          <v-btn text @click.stop="editChild(child, index)">Edit</v-btn>
           <v-btn
             text
             :disabled="PotentialStudies[index].length < 1"
@@ -152,7 +143,71 @@
       </v-card>
     </v-col>
 
-    <v-btn text @click.stop="AddChild" :disabled="!familyId">Add</v-btn>
+    <v-card class="mx-auto" max-width="350px" max-height="300px">
+      <v-card-actions>
+        <v-btn color="purple" text @click.stop="addChild" :disabled="!familyId"
+          >Add</v-btn
+        >
+      </v-card-actions>
+    </v-card>
+
+    <div>
+      <v-dialog
+        v-model="dialogNewChild"
+        max-width="760px"
+        :retain-focus="false"
+      >
+        <v-card>
+          <v-card-title>
+            <span class="headline">Edit child's information</span>
+          </v-card-title>
+
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="editedItem.Name"
+                    :rules="[rules.required, rules.name]"
+                    label="Name"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="editedItem.DoB"
+                    :rules="[rules.required, rules.dob]"
+                    label="Date of birth (YYYY-MM-DD)"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-select
+                    v-model="editedItem.Sex"
+                    :items="Sex"
+                    filled
+                    label="Sex"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field
+                    v-model="editedItem.BirthWeight"
+                    :rules="[rules.birthWeight]"
+                    label="Birth weight"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="dialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
   </v-row>
 </template>
 
@@ -177,6 +232,7 @@ export default {
     return {
       dialog: false,
       dialogSchedule: false,
+      dialogNewChild: false,
       editedIndex: -1,
       selectedStudy: {
         MinAge: 6,
@@ -185,7 +241,7 @@ export default {
       editedItem: {
         Name: null,
         Sex: null,
-        DoB: (new Date()).toISOString(),
+        DoB: new Date().toISOString(),
         FK_Family: this.familyId,
         Age: null,
         Hearingloss: 0,
@@ -199,7 +255,7 @@ export default {
       defaultItem: {
         Name: null,
         Sex: null,
-        DoB: (new Date()).toISOString(),
+        DoB: null,
         FK_Family: this.familyId,
         Age: null,
         Hearingloss: 0,
@@ -256,42 +312,50 @@ export default {
     };
   },
   methods: {
-    AddChild() {
+    addChild() {
       this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.FK_Family = this.familyId;
-      this.dialog = true;
+      console.log(this.editedItem);
+      this.dialogNewChild = true;
     },
 
-    EditChild(child, index) {
+    editChild(child, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, child);
       this.dialog = true;
     },
 
     async save() {
-      if (this.editedIndex > -1) {
-        this.editedItem.Age = Math.floor(
-          (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
-        );
+      try {
+        if (this.editedIndex > -1) {
+          this.editedItem.Age = Math.floor(
+            (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
+          );
 
-        await child.update(this.editedItem);
+          await child.update(this.editedItem);
 
-        Object.assign(this.Children[this.editedIndex], this.editedItem);
+          Object.assign(this.Children[this.editedIndex], this.editedItem);
 
-        console.log("Child information updated!");
-      } else {
-        this.editedItem.Age = Math.floor(
-          (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
-        );
+          console.log("Child information updated!");
 
-        await child.create(this.editedItem);
+          this.close();
+        } else {
+          this.editedItem.Age = Math.floor(
+            (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
+          );
 
-        this.Children.push(this.editedItem);
+          await child.create(this.editedItem);
 
-        console.log("Child is creted and siblings are updated!");
+          this.Children.push(this.editedItem);
+
+          console.log("Child is creted and siblings are updated!");
+
+          this.closeNewChild();
+        }
+      } catch (error) {
+        console.log(error.response);
       }
-
-      this.close();
     },
 
     close() {
@@ -308,7 +372,7 @@ export default {
       this.dialogSchedule = true;
     },
 
-    async CreateAppointment() {
+    async createAppointment() {
       var newAppointmentInfo = {
         AppointmentTime: moment(this.studyDateTime).toISOString(true),
         Status: this.response,
@@ -350,11 +414,19 @@ export default {
 
       this.$emit("CreateAppointment");
 
-      this.CloseSchedule();
+      this.closeSchedule();
     },
 
-    CloseSchedule() {
+    closeSchedule() {
       this.dialogSchedule = false;
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem);
+        this.editedIndex = -1;
+      }, 300);
+    },
+
+    closeNewChild() {
+      this.dialogNewChild = false;
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -474,7 +546,11 @@ export default {
     },
 
     dialogSchedule(val) {
-      val || this.CloseSchedule();
+      val || this.closeSchedule();
+    },
+
+    dialogNewChild(val) {
+      val || this.closeNewChild();
     }
   }
 };

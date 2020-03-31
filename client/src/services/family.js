@@ -5,8 +5,16 @@ export default {
     return api().get("family/", {
       params: queryString
     });
-    // .catch(err => {
-    //   console.error(err.response.status);
-    // });
+  },
+  update(queryString) {
+    return api().post("family/", queryString);
+  },
+  create(queryString) {
+    return api().post("family/add", queryString);
+  },
+  delete(queryString) {
+    return api().delete("family/", {
+      params: queryString
+    });
   }
 };
