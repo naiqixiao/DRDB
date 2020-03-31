@@ -447,9 +447,9 @@ export default {
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
-        response = null;
-        studyDate = null;
-        studyTime = "09:00AM";
+        this.response = null;
+        this.studyDate = null;
+        this.studyTime = "09:00AM";
       }, 300);
     },
 
