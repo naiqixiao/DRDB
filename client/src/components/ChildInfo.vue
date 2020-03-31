@@ -434,7 +434,7 @@ export default {
 
         console.log("New appointment scheduled!");
 
-        this.$emit("CreateAppointment");
+        this.$emit("createAppointment");
       } catch (error) {
         console.log(error.response);
       }

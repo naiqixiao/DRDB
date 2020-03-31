@@ -13,6 +13,7 @@
           :label="item.label"
           v-model="currentFamily[item.field]"
           :append-icon="searchStatus ? 'mdi-magnify' : undefined"
+          :disabled="!searchStatus"
           dense
         ></v-text-field>
       </v-col>
@@ -28,6 +29,7 @@
           <v-text-field
             :label="item.label"
             v-model="currentFamily[item.field]"
+            disabled
             dense
           ></v-text-field>
         </v-col>
@@ -91,7 +93,7 @@
           color="purple"
           text
           @click.stop="searchMode"
-          :disabled="!currentFamily.id"
+          :disabled="searchStatus"
           >Search</v-btn
         >
       </v-col>
@@ -252,7 +254,7 @@ export default {
           this.page = 1;
           this.Families = Result.data;
           this.currentFamily = this.Families[this.page - 1];
-          this.searchStatus = false;
+          this.searchStatus = !this.searchStatus;
           console.log(JSON.stringify(this.currentFamily));
 
           this.$emit("searchFamily", this.currentFamily);
@@ -272,7 +274,7 @@ export default {
     },
 
     searchMode() {
-      this.searchStatus = true;
+      this.searchStatus = !this.searchStatus;
       this.currentFamily = {};
       this.$emit("searchFamily", this.currentFamily);
     },

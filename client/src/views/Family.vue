@@ -15,7 +15,7 @@
         <ChildInfo
           :Children="queryString.Children"
           :familyId="parseInt(queryString.id)"
-          @CreateAppointment="updateAppointment"
+          @createAppointment="updateAppointment"
         ></ChildInfo>
       </v-col>
       <v-col cols="12" lg="3" md="4">
@@ -62,7 +62,6 @@ export default {
         const Result = await family.search(this.queryString);
         this.NofFamily = Result.data.length;
         if (this.NofFamily > 0) {
-          // console.log("the family is: " + JSON.stringify(Result.data));
 
           this.page = 1;
           this.searchFamilies = Result.data;
@@ -72,7 +71,6 @@ export default {
           this.page = 0;
           this.queryString = {};
         }
-        // this.searchMode == false;
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
