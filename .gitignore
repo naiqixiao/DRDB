@@ -8708,3 +8708,7 @@ server/node_modules/yeast/README.md
 server/sequelizeAuto.js
 .gitignore
 .gitignore
+client/src/views/Family copy.vue
+client/src/components/FamilyInfo.vue
+client/src/components/FamilyInfo.vue
+client/src/components/FamilyInfo.vue

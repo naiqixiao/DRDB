@@ -2,6 +2,9 @@
   <span v-if="DoB">
     {{ AgeFormated(DoB) }}
   </span>
+  <span v-else>
+    {{ "DoB is not available." }}
+  </span>
 </template>
 
 <script>

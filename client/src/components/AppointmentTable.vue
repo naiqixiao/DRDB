@@ -62,12 +62,34 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <v-icon @click="updateAppointment(item, 'Confirmed')">event</v-icon>
-      <v-icon @click="updateAppointment(item, 'Rescheduling')">update</v-icon>
-      <v-icon @click="updateAppointment(item, 'No Show')"
+      <v-icon
+        @click="updateAppointment(item, 'Confirmed')"
+        :disabled="item.Status === 'Confirmed' || item.Completed == 1"
+        >event</v-icon
+      >
+      <v-icon
+        @click="updateAppointment(item, 'Rescheduling')"
+        :disabled="
+          item.Status === 'Rescheduling' ||
+            item.Status === 'No Show' ||
+            item.Status === 'TBD' ||
+            item.Completed == 1
+        "
+        >update</v-icon
+      >
+      <v-icon
+        @click="updateAppointment(item, 'No Show')"
+        :disabled="
+          item.Status === 'Rescheduling' ||
+            item.Status === 'No Show' ||
+            item.Status === 'TBD' ||
+            item.Completed == 1
+        "
         >sentiment_dissatisfied</v-icon
       >
-      <v-icon @click="updateAppointment(item, 'Cancelled')"
+      <v-icon
+        @click="updateAppointment(item, 'Cancelled')"
+        :disabled="item.Status === 'Cancelled' || item.Completed == 1"
         >not_interested</v-icon
       >
     </template>
@@ -165,7 +187,6 @@ export default {
         case "Completed":
           try {
             await appointment.update(item);
-            console.log("study completed!");
           } catch (error) {
             console.log(error.response);
           }
@@ -173,6 +194,20 @@ export default {
 
         default:
           item.Status = status;
+
+          if (status == "Cancelled") {
+            this.$emit("alert");
+          }
+
+          item.summary =
+            item.Status.toUpperCase() +
+            " - " +
+            item.Study.StudyName +
+            ", Family: " +
+            item.FK_Family +
+            ", Child: " +
+            item.FK_Child;
+
           try {
             await appointment.update(item);
             item.AppointmentTime = null;
@@ -209,9 +244,18 @@ export default {
       try {
         if (this.editedIndex > -1) {
           this.editedItem.Status = "Confirmed";
+
           this.editedItem.AppointmentTime = moment(
             this.studyDateTime
           ).toISOString(true);
+
+          this.editedItem.summary =
+            this.editedItem.Study.StudyName +
+            ", Family: " +
+            this.editedItem.FK_Family +
+            ", Child: " +
+            this.editedItem.FK_Child;
+
           this.editedItem.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
             timeZone: "America/Toronto"
@@ -223,8 +267,10 @@ export default {
             timeZone: "America/Toronto"
           };
 
-          await appointment.update(this.editedItem);
+          const calendarEvent = await appointment.update(this.editedItem);
 
+          this.editedItem.calendarEventId = calendarEvent.calendarEventId;
+          this.editedItem.eventURL = calendarEvent.eventURL;
           this.editedItem.updatedAt = new Date().toISOString();
 
           Object.assign(this.Appointments[this.editedIndex], this.editedItem);
@@ -236,6 +282,7 @@ export default {
       }
     }
   },
+
   computed: {
     studyDateTime: function() {
       var StudyTimeString = this.studyTime.slice(0, 5);

@@ -70,7 +70,8 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.FK_Family = req.query.FamilyId;
   }
   if (req.query.Status) {
-    queryString.Status = { [Op.in]: JSON.parse(req.query.Status) };
+    console.log(req.query.Status);
+    queryString.Status = { [Op.in]: JSON.parse([req.query.Status]) };
   }
   if (req.query.AppointmentTimeAfter) {
     queryString.AppointmentTime = {
@@ -97,6 +98,10 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.FamilyId) {
     queryString["$Family.id$"] = req.query.FamilyId;
+  }
+
+  if (req.query.StudyName) {
+    queryString["$Study.StudyName$"] = req.query.StudyName;
   }
 
   const appointment = await model.appointment.findAll({
@@ -149,17 +154,10 @@ exports.update = asyncHandler(async (req, res) => {
     var ID = updatedAppointmentInfo.id;
     delete updatedAppointmentInfo["id"];
   }
+  
   if (!updatedAppointmentInfo.Completed) {
     switch (updatedAppointmentInfo.Status) {
       case "Confirmed": {
-        updatedAppointmentInfo.summary =
-          updatedAppointmentInfo.Study.StudyName +
-          ", Family: " +
-          updatedAppointmentInfo.FK_Family +
-          ", Child: " +
-          updatedAppointmentInfo.FK_Child;
-
-        console.log(JSON.stringify(updatedAppointmentInfo));
 
         if (updatedAppointmentInfo.calendarEventId) {
           await google.calendar.events.patch({
@@ -178,6 +176,11 @@ exports.update = asyncHandler(async (req, res) => {
 
           updatedAppointmentInfo.calendarEventId = calEvent.data.id;
           updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
+
+          res.status(200).send({
+            calendarEventId: calEvent.data.id,
+            eventURL: calEvent.data.htmlLink
+          });
         }
 
         break;

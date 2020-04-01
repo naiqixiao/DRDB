@@ -1,128 +1,6 @@
 <template>
   <v-row dense>
     <v-col cols="6" v-for="(child, index) in Children" :key="child.id" dense>
-      <div>
-        <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
-          <v-card>
-            <v-card-title>
-              <span class="headline">Edit child's information</span>
-            </v-card-title>
-
-            <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.Name"
-                      :rules="[rules.required, rules.name]"
-                      label="Name"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.DoB"
-                      :rules="[rules.required, rules.dob]"
-                      label="Date of birth (YYYY-MM-DD)"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-select
-                      v-model="editedItem.Sex"
-                      :items="Sex"
-                      filled
-                      label="Sex"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="editedItem.BirthWeight"
-                      :rules="[rules.birthWeight]"
-                      label="Birth weight"
-                    ></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="dialog = false"
-                >Cancel</v-btn
-              >
-              <v-btn color="green darken-1" text @click="save">Save</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
-
-      <div>
-        <v-dialog
-          v-model="dialogSchedule"
-          max-width="1200px"
-          :retain-focus="false"
-        >
-          <v-card>
-            <v-card-title class="headline">Schedule a study</v-card-title>
-            <template>
-              <v-container fluid>
-                <v-row
-                  class="grey lighten-5"
-                  style="height: 600px"
-                  justify="space-around"
-                >
-                  <v-col cols="12" lg="5">
-                    <v-card-title class="headline">{{
-                      editedItem.Name
-                    }}</v-card-title>
-                    <AgeDisplay :DoB="editedItem.DoB" />
-
-                    <v-select
-                      :items="PotentialStudies[editedIndex]"
-                      :item-value="'id'"
-                      :item-text="'StudyName'"
-                      v-model="selectedStudy"
-                      return-object
-                      filled
-                      label="Elegible Studies"
-                    ></v-select>
-                    <v-select
-                      :items="Responses"
-                      v-model="response"
-                      filled
-                      label="Parents' response"
-                    ></v-select>
-                  </v-col>
-                  <v-col cols="12" lg="5">
-                    <v-date-picker
-                      v-model="studyDate"
-                      show-current
-                      :min="earliestDate"
-                      :max="latestDate"
-                    ></v-date-picker>
-                  </v-col>
-                  <v-col cols="12" lg="3">
-                    <v-combobox
-                      v-model="studyTime"
-                      :items="studyTimeSlots"
-                      label="Study time"
-                    ></v-combobox>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </template>
-            <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="closeSchedule"
-                >Cancel</v-btn
-              >
-              <v-btn color="green darken-1" text @click="createAppointment"
-                >Confirm</v-btn
-              >
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
-
       <v-card class="mx-auto" max-width="350px" max-height="300px">
         <v-card-title>{{ child.Name }}</v-card-title>
 
@@ -150,30 +28,45 @@
     </v-card>
 
     <div>
-      <v-dialog
-        v-model="dialogNewChild"
-        max-width="760px"
-        :retain-focus="false"
-      >
+      <v-dialog v-model="dialogPicker" max-width="360px">
+        <v-card>
+          <v-row align="center">
+            <v-col cols="12" lg="12">
+              <v-date-picker
+                v-model="editedItem.DoB"
+                show-current
+                :max="new Date().toISOString()"
+                @click:date="dialogPicker = false"
+              ></v-date-picker>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-dialog>
+    </div>
+
+    <div>
+      <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false">
         <v-card>
           <v-card-title>
-            <span class="headline">Edit child's information</span>
+            <span class="headline">Child's information</span>
           </v-card-title>
 
-          <v-card-text>
+          <v-form ref="formChild" v-model="validChild" lazy-validation>
             <v-container>
               <v-row>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.Name"
-                    :rules="[rules.required, rules.name]"
+                    :rules="rules.name"
                     label="Name"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.DoB"
-                    :rules="[rules.required, rules.dob]"
+                    append-icon="event"
+                    @click:append="dialogPicker = true"
+                    :rules="rules.dob"
                     label="Date of birth (YYYY-MM-DD)"
                   ></v-text-field>
                 </v-col>
@@ -188,20 +81,88 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.BirthWeight"
-                    :rules="[rules.birthWeight]"
+                    :rules="rules.birthWeight"
                     label="Birth weight"
                   ></v-text-field>
                 </v-col>
               </v-row>
             </v-container>
-          </v-card-text>
+          </v-form>
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialog = false"
+            <v-btn color="green darken-1" text @click="dialogChild = false"
               >Cancel</v-btn
             >
             <v-btn color="green darken-1" text @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
+
+    <div>
+      <v-dialog
+        v-model="dialogSchedule"
+        max-width="1200px"
+        :retain-focus="false"
+      >
+        <v-card>
+          <v-card-title class="headline">Schedule a study</v-card-title>
+          <template>
+            <v-container fluid>
+              <v-row
+                class="grey lighten-5"
+                style="height: 600px"
+                justify="space-around"
+              >
+                <v-col cols="12" lg="5">
+                  <v-card-title class="headline">{{
+                    editedItem.Name
+                  }}</v-card-title>
+                  <AgeDisplay :DoB="editedItem.DoB" />
+
+                  <v-select
+                    :items="PotentialStudies[editedIndex]"
+                    :item-value="'id'"
+                    :item-text="'StudyName'"
+                    v-model="selectedStudy"
+                    return-object
+                    filled
+                    label="Elegible Studies"
+                  ></v-select>
+                  <v-select
+                    :items="Responses"
+                    v-model="response"
+                    filled
+                    label="Parents' response"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" lg="5">
+                  <v-date-picker
+                    v-model="studyDate"
+                    show-current
+                    :min="earliestDate"
+                    :max="latestDate"
+                  ></v-date-picker>
+                </v-col>
+                <v-col cols="12" lg="3">
+                  <v-combobox
+                    v-model="studyTime"
+                    :items="studyTimeSlots"
+                    label="Study time"
+                  ></v-combobox>
+                </v-col>
+              </v-row>
+            </v-container>
+          </template>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="closeSchedule"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="createAppointment"
+              >Confirm</v-btn
+            >
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -228,10 +189,11 @@ export default {
   },
   data() {
     return {
-      dialog: false,
+      dialogChild: false,
       dialogSchedule: false,
-      dialogNewChild: false,
+      dialogPicker: false,
       editedIndex: -1,
+      validChild: true,
       selectedStudy: {
         MinAge: 6,
         MaxAge: 18
@@ -292,20 +254,27 @@ export default {
       ],
       Sex: ["F", "M"],
       rules: {
-        required: value => !!value || "Required.",
-        counter: value => value.length <= 30 || "Max 30 characters",
-        dob: value => {
-          var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-          return pattern.test(value) || "Invalid Date of Birth.";
-        },
-        birthWeight: value => {
-          var pattern = /^[0-9]{1,2}[:.,-]?$/;
-          return pattern.test(value) || "Invalid Birth Weight.";
-        },
-        name: value => {
-          var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-          return pattern.test(value) || "Invalid Name.";
-        }
+        name: [
+          value => !!value || "Required.",
+          value => {
+            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
+            return pattern.test(value) || "Invalid Name.";
+          },
+          value => (value && value.length <= 30) || "Max 30 characters"
+        ],
+        dob: [
+          value => !!value || "Required.",
+          value => {
+            var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+            return pattern.test(value) || "Invalid Date of Birth.";
+          }
+        ],
+        birthWeight: [
+          value => {
+            var pattern = /^[0-9]{1,2}[:.,-]?$/;
+            return pattern.test(value) || "Invalid Birth Weight.";
+          }
+        ]
       }
     };
   },
@@ -314,41 +283,53 @@ export default {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.FK_Family = this.familyId;
-      this.dialogNewChild = true;
+      this.dialogChild = true;
     },
 
     editChild(child, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, child);
-      this.dialog = true;
+      this.dialogChild = true;
     },
 
     async save() {
       try {
+        var validationResults = false;
+
         if (this.editedIndex > -1) {
-          this.editedItem.Age = Math.floor(
-            (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
-          );
+          validationResults = this.$refs.formChild.validate();
 
-          await child.update(this.editedItem);
+          if (validationResults) {
+            this.editedItem.Age = Math.floor(
+              (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
+            );
 
-          Object.assign(this.Children[this.editedIndex], this.editedItem);
+            await child.update(this.editedItem);
 
-          console.log("Child information updated!");
+            Object.assign(this.Children[this.editedIndex], this.editedItem);
 
-          this.close();
+            console.log("Child information updated!");
+
+            this.close();
+          }
         } else {
-          this.editedItem.Age = Math.floor(
-            (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
-          );
+          validationResults = this.$refs.formChild.validate();
 
-          await child.create(this.editedItem);
+          if (validationResults) {
+            this.editedItem.Age = Math.floor(
+              (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
+            );
 
-          this.Children.push(this.editedItem);
+            const newChild = await child.create(this.editedItem);
 
-          console.log("Child is creted and siblings are updated!");
+            this.editedItem.id = newChild.data.id;
 
-          this.closeNewChild();
+            this.Children.push(this.editedItem);
+
+            console.log("Child is creted and siblings are updated!");
+
+            this.close();
+          }
         }
       } catch (error) {
         console.log(error.response);
@@ -356,7 +337,7 @@ export default {
     },
 
     close() {
-      this.dialog = false;
+      this.dialogChild = false;
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -373,7 +354,7 @@ export default {
       var newAppointmentInfo = {};
 
       switch (this.response) {
-        case "Comfirmed":
+        case "Confirmed":
           newAppointmentInfo = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
@@ -451,32 +432,31 @@ export default {
         this.studyDate = null;
         this.studyTime = "09:00AM";
       }, 300);
-    },
-
-    closeNewChild() {
-      this.dialogNewChild = false;
-      setTimeout(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      }, 300);
     }
   },
   computed: {
+    // childrenList: function() {
+    //   return this.Children.push(this.defaultItem);
+    // },
     ElegibleStudies: function() {
-      var elegibleStudies = this.Children.map(child => {
-        let studyIds = [];
-        store.state.studies.forEach(study => {
-          if (
-            child.Age >= study.MinAge * 30.5 &&
-            child.Age <= study.MaxAge * 30.5
-          ) {
-            studyIds.push(study.id);
-          }
+      if (this.Children) {
+        var elegibleStudies = this.Children.map(child => {
+          let studyIds = [];
+          store.state.studies.forEach(study => {
+            if (
+              child.Age >= study.MinAge * 30.5 &&
+              child.Age <= study.MaxAge * 30.5
+            ) {
+              studyIds.push(study.id);
+            }
+          });
+          return studyIds;
         });
-        return studyIds;
-      });
 
-      return elegibleStudies;
+        return elegibleStudies;
+      } else {
+        return [];
+      }
     },
 
     UniquePreviousStudies: function() {
@@ -569,16 +549,12 @@ export default {
     }
   },
   watch: {
-    dialog(val) {
+    dialogChild(val) {
       val || this.close();
     },
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    },
-
-    dialogNewChild(val) {
-      val || this.closeNewChild();
     }
   }
 };

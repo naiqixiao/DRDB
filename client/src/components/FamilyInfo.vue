@@ -40,10 +40,10 @@
       <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
         <v-card>
           <v-card-title>
-            <span class="headline">Edit family information</span>
+            <span class="headline">Family information</span>
           </v-card-title>
 
-          <v-card-text>
+          <v-form ref="form" v-model="valid" lazy-validation>
             <v-container>
               <v-row>
                 <v-col
@@ -63,6 +63,15 @@
                       dense
                     ></v-combobox>
                   </div>
+                  <div v-else-if="field.rules">
+                    <v-text-field
+                      :label="field.label"
+                      v-model="editedItem[field.field]"
+                      :rules="rules[field.rules]"
+                      filled
+                      dense
+                    ></v-text-field>
+                  </div>
                   <div v-else>
                     <v-text-field
                       :label="field.label"
@@ -74,7 +83,7 @@
                 </v-col>
               </v-row>
             </v-container>
-          </v-card-text>
+          </v-form>
 
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -138,6 +147,7 @@ export default {
       page: 0,
       searchStatus: false,
       dialog: false,
+      valid: true,
       editedIndex: -1,
       editedItem: {
         id: null,
@@ -188,10 +198,10 @@ export default {
       searchingFields: [
         { label: "Family ID", field: "id" },
         { label: "Postal Code", field: "Address" },
-        { label: "Email", field: "Email" },
-        { label: "Phone", field: "Phone" },
-        { label: "Mother's Name", field: "NameMom", rules: ["name"] },
-        { label: "Father's Name", field: "NameDad", rules: ["name"] }
+        { label: "Email", field: "Email", rules: "email" },
+        { label: "Phone", field: "Phone", rules: "phone" },
+        { label: "Mother's Name", field: "NameMom", rules: "name" },
+        { label: "Father's Name", field: "NameDad", rules: "name" }
       ],
       otherInfo: [
         {
@@ -227,20 +237,30 @@ export default {
         ]
       },
       rules: {
-        required: value => !!value || "Required.",
-        counter: value => value.length <= 30 || "Max 30 characters",
-        email: value => {
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(value) || "Invalid e-mail.";
-        },
-        phone: value => {
-          const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-          return pattern.test(value) || "Invalid phone.";
-        },
-        name: value => {
-          var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-          return pattern.test(value) || "Invalid Name.";
-        }
+        name: [
+          value => !!value || "Required.",
+          value => {
+            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
+            return pattern.test(value) || "Invalid Name.";
+          },
+          value => (value && value.length <= 30) || "Max 30 characters"
+        ],
+        email: [
+          value => !!value || "Required.",
+          value => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return pattern.test(value) || "Invalid e-mail.";
+          },
+          value => (value && value.length <= 30) || "Max 30 characters"
+        ],
+        phone: [
+          value => {
+            const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+            return pattern.test(value) || "Invalid phone.";
+          },
+          value => !!value || "Required.",
+          value => (value && value.length == 10) || "Have to be 10 digits"
+        ]
       },
       editableFields: []
     };
@@ -300,39 +320,42 @@ export default {
     },
 
     async save() {
-      try {
-        if (this.editedIndex > -1) {
-          this.editedItem.UpdatedBy = store.state.userID;
+      var validationResults = this.$refs.form.validate();
 
-          await family.update(this.editedItem);
+      if (validationResults) {
+        try {
+          if (this.editedIndex > -1) {
+            this.editedItem.UpdatedBy = store.state.userID;
 
-          Object.assign(this.Families[this.editedIndex], this.editedItem);
+            await family.update(this.editedItem);
 
-          console.log("Family information updated!");
-        } else {
-          this.editedItem.LastContactDate = new Date();
-          this.editedItem.NextContactDate = new Date();
-          this.editedItem.UpdatedBy = store.state.userID;
-          this.editedItem.CreatedBy = store.state.userID;
+            Object.assign(this.Families[this.editedIndex], this.editedItem);
 
-          const newfamilyId = await family.create(this.editedItem);
+            console.log("Family information updated!");
+          } else {
+            this.editedItem.LastContactDate = new Date();
+            this.editedItem.NextContactDate = new Date();
+            this.editedItem.UpdatedBy = store.state.userID;
+            this.editedItem.CreatedBy = store.state.userID;
 
-          this.editedItem.id = newfamilyId.data.id;
-          // console.log(JSON.stringify(newfamilyId));
+            const newfamilyId = await family.create(this.editedItem);
 
-          this.currentFamily = this.editedItem;
-          console.log(JSON.stringify(this.currentFamily));
+            this.editedItem.id = newfamilyId.data.id;
 
-          this.Families.push(this.editedItem);
-          this.page = this.Families.length;
-          console.log("Family is creted!");
-          this.$emit("searchFamily", this.editedItem);
+            this.currentFamily = this.editedItem;
+            console.log(JSON.stringify(this.currentFamily));
+
+            this.Families.push(this.editedItem);
+            this.page = this.Families.length;
+            console.log("Family is creted!");
+            this.$emit("searchFamily", this.editedItem);
+          }
+        } catch (error) {
+          console.log(error.response);
         }
-      } catch (error) {
-        console.log(error.response);
-      }
 
-      this.close();
+        this.close();
+      }
     },
 
     close() {
@@ -341,6 +364,10 @@ export default {
         this.editedItem = Object.assign({}, this.familyTemplate);
         this.editedIndex = -1;
       }, 300);
+    },
+    validate() {
+      var validationresults = this.$refs.form.validate();
+      console.log(validationresults);
     },
 
     nextPage() {
