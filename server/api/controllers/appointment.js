@@ -71,7 +71,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.Status) {
     console.log(req.query.Status);
-    queryString.Status = { [Op.in]: JSON.parse([req.query.Status]) };
+    queryString.Status = { [Op.in]: req.query.Status };
   }
   if (req.query.AppointmentTimeAfter) {
     queryString.AppointmentTime = {
@@ -103,6 +103,8 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.StudyName) {
     queryString["$Study.StudyName$"] = req.query.StudyName;
   }
+
+  // console.log(JSON.stringify(queryString));
 
   const appointment = await model.appointment.findAll({
     where: queryString,
@@ -154,11 +156,10 @@ exports.update = asyncHandler(async (req, res) => {
     var ID = updatedAppointmentInfo.id;
     delete updatedAppointmentInfo["id"];
   }
-  
+
   if (!updatedAppointmentInfo.Completed) {
     switch (updatedAppointmentInfo.Status) {
       case "Confirmed": {
-
         if (updatedAppointmentInfo.calendarEventId) {
           await google.calendar.events.patch({
             calendarId: "primary",

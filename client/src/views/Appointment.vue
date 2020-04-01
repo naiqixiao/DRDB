@@ -17,7 +17,7 @@
           :items="Status"
           filled
           label="Status"
-          @click="searchAppointment"
+          @blur="searchAppointment"
           multiple
         ></v-select>
       </v-col>
@@ -146,7 +146,7 @@ export default {
         const Result = await appointment.search(this.queryString);
         this.Appointments = Result.data;
 
-        console.log(this.Appointments);
+        // console.log(this.Appointments);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
