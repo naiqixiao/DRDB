@@ -70,17 +70,22 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.FK_Family = req.query.FamilyId;
   }
   if (req.query.Status) {
-    console.log(req.query.Status);
     queryString.Status = { [Op.in]: req.query.Status };
   }
-  if (req.query.AppointmentTimeAfter) {
+  if (req.query.AppointmentTimeBefore && req.query.AppointmentTimeAfter) {
     queryString.AppointmentTime = {
-      [Op.gte]: new Date(req.query.AppointmentTimeAfter)
+      [Op.between]: [
+        new Date(req.query.AppointmentTimeAfter),
+        new Date(req.query.AppointmentTimeBefore)
+      ]
     };
-  }
-  if (req.query.AppointmentTimeBefore) {
+  } else if (req.query.AppointmentTimeBefore) {
     queryString.AppointmentTime = {
       [Op.lte]: new Date(req.query.AppointmentTimeBefore)
+    };
+  } else if (req.query.AppointmentTimeAfter) {
+    queryString.AppointmentTime = {
+      [Op.gte]: new Date(req.query.AppointmentTimeAfter)
     };
   }
 
@@ -104,11 +109,13 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Study.StudyName$"] = req.query.StudyName;
   }
 
-  // console.log(JSON.stringify(queryString));
-
   const appointment = await model.appointment.findAll({
     where: queryString,
-    include: [model.family, model.child, model.study]
+    include: [
+      { model: model.family, attributes: ["id"] },
+      { model: model.child, attributes: ["Name", "DoB"] },
+      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
+    ]
   });
   res.status(200).send(appointment);
   console.log("Search successful!");
@@ -117,10 +124,6 @@ exports.search = asyncHandler(async (req, res) => {
 // Retrieve today's appointments from the database.
 exports.today = asyncHandler(async (req, res) => {
   var queryString = {};
-
-  if (req.query.Status) {
-    queryString.Status = { [Op.in]: JSON.parse(req.query.Status) };
-  }
 
   queryString.AppointmentTime = {
     [Op.between]: [
@@ -142,7 +145,11 @@ exports.today = asyncHandler(async (req, res) => {
 
   const appointment = await model.appointment.findAll({
     where: queryString,
-    include: [model.family, model.child, model.study]
+    include: [
+      { model: model.family, attributes: ["id"] },
+      { model: model.child, attributes: ["Name", "DoB"] },
+      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
+    ]
   });
   res.status(200).send(appointment);
   console.log("Search successful!");

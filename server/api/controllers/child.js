@@ -6,33 +6,33 @@ const asyncHandler = require("express-async-handler");
 // Create and Save a new child of an existing family
 exports.create = asyncHandler(async (req, res) => {
   const newChildInfo = req.body;
-  
-  console.log(JSON.stringify(newChildInfo));
 
-  const child = await model.child.create(newChildInfo);
+  try {
+    const child = await model.child.create(newChildInfo);
 
-  // match siblings and update sibling table
-  var Children = await model.child.findAll({
-    attributes: ["id"],
-    where: { FK_Family: child.FK_Family, id: { [Op.ne]: child.id } }
-  });
-
-  if (Children.length > 0) {
-    var siblings = [];
-
-    Children.forEach(sibling => {
-      siblings.push({ FK_Child: child.id, Sibling: sibling.id });
-      siblings.push({ FK_Child: sibling.id, Sibling: child.id });
+    // match siblings and update sibling table
+    var Children = await model.child.findAll({
+      attributes: ["id"],
+      where: { FK_Family: child.FK_Family, id: { [Op.ne]: child.id } }
     });
 
-    // console.log(JSON.stringify(siblings));
+    if (Children.length > 0) {
+      var siblings = [];
 
-    await model.sibling.bulkCreate(siblings);
+      Children.forEach(sibling => {
+        siblings.push({ FK_Child: child.id, Sibling: sibling.id });
+        siblings.push({ FK_Child: sibling.id, Sibling: child.id });
+      });
+
+      await model.sibling.bulkCreate(siblings);
+    }
+
+    res.status(200).send(child);
+
+    console.log("Child is creted and siblings are updated!");
+  } catch (error) {
+    res.status(500).send(error);
   }
-
-  res.status(200).send(child);
-
-  console.log("Child is creted and siblings are updated!")
 });
 
 // Retrieve all children from the database.
@@ -67,7 +67,7 @@ exports.search = asyncHandler(async (req, res) => {
     };
   }
   if (req.query.pastParticipants) {
-    queryString.id = { [Op.notIn]: JSON.parse(req.query.pastParticipants) };
+    queryString.id = { [Op.notIn]: req.query.pastParticipants };
   }
   if (req.query.Prematurity) {
     queryString.PrematureBirth = req.query.Prematurity;
@@ -77,7 +77,14 @@ exports.search = asyncHandler(async (req, res) => {
     where: queryString,
     include: [
       model.appointment,
-      model.family,
+      {
+        model: model.family,
+        include: [
+          {
+            model: model.conversations
+          }
+        ]
+      },
       {
         model: model.child,
         as: "sibling",

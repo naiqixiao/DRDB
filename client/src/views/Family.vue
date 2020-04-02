@@ -351,10 +351,10 @@ export default {
       this.queryString = this.currentFamily;
 
       try {
-        const Result = await family.search(this.queryString);
-        if (Result.data.length > 0) {
+        const Results = await family.search(this.queryString);
+        if (Results.data.length > 0) {
           this.page = 1;
-          this.Families = Result.data;
+          this.Families = Results.data;
           this.currentFamily = this.Families[this.page - 1];
           this.searchStatus = !this.searchStatus;
 
@@ -446,12 +446,12 @@ export default {
 
     nextPage() {
       this.currentFamily = this.Families[this.page - 1];
-      this.$emit("searchFamily", this.currentFamily);
+      // this.$emit("searchFamily", this.currentFamily);
     },
 
     previousPage() {
       this.currentFamily = this.Families[this.page - 1];
-      this.$emit("searchFamily", this.currentFamily);
+      // this.$emit("searchFamily", this.currentFamily);
     }
   },
   computed: {

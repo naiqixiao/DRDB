@@ -28,7 +28,7 @@
     </v-card>
 
     <div>
-      <v-dialog v-model="dialogPicker" max-width="360px">
+      <v-dialog v-model="dobPicker" max-width="360px">
         <v-card>
           <v-row align="center">
             <v-col cols="12" lg="12">
@@ -36,7 +36,7 @@
                 v-model="editedItem.DoB"
                 show-current
                 :max="new Date().toISOString()"
-                @click:date="dialogPicker = false"
+                @click:date="dobPicker = false"
               ></v-date-picker>
             </v-col>
           </v-row>
@@ -65,7 +65,7 @@
                   <v-text-field
                     v-model="editedItem.DoB"
                     append-icon="event"
-                    @click:append="dialogPicker = true"
+                    @click:append="dobPicker = true"
                     :rules="rules.dob"
                     label="Date of birth (YYYY-MM-DD)"
                   ></v-text-field>
@@ -137,14 +137,17 @@
                     label="Parents' response"
                   ></v-select>
                 </v-col>
-                <v-col cols="12" lg="5">
-                  <v-date-picker
+
+                <v-col cols="12" md="2">
+                  <v-text-field
+                    ref="studyDate"
+                    label="Study date"
                     v-model="studyDate"
-                    show-current
-                    :min="earliestDate"
-                    :max="latestDate"
-                  ></v-date-picker>
+                    append-icon="event"
+                    @click:append="datePicker = true"
+                  ></v-text-field>
                 </v-col>
+
                 <v-col cols="12" lg="3">
                   <v-combobox
                     v-model="studyTime"
@@ -164,6 +167,22 @@
               >Confirm</v-btn
             >
           </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="datePicker" max-width="360px">
+        <v-card>
+          <v-row align="center">
+            <v-col cols="12" lg="12">
+              <v-date-picker
+                v-model="studyDate"
+                show-current
+                @click:date="datePick"
+                :min="earliestDate"
+                :max="latestDate"
+              ></v-date-picker>
+            </v-col>
+          </v-row>
         </v-card>
       </v-dialog>
     </div>
@@ -191,7 +210,8 @@ export default {
     return {
       dialogChild: false,
       dialogSchedule: false,
-      dialogPicker: false,
+      dobPicker: false,
+      datePicker: false,
       editedIndex: -1,
       validChild: true,
       selectedStudy: {
@@ -344,7 +364,7 @@ export default {
       }, 300);
     },
 
-    async Schedule(child, index) {
+    Schedule(child, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, child);
       this.dialogSchedule = true;
@@ -432,12 +452,16 @@ export default {
         this.studyDate = null;
         this.studyTime = "09:00AM";
       }, 300);
+    },
+
+    datePick() {
+      this.datePicker = false;
+      setTimeout(() => {
+        this.$refs.studyDate.focus();
+      }, 100);
     }
   },
   computed: {
-    // childrenList: function() {
-    //   return this.Children.push(this.defaultItem);
-    // },
     ElegibleStudies: function() {
       if (this.Children) {
         var elegibleStudies = this.Children.map(child => {

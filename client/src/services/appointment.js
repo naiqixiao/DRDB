@@ -9,6 +9,9 @@ export default {
       params: appointment
     });
   },
+  today() {
+    return api().get("appointment/today");
+  },
   update(appointment) {
     return api().post("appointment/", appointment);
   },

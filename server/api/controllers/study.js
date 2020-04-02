@@ -17,14 +17,19 @@ exports.create = asyncHandler(async (req, res) => {
 // Retrieve all families from the database.
 exports.search = asyncHandler(async (req, res) => {
   var ID = req.query.id;
-  const study = await model.study.findOne({
-    where: { id: ID },
-    include: [model.appointment, model.lab]
-  });
 
-  console.log("Search successful!");
+  try {
+    const study = await model.study.findOne({
+      where: { id: ID },
+      include: [model.appointment, model.lab]
+    });
 
-  res.status(200).send(study);
+    console.log("Search successful!");
+
+    res.status(200).send(study);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 // Update a Tutorial by the id in the request
@@ -47,7 +52,6 @@ exports.update = asyncHandler(async (req, res) => {
 
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
-
   const study = await model.study.destroy({
     where: req.query
   });

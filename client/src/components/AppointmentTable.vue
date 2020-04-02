@@ -1,28 +1,23 @@
 <template>
   <v-data-table
     hide-default-footer
-    height="380px"
-    dense
+    disable-pagination
     fixed-header
+    height=700
     single-select
     no-data-text="The family hasn't participated in any study."
     :headers="headersAppointments"
     :items="Appointments"
     class="elevation-1"
+    @click:row="rowSelected"
   >
     <template v-slot:top>
       <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
         <v-card>
-          <v-card-title class="headline"
-            >Select study date and time.</v-card-title
-          >
+          <v-card-title class="headline">Select study date and time.</v-card-title>
           <template>
             <v-container fluid>
-              <v-row
-                class="grey lighten-5"
-                style="height: 400px;"
-                justify="space-around"
-              >
+              <v-row class="grey lighten-5" style="height: 400px;" justify="space-around">
                 <v-col cols="12" lg="5">
                   <v-date-picker
                     v-model="studyDate"
@@ -32,11 +27,7 @@
                   ></v-date-picker>
                 </v-col>
                 <v-col cols="12" lg="3">
-                  <v-combobox
-                    v-model="studyTime"
-                    :items="studyTimeSlots"
-                    label="Study time"
-                  ></v-combobox>
+                  <v-combobox v-model="studyTime" :items="studyTimeSlots" label="Study time"></v-combobox>
                   <h3>{{ studyDateTime }}</h3>
                 </v-col>
               </v-row>
@@ -65,8 +56,7 @@
       <v-icon
         @click="updateAppointment(item, 'Confirmed')"
         :disabled="item.Status === 'Confirmed' || item.Completed == 1"
-        >event</v-icon
-      >
+      >event</v-icon>
       <v-icon
         @click="updateAppointment(item, 'Rescheduling')"
         :disabled="
@@ -75,8 +65,7 @@
             item.Status === 'TBD' ||
             item.Completed == 1
         "
-        >update</v-icon
-      >
+      >update</v-icon>
       <v-icon
         @click="updateAppointment(item, 'No Show')"
         :disabled="
@@ -85,13 +74,11 @@
             item.Status === 'TBD' ||
             item.Completed == 1
         "
-        >sentiment_dissatisfied</v-icon
-      >
+      >sentiment_dissatisfied</v-icon>
       <v-icon
         @click="updateAppointment(item, 'Cancelled')"
         :disabled="item.Status === 'Cancelled' || item.Completed == 1"
-        >not_interested</v-icon
-      >
+      >not_interested</v-icon>
     </template>
 
     <template v-slot:item.Completed="{ item }">
@@ -159,19 +146,47 @@ export default {
         "06:00PM"
       ],
       headersAppointments: [
-        { text: "Child", align: "center", value: "Child.Name" },
-        { text: "Study", align: "center", value: "Study.StudyName" },
-        { text: "Study Time", align: "center", value: "AppointmentTime" },
+        { text: "Child", align: "center", value: "Child.Name", width: "50px" },
+        {
+          text: "Study",
+          align: "center",
+          value: "Study.StudyName",
+          width: "50px"
+        },
+        {
+          text: "Study Time",
+          align: "center",
+          value: "AppointmentTime",
+          width: "100px"
+        },
         {
           text: "Age by Participation",
           align: "center",
-          value: "AgeByParticipation"
+          value: "AgeByParticipation",
+          width: "80px"
         },
-        { text: "Status", align: "center", value: "Status" },
-        { text: "Updated Time", align: "center", value: "updatedAt" },
+        { text: "Status", align: "center", value: "Status", width: "80px" },
+        {
+          text: "Updated Time",
+          align: "center",
+          value: "updatedAt",
+          width: "80px"
+        },
 
-        { text: "Actions", align: "center", value: "actions", sortable: false },
-        { text: "Completion", align: "center", value: "Completed" }
+        {
+          text: "Actions",
+          align: "center",
+          value: "actions",
+          sortable: false,
+          width: "80px"
+        },
+        {
+          text: "Completion",
+          align: "start",
+          value: "Completed",
+          sortable: false,
+          width: "80px"
+        }
       ]
     };
   },
@@ -280,6 +295,12 @@ export default {
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    rowSelected(item, row) {
+
+      row.select(true);
+      this.$emit("rowSelected", item.FK_Family);
     }
   },
 
