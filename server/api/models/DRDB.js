@@ -109,11 +109,12 @@ Personnel.hasMany(Family, {
   foreignKey: "UpdatedBy"
 });
 
-// Appointment
+// Schedule & Appointment
+const Schedule = sequelize.import("../models/SequelizeAuto/Schedule");
 const Appointment = sequelize.import("../models/SequelizeAuto/Appointment");
 
 Appointment.belongsTo(Family, {
-  foreignKey: "FK_Family"
+foreignKey: "FK_Family"
 });
 Family.hasMany(Appointment, {
   foreignKey: "FK_Family"
@@ -133,12 +134,20 @@ Study.hasMany(Appointment, {
   foreignKey: "FK_Study"
 });
 
-Appointment.belongsTo(Personnel, {
+Appointment.belongsTo(Schedule, {
+  foreignKey: "FK_Schedule"
+});
+Schedule.hasMany(Appointment, {
+  foreignKey: "FK_Schedule"
+});
+
+Schedule.belongsTo(Personnel, {
   foreignKey: "ScheduledBy"
 });
-Personnel.hasMany(Appointment, {
+Personnel.hasMany(Schedule, {
   foreignKey: "ScheduledBy"
 });
+
 
 // Syncronize with database
 sequelize.sync({ force: false }).then(() => {
@@ -147,6 +156,7 @@ sequelize.sync({ force: false }).then(() => {
   exports.conversations = Conversations;
   exports.study = Study;
   exports.appointment = Appointment;
+  exports.schedule = Schedule;
   exports.lab = Lab;
   exports.personnel = Personnel;
   exports.experimenter = Experimenter;

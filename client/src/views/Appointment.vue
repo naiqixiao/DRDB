@@ -3,7 +3,7 @@
     <v-row class="grey lighten-5" style="height: 150px;" justify="start">
       <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
         <v-text-field
-          @keydown.enter="searchAppointment"
+          @keydown.enter="searchSchedule"
           :label="item.label"
           v-model="queryString[item.field]"
           prepend-icon="mdi-magnify"
@@ -13,8 +13,9 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-select
-          @blur="searchAppointmentByStatus"
+          @blur="searchScheduleByStatus"
           v-model="queryString.Status"
+          prepend-icon="mdi-magnify"
           :items="Status"
           label="Status"
           multiple
@@ -23,7 +24,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
-          @keydown.enter="searchAppointment"
+          @keydown.enter="searchSchedule"
           ref="textfieldAfter"
           label="After"
           v-model="queryString.AppointmentTimeAfter"
@@ -36,7 +37,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
-          @keydown.enter="searchAppointment"
+          @keydown.enter="searchSchedule"
           ref="textfieldBefore"
           label="Before"
           v-model="queryString.AppointmentTimeBefore"
@@ -54,7 +55,7 @@
         >
       </v-col>
       <v-col cols="12" md="2">
-        <v-btn color="purple" big text @click="todayStudies"
+        <v-btn color="purple" big text @click="thisWeekStudies"
           >This week's Studies</v-btn
         >
       </v-col>
@@ -66,10 +67,10 @@
         </template>
       </v-col>
       <v-col cols="12" md="9">
-        <AppointmentTable
-          :Appointments="Appointments"
+        <ScheduleTable
+          :Schedules="Schedules"
           @rowSelected="updateFamily"
-        ></AppointmentTable>
+        ></ScheduleTable>
       </v-col>
     </v-row>
 
@@ -108,16 +109,16 @@
 </template>
 
 <script>
-import AppointmentTable from "@/components/AppointmentTable";
+import ScheduleTable from "@/components/ScheduleTable";
 import FamilyInfo from "@/components/FamilyInfo";
 
 import family from "@/services/family";
-import appointment from "@/services/appointment";
+import schedule from "@/services/schedule";
 
 export default {
   components: {
-    AppointmentTable,
-    FamilyInfo
+    ScheduleTable,
+    FamilyInfo,
   },
   data() {
     return {
@@ -132,7 +133,7 @@ export default {
         NameDad: null,
         Status: null,
         AppointmentTimeBefore: null,
-        AppointmentTimeAfter: null
+        AppointmentTimeAfter: null,
       },
       defaultQueryString: {
         FamilyId: null,
@@ -142,16 +143,16 @@ export default {
         NameDad: null,
         Status: null,
         AppointmentTimeBefore: null,
-        AppointmentTimeAfter: null
+        AppointmentTimeAfter: null,
       },
-      Appointments: [],
+      Schedules: [],
       searchingFields: [
         { label: "Family ID", field: "FamilyId" },
         { label: "Email", field: "Email" },
         { label: "Phone", field: "Phone" },
         { label: "Mother's Name", field: "NameMom" },
         { label: "Father's Name", field: "NameDad" },
-        { label: "Study Name", field: "StudyName" }
+        { label: "Study Name", field: "StudyName" },
       ],
       Status: [
         "Confirmed",
@@ -160,22 +161,21 @@ export default {
         "Rescheduled",
         "No Show",
         "Cancelled",
-        "Rejected"
-      ]
+        "Rejected",
+      ],
     };
   },
-  methods: {
-    async searchAppointment() {
-      console.log(this.queryString);
 
+  methods: {
+    async searchSchedule() {
       try {
-        const Result = await appointment.search(this.queryString);
-        this.Appointments = Result.data;
+        const Result = await schedule.search(this.queryString);
+        this.Schedules = Result.data;
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -183,16 +183,16 @@ export default {
       this.queryString = Object.assign({}, this.defaultQueryString);
     },
 
-    async searchAppointmentByStatus() {
+    async searchScheduleByStatus() {
       if (this.queryString.Status) {
         try {
-          const Result = await appointment.search(this.queryString);
-          this.Appointments = Result.data;
+          const Result = await schedule.search(this.queryString);
+          this.Schedules = Result.data;
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
             this.$router.push({
-              name: "Login"
+              name: "Login",
             });
           }
         }
@@ -203,13 +203,31 @@ export default {
 
     async todayStudies() {
       try {
-        const Result = await appointment.today();
-        this.Appointments = Result.data;
+        const Result = await schedule.today();
+        this.Schedules = Result.data;
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
+          });
+        } else {
+          console.log(JSON.stringify(error.response));
+        }
+      }
+
+      this.queryString = Object.assign({}, this.defaultQueryString);
+    },
+
+    async thisWeekStudies() {
+      try {
+        const Result = await schedule.week();
+        this.Schedules = Result.data;
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
           });
         } else {
           console.log(JSON.stringify(error.response));
@@ -221,7 +239,7 @@ export default {
 
     async updateFamily(familyId) {
       var queryStringFamily = {
-        id: familyId
+        id: familyId,
       };
       const Results = await family.search(queryStringFamily);
       this.currentFamily = Results.data[0];
@@ -239,11 +257,11 @@ export default {
       setTimeout(() => {
         this.$refs.textfieldAfter.focus();
       }, 100);
-    }
+    },
   },
 
   computed: {},
-  watch: {}
+  watch: {},
 };
 </script>
 

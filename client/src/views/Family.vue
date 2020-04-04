@@ -1,18 +1,33 @@
 <template>
   <v-container fluid>
-    <v-row
-      class="grey lighten-5"
-      style="height: 500px;"
-      justify="space-around"
-    >
+    <v-row class="grey lighten-5" style="height: 500px;" justify="space-around">
       <v-col cols="12" md="5">
         <v-row justify="space-around">
-          <v-col
-            cols="12"
-            md="6"
-            v-for="item in searchingFields"
-            :key="item.label"
-          >
+    <v-row justify="space-around">
+      <v-col cols="12" md="2" dense>
+        <v-btn color="purple" text @click.stop="searchMode" :disabled="searchStatus">Search</v-btn>
+      </v-col>
+      <v-col cols="12" md="2" dense>
+        <v-btn color="purple" text @click.stop="editFamily" :disabled="!currentFamily.id">Edit</v-btn>
+      </v-col>
+      <v-col cols="12" md="2" dense>
+        <v-btn color="purple" text @click.stop="addFamily">Add</v-btn>
+      </v-col>
+      <v-col cols="12" md="2" dense>
+        <h5>{{ page + " / " + NofFamily }}</h5>
+      </v-col>
+      <v-col cols="12" md="3" dense>
+        <v-pagination
+          @next="nextPage"
+          @previous="previousPage"
+          circle
+          v-model="page"
+          :length="NofFamily"
+          total-visible="1"
+        ></v-pagination>
+      </v-col>
+    </v-row>
+          <v-col cols="12" md="6" v-for="item in searchingFields" :key="item.label">
             <v-text-field
               @keydown.enter="searchFamily"
               :label="item.label"
@@ -23,20 +38,9 @@
             ></v-text-field>
           </v-col>
           <v-divider></v-divider>
-          <v-row >
-            <v-col
-              cols="12"
-              md="4"
-              dense
-              v-for="item in otherInfo"
-              :key="item.label"
-            >
-              <v-text-field
-                :label="item.label"
-                v-model="currentFamily[item.field]"
-                readonly
-                dense
-              ></v-text-field>
+          <v-row>
+            <v-col cols="12" md="4" dense v-for="item in otherInfo" :key="item.label">
+              <v-text-field :label="item.label" v-model="currentFamily[item.field]" readonly dense></v-text-field>
             </v-col>
           </v-row>
         </v-row>
@@ -92,58 +96,19 @@
 
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="green darken-1" text @click="dialog = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="green darken-1" text @click="dialog = false">Cancel</v-btn>
                 <v-btn color="green darken-1" text @click="save">Save</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
         </div>
-
-        <v-row justify="space-around">
-          <v-col cols="12" md="2" dense>
-            <v-btn
-              color="purple"
-              text
-              @click.stop="searchMode"
-              :disabled="searchStatus"
-              >Search</v-btn
-            >
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-btn
-              color="purple"
-              text
-              @click.stop="editFamily"
-              :disabled="!currentFamily.id"
-              >Edit</v-btn
-            >
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-btn color="purple" text @click.stop="addFamily">Add</v-btn>
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <h5>{{ page + " / " + NofFamily }}</h5>
-          </v-col>
-          <v-col cols="12" md="3" dense>
-            <v-pagination
-              @next="nextPage"
-              @previous="previousPage"
-              circle
-              v-model="page"
-              :length="NofFamily"
-              total-visible="1"
-            ></v-pagination>
-          </v-col>
-        </v-row>
       </v-col>
 
       <v-col cols="12" md="4">
         <ChildInfo
           :Children="currentFamily.Children"
           :familyId="parseInt(currentFamily.id)"
-          @createAppointment="updateFamilyAppointment"
+          @newSchedule="updateFamilyAppointment"
         ></ChildInfo>
       </v-col>
       <v-col cols="12" md="3">
@@ -155,10 +120,7 @@
     </v-row>
     <v-row class="grey lighten-5" style="height: 400px;" justify="start" dense>
       <v-col cols="12" lg="8" md="8">
-        <AppointmentTable
-          :Appointments="currentFamily.Appointments"
-          @alert="alert = true"
-        ></AppointmentTable>
+        <AppointmentTable :Appointments="currentFamily.Appointments" @alert="alert = true"></AppointmentTable>
       </v-col>
     </v-row>
 
@@ -170,9 +132,7 @@
         type="warning"
         dark
         dismissible
-      >
-        Cancel the appointment?
-      </v-alert>
+      >Cancel the appointment?</v-alert>
     </template>
   </v-container>
 </template>
@@ -325,7 +285,6 @@ export default {
           this.Families = Result.data;
           this.currentFamily = this.Families[this.page - 1];
           // this.searchStatus = !this.searchStatus;
-
         } else {
           alert("no family can be found");
           this.page = 0;
@@ -344,24 +303,22 @@ export default {
     searchMode() {
       this.searchStatus = !this.searchStatus;
       this.currentFamily = {};
+      this.page = 1;
     },
 
     async searchFamily() {
-
       this.queryString = this.currentFamily;
 
       try {
         const Results = await family.search(this.queryString);
         if (Results.data.length > 0) {
-          this.page = 1;
           this.Families = Results.data;
           this.currentFamily = this.Families[this.page - 1];
           this.searchStatus = !this.searchStatus;
-
         } else {
           alert("no family can be found");
-          this.page = 0;
-          this.currentFamily = {};
+          // this.page = 0;
+          this.currentFamily = Object.assign({}, this.familyTemplate);
         }
       } catch (error) {
         if (error.response.status === 401) {

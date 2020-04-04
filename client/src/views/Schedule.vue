@@ -20,12 +20,11 @@
 
     <v-col cols="12" md="4">
       <v-row justify="space-around">
-        <!-- <h1>Family infomation</h1>
-          <v-divider></v-divider> -->
         <v-col cols="12" md="6" v-for="field in familyField" :key="field.label">
           <v-text-field
             :label="field.label"
             v-model="currentFamily[field.field]"
+            readonly
             dense
           ></v-text-field>
         </v-col>
@@ -35,6 +34,7 @@
           <v-text-field
             :label="field.label"
             v-model="currentChild[field.field]"
+            readonly
             dense
           ></v-text-field>
         </v-col>
@@ -146,13 +146,13 @@
               <v-container fluid>
                 <v-row
                   class="grey lighten-5"
-                  style="height: 600px"
+                  style="height: 300px;"
                   justify="space-around"
                 >
                   <v-col cols="12" lg="5">
-                    <v-card-title class="headline">{{
-                      editedItem.Name
-                    }}</v-card-title>
+                    <v-card-title class="headline">
+                      {{ editedItem.Name }}
+                    </v-card-title>
                     <AgeDisplay :DoB="editedItem.DoB" />
 
                     <v-select
@@ -180,6 +180,19 @@
                     ></v-combobox>
                   </v-col>
                 </v-row>
+
+                <v-row
+                  class="grey lighten-5"
+                  style="height: 300px;"
+                  justify="start"
+                ></v-row>
+                <v-col cols="12" md="12">
+                  <SiblingInfo
+                    :Children="currentChild.sibling"
+                    @updateSibling="updateSibling"
+                    v-show="response == 'Confirmed'"
+                  ></SiblingInfo>
+                </v-col>
               </v-container>
             </template>
             <v-card-actions>
@@ -212,11 +225,10 @@
       </v-row>
     </v-col>
     <v-col cols="12" md="4" dense>
-      <h4>Sibling, Conversations</h4>
       <Conversation
-          :Conversation="currentFamily.Conversations"
-          :familyId="parseInt(currentFamily.id)"
-        ></Conversation>
+        :Conversation="currentFamily.Conversations"
+        :familyId="parseInt(currentFamily.id)"
+      ></Conversation>
     </v-col>
   </v-row>
   <!-- </v-container> -->
@@ -233,11 +245,13 @@ import moment from "moment";
 import AgeDisplay from "@/components/AgeDisplay";
 
 import Conversation from "@/components/Conversation";
+import SiblingInfo from "@/components/SiblingInfo";
 
 export default {
   components: {
     AgeDisplay,
-    Conversation
+    Conversation,
+    SiblingInfo,
   },
   data() {
     return {
@@ -256,8 +270,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedItem: {
         Name: null,
@@ -267,8 +281,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       defaultItem: {
         Name: null,
@@ -278,21 +292,21 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       Sex: ["F", "M"],
       editedIndex: null,
       childField: [
         { label: "Name", field: "Name" },
         { label: "Sex", field: "Sex" },
-        { label: "DoB", field: "DoB" }
+        { label: "DoB", field: "DoB" },
       ],
       familyField: [
         { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" }
+        { label: "Father's Name", field: "NameDad", rules: "name" },
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -318,62 +332,63 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM"
+        "06:00PM",
       ],
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         email: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         phone: [
-          value => {
+          (value) => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          value => !!value || "Required.",
-          value => (value && value.length == 10) || "Have to be 10 digits"
+          (value) => !!value || "Required.",
+          (value) => (value && value.length == 10) || "Have to be 10 digits",
         ],
         dob: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          }
+          },
         ],
         birthWeight: [
-          value => {
+          (value) => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          }
-        ]
+          },
+        ],
       },
-      page: 0
+      page: 0,
     };
   },
 
   methods: {
     async searchChild() {
       var studyQuery = {
-        id: this.selectedStudy.id
+        id: this.selectedStudy.id,
       };
       try {
         const studyInfo = await study.search(studyQuery);
-        // console.log(JSON.stringify(studyInfo.data));
-        var pastParticipants = studyInfo.data.Appointments.map(appointment => {
-          return appointment.FK_Child;
-        });
+        var pastParticipants = studyInfo.data.Appointments.map(
+          (appointment) => {
+            return appointment.FK_Child;
+          }
+        );
       } catch (error) {
         console.log(JSON.stringify(error.response));
       }
@@ -391,7 +406,7 @@ export default {
           this.page = 1;
           this.Children = Results.data;
           this.currentChild = this.Children[this.page - 1];
-          // console.log(JSON.stringify(this.currentChild));
+          console.log(JSON.stringify(this.currentChild));
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
@@ -401,7 +416,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         } else {
           console.log(JSON.stringify(error.response));
@@ -447,6 +462,10 @@ export default {
       }, 300);
     },
 
+    updateSibling(updatedSibling) {
+      this.SiblingInfo = updatedSibling;
+    },
+
     scheduleChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedItem = Object.assign({}, this.currentChild);
@@ -474,19 +493,19 @@ export default {
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             attendees: [
               {
-                email: "g.jaeger0226@gmail.com" // will change to experiments' emails later.
-              }
-            ]
+                email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
+              },
+            ],
           };
 
           break;
@@ -498,7 +517,7 @@ export default {
             FK_Study: this.selectedStudy.id,
             FK_Family: this.editedItem.FK_Family,
             FK_Child: this.editedItem.id,
-            ScheduledBy: store.state.userID
+            ScheduledBy: store.state.userID,
           };
 
           if (
@@ -541,10 +560,12 @@ export default {
 
     nextPage() {
       this.currentChild = this.Children[this.page - 1];
+      console.log(this.currentChild);
     },
 
     previousPage() {
       this.currentChild = this.Children[this.page - 1];
+      console.log(this.currentChild);
     },
 
     datePick() {
@@ -552,7 +573,7 @@ export default {
       setTimeout(() => {
         this.$refs.studyDate.focus();
       }, 100);
-    }
+    },
   },
   computed: {
     studies() {
@@ -567,7 +588,7 @@ export default {
       return this.currentChild.Family;
     },
 
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -596,7 +617,7 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment(new Date())
           .add(1, "days")
@@ -607,9 +628,7 @@ export default {
             )
           )
       ) {
-        return moment(new Date())
-          .add(1, "days")
-          .toISOString(true);
+        return moment(new Date()).add(1, "days").toISOString(true);
       } else {
         return moment(this.editedItem.DoB)
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -617,11 +636,11 @@ export default {
       }
     },
 
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.editedItem.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
-    }
+    },
   },
 
   watch: {
@@ -631,8 +650,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    }
-  }
+    },
+  },
 };
 </script>
 

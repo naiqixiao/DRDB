@@ -76,7 +76,7 @@ exports.search = asyncHandler(async (req, res) => {
   const children = await model.child.findAll({
     where: queryString,
     include: [
-      model.appointment,
+      { model: model.appointment, include: [model.schedule] },
       {
         model: model.family,
         include: [
@@ -90,7 +90,8 @@ exports.search = asyncHandler(async (req, res) => {
         as: "sibling",
         through: {
           model: model.sibling
-        }
+        },
+        include: [{ model: model.appointment, include: [model.schedule] }]
       }
     ]
   });

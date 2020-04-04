@@ -8712,3 +8712,6 @@ client/src/views/Family copy.vue
 client/src/components/FamilyInfo.vue
 client/src/components/FamilyInfo.vue
 client/src/components/FamilyInfo.vue
+server/api/controllers/appointment_old.js
+server/api/models/SequelizeAuto/Appointment_old.js
+client/src/services/appointment copy.js

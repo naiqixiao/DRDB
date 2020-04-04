@@ -30,10 +30,12 @@ const childRoutes = require("./api/routes/child");
 const conversationRoutes = require("./api/routes/conversation");
 
 const studyRoutes = require("./api/routes/study");
-const appointmentRoutes = require("./api/routes/appointment");
 const personnelRoutes = require("./api/routes/personnel");
 const labRoutes = require("./api/routes/lab");
 const experimenterRoutes = require("./api/routes/experimenter");
+
+const appointmentRoutes = require("./api/routes/appointment");
+const scheduleRoutes = require("./api/routes/schedule");
 
 const calRoutes = require("./api/routes/calendar");
 
@@ -45,10 +47,12 @@ app.use("/child", childRoutes);
 app.use("/conversation", conversationRoutes);
 
 app.use("/study", studyRoutes);
-app.use("/appointment", appointmentRoutes);
 app.use("/personnel", personnelRoutes);
 app.use("/lab", labRoutes);
 app.use("/experimenter", experimenterRoutes);
+
+app.use("/appointment", appointmentRoutes);
+app.use("/schedule", scheduleRoutes);
 
 app.use("/cal", calRoutes);
 

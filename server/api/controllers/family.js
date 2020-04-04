@@ -37,7 +37,11 @@ exports.create = asyncHandler(async (req, res) => {
 
   try {
     const newFamily = await model.family.create(newFamilyInfo, {
-      include: [model.conversations, model.child, model.appointment]
+      include: [
+        model.conversations,
+        model.child,
+        { model: model.appointment, include: [model.schedule] }
+      ]
     });
 
     res.status(200).send(newFamily);
@@ -73,7 +77,11 @@ exports.batchCreate = asyncHandler(async (req, res) => {
   var newFamilyInfo = req.body;
 
   const newFamily = await model.family.bulkCreate(newFamilyInfo, {
-    include: [model.conversations, model.child, model.appointment]
+    include: [
+      model.conversations,
+      model.child,
+      { model: model.appointment, include: [model.schedule] }
+    ]
   });
 
   // update sibbling table
@@ -140,7 +148,8 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.appointment,
         include: [
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
+          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          { model: model.schedule }
         ]
       }
     ]
@@ -155,8 +164,7 @@ exports.update = asyncHandler(async (req, res) => {
   var updatedFamilyInfo = req.body;
 
   const family = await model.family.update(updatedFamilyInfo, {
-    where: { id: ID },
-    include: [model.conversations, model.child, model.appointment]
+    where: { id: ID }
   });
   res.status(200).send(family);
   console.log("Family Information Updated!");

@@ -1,59 +1,25 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const google = require("../middleware/calendar");
-
-// Create and Save an appointment
 
 // {
-//   "AppointmentTime": "2020-03-24T14:00:00.000",
-//   "Status": "Confirmed",
-//   "FK_Study": 4,
-//   "FK_Family": 118,
-//   "FK_Child": 236,
-//   "ScheduledBy": 5,
-//   "location": "Psychology Building, McMaster University",
-//   "start": {
-//       "dateTime": "2020-03-24T14:00:00.000",
-//       "timeZone": "America/Toronto"
-//   },
-//   "end": {
-//       "dateTime": "2020-03-24T15:30:00.000",
-//       "timeZone": "America/Toronto"
-//   },
-//   "attendees": [
-//       {
-//           "email": "g.jaeger0226@gmail.com"
-//       }
-//   ]
-// }
+//             "FK_Schedule": 35,
+//             "FK_Study": 3,
+//             "FK_Family": 208,
+//             "FK_Child": 415
+//         }
 
+// add an appointment (child, family, & study) to an existing schedule.
 exports.create = asyncHandler(async (req, res) => {
   var newAppointmentInfo = req.body;
 
-  if (newAppointmentInfo.Status == "Confirmed") {
-    // Create a calendar event
-    const calEvent = await google.calendar.events.insert({
-      calendarId: "primary",
-      resource: newAppointmentInfo,
-      sendUpdates: "all"
-    });
-
-    newAppointmentInfo.calendarEventId = calEvent.data.id;
-    newAppointmentInfo.eventURL = calEvent.data.htmlLink;
-  }
-
   try {
-    const appointment = await model.appointment.create(newAppointmentInfo, {
-      include: [model.family, model.child, model.study]
-    });
+    const appointments = await model.appointment.bulkCreate(newAppointmentInfo);
 
-    res.status(200).send(appointment);
+    res.status(200).send(appointments);
   } catch (error) {
     throw error;
   }
-
-  // console.log("appointment created " + JSON.stringify(appointment));
 });
 
 // Retrieve appointments from the database.
@@ -69,24 +35,8 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.FamilyId) {
     queryString.FK_Family = req.query.FamilyId;
   }
-  if (req.query.Status) {
-    queryString.Status = { [Op.in]: req.query.Status };
-  }
-  if (req.query.AppointmentTimeBefore && req.query.AppointmentTimeAfter) {
-    queryString.AppointmentTime = {
-      [Op.between]: [
-        new Date(req.query.AppointmentTimeAfter),
-        new Date(req.query.AppointmentTimeBefore)
-      ]
-    };
-  } else if (req.query.AppointmentTimeBefore) {
-    queryString.AppointmentTime = {
-      [Op.lte]: new Date(req.query.AppointmentTimeBefore)
-    };
-  } else if (req.query.AppointmentTimeAfter) {
-    queryString.AppointmentTime = {
-      [Op.gte]: new Date(req.query.AppointmentTimeAfter)
-    };
+  if (req.query.ChildId) {
+    queryString.FK_Child = { [Op.in]: req.query.ChildId };
   }
 
   if (req.query.Email) {
@@ -101,12 +51,11 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.Phone) {
     queryString["$Family.Phone$"] = { [Op.like]: `${req.query.Phone}%` };
   }
-  if (req.query.FamilyId) {
-    queryString["$Family.id$"] = req.query.FamilyId;
+  if (req.query.ChildName) {
+    queryString["$Child.Name$"] = { [Op.like]: `${req.query.ChildName}%` };
   }
-
   if (req.query.StudyName) {
-    queryString["$Study.StudyName$"] = req.query.StudyName;
+    queryString["$Study.StudyName$"] = { [Op.like]: `${req.query.StudyName}%` };
   }
 
   const appointment = await model.appointment.findAll({
@@ -114,42 +63,8 @@ exports.search = asyncHandler(async (req, res) => {
     include: [
       { model: model.family, attributes: ["id"] },
       { model: model.child, attributes: ["Name", "DoB"] },
-      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
-    ]
-  });
-  res.status(200).send(appointment);
-  console.log("Search successful!");
-});
-
-// Retrieve today's appointments from the database.
-exports.today = asyncHandler(async (req, res) => {
-  var queryString = {};
-
-  queryString.AppointmentTime = {
-    [Op.between]: [
-      new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate()
-      ),
-      new Date(
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        ).getTime() +
-          24 * 60 * 60 * 1000
-      )
-    ]
-  };
-
-  const appointment = await model.appointment.findAll({
-    where: queryString,
-    include: [
-      { model: model.family, attributes: ["id"] },
-      { model: model.child, attributes: ["Name", "DoB"] },
-      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
-    ]
+      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+    ],
   });
   res.status(200).send(appointment);
   console.log("Search successful!");
@@ -164,79 +79,11 @@ exports.update = asyncHandler(async (req, res) => {
     delete updatedAppointmentInfo["id"];
   }
 
-  if (!updatedAppointmentInfo.Completed) {
-    switch (updatedAppointmentInfo.Status) {
-      case "Confirmed": {
-        if (updatedAppointmentInfo.calendarEventId) {
-          await google.calendar.events.patch({
-            calendarId: "primary",
-            eventId: updatedAppointmentInfo.calendarEventId,
-            resource: updatedAppointmentInfo,
-            sendUpdates: "all"
-          });
-        } else {
-          // Create a calendar event
-          const calEvent = await google.calendar.events.insert({
-            calendarId: "primary",
-            resource: updatedAppointmentInfo,
-            sendUpdates: "all"
-          });
-
-          updatedAppointmentInfo.calendarEventId = calEvent.data.id;
-          updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
-
-          res.status(200).send({
-            calendarEventId: calEvent.data.id,
-            eventURL: calEvent.data.htmlLink
-          });
-        }
-
-        break;
-      }
-
-      case "No Show":
-      case "TBD":
-      case "Rescheduling":
-      case "Cancelled":
-      case "Rejected": {
-        // update the calendar event, if an appointment is rescheduled.
-        if (updatedAppointmentInfo.calendarEventId) {
-          // check if there was an calendar event created before.
-
-          updatedAppointmentInfo.summary =
-            updatedAppointmentInfo.Status.toUpperCase() +
-            " - " +
-            updatedAppointmentInfo.Study.StudyName +
-            ", Family: " +
-            updatedAppointmentInfo.FK_Family +
-            ", Child: " +
-            updatedAppointmentInfo.FK_Child;
-
-          try {
-            await google.calendar.events.patch({
-              calendarId: "primary",
-              eventId: updatedAppointmentInfo.calendarEventId,
-              resource: updatedAppointmentInfo,
-              sendUpdates: "all"
-            });
-          } catch (err) {
-            throw err;
-          }
-
-          updatedAppointmentInfo.AppointmentTime = null;
-        }
-
-        break;
-      }
-    }
-  }
-
   try {
     const updatedAppointment = await model.appointment.update(
       updatedAppointmentInfo,
       {
         where: { id: ID },
-        include: [model.family, model.child, model.study]
       }
     );
 
@@ -250,21 +97,8 @@ exports.update = asyncHandler(async (req, res) => {
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
-  const appointment = await model.appointment.findOne({
-    where: req.query
-  });
-
-  // remove calendar event, if it exists.
-  if (appointment.calendarEventId) {
-    await google.calendar.events.delete({
-      calendarId: "primary",
-      eventId: appointment.calendarEventId,
-      sendUpdates: "all"
-    });
-  }
-
   await model.appointment.destroy({
-    where: req.query
+    where: req.query,
   });
 
   res.status(200).send("appointment deleted.");

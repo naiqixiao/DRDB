@@ -13,7 +13,7 @@ import moment from "moment";
 export default {
   props: {
     date: String,
-    format: String
+    format: String,
   },
   methods: {
     DateFormat(date, format) {
@@ -27,10 +27,9 @@ export default {
           formatedDate = moment(date).format("L");
           break;
       }
-
       return formatedDate;
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped></style>

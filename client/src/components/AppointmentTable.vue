@@ -3,21 +3,28 @@
     hide-default-footer
     disable-pagination
     fixed-header
-    height=700
+    height="400"
     single-select
     no-data-text="The family hasn't participated in any study."
     :headers="headersAppointments"
     :items="Appointments"
     class="elevation-1"
     @click:row="rowSelected"
+
   >
     <template v-slot:top>
       <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
         <v-card>
-          <v-card-title class="headline">Select study date and time.</v-card-title>
+          <v-card-title class="headline"
+            >Select study date and time.</v-card-title
+          >
           <template>
             <v-container fluid>
-              <v-row class="grey lighten-5" style="height: 400px;" justify="space-around">
+              <v-row
+                class="grey lighten-5"
+                style="height: 400px;"
+                justify="space-around"
+              >
                 <v-col cols="12" lg="5">
                   <v-date-picker
                     v-model="studyDate"
@@ -27,7 +34,11 @@
                   ></v-date-picker>
                 </v-col>
                 <v-col cols="12" lg="3">
-                  <v-combobox v-model="studyTime" :items="studyTimeSlots" label="Study time"></v-combobox>
+                  <v-combobox
+                    v-model="studyTime"
+                    :items="studyTimeSlots"
+                    label="Study time"
+                  ></v-combobox>
                   <h3>{{ studyDateTime }}</h3>
                 </v-col>
               </v-row>
@@ -42,11 +53,11 @@
       </v-dialog>
     </template>
 
-    <template #item.AppointmentTime="{ value }">
-      <DateDisplay :date="value" :format="'long'" />
+    <template #item.AppointmentTime="{ item }">
+      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" />
     </template>
-    <template #item.updatedAt="{ value }">
-      <DateDisplay :date="value" :format="'short'" />
+    <template #item.updatedAt="{ item }">
+      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" />
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
@@ -54,39 +65,47 @@
 
     <template v-slot:item.actions="{ item }">
       <v-icon
-        @click="updateAppointment(item, 'Confirmed')"
-        :disabled="item.Status === 'Confirmed' || item.Completed == 1"
-      >event</v-icon>
-      <v-icon
-        @click="updateAppointment(item, 'Rescheduling')"
+        @click="updateSchedule(item, 'Confirmed')"
         :disabled="
-          item.Status === 'Rescheduling' ||
-            item.Status === 'No Show' ||
-            item.Status === 'TBD' ||
-            item.Completed == 1
+          item.Schedule.Status === 'Confirmed' || item.Schedule.Completed == 1
         "
-      >update</v-icon>
+        >event</v-icon
+      >
       <v-icon
-        @click="updateAppointment(item, 'No Show')"
+        @click="updateSchedule(item, 'Rescheduling')"
         :disabled="
-          item.Status === 'Rescheduling' ||
-            item.Status === 'No Show' ||
-            item.Status === 'TBD' ||
-            item.Completed == 1
+          item.Schedule.Status === 'Rescheduling' ||
+          item.Schedule.Status === 'No Show' ||
+          item.Schedule.Status === 'TBD' ||
+          item.Schedule.Completed == 1
         "
-      >sentiment_dissatisfied</v-icon>
+        >update</v-icon
+      >
       <v-icon
-        @click="updateAppointment(item, 'Cancelled')"
-        :disabled="item.Status === 'Cancelled' || item.Completed == 1"
-      >not_interested</v-icon>
+        @click="updateSchedule(item, 'No Show')"
+        :disabled="
+          item.Schedule.Status === 'Rescheduling' ||
+          item.Schedule.Status === 'No Show' ||
+          item.Schedule.Status === 'TBD' ||
+          item.Schedule.Completed == 1
+        "
+        >sentiment_dissatisfied</v-icon
+      >
+      <v-icon
+        @click="updateSchedule(item, 'Cancelled')"
+        :disabled="
+          item.Schedule.Status === 'Cancelled' || item.Schedule.Completed == 1
+        "
+        >not_interested</v-icon
+      >
     </template>
 
     <template v-slot:item.Completed="{ item }">
       <v-checkbox
         dense
         class="mr-0 pa-0"
-        v-model="item.Completed"
-        @change="updateAppointment(item, 'Completed')"
+        v-model="item.Schedule.Completed"
+        @change="updateSchedule(item, 'Completed')"
       ></v-checkbox>
     </template>
   </v-data-table>
@@ -96,16 +115,18 @@
 import DateDisplay from "@/components/DateDisplay";
 import AgeByParticipation from "@/components/AgeByParticipation";
 
-import appointment from "@/services/appointment";
+// import appointment from "@/services/appointment";
+import schedule from "@/services/schedule";
+
 import moment from "moment";
 
 export default {
   components: {
     DateDisplay,
-    AgeByParticipation
+    AgeByParticipation,
   },
   props: {
-    Appointments: Array
+    Appointments: Array,
   },
   data() {
     return {
@@ -114,12 +135,12 @@ export default {
       editedItem: {
         Study: {
           MinAge: 6,
-          MaxAge: 18
+          MaxAge: 18,
         },
         Child: {
           Name: null,
-          DoB: new Date()
-        }
+          DoB: new Date(),
+        },
       },
       studyDate: null,
       studyTime: "09:00AM",
@@ -143,7 +164,7 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM"
+        "06:00PM",
       ],
       headersAppointments: [
         { text: "Child", align: "center", value: "Child.Name", width: "50px" },
@@ -151,26 +172,31 @@ export default {
           text: "Study",
           align: "center",
           value: "Study.StudyName",
-          width: "50px"
+          width: "50px",
         },
         {
           text: "Study Time",
           align: "center",
           value: "AppointmentTime",
-          width: "100px"
+          width: "100px",
         },
         {
           text: "Age by Participation",
           align: "center",
           value: "AgeByParticipation",
-          width: "80px"
+          width: "80px",
         },
-        { text: "Status", align: "center", value: "Status", width: "80px" },
+        {
+          text: "Status",
+          align: "center",
+          value: "Schedule.Status",
+          width: "80px",
+        },
         {
           text: "Updated Time",
           align: "center",
           value: "updatedAt",
-          width: "80px"
+          width: "80px",
         },
 
         {
@@ -178,20 +204,20 @@ export default {
           align: "center",
           value: "actions",
           sortable: false,
-          width: "80px"
+          width: "80px",
         },
         {
           text: "Completion",
           align: "start",
-          value: "Completed",
+          value: "Schedule.Completed",
           sortable: false,
-          width: "80px"
-        }
-      ]
+          width: "80px",
+        },
+      ],
     };
   },
   methods: {
-    async updateAppointment(item, status) {
+    async updateSchedule(item, status) {
       switch (status) {
         case "Confirmed":
           this.editedIndex = this.Appointments.indexOf(item);
@@ -201,32 +227,50 @@ export default {
 
         case "Completed":
           try {
-            await appointment.update(item);
+            await schedule.update(item.Schedule);
           } catch (error) {
             console.log(error.response);
           }
           break;
 
         default:
-          item.Status = status;
+          item.Schedule.Status = status;
 
           if (status == "Cancelled") {
             this.$emit("alert");
           }
 
-          item.summary =
-            item.Status.toUpperCase() +
+          var studyNames = this.Appointments.map(appointment => {
+            return appointment.Study.StudyName;
+          });
+
+          // this.Appointments.forEach((appointment) => {
+          //   if (appointment.FK_Schedule === item.FK_Schedule) {
+          //     studyNames += (appointment.Study.StudyName + " + ");
+          //   }
+          // });
+
+          // studyNames = studyNames.slice(0, studyNames.length - 3);
+
+          item.Schedule.summary =
+            item.Schedule.Status.toUpperCase() +
             " - " +
-            item.Study.StudyName +
+            studyNames.join(" + ") +
             ", Family: " +
             item.FK_Family +
             ", Child: " +
             item.FK_Child;
 
           try {
-            await appointment.update(item);
-            item.AppointmentTime = null;
-            item.updatedAt = new Date().toISOString();
+            await schedule.update(item.Schedule);
+            item.Schedule.AppointmentTime = null;
+            item.Schedule.updatedAt = new Date().toISOString();
+
+            this.Appointments.forEach((appointment) => {
+              if (appointment.FK_Schedule === item.FK_Schedule) {
+                appointment.Schedule = this.item.Schedule;
+              }
+            });
 
             console.log("appointment updated!");
           } catch (error) {
@@ -242,12 +286,12 @@ export default {
         this.editedItem = {
           Study: {
             MinAge: 6,
-            MaxAge: 18
+            MaxAge: 18,
           },
           Child: {
             Name: null,
-            DoB: new Date()
-          }
+            DoB: new Date(),
+          },
         };
         this.editedIndex = -1;
         this.studyDate = null;
@@ -258,37 +302,52 @@ export default {
     async save() {
       try {
         if (this.editedIndex > -1) {
-          this.editedItem.Status = "Confirmed";
+          this.editedItem.Schedule.Status = "Confirmed";
 
-          this.editedItem.AppointmentTime = moment(
+          this.editedItem.Schedule.AppointmentTime = moment(
             this.studyDateTime
           ).toISOString(true);
 
-          this.editedItem.summary =
-            this.editedItem.Study.StudyName +
+          var studyNames = "";
+
+          this.Appointments.forEach((appointment) => {
+            if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
+              studyNames += (appointment.Study.StudyName + " + ");
+            }
+          });
+
+          studyNames = studyNames.slice(0, studyNames.length - 3);
+
+          this.editedItem.Schedule.summary =
+            studyNames +
             ", Family: " +
             this.editedItem.FK_Family +
             ", Child: " +
             this.editedItem.FK_Child;
 
-          this.editedItem.start = {
+          this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
-          this.editedItem.end = {
-            dateTime: moment(this.studyDateTime)
-              .add(1, "h")
-              .toISOString(true),
-            timeZone: "America/Toronto"
+          this.editedItem.Schedule.end = {
+            dateTime: moment(this.studyDateTime).add(1, "h").toISOString(true),
+            timeZone: "America/Toronto",
           };
 
-          const calendarEvent = await appointment.update(this.editedItem);
+          const calendarEvent = await schedule.update(this.editedItem.Schedule);
 
-          this.editedItem.calendarEventId = calendarEvent.calendarEventId;
-          this.editedItem.eventURL = calendarEvent.eventURL;
-          this.editedItem.updatedAt = new Date().toISOString();
+          this.editedItem.Schedule.calendarEventId =
+            calendarEvent.calendarEventId;
+          this.editedItem.Schedule.eventURL = calendarEvent.eventURL;
+          this.editedItem.Schedule.updatedAt = new Date().toISOString();
 
           Object.assign(this.Appointments[this.editedIndex], this.editedItem);
+
+          this.Appointments.forEach((appointment) => {
+            if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
+              appointment.Schedule = this.editedItem.Schedule;
+            }
+          });
         }
 
         this.close();
@@ -298,14 +357,13 @@ export default {
     },
 
     rowSelected(item, row) {
-
       row.select(true);
       this.$emit("rowSelected", item.FK_Family);
-    }
+    },
   },
 
   computed: {
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -333,7 +391,7 @@ export default {
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
     },
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment(new Date())
           .add(1, "days")
@@ -344,26 +402,24 @@ export default {
             )
           )
       ) {
-        return moment(new Date())
-          .add(1, "days")
-          .toISOString(true);
+        return moment(new Date()).add(1, "days").toISOString(true);
       } else {
         return moment(this.editedItem.Child.DoB)
           .add(Math.floor(this.editedItem.Study.MinAge * 30.5), "days")
           .toISOString(true);
       }
     },
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.editedItem.Child.DoB)
         .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
         .toISOString(true);
-    }
+    },
   },
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 

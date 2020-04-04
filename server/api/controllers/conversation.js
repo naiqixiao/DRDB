@@ -11,7 +11,7 @@ exports.create = asyncHandler(async (req, res) => {
   console.log("conversation created " + conversation.id);
 });
 
-// Delete an appointment with the specified id in the request
+// Delete an conversation with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   await model.conversations.destroy({
     where: req.query

@@ -10,10 +10,6 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false,
         primaryKey: true
       },
-      AppointmentTime: {
-        type: DataTypes.DATE,
-        allowNull: true
-      },
       FK_Study: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -38,52 +34,13 @@ module.exports = function(sequelize, DataTypes) {
           key: "id"
         }
       },
-      Status: {
-        type: DataTypes.ENUM(
-          "Confirmed",
-          "TBD",
-          "Rescheduling",
-          "Rescheduled",
-          "No Show",
-          "Cancelled",
-          "Rejected"
-        ),
-        allowNull: false
-      },
-      ReminderEmail: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: "0"
-      },
-      ThankYouEmail: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: "0"
-      },
-      Completed: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: "0"
-      },
-      Note: {
-        type: DataTypes.TEXT,
-        allowNull: true
-      },
-      ScheduledBy: {
+      FK_Schedule: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Personnel",
+          model: "Schedule",
           key: "id"
         }
-      },
-      calendarEventId: {
-        type: DataTypes.STRING(30),
-        allowNull: true
-      },
-      eventURL: {
-        type: DataTypes.STRING(150),
-        allowNull: true
       },
       createdAt: {
         type: DataTypes.DATE,

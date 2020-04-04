@@ -112,7 +112,7 @@
             <v-container fluid>
               <v-row
                 class="grey lighten-5"
-                style="height: 600px"
+                style="height: 600px;"
                 justify="space-around"
               >
                 <v-col cols="12" lg="5">
@@ -127,13 +127,12 @@
                     :item-text="'StudyName'"
                     v-model="selectedStudy"
                     return-object
-                    filled
                     label="Elegible Studies"
+                    multiple
                   ></v-select>
                   <v-select
                     :items="Responses"
                     v-model="response"
-                    filled
                     label="Parents' response"
                   ></v-select>
                 </v-col>
@@ -195,16 +194,18 @@ import AgeDisplay from "@/components/AgeDisplay";
 import child from "@/services/child";
 import store from "@/store";
 
-import appointment from "@/services/appointment";
+// import appointment from "@/services/appointment";
+import schedule from "@/services/schedule";
+
 import moment from "moment";
 
 export default {
   components: {
-    AgeDisplay
+    AgeDisplay,
   },
   props: {
     Children: Array,
-    familyId: Number
+    familyId: Number,
   },
   data() {
     return {
@@ -214,10 +215,7 @@ export default {
       datePicker: false,
       editedIndex: -1,
       validChild: true,
-      selectedStudy: {
-        MinAge: 6,
-        MaxAge: 18
-      },
+      selectedStudy: [],
       editedItem: {
         Name: null,
         Sex: null,
@@ -230,7 +228,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       defaultItem: {
         Name: null,
@@ -244,7 +242,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -270,35 +268,38 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM"
+        "06:00PM",
       ],
       Sex: ["F", "M"],
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         dob: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          }
+          },
         ],
         birthWeight: [
-          value => {
+          (value) => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          }
-        ]
-      }
+          },
+        ],
+      },
     };
   },
   methods: {
+    // showSelectedStudy() {
+    //   console.log(this.selectedStudy);
+    // },
     addChild() {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
@@ -371,71 +372,81 @@ export default {
     },
 
     async createAppointment() {
-      var newAppointmentInfo = {};
+      var newScheduleInfo = {};
 
+      var studyNames = "";
+      var studyAppointments = [];
+
+      this.selectedStudy.forEach((study) => {
+        studyNames += study.StudyName + " + ";
+        studyAppointments.push({
+          FK_Family: this.editedItem.FK_Family,
+          FK_Child: this.editedItem.id,
+          FK_Study: study.id,
+        });
+      });
+
+      studyNames = studyNames.slice(0, studyNames.length - 3);
+      
       switch (this.response) {
         case "Confirmed":
-          newAppointmentInfo = {
+          newScheduleInfo = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
-            FK_Study: this.selectedStudy.id,
             summary:
-              this.selectedStudy.StudyName +
+              studyNames +
               ", Family: " +
               this.editedItem.FK_Family +
               ", Child: " +
               this.editedItem.id,
-            FK_Family: this.editedItem.FK_Family,
-            FK_Child: this.editedItem.id,
-            ScheduledBy: store.state.userID,
             location: "Psychology Building, McMaster University",
+            Appointments: studyAppointments,
+            ScheduledBy: store.state.userID,
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             attendees: [
               {
-                email: "g.jaeger0226@gmail.com" // will change to experiments' emails later.
-              }
-            ]
+                email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
+              },
+            ],
           };
 
           break;
 
         default:
-          newAppointmentInfo = {
+          newScheduleInfo = {
             AppointmentTime: null,
             Status: this.response,
-            FK_Study: this.selectedStudy.id,
-            FK_Family: this.editedItem.FK_Family,
-            FK_Child: this.editedItem.id,
-            ScheduledBy: store.state.userID
+            ScheduledBy: store.state.userID,
+            Appointments: studyAppointments,
           };
 
           if (
             this.response === "Left a message" ||
             this.response === "Interested"
           ) {
-            newAppointmentInfo.Status = "TBD";
+            newScheduleInfo.Status = "TBD";
           }
           break;
       }
       try {
-        const newAppointment = await appointment.create(newAppointmentInfo);
+        const newSchedule = await schedule.create(newScheduleInfo);
 
         this.Children[this.editedIndex].Appointments.push({
-          FK_Study: newAppointment.data.FK_Study
+          FK_Study: newSchedule.data.Appointments.FK_Study,
         });
 
         console.log("New appointment scheduled!");
 
-        this.$emit("createAppointment");
+        this.$emit("newSchedule");
       } catch (error) {
         console.log(error.response);
       }
@@ -451,6 +462,7 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
+        this.selectedStudy = [];
       }, 300);
     },
 
@@ -459,14 +471,14 @@ export default {
       setTimeout(() => {
         this.$refs.studyDate.focus();
       }, 100);
-    }
+    },
   },
   computed: {
-    ElegibleStudies: function() {
+    ElegibleStudies: function () {
       if (this.Children) {
-        var elegibleStudies = this.Children.map(child => {
+        var elegibleStudies = this.Children.map((child) => {
           let studyIds = [];
-          store.state.studies.forEach(study => {
+          store.state.studies.forEach((study) => {
             if (
               child.Age >= study.MinAge * 30.5 &&
               child.Age <= study.MaxAge * 30.5
@@ -483,10 +495,10 @@ export default {
       }
     },
 
-    UniquePreviousStudies: function() {
-      return this.Children.map(child => {
+    UniquePreviousStudies: function () {
+      return this.Children.map((child) => {
         let studyIds = [];
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           studyIds.push(appointment.FK_Study);
         });
 
@@ -494,7 +506,7 @@ export default {
       });
     },
 
-    PotentialStudies: function() {
+    PotentialStudies: function () {
       var PotentialStudies = [];
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
@@ -503,10 +515,10 @@ export default {
         previousStudies = Array.from(new Set(previousStudies));
 
         let potentialStudyIds = elegibleStudy.filter(
-          study => !previousStudies.includes(study)
+          (study) => !previousStudies.includes(study)
         );
 
-        var PotentialStudyList = store.state.studies.filter(study =>
+        var PotentialStudyList = store.state.studies.filter((study) =>
           potentialStudyIds.includes(study.id)
         );
 
@@ -516,7 +528,7 @@ export default {
       return PotentialStudies;
     },
 
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -545,32 +557,45 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function() {
-      if (
-        moment(new Date())
-          .add(1, "days")
-          .isSameOrAfter(
-            moment(this.editedItem.DoB).add(
-              Math.floor(this.selectedStudy.MinAge * 30.5),
-              "days"
+    earliestDate: function () {
+      if (this.selectedStudy.length > 0) {
+        var minAges = this.selectedStudy.map((study) => {
+          return study.MinAge;
+        });
+        var MinAge = Math.max.apply(Math, minAges);
+
+        if (
+          moment(new Date())
+            .add(1, "days")
+            .isSameOrAfter(
+              moment(this.editedItem.DoB).add(Math.floor(MinAge * 30.5), "days")
             )
-          )
-      ) {
-        return moment(new Date())
-          .add(1, "days")
-          .toISOString(true);
+        ) {
+          return moment(new Date()).add(1, "days").toISOString(true);
+        } else {
+          return moment(this.editedItem.DoB)
+            .add(Math.floor(MinAge * 30.5), "days")
+            .toISOString(true);
+        }
       } else {
-        return moment(this.editedItem.DoB)
-          .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
-          .toISOString(true);
+        return new Date().toISOString();
       }
     },
 
-    latestDate: function() {
-      return moment(this.editedItem.DoB)
-        .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
-        .toISOString(true);
-    }
+    latestDate: function () {
+      if (this.selectedStudy.length > 0) {
+        var maxAges = this.selectedStudy.map((study) => {
+          return study.MaxAge;
+        });
+        var MaxAge = Math.min.apply(Math, maxAges);
+
+        return moment(this.editedItem.DoB)
+          .add(Math.floor(MaxAge * 30.5), "days")
+          .toISOString(true);
+      } else {
+        return new Date().toISOString();
+      }
+    },
   },
   watch: {
     dialogChild(val) {
@@ -579,8 +604,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    }
-  }
+    },
+  },
 };
 </script>
 
