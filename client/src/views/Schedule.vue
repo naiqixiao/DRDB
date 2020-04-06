@@ -127,7 +127,7 @@
                       @click:append="dobPicker = true"
                       :rules="rules.dob"
                       label="Date of birth (YYYY-MM-DD)"
-                    ></v-text-field>
+                    ></v-text-field>flffdjjdfa;kfjdsf
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-select
@@ -288,6 +288,7 @@ export default {
     ExtraStudies,
     ElegibleExperimenters,
   },
+  props: {},
   data() {
     return {
       dialogEdit: false,
@@ -694,7 +695,7 @@ export default {
       return this.currentChild.Family;
     },
 
-    studyDateTime: function () {
+    studyDateTime: function() {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -723,7 +724,7 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function () {
+    earliestDate: function() {
       if (
         moment(new Date())
           .add(1, "days")
@@ -734,7 +735,9 @@ export default {
             )
           )
       ) {
-        return moment(new Date()).add(1, "days").toISOString(true);
+        return moment(new Date())
+          .add(1, "days")
+          .toISOString(true);
       } else {
         return moment(this.editedItem.DoB)
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -742,7 +745,7 @@ export default {
       }
     },
 
-    latestDate: function () {
+    latestDate: function() {
       return moment(this.editedItem.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);

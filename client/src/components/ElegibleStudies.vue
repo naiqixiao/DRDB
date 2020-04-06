@@ -4,7 +4,6 @@
     :item-value="'id'"
     :item-text="'StudyName'"
     v-model="selectedStudy"
-    @change="selectStudy"
     return-object
     label="Studies"
     multiple

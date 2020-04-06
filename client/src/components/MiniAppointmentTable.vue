@@ -10,9 +10,16 @@
       <v-card class="mx-auto" width="360px" height="160px">
         <v-card-title>{{ appointment.Child.Name }}</v-card-title>
 
-        <v-card-text align="start">{{ appointment.Study.StudyName }}</v-card-text>
+        <v-card-text align="start">{{
+          appointment.Study.StudyName
+        }}</v-card-text>
         <v-card-actions>
-          <v-btn text @click="removeAppointment(index)" :disabled="Appointments.length == 1">Delete</v-btn>
+          <v-btn
+            text
+            @click="removeAppointment(index)"
+            :disabled="Appointments.length == 1"
+            >Delete</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-col>
@@ -23,17 +30,22 @@
     </v-row>
 
     <div>
-      <v-dialog v-model="dialogAppointment" max-width="720px">
+      <v-dialog v-model="dialogAppointment" max-width="1200px">
         <v-card>
           <v-row align="center">
-            <v-col cols="12" lg="10">
+            <v-col cols="12" lg="12">
               <SiblingInfo
+                ref="siblingTable"
                 :Children="Children"
                 :ScheduleID="Appointments[0].FK_Schedule"
-                @newAppointments="addNewAppointments"
+                @updateSiblingStudies="addNewAppointments"
               ></SiblingInfo>
             </v-col>
           </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
+          </v-card-actions>
         </v-card>
       </v-dialog>
     </div>
@@ -51,16 +63,16 @@ import appointment from "@/services/appointment";
 
 export default {
   components: {
-    SiblingInfo
+    SiblingInfo,
   },
   props: {
-    Appointments: Array
+    Appointments: Array,
   },
 
   data() {
     return {
       Children: [],
-      dialogAppointment: false
+      dialogAppointment: false,
     };
   },
   methods: {
@@ -75,7 +87,6 @@ export default {
       try {
         if (this.Appointments[index].id) {
           await appointment.delete(this.Appointments[index].id);
-          console.log(this.Appointments[index].id);
           this.Appointments.splice(index, 1);
 
           console.log("Appointment deleted.");
@@ -88,17 +99,12 @@ export default {
     async addNewAppointments(newAppointments) {
       try {
         const createdAppointments = await appointment.create(newAppointments);
-        // update schedule updated date
-        // this.$emit("updateSchedule", {
-        //   id: this.Appointments[0].FK_Schedule,
-        // });
-        // console.log(createdAppointments.data);
 
         for (var i = 0; i < newAppointments.length; i++) {
           newAppointments[i].id = createdAppointments.data[i].id;
         }
 
-        newAppointments.forEach(appointment => {
+        newAppointments.forEach((appointment) => {
           this.Appointments.push(appointment);
         });
 
@@ -108,14 +114,18 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-    }
+    },
+
+    save() {
+      this.$refs.siblingTable.saveAppointment();
+    },
   },
   computed: {},
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
