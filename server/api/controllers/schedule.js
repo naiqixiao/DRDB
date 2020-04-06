@@ -46,7 +46,7 @@ exports.create = asyncHandler(async (req, res) => {
     const calEvent = await google.calendar.events.insert({
       calendarId: "primary",
       resource: newScheduleInfo,
-      sendUpdates: "all"
+      sendUpdates: "all",
     });
 
     newScheduleInfo.calendarEventId = calEvent.data.id;
@@ -55,12 +55,7 @@ exports.create = asyncHandler(async (req, res) => {
 
   try {
     const schedule = await model.schedule.create(newScheduleInfo, {
-      include: [
-        {
-          model: model.appointment,
-          include: [model.family, model.child, model.study]
-        }
-      ]
+      include: [model.appointment],
     });
 
     res.status(200).send(schedule);
@@ -88,37 +83,37 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.AppointmentTime = {
       [Op.between]: [
         new Date(req.query.AppointmentTimeAfter),
-        new Date(req.query.AppointmentTimeBefore)
-      ]
+        new Date(req.query.AppointmentTimeBefore),
+      ],
     };
   } else if (req.query.AppointmentTimeBefore) {
     queryString.AppointmentTime = {
-      [Op.lte]: new Date(req.query.AppointmentTimeBefore)
+      [Op.lte]: new Date(req.query.AppointmentTimeBefore),
     };
   } else if (req.query.AppointmentTimeAfter) {
     queryString.AppointmentTime = {
-      [Op.gte]: new Date(req.query.AppointmentTimeAfter)
+      [Op.gte]: new Date(req.query.AppointmentTimeAfter),
     };
   }
 
   if (req.query.Email) {
     queryString["$Appointments.Family.Email$"] = {
-      [Op.like]: `${req.query.Email}%`
+      [Op.like]: `${req.query.Email}%`,
     };
   }
   if (req.query.NameMom) {
     queryString["$Appointments.Family.NameMom$"] = {
-      [Op.like]: `${req.query.NameMom}%`
+      [Op.like]: `${req.query.NameMom}%`,
     };
   }
   if (req.query.NameDad) {
     queryString["$Appointments.Family.NameDad$"] = {
-      [Op.like]: `${req.query.NameDad}%`
+      [Op.like]: `${req.query.NameDad}%`,
     };
   }
   if (req.query.Phone) {
     queryString["$Appointments.Family.Phone$"] = {
-      [Op.like]: `${req.query.Phone}%`
+      [Op.like]: `${req.query.Phone}%`,
     };
   }
   if (req.query.FamilyId) {
@@ -126,7 +121,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.StudyName) {
     queryString["$Appointments.Study.StudyName$"] = {
-      [Op.like]: `${req.query.StudyName}%`
+      [Op.like]: `${req.query.StudyName}%`,
     };
   }
   if (req.query.StudyId) {
@@ -141,10 +136,10 @@ exports.search = asyncHandler(async (req, res) => {
         include: [
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
-        ]
-      }
-    ]
+          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+        ],
+      },
+    ],
   });
   res.status(200).send(schedule);
   console.log("Search successful!");
@@ -168,8 +163,8 @@ exports.today = asyncHandler(async (req, res) => {
           new Date().getDate()
         ).getTime() +
           24 * 60 * 60 * 1000
-      )
-    ]
+      ),
+    ],
   };
 
   const schedule = await model.schedule.findAll({
@@ -180,10 +175,10 @@ exports.today = asyncHandler(async (req, res) => {
         include: [
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
-        ]
-      }
-    ]
+          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+        ],
+      },
+    ],
   });
   res.status(200).send(schedule);
   console.log("Search successful!");
@@ -210,8 +205,8 @@ exports.week = asyncHandler(async (req, res) => {
           new Date().getDate()
         ).getTime() +
           24 * 60 * 60 * 1000 * (7 - new Date().getDay())
-      )
-    ]
+      ),
+    ],
   };
 
   const schedule = await model.schedule.findAll({
@@ -222,10 +217,10 @@ exports.week = asyncHandler(async (req, res) => {
         include: [
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] }
-        ]
-      }
-    ]
+          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+        ],
+      },
+    ],
   });
   res.status(200).send(schedule);
   console.log("Search successful!");
@@ -248,14 +243,14 @@ exports.update = asyncHandler(async (req, res) => {
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
             resource: updatedScheduleInfo,
-            sendUpdates: "all"
+            sendUpdates: "all",
           });
         } else {
           // Create a calendar event
           const calEvent = await google.calendar.events.insert({
             calendarId: "primary",
             resource: updatedScheduleInfo,
-            sendUpdates: "all"
+            sendUpdates: "all",
           });
 
           updatedScheduleInfo.calendarEventId = calEvent.data.id;
@@ -284,7 +279,7 @@ exports.update = asyncHandler(async (req, res) => {
               calendarId: "primary",
               eventId: updatedScheduleInfo.calendarEventId,
               resource: updatedScheduleInfo,
-              sendUpdates: "all"
+              sendUpdates: "all",
             });
           } catch (err) {
             throw err;
@@ -309,11 +304,11 @@ exports.update = asyncHandler(async (req, res) => {
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"]
-            }
-          ]
-        }
-      ]
+              attributes: ["StudyName", "MinAge", "MaxAge"],
+            },
+          ],
+        },
+      ],
     });
 
     res.status(200).send(updatedSchedule);
@@ -327,7 +322,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const schedule = await model.schedule.findOne({
-    where: req.query
+    where: req.query,
   });
 
   // remove calendar event, if it exists.
@@ -335,12 +330,12 @@ exports.delete = asyncHandler(async (req, res) => {
     await google.calendar.events.delete({
       calendarId: "primary",
       eventId: schedule.calendarEventId,
-      sendUpdates: "all"
+      sendUpdates: "all",
     });
   }
 
   await model.schedule.destroy({
-    where: req.query
+    where: req.query,
   });
 
   res.status(200).send("appointment deleted.");

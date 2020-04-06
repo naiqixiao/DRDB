@@ -204,12 +204,13 @@
                     <div class="title">
                       Additional studies for {{ currentChild.Name }}:
                     </div>
-                    <ElegibleStudies
+                    <ExtraStudies
                       ref="extraStudies"
                       :child="currentChild"
+                      :currentStudy="selectedStudy"
                       @selectStudy="selectStudy"
                       align="start"
-                    ></ElegibleStudies>
+                    ></ExtraStudies>
                   </v-col>
                   <v-col cols="12" md="12">
                     <div class="title" align="start">
@@ -273,7 +274,7 @@ import schedule from "@/services/schedule";
 import moment from "moment";
 
 import AgeDisplay from "@/components/AgeDisplay";
-import ElegibleStudies from "@/components/ElegibleStudies";
+import ExtraStudies from "@/components/ExtraStudies";
 import ElegibleExperimenters from "@/components/ElegibleExperimenters";
 
 import Conversation from "@/components/Conversation";
@@ -284,7 +285,7 @@ export default {
     AgeDisplay,
     Conversation,
     SiblingInfo,
-    ElegibleStudies,
+    ExtraStudies,
     ElegibleExperimenters,
   },
   data() {
@@ -509,32 +510,37 @@ export default {
       this.dialogSchedule = true;
     },
 
-    createAppointment() {
+    async createAppointment() {
       this.appointments = [];
 
       this.$refs.siblingTable.saveAppointment();
       this.$refs.extraStudies.selectStudy();
 
-      console.log(this.appointments);
-    },
-
-    async createAppointment1() {
       var newAppointmentInfo = {};
 
       switch (this.response) {
         case "Confirmed":
+          var studyNames = this.appointments.map((appointment) => {
+            return appointment.Study.StudyName;
+          });
+
+          var childNames = this.appointments.map((appointment) => {
+            return appointment.FK_Child;
+          });
+
+          studyNames = Array.from(new Set(studyNames));
+          childNames = Array.from(new Set(childNames));
+
           newAppointmentInfo = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
-            FK_Study: this.selectedStudy.id,
             summary:
-              this.selectedStudy.StudyName +
+              studyNames.join(" + ") +
               ", Family: " +
-              this.editedItem.FK_Family +
+              this.currentChild.FK_Family +
               ", Child: " +
-              this.editedItem.id,
-            FK_Family: this.editedItem.FK_Family,
-            FK_Child: this.editedItem.id,
+              childNames.join(" + "),
+            Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             location: "Psychology Building, McMaster University",
             start: {
@@ -560,9 +566,7 @@ export default {
           newAppointmentInfo = {
             AppointmentTime: null,
             Status: this.response,
-            FK_Study: this.selectedStudy.id,
-            FK_Family: this.editedItem.FK_Family,
-            FK_Child: this.editedItem.id,
+            Appointments: this.appointments,
             ScheduledBy: store.state.userID,
           };
 
@@ -574,18 +578,11 @@ export default {
           }
           break;
       }
+
       try {
-        const newAppointment = await schedule.create(newAppointmentInfo);
+        await schedule.create(newAppointmentInfo);
 
-        // this.Children[this.editedIndex].Appointments.push({
-        //   FK_Study: newAppointment.data.FK_Study
-        // });
-
-        console.log(
-          "New appointment scheduled!" + JSON.stringify(newAppointment)
-        );
-
-        this.$emit("createAppointment");
+        console.log("New appointment scheduled!");
       } catch (error) {
         console.log(error.response);
       }
@@ -594,43 +591,38 @@ export default {
     },
 
     selectStudy(selectedStudy) {
-      // this.appointments = this.appointments.filter((appointment) => {
-      //   !(appointment.FK_Child === this.currentChild.id);
-      // });
+      if (selectedStudy.studies.indexOf(this.selectedStudy) == -1) {
+        selectedStudy.studies.push(this.selectedStudy);
+      }
 
       selectedStudy.studies.forEach((study) => {
         this.appointments.push({
           FK_Family: this.currentChild.FK_Family,
           FK_Child: this.currentChild.id,
           FK_Study: study.id,
-          // Child: {
-          //   Name: selectedStudy.child.Name,
-          //   DoB: selectedStudy.child.DoB,
-          // },
-          // Study: {
-          //   StudyName: study.StudyName,
-          //   MinAge: study.MinAge,
-          //   MaxAge: study.MaxAge,
-          // },
+          Child: {
+            Name: selectedStudy.child.Name,
+            DoB: selectedStudy.child.DoB,
+          },
+          Study: {
+            StudyName: study.StudyName,
+            MinAge: study.MinAge,
+            MaxAge: study.MaxAge,
+          },
         });
-
-        // this.appointments.push(appointment);
       });
-      // console.log(this.appointments);
     },
 
     updateSiblingStudies(siblingAppointments) {
-      // console.log(siblingAppointments);
-
       siblingAppointments.forEach((appointment) => {
         this.appointments.push({
           FK_Family: appointment.FK_Family,
           FK_Child: appointment.FK_Child,
           FK_Study: appointment.FK_Study,
+          Study: appointment.Study,
+          Child: appointment.Child,
         });
       });
-
-      // console.log(this.appointments);
     },
 
     closeSchedule() {

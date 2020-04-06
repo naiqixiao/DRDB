@@ -208,6 +208,7 @@ export default {
           width: "140px",
           sortable: false,
         },
+        
         {
           text: "Elegible Studies",
           align: "center",
