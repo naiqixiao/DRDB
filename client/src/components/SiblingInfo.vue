@@ -208,7 +208,7 @@ export default {
           width: "140px",
           sortable: false,
         },
-        
+
         {
           text: "Elegible Studies",
           align: "center",
@@ -259,11 +259,10 @@ export default {
     },
 
     selectStudy(selectedStudy) {
-      // console.log("child" + JSON.stringify(selectedStudy));
 
-      this.appointments = this.appointments.filter((appointment) => {
-        !(appointment.FK_Child == selectedStudy.child.id);
-      });
+      var childId = selectedStudy.child.id
+
+      this.appointments = this.appointments.filter(appointment => appointment.FK_Child !== childId)
 
       selectedStudy.studies.forEach((study) => {
         var appointment = {
@@ -285,6 +284,7 @@ export default {
         this.appointments.push(appointment);
       });
 
+      // console.log(this.appointments);
       // this.$emit("updateSiblingStudies", this.appointments);
     },
 
