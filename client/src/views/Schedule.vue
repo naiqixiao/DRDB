@@ -8,7 +8,6 @@
         :item-text="'StudyName'"
         v-model="selectedStudy"
         return-object
-        filled
         label="Studies"
         @change="searchChild"
       ></v-select>
@@ -16,11 +15,36 @@
       <h4>{{ selectedStudy.StudyName }}</h4>
       <h4>{{ selectedStudy.MinAge }}</h4>
       <h4>{{ selectedStudy.MaxAge }}</h4>
+      <h4>{{ selectedStudy.Summary }}</h4>
     </v-col>
 
     <v-col cols="12" md="4">
       <v-row justify="space-around">
-        <v-col cols="12" md="6" v-for="field in familyField" :key="field.label">
+        <v-col cols="12" md="3">
+          <v-btn
+            color="purple"
+            text
+            @click.stop="editChild"
+            :disabled="!currentChild.id"
+            >Edit</v-btn
+          >
+        </v-col>
+        <v-col cols="12" md="3">
+          <h5>{{ page + " / " + NofChildren }}</h5>
+        </v-col>
+        <v-col cols="12" md="3">
+          <v-pagination
+            @next="nextPage"
+            @previous="previousPage"
+            circle
+            v-model="page"
+            :length="NofChildren"
+            total-visible="1"
+          ></v-pagination>
+        </v-col>
+      </v-row>
+      <v-row justify="space-around">
+        <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
           <v-text-field
             :label="field.label"
             v-model="currentFamily[field.field]"
@@ -30,7 +54,7 @@
         </v-col>
       </v-row>
       <v-row justify="space-around">
-        <v-col cols="12" md="3" v-for="field in childField" :key="field.label">
+        <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
           <v-text-field
             :label="field.label"
             v-model="currentChild[field.field]"
@@ -38,33 +62,32 @@
             dense
           ></v-text-field>
         </v-col>
+
+        <v-col cols="12" md="5">
+          <AgeDisplay :DoB="currentChild.DoB" />
+        </v-col>
       </v-row>
 
       <v-row justify="space-around">
-        <v-btn
-          color="purple"
-          text
-          @click.stop="editChild"
-          :disabled="!currentChild.id"
-          >Edit</v-btn
-        >
+        <v-col cols="12" md="9">
+          <v-select
+            :items="Responses"
+            v-model="response"
+            label="Parents' response"
+            @change="chooseResponse"
+            :disabled="!currentChild"
+          ></v-select>
+        </v-col>
 
-        <v-btn
-          color="purple"
-          text
-          @click.stop="scheduleChild"
-          :disabled="!currentChild.id"
-          >Schedule</v-btn
-        >
-        <h5>{{ page + " / " + NofChildren }}</h5>
-        <v-pagination
-          @next="nextPage"
-          @previous="previousPage"
-          circle
-          v-model="page"
-          :length="NofChildren"
-          total-visible="1"
-        ></v-pagination>
+        <v-col cols="12" md="3">
+          <v-btn
+            color="purple"
+            text
+            @click.stop="scheduleChild"
+            :disabled="!currentChild.id"
+            >{{ scheduleButtonText }}</v-btn
+          >
+        </v-col>
 
         <v-dialog v-model="dobPicker" max-width="360px">
           <v-card>
@@ -141,58 +164,65 @@
           :retain-focus="false"
         >
           <v-card>
-            <v-card-title class="headline">Schedule a study</v-card-title>
+            <v-card-title class="headline"
+              >Schedule {{ selectedStudy.StudyName }} for
+              {{ currentChild.Name }}</v-card-title
+            >
             <template>
               <v-container fluid>
                 <v-row
                   class="grey lighten-5"
-                  style="height: 300px;"
-                  justify="space-around"
+                  style="height: 500px;"
+                  justify="start"
                 >
-                  <v-col cols="12" lg="5">
-                    <v-card-title class="headline">
-                      {{ editedItem.Name }}
-                    </v-card-title>
-                    <AgeDisplay :DoB="editedItem.DoB" />
-
-                    <v-select
-                      :items="Responses"
-                      v-model="response"
-                      filled
-                      label="Parents' response"
-                    ></v-select>
-                  </v-col>
-
-                  <v-col cols="12" md="2">
+                  <v-col cols="12" md="4">
                     <v-text-field
                       ref="studyDate"
                       label="Study date"
                       v-model="studyDate"
                       append-icon="event"
                       @click:append="datePicker = true"
+                      :disabled="this.response != 'Confirmed'"
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" lg="2">
+                  <v-col cols="12" md="4">
                     <v-combobox
                       v-model="studyTime"
                       :items="studyTimeSlots"
                       label="Study time"
+                      :disabled="this.response != 'Confirmed'"
                     ></v-combobox>
                   </v-col>
+                  <v-col cols="12" md="4">
+                    <ElegibleExperimenters
+                      ref="elegibleExperimenter"
+                      :study="selectedStudy"
+                      @selectExperimenters="selectedExperimenters"
+                    ></ElegibleExperimenters>
+                  </v-col>
+                  <v-col cols="12" md="5" align="start">
+                    <div class="title">
+                      Additional studies for {{ currentChild.Name }}:
+                    </div>
+                    <ElegibleStudies
+                      ref="extraStudies"
+                      :child="currentChild"
+                      @selectStudy="selectStudy"
+                      align="start"
+                    ></ElegibleStudies>
+                  </v-col>
+                  <v-col cols="12" md="12">
+                    <div class="title" align="start">
+                      Studies for the sibling(s)
+                    </div>
+                    <SiblingInfo
+                      ref="siblingTable"
+                      :Children="currentChild.sibling"
+                      @updateSiblingStudies="updateSiblingStudies"
+                      v-show="response == 'Confirmed'"
+                    ></SiblingInfo>
+                  </v-col>
                 </v-row>
-
-                <v-row
-                  class="grey lighten-5"
-                  style="height: 300px;"
-                  justify="start"
-                ></v-row>
-                <v-col cols="12" md="12">
-                  <SiblingInfo
-                    :Children="currentChild.sibling"
-                    @updateSibling="updateSibling"
-                    v-show="response == 'Confirmed'"
-                  ></SiblingInfo>
-                </v-col>
               </v-container>
             </template>
             <v-card-actions>
@@ -239,10 +269,12 @@ import store from "@/store";
 import child from "@/services/child";
 import study from "@/services/study";
 
-import appointment from "@/services/appointment";
+import schedule from "@/services/schedule";
 import moment from "moment";
 
 import AgeDisplay from "@/components/AgeDisplay";
+import ElegibleStudies from "@/components/ElegibleStudies";
+import ElegibleExperimenters from "@/components/ElegibleExperimenters";
 
 import Conversation from "@/components/Conversation";
 import SiblingInfo from "@/components/SiblingInfo";
@@ -252,6 +284,8 @@ export default {
     AgeDisplay,
     Conversation,
     SiblingInfo,
+    ElegibleStudies,
+    ElegibleExperimenters,
   },
   data() {
     return {
@@ -262,6 +296,9 @@ export default {
       validChild: true,
       selectedStudy: {},
       Children: [],
+      elegibleExperimenters: [],
+      scheduleButtonText: "Schedule",
+      appointments: [],
       currentChild: {
         Name: null,
         Sex: null,
@@ -406,7 +443,7 @@ export default {
           this.page = 1;
           this.Children = Results.data;
           this.currentChild = this.Children[this.page - 1];
-          console.log(JSON.stringify(this.currentChild));
+          // console.log(JSON.stringify(this.currentChild));
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
@@ -472,7 +509,16 @@ export default {
       this.dialogSchedule = true;
     },
 
-    async createAppointment() {
+    createAppointment() {
+      this.appointments = [];
+
+      this.$refs.siblingTable.saveAppointment();
+      this.$refs.extraStudies.selectStudy();
+
+      console.log(this.appointments);
+    },
+
+    async createAppointment1() {
       var newAppointmentInfo = {};
 
       switch (this.response) {
@@ -529,7 +575,7 @@ export default {
           break;
       }
       try {
-        const newAppointment = await appointment.create(newAppointmentInfo);
+        const newAppointment = await schedule.create(newAppointmentInfo);
 
         // this.Children[this.editedIndex].Appointments.push({
         //   FK_Study: newAppointment.data.FK_Study
@@ -547,25 +593,74 @@ export default {
       this.closeSchedule();
     },
 
+    selectStudy(selectedStudy) {
+      // this.appointments = this.appointments.filter((appointment) => {
+      //   !(appointment.FK_Child === this.currentChild.id);
+      // });
+
+      selectedStudy.studies.forEach((study) => {
+        this.appointments.push({
+          FK_Family: this.currentChild.FK_Family,
+          FK_Child: this.currentChild.id,
+          FK_Study: study.id,
+          // Child: {
+          //   Name: selectedStudy.child.Name,
+          //   DoB: selectedStudy.child.DoB,
+          // },
+          // Study: {
+          //   StudyName: study.StudyName,
+          //   MinAge: study.MinAge,
+          //   MaxAge: study.MaxAge,
+          // },
+        });
+
+        // this.appointments.push(appointment);
+      });
+      // console.log(this.appointments);
+    },
+
+    updateSiblingStudies(siblingAppointments) {
+      // console.log(siblingAppointments);
+
+      siblingAppointments.forEach((appointment) => {
+        this.appointments.push({
+          FK_Family: appointment.FK_Family,
+          FK_Child: appointment.FK_Child,
+          FK_Study: appointment.FK_Study,
+        });
+      });
+
+      // console.log(this.appointments);
+    },
+
     closeSchedule() {
       this.dialogSchedule = false;
       setTimeout(() => {
+        this.appointments = [];
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
+        this.$refs.elegibleExperimenter.clear();
       }, 300);
     },
 
+    selectedExperimenters(experimenters) {
+      const experimenterEmails = experimenters.map((experimenter) => {
+        return experimenter.Email;
+      });
+
+      console.log(experimenterEmails);
+    },
     nextPage() {
       this.currentChild = this.Children[this.page - 1];
-      console.log(this.currentChild);
+      this.response = "";
     },
 
     previousPage() {
       this.currentChild = this.Children[this.page - 1];
-      console.log(this.currentChild);
+      this.response = "";
     },
 
     datePick() {
@@ -573,6 +668,25 @@ export default {
       setTimeout(() => {
         this.$refs.studyDate.focus();
       }, 100);
+    },
+
+    chooseResponse() {
+      switch (this.response) {
+        case "Confirmed": {
+          this.scheduleButtonText = "Schedule";
+          break;
+        }
+        case "Left a Message":
+        case "Interested": {
+          this.scheduleButtonText = "Confirm";
+          break;
+        }
+
+        case "Rejected": {
+          this.scheduleButtonText = "Confirm";
+          break;
+        }
+      }
     },
   },
   computed: {

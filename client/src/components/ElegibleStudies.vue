@@ -30,6 +30,11 @@ export default {
         studies: this.selectedStudy,
       });
     },
+
+    clear() {
+      this.selectedStudy = [];
+    },
+
   },
   computed: {
     PotentialStudies() {

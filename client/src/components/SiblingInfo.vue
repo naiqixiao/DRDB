@@ -1,6 +1,6 @@
 <template>
   <v-row>
-    <v-col cols="12" md="9">
+    <v-col cols="12" md="10">
       <v-data-table
         hide-default-footer
         disable-pagination
@@ -94,6 +94,7 @@
 
         <template #item.elegibleStudies="{ item }">
           <ElegibleStudies
+            ref="elegibleStudies"
             :child="item"
             @selectStudy="selectStudy"
           ></ElegibleStudies>
@@ -105,9 +106,6 @@
       </v-data-table>
     </v-col>
     <v-col cols="12" md="2">
-      <!-- <v-btn color="green darken-1" text @click="dialog = false"
-        >Cancel</v-btn
-      > -->
       <v-btn color="green darken-1" text @click="saveAppointment">Save</v-btn>
     </v-col>
   </v-row>
@@ -126,7 +124,7 @@ export default {
   },
   props: {
     Children: Array,
-    ScheduleID: Number
+    ScheduleID: Number,
   },
   data() {
     return {
@@ -193,12 +191,14 @@ export default {
           align: "center",
           value: "Name",
           width: "50px",
+          sortable: false,
         },
         {
           text: "Sex",
           align: "center",
           value: "Sex",
           width: "60px",
+          sortable: false,
         },
 
         {
@@ -206,12 +206,14 @@ export default {
           align: "center",
           value: "formattedAge",
           width: "140px",
+          sortable: false,
         },
         {
           text: "Elegible Studies",
           align: "center",
           value: "elegibleStudies",
           width: "100px",
+          sortable: false,
         },
         {
           text: "Edit",
@@ -256,6 +258,8 @@ export default {
     },
 
     selectStudy(selectedStudy) {
+      // console.log("child" + JSON.stringify(selectedStudy));
+
       this.appointments = this.appointments.filter((appointment) => {
         !(appointment.FK_Child == selectedStudy.child.id);
       });
@@ -280,7 +284,7 @@ export default {
         this.appointments.push(appointment);
       });
 
-      // console.log(this.appointments);
+      // this.$emit("updateSiblingStudies", this.appointments);
     },
 
     close() {
@@ -293,14 +297,14 @@ export default {
 
     saveAppointment() {
       this.$emit("newAppointments", this.appointments);
-
+      this.$emit("updateSiblingStudies", this.appointments);
     },
   },
   computed: {},
   watch: {
     dialogChild(val) {
       val || this.close();
-    }
+    },
   },
 };
 </script>

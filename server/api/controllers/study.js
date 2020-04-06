@@ -7,7 +7,7 @@ exports.create = asyncHandler(async (req, res) => {
   var newStudyInfo = req.body;
 
   const study = await model.study.create(newStudyInfo, {
-    include: [model.appointment, model.lab]
+    include: [model.appointment, model.lab],
   });
 
   console.log("Study created " + study.id);
@@ -21,7 +21,17 @@ exports.search = asyncHandler(async (req, res) => {
   try {
     const study = await model.study.findOne({
       where: { id: ID },
-      include: [model.appointment, model.lab]
+      include: [
+        model.appointment,
+        model.lab,
+        {
+          model: model.personnel,
+          // attributes: ["id", "StudyName"],
+          through: {
+            model: model.experimenter,
+          },
+        },
+      ],
     });
 
     console.log("Search successful!");
@@ -43,7 +53,7 @@ exports.update = asyncHandler(async (req, res) => {
 
   const study = await model.study.update(updatedStudyInfo, {
     where: { id: ID },
-    include: [model.appointment, model.lab]
+    include: [model.appointment, model.lab],
   });
 
   console.log("Study Information Updated!");
@@ -53,7 +63,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const study = await model.study.destroy({
-    where: req.query
+    where: req.query,
   });
 
   res.status(200).json(study);

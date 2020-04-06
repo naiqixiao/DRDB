@@ -52,7 +52,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Family.Phone$"] = { [Op.like]: `${req.query.Phone}%` };
   }
   if (req.query.FamilyId) {
-    queryString["$Family.id$"] = req.query.FamilyId;
+    queryString.FK_Family = req.query.FamilyId;
   }
 
   // queryString["$Family.NextContactDate$"] = { [Op.lt]: new Date() };
