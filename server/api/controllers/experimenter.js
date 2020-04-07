@@ -3,18 +3,14 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 
 
-exports.create = asyncHandler(async (req, res) => {
-  const experimenter = req.body.experimenter;
-  const studies = req.body.studies;
-
-  studies.forEach(study => {
-    study.FK_Experimenter = experimenter;
-  });
+exports.update = asyncHandler(async (req, res) => {
+  const experimenters = req.body;
 
   await model.experimenter.destroy({
-    where: { FK_Experimenter: experimenter }
+    where: { FK_Study: experimenters[0].FK_Study }
   });
-  const assignedStudies = await model.experimenter.bulkCreate(studies);
+
+  const assignedStudies = await model.experimenter.bulkCreate(experimenters);
 
   res.status(200).send(assignedStudies);
 });

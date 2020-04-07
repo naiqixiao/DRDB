@@ -33,7 +33,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.id = req.query.id;
   }
   if (req.query.Role) {
-    queryString.Role = req.query.Role;
+    queryString.Role = { [Op.in]: `${req.query.Role}%` };
   }
   if (req.query.Active) {
     queryString.Active = req.query.Active;

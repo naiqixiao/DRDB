@@ -16,17 +16,16 @@ exports.create = asyncHandler(async (req, res) => {
 
 // Retrieve all families from the database.
 exports.search = asyncHandler(async (req, res) => {
-  var ID = req.query.id;
+  var queryString = req.query;
 
   try {
-    const study = await model.study.findOne({
-      where: { id: ID },
+    const study = await model.study.findAll({
+      where: queryString,
       include: [
         model.appointment,
         model.lab,
         {
           model: model.personnel,
-          // attributes: ["id", "StudyName"],
           through: {
             model: model.experimenter,
           },

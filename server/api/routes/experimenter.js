@@ -4,6 +4,6 @@ const checkAuth = require("../middleware/check-auth");
 
 const ExperimenterController = require("../controllers/experimenter");
 
-router.post("/add", checkAuth, ExperimenterController.create);
+router.post("/", checkAuth, ExperimenterController.update);
 
 module.exports = router;
