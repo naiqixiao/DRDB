@@ -16,10 +16,16 @@
     <template #top>
       <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
         <v-card>
-          <v-card-title class="headline">Select study date and time.</v-card-title>
+          <v-card-title class="headline"
+            >Select study date and time.</v-card-title
+          >
           <template>
             <v-container fluid>
-              <v-row class="grey lighten-5" style="height: 400px;" justify="space-around">
+              <v-row
+                class="grey lighten-5"
+                style="height: 400px;"
+                justify="space-around"
+              >
                 <v-col cols="12" lg="5">
                   <v-date-picker
                     v-model="studyDate"
@@ -29,7 +35,11 @@
                   ></v-date-picker>
                 </v-col>
                 <v-col cols="12" lg="3">
-                  <v-combobox v-model="studyTime" :items="studyTimeSlots" label="Study time"></v-combobox>
+                  <v-combobox
+                    v-model="studyTime"
+                    :items="studyTimeSlots"
+                    label="Study time"
+                  ></v-combobox>
                   <h3>{{ studyDateTime }}</h3>
                 </v-col>
               </v-row>
@@ -64,38 +74,42 @@
       <v-icon
         @click="updateSchedule(item, 'Confirmed')"
         :disabled="item.Status === 'Confirmed' || item.Completed == 1"
-      >event</v-icon>
+        >event</v-icon
+      >
       <v-icon
         @click="updateSchedule(item, 'Rescheduling')"
         :disabled="
           item.Status === 'Rescheduling' ||
-          item.Status === 'No Show' ||
-          item.Status === 'TBD' ||
-          item.Completed == 1
+            item.Status === 'No Show' ||
+            item.Status === 'TBD' ||
+            item.Completed == 1
         "
-      >update</v-icon>
+        >update</v-icon
+      >
       <v-icon
         @click="updateSchedule(item, 'No Show')"
         :disabled="
           item.Status === 'Rescheduling' ||
-          item.Status === 'No Show' ||
-          item.Status === 'TBD' ||
-          item.Completed == 1
+            item.Status === 'No Show' ||
+            item.Status === 'TBD' ||
+            item.Completed == 1
         "
-      >sentiment_dissatisfied</v-icon>
+        >sentiment_dissatisfied</v-icon
+      >
       <v-icon
         @click="updateSchedule(item, 'Cancelled')"
         :disabled="item.Status === 'Cancelled' || item.Completed == 1"
-      >not_interested</v-icon>
+        >not_interested</v-icon
+      >
     </template>
 
     <template #item.Completed="{ item }">
-      <v-checkbox
-        dense
-        class="mr-0 pa-0"
+      <v-switch
         v-model="item.Completed"
+        class="mr-0 pa-0"
         @change="updateSchedule(item, 'Completed')"
-      ></v-checkbox>
+        dense
+      ></v-switch>
     </template>
 
     <template #expanded-item="{ headers, item }">
@@ -130,10 +144,10 @@ export default {
     AgeByParticipationSchedule,
     ChildNameSchedule,
     StudyNameSchedule,
-    MiniAppointmentTable
+    MiniAppointmentTable,
   },
   props: {
-    Schedules: Array
+    Schedules: Array,
   },
   data() {
     return {
@@ -164,44 +178,44 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM"
+        "06:00PM",
       ],
       headersSchedule: [
         {
           text: "Child",
           align: "center",
           value: "Child",
-          width: "50px"
+          width: "50px",
         },
         {
           text: "Study",
           align: "center",
           value: "Study",
-          width: "50px"
+          width: "50px",
         },
         {
           text: "Study Time",
           align: "center",
           value: "AppointmentTime",
-          width: "100px"
+          width: "100px",
         },
         {
           text: "Age by Participation",
           align: "center",
           value: "AgeByParticipation",
-          width: "80px"
+          width: "80px",
         },
         {
           text: "Status",
           align: "center",
           value: "Status",
-          width: "80px"
+          width: "80px",
         },
         {
           text: "Updated Time",
           align: "center",
           value: "updatedAt",
-          width: "80px"
+          width: "80px",
         },
 
         {
@@ -209,16 +223,16 @@ export default {
           align: "center",
           value: "actions",
           sortable: false,
-          width: "80px"
+          width: "80px",
         },
         {
           text: "Completion",
           align: "start",
           value: "Completed",
           sortable: false,
-          width: "80px"
-        }
-      ]
+          width: "80px",
+        },
+      ],
     };
   },
   methods: {
@@ -249,11 +263,11 @@ export default {
           }
 
           // name by combining all study names within a schedule
-          var studyNames = item.Appointments.map(appointment => {
+          var studyNames = item.Appointments.map((appointment) => {
             return appointment.Study.StudyName;
           });
 
-          var childNames = item.Appointments.map(appointment => {
+          var childNames = item.Appointments.map((appointment) => {
             return appointment.FK_Child;
           });
 
@@ -301,11 +315,11 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.editedItem.Appointments.map(appointment => {
+          var studyNames = this.editedItem.Appointments.map((appointment) => {
             return appointment.Study.StudyName;
           });
 
-          var childNames = this.editedItem.Appointments.map(appointment => {
+          var childNames = this.editedItem.Appointments.map((appointment) => {
             return appointment.FK_Child;
           });
 
@@ -320,13 +334,13 @@ export default {
 
           this.editedItem.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
           this.editedItem.end = {
             dateTime: moment(this.studyDateTime)
               .add(1, "h") // might change if multiple studies are scheduled for one visit
               .toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
 
           const calendarEvent = await schedule.update(this.editedItem);
@@ -351,7 +365,7 @@ export default {
 
     datePickerRange() {
       if (this.editedItem.Appointments) {
-        var minAges = this.editedItem.Appointments.map(appointment => {
+        var minAges = this.editedItem.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MinAge * 30.5),
             "days"
@@ -364,7 +378,7 @@ export default {
 
         this.earliestDate = MinAge.toISOString(true);
 
-        var maxAges = this.editedItem.Appointments.map(appointment => {
+        var maxAges = this.editedItem.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MaxAge * 30.5),
             "days"
@@ -375,7 +389,7 @@ export default {
 
         this.latestDate = MaxAge.toISOString(true);
       }
-    }
+    },
   },
 
   computed: {
@@ -406,13 +420,13 @@ export default {
 
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
-    }
+    },
   },
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 

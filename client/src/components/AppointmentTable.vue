@@ -100,13 +100,13 @@
       >
     </template>
 
-    <template v-slot:item.Completed="{ item }">
-      <v-checkbox
-        dense
-        class="mr-0 pa-0"
+    <template #item.Schedule.Completed="{ item }">
+      <v-switch
         v-model="item.Schedule.Completed"
+        class="mr-0 pa-0"
         @change="updateSchedule(item, 'Completed')"
-      ></v-checkbox>
+        dense
+      ></v-switch>
     </template>
   </v-data-table>
 </template>

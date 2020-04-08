@@ -14,6 +14,15 @@
         <template #item.updatedAt="{ value }">
           <DateDisplay :date="value" :format="'short'" />
         </template>
+
+        <template #item.Completed="{ item }">
+          <v-switch
+            v-model="item.Completed"
+            class="ma-2"
+            @change="changeStudyStatus(item)"
+            dense
+          ></v-switch>
+        </template>
       </v-data-table>
     </v-col>
 
@@ -55,6 +64,23 @@
                 solo
                 v-model="currentStudy['EmailTemplate']"
               ></v-textarea>
+              <v-row justify="space-around">
+                <v-col cols="12" md="2" dense>
+                  <v-btn color="purple" text @click.stop="createStudy"
+                    >Add</v-btn
+                  >
+                </v-col>
+                <v-col cols="12" md="2" dense>
+                  <v-btn color="purple" text @click.stop="editStudy"
+                    >Edit</v-btn
+                  >
+                </v-col>
+                <v-col cols="12" md="2" dense>
+                  <v-btn color="purple" text @click.stop="deleteStudy"
+                    >Delete</v-btn
+                  >
+                </v-col>
+              </v-row>
             </v-col>
             <v-col cols="12" md="4">
               <h3>Experimenters</h3>
@@ -65,19 +91,6 @@
                 :studyId="currentStudy.id"
                 @updatedExperimenters="updateExperimenters"
               ></Experimenters>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="createStudy">Add</v-btn>
-            </v-col>
-            <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="editStudy">Edit</v-btn>
-            </v-col>
-            <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="deleteStudy"
-                >Delete</v-btn
-              >
             </v-col>
           </v-row>
         </v-container>
@@ -224,18 +237,7 @@ export default {
 
       Studies: [],
       currentStudy: {},
-      editedStudy: {
-        // StudyName: null,
-        // FK_Lab: store.state.lab,
-        // MinAge: null,
-        // MaxAge: null,
-        // Description: "",
-        // EmailTemplate: "",
-        // Completed: 0,
-        // StudyType: null,
-        // PrematureParticipant: 0,
-        // updatedAt: new Date(),
-      },
+      editedStudy: {},
       defaultStudy: {
         StudyName: null,
         FK_Lab: store.state.lab,
@@ -292,10 +294,21 @@ export default {
         this.labMembers = this.labMembers.filter((member) => {
           return member.Role !== "PI";
         });
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
+    },
 
-        // this.labMembers = this.labMembers.map((member) => {
-        //   return member.id;
-        // });
+    async changeStudyStatus(item) {
+      this.currentStudy = item;
+
+      try {
+        await study.update(this.currentStudy);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
