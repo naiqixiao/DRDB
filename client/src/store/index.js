@@ -13,7 +13,7 @@ export default new Vuex.Store({
     userID: null,
     lab: null,
     studies: null,
-    isUserLoggedIn: false
+    isUserLoggedIn: false,
   },
   mutations: {
     setToken(state, token) {
@@ -31,7 +31,7 @@ export default new Vuex.Store({
     },
     setStudies(state, studies) {
       state.studies = studies;
-    }
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -48,6 +48,6 @@ export default new Vuex.Store({
     },
     setStudies({ commit }, studies) {
       commit("setStudies", studies);
-    }
-  }
+    },
+  },
 });

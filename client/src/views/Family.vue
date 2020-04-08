@@ -408,7 +408,6 @@ export default {
             this.editedItem.id = newfamilyId.data.id;
 
             this.currentFamily = this.editedItem;
-            console.log(JSON.stringify(this.currentFamily));
 
             this.Families.push(this.editedItem);
             this.page = this.Families.length;

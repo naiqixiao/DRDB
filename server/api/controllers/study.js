@@ -6,12 +6,13 @@ const asyncHandler = require("express-async-handler");
 exports.create = asyncHandler(async (req, res) => {
   var newStudyInfo = req.body;
 
-  const study = await model.study.create(newStudyInfo, {
-    include: [model.appointment, model.lab],
-  });
-
-  console.log("Study created " + study.id);
-  res.status(200).send(study);
+  try {
+    const study = await model.study.create(newStudyInfo);
+    console.log("Study created: " + study.id);
+    res.status(200).send(study);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
 // Retrieve all families from the database.
@@ -43,16 +44,19 @@ exports.search = asyncHandler(async (req, res) => {
 
 // Update a Tutorial by the id in the request
 exports.update = asyncHandler(async (req, res) => {
-  var ID = req.query.id;
+  var ID = req.body.id;
   var updatedStudyInfo = req.body;
 
   if (updatedStudyInfo.id) {
     delete updatedStudyInfo["id"];
   }
 
-  const study = await model.study.update(updatedStudyInfo, {
+  await model.study.update(updatedStudyInfo, {
     where: { id: ID },
-    include: [model.appointment, model.lab],
+  });
+
+  const study = await model.study.findOne({
+    where: { id: ID },
   });
 
   console.log("Study Information Updated!");

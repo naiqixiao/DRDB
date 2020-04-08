@@ -42,20 +42,18 @@
               <v-textarea
                 label="Study summary"
                 outlined
-                filled
                 no-resize
                 rows="3"
                 solo
-                v-model="currentStudy.Summary"
+                v-model="currentStudy['Description']"
               ></v-textarea>
               <v-textarea
                 label="Study email template"
                 outlined
-                filled
                 no-resize
                 rows="6"
                 solo
-                v-model="currentStudy.Template"
+                v-model="currentStudy['EmailTemplate']"
               ></v-textarea>
             </v-col>
             <v-col cols="12" md="4">
@@ -71,16 +69,96 @@
           </v-row>
           <v-row>
             <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="">Add</v-btn>
+              <v-btn color="purple" text @click.stop="createStudy">Add</v-btn>
             </v-col>
             <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="">Edit</v-btn>
+              <v-btn color="purple" text @click.stop="editStudy">Edit</v-btn>
             </v-col>
             <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="">Delete</v-btn>
+              <v-btn color="purple" text @click.stop="deleteStudy"
+                >Delete</v-btn
+              >
             </v-col>
           </v-row>
         </v-container>
+
+        <div>
+          <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+            <v-card>
+              <v-card-title>
+                <span class="headline">Study information</span>
+              </v-card-title>
+
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-container>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="3"
+                      v-for="field in studyFields"
+                      :key="field.label"
+                    >
+                      <div v-if="field.options">
+                        <v-combobox
+                          justify="start"
+                          :items="options[field.options]"
+                          v-model="editedStudy[field.field]"
+                          :label="field.label"
+                          dense
+                        ></v-combobox>
+                      </div>
+                      <div v-else-if="field.rules">
+                        <v-text-field
+                          :label="field.label"
+                          v-model="editedStudy[field.field]"
+                          :rules="rules[field.rules]"
+                          dense
+                        ></v-text-field>
+                      </div>
+                      <div v-else>
+                        <v-text-field
+                          :label="field.label"
+                          v-model="editedStudy[field.field]"
+                          dense
+                        ></v-text-field>
+                      </div>
+                    </v-col>
+                  </v-row>
+
+                  <v-row>
+                    <v-col cols="12" md="8">
+                      <h3>Study summary & email template</h3>
+
+                      <v-textarea
+                        label="Study summary"
+                        outlined
+                        no-resize
+                        rows="3"
+                        solo
+                        v-model="editedStudy['Description']"
+                      ></v-textarea>
+                      <v-textarea
+                        label="Study email template"
+                        outlined
+                        no-resize
+                        rows="6"
+                        solo
+                        v-model="editedStudy['EmailTemplate']"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-form>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="green darken-1" text @click="close">Cancel</v-btn>
+                <v-btn color="green darken-1" text @click="save">Save</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
       </v-form>
     </v-col>
   </v-row>
@@ -128,17 +206,48 @@ export default {
           width: "50px",
         },
       ],
+      dialog: false,
       studyFields: [
         { label: "Study Name", field: "StudyName" },
         { label: "Min Age", field: "MinAge" },
         { label: "Max Age", field: "MaxAge" },
-        { label: "Study Type", field: "StudyType" },
+        {
+          label: "Study Type",
+          field: "StudyType",
+          options: "studyType",
+        },
         { label: "Premature Participants", field: "PrematureParticipant" },
       ],
+      options: {
+        studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"],
+      },
 
       Studies: [],
       currentStudy: {},
-      editedStudy: {},
+      editedStudy: {
+        // StudyName: null,
+        // FK_Lab: store.state.lab,
+        // MinAge: null,
+        // MaxAge: null,
+        // Description: "",
+        // EmailTemplate: "",
+        // Completed: 0,
+        // StudyType: null,
+        // PrematureParticipant: 0,
+        // updatedAt: new Date(),
+      },
+      defaultStudy: {
+        StudyName: null,
+        FK_Lab: store.state.lab,
+        MinAge: null,
+        MaxAge: null,
+        Description: "",
+        EmailTemplate: "",
+        Completed: 0,
+        StudyType: null,
+        PrematureParticipant: 0,
+        updatedAt: new Date().toISOString(),
+      },
       editedIndex: -1,
       labMembers: [],
       valid: true,
@@ -199,17 +308,80 @@ export default {
 
     rowSelected(item, row) {
       row.select(true);
-      // this.$emit("rowSelected", item.Appointments[0].FK_Family);
       this.currentStudy = item;
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
     },
 
+    editStudy() {
+      this.editedStudy = this.currentStudy;
+      this.editedIndex = this.Studies.indexOf(this.currentStudy);
+      this.dialog = true;
+    },
+
+    createStudy() {
+      this.editedStudy = Object.assign({}, this.defaultStudy);
+      this.editedIndex = -1;
+      this.dialog = true;
+    },
+
+    async save() {
+      if (this.editedIndex < 0) {
+        try {
+          const Result = await study.create(this.editedStudy);
+          this.editedStudy.id = Result.data.id;
+          this.Studies.push(this.editedStudy);
+          // this.editedIndex = (this.Studies.length - 1);
+        } catch (error) {
+          console.log(error.response);
+        }
+      } else {
+        try {
+          const Result = await study.update(this.editedStudy);
+
+          this.currentStudy = Result.data;
+          Object.assign(this.Studies[this.editedIndex], Result.data);
+          // this.$store.dispatch("setStudies", this.Studies);
+          // store.commit("setStudies", this.Studies);
+        } catch (error) {
+          if (error.response.status === 401) {
+            alert("Authentication failed, please login.");
+            this.$router.push({
+              name: "Login",
+            });
+          }
+        }
+      }
+
+      this.close();
+    },
+
+    close() {
+      this.dialog = false;
+
+      setTimeout(() => {
+        // this.editedStudy = [];
+        // this.editedIndex = -1;
+      }, 300);
+    },
+
+    async deleteStudy() {
+      var studyInfo = {
+        id: this.currentStudy.id,
+      };
+
+      try {
+        await study.delete(studyInfo);
+        var index = this.Studies.indexOf(this.currentStudy);
+        this.Studies.splice(index, 1);
+
+        this.currentStudy = Object.assign({}, this.defaultStudy);
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
     updateExperimenters(updatedExperimenters) {
       this.currentStudy.Personnels = updatedExperimenters;
-      // updatedExperimenters.forEach(experimenter => {
-      // this.currentStudy.personnel
-
-      // })
     },
   },
   mounted: function() {
