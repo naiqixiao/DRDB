@@ -91,7 +91,7 @@ module.exports = function(sequelize, DataTypes) {
         }
       },
       NoMoreContact: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
         allowNull: true,
         defaultValue: "0"
       },

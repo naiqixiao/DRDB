@@ -101,12 +101,12 @@
     </template>
 
     <template #item.Schedule.Completed="{ item }">
-      <v-switch
+      <v-simple-checkbox
         v-model="item.Schedule.Completed"
         class="mr-0 pa-0"
-        @change="updateSchedule(item, 'Completed')"
+        @input="updateSchedule(item, 'Completed')"
         dense
-      ></v-switch>
+      ></v-simple-checkbox>
     </template>
   </v-data-table>
 </template>

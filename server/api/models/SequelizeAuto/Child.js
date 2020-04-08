@@ -27,22 +27,22 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       Hearingloss: {
-        type: DataTypes.INTEGER(1),
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       },
       VisionLoss: {
-        type: DataTypes.INTEGER(1),
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       },
       PrematureBirth: {
-        type: DataTypes.INTEGER(1),
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       },
       Illness: {
-        type: DataTypes.INTEGER(1),
+        type: DataTypes.BOOLEAN,
         allowNull: true
       },
       Note: {

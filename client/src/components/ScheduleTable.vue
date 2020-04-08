@@ -104,12 +104,18 @@
     </template>
 
     <template #item.Completed="{ item }">
-      <v-switch
+      <!-- <v-switch
         v-model="item.Completed"
         class="mr-0 pa-0"
         @change="updateSchedule(item, 'Completed')"
         dense
-      ></v-switch>
+      ></v-switch> -->
+      <v-simple-checkbox
+        v-model="item.Completed"
+        class="mr-0 pa-0"
+        @input="updateSchedule(item, 'Completed')"
+        dense
+      ></v-simple-checkbox>
     </template>
 
     <template #expanded-item="{ headers, item }">

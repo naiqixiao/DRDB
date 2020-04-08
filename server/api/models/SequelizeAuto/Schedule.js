@@ -25,12 +25,12 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       ReminderEmail: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       },
       ThankYouEmail: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       },
@@ -65,7 +65,7 @@ module.exports = function(sequelize, DataTypes) {
         defaultValue: sequelize.literal("CURRENT_TIMESTAMP")
       },
       Completed: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"
       }

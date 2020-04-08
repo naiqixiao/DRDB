@@ -127,7 +127,8 @@
                       @click:append="dobPicker = true"
                       :rules="rules.dob"
                       label="Date of birth (YYYY-MM-DD)"
-                    ></v-text-field>flffdjjdfa;kfjdsf
+                    ></v-text-field
+                    >flffdjjdfa;kfjdsf
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
                     <v-select
@@ -296,6 +297,7 @@ export default {
       dobPicker: false,
       datePicker: false,
       validChild: true,
+      studies: [],
       selectedStudy: {},
       Children: [],
       elegibleExperimenters: [],
@@ -417,6 +419,26 @@ export default {
   },
 
   methods: {
+    async searchStudies() {
+      var queryString = {
+        FK_Lab: store.state.lab,
+        Completed: 0,
+      };
+
+      try {
+        const Result = await study.search(queryString);
+
+        this.studies = Result.data;
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
+    },
+
     async searchChild() {
       var studyQuery = {
         id: this.selectedStudy.id,
@@ -683,10 +705,6 @@ export default {
     },
   },
   computed: {
-    studies() {
-      return store.state.studies;
-    },
-
     NofChildren() {
       return this.Children.length;
     },
@@ -750,6 +768,9 @@ export default {
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
+  },
+  mounted: function() {
+    this.searchStudies();
   },
 
   watch: {
