@@ -36,7 +36,7 @@ module.exports = function(sequelize, DataTypes) {
         unique: true
       },
       Role: {
-        type: DataTypes.ENUM("PostDoc", "PI", "GradStudent", "Undergrad", "RA"),
+        type: DataTypes.ENUM("PostDoc", "PI", "GradStudent", "Undergrad", "RA", "Lab manager", "Staff"),
         allowNull: false
       },
       FK_Lab: {

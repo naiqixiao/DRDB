@@ -1,7 +1,11 @@
 import api from "./api";
 
 export default {
-  post(experimenter) {
-    return api().post("experimenter/", experimenter);
+  postExperimenters(experimenter) {
+    return api().post("experimenter/experimenters", experimenter);
+  },
+
+  postStudies(studies) {
+    return api().post("experimenter/studies", studies);
   }
 };

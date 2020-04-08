@@ -3,50 +3,42 @@
     <v-col
       cols="12"
       md="12"
-      v-for="experimenter in Experimenters"
-      :key="experimenter.id"
+      v-for="study in Studies"
+      :key="study.id"
       dense
     >
       <v-card class="mx-auto" width="360px" height="120px">
         <v-card-title>{{
-          experimenter.Name + " (" + experimenter.Initial + ")"
+          study.StudyName
         }}</v-card-title>
 
         <v-card-text align="start">{{
-          "Email: " + experimenter.Email
+          "Age range: " + study.MinAge + " to " + study.MaxAge
         }}</v-card-text>
-        <h4 align="end">{{ "Role: " + experimenter.Role }}</h4>
+        <h4 align="end">{{ "Type: " + study.StudyType }}</h4>
 
-        <!-- <v-card-actions>
-          <v-btn
-            text
-            @click="removeExperimenter(index)"
-            :disabled="Experimenters.length == 1"
-            >Delete</v-btn
-          >
-        </v-card-actions> -->
       </v-card>
     </v-col>
     <v-row align="center" justify="center">
       <v-col cols="12" md="2" dense>
-        <v-btn color="purple" fab large @click.stop="updateExperimenters"
+        <v-btn color="purple" fab large @click.stop="updateStudies"
           >+</v-btn
         >
       </v-col>
     </v-row>
 
     <div>
-      <v-dialog v-model="dialogExperimenter" max-width="1200px">
+      <v-dialog v-model="dialogStudy" max-width="1200px">
         <v-card>
           <v-row align="center" justify="center">
             <v-col cols="12" lg="10">
               <v-select
-                :items="labMembers"
+                :items="labStudies"
                 :item-value="'id'"
-                :item-text="'Name'"
-                v-model="editedExperimenter"
+                :item-text="'StudyName'"
+                v-model="editedStudies"
                 return-object
-                label="Experimenters"
+                label="Studies"
                 multiple
               >
               </v-select>
@@ -68,40 +60,39 @@ import experimenter from "@/services/experimenter";
 export default {
   components: {},
   props: {
-    Experimenters: Array,
-    labMembers: Array,
-    studyId: Number,
+    Studies: Array,
+    labStudies: Array,
+    personnelId: Number,
   },
 
   data() {
     return {
-      dialogExperimenter: false,
-      editedExperimenter: [],
+      dialogStudy: false,
+      editedStudies: [],
     };
   },
   methods: {
-    updateExperimenters() {
+    updateStudies() {
 
-      this.editedExperimenter = this.Experimenters
-      this.dialogExperimenter = true;
+      this.editedStudies = this.Studies
+      this.dialogStudy = true;
     },
 
     async save() {
-      var newExperimenters = this.editedExperimenter.map((experimenter) => {
+      var newStudies = this.editedStudies.map((study) => {
         return {
-          FK_Study: this.studyId,
-          FK_Experimenter: experimenter.id,
+          FK_Experimenter: this.personnelId,
+          FK_Study: study.id,
         };
       });
 
-      console.log(newExperimenters);
       try {
-        await experimenter.postExperimenters(newExperimenters);
+        await experimenter.postStudies(newStudies);
 
-        this.$emit("updatedExperimenters", this.editedExperimenter);
-        this.dialogExperimenter = false;
+        this.$emit("updatedStudies", this.editedStudies);
+        this.dialogStudy = false;
 
-        console.log("Experimenters updated.");
+        console.log("Studies updated.");
       } catch (error) {
         console.error(error.response);
       }

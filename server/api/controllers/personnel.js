@@ -5,9 +5,7 @@ const asyncHandler = require("express-async-handler");
 // Create and Save a new personnel
 exports.create = asyncHandler(async (req, res) => {
   var newPersonnelInfo = req.body;
-  const personnel = await model.personnel.create(newPersonnelInfo, {
-    include: [model.lab, model.appointment]
-  });
+  const personnel = await model.personnel.create(newPersonnelInfo);
 
   res.status(200).send(personnel);
   console.log("personnel created " + personnel.id);
@@ -45,7 +43,7 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.study) {
     queryString["$Studies.id$"] = { [Op.in]: `${req.query.study}%` };
   }
-  
+
   const personnel = await model.personnel.findAll({
     where: queryString,
     include: [
@@ -53,12 +51,12 @@ exports.search = asyncHandler(async (req, res) => {
       // model.appointment,
       {
         model: model.study,
-        attributes: ["id", "StudyName"],
+        attributes: ["id", "StudyName", "MinAge", "MaxAge", "StudyType"],
         through: {
-          model: model.experimenter
-        }
-      }
-    ]
+          model: model.experimenter,
+        },
+      },
+    ],
   });
 
   return res.status(200).send(personnel);
@@ -66,18 +64,20 @@ exports.search = asyncHandler(async (req, res) => {
 
 // Update a Tutorial by the id in the request
 exports.update = asyncHandler(async (req, res) => {
-  var ID = req.query.id;
+  var ID = req.body.id;
   var updatedPersonnelInfo = req.body;
 
   if (updatedPersonnelInfo.id) {
     delete updatedPersonnelInfo["id"];
   }
 
-  const personnel = await model.personnel.update(updatedPersonnelInfo, {
+  await model.personnel.update(updatedPersonnelInfo, {
     where: { id: ID },
-    include: [model.lab, model.appointment]
   });
 
+  const personnel = await model.personnel.findOne({
+    where: { id: ID },
+  });
   res.status(200).send(personnel);
   console.log("Personnel Information Updated!");
 });
@@ -85,7 +85,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.destroy({
-    where: req.query
+    where: req.query,
   });
   res.status(200).json(personnel);
   console.log(personnel.id + " deleted.");
