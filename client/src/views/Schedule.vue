@@ -210,6 +210,7 @@
                       :child="currentChild"
                       :currentStudy="selectedStudy"
                       @selectStudy="selectStudy"
+                      @selectExperimenters="selectedExperimenters"
                       align="start"
                     ></ExtraStudies>
                   </v-col>
@@ -217,12 +218,13 @@
                     <div class="title" align="start">
                       Studies for the sibling(s)
                     </div>
-                    <SiblingInfo
+                    <!-- <SiblingInfo
                       ref="siblingTable"
                       :Children="currentChild.sibling"
                       @updateSiblingStudies="updateSiblingStudies"
+                      @selectExperimenters="selectedSiblingExperimenters"
                       v-show="response == 'Confirmed'"
-                    ></SiblingInfo>
+                    ></SiblingInfo> -->
                   </v-col>
                 </v-row>
               </v-container>
@@ -279,13 +281,13 @@ import ExtraStudies from "@/components/ExtraStudies";
 import ElegibleExperimenters from "@/components/ElegibleExperimenters";
 
 import Conversation from "@/components/Conversation";
-import SiblingInfo from "@/components/SiblingInfo";
+// import SiblingInfo from "@/components/SiblingInfo";
 
 export default {
   components: {
     AgeDisplay,
     Conversation,
-    SiblingInfo,
+    // SiblingInfo,
     ExtraStudies,
     ElegibleExperimenters,
   },
@@ -303,6 +305,7 @@ export default {
       elegibleExperimenters: [],
       scheduleButtonText: "Schedule",
       appointments: [],
+      experimenters: [],
       currentChild: {
         Name: null,
         Sex: null,
@@ -467,7 +470,6 @@ export default {
           this.page = 1;
           this.Children = Results.data;
           this.currentChild = this.Children[this.page - 1];
-          // console.log(JSON.stringify(this.currentChild));
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
@@ -523,9 +525,9 @@ export default {
       }, 300);
     },
 
-    updateSibling(updatedSibling) {
-      this.SiblingInfo = updatedSibling;
-    },
+    // updateSibling(updatedSibling) {
+    //   this.SiblingInfo = updatedSibling;
+    // },
 
     scheduleChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
@@ -535,9 +537,13 @@ export default {
 
     async createAppointment() {
       this.appointments = [];
-
-      this.$refs.siblingTable.saveAppointment();
+      // this.$refs.siblingTable.saveAppointment();
       this.$refs.extraStudies.selectStudy();
+
+      this.Experimenters = [];
+      this.$refs.elegibleExperimenter.selectExperimenters();
+      // this.$refs.siblingTable.selectedExperimenters();
+      this.$refs.extraStudies.selectExperimenters();
 
       var newAppointmentInfo = {};
 
@@ -576,11 +582,12 @@ export default {
                 .toISOString(true),
               timeZone: "America/Toronto",
             },
-            attendees: [
-              {
-                email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
-              },
-            ],
+            attendees: this.Experimenters
+            // [
+            //   {
+            //     email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
+            //   },
+            // ],
           };
 
           break;
@@ -636,17 +643,17 @@ export default {
       });
     },
 
-    updateSiblingStudies(siblingAppointments) {
-      siblingAppointments.forEach((appointment) => {
-        this.appointments.push({
-          FK_Family: appointment.FK_Family,
-          FK_Child: appointment.FK_Child,
-          FK_Study: appointment.FK_Study,
-          Study: appointment.Study,
-          Child: appointment.Child,
-        });
-      });
-    },
+    // updateSiblingStudies(siblingAppointments) {
+    //   siblingAppointments.forEach((appointment) => {
+    //     this.appointments.push({
+    //       FK_Family: appointment.FK_Family,
+    //       FK_Child: appointment.FK_Child,
+    //       FK_Study: appointment.FK_Study,
+    //       Study: appointment.Study,
+    //       Child: appointment.Child,
+    //     });
+    //   });
+    // },
 
     closeSchedule() {
       this.dialogSchedule = false;
@@ -662,12 +669,15 @@ export default {
     },
 
     selectedExperimenters(experimenters) {
-      const experimenterEmails = experimenters.map((experimenter) => {
-        return experimenter.Email;
-      });
-
-      console.log(experimenterEmails);
+      if (this.Experimenters.length == 0) {
+        this.Experimenters = experimenters;
+      } else {
+        experimenters.forEach((experimenter) => {
+          this.Experimenters.push(experimenter);
+        });
+      }
     },
+
     nextPage() {
       this.currentChild = this.Children[this.page - 1];
       this.response = "";
@@ -704,6 +714,7 @@ export default {
       }
     },
   },
+
   computed: {
     NofChildren() {
       return this.Children.length;

@@ -1,8 +1,8 @@
 <template>
-  <v-row dense>
+  <v-row dense justify="start">
     <v-col
       cols="12"
-      md="12"
+      md="4"
       v-for="study in Studies"
       :key="study.id"
       dense

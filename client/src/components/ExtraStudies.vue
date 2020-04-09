@@ -1,17 +1,33 @@
 <template>
-  <v-select
-    :items="PotentialStudies"
-    :item-value="'id'"
-    :item-text="'StudyName'"
-    v-model="selectedStudy"
-    return-object
-    label="Studies"
-    multiple
-  ></v-select>
+  <v-row>
+    <v-col cols="12" md="6">
+      <v-select
+        :items="PotentialStudies"
+        :item-value="'id'"
+        :item-text="'StudyName'"
+        v-model="selectedStudy"
+        return-object
+        label="Studies"
+        multiple
+      ></v-select>
+    </v-col>
+    <v-col cols="12" md="6">
+      <v-select
+        :items="PotentialExperimenters"
+        :item-value="'id'"
+        :item-text="'Name'"
+        v-model="selectedExperimenters"
+        return-object
+        label="Experimenters"
+        multiple
+      ></v-select>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
 import store from "@/store";
+import personnel from "@/services/personnel";
 
 export default {
   props: {
@@ -21,6 +37,7 @@ export default {
   data() {
     return {
       selectedStudy: [],
+      selectedExperimenters: [],
     };
   },
   methods: {
@@ -33,6 +50,17 @@ export default {
 
     clear() {
       this.selectedStudy = [];
+    },
+
+    selectExperimenters() {
+      const experimenters = this.selectedExperimenters.map((experimenter) => {
+        return { displayName: experimenter.Name, email: experimenter.Calendar };
+      });
+      this.$emit("selectExperimenters", experimenters);
+    },
+
+    clearExperimenter() {
+      this.selectedExperimenters = [];
     },
   },
   computed: {
@@ -67,6 +95,26 @@ export default {
       );
 
       return PotentialStudyList;
+    },
+  },
+
+  asyncComputed: {
+    async PotentialExperimenters() {
+      var studyIds = this.selectedStudy.map((study) => {
+        return study.id;
+      });
+
+      try {
+        var queryString = {
+          study: studyIds,
+        };
+
+        const results = await personnel.search(queryString);
+
+        return results.data;
+      } catch (error) {
+        console.log(error.response);
+      }
     },
   },
 };

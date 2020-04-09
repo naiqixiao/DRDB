@@ -41,9 +41,10 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.FK_Lab = req.query.lab;
   }
   if (req.query.study) {
-    queryString["$Studies.id$"] = { [Op.in]: `${req.query.study}%` };
+    queryString["$Studies.id$"] = req.query.study;
   }
 
+  // console.log(queryString)
   const personnel = await model.personnel.findAll({
     where: queryString,
     include: [

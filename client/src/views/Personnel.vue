@@ -45,8 +45,8 @@
                 ></v-text-field>
               </v-col>
             </v-row>
-            <v-row>
-              <v-col cols="12" md="8">
+            <v-row justify="space-around">
+              <v-col cols="12" md="12">
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
                     <v-btn color="purple" text @click.stop="createPersonnel"
@@ -67,7 +67,7 @@
               </v-col>
 
               <v-col cols="12" md="12">
-                <h3>Assigned studies</h3>
+                <h3 justify="start">Assigned studies</h3>
 
                 <AssignedStudies
                   :Studies="currentPersonnel.Studies"
@@ -89,7 +89,7 @@
 
                 <v-form ref="form" v-model="valid" lazy-validation>
                   <v-container>
-                    <v-row>
+                    <v-row >
                       <v-col
                         cols="12"
                         sm="6"

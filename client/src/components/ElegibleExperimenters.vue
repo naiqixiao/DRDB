@@ -4,7 +4,6 @@
     :item-value="'id'"
     :item-text="'Name'"
     v-model="selectedExperimenters"
-    @change="selectExperimenters"
     return-object
     label="Experimenters"
     multiple
@@ -13,8 +12,8 @@
 
 <script>
 // import store from "@/store";
-// import personnel from "@/services/personnel";
-import study from "@/services/study";
+import personnel from "@/services/personnel";
+// import study from "@/services/study";
 
 export default {
   props: {
@@ -27,7 +26,12 @@ export default {
   },
   methods: {
     selectExperimenters() {
-      this.$emit("selectExperimenters", this.selectedExperimenters);
+      
+      const experimenters = this.selectedExperimenters.map((experimenter) => {
+        return { displayName: experimenter.Name, email: experimenter.Calendar };
+      });
+
+      this.$emit("selectExperimenters", experimenters);
     },
     clear() {
       this.selectedExperimenters = [];
@@ -38,14 +42,14 @@ export default {
     async PotentialExperimenters() {
       try {
         var queryString = {
-          id: this.study.id,
+          study: this.study.id,
         };
 
-        const results = await study.search(queryString);
+        const results = await personnel.search(queryString);
 
-        return results.data.Personnels;
+        return results.data;
       } catch (error) {
-        console.log(JSON.stringify(error.response));
+        console.log(error.response);
       }
     },
   },
