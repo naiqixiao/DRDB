@@ -196,7 +196,6 @@
                       dense
                     ></v-combobox>
                   </v-col>
-                
                 </v-row>
                 <v-row>
                   <v-col
@@ -223,8 +222,9 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(currentChild)"
-                          >{{ currentChild.Name }}</v-btn
-                        >
+                          :disabled="potentialStudies(currentChild).length < 1"
+                          >{{ currentChild.Name }}
+                        </v-btn>
                       </v-col>
                       <v-col
                         cols="12"
@@ -236,6 +236,7 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(child)"
+                          :disabled="potentialStudies(child).length < 1"
                         >
                           {{ child.Name }}</v-btn
                         >
@@ -302,7 +303,7 @@ export default {
   components: {
     AgeDisplay,
     Conversation,
-    ExtraStudies,
+    ExtraStudies
   },
   props: {},
   data() {
@@ -468,13 +469,14 @@ export default {
       };
       try {
         const studyInfo = await study.search(studyQuery);
-        var pastParticipants = studyInfo.data.Appointments.map(appointment => {
+        var pastParticipants = studyInfo.data[0].Appointments.map(appointment => {
           return appointment.FK_Child;
         });
       } catch (error) {
         console.log(error.response);
       }
 
+      // console.log("past participants: " + pastParticipants);
       var queryString = {};
 
       queryString.pastParticipants = pastParticipants;
@@ -555,6 +557,37 @@ export default {
       this.appointments.push(newAppointment);
 
       this.dialogSchedule = true;
+    },
+
+    potentialStudies(child) {
+      var ElegibleStudies = [];
+
+      store.state.studies.forEach(study => {
+        if (
+          child.Age >= study.MinAge * 30.5 - 5 &&
+          child.Age <= study.MaxAge * 30.5 - 5
+        ) {
+          ElegibleStudies.push(study.id);
+        }
+      });
+
+      var uniquePreviousStudies = [];
+
+      child.Appointments.forEach(appointment => {
+        uniquePreviousStudies.push(appointment.FK_Study);
+      });
+
+      uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
+
+      var potentialStudies = ElegibleStudies.filter(
+        study => !uniquePreviousStudies.includes(study)
+      );
+
+      var potentialStudyList = store.state.studies.filter(study =>
+        potentialStudies.includes(study.id)
+      );
+
+      return potentialStudyList;
     },
 
     newAppointment(child) {
@@ -701,7 +734,6 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
-        this.$refs.elegibleExperimenter.clear();
       }, 300);
     },
 

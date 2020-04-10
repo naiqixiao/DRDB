@@ -21,7 +21,7 @@
         v-model="defaultSelected"
         return-object
         label="Studies"
-        disabled
+        
         dense
       ></v-select>
     </v-col>
@@ -112,8 +112,8 @@ export default {
 
       store.state.studies.forEach(study => {
         if (
-          this.child.Age >= study.MinAge * 30.5 &&
-          this.child.Age <= study.MaxAge * 30.5
+          this.child.Age >= study.MinAge * 30.5 - 5 &&
+          this.child.Age <= study.MaxAge * 30.5 - 5
         ) {
           ElegibleStudies.push(study.id);
         }

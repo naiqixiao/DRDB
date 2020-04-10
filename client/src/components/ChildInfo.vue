@@ -480,8 +480,8 @@ export default {
           let studyIds = [];
           store.state.studies.forEach((study) => {
             if (
-              child.Age >= study.MinAge * 30.5 &&
-              child.Age <= study.MaxAge * 30.5
+              child.Age >= study.MinAge * 30.5 - 5 &&
+              child.Age <= study.MaxAge * 30.5 - 5
             ) {
               studyIds.push(study.id);
             }
