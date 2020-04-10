@@ -104,12 +104,6 @@
     </template>
 
     <template #item.Completed="{ item }">
-      <!-- <v-switch
-        v-model="item.Completed"
-        class="mr-0 pa-0"
-        @change="updateSchedule(item, 'Completed')"
-        dense
-      ></v-switch> -->
       <v-simple-checkbox
         v-model="item.Completed"
         class="mr-0 pa-0"

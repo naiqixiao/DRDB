@@ -173,10 +173,10 @@
               <v-container fluid>
                 <v-row
                   class="grey lighten-5"
-                  style="height: 500px;"
-                  justify="start"
+                  style="height: 100px;"
+                  justify="space-around"
                 >
-                  <v-col cols="12" md="4">
+                  <v-col cols="12" md="3">
                     <v-text-field
                       ref="studyDate"
                       label="Study date"
@@ -184,57 +184,74 @@
                       append-icon="event"
                       @click:append="datePicker = true"
                       :disabled="this.response != 'Confirmed'"
+                      dense
                     ></v-text-field>
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col cols="12" md="3">
                     <v-combobox
                       v-model="studyTime"
                       :items="studyTimeSlots"
                       label="Study time"
                       :disabled="this.response != 'Confirmed'"
+                      dense
                     ></v-combobox>
                   </v-col>
-                  <v-col cols="12" md="4">
-                    <ElegibleExperimenters
-                      ref="elegibleExperimenter"
-                      :study="selectedStudy"
-                      @selectExperimenters="selectedExperimenters"
-                    ></ElegibleExperimenters>
-                  </v-col>
-                  <v-col cols="12" md="5" align="start">
-                    <div class="title">
-                      Additional studies for {{ currentChild.Name }}:
-                    </div>
+                
+                </v-row>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    md="12"
+                    v-for="(appointment, index) in appointments"
+                    :key="appointment.index"
+                  >
                     <ExtraStudies
                       ref="extraStudies"
-                      :child="currentChild"
+                      :child="appointment.Child"
                       :currentStudy="selectedStudy"
+                      :index="index"
                       @selectStudy="selectStudy"
-                      @selectExperimenters="selectedExperimenters"
+                      @deleteAppointment="deleteAppointment"
                       align="start"
                     ></ExtraStudies>
-                  </v-col>
-                  <v-col cols="12" md="12">
-                    <div class="title" align="start">
-                      Studies for the sibling(s)
-                    </div>
-                    <!-- <SiblingInfo
-                      ref="siblingTable"
-                      :Children="currentChild.sibling"
-                      @updateSiblingStudies="updateSiblingStudies"
-                      @selectExperimenters="selectedSiblingExperimenters"
-                      v-show="response == 'Confirmed'"
-                    ></SiblingInfo> -->
+                    <v-row v-if="index === 0">
+                      <div class="title">
+                        Additional appointment(s) for:
+                      </div>
+                      <v-col cols="12" md="2">
+                        <v-btn
+                          color="green darken-2"
+                          text
+                          @click="newAppointment(currentChild)"
+                          >{{ currentChild.Name }}</v-btn
+                        >
+                      </v-col>
+                      <v-col
+                        cols="12"
+                        md="2"
+                        v-for="child in currentChild.sibling"
+                        :key="child.id"
+                      >
+                        <v-btn
+                          color="green darken-2"
+                          text
+                          @click="newAppointment(child)"
+                        >
+                          {{ child.Name }}</v-btn
+                        >
+                      </v-col>
+                    </v-row>
                   </v-col>
                 </v-row>
               </v-container>
             </template>
             <v-card-actions>
               <v-spacer></v-spacer>
+              <v-btn color="green darken-4" text @click="show">Show</v-btn>
               <v-btn color="green darken-1" text @click="closeSchedule"
                 >Cancel</v-btn
               >
-              <v-btn color="green darken-1" text @click="createAppointment"
+              <v-btn color="green darken-1" text @click="createSchedule"
                 >Confirm</v-btn
               >
             </v-card-actions>
@@ -278,18 +295,14 @@ import moment from "moment";
 
 import AgeDisplay from "@/components/AgeDisplay";
 import ExtraStudies from "@/components/ExtraStudies";
-import ElegibleExperimenters from "@/components/ElegibleExperimenters";
 
 import Conversation from "@/components/Conversation";
-// import SiblingInfo from "@/components/SiblingInfo";
 
 export default {
   components: {
     AgeDisplay,
     Conversation,
-    // SiblingInfo,
     ExtraStudies,
-    ElegibleExperimenters,
   },
   props: {},
   data() {
@@ -305,6 +318,13 @@ export default {
       elegibleExperimenters: [],
       scheduleButtonText: "Schedule",
       appointments: [],
+      defaultAppointment: {
+        index: null,
+        FK_Family: null,
+        FK_Child: null,
+        FK_Study: null,
+        Experimenters: []
+      },
       experimenters: [],
       currentChild: {
         Name: null,
@@ -314,8 +334,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       editedItem: {
         Name: null,
@@ -325,8 +345,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       defaultItem: {
         Name: null,
@@ -336,21 +356,21 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       Sex: ["F", "M"],
       editedIndex: null,
       childField: [
         { label: "Name", field: "Name" },
         { label: "Sex", field: "Sex" },
-        { label: "DoB", field: "DoB" },
+        { label: "DoB", field: "DoB" }
       ],
       familyField: [
         { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" },
+        { label: "Father's Name", field: "NameDad", rules: "name" }
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -376,48 +396,48 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM",
+        "06:00PM"
       ],
       rules: {
         name: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         email: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         phone: [
-          (value) => {
+          value => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          (value) => !!value || "Required.",
-          (value) => (value && value.length == 10) || "Have to be 10 digits",
+          value => !!value || "Required.",
+          value => (value && value.length == 10) || "Have to be 10 digits"
         ],
         dob: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          },
+          }
         ],
         birthWeight: [
-          (value) => {
+          value => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          },
-        ],
+          }
+        ]
       },
-      page: 0,
+      page: 0
     };
   },
 
@@ -425,7 +445,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0,
+        Completed: 0
       };
 
       try {
@@ -436,7 +456,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -444,17 +464,15 @@ export default {
 
     async searchChild() {
       var studyQuery = {
-        id: this.selectedStudy.id,
+        id: this.selectedStudy.id
       };
       try {
         const studyInfo = await study.search(studyQuery);
-        var pastParticipants = studyInfo.data.Appointments.map(
-          (appointment) => {
-            return appointment.FK_Child;
-          }
-        );
+        var pastParticipants = studyInfo.data.Appointments.map(appointment => {
+          return appointment.FK_Child;
+        });
       } catch (error) {
-        console.log(JSON.stringify(error.response));
+        console.log(error.response);
       }
 
       var queryString = {};
@@ -479,10 +497,10 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         } else {
-          console.log(JSON.stringify(error.response));
+          console.log(error.response);
         }
       }
     },
@@ -525,35 +543,94 @@ export default {
       }, 300);
     },
 
-    // updateSibling(updatedSibling) {
-    //   this.SiblingInfo = updatedSibling;
-    // },
-
     scheduleChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedItem = Object.assign({}, this.currentChild);
+
+      var newAppointment = Object.assign({}, this.defaultAppointment);
+      newAppointment.FK_Child = this.currentChild.id;
+      newAppointment.FK_Family = this.currentChild.FK_Family;
+      newAppointment.Child = this.currentChild;
+      newAppointment.index = this.appointments.length;
+      this.appointments.push(newAppointment);
+
       this.dialogSchedule = true;
     },
 
-    async createAppointment() {
+    newAppointment(child) {
+      var newAppointment = Object.assign({}, this.defaultAppointment);
+
+      newAppointment.FK_Child = child.id;
+      newAppointment.Child = child;
+      newAppointment.FK_Family = child.FK_Family;
+      newAppointment.index = this.appointments.length;
+
+      this.appointments.push(newAppointment);
+    },
+
+    deleteAppointment(index) {
+      this.appointments.splice(index, 1);
+    },
+
+    selectStudy(extraAppointments) {
+      console.log(extraAppointments);
+      //  a lot of things to do here.
+    },
+
+    show() {
+      for (var i = 0; i < this.appointments.length; i++) {
+        this.$refs.extraStudies[i].selectStudy();
+      }
+    },
+
+    selectedExperimenters(experimenters) {
+      if (this.Experimenters.length == 0) {
+        this.Experimenters = experimenters;
+      } else {
+        experimenters.forEach(experimenter => {
+          this.Experimenters.push(experimenter);
+        });
+      }
+
+      this.appointments[0].Experimenters = experimenters.map(experimenter => {
+        return experimenter.id;
+      });
+    },
+
+    async createSchedule() {
       this.appointments = [];
+      this.Experimenters = [];
+
+      this.appointments.push({
+        FK_Family: this.currentChild.FK_Family,
+        FK_Study: this.selectedStudy.id,
+        FK_Child: this.currentChild.id,
+        Child: {
+          Name: this.currentChild.Name,
+          DoB: this.currentChild.DoB
+        },
+        Study: {
+          StudyName: this.selectedStudy.StudyName,
+          MinAge: this.selectedStudy.MinAge,
+          MaxAge: this.selectedStudy.MaxAge
+        }
+      });
+
+      this.$refs.elegibleExperimenter.selectExperimenters();
+
       // this.$refs.siblingTable.saveAppointment();
       this.$refs.extraStudies.selectStudy();
 
-      this.Experimenters = [];
-      this.$refs.elegibleExperimenter.selectExperimenters();
-      // this.$refs.siblingTable.selectedExperimenters();
-      this.$refs.extraStudies.selectExperimenters();
-
+      // console.log(this.appointments);
       var newAppointmentInfo = {};
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map((appointment) => {
+          var studyNames = this.appointments.map(appointment => {
             return appointment.Study.StudyName;
           });
 
-          var childNames = this.appointments.map((appointment) => {
+          var childNames = this.appointments.map(appointment => {
             return appointment.FK_Child;
           });
 
@@ -574,20 +651,15 @@ export default {
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto",
+              timeZone: "America/Toronto"
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto",
+              timeZone: "America/Toronto"
             },
             attendees: this.Experimenters
-            // [
-            //   {
-            //     email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
-            //   },
-            // ],
           };
 
           break;
@@ -597,7 +669,7 @@ export default {
             AppointmentTime: null,
             Status: this.response,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID,
+            ScheduledBy: store.state.userID
           };
 
           if (
@@ -620,41 +692,6 @@ export default {
       this.closeSchedule();
     },
 
-    selectStudy(selectedStudy) {
-      if (selectedStudy.studies.indexOf(this.selectedStudy) == -1) {
-        selectedStudy.studies.push(this.selectedStudy);
-      }
-
-      selectedStudy.studies.forEach((study) => {
-        this.appointments.push({
-          FK_Family: this.currentChild.FK_Family,
-          FK_Child: this.currentChild.id,
-          FK_Study: study.id,
-          Child: {
-            Name: selectedStudy.child.Name,
-            DoB: selectedStudy.child.DoB,
-          },
-          Study: {
-            StudyName: study.StudyName,
-            MinAge: study.MinAge,
-            MaxAge: study.MaxAge,
-          },
-        });
-      });
-    },
-
-    // updateSiblingStudies(siblingAppointments) {
-    //   siblingAppointments.forEach((appointment) => {
-    //     this.appointments.push({
-    //       FK_Family: appointment.FK_Family,
-    //       FK_Child: appointment.FK_Child,
-    //       FK_Study: appointment.FK_Study,
-    //       Study: appointment.Study,
-    //       Child: appointment.Child,
-    //     });
-    //   });
-    // },
-
     closeSchedule() {
       this.dialogSchedule = false;
       setTimeout(() => {
@@ -666,16 +703,6 @@ export default {
         this.studyTime = "09:00AM";
         this.$refs.elegibleExperimenter.clear();
       }, 300);
-    },
-
-    selectedExperimenters(experimenters) {
-      if (this.Experimenters.length == 0) {
-        this.Experimenters = experimenters;
-      } else {
-        experimenters.forEach((experimenter) => {
-          this.Experimenters.push(experimenter);
-        });
-      }
     },
 
     nextPage() {
@@ -712,7 +739,7 @@ export default {
           break;
         }
       }
-    },
+    }
   },
 
   computed: {
@@ -778,7 +805,7 @@ export default {
       return moment(this.editedItem.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
-    },
+    }
   },
   mounted: function() {
     this.searchStudies();
@@ -791,8 +818,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    },
-  },
+    }
+  }
 };
 </script>
 

@@ -2,7 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 
-// Create and Save a new family
+// Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
   var newStudyInfo = req.body;
 
@@ -15,7 +15,7 @@ exports.create = asyncHandler(async (req, res) => {
   }
 });
 
-// Retrieve all families from the database.
+// Retrieve all studies from the database.
 exports.search = asyncHandler(async (req, res) => {
   var queryString = req.query;
 

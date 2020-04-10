@@ -27,11 +27,11 @@ export default {
   methods: {
     selectExperimenters() {
       
-      const experimenters = this.selectedExperimenters.map((experimenter) => {
-        return { displayName: experimenter.Name, email: experimenter.Calendar };
+      const attendees = this.selectedExperimenters.map((experimenter) => {
+        return { displayName: experimenter.Name, email: experimenter.Calendar, id: experimenter.id };
       });
 
-      this.$emit("selectExperimenters", experimenters);
+      this.$emit("selectExperimenters", attendees);
     },
     clear() {
       this.selectedExperimenters = [];

@@ -14,12 +14,14 @@ const google = require("../middleware/calendar");
 //       {
 //           "FK_Study": 3,
 //           "FK_Family": 208,
-//           "FK_Child": 415
+//           "FK_Child": 415,
+//           "Experimenters": [1, 34]
 //       },
 //       {
 //           "FK_Study": 7,
 //           "FK_Family": 208,
-//           "FK_Child": 416
+//           "FK_Child": 416,
+//           "Experimenters": [12, 14]
 //       }
 //   ],
 //   "location": "Psychology Building, McMaster University",
@@ -27,7 +29,7 @@ const google = require("../middleware/calendar");
 //       "dateTime": "2020-04-24T14:00:00.000",
 //       "timeZone": "America/Toronto"
 //   },
-//   "end": {
+//   flying124"end": {
 //       "dateTime": "2020-04-24T15:30:00.000",
 //       "timeZone": "America/Toronto"
 //   },
@@ -57,6 +59,20 @@ exports.create = asyncHandler(async (req, res) => {
     const schedule = await model.schedule.create(newScheduleInfo, {
       include: [model.appointment],
     });
+
+    var experimenterAssignment = [];
+    for (var i = 0; i < schedule.Appointments.length; i++) {
+      var appointmentId = schedule.Appointments[i].id;
+
+      newScheduleInfo.Appointments[i].Experimenters.forEach((experimenter) => {
+        experimenterAssignment.push({
+          FK_Experimenter: experimenter,
+          FK_Appointment: appointmentId,
+        });
+      });
+    }
+
+    await model.experimenterAssignment.bulkCreate(experimenterAssignment);
 
     res.status(200).send(schedule);
   } catch (error) {

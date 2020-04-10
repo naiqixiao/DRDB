@@ -387,7 +387,7 @@ export default {
       });
 
       studyNames = studyNames.slice(0, studyNames.length - 3);
-      
+
       switch (this.response) {
         case "Confirmed":
           newScheduleInfo = {
@@ -474,7 +474,7 @@ export default {
     },
   },
   computed: {
-    ElegibleStudies: function () {
+    ElegibleStudies: function() {
       if (this.Children) {
         var elegibleStudies = this.Children.map((child) => {
           let studyIds = [];
@@ -495,7 +495,7 @@ export default {
       }
     },
 
-    UniquePreviousStudies: function () {
+    UniquePreviousStudies: function() {
       return this.Children.map((child) => {
         let studyIds = [];
         child.Appointments.forEach((appointment) => {
@@ -506,7 +506,7 @@ export default {
       });
     },
 
-    PotentialStudies: function () {
+    PotentialStudies: function() {
       var PotentialStudies = [];
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
@@ -528,7 +528,7 @@ export default {
       return PotentialStudies;
     },
 
-    studyDateTime: function () {
+    studyDateTime: function() {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -557,44 +557,43 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function () {
+    earliestDate: function() {
       if (this.selectedStudy.length > 0) {
+        
         var minAges = this.selectedStudy.map((study) => {
-          return study.MinAge;
+          return moment(this.editedItem.DoB).add(
+            Math.floor(study.MinAge * 30.5),
+            "days"
+          );
         });
-        var MinAge = Math.max.apply(Math, minAges);
 
-        if (
-          moment(new Date())
-            .add(1, "days")
-            .isSameOrAfter(
-              moment(this.editedItem.DoB).add(Math.floor(MinAge * 30.5), "days")
-            )
-        ) {
-          return moment(new Date()).add(1, "days").toISOString(true);
-        } else {
-          return moment(this.editedItem.DoB)
-            .add(Math.floor(MinAge * 30.5), "days")
-            .toISOString(true);
-        }
+        minAges.push(moment());
+
+        var MinAge = moment.max(minAges);
+
+        return MinAge.toISOString(true);
       } else {
         return new Date().toISOString();
       }
     },
 
-    latestDate: function () {
+    latestDate: function() {
       if (this.selectedStudy.length > 0) {
+        
         var maxAges = this.selectedStudy.map((study) => {
-          return study.MaxAge;
+          return moment(this.editedItem.DoB).add(
+            Math.floor(study.MaxAge * 30.5),
+            "days"
+          );
         });
-        var MaxAge = Math.min.apply(Math, maxAges);
 
-        return moment(this.editedItem.DoB)
-          .add(Math.floor(MaxAge * 30.5), "days")
-          .toISOString(true);
+        var MaxAge = moment.min(maxAges);
+
+        return MaxAge.toISOString(true);
       } else {
         return new Date().toISOString();
       }
+
     },
   },
   watch: {

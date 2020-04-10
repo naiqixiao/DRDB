@@ -88,6 +88,18 @@
             @selectStudy="selectStudy"
           ></ElegibleStudies>
         </v-col>
+        <v-col cols="12" md="6">
+          <v-select
+            :items="PotentialExperimenters"
+            :item-value="'id'"
+            :item-text="'Name'"
+            v-model="selectedExperimenters"
+            @change="selectExperimenters"
+            return-object
+            label="Experimenters"
+            multiple
+          ></v-select>
+        </v-col>
         <v-col cols="12" md="1">
           <v-icon @click.stop="editChild(child)">create</v-icon>
         </v-col>

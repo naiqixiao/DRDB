@@ -1,26 +1,46 @@
 <template>
   <v-row>
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="1"></v-col>
+    <h3>{{ child.Name }}</h3>
+    <v-col cols="12" md="2">
       <v-select
-        :items="PotentialStudies"
+        v-if="index > 0"
+        :items="potentialStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
         v-model="selectedStudy"
         return-object
         label="Studies"
-        multiple
+        dense
+      ></v-select>
+      <v-select
+        v-else
+        :items="potentialStudies"
+        :item-value="'id'"
+        :item-text="'StudyName'"
+        v-model="defaultSelected"
+        return-object
+        label="Studies"
+        disabled
+        dense
       ></v-select>
     </v-col>
-    <v-col cols="12" md="6">
+    <v-col cols="12" md="2">
       <v-select
-        :items="PotentialExperimenters"
+        :items="potentialExperimenters"
         :item-value="'id'"
         :item-text="'Name'"
         v-model="selectedExperimenters"
         return-object
         label="Experimenters"
         multiple
+        dense
       ></v-select>
+    </v-col>
+    <v-col cols="12" md="2" v-if="index > 0">
+      <v-btn color="green darken-2" text @click="deleteAppointment">
+        delete</v-btn
+      >
     </v-col>
   </v-row>
 </template>
@@ -33,18 +53,48 @@ export default {
   props: {
     child: Object,
     currentStudy: Object,
+    participationDate: Date,
+    index: Number
   },
   data() {
     return {
-      selectedStudy: [],
+      selectedStudy: this.currentStudy,
       selectedExperimenters: [],
+      defaultSelected: {
+        id: this.currentStudy.id,
+        StudyName: this.currentStudy.StudyName
+      }
     };
   },
   methods: {
     selectStudy() {
+      const experimenterIds = this.selectedExperimenters.map(experimenter => {
+        return experimenter.id;
+      });
+
+      const appointment = {
+        FK_Child: this.child.id,
+        FK_Family: this.child.FK_Family,
+        FK_Study: this.selectedStudy.id,
+        Child: {
+          Name: this.child.Name,
+          DoB: this.child.DoB
+        },
+        Study: {
+          StudyName: this.selectedStudy.StudyName,
+          MinAge: this.selectedStudy.MinAge,
+          MaxAge: this.selectedStudy.MaxAge
+        },
+        Experimenters: experimenterIds
+      };
+
+      const attendees = this.selectedExperimenters.map(experimenter => {
+        return { displayName: experimenter.Name, email: experimenter.Calendar };
+      });
+
       this.$emit("selectStudy", {
-        child: this.child,
-        studies: this.selectedStudy,
+        appointment: appointment,
+        attendees: attendees
       });
     },
 
@@ -52,22 +102,15 @@ export default {
       this.selectedStudy = [];
     },
 
-    selectExperimenters() {
-      const experimenters = this.selectedExperimenters.map((experimenter) => {
-        return { displayName: experimenter.Name, email: experimenter.Calendar };
-      });
-      this.$emit("selectExperimenters", experimenters);
-    },
-
-    clearExperimenter() {
-      this.selectedExperimenters = [];
-    },
+    deleteAppointment() {
+      this.$emit("deleteAppointment", this.index);
+    }
   },
   computed: {
-    PotentialStudies() {
+    potentialStudies() {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach((study) => {
+      store.state.studies.forEach(study => {
         if (
           this.child.Age >= study.MinAge * 30.5 &&
           this.child.Age <= study.MaxAge * 30.5
@@ -76,47 +119,56 @@ export default {
         }
       });
 
-      var UniquePreviousStudies = [];
+      var uniquePreviousStudies = [];
 
-      this.child.Appointments.forEach((appointment) => {
-        UniquePreviousStudies.push(appointment.FK_Study);
+      this.child.Appointments.forEach(appointment => {
+        uniquePreviousStudies.push(appointment.FK_Study);
       });
 
-      UniquePreviousStudies = Array.from(new Set(UniquePreviousStudies));
+      uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
 
-      UniquePreviousStudies.push(this.currentStudy.id);
+      if (this.index > 0) {
+        uniquePreviousStudies.push(this.currentStudy.id);
+      }
 
-      var PotentialStudies = ElegibleStudies.filter(
-        (study) => !UniquePreviousStudies.includes(study)
+      var potentialStudies = ElegibleStudies.filter(
+        study => !uniquePreviousStudies.includes(study)
       );
 
-      var PotentialStudyList = store.state.studies.filter((study) =>
-        PotentialStudies.includes(study.id)
+      var potentialStudyList = store.state.studies.filter(study =>
+        potentialStudies.includes(study.id)
       );
 
-      return PotentialStudyList;
-    },
+      return potentialStudyList;
+    }
   },
 
   asyncComputed: {
-    async PotentialExperimenters() {
-      var studyIds = this.selectedStudy.map((study) => {
-        return study.id;
-      });
+    async potentialExperimenters() {
+
+      var studyId = null;
+      if (this.index > 0) {
+        studyId = this.selectedStudy.id;
+      } else {
+        studyId = this.currentStudy.id;
+      }
 
       try {
         var queryString = {
-          study: studyIds,
+          study: studyId
         };
 
         const results = await personnel.search(queryString);
+
+        // filter the output based on experimenters' availability on the participation date.
+        // this.participationDate
 
         return results.data;
       } catch (error) {
         console.log(error.response);
       }
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss" scoped></style>
