@@ -207,10 +207,13 @@
                     <ExtraStudies
                       ref="extraStudies"
                       :child="appointment.Child"
+                      :targetChild="currentChild"
                       :currentStudy="selectedStudy"
+                      :potentialStudies="potentialStudies(appointment.Child).potentialStudyList"
                       :index="index"
                       @selectStudy="selectStudy"
                       @deleteAppointment="deleteAppointment"
+                      @emitSelectedStudy="receiveSelectedStudy"
                       align="start"
                     ></ExtraStudies>
                     <v-row v-if="index === 0">
@@ -222,7 +225,7 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(currentChild)"
-                          :disabled="potentialStudies(currentChild).length < 1"
+                          :disabled="potentialStudies(currentChild).selectableStudies.length < 1"
                           >{{ currentChild.Name }}
                         </v-btn>
                       </v-col>
@@ -236,7 +239,7 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(child)"
-                          :disabled="potentialStudies(child).length < 1"
+                          :disabled="potentialStudies(child).selectableStudies.length < 1"
                         >
                           {{ child.Name }}</v-btn
                         >
@@ -469,9 +472,11 @@ export default {
       };
       try {
         const studyInfo = await study.search(studyQuery);
-        var pastParticipants = studyInfo.data[0].Appointments.map(appointment => {
-          return appointment.FK_Child;
-        });
+        var pastParticipants = studyInfo.data[0].Appointments.map(
+          appointment => {
+            return appointment.FK_Child;
+          }
+        );
       } catch (error) {
         console.log(error.response);
       }
@@ -552,11 +557,23 @@ export default {
       var newAppointment = Object.assign({}, this.defaultAppointment);
       newAppointment.FK_Child = this.currentChild.id;
       newAppointment.FK_Family = this.currentChild.FK_Family;
+      newAppointment.FK_Study = this.selectedStudy.id;
       newAppointment.Child = this.currentChild;
+      newAppointment.Study = {
+        StudyName: this.selectedStudy.StudyName,
+        MinAge: this.selectedStudy.MinAge,
+        MaxAge: this.selectedStudy.MaxAge
+      };
       newAppointment.index = this.appointments.length;
       this.appointments.push(newAppointment);
 
       this.dialogSchedule = true;
+    },
+
+    receiveSelectedStudy(selectedStudy) {
+      this.appointments[selectedStudy.index].FK_Study = selectedStudy.studyId;
+      this.appointments[selectedStudy.index].FK_Child = selectedStudy.childId;
+      console.log(this.appointments);
     },
 
     potentialStudies(child) {
@@ -576,18 +593,34 @@ export default {
       child.Appointments.forEach(appointment => {
         uniquePreviousStudies.push(appointment.FK_Study);
       });
-
       uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
 
       var potentialStudies = ElegibleStudies.filter(
         study => !uniquePreviousStudies.includes(study)
       );
 
+      // check the selected studies.
+      var currentSelectedStudies = [];
+      if (this.appointments.length > 0) {
+        for (var i = 0; i < this.appointments.length; i++) {
+          if (this.appointments[i].FK_Child == child.id) {
+            currentSelectedStudies.push(this.appointments[i].FK_Study);
+          }
+        }
+      }
+
+      var selectableStudies = potentialStudies.filter(
+        study => !currentSelectedStudies.includes(study)
+      );
+
       var potentialStudyList = store.state.studies.filter(study =>
         potentialStudies.includes(study.id)
       );
 
-      return potentialStudyList;
+      return {
+        potentialStudyList: potentialStudyList,
+        selectableStudies: selectableStudies
+      };
     },
 
     newAppointment(child) {
@@ -608,6 +641,7 @@ export default {
     selectStudy(extraAppointments) {
       console.log(extraAppointments);
       //  a lot of things to do here.
+      // this.currentSelectedStudies.push(extraAppointments);
     },
 
     show() {

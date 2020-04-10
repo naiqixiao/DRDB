@@ -5,9 +5,10 @@
     <v-col cols="12" md="2">
       <v-select
         v-if="index > 0"
-        :items="potentialStudies"
+        :items="potentialExtraStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
+        @change="emitSelectedStudy"
         v-model="selectedStudy"
         return-object
         label="Studies"
@@ -21,7 +22,7 @@
         v-model="defaultSelected"
         return-object
         label="Studies"
-        
+        disabled
         dense
       ></v-select>
     </v-col>
@@ -46,12 +47,14 @@
 </template>
 
 <script>
-import store from "@/store";
+// import store from "@/store";
 import personnel from "@/services/personnel";
 
 export default {
   props: {
     child: Object,
+    targetChild: Object,
+    potentialStudies: Array,
     currentStudy: Object,
     participationDate: Date,
     index: Number
@@ -98,6 +101,15 @@ export default {
       });
     },
 
+    emitSelectedStudy() {
+      const selectedStudy = {
+        studyId: this.selectedStudy.id,
+        childId: this.child.id,
+        index: this.index
+      };
+      this.$emit("emitSelectedStudy", selectedStudy);
+    },
+
     clear() {
       this.selectedStudy = [];
     },
@@ -107,45 +119,19 @@ export default {
     }
   },
   computed: {
-    potentialStudies() {
-      var ElegibleStudies = [];
-
-      store.state.studies.forEach(study => {
-        if (
-          this.child.Age >= study.MinAge * 30.5 - 5 &&
-          this.child.Age <= study.MaxAge * 30.5 - 5
-        ) {
-          ElegibleStudies.push(study.id);
-        }
-      });
-
-      var uniquePreviousStudies = [];
-
-      this.child.Appointments.forEach(appointment => {
-        uniquePreviousStudies.push(appointment.FK_Study);
-      });
-
-      uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
-
-      if (this.index > 0) {
-        uniquePreviousStudies.push(this.currentStudy.id);
+    potentialExtraStudies() {
+      if (this.targetChild.id == this.child.id) {
+        return this.potentialStudies.filter(
+          study => this.currentStudy.id != study.id
+        );
+      } else {
+        return this.potentialStudies;
       }
-
-      var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
-      );
-
-      var potentialStudyList = store.state.studies.filter(study =>
-        potentialStudies.includes(study.id)
-      );
-
-      return potentialStudyList;
     }
   },
 
   asyncComputed: {
     async potentialExperimenters() {
-
       var studyId = null;
       if (this.index > 0) {
         studyId = this.selectedStudy.id;
