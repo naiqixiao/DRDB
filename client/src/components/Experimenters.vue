@@ -94,7 +94,6 @@ export default {
         };
       });
 
-      console.log(newExperimenters);
       try {
         await experimenter.postExperimenters(newExperimenters);
 

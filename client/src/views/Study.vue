@@ -348,6 +348,7 @@ export default {
           this.editedStudy.id = Result.data.id;
           this.Studies.push(this.editedStudy);
           // this.editedIndex = (this.Studies.length - 1);
+          store.dispatch("setStudies", this.Studies);
         } catch (error) {
           console.log(error.response);
         }
@@ -357,8 +358,7 @@ export default {
 
           this.currentStudy = Result.data;
           Object.assign(this.Studies[this.editedIndex], Result.data);
-          // this.$store.dispatch("setStudies", this.Studies);
-          // store.commit("setStudies", this.Studies);
+          store.dispatch("setStudies", this.Studies);
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");

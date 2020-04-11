@@ -368,8 +368,8 @@ export default {
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
       }
-      console.log(this.appointments);
-      console.log(this.Experimenters);
+      // console.log(this.appointments);
+      // console.log(this.Experimenters);
     },
 
     selectStudy(extraAppointments) {
