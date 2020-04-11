@@ -166,8 +166,7 @@
         >
           <v-card>
             <v-card-title class="headline"
-              >Schedule {{ selectedStudy.StudyName }} for
-              {{ currentChild.Name }}</v-card-title
+              >Schedule studies for {{ currentChild.Name }}</v-card-title
             >
             <template>
               <v-container fluid>
@@ -209,7 +208,9 @@
                       :child="appointment.Child"
                       :targetChild="currentChild"
                       :currentStudy="selectedStudy"
-                      :potentialStudies="potentialStudies(appointment.Child).potentialStudyList"
+                      :potentialStudies="
+                        potentialStudies(appointment.Child).potentialStudyList
+                      "
                       :index="index"
                       @selectStudy="selectStudy"
                       @deleteAppointment="deleteAppointment"
@@ -225,7 +226,10 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(currentChild)"
-                          :disabled="potentialStudies(currentChild).selectableStudies.length < 1"
+                          :disabled="
+                            potentialStudies(currentChild).selectableStudies
+                              .length < 1
+                          "
                           >{{ currentChild.Name }}
                         </v-btn>
                       </v-col>
@@ -239,7 +243,9 @@
                           color="green darken-2"
                           text
                           @click="newAppointment(child)"
-                          :disabled="potentialStudies(child).selectableStudies.length < 1"
+                          :disabled="
+                            potentialStudies(child).selectableStudies.length < 1
+                          "
                         >
                           {{ child.Name }}</v-btn
                         >
@@ -322,14 +328,8 @@ export default {
       elegibleExperimenters: [],
       scheduleButtonText: "Schedule",
       appointments: [],
-      defaultAppointment: {
-        index: null,
-        FK_Family: null,
-        FK_Child: null,
-        FK_Study: null,
-        Experimenters: []
-      },
-      experimenters: [],
+      Experimenters: [],
+      
       currentChild: {
         Name: null,
         Sex: null,
@@ -573,7 +573,7 @@ export default {
     receiveSelectedStudy(selectedStudy) {
       this.appointments[selectedStudy.index].FK_Study = selectedStudy.studyId;
       this.appointments[selectedStudy.index].FK_Child = selectedStudy.childId;
-      console.log(this.appointments);
+      // console.log(this.appointments);
     },
 
     potentialStudies(child) {
@@ -590,10 +590,12 @@ export default {
 
       var uniquePreviousStudies = [];
 
-      child.Appointments.forEach(appointment => {
-        uniquePreviousStudies.push(appointment.FK_Study);
-      });
-      uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
+      if (child.Appointments) {
+        child.Appointments.forEach(appointment => {
+          uniquePreviousStudies.push(appointment.FK_Study);
+        });
+        uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
+      }
 
       var potentialStudies = ElegibleStudies.filter(
         study => !uniquePreviousStudies.includes(study)
@@ -639,57 +641,57 @@ export default {
     },
 
     selectStudy(extraAppointments) {
-      console.log(extraAppointments);
+      Object.assign(
+        this.appointments[extraAppointments.index],
+        extraAppointments.appointment
+      );
+
+      if (this.Experimenters.lenth < 1) {
+        this.Experimenters = extraAppointments.attendees;
+      } else {
+        extraAppointments.attendees.forEach(experimenter => {
+          this.Experimenters.push(experimenter);
+        });
+      }
+
+      // this.Experimenters.push(extraAppointments.attendees);
+      // console.log(this.appointments);
       //  a lot of things to do here.
       // this.currentSelectedStudies.push(extraAppointments);
     },
 
     show() {
+      this.Experimenters = [];
+
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
       }
+      console.log(this.appointments);
+      console.log(this.Experimenters);
     },
 
-    selectedExperimenters(experimenters) {
-      if (this.Experimenters.length == 0) {
-        this.Experimenters = experimenters;
-      } else {
-        experimenters.forEach(experimenter => {
-          this.Experimenters.push(experimenter);
-        });
-      }
+    // selectedExperimenters(experimenters) {
+    //   if (this.Experimenters.length == 0) {
+    //     this.Experimenters = experimenters;
+    //   } else {
+    //     experimenters.forEach(experimenter => {
+    //       this.Experimenters.push(experimenter);
+    //     });
+    //   }
 
-      this.appointments[0].Experimenters = experimenters.map(experimenter => {
-        return experimenter.id;
-      });
-    },
+    //   this.appointments[0].Experimenters = experimenters.map(experimenter => {
+    //     return experimenter.id;
+    //   });
+    // },
 
     async createSchedule() {
-      this.appointments = [];
       this.Experimenters = [];
 
-      this.appointments.push({
-        FK_Family: this.currentChild.FK_Family,
-        FK_Study: this.selectedStudy.id,
-        FK_Child: this.currentChild.id,
-        Child: {
-          Name: this.currentChild.Name,
-          DoB: this.currentChild.DoB
-        },
-        Study: {
-          StudyName: this.selectedStudy.StudyName,
-          MinAge: this.selectedStudy.MinAge,
-          MaxAge: this.selectedStudy.MaxAge
-        }
-      });
+      for (var i = 0; i < this.appointments.length; i++) {
+        this.$refs.extraStudies[i].selectStudy();
+      }
 
-      this.$refs.elegibleExperimenter.selectExperimenters();
-
-      // this.$refs.siblingTable.saveAppointment();
-      this.$refs.extraStudies.selectStudy();
-
-      // console.log(this.appointments);
-      var newAppointmentInfo = {};
+      var newSchedule = {};
 
       switch (this.response) {
         case "Confirmed":
@@ -704,7 +706,7 @@ export default {
           studyNames = Array.from(new Set(studyNames));
           childNames = Array.from(new Set(childNames));
 
-          newAppointmentInfo = {
+          newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             summary:
@@ -732,7 +734,7 @@ export default {
           break;
 
         default:
-          newAppointmentInfo = {
+          newSchedule = {
             AppointmentTime: null,
             Status: this.response,
             Appointments: this.appointments,
@@ -743,13 +745,14 @@ export default {
             this.response === "Left a message" ||
             this.response === "Interested"
           ) {
-            newAppointmentInfo.Status = "TBD";
+            newSchedule.Status = "TBD";
           }
           break;
       }
 
+      console.log(JSON.stringify(newSchedule));
       try {
-        await schedule.create(newAppointmentInfo);
+        await schedule.create(newSchedule);
 
         console.log("New appointment scheduled!");
       } catch (error) {

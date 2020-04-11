@@ -4,18 +4,7 @@
     <h3>{{ child.Name }}</h3>
     <v-col cols="12" md="2">
       <v-select
-        v-if="index > 0"
-        :items="potentialExtraStudies"
-        :item-value="'id'"
-        :item-text="'StudyName'"
-        @change="emitSelectedStudy"
-        v-model="selectedStudy"
-        return-object
-        label="Studies"
-        dense
-      ></v-select>
-      <v-select
-        v-else
+        v-if="index == 0 && currentStudy"
         :items="potentialStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
@@ -23,6 +12,17 @@
         return-object
         label="Studies"
         disabled
+        dense
+      ></v-select>
+      <v-select
+        v-else
+        :items="potentialExtraStudies"
+        :item-value="'id'"
+        :item-text="'StudyName'"
+        @change="emitSelectedStudy"
+        v-model="selectedStudy"
+        return-object
+        label="Studies"
         dense
       ></v-select>
     </v-col>
@@ -62,11 +62,7 @@ export default {
   data() {
     return {
       selectedStudy: this.currentStudy,
-      selectedExperimenters: [],
-      defaultSelected: {
-        id: this.currentStudy.id,
-        StudyName: this.currentStudy.StudyName
-      }
+      selectedExperimenters: []
     };
   },
   methods: {
@@ -92,10 +88,14 @@ export default {
       };
 
       const attendees = this.selectedExperimenters.map(experimenter => {
-        return { displayName: experimenter.Name, email: experimenter.Calendar };
+        return {
+          displayName: experimenter.Name,
+          email: experimenter.Calendar + ".CAL"
+        };
       });
 
       this.$emit("selectStudy", {
+        index: this.index,
         appointment: appointment,
         attendees: attendees
       });
@@ -120,38 +120,52 @@ export default {
   },
   computed: {
     potentialExtraStudies() {
-      if (this.targetChild.id == this.child.id) {
+      if (this.currentStudy && this.targetChild.id == this.child.id) {
         return this.potentialStudies.filter(
           study => this.currentStudy.id != study.id
         );
       } else {
         return this.potentialStudies;
       }
+    },
+
+    defaultSelected() {
+      return this.currentStudy
+        ? {
+            id: this.currentStudy.id,
+            StudyName: this.currentStudy.StudyName
+          }
+        : {};
     }
   },
 
   asyncComputed: {
     async potentialExperimenters() {
-      var studyId = null;
-      if (this.index > 0) {
-        studyId = this.selectedStudy.id;
+      if (this.selectedStudy) {
+        var studyId = null;
+
+        if (this.index == 0 && this.currentStudy) {
+          studyId = this.currentStudy.id;
+        } else {
+          studyId = this.selectedStudy.id;
+        }
+
+        try {
+          var queryString = {
+            study: studyId
+          };
+
+          const results = await personnel.search(queryString);
+
+          // filter the output based on experimenters' availability on the participation date.
+          // this.participationDate
+
+          return results.data;
+        } catch (error) {
+          console.log(error.response);
+        }
       } else {
-        studyId = this.currentStudy.id;
-      }
-
-      try {
-        var queryString = {
-          study: studyId
-        };
-
-        const results = await personnel.search(queryString);
-
-        // filter the output based on experimenters' availability on the participation date.
-        // this.participationDate
-
-        return results.data;
-      } catch (error) {
-        console.log(error.response);
+        return [];
       }
     }
   }

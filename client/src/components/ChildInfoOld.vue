@@ -107,100 +107,62 @@
         :retain-focus="false"
       >
         <v-card>
-          <v-card-title class="headline"
-            >Schedule studies for {{ currentChild.Name }}</v-card-title
-          >
+          <v-card-title class="headline">Schedule a study</v-card-title>
           <template>
             <v-container fluid>
               <v-row
                 class="grey lighten-5"
-                style="height: 100px;"
+                style="height: 600px;"
                 justify="space-around"
               >
-                <v-col cols="12" md="3">
+                <v-col cols="12" lg="5">
+                  <v-card-title class="headline">{{
+                    editedItem.Name
+                  }}</v-card-title>
+                  <AgeDisplay :DoB="editedItem.DoB" />
+
+                  <v-select
+                    :items="PotentialStudies[editedIndex]"
+                    :item-value="'id'"
+                    :item-text="'StudyName'"
+                    v-model="selectedStudy"
+                    return-object
+                    label="Elegible Studies"
+                    multiple
+                  ></v-select>
+                  <v-select
+                    :items="Responses"
+                    v-model="response"
+                    label="Parents' response"
+                  ></v-select>
+                </v-col>
+
+                <v-col cols="12" md="2">
                   <v-text-field
                     ref="studyDate"
                     label="Study date"
                     v-model="studyDate"
                     append-icon="event"
                     @click:append="datePicker = true"
-                    dense
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="3">
+
+                <v-col cols="12" lg="3">
                   <v-combobox
                     v-model="studyTime"
                     :items="studyTimeSlots"
                     label="Study time"
-                    dense
                   ></v-combobox>
-                </v-col>
-              </v-row>
-              <v-row>
-                <v-col
-                  cols="12"
-                  md="12"
-                  v-for="(appointment, index) in appointments"
-                  :key="appointment.index"
-                >
-                  <ExtraStudies
-                    ref="extraStudies"
-                    :child="appointment.Child"
-                    :targetChild="currentChild"
-                    :potentialStudies="
-                      potentialStudies(appointment.Child).potentialStudyList
-                    "
-                    :index="index"
-                    @selectStudy="selectStudy"
-                    @deleteAppointment="deleteAppointment"
-                    @emitSelectedStudy="receiveSelectedStudy"
-                    align="start"
-                  ></ExtraStudies>
-                  <v-row v-if="index === 0">
-                    <div class="title">
-                      Additional appointment(s) for:
-                    </div>
-                    <v-col cols="12" md="2">
-                      <v-btn
-                        color="green darken-2"
-                        text
-                        @click="newAppointment(currentChild)"
-                        :disabled="
-                          potentialStudies(currentChild).selectableStudies
-                            .length < 1
-                        "
-                        >{{ currentChild.Name }}
-                      </v-btn>
-                    </v-col>
-                    <v-col
-                      cols="12"
-                      md="2"
-                      v-for="sibling in Children"
-                      :key="sibling.id"
-                    >
-                      <v-btn
-                        color="green darken-2"
-                        text
-                        @click="newAppointment(sibling)"
-                        :disabled="
-                          potentialStudies(sibling).selectableStudies.length < 1
-                        "
-                      >
-                        {{ sibling.Name }}</v-btn
-                      >
-                    </v-col>
-                  </v-row>
                 </v-col>
               </v-row>
             </v-container>
           </template>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-4" text @click="show">Show</v-btn>
             <v-btn color="green darken-1" text @click="closeSchedule"
               >Cancel</v-btn
             >
-            <v-btn color="green darken-1" text @click="createSchedule"
+            <v-btn color="green darken-1" text @click="createAppointment"
               >Confirm</v-btn
             >
           </v-card-actions>
@@ -228,11 +190,11 @@
 
 <script>
 import AgeDisplay from "@/components/AgeDisplay";
-import ExtraStudies from "@/components/ExtraStudies";
 
 import child from "@/services/child";
 import store from "@/store";
 
+// import appointment from "@/services/appointment";
 import schedule from "@/services/schedule";
 
 import moment from "moment";
@@ -240,11 +202,10 @@ import moment from "moment";
 export default {
   components: {
     AgeDisplay,
-    ExtraStudies
   },
   props: {
     Children: Array,
-    familyId: Number
+    familyId: Number,
   },
   data() {
     return {
@@ -254,18 +215,7 @@ export default {
       datePicker: false,
       editedIndex: -1,
       validChild: true,
-
       selectedStudy: [],
-      Experimenters: [],
-      appointments: [],
-      defaultAppointment: {
-        index: null,
-        FK_Family: null,
-        FK_Child: null,
-        FK_Study: null,
-        Experimenters: []
-      },
-
       editedItem: {
         Name: null,
         Sex: null,
@@ -278,21 +228,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
-      },
-      currentChild: {
-        Name: null,
-        Sex: null,
-        DoB: new Date().toISOString(),
-        FK_Family: this.familyId,
-        Age: null,
-        Hearingloss: 0,
-        VisionLoss: 0,
-        PrematureBirth: 0,
-        Illness: 0,
-        Note: null,
-        BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       defaultItem: {
         Name: null,
@@ -306,10 +242,10 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
-      response: "Confirmed",
+      response: null,
       studyDate: null,
       studyTime: "09:00AM",
       studyTimeSlots: [
@@ -332,210 +268,38 @@ export default {
         "04:30PM",
         "05:00PM",
         "05:30PM",
-        "06:00PM"
+        "06:00PM",
       ],
       Sex: ["F", "M"],
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         dob: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          }
+          },
         ],
         birthWeight: [
-          value => {
+          (value) => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          }
-        ]
-      }
+          },
+        ],
+      },
     };
   },
   methods: {
-
-    show() {
-      this.Experimenters = [];
-
-      for (var i = 0; i < this.appointments.length; i++) {
-        this.$refs.extraStudies[i].selectStudy();
-      }
-      console.log(this.appointments);
-      console.log(this.Experimenters);
-    },
-
-    selectStudy(extraAppointments) {
-      Object.assign(
-        this.appointments[extraAppointments.index],
-        extraAppointments.appointment
-      );
-
-      if (this.Experimenters.lenth < 1) {
-        this.Experimenters = extraAppointments.attendees;
-      } else {
-        extraAppointments.attendees.forEach(experimenter => {
-          this.Experimenters.push(experimenter);
-        });
-      }
-    },
-
-    deleteAppointment(index) {
-      this.appointments.splice(index, 1);
-    },
-
-    receiveSelectedStudy(selectedStudy) {
-      this.appointments[selectedStudy.index].FK_Study = selectedStudy.studyId;
-      this.appointments[selectedStudy.index].FK_Child = selectedStudy.childId;
-      // console.log(this.appointments);
-    },
-
-    newAppointment(child) {
-      var newAppointment = Object.assign({}, this.defaultAppointment);
-
-      newAppointment.FK_Child = child.id;
-      newAppointment.Child = child;
-      newAppointment.FK_Family = child.FK_Family;
-      newAppointment.index = this.appointments.length;
-
-      this.appointments.push(newAppointment);
-    },
-
-    potentialStudies(child) {
-      var ElegibleStudies = [];
-
-      store.state.studies.forEach(study => {
-        if (
-          child.Age >= study.MinAge * 30.5 - 5 &&
-          child.Age <= study.MaxAge * 30.5 - 5
-        ) {
-          ElegibleStudies.push(study.id);
-        }
-      });
-
-      var uniquePreviousStudies = [];
-
-      if (child.Appointments) {
-        child.Appointments.forEach(appointment => {
-          uniquePreviousStudies.push(appointment.FK_Study);
-        });
-        uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
-      }
-
-      var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
-      );
-
-      // check the selected studies.
-      var currentSelectedStudies = [];
-      if (this.appointments.length > 0) {
-        for (var i = 0; i < this.appointments.length; i++) {
-          if (this.appointments[i].FK_Child == child.id) {
-            currentSelectedStudies.push(this.appointments[i].FK_Study);
-          }
-        }
-      }
-
-      var selectableStudies = potentialStudies.filter(
-        study => !currentSelectedStudies.includes(study)
-      );
-
-      var potentialStudyList = store.state.studies.filter(study =>
-        potentialStudies.includes(study.id)
-      );
-
-      return {
-        potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies
-      };
-    },
-
-    async createSchedule() {
-      this.Experimenters = [];
-
-      for (var i = 0; i < this.appointments.length; i++) {
-        this.$refs.extraStudies[i].selectStudy();
-      }
-
-      var newSchedule = {};
-
-      switch (this.response) {
-        case "Confirmed":
-          var studyNames = this.appointments.map(appointment => {
-            return appointment.Study.StudyName;
-          });
-
-          var childNames = this.appointments.map(appointment => {
-            return appointment.FK_Child;
-          });
-
-          studyNames = Array.from(new Set(studyNames));
-          childNames = Array.from(new Set(childNames));
-
-          newSchedule = {
-            AppointmentTime: moment(this.studyDateTime).toISOString(true),
-            Status: this.response,
-            summary:
-              studyNames.join(" + ") +
-              ", Family: " +
-              this.currentChild.FK_Family +
-              ", Child: " +
-              childNames.join(" + "),
-            Appointments: this.appointments,
-            ScheduledBy: store.state.userID,
-            location: "Psychology Building, McMaster University",
-            start: {
-              dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
-            },
-            end: {
-              dateTime: moment(this.studyDateTime)
-                .add(1, "h")
-                .toISOString(true),
-              timeZone: "America/Toronto"
-            },
-            attendees: this.Experimenters
-          };
-
-          break;
-
-        default:
-          newSchedule = {
-            AppointmentTime: null,
-            Status: this.response,
-            Appointments: this.appointments,
-            ScheduledBy: store.state.userID
-          };
-
-          if (
-            this.response === "Left a message" ||
-            this.response === "Interested"
-          ) {
-            newSchedule.Status = "TBD";
-          }
-          break;
-      }
-
-      console.log(JSON.stringify(newSchedule));
-      try {
-        await schedule.create(newSchedule);
-
-        console.log("New appointment scheduled!");
-        this.$emit("newSchedule");
-      } catch (error) {
-        console.log(error.response);
-      }
-
-      this.closeSchedule();
-    },
-
+    // showSelectedStudy() {
+    //   console.log(this.selectedStudy);
+    // },
     addChild() {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
@@ -602,25 +366,97 @@ export default {
     },
 
     Schedule(child, index) {
-      this.currentChildIndex = index;
-      this.currentChild = Object.assign({}, child);
-
-      var newAppointment = Object.assign({}, this.defaultAppointment);
-
-      newAppointment.FK_Child = child.id;
-      newAppointment.Child = child;
-      newAppointment.FK_Family = child.FK_Family;
-      newAppointment.index = this.appointments.length;
-
-      this.appointments.push(newAppointment);
-
+      this.editedIndex = index;
+      this.editedItem = Object.assign({}, child);
       this.dialogSchedule = true;
+    },
+
+    async createAppointment() {
+      var newScheduleInfo = {};
+
+      var studyNames = "";
+      var studyAppointments = [];
+
+      this.selectedStudy.forEach((study) => {
+        studyNames += study.StudyName + " + ";
+        studyAppointments.push({
+          FK_Family: this.editedItem.FK_Family,
+          FK_Child: this.editedItem.id,
+          FK_Study: study.id,
+        });
+      });
+
+      studyNames = studyNames.slice(0, studyNames.length - 3);
+
+      switch (this.response) {
+        case "Confirmed":
+          newScheduleInfo = {
+            AppointmentTime: moment(this.studyDateTime).toISOString(true),
+            Status: this.response,
+            summary:
+              studyNames +
+              ", Family: " +
+              this.editedItem.FK_Family +
+              ", Child: " +
+              this.editedItem.id,
+            location: "Psychology Building, McMaster University",
+            Appointments: studyAppointments,
+            ScheduledBy: store.state.userID,
+            start: {
+              dateTime: moment(this.studyDateTime).toISOString(true),
+              timeZone: "America/Toronto",
+            },
+            end: {
+              dateTime: moment(this.studyDateTime)
+                .add(1, "h")
+                .toISOString(true),
+              timeZone: "America/Toronto",
+            },
+            attendees: [
+              {
+                email: "g.jaeger0226@gmail.com", // will change to experiments' emails later.
+              },
+            ],
+          };
+
+          break;
+
+        default:
+          newScheduleInfo = {
+            AppointmentTime: null,
+            Status: this.response,
+            ScheduledBy: store.state.userID,
+            Appointments: studyAppointments,
+          };
+
+          if (
+            this.response === "Left a message" ||
+            this.response === "Interested"
+          ) {
+            newScheduleInfo.Status = "TBD";
+          }
+          break;
+      }
+      try {
+        const newSchedule = await schedule.create(newScheduleInfo);
+
+        this.Children[this.editedIndex].Appointments.push({
+          FK_Study: newSchedule.data.Appointments.FK_Study,
+        });
+
+        console.log("New appointment scheduled!");
+
+        this.$emit("newSchedule");
+      } catch (error) {
+        console.log(error.response);
+      }
+
+      this.closeSchedule();
     },
 
     closeSchedule() {
       this.dialogSchedule = false;
       setTimeout(() => {
-        this.appointments = [];
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         this.response = null;
@@ -635,23 +471,14 @@ export default {
       setTimeout(() => {
         this.$refs.studyDate.focus();
       }, 100);
-    }
+    },
   },
   computed: {
-    defaultSelected() {
-      return this.currentStudy
-        ? {
-            id: this.currentStudy.id,
-            StudyName: this.currentStudy.StudyName
-          }
-        : {};
-    },
-
     ElegibleStudies: function() {
       if (this.Children) {
-        var elegibleStudies = this.Children.map(child => {
+        var elegibleStudies = this.Children.map((child) => {
           let studyIds = [];
-          store.state.studies.forEach(study => {
+          store.state.studies.forEach((study) => {
             if (
               child.Age >= study.MinAge * 30.5 - 5 &&
               child.Age <= study.MaxAge * 30.5 - 5
@@ -669,15 +496,16 @@ export default {
     },
 
     UniquePreviousStudies: function() {
-      return this.Children.map(child => {
+      return this.Children.map((child) => {
         let studyIds = [];
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           studyIds.push(appointment.FK_Study);
         });
 
         return studyIds;
       });
     },
+
     PotentialStudies: function() {
       var PotentialStudies = [];
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
@@ -687,10 +515,10 @@ export default {
         previousStudies = Array.from(new Set(previousStudies));
 
         let potentialStudyIds = elegibleStudy.filter(
-          study => !previousStudies.includes(study)
+          (study) => !previousStudies.includes(study)
         );
 
-        var PotentialStudyList = store.state.studies.filter(study =>
+        var PotentialStudyList = store.state.studies.filter((study) =>
           potentialStudyIds.includes(study.id)
         );
 
@@ -730,50 +558,43 @@ export default {
     },
 
     earliestDate: function() {
-      if (!this.dialogSchedule) {
-        if (this.selectedStudy.length > 0) {
-          var minAges = this.selectedStudy.map(study => {
-            return moment(this.editedItem.DoB).add(
-              Math.floor(study.MinAge * 30.5),
-              "days"
-            );
-          });
+      if (this.selectedStudy.length > 0) {
+        
+        var minAges = this.selectedStudy.map((study) => {
+          return moment(this.editedItem.DoB).add(
+            Math.floor(study.MinAge * 30.5),
+            "days"
+          );
+        });
 
-          minAges.push(moment());
+        minAges.push(moment());
 
-          var MinAge = moment.max(minAges);
+        var MinAge = moment.max(minAges);
 
-          return MinAge.toISOString(true);
-        } else {
-          return new Date().toISOString();
-        }
+        return MinAge.toISOString(true);
       } else {
         return new Date().toISOString();
       }
     },
 
     latestDate: function() {
-      if (!this.dialogSchedule) {
-        if (this.selectedStudy.length > 0) {
-          var maxAges = this.selectedStudy.map(study => {
-            return moment(this.editedItem.DoB).add(
-              Math.floor(study.MaxAge * 30.5),
-              "days"
-            );
-          });
+      if (this.selectedStudy.length > 0) {
+        
+        var maxAges = this.selectedStudy.map((study) => {
+          return moment(this.editedItem.DoB).add(
+            Math.floor(study.MaxAge * 30.5),
+            "days"
+          );
+        });
 
-          var MaxAge = moment.min(maxAges);
+        var MaxAge = moment.min(maxAges);
 
-          return MaxAge.toISOString(true);
-        } else {
-          return new Date().toISOString();
-        }
+        return MaxAge.toISOString(true);
       } else {
-        return moment(new Date())
-          .add(60, "days")
-          .toISOString(true);
+        return new Date().toISOString();
       }
-    }
+
+    },
   },
   watch: {
     dialogChild(val) {
@@ -782,8 +603,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    }
-  }
+    },
+  },
 };
 </script>
 

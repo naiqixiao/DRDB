@@ -29,7 +29,7 @@ const google = require("../middleware/calendar");
 //       "dateTime": "2020-04-24T14:00:00.000",
 //       "timeZone": "America/Toronto"
 //   },
-//   flying124"end": {
+//   "end": {
 //       "dateTime": "2020-04-24T15:30:00.000",
 //       "timeZone": "America/Toronto"
 //   },
