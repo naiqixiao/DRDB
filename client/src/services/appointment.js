@@ -9,9 +9,9 @@ export default {
       params: appointment
     });
   },
-  delete(appointmentId) {
+  delete(removedAppointment) {
     return api().delete("appointment/", {
-      params: { id: appointmentId }
+      params: removedAppointment
     });
   }
 };

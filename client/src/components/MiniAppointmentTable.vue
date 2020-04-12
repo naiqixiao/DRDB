@@ -14,6 +14,7 @@
           appointment.Study.StudyName
         }}</v-card-text>
         <v-card-actions>
+          <v-btn text @click="updateExperimenters(index)">Experimenters</v-btn>
           <v-btn
             text
             @click="removeAppointment(index)"
@@ -38,7 +39,7 @@
                 ref="siblingTable"
                 :Children="Children"
                 :ScheduleID="Appointments[0].FK_Schedule"
-                @updateSiblingStudies="addNewAppointments"
+                @updateSiblingStudies="saveNewAppointments"
               ></SiblingInfo>
             </v-col>
           </v-row>
@@ -63,16 +64,16 @@ import appointment from "@/services/appointment";
 
 export default {
   components: {
-    SiblingInfo,
+    SiblingInfo
   },
   props: {
-    Appointments: Array,
+    Appointments: Array
   },
 
   data() {
     return {
       Children: [],
-      dialogAppointment: false,
+      dialogAppointment: false
     };
   },
   methods: {
@@ -83,20 +84,7 @@ export default {
       this.dialogAppointment = true;
     },
 
-    async removeAppointment(index) {
-      try {
-        if (this.Appointments[index].id) {
-          await appointment.delete(this.Appointments[index].id);
-          this.Appointments.splice(index, 1);
-
-          console.log("Appointment deleted.");
-        }
-      } catch (error) {
-        console.error(error.response);
-      }
-    },
-
-    async addNewAppointments(newAppointments) {
+    async saveNewAppointments(newAppointments) {
       try {
         const createdAppointments = await appointment.create(newAppointments);
 
@@ -104,7 +92,7 @@ export default {
           newAppointments[i].id = createdAppointments.data[i].id;
         }
 
-        newAppointments.forEach((appointment) => {
+        newAppointments.forEach(appointment => {
           this.Appointments.push(appointment);
         });
 
@@ -119,13 +107,33 @@ export default {
     save() {
       this.$refs.siblingTable.saveAppointment();
     },
+
+    async removeAppointment(index) {
+      try {
+        if (this.Appointments[index].id) {
+          await appointment.delete(this.Appointments[index]);
+
+          this.Appointments.splice(index, 1);
+
+          console.log("Appointment deleted.");
+        }
+      } catch (error) {
+        console.error(error.response);
+      }
+    },
+
+    updateExperimenters(index) {
+
+      // used to change experimenters of a given appointment
+      console.log(index)
+    }
   },
   computed: {},
   watch: {
     dialog(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 
