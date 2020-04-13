@@ -183,7 +183,7 @@ exports.search = asyncHandler(async (req, res) => {
 // });
 
 exports.update = asyncHandler(async (req, res) => {
-  var updatedAppointmentInfo = req.body;
+  const updatedAppointmentInfo = req.body.updatedExperimenters;
 
   try {
     await model.experimenterAssignment.destroy({
@@ -191,12 +191,12 @@ exports.update = asyncHandler(async (req, res) => {
     });
 
     await model.experimenterAssignment.bulkCreate(
-      appointment
+      updatedAppointmentInfo
     );
 
     // // update calendar event
     const Schedule = await model.schedule.findOne({
-      where: { id: updatedAppointmentInfo[0].FK_Schedule },
+      where: { id: req.body.scheduleId },
       include: [
         {
           model: model.appointment,

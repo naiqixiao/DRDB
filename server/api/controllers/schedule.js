@@ -153,6 +153,11 @@ exports.search = asyncHandler(async (req, res) => {
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
           { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.personnel,
+            through: { model: model.experimenterAssignment },
+            attributes: ["id", "Name", "Email", "Calendar"]
+          }
         ],
       },
     ],
@@ -192,6 +197,11 @@ exports.today = asyncHandler(async (req, res) => {
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
           { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.personnel,
+            through: { model: model.experimenterAssignment },
+            attributes: ["id", "Name", "Email", "Calendar"]
+          }
         ],
       },
     ],
@@ -234,6 +244,11 @@ exports.week = asyncHandler(async (req, res) => {
           { model: model.family, attributes: ["id"] },
           { model: model.child, attributes: ["Name", "DoB"] },
           { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.personnel,
+            through: { model: model.experimenterAssignment },
+            attributes: ["id", "Name", "Email", "Calendar"]
+          }
         ],
       },
     ],
@@ -322,6 +337,11 @@ exports.update = asyncHandler(async (req, res) => {
               model: model.study,
               attributes: ["StudyName", "MinAge", "MaxAge"],
             },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"]
+            }
           ],
         },
       ],

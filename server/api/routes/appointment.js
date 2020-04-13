@@ -4,7 +4,9 @@ const checkAuth = require("../middleware/check-auth");
 
 const AppointmentController = require("../controllers/appointment");
 
-router.post("/", checkAuth, AppointmentController.create);
+router.post("/add", checkAuth, AppointmentController.create);
+
+router.post("/", checkAuth, AppointmentController.update);
 
 router.get("/", checkAuth, AppointmentController.search);
 

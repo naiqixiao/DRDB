@@ -14,12 +14,13 @@
           appointment.Study.StudyName
         }}</v-card-text>
         <v-card-actions>
-          <v-btn text @click="updateExperimenters(index)">Experimenters</v-btn>
-          <v-btn
-            text
+          <v-icon @click="updateExperimenters(appointment, index)"
+            >how_to_reg</v-icon
+          >
+          <v-icon
             @click="removeAppointment(index)"
             :disabled="Appointments.length == 1"
-            >Delete</v-btn
+            >delete</v-icon
           >
         </v-card-actions>
       </v-card>
@@ -29,6 +30,32 @@
         <v-btn color="purple" fab large @click.stop="addAppointments">+</v-btn>
       </v-col>
     </v-row>
+
+    <div>
+      <v-dialog v-model="dialogUpdateExperimenters" max-width="1200px">
+        <v-card>
+          <h2>Update experimenters for the current appointment</h2>
+          <v-col cols="12" md="3">
+            <v-select
+              :items="potentialExperimenters"
+              :item-value="'id'"
+              :item-text="'Name'"
+              v-model="selectedExperimenters"
+              return-object
+              label="Experimenters"
+              multiple
+              dense
+            ></v-select>
+          </v-col>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="saveExperimenters"
+              >Save</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
 
     <div>
       <v-dialog v-model="dialogAppointment" max-width="1200px">
@@ -54,7 +81,8 @@
 </template>
 
 <script>
-import SiblingInfo from "@/components/SiblingInfo";
+// import SiblingInfo from "@/components/SiblingInfo";
+import personnel from "@/services/personnel";
 
 import family from "@/services/family";
 import appointment from "@/services/appointment";
@@ -64,7 +92,7 @@ import appointment from "@/services/appointment";
 
 export default {
   components: {
-    SiblingInfo
+    // SiblingInfo
   },
   props: {
     Appointments: Array
@@ -73,7 +101,11 @@ export default {
   data() {
     return {
       Children: [],
-      dialogAppointment: false
+      dialogAppointment: false,
+      dialogUpdateExperimenters: false,
+      editedAppointment: {},
+      selectedExperimenters: [],
+      index: -1
     };
   },
   methods: {
@@ -122,16 +154,85 @@ export default {
       }
     },
 
-    updateExperimenters(index) {
-
+    updateExperimenters(appointment, index) {
       // used to change experimenters of a given appointment
-      console.log(index)
+      this.editedAppointment = appointment;
+      this.selectedExperimenters = appointment.Personnels;
+      this.index = index;
+      this.dialogUpdateExperimenters = true;
+    },
+
+    async saveExperimenters() {
+      this.editedAppointment.Personnels = this.selectedExperimenters;
+
+      var updatedExperimenters = this.selectedExperimenters.map(
+        experimenter => {
+          return {
+            FK_Appointment: this.editedAppointment.id,
+            FK_Experimenter: experimenter.id
+          };
+        }
+      );
+
+      // console.log({
+      //   updatedExperimenters: updatedExperimenters,
+      //   scheduleId: this.editedAppointment.FK_Schedule
+      // });
+
+      try {
+        await appointment.update({
+          updatedExperimenters: updatedExperimenters,
+          scheduleId: this.editedAppointment.FK_Schedule
+        });
+
+        this.Appointments[this.index] = this.editedAppointment;
+      } catch (error) {
+        console.log(error.response);
+      }
+
+      this.closeUpdateExperimenter();
+    },
+
+    closeUpdateExperimenter() {
+      this.editedAppointment = {};
+      this.selectedExperimenters = [];
+      this.index = -1;
+      this.dialogUpdateExperimenters = false;
     }
   },
+
   computed: {},
+
+  asyncComputed: {
+    async potentialExperimenters() {
+      if (this.editedAppointment.FK_Study) {
+        try {
+          var queryString = {
+            study: this.editedAppointment.FK_Study
+          };
+
+          const results = await personnel.search(queryString);
+
+          // filter the output based on experimenters' availability on the participation date.
+          // this.participationDate
+
+          return results.data;
+        } catch (error) {
+          console.log(error.response);
+        }
+      } else {
+        return [];
+      }
+    }
+  },
+
   watch: {
     dialog(val) {
       val || this.close();
+    },
+
+    dialogUpdateExperimenters(val) {
+      val || this.closeUpdateExperimenter();
     }
   }
 };
