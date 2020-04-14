@@ -11,16 +11,15 @@ export default {
   name: "App",
 
   components: {
-    Header,
+    Header
   },
   watch: {
-    group() {},
+    group() {}
   },
 
   data() {
-    return {
-    };
-  },
+    return {};
+  }
 };
 </script>
 

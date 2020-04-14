@@ -130,7 +130,7 @@
                 <v-col cols="12" md="3">
                   <v-combobox
                     v-model="studyTime"
-                    :items="studyTimeSlots"
+                    :items="this.$studyTimeSlots"
                     label="Study time"
                     dense
                   ></v-combobox>
@@ -312,28 +312,6 @@ export default {
       response: "Confirmed",
       studyDate: null,
       studyTime: "09:00AM",
-      studyTimeSlots: [
-        "08:30AM",
-        "09:00AM",
-        "09:30AM",
-        "10:00AM",
-        "10:30AM",
-        "11:00AM",
-        "11:30AM",
-        "12:00PM",
-        "12:30PM",
-        "01:00PM",
-        "01:30PM",
-        "02:00PM",
-        "02:30PM",
-        "03:00PM",
-        "03:30PM",
-        "04:00PM",
-        "04:30PM",
-        "05:00PM",
-        "05:30PM",
-        "06:00PM"
-      ],
       Sex: ["F", "M"],
       rules: {
         name: [
