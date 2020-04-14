@@ -3,7 +3,7 @@
     <v-col
       cols="12"
       md="2"
-      v-for="(appointment, index) in Appointments"
+      v-for="(appointment, indexAppointments) in Appointments"
       :key="appointment.id"
       dense
     >
@@ -14,11 +14,11 @@
           appointment.Study.StudyName
         }}</v-card-text>
         <v-card-actions>
-          <v-icon @click="updateExperimenters(appointment, index)"
+          <v-icon @click="updateExperimenters(appointment, indexAppointments)"
             >how_to_reg</v-icon
           >
           <v-icon
-            @click="removeAppointment(index)"
+            @click="removeAppointment(indexAppointments)"
             :disabled="Appointments.length == 1"
             >delete</v-icon
           >
@@ -27,9 +27,69 @@
     </v-col>
     <v-row align="center" justify="center">
       <v-col cols="12" md="2" dense>
-        <v-btn color="purple" fab large @click.stop="addAppointments">+</v-btn>
+        <v-btn color="purple" fab large @click.stop="editNewAppointments"
+          >+</v-btn
+        >
       </v-col>
     </v-row>
+
+    <div>
+      <v-dialog v-model="dialogAddAppointments" max-width="1200px">
+        <v-card>
+          <v-card-title class="headline"
+            >Add appointments to the current schedule</v-card-title
+          >
+          <v-container fluid>
+            <v-row>
+              <v-col cols="12" md="2" v-for="child in Children" :key="child.id">
+                <v-btn
+                  color="green darken-2"
+                  text
+                  @click="newAppointmentSlot(child)"
+                  :disabled="
+                    potentialStudies(child).selectableStudies.length < 1
+                  "
+                >
+                  {{ child.Name }}</v-btn
+                >
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="12"
+                md="12"
+                v-for="(appointment, indexNewAppointment) in newAppointments"
+                :key="appointment.index"
+              >
+                <NewAppointments
+                  ref="newAppointments"
+                  :child="appointment.Child"
+                  :scheduleId="appointment.FK_Schedule"
+                  :potentialStudies="
+                    potentialStudies(appointment.Child).potentialStudyList
+                  "
+                  :index="indexNewAppointment"
+                  @selectStudy="selectStudy"
+                  @deleteAppointment="deleteAppointment"
+                  @emitSelectedStudy="receiveSelectedStudy"
+                  align="start"
+                />
+              </v-col>
+            </v-row>
+          </v-container>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-4" text @click="show">Show</v-btn>
+            <v-btn color="green darken-1" text @click="closeNewAppointment"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="saveNewAppointments"
+              >Confirm</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
 
     <div>
       <v-dialog v-model="dialogUpdateExperimenters" max-width="1200px">
@@ -57,42 +117,21 @@
       </v-dialog>
     </div>
 
-    <div>
-      <v-dialog v-model="dialogAppointment" max-width="1200px">
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" lg="12">
-              <SiblingInfo
-                ref="siblingTable"
-                :Children="Children"
-                :ScheduleID="Appointments[0].FK_Schedule"
-                @updateSiblingStudies="saveNewAppointments"
-              ></SiblingInfo>
-            </v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
   </v-row>
 </template>
 
 <script>
-// import SiblingInfo from "@/components/SiblingInfo";
+import NewAppointments from "@/components/NewAppointments";
 import personnel from "@/services/personnel";
 
 import family from "@/services/family";
 import appointment from "@/services/appointment";
-// import schedule from "@/services/schedule";
+import store from "@/store";
 
-// import moment from "moment";
 
 export default {
   components: {
-    // SiblingInfo
+    NewAppointments
   },
   props: {
     Appointments: Array
@@ -103,37 +142,153 @@ export default {
       Children: [],
       dialogAppointment: false,
       dialogUpdateExperimenters: false,
+      dialogAddAppointments: false,
+      newAppointments: [],
+      newAppointment: {},
       editedAppointment: {},
       selectedExperimenters: [],
-      index: -1
+      index: -1,
+      Experimenters: []
     };
   },
   methods: {
-    async addAppointments() {
+    newAppointmentSlot(child) {
+      var newAppointment = Object.assign({}, this.defaultAppointment);
+
+      newAppointment.FK_Child = child.id;
+      newAppointment.Child = child;
+      newAppointment.FK_Schedule = this.Appointments[0].FK_Schedule;
+      newAppointment.FK_Family = child.FK_Family;
+      newAppointment.index = this.newAppointments.length;
+
+      this.newAppointments.push(newAppointment);
+    },
+
+    async editNewAppointments() {
       var queryString = { id: this.Appointments[0].FK_Family };
       var Results = await family.search(queryString);
       this.Children = Results.data[0].Children;
-      this.dialogAppointment = true;
+      this.dialogAddAppointments = true;
     },
 
-    async saveNewAppointments(newAppointments) {
-      try {
-        const createdAppointments = await appointment.create(newAppointments);
+    potentialStudies(child) {
+      var ElegibleStudies = [];
 
-        for (var i = 0; i < newAppointments.length; i++) {
-          newAppointments[i].id = createdAppointments.data[i].id;
+      store.state.studies.forEach(study => {
+        if (
+          child.Age >= study.MinAge * 30.5 - 5 &&
+          child.Age <= study.MaxAge * 30.5 - 5
+        ) {
+          ElegibleStudies.push(study.id);
+        }
+      });
+
+      var uniquePreviousStudies = [];
+
+      if (child.Appointments) {
+        child.Appointments.forEach(appointment => {
+          uniquePreviousStudies.push(appointment.FK_Study);
+        });
+        uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
+      }
+
+      var potentialStudies = ElegibleStudies.filter(
+        study => !uniquePreviousStudies.includes(study)
+      );
+
+      // check the selected studies.
+      var currentSelectedStudies = [];
+      if (this.newAppointments.length > 0) {
+        for (var i = 0; i < this.newAppointments.length; i++) {
+          if (this.newAppointments[i].FK_Child == child.id) {
+            currentSelectedStudies.push(this.newAppointments[i].FK_Study);
+          }
+        }
+      }
+
+      var selectableStudies = potentialStudies.filter(
+        study => !currentSelectedStudies.includes(study)
+      );
+
+      var potentialStudyList = store.state.studies.filter(study =>
+        potentialStudies.includes(study.id)
+      );
+
+      return {
+        potentialStudyList: potentialStudyList,
+        selectableStudies: selectableStudies
+      };
+    },
+
+    receiveSelectedStudy(selectedStudy) {
+      this.newAppointments[selectedStudy.index].FK_Study =
+        selectedStudy.studyId;
+      this.newAppointments[selectedStudy.index].FK_Child =
+        selectedStudy.childId;
+    },
+
+    deleteAppointment(index) {
+      this.newAppointments.splice(index, 1);
+    },
+
+    selectStudy(extraAppointments) {
+      Object.assign(
+        this.newAppointments[extraAppointments.index],
+        extraAppointments.appointment
+      );
+
+      if (this.Experimenters.lenth < 1) {
+        this.Experimenters = extraAppointments.attendees;
+      } else {
+        extraAppointments.attendees.forEach(experimenter => {
+          this.Experimenters.push(experimenter);
+        });
+      }
+    },
+
+    show() {
+      this.Experimenters = [];
+
+      for (var i = 0; i < this.newAppointments.length; i++) {
+        this.$refs.newAppointments[i].selectStudy();
+      }
+      console.log(this.newAppointments);
+      console.log(this.Experimenters);
+    },
+
+    async saveNewAppointments() {
+      this.Experimenters = [];
+
+      for (var i = 0; i < this.newAppointments.length; i++) {
+        this.$refs.newAppointments[i].selectStudy();
+      }
+
+      try {
+        const createdAppointments = await appointment.create(
+          this.newAppointments
+        );
+
+        for (i = 0; i < this.newAppointments.length; i++) {
+          this.newAppointments[i].id = createdAppointments.data[i].id;
         }
 
-        newAppointments.forEach(appointment => {
+        this.newAppointments.forEach(appointment => {
           this.Appointments.push(appointment);
         });
 
-        this.dialogAppointment = false;
-
+        this.closeNewAppointment();
         console.log("Appointments updated.");
       } catch (error) {
         console.error(error.response);
       }
+
+    },
+
+    closeNewAppointment() {
+      this.dialogAddAppointments = false;
+      setTimeout(() => {
+        this.newAppointments = [];
+      }, 300);
     },
 
     save() {
@@ -173,11 +328,6 @@ export default {
           };
         }
       );
-
-      // console.log({
-      //   updatedExperimenters: updatedExperimenters,
-      //   scheduleId: this.editedAppointment.FK_Schedule
-      // });
 
       try {
         await appointment.update({
@@ -233,6 +383,10 @@ export default {
 
     dialogUpdateExperimenters(val) {
       val || this.closeUpdateExperimenter();
+    },
+
+    dialogAddAppointments(val) {
+      val || this.closeNewAppointment();
     }
   }
 };

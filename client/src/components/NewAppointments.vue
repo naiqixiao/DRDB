@@ -5,18 +5,6 @@
     </v-col>
     <v-col cols="12" md="2">
       <v-select
-        v-if="index == 0 && currentStudy"
-        :items="potentialStudies"
-        :item-value="'id'"
-        :item-text="'StudyName'"
-        v-model="defaultSelected"
-        return-object
-        label="Studies"
-        disabled
-        dense
-      ></v-select>
-      <v-select
-        v-else
         :items="potentialExtraStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
@@ -39,7 +27,7 @@
         dense
       ></v-select>
     </v-col>
-    <v-col cols="12" md="2" v-if="index > 0">
+    <v-col cols="12" md="2">
       <v-btn color="green darken-2" text @click="deleteAppointment">
         delete</v-btn
       >
@@ -57,6 +45,7 @@ export default {
     targetChild: Object,
     potentialStudies: Array,
     currentStudy: Object,
+    scheduleId: Number,
     participationDate: Date,
     index: Number
   },
@@ -76,6 +65,7 @@ export default {
         FK_Child: this.child.id,
         FK_Family: this.child.FK_Family,
         FK_Study: this.selectedStudy.id,
+        FK_Schedule: this.scheduleId,
         Child: {
           Name: this.child.Name,
           DoB: this.child.DoB
