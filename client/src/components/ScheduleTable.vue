@@ -6,7 +6,7 @@
     height="700"
     single-select
     no-data-text="No study schedule to display."
-    :headers="headersSchedule"
+    :headers="this.$headersSchedule"
     :items="Schedules"
     class="elevation-1"
     @click:row="rowSelected"
@@ -36,8 +36,8 @@
                 </v-col>
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="this.$studyTime"
-                    :items="this.$studyTimeSlots"
+                    v-model="studyTime"
+                    :items="studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
                   <h3>{{ studyDateTime }}</h3>
@@ -148,6 +148,7 @@ export default {
   },
   props: {
     Schedules: Array,
+    studyTimeSlots: Array,
   },
   data() {
     return {
@@ -157,59 +158,7 @@ export default {
       earliestDate: new Date(),
       latestDate: new Date(),
       studyDate: null,
-      headersSchedule: [
-        {
-          text: "Child",
-          align: "center",
-          value: "Child",
-          width: "50px",
-        },
-        {
-          text: "Study",
-          align: "center",
-          value: "Study",
-          width: "50px",
-        },
-        {
-          text: "Study Time",
-          align: "center",
-          value: "AppointmentTime",
-          width: "100px",
-        },
-        {
-          text: "Age by Participation",
-          align: "center",
-          value: "AgeByParticipation",
-          width: "80px",
-        },
-        {
-          text: "Status",
-          align: "center",
-          value: "Status",
-          width: "80px",
-        },
-        {
-          text: "Updated Time",
-          align: "center",
-          value: "updatedAt",
-          width: "80px",
-        },
-
-        {
-          text: "Actions",
-          align: "center",
-          value: "actions",
-          sortable: false,
-          width: "80px",
-        },
-        {
-          text: "Completion",
-          align: "start",
-          value: "Completed",
-          sortable: false,
-          width: "80px",
-        },
-      ],
+      studyTime: "09:00AM",
     };
   },
   methods: {
@@ -279,7 +228,7 @@ export default {
         this.editedItem = {};
         this.editedIndex = -1;
         this.studyDate = null;
-        this.$studyTime = "09:00AM";
+        this.studyTime = "09:00AM";
       }, 300);
     },
 
@@ -371,8 +320,8 @@ export default {
 
   computed: {
     studyDateTime: function() {
-      var StudyTimeString = this.$studyTime.slice(0, 5);
-      var AMPM = this.$studyTime.slice(5, 7);
+      var StudyTimeString = this.studyTime.slice(0, 5);
+      var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 

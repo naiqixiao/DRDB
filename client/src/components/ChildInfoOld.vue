@@ -149,7 +149,7 @@
 
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="this.$studyTime"
+                    v-model="this.studyTime"
                     :items="this.$studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
@@ -246,7 +246,8 @@ export default {
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
-      studyDate: null,      
+      studyDate: null,
+      studyTime: "09:00AM",
     };
   },
   methods: {
@@ -414,6 +415,7 @@ export default {
         this.editedIndex = -1;
         this.response = null;
         this.studyDate = null;
+        this.studyTime = "09:00AM";
         this.selectedStudy = [];
       }, 300);
     },
@@ -481,8 +483,8 @@ export default {
     },
 
     studyDateTime: function() {
-      var StudyTimeString = this.$studyTime.slice(0, 5);
-      var AMPM = this.$studyTime.slice(5, 7);
+      var StudyTimeString = this.studyTime.slice(0, 5);
+      var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 
@@ -511,7 +513,6 @@ export default {
 
     earliestDate: function() {
       if (this.selectedStudy.length > 0) {
-        
         var minAges = this.selectedStudy.map((study) => {
           return moment(this.editedItem.DoB).add(
             Math.floor(study.MinAge * 30.5),
@@ -531,7 +532,6 @@ export default {
 
     latestDate: function() {
       if (this.selectedStudy.length > 0) {
-        
         var maxAges = this.selectedStudy.map((study) => {
           return moment(this.editedItem.DoB).add(
             Math.floor(study.MaxAge * 30.5),
@@ -545,7 +545,6 @@ export default {
       } else {
         return new Date().toISOString();
       }
-
     },
   },
   watch: {

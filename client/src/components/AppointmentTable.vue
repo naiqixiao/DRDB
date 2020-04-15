@@ -34,8 +34,8 @@
                 </v-col>
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="this.$studyTime"
-                    :items="this.$studyTimeSlots"
+                    v-model="studyTime"
+                    :items="studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
                   <h3>{{ studyDateTime }}</h3>
@@ -125,7 +125,8 @@ export default {
     AgeByParticipation
   },
   props: {
-    Appointments: Array
+    Appointments: Array,
+    studyTimeSlots: Array
   },
   data() {
     return {
@@ -141,7 +142,8 @@ export default {
           DoB: new Date()
         }
       },
-      studyDate: null
+      studyDate: null,
+      studyTime: "09:00AM",
     };
   },
   methods: {
@@ -215,7 +217,7 @@ export default {
         };
         this.editedIndex = -1;
         this.studyDate = null;
-        this.$studyTime = "09:00AM";
+        this.studyTime = "09:00AM";
       }, 300);
     },
 
@@ -286,8 +288,8 @@ export default {
 
   computed: {
     studyDateTime: function() {
-      var StudyTimeString = this.$studyTime.slice(0, 5);
-      var AMPM = this.$studyTime.slice(5, 7);
+      var StudyTimeString = this.studyTime.slice(0, 5);
+      var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 

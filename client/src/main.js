@@ -36,7 +36,59 @@ Vue.prototype.$studyTimeSlots = [
   "06:00PM"
 ];
 
-Vue.prototype.$studyTime = "09:00AM";
+Vue.prototype.$headersSchedule = [
+  {
+    text: "Child",
+    align: "center",
+    value: "Child",
+    width: "50px",
+  },
+  {
+    text: "Study",
+    align: "center",
+    value: "Study",
+    width: "50px",
+  },
+  {
+    text: "Study Time",
+    align: "center",
+    value: "AppointmentTime",
+    width: "100px",
+  },
+  {
+    text: "Age by Participation",
+    align: "center",
+    value: "AgeByParticipation",
+    width: "80px",
+  },
+  {
+    text: "Status",
+    align: "center",
+    value: "Status",
+    width: "80px",
+  },
+  {
+    text: "Updated Time",
+    align: "center",
+    value: "updatedAt",
+    width: "80px",
+  },
+
+  {
+    text: "Actions",
+    align: "center",
+    value: "actions",
+    sortable: false,
+    width: "80px",
+  },
+  {
+    text: "Completion",
+    align: "start",
+    value: "Completed",
+    sortable: false,
+    width: "80px",
+  },
+];
 
 Vue.prototype.$headersAppointments = [
   { text: "Child", align: "center", value: "Child.Name", width: "50px" },

@@ -69,6 +69,7 @@
       <v-col cols="12" md="9">
         <ScheduleTable
           :Schedules="Schedules"
+          :studyTimeSlots="this.$studyTimeSlots"
           @rowSelected="updateFamily"
         ></ScheduleTable>
       </v-col>

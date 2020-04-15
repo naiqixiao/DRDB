@@ -188,7 +188,7 @@
                   </v-col>
                   <v-col cols="12" md="3">
                     <v-combobox
-                      v-model="this.$studyTime"
+                      v-model="studyTime"
                       :items="this.$studyTimeSlots"
                       label="Study time"
                       :disabled="this.response != 'Confirmed'"
@@ -330,7 +330,7 @@ export default {
       scheduleButtonText: "Schedule",
       appointments: [],
       Experimenters: [],
-      
+      studyTime: "09:00AM",
       currentChild: {
         Name: null,
         Sex: null,
@@ -707,7 +707,7 @@ export default {
         this.editedIndex = -1;
         this.response = null;
         this.studyDate = null;
-        this.$studyTime = "09:00AM";
+        this.studyTime = "09:00AM";
       }, 300);
     },
 
@@ -758,8 +758,8 @@ export default {
     },
 
     studyDateTime: function() {
-      var StudyTimeString = this.$studyTime.slice(0, 5);
-      var AMPM = this.$studyTime.slice(5, 7);
+      var StudyTimeString = this.studyTime.slice(0, 5);
+      var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 

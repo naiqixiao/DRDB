@@ -138,6 +138,7 @@
         <ChildInfo
           :Children="currentFamily.Children"
           :familyId="parseInt(currentFamily.id)"
+          :studyTimeSlots="this.$studyTimeSlots"
           @newSchedule="updateFamilyAppointment"
         ></ChildInfo>
       </v-col>
@@ -152,6 +153,7 @@
       <v-col cols="12" lg="8" md="8">
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
+          :studyTimeSlots="this.$studyTimeSlots"
           @alert="alert = true"
         ></AppointmentTable>
       </v-col>
