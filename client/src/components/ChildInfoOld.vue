@@ -57,7 +57,7 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.Name"
-                    :rules="rules.name"
+                    :rules="this.$rules.name"
                     label="Name"
                   ></v-text-field>
                 </v-col>
@@ -66,14 +66,14 @@
                     v-model="editedItem.DoB"
                     append-icon="event"
                     @click:append="dobPicker = true"
-                    :rules="rules.dob"
+                    :rules="this.$rules.dob"
                     label="Date of birth (YYYY-MM-DD)"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-select
                     v-model="editedItem.Sex"
-                    :items="Sex"
+                    :items="this.$Sex"
                     filled
                     label="Sex"
                   ></v-select>
@@ -81,7 +81,7 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.BirthWeight"
-                    :rules="rules.birthWeight"
+                    :rules="this.$rules.birthWeight"
                     label="Birth weight"
                   ></v-text-field>
                 </v-col>
@@ -149,7 +149,7 @@
 
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="studyTime"
+                    v-model="this.$studyTime"
                     :items="this.$studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
@@ -246,32 +246,7 @@ export default {
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
-      studyDate: null,
-      studyTime: "09:00AM",
-      Sex: ["F", "M"],
-      rules: {
-        name: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-            return pattern.test(value) || "Invalid Name.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        dob: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-            return pattern.test(value) || "Invalid Date of Birth.";
-          },
-        ],
-        birthWeight: [
-          (value) => {
-            var pattern = /^[0-9]{1,2}[:.,-]?$/;
-            return pattern.test(value) || "Invalid Birth Weight.";
-          },
-        ],
-      },
+      studyDate: null,      
     };
   },
   methods: {
@@ -439,7 +414,6 @@ export default {
         this.editedIndex = -1;
         this.response = null;
         this.studyDate = null;
-        this.studyTime = "09:00AM";
         this.selectedStudy = [];
       }, 300);
     },
@@ -507,8 +481,8 @@ export default {
     },
 
     studyDateTime: function() {
-      var StudyTimeString = this.studyTime.slice(0, 5);
-      var AMPM = this.studyTime.slice(5, 7);
+      var StudyTimeString = this.$studyTime.slice(0, 5);
+      var AMPM = this.$studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 

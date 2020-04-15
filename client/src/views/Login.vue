@@ -1,10 +1,10 @@
 <template>
-  <v-container fluid ma-0 pa-0 >
+  <v-container fluid ma-0 pa-0>
     <v-row justify="center" align="center" style="height: 600px;">
       <v-col cols="12" lg="3">
         <v-text-field
           label="Email"
-          :rules="[rules.required, rules.email]"
+          :rules="this.$rules.email"
           v-model="email"
           color="teal"
           clearable
@@ -37,15 +37,7 @@ export default {
     return {
       email: "",
       password: "",
-      error: null,
-      rules: {
-        required: value => !!value || "Required.",
-        counter: value => value.length <= 20 || "Max 20 characters",
-        email: value => {
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          return pattern.test(value) || "Invalid e-mail.";
-        }
-      }
+      error: null
     };
   },
   methods: {

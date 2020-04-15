@@ -36,7 +36,7 @@
                 </v-col>
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="studyTime"
+                    v-model="this.$studyTime"
                     :items="this.$studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
@@ -157,7 +157,6 @@ export default {
       earliestDate: new Date(),
       latestDate: new Date(),
       studyDate: null,
-      studyTime: "09:00AM",
       headersSchedule: [
         {
           text: "Child",
@@ -280,7 +279,7 @@ export default {
         this.editedItem = {};
         this.editedIndex = -1;
         this.studyDate = null;
-        this.studyTime = "09:00AM";
+        this.$studyTime = "09:00AM";
       }, 300);
     },
 
@@ -372,8 +371,8 @@ export default {
 
   computed: {
     studyDateTime: function() {
-      var StudyTimeString = this.studyTime.slice(0, 5);
-      var AMPM = this.studyTime.slice(5, 7);
+      var StudyTimeString = this.$studyTime.slice(0, 5);
+      var AMPM = this.$studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 

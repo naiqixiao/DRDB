@@ -6,11 +6,10 @@
     height="400"
     single-select
     no-data-text="The family hasn't participated in any study."
-    :headers="headersAppointments"
+    :headers="this.$headersAppointments"
     :items="Appointments"
     class="elevation-1"
     @click:row="rowSelected"
-
   >
     <template v-slot:top>
       <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
@@ -35,7 +34,7 @@
                 </v-col>
                 <v-col cols="12" lg="3">
                   <v-combobox
-                    v-model="studyTime"
+                    v-model="this.$studyTime"
                     :items="this.$studyTimeSlots"
                     label="Study time"
                   ></v-combobox>
@@ -75,9 +74,9 @@
         @click="updateSchedule(item, 'Rescheduling')"
         :disabled="
           item.Schedule.Status === 'Rescheduling' ||
-          item.Schedule.Status === 'No Show' ||
-          item.Schedule.Status === 'TBD' ||
-          item.Schedule.Completed == 1
+            item.Schedule.Status === 'No Show' ||
+            item.Schedule.Status === 'TBD' ||
+            item.Schedule.Completed == 1
         "
         >update</v-icon
       >
@@ -85,9 +84,9 @@
         @click="updateSchedule(item, 'No Show')"
         :disabled="
           item.Schedule.Status === 'Rescheduling' ||
-          item.Schedule.Status === 'No Show' ||
-          item.Schedule.Status === 'TBD' ||
-          item.Schedule.Completed == 1
+            item.Schedule.Status === 'No Show' ||
+            item.Schedule.Status === 'TBD' ||
+            item.Schedule.Completed == 1
         "
         >sentiment_dissatisfied</v-icon
       >
@@ -123,10 +122,10 @@ import moment from "moment";
 export default {
   components: {
     DateDisplay,
-    AgeByParticipation,
+    AgeByParticipation
   },
   props: {
-    Appointments: Array,
+    Appointments: Array
   },
   data() {
     return {
@@ -135,64 +134,14 @@ export default {
       editedItem: {
         Study: {
           MinAge: 6,
-          MaxAge: 18,
+          MaxAge: 18
         },
         Child: {
           Name: null,
-          DoB: new Date(),
-        },
+          DoB: new Date()
+        }
       },
-      studyDate: null,
-      studyTime: "09:00AM",
-      
-      headersAppointments: [
-        { text: "Child", align: "center", value: "Child.Name", width: "50px" },
-        {
-          text: "Study",
-          align: "center",
-          value: "Study.StudyName",
-          width: "50px",
-        },
-        {
-          text: "Study Time",
-          align: "center",
-          value: "AppointmentTime",
-          width: "100px",
-        },
-        {
-          text: "Age by Participation",
-          align: "center",
-          value: "AgeByParticipation",
-          width: "80px",
-        },
-        {
-          text: "Status",
-          align: "center",
-          value: "Schedule.Status",
-          width: "80px",
-        },
-        {
-          text: "Updated Time",
-          align: "center",
-          value: "updatedAt",
-          width: "80px",
-        },
-
-        {
-          text: "Actions",
-          align: "center",
-          value: "actions",
-          sortable: false,
-          width: "80px",
-        },
-        {
-          text: "Completion",
-          align: "start",
-          value: "Schedule.Completed",
-          sortable: false,
-          width: "80px",
-        },
-      ],
+      studyDate: null
     };
   },
   methods: {
@@ -223,14 +172,6 @@ export default {
             return appointment.Study.StudyName;
           });
 
-          // this.Appointments.forEach((appointment) => {
-          //   if (appointment.FK_Schedule === item.FK_Schedule) {
-          //     studyNames += (appointment.Study.StudyName + " + ");
-          //   }
-          // });
-
-          // studyNames = studyNames.slice(0, studyNames.length - 3);
-
           item.Schedule.summary =
             item.Schedule.Status.toUpperCase() +
             " - " +
@@ -245,7 +186,7 @@ export default {
             item.Schedule.AppointmentTime = null;
             item.Schedule.updatedAt = new Date().toISOString();
 
-            this.Appointments.forEach((appointment) => {
+            this.Appointments.forEach(appointment => {
               if (appointment.FK_Schedule === item.FK_Schedule) {
                 appointment.Schedule = this.item.Schedule;
               }
@@ -265,16 +206,16 @@ export default {
         this.editedItem = {
           Study: {
             MinAge: 6,
-            MaxAge: 18,
+            MaxAge: 18
           },
           Child: {
             Name: null,
-            DoB: new Date(),
-          },
+            DoB: new Date()
+          }
         };
         this.editedIndex = -1;
         this.studyDate = null;
-        this.studyTime = "09:00AM";
+        this.$studyTime = "09:00AM";
       }, 300);
     },
 
@@ -289,9 +230,9 @@ export default {
 
           var studyNames = "";
 
-          this.Appointments.forEach((appointment) => {
+          this.Appointments.forEach(appointment => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
-              studyNames += (appointment.Study.StudyName + " + ");
+              studyNames += appointment.Study.StudyName + " + ";
             }
           });
 
@@ -306,11 +247,13 @@ export default {
 
           this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto",
+            timeZone: "America/Toronto"
           };
           this.editedItem.Schedule.end = {
-            dateTime: moment(this.studyDateTime).add(1, "h").toISOString(true),
-            timeZone: "America/Toronto",
+            dateTime: moment(this.studyDateTime)
+              .add(1, "h")
+              .toISOString(true),
+            timeZone: "America/Toronto"
           };
 
           const calendarEvent = await schedule.update(this.editedItem.Schedule);
@@ -322,7 +265,7 @@ export default {
 
           Object.assign(this.Appointments[this.editedIndex], this.editedItem);
 
-          this.Appointments.forEach((appointment) => {
+          this.Appointments.forEach(appointment => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
               appointment.Schedule = this.editedItem.Schedule;
             }
@@ -338,13 +281,13 @@ export default {
     rowSelected(item, row) {
       row.select(true);
       this.$emit("rowSelected", item.FK_Family);
-    },
+    }
   },
 
   computed: {
-    studyDateTime: function () {
-      var StudyTimeString = this.studyTime.slice(0, 5);
-      var AMPM = this.studyTime.slice(5, 7);
+    studyDateTime: function() {
+      var StudyTimeString = this.$studyTime.slice(0, 5);
+      var AMPM = this.$studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
       var StudyMin = StudyTimeString.split(":")[1];
 
@@ -370,7 +313,7 @@ export default {
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
     },
-    earliestDate: function () {
+    earliestDate: function() {
       if (
         moment(new Date())
           .add(1, "days")
@@ -381,24 +324,26 @@ export default {
             )
           )
       ) {
-        return moment(new Date()).add(1, "days").toISOString(true);
+        return moment(new Date())
+          .add(1, "days")
+          .toISOString(true);
       } else {
         return moment(this.editedItem.Child.DoB)
           .add(Math.floor(this.editedItem.Study.MinAge * 30.5), "days")
           .toISOString(true);
       }
     },
-    latestDate: function () {
+    latestDate: function() {
       return moment(this.editedItem.Child.DoB)
         .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
         .toISOString(true);
-    },
+    }
   },
   watch: {
     dialog(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 

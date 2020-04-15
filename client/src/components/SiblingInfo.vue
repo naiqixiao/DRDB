@@ -30,7 +30,7 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.Name"
-                    :rules="rules.name"
+                    :rules="this.$rules.name"
                     label="Name"
                   ></v-text-field>
                 </v-col>
@@ -39,14 +39,14 @@
                     v-model="editedItem.DoB"
                     append-icon="event"
                     @click:append="dobPicker = true"
-                    :rules="rules.dob"
+                    :rules="this.$rules.dob"
                     label="Date of birth (YYYY-MM-DD)"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-select
                     v-model="editedItem.Sex"
-                    :items="Sex"
+                    :items="this.$Sex"
                     filled
                     label="Sex"
                   ></v-select>
@@ -54,7 +54,7 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
                     v-model="editedItem.BirthWeight"
-                    :rules="rules.birthWeight"
+                    :rules="this.$rules.birthWeight"
                     label="Birth weight"
                   ></v-text-field>
                 </v-col>
@@ -157,31 +157,7 @@ export default {
         BirthWeight: null,
         Appointments: [],
       },
-      editedIndex: -1,
-      Sex: ["F", "M"],
-      rules: {
-        name: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-            return pattern.test(value) || "Invalid Name.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        dob: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-            return pattern.test(value) || "Invalid Date of Birth.";
-          },
-        ],
-        birthWeight: [
-          (value) => {
-            var pattern = /^[0-9]{1,2}[:.,-]?$/;
-            return pattern.test(value) || "Invalid Birth Weight.";
-          },
-        ],
-      },
+      editedIndex: -1
     };
   },
   methods: {

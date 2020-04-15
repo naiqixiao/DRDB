@@ -36,6 +36,99 @@ Vue.prototype.$studyTimeSlots = [
   "06:00PM"
 ];
 
+Vue.prototype.$studyTime = "09:00AM";
+
+Vue.prototype.$headersAppointments = [
+  { text: "Child", align: "center", value: "Child.Name", width: "50px" },
+  {
+    text: "Study",
+    align: "center",
+    value: "Study.StudyName",
+    width: "50px"
+  },
+  {
+    text: "Study Time",
+    align: "center",
+    value: "AppointmentTime",
+    width: "100px"
+  },
+  {
+    text: "Age by Participation",
+    align: "center",
+    value: "AgeByParticipation",
+    width: "80px"
+  },
+  {
+    text: "Status",
+    align: "center",
+    value: "Schedule.Status",
+    width: "80px"
+  },
+  {
+    text: "Updated Time",
+    align: "center",
+    value: "updatedAt",
+    width: "80px"
+  },
+
+  {
+    text: "Actions",
+    align: "center",
+    value: "actions",
+    sortable: false,
+    width: "80px"
+  },
+  {
+    text: "Completion",
+    align: "start",
+    value: "Schedule.Completed",
+    sortable: false,
+    width: "80px"
+  }
+];
+
+Vue.prototype.$Sex = ["F", "M"];
+
+Vue.prototype.$rules = {
+  name: [
+    value => !!value || "Required.",
+    value => {
+      var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
+      return pattern.test(value) || "Invalid Name.";
+    },
+    value => (value && value.length <= 30) || "Max 30 characters"
+  ],
+  email: [
+    value => !!value || "Required.",
+    value => {
+      const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return pattern.test(value) || "Invalid e-mail.";
+    },
+    value => (value && value.length <= 30) || "Max 30 characters"
+  ],
+  phone: [
+    value => {
+      const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+      return pattern.test(value) || "Invalid phone.";
+    },
+    value => !!value || "Required.",
+    value => (value && value.length == 10) || "Have to be 10 digits"
+  ],
+  dob: [
+    value => !!value || "Required.",
+    value => {
+      var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+      return pattern.test(value) || "Invalid Date of Birth.";
+    }
+  ],
+  birthWeight: [
+    value => {
+      var pattern = /^[0-9]{1,2}[:.,-]?$/;
+      return pattern.test(value) || "Invalid Birth Weight.";
+    }
+  ]
+};
+
 new Vue({
   router,
   store,
