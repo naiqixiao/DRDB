@@ -2,4 +2,4 @@ DRDB system from PNB, McMaster University
 
 This is an open source system to manage participant database, studies, and research assistants.
 
-More changes are to come!
+More changes to come!
