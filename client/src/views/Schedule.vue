@@ -24,6 +24,7 @@
         :data="{NameMom: currentFamily.NameMom,
         ChildName: currentChild.Name,
         Email: currentFamily.Email}"
+        @cancelEmail="closeEmail"
       ></Email>
       <v-spacer></v-spacer>
       <v-btn color="green darken-2" text @click.stop="dialogEmail = true"
@@ -623,20 +624,6 @@ export default {
       // console.log(this.Experimenters);
     },
 
-    // selectedExperimenters(experimenters) {
-    //   if (this.Experimenters.length == 0) {
-    //     this.Experimenters = experimenters;
-    //   } else {
-    //     experimenters.forEach(experimenter => {
-    //       this.Experimenters.push(experimenter);
-    //     });
-    //   }
-
-    //   this.appointments[0].Experimenters = experimenters.map(experimenter => {
-    //     return experimenter.id;
-    //   });
-    // },
-
     async createSchedule() {
       this.Experimenters = [];
 
@@ -762,6 +749,11 @@ export default {
         }
       }
     },
+
+    closeEmail() {
+
+      this.dialogEmail = false
+    }
   },
 
   computed: {

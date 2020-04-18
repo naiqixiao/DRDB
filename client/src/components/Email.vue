@@ -1,5 +1,10 @@
 <template>
-  <v-dialog v-model="dialog" max-width="800px" :retain-focus="false">
+  <v-dialog
+    v-model="dialog"
+    max-width="800px"
+    @click:outside="cancel"
+    :retain-focus="false"
+  >
     <v-card>
       <v-row dense>
         <v-col cols="12" md="6">
@@ -11,15 +16,13 @@
           <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
         </v-col>
       </v-row>
-      <v-row dense>
+      <v-row>
         <v-col cols="12" md="10">
-          <v-textarea
-            label="Email Body"
-            :value="emailBody"
-            outlined
-            filled
-            solo
-          ></v-textarea>
+          <vue-editor
+            ref="emailBody"
+            v-model="emailBody"
+            :editor-toolbar="customToolbar"
+          ></vue-editor>
         </v-col>
       </v-row>
       <v-card-actions>
@@ -32,6 +35,8 @@
 </template>
 
 <script>
+import { VueEditor } from "vue2-editor";
+import email from "@/services/email";
 
 export default {
   props: {
@@ -41,25 +46,28 @@ export default {
     dialog: Boolean,
   },
 
+  components: {
+    VueEditor,
+  },
+
   data() {
-    return {};
+    return {
+      emailBody: String,
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ color: [] }, { background: [] }],
+      ],
+    };
   },
 
   methods: {
-    sendEmail() {},
-
-    cancel() {},
-  },
-
-  computed: {
-    emailBody() {
+    generateEmailBody() {
       if (this.emailTemplate) {
         var email = this.emailTemplate;
         // Search for all the variables to be replaced, for instance ${"Column name"}
 
         var pattern = /\$\{\{([^}]+)\}\}/g;
         var templateVars = this.emailTemplate.match(pattern);
-        console.log(templateVars);
         //  Replace variables from the template with the actual values from the data object.
         // If no value is available, replace with the empty string.
         for (var i = 0; i < templateVars.length; ++i) {
@@ -73,6 +81,40 @@ export default {
         return email;
       } else {
         return "email body not available";
+      }
+    },
+
+    async sendEmail() {
+      // send email with the current email body
+      var emailContent = {
+        from: "Gabriel (Naiqi) Xiao <naiqi.xiao@kangleelab.com>",
+        // cc: "lab email <nx@kangleelab.com>",
+        to: this.data.Email,
+        subject: this.emailSubject,
+        body: this.$refs.emailBody.value,
+      };
+
+      await email.send(emailContent);
+
+      this.cancel();
+    },
+
+    cancel() {
+      this.$emit("cancelEmail");
+    },
+  },
+
+  watch: {
+    dialog(val) {
+
+      switch (val) {
+        case true:
+          this.emailBody = this.generateEmailBody();
+          break;
+
+        case false:
+          this.emailBody = "";
+          break;
       }
     },
   },
