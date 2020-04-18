@@ -8716,3 +8716,7 @@ client/src/components/FamilyInfo.vue
 server/api/controllers/appointment_old.js
 server/api/models/SequelizeAuto/Appointment_old.js
 client/src/services/appointment copy.js
+server/api/controllers/gmail.js
+server/gmail/credentials.json
+server/gmail/index.js
+server/gmail/token.json

@@ -15,7 +15,20 @@
       <h4>{{ selectedStudy.StudyName }}</h4>
       <h4>{{ selectedStudy.MinAge }}</h4>
       <h4>{{ selectedStudy.MaxAge }}</h4>
-      <h4>{{ selectedStudy.Summary }}</h4>
+      <p>{{ selectedStudy.Description }}</p>
+
+      <Email
+        :dialog="dialogEmail"
+        :emailTemplate="selectedStudy.EmailTemplate"
+        :emailSubject="selectedStudy.StudyName + '_' + currentChild.Name"
+        :data="{NameMom: currentFamily.NameMom,
+        ChildName: currentChild.Name,
+        Email: currentFamily.Email}"
+      ></Email>
+      <v-spacer></v-spacer>
+      <v-btn color="green darken-2" text @click.stop="dialogEmail = true"
+        >Email</v-btn
+      >
     </v-col>
 
     <v-col cols="12" md="4">
@@ -296,7 +309,6 @@
 </template>
 
 <script>
-
 import store from "@/store";
 import child from "@/services/child";
 import study from "@/services/study";
@@ -309,15 +321,19 @@ import ExtraStudies from "@/components/ExtraStudies";
 
 import Conversation from "@/components/Conversation";
 
+import Email from "@/components/Email";
+
 export default {
   components: {
     AgeDisplay,
     Conversation,
-    ExtraStudies
+    ExtraStudies,
+    Email,
   },
   props: {},
   data() {
     return {
+      dialogEmail: false,
       dialogEdit: false,
       dialogSchedule: false,
       dobPicker: false,
@@ -339,8 +355,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedItem: {
         Name: null,
@@ -350,8 +366,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       defaultItem: {
         Name: null,
@@ -361,26 +377,26 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedIndex: null,
       childField: [
         { label: "Name", field: "Name" },
         { label: "Sex", field: "Sex" },
-        { label: "DoB", field: "DoB" }
+        { label: "DoB", field: "DoB" },
       ],
       familyField: [
         { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" }
+        { label: "Father's Name", field: "NameDad", rules: "name" },
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
       studyDate: null,
-     
-      page: 0
+
+      page: 0,
     };
   },
 
@@ -388,7 +404,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0
+        Completed: 0,
       };
 
       try {
@@ -399,7 +415,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -407,12 +423,12 @@ export default {
 
     async searchChild() {
       var studyQuery = {
-        id: this.selectedStudy.id
+        id: this.selectedStudy.id,
       };
       try {
         const studyInfo = await study.search(studyQuery);
         var pastParticipants = studyInfo.data[0].Appointments.map(
-          appointment => {
+          (appointment) => {
             return appointment.FK_Child;
           }
         );
@@ -442,7 +458,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         } else {
           console.log(error.response);
@@ -500,7 +516,7 @@ export default {
       newAppointment.Study = {
         StudyName: this.selectedStudy.StudyName,
         MinAge: this.selectedStudy.MinAge,
-        MaxAge: this.selectedStudy.MaxAge
+        MaxAge: this.selectedStudy.MaxAge,
       };
       newAppointment.index = this.appointments.length;
       this.appointments.push(newAppointment);
@@ -516,7 +532,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach(study => {
+      store.state.studies.forEach((study) => {
         if (
           child.Age >= study.MinAge * 30.5 - 5 &&
           child.Age <= study.MaxAge * 30.5 - 5
@@ -528,14 +544,14 @@ export default {
       var uniquePreviousStudies = [];
 
       if (child.Appointments) {
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           uniquePreviousStudies.push(appointment.FK_Study);
         });
         uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
       }
 
       var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
+        (study) => !uniquePreviousStudies.includes(study)
       );
 
       // check the selected studies.
@@ -549,16 +565,16 @@ export default {
       }
 
       var selectableStudies = potentialStudies.filter(
-        study => !currentSelectedStudies.includes(study)
+        (study) => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter(study =>
+      var potentialStudyList = store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
       return {
         potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies
+        selectableStudies: selectableStudies,
       };
     },
 
@@ -586,7 +602,7 @@ export default {
       if (this.Experimenters.lenth < 1) {
         this.Experimenters = extraAppointments.attendees;
       } else {
-        extraAppointments.attendees.forEach(experimenter => {
+        extraAppointments.attendees.forEach((experimenter) => {
           this.Experimenters.push(experimenter);
         });
       }
@@ -632,11 +648,11 @@ export default {
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map(appointment => {
+          var studyNames = this.appointments.map((appointment) => {
             return appointment.Study.StudyName;
           });
 
-          var childNames = this.appointments.map(appointment => {
+          var childNames = this.appointments.map((appointment) => {
             return appointment.FK_Child;
           });
 
@@ -657,15 +673,15 @@ export default {
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
-            attendees: this.Experimenters
+            attendees: this.Experimenters,
           };
 
           break;
@@ -675,7 +691,7 @@ export default {
             AppointmentTime: null,
             Status: this.response,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID
+            ScheduledBy: store.state.userID,
           };
 
           if (
@@ -745,7 +761,7 @@ export default {
           break;
         }
       }
-    }
+    },
   },
 
   computed: {
@@ -811,7 +827,7 @@ export default {
       return moment(this.editedItem.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
-    }
+    },
   },
   mounted: function() {
     this.searchStudies();
@@ -824,8 +840,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    }
-  }
+    },
+  },
 };
 </script>
 

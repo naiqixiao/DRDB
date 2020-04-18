@@ -47,7 +47,7 @@
             </v-row>
             <v-row>
               <v-col cols="12" md="8">
-                <h3>Study summary & email template</h3>
+                <h3>Study summary</h3>
 
                 <v-textarea
                   label="Study summary"
@@ -55,16 +55,12 @@
                   no-resize
                   rows="3"
                   solo
-                  v-model="currentStudy['Description']"
+                  v-model="currentStudy.Description"
                 ></v-textarea>
-                <v-textarea
-                  label="Study email template"
-                  outlined
-                  no-resize
-                  rows="6"
-                  solo
-                  v-model="currentStudy['EmailTemplate']"
-                ></v-textarea>
+                <h3>Email template</h3>
+
+                <body v-html="currentStudy.EmailTemplate" align="start"></body>
+
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
                     <v-btn color="purple" text @click.stop="createStudy"
@@ -150,16 +146,12 @@
                           no-resize
                           rows="3"
                           solo
-                          v-model="editedStudy['Description']"
+                          v-model="editedStudy.Description"
                         ></v-textarea>
-                        <v-textarea
-                          label="Study email template"
-                          outlined
-                          no-resize
-                          rows="6"
-                          solo
-                          v-model="editedStudy['EmailTemplate']"
-                        ></v-textarea>
+                        <vue-editor
+                          v-model="editedStudy.EmailTemplate"
+                          :editor-toolbar="customToolbar"
+                        ></vue-editor>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -189,10 +181,13 @@ import study from "@/services/study";
 import personnel from "@/services/personnel";
 import store from "@/store";
 
+import { VueEditor } from "vue2-editor";
+
 export default {
   components: {
     DateDisplay,
     Experimenters,
+    VueEditor,
   },
   data() {
     return {
@@ -257,6 +252,10 @@ export default {
       editedIndex: -1,
       labMembers: [],
       valid: true,
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ color: [] }, { background: [] }],
+      ],
     };
   },
 
@@ -401,9 +400,28 @@ export default {
       this.currentStudy.Personnels = updatedExperimenters;
     },
   },
+
+  computed: {
+    htmlText() {
+      var htmlText = this.currentStudy.EmailTemplate.split("<p>")
+        .join("")
+        .split("</p>")
+        .join("");
+
+      return htmlText;
+    },
+  },
+
   mounted: function() {
     this.searchStudies();
     this.searchLabMembers();
   },
 };
 </script>
+
+<style scoped>
+body {
+  border: 2px solid rgb(0, 153, 255);
+  border-radius: 5px;
+}
+</style>

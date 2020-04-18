@@ -39,6 +39,7 @@ const experimenterAssignmentRoutes = require("./api/routes/experimenterAssignmen
 const scheduleRoutes = require("./api/routes/schedule");
 
 const calRoutes = require("./api/routes/calendar");
+const gmailRoutes = require("./api/routes/gmail");
 
 
 app.use("/user", userRoutes);
@@ -57,6 +58,8 @@ app.use("/experimentAssignment", experimenterAssignmentRoutes);
 app.use("/schedule", scheduleRoutes);
 
 app.use("/cal", calRoutes);
+app.use("/gmail", gmailRoutes);
+
 
 app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
