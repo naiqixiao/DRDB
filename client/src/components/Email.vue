@@ -19,12 +19,6 @@
         ></vue-editor>
       </v-col>
     </v-row>
-    <!-- <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="green darken-1" text @click="sendEmail" :disabled="!dialog"
-        >Send</v-btn
-      >
-    </v-card-actions> -->
   </v-card>
 </template>
 
@@ -46,8 +40,8 @@ export default {
 
   data() {
     return {
-      emailBody: String,
-      emailSubject: String,
+      emailBody: "",
+      emailSubject: "",
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],

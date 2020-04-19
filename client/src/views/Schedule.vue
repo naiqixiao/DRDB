@@ -271,24 +271,12 @@
                       </v-row>
                     </v-container>
                   </template>
-                  <!-- <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn color="green darken-1" text @click="closeSchedule"
-                      >Cancel</v-btn
-                    >
-                    <v-btn color="green darken-1" text @click="createSchedule"
-                      >Confirm</v-btn
-                    >
-                  </v-card-actions> -->
                 </v-card>
                 <v-btn
                   text
                   color="green darken-1"
                   :disabled="!studyDateTime"
-                  @click="
-                    continue12();
-                    dialogEmail = true;
-                  "
+                  @click="continue12()"
                 >
                   Schedule
                 </v-btn>
@@ -299,7 +287,7 @@
               <v-stepper-content step="2">
                 <Email
                   ref="Email"
-                  :dialog="dialogEmail"
+                  :dialog="emailDialog"
                   :emailTemplate="selectedStudy.EmailTemplate"
                   :data="{
                     nameMom: currentFamily.NameMom,
@@ -320,13 +308,13 @@
               </v-stepper-content>
 
               <v-stepper-content step="3">
-                  <NextContact
-                    ref="NextContact"
-                    :familyId="currentFamily.id"
-                    :studyDate="studyDate"
-                    :contactType="response"
-                    :nextContactDialog="nextContactDialog"
-                  ></NextContact>
+                <NextContact
+                  ref="NextContact"
+                  :familyId="currentFamily.id"
+                  :studyDate="studyDate"
+                  :contactType="response"
+                  :nextContactDialog="nextContactDialog"
+                ></NextContact>
 
                 <v-btn text color="primary" @click="completeSchedule()">
                   Complete
@@ -395,7 +383,7 @@ export default {
   data() {
     return {
       e1: 1,
-      dialogEmail: false,
+      emailDialog: false,
       dialogEdit: false,
       dialogSchedule: false,
       dobPicker: false,
@@ -744,7 +732,6 @@ export default {
           break;
       }
 
-      // console.log(JSON.stringify(newSchedule));
       try {
         const newStudySchedule = await schedule.create(newSchedule);
 
@@ -773,6 +760,8 @@ export default {
         const scheduleInfo = await this.createSchedule();
 
         await this.createCalendarEvent(scheduleInfo.calendarEvent);
+
+        this.emailDialog = true;
         this.e1 = 2;
       } catch (error) {
         console.log(error);
@@ -801,6 +790,8 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
+        this.emailDialog = false;
+        this.nextContactDialog = false;
       }, 300);
     },
 
@@ -841,7 +832,7 @@ export default {
     },
 
     closeEmail() {
-      this.dialogEmail = false;
+      this.emailDialog = false;
     },
 
     nextContact() {

@@ -27,7 +27,7 @@
             no-resize
             rows="3"
             solo
-            v-model="NextContactNote"
+            v-model="nextContactNote"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -93,8 +93,8 @@ export default {
     async updateNextContact() {
       var updatedFamilyInfo = {
         id: this.familyId,
-        NextContactNote: this.NextContactNote,
-        NextContactDate: this.NextContactDate,
+        NextContactNote: this.nextContactNote,
+        NextContactDate: this.nextContactDate,
       };
 
       try {
@@ -113,25 +113,25 @@ export default {
               .add(7, "days")
               .format("YYYY-MM-DD");
 
-            this.NextContactNote = "7 days after their participation.";
+            this.nextContactNote = "7 days after their participation.";
             break;
 
           case "Interested":
           case "Left a message":
             this.nextContactDate = moment(new Date()).add(2, "days");
-            this.NextContactNote =
+            this.nextContactNote =
               "Left a message or sent an email, follow up.";
             break;
         }
       } else {
         this.nextContactDate = moment(new Date()).add(2, "days");
-        this.NextContactNote = "";
+        this.nextContactNote = "";
       }
     },
 
     nextContactDate(newVal, oldVal) {
       if (newVal != oldVal) {
-        this.daysAfter = moment(newVal).diff(moment(new Date()), "days");
+        this.daysAfter = moment(new Date(newVal)).diff(moment(new Date()), "days");
       }
     },
   },
