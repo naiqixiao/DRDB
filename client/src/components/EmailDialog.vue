@@ -1,31 +1,37 @@
 <template>
-  <v-card>
-    <v-row dense>
-      <v-col cols="12" md="6">
-        <v-text-field
-          v-model="data.Email"
-          label="Email"
-          :rules="this.$rules.email"
-        ></v-text-field>
-        <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" md="10">
-        <vue-editor
-          ref="emailBody"
-          v-model="emailBody"
-          :editor-toolbar="customToolbar"
-        ></vue-editor>
-      </v-col>
-    </v-row>
-    <!-- <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="green darken-1" text @click="sendEmail" :disabled="!dialog"
-        >Send</v-btn
-      >
-    </v-card-actions> -->
-  </v-card>
+  <v-dialog
+    v-model="dialog"
+    max-width="800px"
+    @click:outside="cancel"
+    :retain-focus="false"
+  >
+    <v-card>
+      <v-row dense>
+        <v-col cols="12" md="6">
+          <v-text-field
+            v-model="data.Email"
+            label="Email"
+            :rules="this.$rules.email"
+          ></v-text-field>
+          <v-text-field :value="emailSubject" label="Subject"></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="10">
+          <vue-editor
+            ref="emailBody"
+            v-model="emailBody"
+            :editor-toolbar="customToolbar"
+          ></vue-editor>
+        </v-col>
+      </v-row>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="green darken-1" text @click="cancel">Cancel</v-btn>
+        <v-btn color="green darken-1" text @click="sendEmail">Send</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>
@@ -90,7 +96,8 @@ export default {
       };
 
       await email.send(emailContent);
-      this.$emit("EmailSent");
+
+      this.cancel();
     },
 
     cancel() {
@@ -100,33 +107,37 @@ export default {
 
   watch: {
     dialog(val) {
-      if (val) {
-        this.emailBody = this.generateEmailBody();
+      switch (val) {
+        case true:
+          this.emailBody = this.generateEmailBody();
 
-        switch (this.emailType) {
-          case "Confirmation":
-            this.emailSubject =
-              "Appointment confirmation for " +
-              this.data.childName +
-              " on " +
-              this.data.scheduleTime;
-            break;
+          switch (this.emailType) {
+            case "Confirmation":
+              this.emailSubject =
+                "Appointment confirmation for " +
+                this.data.childName +
+                "on " +
+                this.data.scheduleTime;
+              break;
 
-          case "Introduction":
-            this.emailSubject = "Elgible study for " + this.data.childName;
-            break;
+            case "Introduction":
+              this.emailSubject = "Elgible study for " + this.data.childName;
+              break;
 
-          case "Reminder":
-            this.emailSubject = "See you tomorrow!" + this.data.childName;
-            break;
+            case "Reminder":
+              this.emailSubject = "See you tomorrow!" + this.data.childName;
+              break;
 
-          case "ThankYou":
-            this.emailSubject = "Thank you!";
-            break;
-        }
-      } else {
-        this.emailBody = "";
-        this.emailSubject = "";
+            case "ThankYou":
+              this.emailSubject = "Thank you!";
+              break;
+          }
+
+          break;
+
+        case false:
+          this.emailBody = "";
+          break;
       }
     },
   },

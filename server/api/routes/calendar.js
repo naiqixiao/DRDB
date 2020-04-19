@@ -5,8 +5,8 @@ const CalController = require("../controllers/calendar");
 
 router.post("/", CalController.create);
 
-router.patch("/:eventId", CalController.update);
+router.patch("/", CalController.update);
 
-router.delete("/:eventId", CalController.delete);
+router.delete("/", CalController.delete);
 
 module.exports = router;

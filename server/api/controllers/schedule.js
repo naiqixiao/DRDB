@@ -43,17 +43,17 @@ const google = require("../middleware/calendar");
 exports.create = asyncHandler(async (req, res) => {
   var newScheduleInfo = req.body;
 
-  if (newScheduleInfo.Status == "Confirmed") {
-    // Create a calendar event
-    const calEvent = await google.calendar.events.insert({
-      calendarId: "primary",
-      resource: newScheduleInfo,
-      sendUpdates: "all",
-    });
+  // if (newScheduleInfo.Status == "Confirmed") {
+  //   // Create a calendar event
+  //   const calEvent = await google.calendar.events.insert({
+  //     calendarId: "primary",
+  //     resource: newScheduleInfo,
+  //     sendUpdates: "all",
+  //   });
 
-    newScheduleInfo.calendarEventId = calEvent.data.id;
-    newScheduleInfo.eventURL = calEvent.data.htmlLink;
-  }
+  //   newScheduleInfo.calendarEventId = calEvent.data.id;
+  //   newScheduleInfo.eventURL = calEvent.data.htmlLink;
+  // }
 
   try {
     const schedule = await model.schedule.create(newScheduleInfo, {
