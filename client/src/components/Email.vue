@@ -84,12 +84,8 @@ export default {
       };
 
       await email.send(emailContent);
-      this.$emit("EmailSent");
     },
 
-    cancel() {
-      this.$emit("cancelEmail");
-    },
   },
 
   watch: {

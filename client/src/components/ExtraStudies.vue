@@ -58,17 +58,17 @@ export default {
     potentialStudies: Array,
     currentStudy: Object,
     participationDate: Date,
-    index: Number
+    index: Number,
   },
   data() {
     return {
       selectedStudy: this.currentStudy,
-      selectedExperimenters: []
+      selectedExperimenters: [],
     };
   },
   methods: {
     selectStudy() {
-      const experimenterIds = this.selectedExperimenters.map(experimenter => {
+      const experimenterIds = this.selectedExperimenters.map((experimenter) => {
         return experimenter.id;
       });
 
@@ -78,27 +78,27 @@ export default {
         FK_Study: this.selectedStudy.id,
         Child: {
           Name: this.child.Name,
-          DoB: this.child.DoB
+          DoB: this.child.DoB,
         },
         Study: {
           StudyName: this.selectedStudy.StudyName,
           MinAge: this.selectedStudy.MinAge,
-          MaxAge: this.selectedStudy.MaxAge
+          MaxAge: this.selectedStudy.MaxAge,
         },
-        Experimenters: experimenterIds
+        Experimenters: experimenterIds,
       };
 
-      const attendees = this.selectedExperimenters.map(experimenter => {
+      const attendees = this.selectedExperimenters.map((experimenter) => {
         return {
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL"
+          email: experimenter.Calendar + ".CAL",
         };
       });
 
       this.$emit("selectStudy", {
         index: this.index,
         appointment: appointment,
-        attendees: attendees
+        attendees: attendees,
       });
     },
 
@@ -106,9 +106,13 @@ export default {
       const selectedStudy = {
         studyId: this.selectedStudy.id,
         childId: this.child.id,
-        index: this.index
+        index: this.index,
       };
       this.$emit("emitSelectedStudy", selectedStudy);
+
+      if (this.index == 0) {
+        this.$emit("emitEmailTemplate", this.selectedStudy.EmailTemplate);
+      }
     },
 
     clear() {
@@ -117,13 +121,13 @@ export default {
 
     deleteAppointment() {
       this.$emit("deleteAppointment", this.index);
-    }
+    },
   },
   computed: {
     potentialExtraStudies() {
       if (this.currentStudy && this.targetChild.id == this.child.id) {
         return this.potentialStudies.filter(
-          study => this.currentStudy.id != study.id
+          (study) => this.currentStudy.id != study.id
         );
       } else {
         return this.potentialStudies;
@@ -134,10 +138,10 @@ export default {
       return this.currentStudy
         ? {
             id: this.currentStudy.id,
-            StudyName: this.currentStudy.StudyName
+            StudyName: this.currentStudy.StudyName,
           }
         : {};
-    }
+    },
   },
 
   asyncComputed: {
@@ -153,7 +157,7 @@ export default {
 
         try {
           var queryString = {
-            study: studyId
+            study: studyId,
           };
 
           const results = await personnel.search(queryString);
@@ -168,8 +172,8 @@ export default {
       } else {
         return [];
       }
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped></style>

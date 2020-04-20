@@ -138,6 +138,7 @@
         <ChildInfo
           :Children="currentFamily.Children"
           :familyId="parseInt(currentFamily.id)"
+          :currentFamily="currentFamily"
           :studyTimeSlots="this.$studyTimeSlots"
           @newSchedule="updateFamilyAppointment"
         ></ChildInfo>

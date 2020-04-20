@@ -5,7 +5,7 @@
 
       <v-row align="center" justify="start">
         <v-col cols="12" md="2">
-          <v-text-field dense label="After" v-model="daysAfter"> </v-text-field>
+          <v-text-field label="After" v-model="daysAfter"> </v-text-field>
         </v-col>
         <v-col cols="12" md="2">
           <v-text-field
@@ -65,8 +65,7 @@ export default {
 
   data() {
     return {
-      daysAfter: Number,
-      nextContactDate: Date,
+      nextContactDate: null,
       neverContact: false,
       nextContactNote: "",
       dialogNextContact: false,
@@ -95,6 +94,9 @@ export default {
         id: this.familyId,
         NextContactNote: this.nextContactNote,
         NextContactDate: this.nextContactDate,
+        LastContactDate: moment()
+          .startOf("day")
+          .format("YYYY-MM-DD")
       };
 
       try {
@@ -104,6 +106,28 @@ export default {
       }
     },
   },
+
+  computed: {
+    daysAfter: {
+      get() {
+        if (this.nextContactDate) {
+          return moment(this.nextContactDate).diff(
+            moment().startOf("day"),
+            "days"
+          );
+        } else {
+          return 0;
+        }
+      },
+      set(newValue) {
+        this.nextContactDate = moment()
+          .startOf("day")
+          .add(parseInt(newValue), "days")
+          .format("YYYY-MM-DD");
+      },
+    },
+  },
+
   watch: {
     nextContactDialog(val) {
       if (val) {
@@ -118,20 +142,17 @@ export default {
 
           case "Interested":
           case "Left a message":
-            this.nextContactDate = moment(new Date()).add(2, "days");
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(2, "days")
+              .format("YYYY-MM-DD");
             this.nextContactNote =
               "Left a message or sent an email, follow up.";
             break;
         }
       } else {
-        this.nextContactDate = moment(new Date()).add(2, "days");
-        this.nextContactNote = "";
-      }
-    },
-
-    nextContactDate(newVal, oldVal) {
-      if (newVal != oldVal) {
-        this.daysAfter = moment(new Date(newVal)).diff(moment(new Date()), "days");
+        this.nextContactDate = null;
+        this.nextContactNote = null;
       }
     },
   },

@@ -16,6 +16,7 @@
       <h4>{{ selectedStudy.MinAge }}</h4>
       <h4>{{ selectedStudy.MaxAge }}</h4>
       <p>{{ selectedStudy.Description }}</p>
+
     </v-col>
 
     <v-col cols="12" md="4">
@@ -296,8 +297,6 @@
                     scheduleTime: studyDateTime,
                   }"
                   emailType="Confirmation"
-                  @cancelEmail="closeEmail"
-                  @EmailSent="nextContact"
                 ></Email>
 
                 <v-btn text color="green darken-2" @click="continue23()">
@@ -350,7 +349,6 @@
       ></Conversation>
     </v-col>
   </v-row>
-  <!-- </v-container> -->
 </template>
 
 <script>
@@ -831,9 +829,9 @@ export default {
       }
     },
 
-    closeEmail() {
-      this.emailDialog = false;
-    },
+    // closeEmail() {
+    //   this.emailDialog = false;
+    // },
 
     nextContact() {
       this.e1 = 3;
