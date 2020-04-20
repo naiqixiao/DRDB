@@ -25,6 +25,7 @@
 <script>
 import { VueEditor } from "vue2-editor";
 import email from "@/services/email";
+import moment from "moment";
 
 export default {
   props: {
@@ -99,7 +100,7 @@ export default {
               "Appointment confirmation for " +
               this.data.childName +
               " on " +
-              this.data.scheduleTime;
+               moment(this.data.scheduleTime).format("MMM D (ddd), [at] h:mma");
             break;
 
           case "Introduction":

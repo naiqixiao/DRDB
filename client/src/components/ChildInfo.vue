@@ -179,7 +179,7 @@
                           <div class="title">
                             Additional appointment(s) for:
                           </div>
-                          <v-col cols="12" md="2">
+                          <!-- <v-col cols="12" md="2">
                             <v-btn
                               color="green darken-2"
                               text
@@ -190,7 +190,7 @@
                               "
                               >{{ currentChild.Name }}
                             </v-btn>
-                          </v-col>
+                          </v-col> -->
                           <v-col
                             cols="12"
                             md="2"

@@ -466,11 +466,7 @@ export default {
 
 /deep/ .v-text-field .v-input__control .v-input__slot {
   width: "150px";
-  dense: true;
-  clearable: true;
   color: "primary";
-  autocomplete: "off";
-  outlined: true;
 }
 
 /deep/ .v-container {
