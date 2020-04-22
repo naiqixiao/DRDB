@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
+const oAuth2 = require("../middleware/oAuth");
 
 const CalController = require("../controllers/calendar");
 
-router.post("/", CalController.create);
+router.post("/", oAuth2, CalController.create);
 
-router.patch("/", CalController.update);
+router.patch("/", oAuth2, CalController.update);
 
-router.delete("/", CalController.delete);
+router.delete("/", oAuth2, CalController.delete);
 
 module.exports = router;

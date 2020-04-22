@@ -94,8 +94,11 @@ export default {
         subject: this.emailSubject,
         body: this.$refs.emailBody.value,
       };
-
-      await email.send(emailContent);
+      try {
+        await email.send(emailContent);
+      } catch (error) {
+        console.log(error.response);
+      }
 
       this.cancel();
     },
@@ -114,10 +117,9 @@ export default {
           switch (this.emailType) {
             case "Confirmation":
               this.emailSubject =
-                "Appointment confirmation for " +
-                this.data.childName +
-                "on " +
-                this.data.scheduleTime;
+                "Appointment confirmation for " + this.data.childName;
+              // "on " +
+              // this.data.scheduleTime;
               break;
 
             case "Introduction":

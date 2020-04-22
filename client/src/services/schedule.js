@@ -1,4 +1,5 @@
 import api from "./api";
+import store from "@/store";
 
 export default {
   create(schedule) {
@@ -16,9 +17,11 @@ export default {
     return api().get("schedule/week");
   },
   update(schedule) {
+    schedule.lab = store.state.lab;
     return api().post("schedule/", schedule);
   },
   delete(schedule) {
+    schedule.lab = store.state.lab;
     return api().delete("schedule/", schedule);
   },
 };

@@ -16,7 +16,17 @@
       <h4>{{ selectedStudy.MinAge }}</h4>
       <h4>{{ selectedStudy.MaxAge }}</h4>
       <p>{{ selectedStudy.Description }}</p>
-
+      <v-btn @click.stop="dialogEmail = true" color="green" text>Email test</v-btn>
+      <EmailDialog
+        :dialog="dialogEmail"
+        :emailTemplate="selectedStudy.EmailTemplate"
+        :data="{
+          NameMom: currentFamily.NameMom,
+          ChildName: currentChild.Name,
+          Email: currentFamily.Email,
+        }"
+        @cancelEmail="closeEmail"
+      ></EmailDialog>
     </v-col>
 
     <v-col cols="12" md="4">
@@ -366,6 +376,7 @@ import ExtraStudies from "@/components/ExtraStudies";
 
 import Conversation from "@/components/Conversation";
 
+import EmailDialog from "@/components/EmailDialog";
 import Email from "@/components/Email";
 import NextContact from "@/components/NextContact";
 
@@ -376,10 +387,12 @@ export default {
     ExtraStudies,
     Email,
     NextContact,
+    EmailDialog,
   },
   props: {},
   data() {
     return {
+      dialogEmail: false,
       e1: 1,
       emailDialog: false,
       dialogEdit: false,
@@ -656,14 +669,6 @@ export default {
       }
     },
 
-    show() {
-      this.Experimenters = [];
-
-      for (var i = 0; i < this.appointments.length; i++) {
-        this.$refs.extraStudies[i].selectStudy();
-      }
-    },
-
     async createSchedule() {
       this.Experimenters = [];
 
@@ -829,9 +834,9 @@ export default {
       }
     },
 
-    // closeEmail() {
-    //   this.emailDialog = false;
-    // },
+    closeEmail() {
+      this.dialogEmail = false;
+    },
 
     nextContact() {
       this.e1 = 3;

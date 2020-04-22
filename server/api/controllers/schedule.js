@@ -1,7 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const google = require("../middleware/calendar");
+const { google } = require("googleapis");
 
 // Create and Save an appointment
 
@@ -156,8 +156,8 @@ exports.search = asyncHandler(async (req, res) => {
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"]
-          }
+            attributes: ["id", "Name", "Email", "Calendar"],
+          },
         ],
       },
     ],
@@ -200,8 +200,8 @@ exports.today = asyncHandler(async (req, res) => {
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"]
-          }
+            attributes: ["id", "Name", "Email", "Calendar"],
+          },
         ],
       },
     ],
@@ -247,8 +247,8 @@ exports.week = asyncHandler(async (req, res) => {
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"]
-          }
+            attributes: ["id", "Name", "Email", "Calendar"],
+          },
         ],
       },
     ],
@@ -266,11 +266,16 @@ exports.update = asyncHandler(async (req, res) => {
     delete updatedScheduleInfo["id"];
   }
 
+  const calendar = google.calendar({
+    version: "v3",
+    auth: req.oAuth2Client,
+  });
+
   if (!updatedScheduleInfo.Completed) {
     switch (updatedScheduleInfo.Status) {
       case "Confirmed": {
         if (updatedScheduleInfo.calendarEventId) {
-          await google.calendar.events.patch({
+          await calendar.events.patch({
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
             resource: updatedScheduleInfo,
@@ -278,7 +283,7 @@ exports.update = asyncHandler(async (req, res) => {
           });
         } else {
           // Create a calendar event
-          const calEvent = await google.calendar.events.insert({
+          const calEvent = await calendar.events.insert({
             calendarId: "primary",
             resource: updatedScheduleInfo,
             sendUpdates: "all",
@@ -306,7 +311,7 @@ exports.update = asyncHandler(async (req, res) => {
           // check if there was an calendar event created before.
 
           try {
-            await google.calendar.events.patch({
+            await calendar.events.patch({
               calendarId: "primary",
               eventId: updatedScheduleInfo.calendarEventId,
               resource: updatedScheduleInfo,
@@ -340,8 +345,8 @@ exports.update = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"]
-            }
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
           ],
         },
       ],
@@ -361,9 +366,11 @@ exports.delete = asyncHandler(async (req, res) => {
     where: req.query,
   });
 
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
   // remove calendar event, if it exists.
   if (schedule.calendarEventId) {
-    await google.calendar.events.delete({
+    await calendar.events.delete({
       calendarId: "primary",
       eventId: schedule.calendarEventId,
       sendUpdates: "all",

@@ -84,9 +84,12 @@ export default {
         body: this.$refs.emailBody.value,
       };
 
-      await email.send(emailContent);
+      try {
+        await email.send(emailContent);
+      } catch (error) {
+        console.log(error.response);
+      }
     },
-
   },
 
   watch: {
@@ -100,7 +103,7 @@ export default {
               "Appointment confirmation for " +
               this.data.childName +
               " on " +
-               moment(this.data.scheduleTime).format("MMM D (ddd), [at] h:mma");
+              moment(this.data.scheduleTime).format("MMM D (ddd), [at] h:mma");
             break;
 
           case "Introduction":

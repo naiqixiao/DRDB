@@ -1,7 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const google = require("../middleware/calendar");
+const { google } = require("googleapis");
 
 // {
 //             "FK_Schedule": 35,
@@ -22,10 +22,10 @@ exports.create = asyncHandler(async (req, res) => {
     for (var i = 0; i < appointments.length; i++) {
       var appointmentId = appointments[i].id;
 
-      newAppointmentInfo[i].Experimenters.forEach(experimenter => {
+      newAppointmentInfo[i].Experimenters.forEach((experimenter) => {
         experimenterAssignment.push({
           FK_Experimenter: experimenter,
-          FK_Appointment: appointmentId
+          FK_Appointment: appointmentId,
         });
       });
     }
@@ -43,23 +43,23 @@ exports.create = asyncHandler(async (req, res) => {
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"]
+              attributes: ["StudyName", "MinAge", "MaxAge"],
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"]
-            }
-          ]
-        }
-      ]
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+      ],
     });
 
-    var studyNames = Schedule.Appointments.map(appointment => {
+    var studyNames = Schedule.Appointments.map((appointment) => {
       return appointment.Study.StudyName;
     });
 
-    var childNames = Schedule.Appointments.map(appointment => {
+    var childNames = Schedule.Appointments.map((appointment) => {
       return appointment.FK_Child;
     });
 
@@ -68,11 +68,11 @@ exports.create = asyncHandler(async (req, res) => {
 
     var attendees = [];
 
-    Schedule.Appointments.forEach(appointment => {
-      appointment.Personnels.forEach(experimenter => {
+    Schedule.Appointments.forEach((appointment) => {
+      appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL"
+          email: experimenter.Calendar + ".CAL",
         });
       });
     });
@@ -84,15 +84,20 @@ exports.create = asyncHandler(async (req, res) => {
         req.query.FK_Family +
         ", Child: " +
         childNames.join(" + "),
-      attendees: attendees
+      attendees: attendees,
     };
 
     try {
-      await google.calendar.events.patch({
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
+
+      await calendar.events.patch({
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendUpdates: "all"
+        sendUpdates: "all",
       });
     } catch (err) {
       throw err;
@@ -149,9 +154,9 @@ exports.search = asyncHandler(async (req, res) => {
       {
         model: model.personnel,
         through: { model: model.experimenterAssignment },
-        attributes: ["id", "Name", "Email", "Calendar"]
-      }
-    ]
+        attributes: ["id", "Name", "Email", "Calendar"],
+      },
+    ],
   });
   res.status(200).send(appointment);
   console.log("Search successful!");
@@ -187,12 +192,10 @@ exports.update = asyncHandler(async (req, res) => {
 
   try {
     await model.experimenterAssignment.destroy({
-      where: { FK_Appointment: updatedAppointmentInfo[0].FK_Appointment }
+      where: { FK_Appointment: updatedAppointmentInfo[0].FK_Appointment },
     });
 
-    await model.experimenterAssignment.bulkCreate(
-      updatedAppointmentInfo
-    );
+    await model.experimenterAssignment.bulkCreate(updatedAppointmentInfo);
 
     // // update calendar event
     const Schedule = await model.schedule.findOne({
@@ -205,23 +208,23 @@ exports.update = asyncHandler(async (req, res) => {
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"]
+              attributes: ["StudyName", "MinAge", "MaxAge"],
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"]
-            }
-          ]
-        }
-      ]
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+      ],
     });
 
-    var studyNames = Schedule.Appointments.map(appointment => {
+    var studyNames = Schedule.Appointments.map((appointment) => {
       return appointment.Study.StudyName;
     });
 
-    var childNames = Schedule.Appointments.map(appointment => {
+    var childNames = Schedule.Appointments.map((appointment) => {
       return appointment.FK_Child;
     });
 
@@ -230,11 +233,11 @@ exports.update = asyncHandler(async (req, res) => {
 
     var attendees = [];
 
-    Schedule.Appointments.forEach(appointment => {
-      appointment.Personnels.forEach(experimenter => {
+    Schedule.Appointments.forEach((appointment) => {
+      appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL"
+          email: experimenter.Calendar + ".CAL",
         });
       });
     });
@@ -246,15 +249,17 @@ exports.update = asyncHandler(async (req, res) => {
         req.query.FK_Family +
         ", Child: " +
         childNames.join(" + "),
-      attendees: attendees
+      attendees: attendees,
     };
 
     try {
-      await google.calendar.events.patch({
+      const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
+      await calendar.events.patch({
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendUpdates: "all"
+        sendUpdates: "all",
       });
     } catch (err) {
       throw err;
@@ -281,27 +286,27 @@ exports.delete = asyncHandler(async (req, res) => {
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"]
+              attributes: ["StudyName", "MinAge", "MaxAge"],
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"]
-            }
-          ]
-        }
-      ]
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+      ],
     });
 
     var updatedAppointments = Schedule.Appointments.filter(
-      appointment => appointment.id != req.query.id
+      (appointment) => appointment.id != req.query.id
     );
 
-    var studyNames = updatedAppointments.map(appointment => {
+    var studyNames = updatedAppointments.map((appointment) => {
       return appointment.Study.StudyName;
     });
 
-    var childNames = updatedAppointments.map(appointment => {
+    var childNames = updatedAppointments.map((appointment) => {
       return appointment.FK_Child;
     });
 
@@ -310,11 +315,11 @@ exports.delete = asyncHandler(async (req, res) => {
 
     var attendees = [];
 
-    updatedAppointments.forEach(appointment => {
-      appointment.Personnels.forEach(experimenter => {
+    updatedAppointments.forEach((appointment) => {
+      appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL"
+          email: experimenter.Calendar + ".CAL",
         });
       });
     });
@@ -326,14 +331,16 @@ exports.delete = asyncHandler(async (req, res) => {
         req.query.FK_Family +
         ", Child: " +
         childNames.join(" + "),
-      attendees: attendees
+      attendees: attendees,
     };
 
     try {
-      await google.calendar.events.patch({
+      const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
+      await calendar.events.patch({
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
-        resource: updatedScheduleInfo
+        resource: updatedScheduleInfo,
         // sendUpdates: "all"
       });
     } catch (err) {
@@ -341,7 +348,7 @@ exports.delete = asyncHandler(async (req, res) => {
     }
 
     await model.appointment.destroy({
-      where: { id: req.query.id }
+      where: { id: req.query.id },
     });
 
     res.status(200).send("appointment deleted.");
