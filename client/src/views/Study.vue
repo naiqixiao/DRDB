@@ -179,7 +179,6 @@ import Experimenters from "@/components/Experimenters";
 
 import study from "@/services/study";
 import personnel from "@/services/personnel";
-import store from "@/store";
 
 import { VueEditor } from "vue2-editor";
 
@@ -239,7 +238,7 @@ export default {
       editedStudy: {},
       defaultStudy: {
         StudyName: null,
-        FK_Lab: store.state.lab,
+        FK_Lab: this.$store.state.lab,
         MinAge: null,
         MaxAge: null,
         Description: "",
@@ -262,7 +261,7 @@ export default {
   methods: {
     async searchStudies() {
       var queryString = {
-        FK_Lab: store.state.lab,
+        FK_Lab: this.$store.state.lab,
       };
 
       try {
@@ -284,7 +283,7 @@ export default {
 
     async searchLabMembers() {
       var queryString = {
-        FK_Lab: store.state.lab,
+        FK_Lab: this.$store.state.lab,
         Active: 1,
       };
 
@@ -347,7 +346,7 @@ export default {
           this.editedStudy.id = Result.data.id;
           this.Studies.push(this.editedStudy);
           // this.editedIndex = (this.Studies.length - 1);
-          store.dispatch("setStudies", this.Studies);
+          this.$store.dispatch("setStudies", this.Studies);
         } catch (error) {
           console.log(error.response);
         }
@@ -357,7 +356,7 @@ export default {
 
           this.currentStudy = Result.data;
           Object.assign(this.Studies[this.editedIndex], Result.data);
-          store.dispatch("setStudies", this.Studies);
+          this.$store.dispatch("setStudies", this.Studies);
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");

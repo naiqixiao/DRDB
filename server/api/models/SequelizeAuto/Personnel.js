@@ -1,20 +1,21 @@
-/* jshint indent: 1 */
-const bcrypt = require("bcrypt");
+// const Promise = require("bluebird");
+// const bcrypt = Promise.promisifyAll(require("bcrypt"));
 
 // function hashPassword(user, options) {
-//   const SALT_FACTOR = 10;
+//   const SALT_FACTOR = 8;
 
-//   if (!user.changed("Password")) {
+//   if (!user.changed("password")) {
 //     return;
 //   }
 
 //   return bcrypt
 //     .genSaltAsync(SALT_FACTOR)
-//     .then(salt => bcrypt.hashAsync(user.Password, salt, null))
-//     .then(hash => {
-//       user.setDataValue("Password", hash);
+//     .then((salt) => bcrypt.hashAsync(user.password, salt, null))
+//     .then((hash) => {
+//       user.setDataValue("password", hash);
 //     });
 // }
+
 
 module.exports = function(sequelize, DataTypes) {
   const Personnel = sequelize.define(
@@ -24,77 +25,84 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         allowNull: false,
-        primaryKey: true
+        primaryKey: true,
       },
       Name: {
         type: DataTypes.STRING(45),
-        allowNull: false
+        allowNull: false,
       },
       Initial: {
         type: DataTypes.STRING(45),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       Role: {
-        type: DataTypes.ENUM("PostDoc", "PI", "GradStudent", "Undergrad", "RA", "Lab manager", "Staff"),
-        allowNull: false
+        type: DataTypes.ENUM(
+          "PostDoc",
+          "PI",
+          "GradStudent",
+          "Undergrad",
+          "RA",
+          "Lab manager",
+          "Staff"
+        ),
+        allowNull: false,
       },
       FK_Lab: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
           model: "Lab",
-          key: "id"
-        }
+          key: "id",
+        },
       },
       Active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: "1"
+        defaultValue: "1",
       },
       Password: {
         type: DataTypes.STRING(255),
-        allowNull: false
+        allowNull: false,
       },
       Email: {
         type: DataTypes.STRING(45),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       Calendar: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true
+        unique: true,
       },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP")
+        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP")
-      }
+        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+      },
     },
     {
       hooks: {
         // beforeCreate: hashPassword,
         // beforeUpdate: hashPassword,
-        // beforeSave: hashPassword
-      }
+        // beforeSave: hashPassword,
+      },
     },
     {
-      tableName: "Personnel"
+      tableName: "Personnel",
     }
   );
 
-  Personnel.prototype.comparePassword = function(password) {
-    return bcrypt.compareAsync(password, this.Password);
-  };
+  // Personnel.prototype.comparePassword = function(password) {
+  //   return bcrypt.compareAsync(password, this.Password);
+  // };
 
-  // User.associate = function (models) {
-  // }
+  // Personnel.associate = function(models) {};
 
   return Personnel;
 };

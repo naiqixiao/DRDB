@@ -7,13 +7,8 @@
       width="250"
       :clipped="$vuetify.breakpoint.lgAndUp"
     >
-
       <v-list dense>
-        <v-list-item
-          v-for="nav in navs"
-          :key="nav.label"
-          :to="nav.address"
-        >
+        <v-list-item v-for="nav in navs" :key="nav.label" :to="nav.address">
           <v-list-item-action>
             <v-icon>{{ nav.icon }}</v-icon>
           </v-list-item-action>
@@ -26,19 +21,17 @@
       <template v-slot:prepend>
         <div class="pa-2">
           <!-- <v-space name="space"></v-space> -->
-
         </div>
       </template>
 
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn block>Logout</v-btn>
+          <v-btn block @click="logout">Logout</v-btn>
         </div>
       </template>
     </v-navigation-drawer>
 
     <v-app-bar app color="teal" clipped-right dark>
-      
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
@@ -58,7 +51,7 @@ export default {
   watch: {
     group() {
       this.drawer = false;
-    }
+    },
   },
 
   data() {
@@ -68,45 +61,55 @@ export default {
         {
           address: "/",
           label: "Home",
-          icon: "home"
+          icon: "home",
         },
         {
           address: "/family",
           label: "Family",
-          icon: "face"
+          icon: "face",
         },
         {
           address: "/schedule",
           label: "Schedule",
-          icon: "phone"
+          icon: "phone",
         },
         {
           address: "/study",
           label: "Study",
-          icon: "description"
+          icon: "description",
         },
         {
           address: "/personnel",
           label: "Personnel",
-          icon: "perm_identity"
+          icon: "perm_identity",
         },
         {
           address: "/appointment",
           label: "Appointment",
-          icon: "event"
+          icon: "event",
         },
         {
           address: "/about",
           label: "About",
-          icon: "dashboard"
+          icon: "dashboard",
         },
         {
           address: "/login",
           label: "Login",
-          icon: "fingerprint"
-        }
-      ]
+          icon: "fingerprint",
+        },
+      ],
     };
-  }
+  },
+
+  methods: {
+    logout() {
+      this.$store.dispatch("setToken", "");
+
+      this.$router.push({
+        name: "Login",
+      });
+    },
+  },
 };
 </script>

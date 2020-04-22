@@ -76,7 +76,6 @@
                   @updatedStudies="updatedStudies"
                 ></AssignedStudies>
               </v-col>
-
             </v-row>
           </v-container>
 
@@ -89,7 +88,7 @@
 
                 <v-form ref="form" v-model="valid" lazy-validation>
                   <v-container>
-                    <v-row >
+                    <v-row>
                       <v-col
                         cols="12"
                         sm="6"
@@ -152,12 +151,13 @@ import AssignedStudies from "@/components/AssignedStudies";
 
 import study from "@/services/study";
 import personnel from "@/services/personnel";
+import login from "@/services/login";
 import store from "@/store";
 
 export default {
   components: {
     DateDisplay,
-    AssignedStudies
+    AssignedStudies,
   },
   data() {
     return {
@@ -223,7 +223,6 @@ export default {
         Calendar: null,
         Role: null,
         Active: 1,
-        Password: "1234567890",
       },
       editedIndex: -1,
       labStudies: [],
@@ -257,7 +256,7 @@ export default {
     async searchLabStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0
+        Completed: 0,
       };
 
       try {
@@ -310,10 +309,12 @@ export default {
     async save() {
       if (this.editedIndex < 0) {
         try {
-          const Result = await personnel.create(this.editedPersonnel);
+          const Result = await login.register(this.editedPersonnel);
           this.editedPersonnel.id = Result.data.id;
           this.Personnels.push(this.editedPersonnel);
+          console.log(Result.data.Email + " has been added to the system!");
         } catch (error) {
+          alert(error.response.data.message);
           console.log(error.response);
         }
       } else {
