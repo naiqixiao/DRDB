@@ -8,7 +8,12 @@
       :clipped="$vuetify.breakpoint.lgAndUp"
     >
       <v-list dense>
-        <v-list-item v-for="nav in navs" :key="nav.label" :to="nav.address">
+        <v-list-item
+          v-for="nav in navs"
+          :key="nav.label"
+          :to="nav.address"
+          @click="pageTitle = nav.label"
+        >
           <v-list-item-action>
             <v-icon>{{ nav.icon }}</v-icon>
           </v-list-item-action>
@@ -35,7 +40,7 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
-        <span class="title">Title</span>
+        <span class="title">{{ pageTitle }}</span>
       </v-toolbar-title>
     </v-app-bar>
 
@@ -89,8 +94,8 @@ export default {
           icon: "event",
         },
         {
-          address: "/about",
-          label: "About",
+          address: "/settings",
+          label: "Settings",
           icon: "dashboard",
         },
         {
@@ -109,6 +114,12 @@ export default {
       this.$router.push({
         name: "Login",
       });
+    },
+  },
+
+  computed: {
+    pageTitle() {
+      return this.$route.name;
     },
   },
 };

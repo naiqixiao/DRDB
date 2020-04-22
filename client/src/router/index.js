@@ -8,7 +8,7 @@ import Schedule from "@/views/Schedule";
 import Personnel from "@/views/Personnel";
 import Study from "@/views/Study";
 import Login from "@/views/Login";
-import About from "@/views/About";
+import Settings from "@/views/Settings";
 
 Vue.use(VueRouter);
 
@@ -19,9 +19,9 @@ const routes = [
     component: Home
   },
   {
-    path: "/about",
-    name: "About",
-    component: About
+    path: "/settings",
+    name: "Settings",
+    component: Settings
   },
   {
     path: "/login",
