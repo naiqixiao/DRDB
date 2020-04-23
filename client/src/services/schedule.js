@@ -22,6 +22,8 @@ export default {
   },
   delete(schedule) {
     schedule.lab = store.state.lab;
-    return api().delete("schedule/", schedule);
+    return api().delete("schedule/", {
+      params: schedule,
+    });
   },
 };

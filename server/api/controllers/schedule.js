@@ -363,7 +363,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const schedule = await model.schedule.findOne({
-    where: req.query,
+    where: { id: req.query.id },
   });
 
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
@@ -377,9 +377,11 @@ exports.delete = asyncHandler(async (req, res) => {
     });
   }
 
+  console.log("check calendar done!")
+  
   await model.schedule.destroy({
-    where: req.query,
+    where: { id: req.query.id },
   });
 
-  res.status(200).send("appointment deleted.");
+  res.status(200).send("schedule deleted.");
 });

@@ -40,8 +40,14 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
-        <span class="title">{{ pageTitle }}</span>
+        <h2 class="title">{{ this.$route.name }}</h2>
       </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-items>
+        <h3 class="title">{{ this.$store.state.user }}</h3>
+      </v-toolbar-items>
     </v-app-bar>
 
     <v-content>
@@ -109,7 +115,9 @@ export default {
 
   methods: {
     logout() {
-      this.$store.dispatch("setToken", "");
+      this.$store.dispatch("setToken", null);
+      this.$store.dispatch("setUser", null);
+      this.$store.dispatch("setUserID", null);
 
       this.$router.push({
         name: "Login",
@@ -117,10 +125,6 @@ export default {
     },
   },
 
-  computed: {
-    pageTitle() {
-      return this.$route.name;
-    },
-  },
+  computed: {},
 };
 </script>

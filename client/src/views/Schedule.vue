@@ -16,7 +16,10 @@
       <h4>{{ selectedStudy.MinAge }}</h4>
       <h4>{{ selectedStudy.MaxAge }}</h4>
       <p>{{ selectedStudy.Description }}</p>
-      <v-btn @click.stop="dialogEmail = true" color="green" text>Email test</v-btn>
+
+      <v-btn @click.stop="dialogEmail = true" color="green" text
+        >Email test</v-btn
+      >
       <EmailDialog
         :dialog="dialogEmail"
         :emailTemplate="selectedStudy.EmailTemplate"
@@ -177,7 +180,11 @@
         >
           <v-stepper v-model="e1">
             <v-stepper-header>
-              <v-stepper-step :complete="e1 > 1" step="1"
+              <v-stepper-step
+                :complete="e1 > 1"
+                editable
+                step="1"
+                @click="emailDialog = false"
                 >Schedule studies for {{ currentChild.Name }}</v-stepper-step
               >
 
@@ -233,11 +240,11 @@
                             :child="appointment.Child"
                             :targetChild="currentChild"
                             :currentStudy="selectedStudy"
+                            :index="index"
                             :potentialStudies="
                               potentialStudies(appointment.Child)
                                 .potentialStudyList
                             "
-                            :index="index"
                             @selectStudy="selectStudy"
                             @deleteAppointment="deleteAppointment"
                             @emitSelectedStudy="receiveSelectedStudy"
@@ -289,10 +296,19 @@
                   :disabled="!studyDateTime"
                   @click="continue12()"
                 >
+                  <v-icon dark left v-show="scheduleId"
+                    >mdi-checkbox-marked-circle</v-icon
+                  >
                   Schedule
                 </v-btn>
 
-                <v-btn text>Cancel</v-btn>
+                <v-btn
+                  text
+                  :disabled="!manualCalendar"
+                  @click="createCalendarbyScheduleId"
+                >
+                  Create Calendar</v-btn
+                >
               </v-stepper-content>
 
               <v-stepper-content step="2">
@@ -312,8 +328,6 @@
                 <v-btn text color="green darken-2" @click="continue23()">
                   Send Email
                 </v-btn>
-
-                <v-btn text>Cancel</v-btn>
               </v-stepper-content>
 
               <v-stepper-content step="3">
@@ -328,8 +342,6 @@
                 <v-btn text color="primary" @click="completeSchedule()">
                   Complete
                 </v-btn>
-
-                <v-btn text>Cancel</v-btn>
               </v-stepper-content>
             </v-stepper-items>
           </v-stepper>
@@ -392,6 +404,8 @@ export default {
   props: {},
   data() {
     return {
+      scheduleId: null,
+      manualCalendar: false,
       dialogEmail: false,
       e1: 1,
       emailDialog: false,
@@ -569,18 +583,20 @@ export default {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedItem = Object.assign({}, this.currentChild);
 
-      var newAppointment = Object.assign({}, this.defaultAppointment);
-      newAppointment.FK_Child = this.currentChild.id;
-      newAppointment.FK_Family = this.currentChild.FK_Family;
-      newAppointment.FK_Study = this.selectedStudy.id;
-      newAppointment.Child = this.currentChild;
-      newAppointment.Study = {
-        StudyName: this.selectedStudy.StudyName,
-        MinAge: this.selectedStudy.MinAge,
-        MaxAge: this.selectedStudy.MaxAge,
-      };
-      newAppointment.index = this.appointments.length;
-      this.appointments.push(newAppointment);
+      if (!this.scheduleId) {
+        var newAppointment = Object.assign({}, this.defaultAppointment);
+        newAppointment.FK_Child = this.currentChild.id;
+        newAppointment.FK_Family = this.currentChild.FK_Family;
+        newAppointment.FK_Study = this.selectedStudy.id;
+        newAppointment.Child = this.currentChild;
+        newAppointment.Study = {
+          StudyName: this.selectedStudy.StudyName,
+          MinAge: this.selectedStudy.MinAge,
+          MaxAge: this.selectedStudy.MaxAge,
+        };
+        newAppointment.index = this.appointments.length;
+        this.appointments.push(newAppointment);
+      }
 
       this.dialogSchedule = true;
     },
@@ -680,40 +696,40 @@ export default {
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map((appointment) => {
-            return appointment.Study.StudyName;
-          });
+          // var studyNames = this.appointments.map((appointment) => {
+          //   return appointment.Study.StudyName;
+          // });
 
-          var childNames = this.appointments.map((appointment) => {
-            return appointment.FK_Child;
-          });
+          // var childNames = this.appointments.map((appointment) => {
+          //   return appointment.FK_Child;
+          // });
 
-          studyNames = Array.from(new Set(studyNames));
-          childNames = Array.from(new Set(childNames));
+          // studyNames = Array.from(new Set(studyNames));
+          // childNames = Array.from(new Set(childNames));
 
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
-            summary:
-              studyNames.join(" + ") +
-              ", Family: " +
-              this.currentChild.FK_Family +
-              ", Child: " +
-              childNames.join(" + "),
+            // summary:
+            //   studyNames.join(" + ") +
+            //   ", Family: " +
+            //   this.currentChild.FK_Family +
+            //   ", Child: " +
+            //   childNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
-            location: "Psychology Building, McMaster University",
-            start: {
-              dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto",
-            },
-            end: {
-              dateTime: moment(this.studyDateTime)
-                .add(1, "h")
-                .toISOString(true),
-              timeZone: "America/Toronto",
-            },
-            attendees: this.Experimenters,
+            // location: "Psychology Building, McMaster University",
+            // start: {
+            //   dateTime: moment(this.studyDateTime).toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
+            // end: {
+            //   dateTime: moment(this.studyDateTime)
+            //     .add(1, "h")
+            //     .toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
+            // attendees: this.Experimenters,
           };
 
           break;
@@ -735,77 +751,172 @@ export default {
           break;
       }
 
+      console.log(newSchedule);
+
       try {
         const newStudySchedule = await schedule.create(newSchedule);
 
-        var calendarEvent = newSchedule;
+        this.scheduleId = newStudySchedule.data.id;
 
-        calendarEvent.scheduleId = newStudySchedule.data.id;
+        this.manualCalendar = true;
+        // var calendarEvent = newSchedule;
+
+        // calendarEvent.scheduleId = newStudySchedule.data.id;
+        // console.log(this.potentialStudies(this.currentChild));
 
         console.log("New Scheduled Created!");
 
-        return { calendarEvent: calendarEvent };
+        // return { calendarEvent: calendarEvent };
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    async deleteUnfinishedSchedule() {
+      await schedule.delete({ id: this.scheduleId });
     },
 
     async createCalendarEvent(calendarEvent) {
       try {
         await calendar.create(calendarEvent);
       } catch (error) {
-        console.log(error);
+        console.log(error.response);
+      }
+    },
+
+    async createCalendarbyScheduleId() {
+      var queryString = { id: this.scheduleId };
+      const currentSchedules = await schedule.search(queryString);
+
+      const currentSchedule = currentSchedules.data[0];
+      var studyNames = currentSchedule.Appointments.map((appointment) => {
+        return appointment.Study.StudyName;
+      });
+
+      var childNames = currentSchedule.Appointments.map((appointment) => {
+        return appointment.FK_Child;
+      });
+
+      studyNames = Array.from(new Set(studyNames));
+      childNames = Array.from(new Set(childNames));
+
+      const attendees = [];
+
+      currentSchedule.Appointments.forEach((appointment) => {
+        appointment.Personnels.forEach((experimenter) => {
+          attendees.push({
+            displayName: experimenter.Name,
+            email: experimenter.Calendar + ".CAL",
+          });
+        });
+      });
+
+      var calendarEvent = {
+        summary:
+          studyNames.join(" + ") +
+          ", Family: " +
+          currentSchedule.Appointments[0].FK_Family +
+          ", Child: " +
+          childNames.join(" + "),
+        location: "Psychology Building, McMaster University",
+        start: {
+          dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
+          timeZone: "America/Toronto",
+        },
+        end: {
+          dateTime: moment(currentSchedule.AppointmentTime)
+            .add(1, "h")
+            .toISOString(true),
+          timeZone: "America/Toronto",
+        },
+        attendees: attendees,
+        scheduleId: this.scheduleId,
+      };
+
+      try {
+        await calendar.create(calendarEvent);
+
+        this.manualCalendar = false;
+
+        if (this.e1 == 1) {
+          this.e1 = 2;
+          this.emailDialog = true;
+        }
+      } catch (error) {
+        console.log(error.response);
       }
     },
 
     async continue12() {
       try {
-        const scheduleInfo = await this.createSchedule();
+        if (this.scheduleId) {
+          await this.deleteUnfinishedSchedule();
+        }
 
-        await this.createCalendarEvent(scheduleInfo.calendarEvent);
+        await this.createSchedule();
 
-        this.emailDialog = true;
-        this.e1 = 2;
+        // await this.createCalendarEvent(scheduleInfo.calendarEvent).catch(
+        //   (error) => {
+        //     // if calendar creation fails, activate manual creation button.
+        //     alert(
+        //       "Calendar event wasn't created successfully, please try again."
+        //     );
+        //     console.log(error.response);
+        //     this.manualCalendar = true;
+        //   }
+        // );
+
+        // this.emailDialog = true;
+        // this.e1 = 2;
       } catch (error) {
-        console.log(error);
+        console.log(error.response);
       }
     },
 
     async continue23() {
-      await this.$refs.Email.sendEmail();
-      this.e1 = 3;
-      this.nextContactDialog = true;
+      try {
+        await this.$refs.Email.sendEmail();
+        this.e1 = 3;
+        this.nextContactDialog = true;
+      } catch (error) {
+        console.log(error.response);
+      }
     },
 
     async completeSchedule() {
       // update next contact date and content for the family.
-      await this.$refs.NextContact.updateNextContact();
-      this.e1 = 1;
-      this.closeSchedule();
+      try {
+        await this.$refs.NextContact.updateNextContact();
+        this.resetSchedule();
+        this.closeSchedule();
+      } catch (error) {
+        console.log(error.response);
+      }
     },
 
     closeSchedule() {
       this.dialogSchedule = false;
-      setTimeout(() => {
-        this.appointments = [];
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-        this.response = null;
-        this.studyDate = null;
-        this.studyTime = "09:00AM";
-        this.emailDialog = false;
-        this.nextContactDialog = false;
-      }, 300);
+    },
+
+    resetSchedule() {
+      this.e1 = 1;
+      this.scheduleId = null;
+      this.response = null;
+      this.studyDate = null;
+      this.studyTime = "09:00AM";
+      this.appointments = [];
+      this.emailDialog = false;
+      this.nextContactDialog = false;
     },
 
     nextPage() {
       this.currentChild = this.Children[this.page - 1];
-      this.response = "";
+      this.resetSchedule();
     },
 
     previousPage() {
       this.currentChild = this.Children[this.page - 1];
-      this.response = "";
+      this.resetSchedule();
     },
 
     datePick() {

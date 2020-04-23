@@ -76,15 +76,8 @@ export default {
         FK_Child: this.child.id,
         FK_Family: this.child.FK_Family,
         FK_Study: this.selectedStudy.id,
-        Child: {
-          Name: this.child.Name,
-          DoB: this.child.DoB,
-        },
-        Study: {
-          StudyName: this.selectedStudy.StudyName,
-          MinAge: this.selectedStudy.MinAge,
-          MaxAge: this.selectedStudy.MaxAge,
-        },
+        Child: this.child,
+        Study: this.selectedStudy,
         Experimenters: experimenterIds,
       };
 

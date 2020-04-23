@@ -7,11 +7,18 @@ const { OAuth2 } = google.auth;
 
 module.exports = asyncHandler(async (req, res, next) => {
   try {
-    const emailContent = req.body;
+
+    if(req.body.lab) {
+      var lab = req.body.lab;
+    } else {
+      var lab = req.query.lab;
+    }
+
+    console.log(lab);
 
     const credentialsPath =
-      "api/google/lab" + emailContent.lab + "/credentials.json";
-    const tokenPath = "api/google/lab" + emailContent.lab + "/token.json";
+      "api/google/lab" + lab + "/credentials.json";
+    const tokenPath = "api/google/lab" + lab + "/token.json";
 
     const credentials = await fs.promises.readFile(credentialsPath);
     const { client_secret, client_id, redirect_uris } = JSON.parse(
