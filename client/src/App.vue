@@ -11,15 +11,15 @@ export default {
   name: "App",
 
   components: {
-    Header
+    Header,
   },
   watch: {
-    group() {}
+    group() {},
   },
 
   data() {
     return {};
-  }
+  },
 };
 </script>
 
@@ -44,4 +44,17 @@ export default {
     }
   }
 }
+
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.v-pagination__item {
+  display: none;
+}
+.v-pagination__more {
+  display: none;
+}
+
 </style>

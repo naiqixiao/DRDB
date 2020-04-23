@@ -464,13 +464,5 @@ export default {
   display: none;
 }
 
-/deep/ .v-text-field .v-input__control .v-input__slot {
-  width: "150px";
-  color: "primary";
-}
 
-/deep/ .v-container {
-  display: flex; /* or inline-flex */
-  flex-direction: row;
-}
 </style>

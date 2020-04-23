@@ -1,6 +1,8 @@
 <template>
-  <v-row>
-    <v-col cols="12" md="1">
+  <v-row dense
+  align="center"
+  >
+    <v-col cols="12" md="2">
       <h3>{{ child.Name }}</h3>
     </v-col>
     <v-col cols="12" md="2">

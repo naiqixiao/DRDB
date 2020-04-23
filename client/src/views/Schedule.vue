@@ -751,8 +751,6 @@ export default {
           break;
       }
 
-      console.log(newSchedule);
-
       try {
         const newStudySchedule = await schedule.create(newSchedule);
 
@@ -899,14 +897,16 @@ export default {
     },
 
     resetSchedule() {
-      this.e1 = 1;
-      this.scheduleId = null;
-      this.response = null;
-      this.studyDate = null;
-      this.studyTime = "09:00AM";
-      this.appointments = [];
-      this.emailDialog = false;
-      this.nextContactDialog = false;
+      setTimeout(() => {
+        this.e1 = 1;
+        this.scheduleId = null;
+        this.response = null;
+        this.studyDate = null;
+        this.studyTime = "09:00AM";
+        this.appointments = [];
+        this.emailDialog = false;
+        this.nextContactDialog = false;
+      }, 300);
     },
 
     nextPage() {
@@ -1041,18 +1041,5 @@ export default {
 }
 /deep/ .v-pagination__more {
   display: none;
-}
-
-/deep/ .v-text-field .v-input__control .v-input__slot {
-  width: "150px";
-  clearable: true;
-  color: "primary";
-  autocomplete: "off";
-  outlined: true;
-}
-
-/deep/ .v-container {
-  display: flex; /* or inline-flex */
-  flex-direction: row;
 }
 </style>
