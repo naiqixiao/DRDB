@@ -13,9 +13,7 @@ module.exports = asyncHandler(async (req, res, next) => {
     } else {
       var lab = req.query.lab;
     }
-
-    console.log(lab);
-
+    
     const credentialsPath =
       "api/google/lab" + lab + "/credentials.json";
     const tokenPath = "api/google/lab" + lab + "/token.json";

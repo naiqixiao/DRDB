@@ -376,8 +376,6 @@ exports.delete = asyncHandler(async (req, res) => {
       sendUpdates: "all",
     });
   }
-
-  console.log("check calendar done!")
   
   await model.schedule.destroy({
     where: { id: req.query.id },
