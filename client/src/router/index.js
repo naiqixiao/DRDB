@@ -30,12 +30,12 @@ const routes = [
   },
   {
     path: "/family",
-    name: "Family",
+    name: "Family information",
     component: Family
   },
   {
     path: "/schedule",
-    name: "Schedule",
+    name: "Schedule studies",
     component: Schedule
   },
   {
@@ -45,12 +45,12 @@ const routes = [
   },
   {
     path: "/study",
-    name: "Study",
+    name: "Study information",
     component: Study
   },
   {
     path: "/appointment",
-    name: "Appointment",
+    name: "Study appointments",
     component: Appointment
   }
 ];

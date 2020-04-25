@@ -56,10 +56,10 @@ Vue.prototype.$headersSchedule = [
     width: "100px",
   },
   {
-    text: "Age by Participation",
+    text: "Age",
     align: "center",
     value: "AgeByParticipation",
-    width: "80px",
+    width: "60px",
   },
   {
     text: "Status",
@@ -79,14 +79,14 @@ Vue.prototype.$headersSchedule = [
     align: "center",
     value: "actions",
     sortable: false,
-    width: "80px",
+    width: "100px",
   },
   {
     text: "Completion",
     align: "start",
     value: "Completed",
     sortable: false,
-    width: "80px",
+    width: "60px",
   },
 ];
 
@@ -105,10 +105,10 @@ Vue.prototype.$headersAppointments = [
     width: "100px"
   },
   {
-    text: "Age by Participation",
+    text: "Age",
     align: "center",
     value: "AgeByParticipation",
-    width: "80px"
+    width: "60px"
   },
   {
     text: "Status",
@@ -135,7 +135,7 @@ Vue.prototype.$headersAppointments = [
     align: "start",
     value: "Schedule.Completed",
     sortable: false,
-    width: "80px"
+    width: "40px"
   }
 ];
 

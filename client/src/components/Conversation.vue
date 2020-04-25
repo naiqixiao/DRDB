@@ -37,9 +37,11 @@
         ><v-btn
           color="purple"
           text
+          dark
           :disabled="!parseInt(familyId) && conv.length > 5"
           @click="submitConversation"
-          >submit</v-btn
+          ><v-icon>keyboard_return</v-icon>
+          </v-btn
         ></v-col
       >
     </v-row>

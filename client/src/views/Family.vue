@@ -1,51 +1,33 @@
 <template>
   <v-container fluid>
-    <v-row class="grey lighten-5" style="height: 500px;" justify="space-around">
+    <v-row justify="space-around" dense>
       <v-col cols="12" md="5">
+        <v-row justify="space-between" align="center">
+          <v-col cols="12" md="3">
+            <v-btn x-large @click.stop="searchMode" :disabled="searchStatus"
+              ><v-icon left>mdi-magnify</v-icon> Search</v-btn
+            >
+          </v-col>
+          <v-col cols="12" md="3">
+            <Page
+              :page="page"
+              :NofPages="Families ? Families.length : 0"
+              @nextPage="nextPage"
+              @previousPage="previousPage"
+            ></Page>
+          </v-col>
+        </v-row>
         <v-row justify="space-around">
-          <v-row justify="space-around">
-            <v-col cols="12" md="2" dense>
-              <v-btn
-                color="purple"
-                text
-                @click.stop="searchMode"
-                :disabled="searchStatus"
-                >Search</v-btn
-              >
-            </v-col>
-            <v-col cols="12" md="2" dense>
-              <v-btn
-                color="purple"
-                text
-                @click.stop="editFamily"
-                :disabled="!currentFamily.id"
-                >Edit</v-btn
-              >
-            </v-col>
-            <v-col cols="12" md="2" dense>
-              <v-btn color="purple" text @click.stop="addFamily">Add</v-btn>
-            </v-col>
-            <v-col cols="12" md="2" dense>
-              <h5>{{ page + " / " + NofFamily }}</h5>
-            </v-col>
-            <v-col cols="12" md="3" dense>
-              <v-pagination
-                @next="nextPage"
-                @previous="previousPage"
-                circle
-                v-model="page"
-                :length="NofFamily"
-                total-visible="1"
-              ></v-pagination>
-            </v-col>
-          </v-row>
           <v-col
             cols="12"
-            md="6"
+            md="4"
             v-for="item in searchingFields"
             :key="item.label"
           >
             <v-text-field
+              filled
+              background-color="textbackground"
+              hide-details
               @keydown.enter="searchFamily"
               :label="item.label"
               v-model="currentFamily[item.field]"
@@ -55,7 +37,7 @@
             ></v-text-field>
           </v-col>
           <v-divider></v-divider>
-          <v-row  justify="space-around">
+          <v-row justify="space-around">
             <v-col
               cols="12"
               md="4"
@@ -64,18 +46,38 @@
               :key="item.label"
             >
               <v-text-field
+                filled
+                hide-details
                 :label="item.label"
                 v-model="currentFamily[item.field]"
                 readonly
                 dense
+                background-color="textbackground"
               ></v-text-field>
+            </v-col>
+          </v-row>
+
+          <v-row justify="end">
+            <v-col cols="12" md="2" dense>
+              <v-btn
+                fab
+                color="secondary"
+                @click.stop="editFamily"
+                :disabled="!currentFamily.id"
+                ><v-icon>edit</v-icon></v-btn
+              >
+            </v-col>
+            <v-col cols="12" md="2" dense>
+              <v-btn color="primary" fab @click.stop="addFamily"
+                ><v-icon>add</v-icon></v-btn
+              >
             </v-col>
           </v-row>
         </v-row>
 
         <div>
           <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
-            <v-card>
+            <v-card outlined>
               <v-card-title>
                 <span class="headline">Family information</span>
               </v-card-title>
@@ -150,7 +152,7 @@
         ></Conversation>
       </v-col>
     </v-row>
-    <v-row class="grey lighten-5" style="height: 400px;" justify="start" dense>
+    <v-row justify="start" dense>
       <v-col cols="12" lg="8" md="8">
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
@@ -166,7 +168,6 @@
         border="left"
         close-text="Close Alert"
         type="warning"
-        dark
         dismissible
         >Cancel the appointment?</v-alert
       >
@@ -178,6 +179,7 @@
 import ChildInfo from "@/components/ChildInfo";
 import AppointmentTable from "@/components/AppointmentTable";
 import Conversation from "@/components/Conversation";
+import Page from "@/components/Page";
 
 import family from "@/services/family";
 import store from "@/store";
@@ -187,6 +189,7 @@ export default {
     AppointmentTable,
     ChildInfo,
     Conversation,
+    Page,
   },
   data() {
     return {
@@ -244,12 +247,12 @@ export default {
       },
       Families: [],
       searchingFields: [
-        { label: "Family ID", field: "id" },
-        { label: "Postal Code", field: "Address" },
-        { label: "Email", field: "Email", rules: "email" },
-        { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
         { label: "Father's Name", field: "NameDad", rules: "name" },
+        { label: "Family ID", field: "id" },
+        { label: "Email", field: "Email", rules: "email" },
+        { label: "Phone", field: "Phone", rules: "phone" },
+        { label: "Postal Code", field: "Address" },
       ],
       otherInfo: [
         {
@@ -257,13 +260,13 @@ export default {
           field: "LanguageMom",
           options: "language",
         },
+        { label: "Mother's Race", field: "RaceMom", options: "race" },
+        { label: "English %", field: "EnglishPercent" },
         {
           label: "Father's Language",
           field: "LanguageDad",
           options: "language",
         },
-        { label: "English %", field: "EnglishPercent" },
-        { label: "Mother's Race", field: "RaceMom", options: "race" },
         { label: "Father's Race", field: "RaceDad", options: "race" },
         { label: "Vehicle", field: "Vehicle" },
         {
@@ -340,7 +343,8 @@ export default {
     searchMode() {
       this.searchStatus = !this.searchStatus;
       this.currentFamily = {};
-      this.page = 1;
+      this.Families = [];
+      this.page = 0;
     },
 
     async searchFamily() {
@@ -350,11 +354,12 @@ export default {
         const Results = await family.search(this.queryString);
         if (Results.data.length > 0) {
           this.Families = Results.data;
+          this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
           this.searchStatus = !this.searchStatus;
         } else {
           alert("no family can be found");
-          // this.page = 0;
+          this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
         }
       } catch (error) {
@@ -432,37 +437,24 @@ export default {
         this.editedIndex = -1;
       }, 300);
     },
+
     validate() {
       var validationresults = this.$refs.form.validate();
       console.log(validationresults);
     },
 
     nextPage() {
+      this.page += 1;
       this.currentFamily = this.Families[this.page - 1];
-      // this.$emit("searchFamily", this.currentFamily);
     },
 
     previousPage() {
+      this.page -= 1;
       this.currentFamily = this.Families[this.page - 1];
-      // this.$emit("searchFamily", this.currentFamily);
-    },
-  },
-  computed: {
-    NofFamily() {
-      return this.Families.length;
     },
   },
   watch: {},
 };
 </script>
 
-<style scoped>
-/deep/ .v-pagination__item {
-  display: none;
-}
-/deep/ .v-pagination__more {
-  display: none;
-}
-
-
-</style>
+<style scoped></style>

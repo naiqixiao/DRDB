@@ -1,184 +1,209 @@
 <template>
-  <v-row dense>
-    <v-col cols="6" v-for="(child, index) in Children" :key="child.id" dense>
-      <v-card class="mx-auto" max-width="350px" max-height="300px">
-        <v-card-title>{{ child.Name }}</v-card-title>
-
-        <v-card-subtitle justify="start">
-          <AgeDisplay :DoB="child.DoB" />
-        </v-card-subtitle>
-        <v-card-actions>
-          <v-btn text @click.stop="editChild(child, index)">Edit</v-btn>
-          <v-btn
-            text
-            :disabled="PotentialStudies[index].length < 1"
-            @click.stop="Schedule(child, index)"
-            >Schedule</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-col>
-
-    <v-card class="mx-auto" max-width="350px" max-height="300px">
-      <v-card-actions>
-        <v-btn color="purple" text @click.stop="addChild" :disabled="!familyId"
-          >Add</v-btn
-        >
-      </v-card-actions>
-    </v-card>
-
-    <div>
-      <v-dialog v-model="dobPicker" max-width="360px">
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" lg="12">
-              <v-date-picker
-                v-model="editedItem.DoB"
-                show-current
-                :max="new Date().toISOString()"
-                @click:date="dobPicker = false"
-              ></v-date-picker>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-dialog>
-    </div>
-
-    <div>
-      <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false">
-        <v-card>
-          <v-card-title>
-            <span class="headline">Child's information</span>
+  <v-container>
+    <v-row dense align="start" style="height: 400px;">
+      <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
+        <v-card class="child-card">
+          <v-card-title class="title"
+            >{{ child.Name }}
+            <v-spacer></v-spacer>
+            <v-icon
+              v-if="child.Sex == 'M'"
+              :color="
+                child.Sex == 'M' ? 'light-blue darken-4' : 'pink darken-1'
+              "
+              large
+              >mdi-human-male</v-icon
+            >
+            <v-icon
+              v-else
+              :color="
+                child.Sex == 'M' ? 'light-blue darken-4' : 'pink darken-1'
+              "
+              large
+              >mdi-human-female</v-icon
+            >
           </v-card-title>
 
-          <v-form ref="formChild" v-model="validChild" lazy-validation>
-            <v-container>
-              <v-row>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.Name"
-                    :rules="this.$rules.name"
-                    label="Name"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.DoB"
-                    append-icon="event"
-                    @click:append="dobPicker = true"
-                    :rules="this.$rules.dob"
-                    label="Date of birth (YYYY-MM-DD)"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-select
-                    v-model="editedItem.Sex"
-                    :items="this.$Sex"
-                    filled
-                    label="Sex"
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.BirthWeight"
-                    :rules="this.$rules.birthWeight"
-                    label="Birth weight"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-form>
-
+          <v-card-text align="start">
+            <AgeDisplay class="subtitle-1 pl-md-2" :DoB="child.DoB" />
+          </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialogChild = false"
-              >Cancel</v-btn
+            <v-btn
+              small
+              color="primary"
+              dark
+              outlined
+              @click.stop="editChild(child, index)"
             >
-            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+              <v-icon>edit</v-icon>edit</v-btn
+            >
+            <v-spacer></v-spacer>
+            <v-btn
+              small
+              dark
+              outlined
+              color="primary"
+              :disabled="PotentialStudies[index].length < 1"
+              @click.stop="Schedule(child, index)"
+            >
+              <v-icon dark>event</v-icon>schedule
+            </v-btn>
           </v-card-actions>
         </v-card>
-      </v-dialog>
-    </div>
+      </v-col>
+      <div>
+        <v-dialog v-model="dobPicker" max-width="360px">
+          <v-card>
+            <v-row>
+              <v-col cols="12" md="12">
+                <v-date-picker
+                  v-model="editedItem.DoB"
+                  show-current
+                  :max="new Date().toISOString()"
+                  @click:date="dobPicker = false"
+                ></v-date-picker>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-dialog>
+      </div>
 
-    <div>
-      <v-dialog
-        v-model="dialogSchedule"
-        max-width="1200px"
-        :retain-focus="false"
-        persistent
-      >
-        <v-stepper v-model="e1">
-          <v-stepper-header>
-            <v-stepper-step
-              :complete="e1 > 1"
-              editable
-              step="1"
-              @click="emailDialog = false"
-              >Schedule studies for {{ currentChild.Name }}</v-stepper-step
-            >
+      <div>
+        <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false">
+          <v-card outlined>
+            <v-card-title>
+              <span class="headline">Child's information</span>
+            </v-card-title>
 
-            <v-divider></v-divider>
+            <v-form ref="formChild" v-model="validChild" lazy-validation>
+              <v-container>
+                <v-row>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.Name"
+                      :rules="this.$rules.name"
+                      label="Name"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.DoB"
+                      append-icon="event"
+                      @click:append="dobPicker = true"
+                      :rules="this.$rules.dob"
+                      label="Date of birth (YYYY-MM-DD)"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-select
+                      v-model="editedItem.Sex"
+                      :items="this.$Sex"
+                      filled
+                      label="Sex"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" sm="6" md="4">
+                    <v-text-field
+                      v-model="editedItem.BirthWeight"
+                      :rules="this.$rules.birthWeight"
+                      label="Birth weight"
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-form>
 
-            <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="primary" text @click="dialogChild = false"
+                >Cancel</v-btn
+              >
+              <v-btn color="primary" text @click="save">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
 
-            <v-divider></v-divider>
+      <div>
+        <v-dialog
+          v-model="dialogSchedule"
+          max-width="1200px"
+          :retain-focus="false"
+          persistent
+        >
+          <v-stepper v-model="e1">
+            <v-stepper-header>
+              <v-stepper-step
+                :complete="e1 > 1"
+                editable
+                step="1"
+                @click="emailDialog = false"
+                >Schedule studies for {{ currentChild.Name }}</v-stepper-step
+              >
 
-            <v-stepper-step step="3">Next contact</v-stepper-step>
-          </v-stepper-header>
+              <v-divider></v-divider>
 
-          <v-stepper-items>
-            <v-stepper-content step="1">
-              <v-card outlined>
-                <v-container fluid>
-                  <v-row dense justify="start">
-                    <v-col cols="12" md="3">
-                      <p class="title">Study date and time:</p>
-                    </v-col>
-                    <v-col cols="12" md="2">
-                      <v-text-field
-                        ref="studyDate"
-                        label="Study date"
-                        v-model="studyDate"
-                        append-icon="event"
-                        @click:append="datePicker = true"
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="2">
-                      <v-combobox
-                        v-model="studyTime"
-                        :items="studyTimeSlots"
-                        label="Study time"
-                        dense
-                      ></v-combobox>
-                    </v-col>
-                  </v-row>
-                  <v-row dense justify="start">
-                    <v-col
-                      cols="12"
-                      md="11"
-                      v-for="(appointment, index) in appointments"
-                      :key="appointment.index"
-                    >
-                      <ExtraStudies
-                        ref="extraStudies"
-                        :child="appointment.Child"
-                        :targetChild="currentChild"
-                        :potentialStudies="
-                          potentialStudies(appointment.Child).potentialStudyList
-                        "
-                        :index="index"
-                        @selectStudy="selectStudy"
-                        @deleteAppointment="deleteAppointment"
-                        @emitSelectedStudy="receiveSelectedStudy"
-                        @emitEmailTemplate="getEmailTemplate"
-                        align="start"
-                      ></ExtraStudies>
-                      <v-row v-if="index === 0" align="end">
-                        <p class="title">
-                          Additional appointment(s) for:
-                        </p>
-                        <!-- <v-col cols="12" md="2">
+              <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
+
+              <v-divider></v-divider>
+
+              <v-stepper-step step="3">Next contact</v-stepper-step>
+            </v-stepper-header>
+
+            <v-stepper-items>
+              <v-stepper-content step="1">
+                <v-card outlined>
+                  <v-container fluid>
+                    <v-row dense justify="start">
+                      <v-col cols="12" md="3">
+                        <p class="title">Study date and time:</p>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-text-field
+                          ref="studyDate"
+                          label="Study date"
+                          v-model="studyDate"
+                          append-icon="event"
+                          @click:append="datePicker = true"
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-combobox
+                          v-model="studyTime"
+                          :items="studyTimeSlots"
+                          label="Study time"
+                          dense
+                        ></v-combobox>
+                      </v-col>
+                    </v-row>
+                    <v-row dense justify="start">
+                      <v-col
+                        cols="12"
+                        md="11"
+                        v-for="(appointment, index) in appointments"
+                        :key="appointment.index"
+                      >
+                        <ExtraStudies
+                          ref="extraStudies"
+                          :child="appointment.Child"
+                          :targetChild="currentChild"
+                          :potentialStudies="
+                            potentialStudies(appointment.Child)
+                              .potentialStudyList
+                          "
+                          :index="index"
+                          @selectStudy="selectStudy"
+                          @deleteAppointment="deleteAppointment"
+                          @emitSelectedStudy="receiveSelectedStudy"
+                          @emitEmailTemplate="getEmailTemplate"
+                          align="start"
+                        ></ExtraStudies>
+                        <v-row v-if="index === 0" align="end">
+                          <p class="title">
+                            Additional appointment(s) for:
+                          </p>
+                          <!-- <v-col cols="12" md="2">
                             <v-btn
                               color="green darken-2"
                               text
@@ -190,101 +215,108 @@
                               >{{ currentChild.Name }}
                             </v-btn>
                           </v-col> -->
-                        <v-col
-                          cols="12"
-                          md="2"
-                          v-for="sibling in Children"
-                          :key="sibling.id"
-                        >
-                          <v-btn
-                            color="green darken-2"
-                            text
-                            @click="newAppointment(sibling)"
-                            :disabled="
-                              potentialStudies(sibling).selectableStudies
-                                .length < 1
-                            "
+                          <v-col
+                            cols="12"
+                            md="2"
+                            v-for="sibling in Children"
+                            :key="sibling.id"
                           >
-                            {{ sibling.Name }}</v-btn
-                          >
-                        </v-col>
-                      </v-row>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-card>
-              <v-btn
-                text
-                color="green darken-1"
-                :disabled="!studyDateTime"
-                @click="continue12()"
-              >
-                <v-icon dark left v-show="scheduleId"
-                  >mdi-checkbox-marked-circle</v-icon
+                            <v-btn
+                              color="green darken-2"
+                              text
+                              @click="newAppointment(sibling)"
+                              :disabled="
+                                potentialStudies(sibling).selectableStudies
+                                  .length < 1
+                              "
+                            >
+                              {{ sibling.Name }}</v-btn
+                            >
+                          </v-col>
+                        </v-row>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-card>
+                <v-btn
+                  text
+                  color="green darken-1"
+                  :disabled="!studyDateTime"
+                  @click="continue12()"
                 >
-                Schedule
-              </v-btn>
-              <v-btn
-                text
-                :disabled="!manualCalendar"
-                @click="createCalendarbyScheduleId"
-              >
-                Create Calendar</v-btn
-              >
-            </v-stepper-content>
-            <v-stepper-content step="2">
-              <Email
-                ref="Email"
-                :dialog="emailDialog"
-                :emailTemplate="emailTemplate"
-                :data="{
-                  nameMom: currentFamily.NameMom,
-                  childName: currentChild.Name,
-                  Email: currentFamily.Email,
-                  scheduleTime: studyDateTime,
-                }"
-                emailType="Confirmation"
-              ></Email>
+                  <v-icon dark left v-show="scheduleId"
+                    >mdi-checkbox-marked-circle</v-icon
+                  >
+                  Schedule
+                </v-btn>
+                <v-btn
+                  text
+                  :disabled="!manualCalendar"
+                  @click="createCalendarbyScheduleId"
+                >
+                  Create Calendar</v-btn
+                >
+              </v-stepper-content>
+              <v-stepper-content step="2">
+                <Email
+                  ref="Email"
+                  :dialog="emailDialog"
+                  :emailTemplate="emailTemplate"
+                  :data="{
+                    nameMom: currentFamily.NameMom,
+                    childName: currentChild.Name,
+                    Email: currentFamily.Email,
+                    scheduleTime: studyDateTime,
+                  }"
+                  emailType="Confirmation"
+                ></Email>
 
-              <v-btn text color="green darken-2" @click="continue23()">
-                Send Email
-              </v-btn>
-            </v-stepper-content>
+                <v-btn text color="green darken-2" @click="continue23()">
+                  Send Email
+                </v-btn>
+              </v-stepper-content>
 
-            <v-stepper-content step="3">
-              <NextContact
-                ref="NextContact"
-                :familyId="currentFamily.id"
-                :studyDate="studyDate"
-                :contactType="response"
-                :nextContactDialog="nextContactDialog"
-              ></NextContact>
+              <v-stepper-content step="3">
+                <NextContact
+                  ref="NextContact"
+                  :familyId="currentFamily.id"
+                  :studyDate="studyDate"
+                  :contactType="response"
+                  :nextContactDialog="nextContactDialog"
+                ></NextContact>
 
-              <v-btn text color="primary" @click="completeSchedule()">
-                Complete
-              </v-btn>
-            </v-stepper-content>
-          </v-stepper-items>
-        </v-stepper>
-      </v-dialog>
+                <v-btn text color="primary" @click="completeSchedule()">
+                  Complete
+                </v-btn>
+              </v-stepper-content>
+            </v-stepper-items>
+          </v-stepper>
+        </v-dialog>
 
-      <v-dialog v-model="datePicker" max-width="360px">
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" lg="12">
-              <v-date-picker
-                v-model="studyDate"
-                show-current
-                @click:date="datePick"
-                :min="earliestDate"
-                :max="latestDate"
-              ></v-date-picker>
-            </v-col>
-          </v-row>
-        </v-card>
-      </v-dialog>
-    </div>
-  </v-row>
+        <v-dialog v-model="datePicker" max-width="360px">
+          <v-card>
+            <v-row align="center">
+              <v-col cols="12" lg="12">
+                <v-date-picker
+                  v-model="studyDate"
+                  show-current
+                  @click:date="datePick"
+                  :min="earliestDate"
+                  :max="latestDate"
+                ></v-date-picker>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-dialog>
+      </div>
+    </v-row>
+    <v-spacer></v-spacer>
+    <v-row align-content="end" justify="end">
+      <v-btn class="c1" fab @click.stop="addChild" v-if="familyId"
+        ><v-icon>add</v-icon></v-btn
+      >
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -878,6 +910,13 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
+.child-card {
+  border-radius: 10px !important;
+  border-style: solid !important;
+  border-width: thin !important;
+  border-color: var(--v-primary-base) !important;
+  background-color: var(--v-background-lighten4) !important;
+}
 
 </style>

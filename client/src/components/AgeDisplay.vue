@@ -1,10 +1,10 @@
-<template>
-  <span v-if="DoB">
-    {{ AgeFormated(DoB) }}
-  </span>
-  <span v-else>
+<template >
+  <p v-if="DoB">
+    {{ 'Age: ' + AgeFormated(DoB) }}
+  </p>
+  <p v-else>
     {{ "DoB is not available." }}
-  </span>
+  </p>
 </template>
 
 <script>

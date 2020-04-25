@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app style="{background: $vuetify.theme.themes.light.secondary}">
     <Header />
   </v-app>
 </template>
@@ -29,20 +29,23 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  // color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
+// #nav {
+//   padding: 30px;
 
-  a {
-    font-weight: bold;
-    color: #ffffff;
+//   a {
+//     font-weight: bold;
+//     color: #ffffff;
 
-    &.router-link-exact-active {
-      color: #2c3e50;
-    }
-  }
+//     &.router-link-exact-active {
+//       color: #fafafa;
+//     }
+//   }
+// }
+
+.v-application {
+  background-color: var(--v-background-base) !important;
 }
 
 .row {
@@ -50,11 +53,37 @@ export default {
   margin-right: 0;
 }
 
-.v-pagination__item {
-  display: none;
-}
-.v-pagination__more {
-  display: none;
+.theme--light.v-btn:enabled:not(.v-btn--icon):not(.v-btn--text) {
+  color: var(--v-secondary-base) !important;
+  background-color: var(--v-primary-base) !important;
 }
 
+.theme--light.v-data-table {
+  border-top-left-radius: 50px !important;
+  border-top-right-radius: 10px !important;
+}
+
+.theme--light.v-data-table th {
+  font-size: 16px;
+  font-weight: 800;
+  height: 60px;
+}
+
+.theme--light.v-data-table.v-data-table--fixed-header thead th {
+  border-bottom-width: 2px !important;
+  color: var(--v-secondary-base);
+  // border-bottom-color: var(--v-secondary-base) !important;
+  background-color: var(--v-primary-base) !important;
+}
+
+// .theme--light.v-data-table tbody tr.v-data-table__selected {
+//   background-color: var(--v-secondary-base) !important;
+// }
+
+.theme--light.v-data-table tbody tr:nth-of-type(odd) {
+  background-color: var(--v-textbackground-base) !important;
+}
+.theme--light.v-data-table tbody tr:nth-of-type(even) {
+  background-color: var(--v-background-base) !important;
+}
 </style>

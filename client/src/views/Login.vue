@@ -53,7 +53,7 @@ export default {
         this.$store.dispatch("setLab", response.data.lab);
         this.$store.dispatch("setStudies", response.data.studies);
         this.$router.push({
-          name: "Family"
+          name: "Family information"
         });
       } catch (error) {
         this.error = error.response.data.error;

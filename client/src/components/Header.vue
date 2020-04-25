@@ -1,12 +1,24 @@
 <template>
   <v-app>
-    <v-navigation-drawer
-      app
-      v-model="drawer"
-      temporary
-      width="250"
-      :clipped="$vuetify.breakpoint.lgAndUp"
-    >
+    <v-app-bar app color="primary" clipped-right>
+      <v-app-bar-nav-icon
+        x-large
+        class="title-text ma-2"
+        @click.stop="drawer = !drawer"
+      ></v-app-bar-nav-icon>
+
+      <v-toolbar-title class="mr-12 align-center">
+        <h2 class="title-text title-p-4 ma-2">{{ this.$route.name }}</h2>
+      </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-items align="end">
+        <h2 class="title-text title ma-4">{{ this.$store.state.user }}</h2>
+      </v-toolbar-items>
+    </v-app-bar>
+
+    <v-navigation-drawer app v-model="drawer" temporary width="300" clipped>
       <v-list dense>
         <v-list-item
           v-for="nav in navs"
@@ -23,11 +35,7 @@
         </v-list-item>
       </v-list>
 
-      <template v-slot:prepend>
-        <div class="pa-2">
-          <!-- <v-space name="space"></v-space> -->
-        </div>
-      </template>
+      <!-- <v-space name="space"></v-space> -->
 
       <template v-slot:append>
         <div class="pa-2">
@@ -35,20 +43,6 @@
         </div>
       </template>
     </v-navigation-drawer>
-
-    <v-app-bar app color="teal" clipped-right dark>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-
-      <v-toolbar-title class="mr-12 align-center">
-        <h2 class="title">{{ this.$route.name }}</h2>
-      </v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-toolbar-items>
-        <h3 class="title">{{ this.$store.state.user }}</h3>
-      </v-toolbar-items>
-    </v-app-bar>
 
     <v-content>
       <router-view />
@@ -76,17 +70,22 @@ export default {
         },
         {
           address: "/family",
-          label: "Family",
+          label: "Family information",
           icon: "face",
         },
         {
           address: "/schedule",
-          label: "Schedule",
+          label: "Schedule studies",
           icon: "phone",
         },
         {
+          address: "/appointment",
+          label: "Study appointments",
+          icon: "mdi-format-list-bulleted-square",
+        },
+        {
           address: "/study",
-          label: "Study",
+          label: "Study information",
           icon: "description",
         },
         {
@@ -94,11 +93,7 @@ export default {
           label: "Personnel",
           icon: "perm_identity",
         },
-        {
-          address: "/appointment",
-          label: "Appointment",
-          icon: "event",
-        },
+
         {
           address: "/settings",
           label: "Settings",
@@ -128,3 +123,14 @@ export default {
   computed: {},
 };
 </script>
+
+<style lang="scss">
+.v-navigation-drawer--temporary.v-navigation-drawer--clipped {
+  z-index: 3;
+  padding-top: 64px;
+}
+
+.title-text {
+  color:  var(--v-secondary-base) !important;
+}
+</style>
