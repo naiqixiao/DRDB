@@ -57,15 +57,17 @@
             </v-col>
           </v-row>
 
-          <v-row justify="space-between">
+          <v-row justify="space-between" align="center">
             <v-col cols="12" md="6">
               <v-textarea
+                class="conv-textarea"
                 label="Notes for next contact"
                 outlined
-                disabled
                 no-resize
-                rows="2"
+                rows="3"
                 solo
+                hide-details
+                readonly
                 v-model="currentFamily.NextContactNote"
               ></v-textarea>
             </v-col>
@@ -185,6 +187,7 @@
             :studyDate="nextContactDate"
             :contactType="contactType"
             :nextContactDialog="nextContactDialog"
+            @nextContactDone="updateNextContactFrontend"
           ></NextContact>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -194,7 +197,7 @@
               @click="nextContactDialog = false"
               >Cancel</v-btn
             >
-            <v-btn color="green darken-1" text @click="saveNextContact"
+            <v-btn color="green darken-1" text @click="updateNextContact"
               >Save</v-btn
             >
           </v-card-actions>
@@ -510,13 +513,24 @@ export default {
       }, 300);
     },
 
-    async saveNextContact() {
+    async updateNextContact() {
       try {
         await this.$refs.NextContact.updateNextContact();
-        this.nextContactDialog = false;
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    updateNextContactFrontend(nextContact) {
+      this.currentFamily.NextContactNote = nextContact.NextContactNote;
+      this.currentFamily.NextContactDate = nextContact.NextContactDate;
+      this.currentFamily.NoMoreContact = nextContact.NoMoreContact;
+      this.currentFamily.LastContactDate = nextContact.LastContactDate;
+
+      Object.assign(this.Families[this.page - 1], this.currentFamily);
+
+      this.nextContactDialog = false;
+      console.log("Next Contact updated!");
     },
 
     validate() {

@@ -6,7 +6,7 @@
       </v-col>
     </v-row>
     <div v-if="Children">
-      <v-row dense align="start" style="height: 384px;">
+      <v-row dense align="start" style="height: 372px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
           <v-card class="child-card" height="174px">
             <v-card-title class="title"
@@ -330,7 +330,7 @@
       </v-dialog>
     </div>
     <v-spacer></v-spacer>
-    <v-row align-content="end" justify="end">
+    <v-row align-content="center" justify="end" style="height: 120px;">
       <v-btn class="c1" fab @click.stop="addChild" v-if="familyId"
         ><v-icon>add</v-icon></v-btn
       >
@@ -668,16 +668,25 @@ export default {
     },
 
     async continue23() {
-      await this.$refs.Email.sendEmail();
-      this.e1 = 3;
-      this.nextContactDialog = true;
+      try {
+        await this.$refs.Email.sendEmail();
+        this.e1 = 3;
+        this.nextContactDialog = true;
+      } catch (error) {
+        console.log(error.response);
+      }
     },
 
     async completeSchedule() {
       // update next contact date and content for the family.
-      await this.$refs.NextContact.updateNextContact();
-      this.resetSchedule();
-      this.closeSchedule();
+      try {
+        await this.$refs.NextContact.updateNextContact();
+        this.$emit("newSchedule");
+        this.resetSchedule();
+        this.closeSchedule();
+      } catch (error) {
+        console.log(error.response);
+      }
     },
 
     resetSchedule() {

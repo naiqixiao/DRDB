@@ -1,34 +1,41 @@
 <template>
   <v-container fluid>
     <v-card outlined>
-      <v-card-title>When to contact this family again?</v-card-title>
-
-      <v-row align="center" justify="start" dense>
-        <v-col cols="12" md="2">
-          <v-text-field label="After" suffix="days" v-model="daysAfter">
-          </v-text-field>
-        </v-col>
-        <v-col cols="12" md="3">
-          <v-text-field
-            ref="contactDate"
-            label="Contact after"
-            v-model="nextContactDate"
-            append-icon="event"
-            @click:append="datePicker = true"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-
-      <v-row align="center" justify="start">
-        <v-col cols="12" md="2">
-          <v-switch
-            v-if="contactType == 'NoMoreContact'"
-            v-model="neverContact"
-            label="No more contact"
-          >
-          </v-switch>
-        </v-col>
-      </v-row>
+      <div v-if="contactType != 'NoMoreContact'">
+        <v-card-title>When to contact this family again?</v-card-title>
+        <v-row align="center" justify="start">
+          <v-col cols="12" md="2">
+            <v-text-field
+              class="pa=3"
+              label="After"
+              suffix="days"
+              hide-details
+              v-model="daysAfter"
+            >
+            </v-text-field>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              class="pa=3"
+              ref="contactDate"
+              label="Contact after"
+              v-model="nextContactDate"
+              append-icon="event"
+              hide-details
+              @click:append="datePicker = true"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+      </div>
+      <div v-else>
+        <v-card-title>No more contact this family?</v-card-title>
+        <v-row align="center" justify="start">
+          <v-col cols="12" md="4">
+            <v-switch v-model="neverContact" label="No more contact">
+            </v-switch>
+          </v-col>
+        </v-row>
+      </div>
 
       <v-row align="center">
         <v-col cols="12" lg="9">
@@ -92,16 +99,38 @@ export default {
       }, 100);
     },
 
-    closeNextContact() {
-      this.$emit("nextContactDone", {
-        id: this.currentFamily.id,
-        NextContactDate: this.nextContactDate,
-        NextContactNote: this.nextContactNote,
-        NoMoreContact: this.neverContact,
-      });
-    },
+    // closeNextContact() {
+    //   this.$emit("nextContactDone", {
+    //     id: this.currentFamily.id,
+    //     NextContactDate: this.nextContactDate,
+    //     NextContactNote: this.nextContactNote,
+    //     LastContactDate: moment()
+    //       .startOf("day")
+    //       .format("YYYY-MM-DD"),
+    //     NoMoreContact: this.neverContact,
+    //   });
+    // },
 
     async updateNextContact() {
+      if (this.contactType == "NoMoreContact") {
+        switch (this.neverContact) {
+          case true:
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(100, "y")
+              .format("YYYY-MM-DD");
+            break;
+          case false:
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(1, "d")
+              .format("YYYY-MM-DD");
+            break;
+        }
+      } else {
+        this.neverContact = false;
+      }
+
       var updatedFamilyInfo = {
         id: this.familyId,
         NextContactNote: this.nextContactNote,
@@ -114,6 +143,8 @@ export default {
 
       try {
         await family.update(updatedFamilyInfo);
+
+        this.$emit("nextContactDone", updatedFamilyInfo);
       } catch (error) {
         console.log(error.response);
       }
@@ -161,9 +192,6 @@ export default {
               .format("YYYY-MM-DD");
             this.nextContactNote =
               "Left a message or sent an email, follow up.";
-            break;
-
-          case "NextContact":
             break;
         }
       } else {
