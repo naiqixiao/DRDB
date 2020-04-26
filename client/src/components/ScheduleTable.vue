@@ -3,7 +3,7 @@
     hide-default-footer
     disable-pagination
     fixed-header
-    height="700"
+    height="720"
     single-select
     no-data-text="No study schedule to display."
     :headers="this.$headersSchedule"

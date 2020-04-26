@@ -918,5 +918,4 @@ export default {
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
-
 </style>

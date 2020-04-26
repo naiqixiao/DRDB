@@ -1,13 +1,12 @@
 <template>
   <v-container fluid>
-    <v-row class="grey lighten-5" style="height: 150px;" justify="start">
+    <v-row justify="start">
       <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
         <v-text-field
           @keydown.enter="searchSchedule"
           :label="item.label"
           v-model="queryString[item.field]"
           prepend-icon="mdi-magnify"
-          clearable
           dense
         ></v-text-field>
       </v-col>
@@ -31,7 +30,6 @@
           prepend-icon="mdi-magnify"
           append-icon="event"
           @click:append="dialogPickerAfter = true"
-          clearable
           dense
         ></v-text-field>
       </v-col>
@@ -44,23 +42,22 @@
           prepend-icon="mdi-magnify"
           append-icon="event"
           @click:append="dialogPickerBefore = true"
-          clearable
           dense
         ></v-text-field>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="12" md="2">
-        <v-btn color="purple" big text @click="todayStudies"
+        <v-btn large @click="todayStudies"
           >Today's Studies</v-btn
         >
       </v-col>
       <v-col cols="12" md="2">
-        <v-btn color="purple" big text @click="thisWeekStudies"
+        <v-btn large @click="thisWeekStudies"
           >This week's Studies</v-btn
         >
       </v-col>
     </v-row>
-    <v-row class="grey lighten-5" style="height: 700px;" justify="center">
+    <v-row justify="center">
       <v-col cols="12" md="3">
         <template>
           <FamilyInfo :currentFamily="currentFamily"></FamilyInfo>

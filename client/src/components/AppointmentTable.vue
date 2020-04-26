@@ -4,7 +4,8 @@
     disable-pagination
     fixed-header
     single-select
-    no-data-text="The family hasn't participated in any study."
+    no-results-text="The family hasn't participated in any study."
+    no-data-text="Data not available."
     :headers="this.$headersAppointments"
     :items="Appointments"
     class="elevation-1"
@@ -348,4 +349,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
+.theme--light.v-icon {
+
+  color: var(--v-primary-base) !important;
+}
+
 </style>

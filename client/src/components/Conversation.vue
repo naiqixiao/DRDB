@@ -1,51 +1,41 @@
 <template>
-  <v-container>
-    <v-data-table
-      hide-default-footer
-      height="300px"
-      dense
-      fixed-header
-      single-select
-      no-data-text="No conversation is stored."
-      :headers="headers"
-      :items="Conversation"
-      class="elevation-1"
-      justify-center
-    >
-      <template #item.Time="{ value }">
-        <DateDisplay :date="value" :format="'short'" />
-      </template>
-
-      <template #item.actions="{ item }">
-        <v-icon @click="deleteItem(item)">delete</v-icon>
-      </template>
-    </v-data-table>
-    <v-row align="center">
-      <v-col cols="12" lg="9">
-        <v-textarea
-          label="Conversation with parents"
-          outlined
-          filled
-          no-resize
-          rows="4"
-          solo
-          v-model="conv"
-          :disabled="!familyId"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12" lg="2" 
-        ><v-btn
-          color="purple"
-          text
-          dark
-          :disabled="!parseInt(familyId) && conv.length > 5"
-          @click="submitConversation"
-          ><v-icon>keyboard_return</v-icon>
-          </v-btn
-        ></v-col
+  <v-row  justify-content="space-between" >
+    <v-col cols="12" md="12">
+      <v-data-table
+        hide-default-footer
+        height="380px"
+        dense
+        fixed-header
+        single-select
+        no-data-text="No conversation is stored."
+        :headers="headers"
+        :items="Conversation"
+        justify-center
       >
-    </v-row>
-  </v-container>
+        <template #item.Time="{ value }">
+          <DateDisplay :date="value" :format="'short'" />
+        </template>
+
+        <template #item.actions="{ item }">
+          <v-icon @click="deleteItem(item)">delete</v-icon>
+        </template>
+      </v-data-table>
+
+      <v-row style="height: 10px;"> </v-row>
+      <v-textarea
+        class="conv-textarea"
+        label="Conversation with parents"
+        no-resize
+        rows="4"
+        solo
+        v-model="conv"
+        :disabled="!familyId"
+        hide-details
+        append-icon="mdi-send"
+        @click:append="submitConversation"
+      ></v-textarea>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -54,11 +44,11 @@ import conversation from "@/services/conversation";
 
 export default {
   components: {
-    DateDisplay
+    DateDisplay,
   },
   props: {
     Conversation: Array,
-    familyId: Number
+    familyId: Number,
   },
 
   data() {
@@ -67,8 +57,8 @@ export default {
       headers: [
         { text: "Time", align: "center", value: "Time" },
         { text: "Conversation", align: "left", value: "Conversation" },
-        { text: "Actions", align: "center", value: "actions", sortable: false }
-      ]
+        { text: "Actions", align: "center", value: "actions", sortable: false },
+      ],
     };
   },
 
@@ -77,7 +67,7 @@ export default {
       const newConversation = {
         FK_Family: this.familyId,
         Conversation: this.conv,
-        Time: new Date().toISOString()
+        Time: new Date().toISOString(),
       };
 
       try {
@@ -103,7 +93,7 @@ export default {
           console.log(error);
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>

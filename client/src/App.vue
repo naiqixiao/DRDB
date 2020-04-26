@@ -76,14 +76,34 @@ export default {
   background-color: var(--v-primary-base) !important;
 }
 
-// .theme--light.v-data-table tbody tr.v-data-table__selected {
-//   background-color: var(--v-secondary-base) !important;
-// }
-
 .theme--light.v-data-table tbody tr:nth-of-type(odd) {
   background-color: var(--v-textbackground-base) !important;
 }
 .theme--light.v-data-table tbody tr:nth-of-type(even) {
   background-color: var(--v-background-base) !important;
 }
+.theme--light.v-data-table tbody tr.v-data-table__selected {
+  border-bottom-color: var(--v-secondary-base) !important;
+  border-bottom-width: 10px !important;
+  border-bottom-style: solid !important;
+}
+
+.theme--light.v-data-table--dense th {
+  font-size: 14px;
+  font-weight: 700;
+  height: 40px;
+}
+
+.theme--light.v-data-table--dense tbody tr {
+  height: 35px !important;
+}
+
+.conv-textarea {
+  border-radius: 10px !important;
+  border-style: solid !important;
+  border-width: thin !important;
+  border-color: var(--v-primary-base) !important;
+  background-color: var(--v-background-lighten4) !important;
+}
+
 </style>

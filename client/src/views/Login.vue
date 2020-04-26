@@ -6,7 +6,6 @@
           label="Email"
           :rules="this.$rules.email"
           v-model="email"
-          color="teal"
           clearable
         ></v-text-field>
         <br />
@@ -14,7 +13,6 @@
           label="Password"
           type="password"
           v-model="password"
-          color="teal"
           clearable
           @keydown.enter="login"
         ></v-text-field>
@@ -37,7 +35,7 @@ export default {
     return {
       email: "",
       password: "",
-      error: null
+      error: null,
     };
   },
   methods: {
@@ -45,7 +43,7 @@ export default {
       try {
         const response = await login.login({
           Email: this.email,
-          Password: this.password
+          Password: this.password,
         });
         this.$store.dispatch("setToken", response.data.token);
         this.$store.dispatch("setUser", response.data.user);
@@ -53,13 +51,13 @@ export default {
         this.$store.dispatch("setLab", response.data.lab);
         this.$store.dispatch("setStudies", response.data.studies);
         this.$router.push({
-          name: "Family information"
+          name: "Family information",
         });
       } catch (error) {
         this.error = error.response.data.error;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

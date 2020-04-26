@@ -8,7 +8,7 @@
               ><v-icon left>mdi-magnify</v-icon> Search</v-btn
             >
           </v-col>
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="4">
             <Page
               :page="page"
               :NofPages="Families ? Families.length : 0"
