@@ -29,9 +29,9 @@
         no-resize
         rows="4"
         solo
+        hide-details
         v-model="conv"
         :disabled="!familyId"
-        hide-details
         append-icon="mdi-send"
         @click:append="submitConversation"
       ></v-textarea>

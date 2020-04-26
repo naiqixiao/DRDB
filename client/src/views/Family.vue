@@ -57,84 +57,149 @@
             </v-col>
           </v-row>
 
-          <v-row justify="end">
-            <v-col cols="12" md="2" dense>
+          <v-row justify="space-between">
+            <v-col cols="12" md="6">
+              <v-textarea
+                label="Notes for next contact"
+                outlined
+                disabled
+                no-resize
+                rows="2"
+                solo
+                v-model="currentFamily.NextContactNote"
+              ></v-textarea>
+            </v-col>
+            <v-spacer></v-spacer>
+
+            <v-col cols="12" md="1">
               <v-btn
                 fab
-                color="secondary"
-                @click.stop="editFamily"
-                :disabled="!currentFamily.id"
+                @click.stop="
+                  contactType = 'NextContact';
+                  nextContactDate = TodaysDate;
+                  nextContactDialog = !nextContactDialog;
+                "
+                :disabled="!currentFamily.id && !nextContactDialog"
+                ><v-icon>notes</v-icon></v-btn
+              >
+            </v-col>
+
+            <v-col cols="12" md="1">
+              <v-btn fab @click.stop="editFamily" :disabled="!currentFamily.id"
                 ><v-icon>edit</v-icon></v-btn
               >
             </v-col>
-            <v-col cols="12" md="2" dense>
+
+            <v-col cols="12" md="1">
+              <v-btn
+                fab
+                @click.stop="
+                  contactType = 'NoMoreContact';
+                  nextContactDate = TodaysDate;
+                  nextContactDialog = !nextContactDialog;
+                "
+                :disabled="!currentFamily.id && !nextContactDialog"
+                ><v-icon>block</v-icon></v-btn
+              >
+            </v-col>
+
+            <v-col cols="12" md="2">
               <v-btn color="primary" fab @click.stop="addFamily"
                 ><v-icon>add</v-icon></v-btn
               >
             </v-col>
           </v-row>
         </v-row>
-
-        <div>
-          <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
-            <v-card outlined>
-              <v-card-title>
-                <span class="headline">Family information</span>
-              </v-card-title>
-
-              <v-form ref="form" v-model="valid" lazy-validation>
-                <v-container>
-                  <v-row>
-                    <v-col
-                      cols="12"
-                      sm="6"
-                      md="3"
-                      v-for="field in editableFields"
-                      :key="field.label"
-                    >
-                      <div v-if="field.options">
-                        <v-combobox
-                          justify="start"
-                          :items="options[field.options]"
-                          v-model="editedItem[field.field]"
-                          filled
-                          :label="field.label"
-                          dense
-                        ></v-combobox>
-                      </div>
-                      <div v-else-if="field.rules">
-                        <v-text-field
-                          :label="field.label"
-                          v-model="editedItem[field.field]"
-                          :rules="rules[field.rules]"
-                          filled
-                          dense
-                        ></v-text-field>
-                      </div>
-                      <div v-else>
-                        <v-text-field
-                          :label="field.label"
-                          v-model="editedItem[field.field]"
-                          filled
-                          dense
-                        ></v-text-field>
-                      </div>
-                    </v-col>
-                  </v-row>
-                </v-container>
-              </v-form>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="green darken-1" text @click="dialog = false"
-                  >Cancel</v-btn
-                >
-                <v-btn color="green darken-1" text @click="save">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </div>
       </v-col>
+
+      <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Family information</span>
+          </v-card-title>
+
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-container>
+              <v-row>
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                  v-for="field in editableFields"
+                  :key="field.label"
+                >
+                  <div v-if="field.options">
+                    <v-combobox
+                      justify="start"
+                      :items="options[field.options]"
+                      v-model="editedItem[field.field]"
+                      filled
+                      :label="field.label"
+                      dense
+                    ></v-combobox>
+                  </div>
+                  <div v-else-if="field.rules">
+                    <v-text-field
+                      :label="field.label"
+                      v-model="editedItem[field.field]"
+                      :rules="rules[field.rules]"
+                      filled
+                      dense
+                    ></v-text-field>
+                  </div>
+                  <div v-else>
+                    <v-text-field
+                      :label="field.label"
+                      v-model="editedItem[field.field]"
+                      filled
+                      dense
+                    ></v-text-field>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="dialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog
+        v-model="nextContactDialog"
+        max-width="800px"
+        :retain-focus="false"
+      >
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Notes for the next contact</span>
+          </v-card-title>
+          <NextContact
+            ref="NextContact"
+            :familyId="currentFamily.id"
+            :studyDate="nextContactDate"
+            :contactType="contactType"
+            :nextContactDialog="nextContactDialog"
+          ></NextContact>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="green darken-1"
+              text
+              @click="nextContactDialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="saveNextContact"
+              >Save</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <v-col cols="12" md="4">
         <ChildInfo
@@ -153,7 +218,7 @@
       </v-col>
     </v-row>
     <v-row justify="start" dense>
-      <v-col cols="12" lg="8" md="8">
+      <v-col cols="12" md="9">
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
           :studyTimeSlots="this.$studyTimeSlots"
@@ -180,9 +245,12 @@ import ChildInfo from "@/components/ChildInfo";
 import AppointmentTable from "@/components/AppointmentTable";
 import Conversation from "@/components/Conversation";
 import Page from "@/components/Page";
+import NextContact from "@/components/NextContact";
 
 import family from "@/services/family";
 import store from "@/store";
+
+import moment from "moment";
 
 export default {
   components: {
@@ -190,9 +258,13 @@ export default {
     ChildInfo,
     Conversation,
     Page,
+    NextContact,
   },
   data() {
     return {
+      contactType: "",
+      nextContactDate: "",
+      nextContactDialog: false,
       queryString: {},
       alert: false,
       page: 0,
@@ -438,6 +510,15 @@ export default {
       }, 300);
     },
 
+    async saveNextContact() {
+      try {
+        await this.$refs.NextContact.updateNextContact();
+        this.nextContactDialog = false;
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
     validate() {
       var validationresults = this.$refs.form.validate();
       console.log(validationresults);
@@ -454,6 +535,13 @@ export default {
     },
   },
   watch: {},
+  computed: {
+    TodaysDate() {
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
+    },
+  },
 };
 </script>
 

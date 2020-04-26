@@ -41,19 +41,19 @@ Vue.prototype.$headersSchedule = [
     text: "Child",
     align: "center",
     value: "Child",
-    width: "50px",
+    width: "40px",
   },
   {
     text: "Study",
     align: "center",
     value: "Study",
-    width: "50px",
+    width: "40px",
   },
   {
     text: "Study Time",
     align: "center",
     value: "AppointmentTime",
-    width: "100px",
+    width: "80px",
   },
   {
     text: "Age",
@@ -71,7 +71,7 @@ Vue.prototype.$headersSchedule = [
     text: "Updated",
     align: "center",
     value: "updatedAt",
-    width: "80px",
+    width: "60px",
   },
 
   {
@@ -79,7 +79,7 @@ Vue.prototype.$headersSchedule = [
     align: "center",
     value: "actions",
     sortable: false,
-    width: "70px",
+    width: "100px",
   },
   {
     text: "Complete",
@@ -120,7 +120,7 @@ Vue.prototype.$headersAppointments = [
     text: "Updated",
     align: "center",
     value: "updatedAt",
-    width: "80px"
+    width: "60px"
   },
 
   {

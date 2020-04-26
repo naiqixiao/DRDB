@@ -17,11 +17,13 @@
           </template>
 
           <template #item.Completed="{ item }">
+            
             <v-switch
               v-model="item.Completed"
               class="ma-2"
               @change="changeStudyStatus(item)"
               dense
+              
             ></v-switch>
           </template>
         </v-data-table>

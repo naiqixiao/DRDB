@@ -78,6 +78,18 @@ export default {
   font-weight: 600;
 }
 
+.theme--light.v-data-table td {
+
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.theme--light.v-data-table th {
+
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
 .theme--light.v-data-table.v-data-table--fixed-header thead th {
   border-bottom-width: 2px;
   color: var(--v-secondary-base);

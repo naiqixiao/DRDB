@@ -1,13 +1,14 @@
 <template>
   <v-container fluid>
-    <v-card>
+    <v-card outlined>
       <v-card-title>When to contact this family again?</v-card-title>
 
-      <v-row align="center" justify="start">
+      <v-row align="center" justify="start" dense>
         <v-col cols="12" md="2">
-          <v-text-field label="After" v-model="daysAfter"> </v-text-field>
+          <v-text-field label="After" suffix="days" v-model="daysAfter">
+          </v-text-field>
         </v-col>
-        <v-col cols="12" md="2">
+        <v-col cols="12" md="3">
           <v-text-field
             ref="contactDate"
             label="Contact after"
@@ -18,15 +19,26 @@
         </v-col>
       </v-row>
 
+      <v-row align="center" justify="start">
+        <v-col cols="12" md="2">
+          <v-switch
+            v-if="contactType == 'NoMoreContact'"
+            v-model="neverContact"
+            label="No more contact"
+          >
+          </v-switch>
+        </v-col>
+      </v-row>
+
       <v-row align="center">
         <v-col cols="12" lg="9">
           <v-textarea
+            class="conv-textarea"
             label="Notes for next contact"
-            outlined
-            filled
             no-resize
             rows="3"
             solo
+            hide-details
             v-model="nextContactNote"
           ></v-textarea>
         </v-col>
@@ -96,7 +108,8 @@ export default {
         NextContactDate: this.nextContactDate,
         LastContactDate: moment()
           .startOf("day")
-          .format("YYYY-MM-DD")
+          .format("YYYY-MM-DD"),
+        NoMoreContact: this.neverContact,
       };
 
       try {
@@ -148,6 +161,9 @@ export default {
               .format("YYYY-MM-DD");
             this.nextContactNote =
               "Left a message or sent an email, follow up.";
+            break;
+
+          case "NextContact":
             break;
         }
       } else {

@@ -257,6 +257,7 @@ exports.week = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
+
 // Update an appointment by the id in the request
 exports.update = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
@@ -356,9 +357,11 @@ exports.update = asyncHandler(async (req, res) => {
 
     console.log("Appointment Information Updated.");
   } catch (error) {
-    console.log("Appointment update error:" + error);
+    console.log("Appointment update error: " + error);
+    throw error
   }
 });
+
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {

@@ -163,6 +163,7 @@ export default {
   },
   methods: {
     async updateSchedule(item, status) {
+      console.log(item);
       switch (status) {
         case "Confirmed":
           this.editedIndex = this.Schedules.indexOf(item);
@@ -356,4 +357,26 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style scoped>
+
+
+.theme--light.v-icon {
+  color: var(--v-primary-base);
+  font-size: 28px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
+  color: var(--v-secondary-base) !important;
+}
+
+.v-data-table
+  /deep/
+  tbody
+  /deep/
+  tr:hover:not(.v-data-table__expanded__content) {
+  /* border-bottom-width: 2px !important; */
+  background-color: var(--v-secondary-lighten1) !important;
+}
+</style>
