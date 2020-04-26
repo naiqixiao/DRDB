@@ -82,7 +82,7 @@ Vue.prototype.$headersSchedule = [
     width: "70px",
   },
   {
-    text: "Completion",
+    text: "Complete",
     align: "center",
     value: "Completed",
     sortable: false,
@@ -131,7 +131,7 @@ Vue.prototype.$headersAppointments = [
     width: "80px"
   },
   {
-    text: "Completion",
+    text: "Complete",
     align: "center",
     value: "Schedule.Completed",
     sortable: false,

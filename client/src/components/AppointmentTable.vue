@@ -4,11 +4,12 @@
     disable-pagination
     fixed-header
     single-select
-    no-results-text="The family hasn't participated in any study."
-    no-data-text="Data not available."
+    no-data-text="The family hasn't participated in any study or no family is selected."
     :headers="this.$headersAppointments"
     :items="Appointments"
     class="elevation-1"
+    height="380px"
+    calculate-widths
     @click:row="rowSelected"
   >
     <template v-slot:top>
@@ -60,7 +61,6 @@
 
     <template v-slot:item.actions="{ item }">
       <v-icon
-        class="pr-1"
         @click="updateSchedule(item, 'Confirmed')"
         :disabled="
           item.Schedule.Status === 'Confirmed' || item.Schedule.Completed == 1
@@ -68,7 +68,6 @@
         >event</v-icon
       >
       <v-icon
-        class="pr-1"
         @click="updateSchedule(item, 'Rescheduling')"
         :disabled="
           item.Schedule.Status === 'Rescheduling' ||
@@ -79,7 +78,6 @@
         >update</v-icon
       >
       <v-icon
-        class="pr-1"
         @click="updateSchedule(item, 'No Show')"
         :disabled="
           item.Schedule.Status === 'Rescheduling' ||
@@ -348,11 +346,24 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-
+<style scoped>
 .theme--light.v-icon {
-
-  color: var(--v-primary-base) !important;
+  color: var(--v-primary-base) ;
+  font-size: 28px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 
+.theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
+  color: var(--v-secondary-base) !important;
+}
+
+.v-data-table
+  /deep/
+  tbody
+  /deep/
+  tr:hover:not(.v-data-table__expanded__content) {
+  /* border-bottom-width: 2px !important; */
+  background-color: var(--v-secondary-lighten1) !important;
+}
 </style>

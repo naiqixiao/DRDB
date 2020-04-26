@@ -40,7 +40,7 @@ const routes = [
   },
   {
     path: "/personnel",
-    name: "Personnel",
+    name: "Personnel management",
     component: Personnel
   },
   {

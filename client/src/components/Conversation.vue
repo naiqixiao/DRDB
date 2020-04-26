@@ -1,5 +1,5 @@
 <template>
-  <v-row  justify-content="space-between" >
+  <v-row justify-content="space-between">
     <v-col cols="12" md="12">
       <v-data-table
         hide-default-footer
@@ -9,6 +9,7 @@
         single-select
         no-data-text="No conversation is stored."
         :headers="headers"
+        class="elevation-1"
         :items="Conversation"
         justify-center
       >

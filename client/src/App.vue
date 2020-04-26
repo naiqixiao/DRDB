@@ -58,8 +58,13 @@ export default {
   background-color: var(--v-primary-base) !important;
 }
 
+.theme--light.v-text-field {
+  font-size: 16px;
+  font-weight: 700;
+}
+
 .theme--light.v-data-table {
-  border-top-left-radius: 50px !important;
+  border-top-left-radius: 10px !important;
   border-top-right-radius: 10px !important;
 }
 
@@ -69,23 +74,26 @@ export default {
   height: 60px;
 }
 
+.theme--light.v-data-table tbody tr {
+  font-weight: 600;
+}
+
 .theme--light.v-data-table.v-data-table--fixed-header thead th {
-  border-bottom-width: 2px !important;
+  border-bottom-width: 2px;
   color: var(--v-secondary-base);
-  // border-bottom-color: var(--v-secondary-base) !important;
   background-color: var(--v-primary-base) !important;
 }
 
 .theme--light.v-data-table tbody tr:nth-of-type(odd) {
-  background-color: var(--v-textbackground-base) !important;
+  background-color: var(--v-textbackground-base) ;
 }
 .theme--light.v-data-table tbody tr:nth-of-type(even) {
-  background-color: var(--v-background-base) !important;
+  background-color: var(--v-background-base) ;
 }
-.theme--light.v-data-table tbody tr.v-data-table__selected {
-  border-bottom-color: var(--v-secondary-base) !important;
-  border-bottom-width: 10px !important;
-  border-bottom-style: solid !important;
+
+.theme--light.v-data-table .v-data-table-header th.sortable .v-data-table-header__icon
+ {
+  color: var(--v-secondary-base) !important;
 }
 
 .theme--light.v-data-table--dense th {
@@ -105,5 +113,4 @@ export default {
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
-
 </style>
