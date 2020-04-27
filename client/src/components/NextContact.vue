@@ -99,18 +99,6 @@ export default {
       }, 100);
     },
 
-    // closeNextContact() {
-    //   this.$emit("nextContactDone", {
-    //     id: this.currentFamily.id,
-    //     NextContactDate: this.nextContactDate,
-    //     NextContactNote: this.nextContactNote,
-    //     LastContactDate: moment()
-    //       .startOf("day")
-    //       .format("YYYY-MM-DD"),
-    //     NoMoreContact: this.neverContact,
-    //   });
-    // },
-
     async updateNextContact() {
       if (this.contactType == "NoMoreContact") {
         switch (this.neverContact) {
@@ -191,7 +179,26 @@ export default {
               .add(2, "days")
               .format("YYYY-MM-DD");
             this.nextContactNote =
-              "Left a message or sent an email, follow up.";
+              "Left a message or sent an email, follow up in 2 days.";
+            break;
+
+          case "Rescheduling":
+          case "No Show":
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(2, "days")
+              .format("YYYY-MM-DD");
+            this.nextContactNote =
+              "Rescheduling or No Show, need to reschedule after 2 day.";
+            break;
+
+          case "Cancelled":
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(7, "days")
+              .format("YYYY-MM-DD");
+            this.nextContactNote =
+              "Cancelled a study, to contact the family after 7 days.";
             break;
         }
       } else {
@@ -199,6 +206,52 @@ export default {
         this.nextContactNote = null;
       }
     },
+  },
+
+  mounted() {
+    if (this.nextContactDialog) {
+      switch (this.contactType) {
+        case "Confirmed":
+          this.nextContactDate = moment(this.studyDate)
+            .add(7, "days")
+            .format("YYYY-MM-DD");
+
+          this.nextContactNote = "7 days after their participation.";
+          break;
+
+        case "Interested":
+        case "Left a message":
+          this.nextContactDate = moment()
+            .startOf("day")
+            .add(2, "days")
+            .format("YYYY-MM-DD");
+          this.nextContactNote =
+            "Left a message or sent an email, follow up in 2 days.";
+          break;
+
+        case "Rescheduling":
+        case "No Show":
+          this.nextContactDate = moment()
+            .startOf("day")
+            .add(2, "days")
+            .format("YYYY-MM-DD");
+          this.nextContactNote =
+            "Rescheduling or No Show, need to reschedule after 2 day.";
+          break;
+
+        case "Cancelled":
+          this.nextContactDate = moment()
+            .startOf("day")
+            .add(7, "days")
+            .format("YYYY-MM-DD");
+          this.nextContactNote =
+            "Cancelled a study, to contact the family after 7 days.";
+          break;
+      }
+    } else {
+      this.nextContactDate = null;
+      this.nextContactNote = null;
+    }
   },
 };
 </script>

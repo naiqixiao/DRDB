@@ -227,7 +227,9 @@
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
           :studyTimeSlots="this.$studyTimeSlots"
+          :family=currentFamily
           @alert="alert = true"
+          @nextContactDone="updateNextContactFrontend"
         ></AppointmentTable>
       </v-col>
     </v-row>

@@ -87,7 +87,7 @@ export default {
       try {
         await email.send(emailContent);
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
   },
@@ -123,6 +123,37 @@ export default {
         this.emailSubject = "";
       }
     },
+  },
+
+  mounted() {
+    if (this.dialog) {
+      this.emailBody = this.generateEmailBody();
+
+      switch (this.emailType) {
+        case "Confirmation":
+          this.emailSubject =
+            "Appointment confirmation for " +
+            this.data.childName +
+            " on " +
+            moment(this.data.scheduleTime).format("MMM D (ddd), [at] h:mma");
+          break;
+
+        case "Introduction":
+          this.emailSubject = "Elgible study for " + this.data.childName;
+          break;
+
+        case "Reminder":
+          this.emailSubject = "See you tomorrow!" + this.data.childName;
+          break;
+
+        case "ThankYou":
+          this.emailSubject = "Thank you!";
+          break;
+      }
+    } else {
+      this.emailBody = "";
+      this.emailSubject = "";
+    }
   },
 };
 </script>

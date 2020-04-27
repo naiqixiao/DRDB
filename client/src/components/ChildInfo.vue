@@ -698,7 +698,7 @@ export default {
         this.editedIndex = -1;
         this.response = null;
         this.studyDate = null;
-        this.$studyTime = "09:00AM";
+        this.studyTime = "09:00AM";
         this.selectedStudy = [];
         this.emailDialog = false;
         this.nextContactDialog = false;
