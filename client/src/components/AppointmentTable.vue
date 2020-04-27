@@ -99,7 +99,7 @@
     <template #item.Schedule.Completed="{ item }">
       <v-simple-checkbox
         v-model="item.Schedule.Completed"
-        class="mr-0 pa-0"
+        class="ma-0 pa-0"
         @input="updateSchedule(item, 'Completed')"
         dense
       ></v-simple-checkbox>
@@ -154,7 +154,7 @@ export default {
 
         case "Completed":
           try {
-            await schedule.update(item.Schedule);
+            await schedule.complete(item.Schedule);
           } catch (error) {
             console.log(error.response);
           }
@@ -348,7 +348,7 @@ export default {
 
 <style scoped>
 .theme--light.v-icon {
-  color: var(--v-primary-base) ;
+  color: var(--v-primary-base);
   font-size: 28px;
   padding-left: 2px;
   padding-right: 2px;

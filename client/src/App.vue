@@ -26,7 +26,7 @@ export default {
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
 }
@@ -53,8 +53,8 @@ export default {
   margin-right: 0;
 }
 
-.theme--light.v-btn:enabled:not(.v-btn--icon):not(.v-btn--text) {
-  color: var(--v-secondary-base) !important;
+.theme--light.v-btn:enabled:not(.v-btn--text) {
+  color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;
 }
 

@@ -257,7 +257,6 @@ exports.week = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
-
 // Update an appointment by the id in the request
 exports.update = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
@@ -272,61 +271,59 @@ exports.update = asyncHandler(async (req, res) => {
     auth: req.oAuth2Client,
   });
 
-  if (!updatedScheduleInfo.Completed) {
-    switch (updatedScheduleInfo.Status) {
-      case "Confirmed": {
-        if (updatedScheduleInfo.calendarEventId) {
+  switch (updatedScheduleInfo.Status) {
+    case "Confirmed": {
+      if (updatedScheduleInfo.calendarEventId) {
+        await calendar.events.patch({
+          calendarId: "primary",
+          eventId: updatedScheduleInfo.calendarEventId,
+          resource: updatedScheduleInfo,
+          sendUpdates: "all",
+        });
+      } else {
+        // Create a calendar event
+        const calEvent = await calendar.events.insert({
+          calendarId: "primary",
+          resource: updatedScheduleInfo,
+          sendUpdates: "all",
+        });
+
+        updatedScheduleInfo.calendarEventId = calEvent.data.id;
+        updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+
+        // res.status(200).send({
+        //   calendarEventId: calEvent.data.id,
+        //   eventURL: calEvent.data.htmlLink
+        // });
+      }
+
+      break;
+    }
+
+    case "No Show":
+    case "TBD":
+    case "Rescheduling":
+    case "Cancelled":
+    case "Rejected": {
+      // update the calendar event, if an appointment is rescheduled.
+      if (updatedScheduleInfo.calendarEventId) {
+        // check if there was an calendar event created before.
+
+        try {
           await calendar.events.patch({
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
             resource: updatedScheduleInfo,
             sendUpdates: "all",
           });
-        } else {
-          // Create a calendar event
-          const calEvent = await calendar.events.insert({
-            calendarId: "primary",
-            resource: updatedScheduleInfo,
-            sendUpdates: "all",
-          });
-
-          updatedScheduleInfo.calendarEventId = calEvent.data.id;
-          updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
-
-          // res.status(200).send({
-          //   calendarEventId: calEvent.data.id,
-          //   eventURL: calEvent.data.htmlLink
-          // });
+        } catch (err) {
+          throw err;
         }
 
-        break;
+        updatedScheduleInfo.AppointmentTime = null;
       }
 
-      case "No Show":
-      case "TBD":
-      case "Rescheduling":
-      case "Cancelled":
-      case "Rejected": {
-        // update the calendar event, if an appointment is rescheduled.
-        if (updatedScheduleInfo.calendarEventId) {
-          // check if there was an calendar event created before.
-
-          try {
-            await calendar.events.patch({
-              calendarId: "primary",
-              eventId: updatedScheduleInfo.calendarEventId,
-              resource: updatedScheduleInfo,
-              sendUpdates: "all",
-            });
-          } catch (err) {
-            throw err;
-          }
-
-          updatedScheduleInfo.AppointmentTime = null;
-        }
-
-        break;
-      }
+      break;
     }
   }
 
@@ -358,10 +355,49 @@ exports.update = asyncHandler(async (req, res) => {
     console.log("Appointment Information Updated.");
   } catch (error) {
     console.log("Appointment update error: " + error);
-    throw error
+    throw error;
   }
 });
 
+exports.complete = asyncHandler(async (req, res) => {
+  var updatedScheduleInfo = req.body;
+
+  if (updatedScheduleInfo.id) {
+    var ID = updatedScheduleInfo.id;
+    delete updatedScheduleInfo["id"];
+  }
+
+  try {
+    const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
+      where: { id: ID },
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            { model: model.family, attributes: ["id"] },
+            { model: model.child, attributes: ["Name", "DoB"] },
+            {
+              model: model.study,
+              attributes: ["StudyName", "MinAge", "MaxAge"],
+            },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+      ],
+    });
+
+    res.status(200).send(updatedSchedule);
+
+    console.log("Appointment Information Updated.");
+  } catch (error) {
+    console.log("Appointment update error: " + error);
+    throw error;
+  }
+});
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
@@ -379,7 +415,7 @@ exports.delete = asyncHandler(async (req, res) => {
       sendUpdates: "all",
     });
   }
-  
+
   await model.schedule.destroy({
     where: { id: req.query.id },
   });

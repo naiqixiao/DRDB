@@ -20,6 +20,10 @@ export default {
     schedule.lab = store.state.lab;
     return api().post("schedule/", schedule);
   },
+  complete(schedule) {
+    schedule.lab = store.state.lab;
+    return api().post("schedule/complete", schedule);
+  },
   delete(schedule) {
     schedule.lab = store.state.lab;
     return api().delete("schedule/", {

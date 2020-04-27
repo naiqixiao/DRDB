@@ -94,6 +94,8 @@
 
             <v-col cols="12" md="1">
               <v-btn
+                class="nomorecontact-fab"
+                
                 fab
                 @click.stop="
                   contactType = 'NoMoreContact';
@@ -101,7 +103,7 @@
                   nextContactDialog = !nextContactDialog;
                 "
                 :disabled="!currentFamily.id && !nextContactDialog"
-                ><v-icon>block</v-icon></v-btn
+                ><v-icon >mdi-block-helper</v-icon></v-btn
               >
             </v-col>
 
@@ -559,4 +561,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.nomorecontact-fab {
+  color:red !important;
+}
+</style>

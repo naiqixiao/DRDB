@@ -174,7 +174,7 @@ export default {
 
         case "Completed":
           try {
-            await schedule.update(item);
+            await schedule.complete(item);
           } catch (error) {
             console.log(error.response);
           }
