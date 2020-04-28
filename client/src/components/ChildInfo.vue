@@ -1,12 +1,12 @@
 <template>
-  <v-container>
-    <v-row style="height: 80px;" dense>
+  <div>
+    <v-row style="height: 48px;" dense>
       <v-col cols="12" md="12" class="justify-start">
-        <h1>Child information</h1>
+        <h1 class="text-left">Child information</h1>
       </v-col>
     </v-row>
     <div v-if="Children">
-      <v-row dense align="start" style="height: 372px;">
+      <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
           <v-card class="child-card" height="174px">
             <v-card-title class="title"
@@ -60,7 +60,7 @@
       </v-row>
     </div>
     <div v-else>
-      <v-row dense align="start" style="height: 384px;">
+      <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="child in 4" :key="child">
           <v-card class="placeholder-card" height="174px">
             <v-card-title class="title"> {{ "Child " + child }} </v-card-title>
@@ -330,12 +330,12 @@
       </v-dialog>
     </div>
     <v-spacer></v-spacer>
-    <v-row align-content="center" justify="end" style="height: 120px;">
+    <v-row align-content="end" justify="end" style="height: 120px;" dense>
       <v-btn class="c1" fab @click.stop="addChild" v-if="familyId"
         ><v-icon>add</v-icon></v-btn
       >
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script>

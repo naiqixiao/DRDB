@@ -1,9 +1,9 @@
 <template>
-  <v-row justify-content="space-between">
-    <v-col cols="12" md="12">
+  <v-row justify="space-between" align="end" dense>
+    <v-col cols="12" md="12" class="noPadding">
       <v-data-table
         hide-default-footer
-        height="380px"
+        height="360px"
         dense
         fixed-header
         single-select
@@ -21,11 +21,12 @@
           <v-icon @click="deleteItem(item)">delete</v-icon>
         </template>
       </v-data-table>
-
-      <v-row style="height: 10px;"> </v-row>
+    </v-col>
+    <v-col class="noPadding">
       <v-textarea
         class="conv-textarea"
         label="Conversation with parents"
+        outlined
         no-resize
         rows="4"
         solo
@@ -98,3 +99,10 @@ export default {
   },
 };
 </script>
+
+<style lang="scss">
+.noPadding {
+
+  padding: 8px 0px 12px 0px !important;
+}
+</style>

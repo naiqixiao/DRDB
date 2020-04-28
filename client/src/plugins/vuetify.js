@@ -24,6 +24,9 @@ const vuetify = new Vuetify({
       customProperties: true,
     },
   },
+  icons: {
+    iconfont: "mdi", // 'mdi' || 'mdiSvg' || 'md' || 'fa' || 'fa4' || 'faSvg'
+  },
 });
 
 export default vuetify;

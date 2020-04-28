@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row justify="start">
+    <v-row justify="start" dense>
       <v-col cols="12" md="12">
         <span class="headline">Family information</span>
       </v-col>
@@ -224,6 +224,7 @@ export default {
 </script>
 
 <style scoped>
+
 /deep/ .v-text-field .v-input__control .v-input__slot {
   width: "150px";
   dense: true;

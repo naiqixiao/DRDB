@@ -14,7 +14,7 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items align="end">
-        <h2 class="title-text title ma-4">{{ this.$store.state.user }}</h2>
+        <h2 class="title-text title ma-3">{{ this.$store.state.user }}</h2>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -34,8 +34,6 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
-
-      <!-- <v-space name="space"></v-space> -->
 
       <template v-slot:append>
         <div class="pa-2">
@@ -127,10 +125,14 @@ export default {
 <style lang="scss">
 .v-navigation-drawer--temporary.v-navigation-drawer--clipped {
   z-index: 3;
-  padding-top: 64px;
+  padding-top: 56px;
 }
 
 .title-text {
-  color:  var(--v-secondary-base) !important;
+  color: var(--v-secondary-base) !important;
+}
+
+.v-app-bar, .v-app-bar--clipped, .v-app-bar--fixed, .v-toolbar__content {
+  height: 56px !important;
 }
 </style>

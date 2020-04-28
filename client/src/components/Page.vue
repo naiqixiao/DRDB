@@ -1,19 +1,20 @@
 <template>
-  <v-container class="pagination-container">
-    <!-- <v-row no-gutters justify="end" align = "center">
-      <v-col cols="12" md="12" class=".align-self-center"> -->
+  <div class="pagination-container" >
     <v-btn class="ma-0" text icon @click="previousPage" :disabled="page <= 1">
       <v-icon large>navigate_before </v-icon></v-btn
     >
 
     <span class="title">{{ page + " / " + NofPages }}</span>
 
-    <v-btn class="ma-0" text icon @click="nextPage" :disabled="page >= NofPages || page == 0"
+    <v-btn
+      class="ma-0"
+      text
+      icon
+      @click="nextPage"
+      :disabled="page >= NofPages || page == 0"
       ><v-icon large>navigate_next </v-icon></v-btn
     >
-    <!-- </v-col>
-    </v-row> -->
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -37,6 +38,7 @@ export default {
 
 <style lang="scss">
 .pagination-container {
+  text-align: end;
   display: flex;
   justify-content: space-around;
   align-items: center;

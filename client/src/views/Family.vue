@@ -1,14 +1,16 @@
 <template>
   <v-container fluid>
-    <v-row justify="space-around" dense>
+    <v-row justify="space-around">
       <v-col cols="12" md="5">
-        <v-row justify="space-between" align="center">
-          <v-col cols="12" md="3">
-            <v-btn x-large @click.stop="searchMode" :disabled="searchStatus"
-              ><v-icon left>mdi-magnify</v-icon> Search</v-btn
+        <v-row align="center" dense>
+          <v-col cols="12" md="3" style="text-align: start;">
+            <v-btn large @click.stop="searchMode" :disabled="searchStatus"
+              ><v-icon left>mdi-magnify</v-icon>Search</v-btn
             >
           </v-col>
-          <v-col cols="12" md="4">
+
+          <v-spacer></v-spacer>
+          <v-col cols="12" md="4" style="text-align: end;">
             <Page
               :page="page"
               :NofPages="Families ? Families.length : 0"
@@ -17,47 +19,105 @@
             ></Page>
           </v-col>
         </v-row>
-        <v-row justify="space-around">
+
+        <v-row justify="space-between" dense>
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Contact information:</h4>
+          </v-col>
           <v-col
             cols="12"
-            md="4"
-            v-for="item in searchingFields"
+            :md="item.width"
+            v-for="item in this.$familyFields.slice(0, 3)"
             :key="item.label"
           >
-            <v-text-field
-              filled
-              background-color="textbackground"
-              hide-details
-              @keydown.enter="searchFamily"
-              :label="item.label"
-              v-model="currentFamily[item.field]"
-              :append-icon="searchStatus ? 'mdi-magnify' : undefined"
-              :readonly="!searchStatus"
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-divider></v-divider>
-          <v-row justify="space-around">
-            <v-col
-              cols="12"
-              md="4"
-              dense
-              v-for="item in otherInfo"
-              :key="item.label"
-            >
+            <div v-if="item.searchable">
               <v-text-field
+                height="48px"
+                background-color="textbackground"
+                hide-details
+                @keydown.enter="searchFamily"
+                :label="item.label"
+                v-model="currentFamily[item.field]"
+                :append-icon="searchStatus ? 'mdi-magnify' : undefined"
+                :readonly="!searchStatus"
+                placeholder="  "
+                outlined
+                dense
+              ></v-text-field>
+            </div>
+          </v-col>
+
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+
+            <h4 class="text-left">Parents information:</h4>
+          </v-col>
+          <v-col
+            cols="12"
+            :md="item.width"
+            v-for="item in this.$familyFields.slice(3, 9)"
+            :key="item.label"
+          >
+            <div v-if="item.searchable">
+              <v-text-field
+                height="48px"
+                background-color="textbackground"
+                hide-details
+                @keydown.enter="searchFamily"
+                :label="item.label"
+                v-model="currentFamily[item.field]"
+                :append-icon="searchStatus ? 'mdi-magnify' : undefined"
+                :readonly="!searchStatus"
+                placeholder="  "
+                outlined
+                dense
+              ></v-text-field>
+            </div>
+            <div v-else>
+              <v-text-field
+                height="48px"
                 filled
                 hide-details
                 :label="item.label"
                 v-model="currentFamily[item.field]"
                 readonly
                 dense
+                placeholder="  "
+                outlined
                 background-color="textbackground"
               ></v-text-field>
-            </v-col>
-          </v-row>
+            </div>
+          </v-col>
 
-          <v-row justify="space-between" align="center">
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+
+            <h4 class="text-left">Schedule information:</h4>
+          </v-col>
+          <v-col
+            cols="12"
+            :md="item.width"
+            v-for="item in this.$familyFields.slice(9, 12)"
+            :key="item.label"
+          >
+            <div>
+              <v-text-field
+                height="48px"
+                filled
+                hide-details
+                :label="item.label"
+                v-model="currentFamily[item.field]"
+                readonly
+                dense
+                placeholder="  "
+                outlined
+                background-color="textbackground"
+              ></v-text-field>
+            </div>
+          </v-col>
+
+          <v-row justify="space-between" align="end" dense>
             <v-col cols="12" md="6">
               <v-textarea
                 class="conv-textarea"
@@ -95,7 +155,6 @@
             <v-col cols="12" md="1">
               <v-btn
                 class="nomorecontact-fab"
-                
                 fab
                 @click.stop="
                   contactType = 'NoMoreContact';
@@ -103,11 +162,11 @@
                   nextContactDialog = !nextContactDialog;
                 "
                 :disabled="!currentFamily.id && !nextContactDialog"
-                ><v-icon >mdi-block-helper</v-icon></v-btn
+                ><v-icon>mdi-cancel</v-icon></v-btn
               >
             </v-col>
 
-            <v-col cols="12" md="2">
+            <v-col cols="12" md="2" class="text-right">
               <v-btn color="primary" fab @click.stop="addFamily"
                 ><v-icon>add</v-icon></v-btn
               >
@@ -135,7 +194,7 @@
                   <div v-if="field.options">
                     <v-combobox
                       justify="start"
-                      :items="options[field.options]"
+                      :items="this.$options[field.options]"
                       v-model="editedItem[field.field]"
                       filled
                       :label="field.label"
@@ -146,7 +205,7 @@
                     <v-text-field
                       :label="field.label"
                       v-model="editedItem[field.field]"
-                      :rules="rules[field.rules]"
+                      :rules="this.$rules[field.rules]"
                       filled
                       dense
                     ></v-text-field>
@@ -227,7 +286,7 @@
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
           :studyTimeSlots="this.$studyTimeSlots"
-          :family=currentFamily
+          :family="currentFamily"
           @alert="alert = true"
           @nextContactDone="updateNextContactFrontend"
         ></AppointmentTable>
@@ -325,73 +384,6 @@ export default {
         RecruitmentMethod: null,
       },
       Families: [],
-      searchingFields: [
-        { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" },
-        { label: "Family ID", field: "id" },
-        { label: "Email", field: "Email", rules: "email" },
-        { label: "Phone", field: "Phone", rules: "phone" },
-        { label: "Postal Code", field: "Address" },
-      ],
-      otherInfo: [
-        {
-          label: "Mother's Language",
-          field: "LanguageMom",
-          options: "language",
-        },
-        { label: "Mother's Race", field: "RaceMom", options: "race" },
-        { label: "English %", field: "EnglishPercent" },
-        {
-          label: "Father's Language",
-          field: "LanguageDad",
-          options: "language",
-        },
-        { label: "Father's Race", field: "RaceDad", options: "race" },
-        { label: "Vehicle", field: "Vehicle" },
-        {
-          label: "Recruited via",
-          field: "RecruitmentMethod",
-          options: "recruitmentMethod",
-        },
-        { label: "Last Contact Date", field: "LastContactDate" },
-        { label: "Next ContactDate", field: "NextContactDate" },
-      ],
-      options: {
-        language: ["English", "French", "Chinese", "Spanish", "Hindi"],
-        race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
-        recruitmentMethod: [
-          "Hospital",
-          "Events",
-          "SocialMedia",
-          "PreviousParticipation",
-        ],
-      },
-      rules: {
-        name: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-            return pattern.test(value) || "Invalid Name.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        email: [
-          (value) => !!value || "Required.",
-          (value) => {
-            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return pattern.test(value) || "Invalid e-mail.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        phone: [
-          (value) => {
-            const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-            return pattern.test(value) || "Invalid phone.";
-          },
-          (value) => !!value || "Required.",
-          (value) => (value && value.length == 10) || "Have to be 10 digits",
-        ],
-      },
       editableFields: [],
     };
   },
@@ -454,7 +446,7 @@ export default {
     addFamily() {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.familyTemplate);
-      this.editableFields = this.searchingFields.concat(this.otherInfo);
+      this.editableFields = Object.assign({}, this.$familyFields);
       this.editableFields.shift();
       this.editableFields.pop();
       this.editableFields.pop();
@@ -464,10 +456,11 @@ export default {
     editFamily() {
       this.editedIndex = this.Families.indexOf(this.currentFamily);
       this.editedItem = Object.assign({}, this.currentFamily);
-      this.editableFields = this.searchingFields.concat(this.otherInfo);
-      this.editableFields.shift();
-      this.editableFields.pop();
-      this.editableFields.pop();
+      this.editableFields = Object.assign({}, this.$familyFields);
+      // this.editableFields.shift();
+      // this.editableFields.pop();
+      // this.editableFields.pop();
+      console.log(this.editableFields);
       this.dialog = true;
     },
 
@@ -563,8 +556,12 @@ export default {
 };
 </script>
 
-<style scoped>
+<style  scoped>
 .nomorecontact-fab {
-  color:red !important;
+  color: red !important;
+}
+
+.subtitle {
+  padding: 4px 0px 2px 8px !important;
 }
 </style>
