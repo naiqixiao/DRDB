@@ -145,3 +145,8 @@ exports.login = asyncHandler(async (req, res) => {
     studies: personnel.Lab.Studies,
   });
 });
+
+
+exports.loginChecked = asyncHandler(async (req, res) => {
+  res.send("the user already logged in.")
+});

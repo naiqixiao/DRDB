@@ -18,6 +18,7 @@ const vuetify = new Vuetify({
         quaternary: "#4A6572",
         background: "#F4EFE3",
         textbackground: "#FEFEFE",
+        warning: "#cc3300"
       },
     },
     options: {

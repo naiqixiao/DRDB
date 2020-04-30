@@ -100,7 +100,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .noPadding {
 
   padding: 8px 0px 12px 0px !important;

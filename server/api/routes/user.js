@@ -7,6 +7,8 @@ const UserController = require("../controllers/user");
 
 router.post("/signup", checkAuth, oAuth2, UserController.signup);
 
+router.post("/checklogin", checkAuth, UserController.loginChecked);
+
 router.post("/login", UserController.login);
 
 module.exports = router;

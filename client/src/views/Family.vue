@@ -154,7 +154,6 @@
 
             <v-col cols="12" md="1">
               <v-btn
-                class="nomorecontact-fab"
                 fab
                 @click.stop="
                   contactType = 'NoMoreContact';
@@ -162,7 +161,7 @@
                   nextContactDialog = !nextContactDialog;
                 "
                 :disabled="!currentFamily.id && !nextContactDialog"
-                ><v-icon>mdi-cancel</v-icon></v-btn
+                ><v-icon color="warning">cancel</v-icon></v-btn
               >
             </v-col>
 
@@ -291,6 +290,13 @@
           @nextContactDone="updateNextContactFrontend"
         ></AppointmentTable>
       </v-col>
+
+      <v-col cols="12" md="3">
+        <ParticipationHistory
+        :family=currentFamily
+         />
+        
+         </v-col>
     </v-row>
 
     <template>
@@ -312,6 +318,7 @@ import AppointmentTable from "@/components/AppointmentTable";
 import Conversation from "@/components/Conversation";
 import Page from "@/components/Page";
 import NextContact from "@/components/NextContact";
+import ParticipationHistory from "@/components/ParticipationHistory";
 
 import family from "@/services/family";
 import store from "@/store";
@@ -325,6 +332,7 @@ export default {
     Conversation,
     Page,
     NextContact,
+    ParticipationHistory,
   },
   data() {
     return {
@@ -553,14 +561,14 @@ export default {
         .format("YYYY-MM-DD");
     },
   },
+
+  updated() {
+    // console.log("page updated~~");
+  },
 };
 </script>
 
-<style  scoped>
-.nomorecontact-fab {
-  color: red !important;
-}
-
+<style scoped>
 .subtitle {
   padding: 4px 0px 2px 8px !important;
 }
