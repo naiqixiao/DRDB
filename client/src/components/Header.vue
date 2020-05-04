@@ -83,12 +83,12 @@ export default {
         },
         {
           address: "/study",
-          label: "Study information",
+          label: "Study management",
           icon: "description",
         },
         {
           address: "/personnel",
-          label: "Personnel",
+          label: "Personnel management",
           icon: "perm_identity",
         },
 

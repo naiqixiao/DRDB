@@ -45,7 +45,7 @@ const routes = [
   },
   {
     path: "/study",
-    name: "Study information",
+    name: "Study management",
     component: Study
   },
   {

@@ -26,152 +26,176 @@
         </v-data-table>
       </v-col>
 
-      <v-col cols="12" md="8">
-        <v-form ref="form" v-model="valid" lazy-validation>
-          <v-container>
-            <v-row>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-                v-for="field in studyFields"
-                :key="field.label"
-              >
-                <v-text-field
-                  height="48px"
-                  background-color="textbackground"
-                  hide-details
-                  :label="field.label"
-                  v-model="currentStudy[field.field]"
-                  placeholder="  "
-                  outlined
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" md="8">
-                <h3>Study summary</h3>
+      <v-col cols="12" md="5">
+        <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
+        <v-row>
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Basic information:</h4>
+          </v-col>
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+            v-for="field in studyFields"
+            :key="field.label"
+          >
+            <v-text-field
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              :label="field.label"
+              v-model="currentStudy[field.field]"
+              placeholder="  "
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+          <v-col md="12" class="subtitle">
+            <v-textarea
+              label="Study summary"
+              outlined
+              no-resize
+              rows="3"
+              solo
+              v-model="currentStudy.Description"
+            ></v-textarea
+          ></v-col>
+        </v-row>
 
-                <v-textarea
-                  label="Study summary"
-                  outlined
-                  no-resize
-                  rows="3"
-                  solo
-                  v-model="currentStudy.Description"
-                ></v-textarea>
-                <h3>Email template</h3>
+        <v-row>
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Study criteria:</h4>
+          </v-col>
 
-                <body v-html="currentStudy.EmailTemplate" align="start"></body>
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+            v-for="field in criteriaFields"
+            :key="field.label"
+          >
+            <v-text-field
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              :label="field.label"
+              v-model="currentStudy[field.field]"
+              placeholder="  "
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
 
-                <v-row justify="space-around">
-                  <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="createStudy"
-                      >Add</v-btn
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Email template:</h4>
+          </v-col>
+          <body v-html="currentStudy.EmailTemplate" align="start"></body>
+
+          <v-col cols="12" md="2" dense>
+            <v-btn color="primary" fab @click.stop="createStudy"
+              ><v-icon>add</v-icon></v-btn
+            >
+          </v-col>
+          <v-col cols="12" md="2" dense>
+            <v-btn color="primary" fab @click.stop="editStudy"
+              ><v-icon>edit</v-icon></v-btn
+            >
+          </v-col>
+          <v-col cols="12" md="2" dense>
+            <v-btn color="primary" fab @click.stop="deleteStudy"
+              ><v-icon>delete</v-icon></v-btn
+            >
+          </v-col>
+        </v-row>
+
+        <div>
+          <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+            <v-card>
+              <v-card-title>
+                <span class="headline">Study information</span>
+              </v-card-title>
+
+              <v-form ref="form" v-model="valid" lazy-validation>
+                <v-container>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="3"
+                      v-for="field in studyFields"
+                      :key="field.label"
                     >
-                  </v-col>
-                  <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="editStudy"
-                      >Edit</v-btn
-                    >
-                  </v-col>
-                  <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="deleteStudy"
-                      >Delete</v-btn
-                    >
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="4">
-                <h3>Experimenters</h3>
+                      <div v-if="field.options">
+                        <v-combobox
+                          justify="start"
+                          :items="options[field.options]"
+                          v-model="editedStudy[field.field]"
+                          :label="field.label"
+                          dense
+                        ></v-combobox>
+                      </div>
+                      <div v-else-if="field.rules">
+                        <v-text-field
+                          :label="field.label"
+                          v-model="editedStudy[field.field]"
+                          :rules="rules[field.rules]"
+                          dense
+                        ></v-text-field>
+                      </div>
+                      <div v-else>
+                        <v-text-field
+                          :label="field.label"
+                          v-model="editedStudy[field.field]"
+                          dense
+                        ></v-text-field>
+                      </div>
+                    </v-col>
+                  </v-row>
 
-                <Experimenters
-                  :Experimenters="currentStudy.Personnels"
-                  :labMembers="labMembers"
-                  :studyId="currentStudy.id"
-                  @updatedExperimenters="updateExperimenters"
-                ></Experimenters>
-              </v-col>
-            </v-row>
-          </v-container>
+                  <v-row>
+                    <v-col cols="12" md="8">
+                      <h3>Study summary & email template</h3>
 
-          <div>
-            <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
-              <v-card>
-                <v-card-title>
-                  <span class="headline">Study information</span>
-                </v-card-title>
+                      <v-textarea
+                        label="Study summary"
+                        outlined
+                        no-resize
+                        rows="3"
+                        solo
+                        v-model="editedStudy.Description"
+                      ></v-textarea>
+                      <vue-editor
+                        v-model="editedStudy.EmailTemplate"
+                        :editor-toolbar="customToolbar"
+                      ></vue-editor>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-form>
 
-                <v-form ref="form" v-model="valid" lazy-validation>
-                  <v-container>
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        sm="6"
-                        md="3"
-                        v-for="field in studyFields"
-                        :key="field.label"
-                      >
-                        <div v-if="field.options">
-                          <v-combobox
-                            justify="start"
-                            :items="options[field.options]"
-                            v-model="editedStudy[field.field]"
-                            :label="field.label"
-                            dense
-                          ></v-combobox>
-                        </div>
-                        <div v-else-if="field.rules">
-                          <v-text-field
-                            :label="field.label"
-                            v-model="editedStudy[field.field]"
-                            :rules="rules[field.rules]"
-                            dense
-                          ></v-text-field>
-                        </div>
-                        <div v-else>
-                          <v-text-field
-                            :label="field.label"
-                            v-model="editedStudy[field.field]"
-                            dense
-                          ></v-text-field>
-                        </div>
-                      </v-col>
-                    </v-row>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="green darken-1" text @click="close">Cancel</v-btn>
+                <v-btn color="green darken-1" text @click="save">Save</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </div>
+        <!-- </v-form> -->
+      </v-col>
 
-                    <v-row>
-                      <v-col cols="12" md="8">
-                        <h3>Study summary & email template</h3>
+      <v-col cols="12" md="3">
+        <h3>Experimenters</h3>
 
-                        <v-textarea
-                          label="Study summary"
-                          outlined
-                          no-resize
-                          rows="3"
-                          solo
-                          v-model="editedStudy.Description"
-                        ></v-textarea>
-                        <vue-editor
-                          v-model="editedStudy.EmailTemplate"
-                          :editor-toolbar="customToolbar"
-                        ></vue-editor>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-form>
-
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="green darken-1" text @click="close"
-                    >Cancel</v-btn
-                  >
-                  <v-btn color="green darken-1" text @click="save">Save</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-          </div>
-        </v-form>
+        <Experimenters
+          :Experimenters="currentStudy.Personnels"
+          :labMembers="labMembers"
+          :studyId="currentStudy.id"
+          @updatedExperimenters="updateExperimenters"
+        ></Experimenters>
       </v-col>
     </v-row>
   </v-container>
@@ -226,13 +250,18 @@ export default {
       dialog: false,
       studyFields: [
         { label: "Study Name", field: "StudyName" },
-        { label: "Min Age", field: "MinAge" },
-        { label: "Max Age", field: "MaxAge" },
+
         {
           label: "Study Type",
           field: "StudyType",
           options: "studyType",
         },
+        { label: "Premature Participants", field: "PrematureParticipant" },
+      ],
+
+      criteriaFields: [
+        { label: "Min Age", field: "MinAge" },
+        { label: "Max Age", field: "MaxAge" },
         { label: "Premature Participants", field: "PrematureParticipant" },
       ],
       options: {

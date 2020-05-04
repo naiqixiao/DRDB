@@ -1,7 +1,12 @@
 <template>
   <!-- <v-container fluid> -->
-  <v-row class="grey lighten-5" style="height: 400px;" justify="space-around">
+  <v-row justify="space-around">
     <v-col cols="12" md="4">
+      <v-row style="height: 60px;" dense>
+        <v-col cols="12" md="12" class="justify-start">
+          <h1 class="text-left">Choose a study</h1>
+        </v-col>
+      </v-row>
       <v-select
         :items="studies"
         :item-value="'id'"
@@ -39,30 +44,22 @@
 
     <v-col cols="12" md="4">
       <v-row justify="space-around">
-        <v-col cols="12" md="3">
-          <v-btn
-            color="purple"
-            text
-            @click.stop="editChild"
-            :disabled="!currentChild.id"
-            >Edit</v-btn
-          >
-        </v-col>
-        <v-col cols="12" md="3">
-          <h5>{{ page + " / " + NofChildren }}</h5>
-        </v-col>
-        <v-col cols="12" md="3">
-          <v-pagination
-            @next="nextPage"
-            @previous="previousPage"
-            circle
-            v-model="page"
-            :length="NofChildren"
-            total-visible="1"
-          ></v-pagination>
+        <v-col cols="12" md="3"> </v-col>
+        <v-spacer></v-spacer>
+        <v-col cols="12" md="4" style="text-align: end;">
+          <Page
+            :page="page"
+            :NofPages="Children ? Children.length : 0"
+            @nextPage="nextPage"
+            @previousPage="previousPage"
+          ></Page>
         </v-col>
       </v-row>
-      <v-row justify="space-around">
+      <v-row justify="start">
+        <v-col md="12" class="subtitle">
+          <v-divider></v-divider>
+          <h4 class="text-left">Family information:</h4>
+        </v-col>
         <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
           <v-text-field
             height="48px"
@@ -77,7 +74,11 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <v-row justify="space-around">
+      <v-row justify="start">
+        <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Child information:</h4>
+          </v-col>
         <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
           <v-text-field
             height="48px"
@@ -96,8 +97,24 @@
           <AgeDisplay :DoB="currentChild.DoB" />
         </v-col>
       </v-row>
+      <v-row justify="space-around">
+        <v-col cols="12" md="3">
+          <v-btn
+            color="primary"
+            fab
+            @click.stop="editChild"
+            :disabled="!currentChild.id"
+            ><v-icon>edit</v-icon></v-btn
+          >
+        </v-col>
+        <v-spacer></v-spacer>
+      </v-row>
 
       <v-row justify="space-around">
+        <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Schedule this child</h4>
+          </v-col>
         <v-col cols="12" md="9">
           <v-select
             :items="Responses"
@@ -115,12 +132,13 @@
 
         <v-col cols="12" md="3">
           <v-btn
-            color="purple"
-            text
+            color="primary"
+            fab
             @click.stop="scheduleChild"
             :disabled="!currentChild.id"
-            >{{ scheduleButtonText }}</v-btn
           >
+            <v-icon> {{ scheduleButtonIcon }}</v-icon>
+          </v-btn>
         </v-col>
 
         <v-dialog v-model="dobPicker" max-width="360px">
@@ -412,6 +430,8 @@ import EmailDialog from "@/components/EmailDialog";
 import Email from "@/components/Email";
 import NextContact from "@/components/NextContact";
 
+import Page from "@/components/Page";
+
 export default {
   components: {
     AgeDisplay,
@@ -420,6 +440,7 @@ export default {
     Email,
     NextContact,
     EmailDialog,
+    Page,
   },
   props: {},
   data() {
@@ -438,7 +459,7 @@ export default {
       selectedStudy: {},
       Children: [],
       elegibleExperimenters: [],
-      scheduleButtonText: "Schedule",
+      scheduleButtonIcon: "event",
       appointments: [],
       Experimenters: [],
       studyTime: "09:00AM",
@@ -930,11 +951,13 @@ export default {
     },
 
     nextPage() {
+      this.page += 1;
       this.currentChild = this.Children[this.page - 1];
       this.resetSchedule();
     },
 
     previousPage() {
+      this.page -= 1;
       this.currentChild = this.Children[this.page - 1];
       this.resetSchedule();
     },
@@ -949,17 +972,17 @@ export default {
     chooseResponse() {
       switch (this.response) {
         case "Confirmed": {
-          this.scheduleButtonText = "Schedule";
+          this.scheduleButtonIcon = "event";
           break;
         }
         case "Left a Message":
         case "Interested": {
-          this.scheduleButtonText = "Confirm";
+          this.scheduleButtonIcon = "email";
           break;
         }
 
         case "Rejected": {
-          this.scheduleButtonText = "Confirm";
+          this.scheduleButtonIcon = "sentiment_dissatisfied";
           break;
         }
       }
@@ -975,10 +998,6 @@ export default {
   },
 
   computed: {
-    NofChildren() {
-      return this.Children.length;
-    },
-
     currentFamily() {
       return this.currentChild.Family;
     },
