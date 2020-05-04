@@ -1,57 +1,50 @@
 <template>
-  <v-row dense justify="start">
-    <v-col
-      cols="12"
-      md="4"
-      v-for="study in Studies"
-      :key="study.id"
-      dense
-    >
-      <v-card class="mx-auto" width="360px" height="120px">
-        <v-card-title>{{
-          study.StudyName
-        }}</v-card-title>
+  <div>
+    <v-row dense justify="start">
+      <v-col cols="12" md="4" v-for="study in Studies" :key="study.id" dense>
+        <v-card class="mx-auto" width="360px" height="120px">
+          <v-card-title>{{ study.StudyName }}</v-card-title>
 
-        <v-card-text align="start">{{
-          "Age range: " + study.MinAge + " to " + study.MaxAge
-        }}</v-card-text>
-        <h4 align="end">{{ "Type: " + study.StudyType }}</h4>
+          <v-card-text align="start">{{
+            "Age range: " + study.MinAge + " to " + study.MaxAge
+          }}</v-card-text>
+          <h4 align="end">{{ "Type: " + study.StudyType }}</h4>
+        </v-card>
+      </v-col>
 
-      </v-card>
-    </v-col>
-    <v-row align="center" justify="center">
+      <div>
+        <v-dialog v-model="dialogStudy" max-width="1200px">
+          <v-card>
+            <v-row align="center" justify="center">
+              <v-col cols="12" lg="10">
+                <v-select
+                  :items="labStudies"
+                  :item-value="'id'"
+                  :item-text="'StudyName'"
+                  v-model="editedStudies"
+                  return-object
+                  label="Studies"
+                  multiple
+                >
+                </v-select>
+              </v-col>
+            </v-row>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
+    </v-row>
+    <v-row align="center" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="purple" fab large @click.stop="updateStudies"
-          >+</v-btn
+        <v-btn color="primary" fab large @click.stop="updateStudies"
+          ><v-icon>add</v-icon></v-btn
         >
       </v-col>
     </v-row>
-
-    <div>
-      <v-dialog v-model="dialogStudy" max-width="1200px">
-        <v-card>
-          <v-row align="center" justify="center">
-            <v-col cols="12" lg="10">
-              <v-select
-                :items="labStudies"
-                :item-value="'id'"
-                :item-text="'StudyName'"
-                v-model="editedStudies"
-                return-object
-                label="Studies"
-                multiple
-              >
-              </v-select>
-            </v-col>
-          </v-row>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
-  </v-row>
+  </div>
 </template>
 
 <script>
@@ -73,8 +66,7 @@ export default {
   },
   methods: {
     updateStudies() {
-
-      this.editedStudies = this.Studies
+      this.editedStudies = this.Studies;
       this.dialogStudy = true;
     },
 
@@ -96,7 +88,7 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-    }
+    },
   },
   computed: {},
   watch: {

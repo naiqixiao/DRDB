@@ -17,14 +17,11 @@
           </template>
 
           <template #item.Completed="{ item }">
-            
-            <v-switch
+            <v-simple-checkbox
               v-model="item.Completed"
-              class="ma-2"
-              @change="changeStudyStatus(item)"
+              @input="changeStudyStatus(item)"
               dense
-              
-            ></v-switch>
+            ></v-simple-checkbox>
           </template>
         </v-data-table>
       </v-col>
@@ -41,8 +38,13 @@
                 :key="field.label"
               >
                 <v-text-field
+                  height="48px"
+                  background-color="textbackground"
+                  hide-details
                   :label="field.label"
                   v-model="currentStudy[field.field]"
+                  placeholder="  "
+                  outlined
                   dense
                 ></v-text-field>
               </v-col>
@@ -195,6 +197,7 @@ export default {
       headersStudy: [
         {
           text: "Study Name",
+          sortable: false,
           align: "center",
           value: "StudyName",
           width: "80px",
@@ -213,9 +216,10 @@ export default {
         },
 
         {
-          text: "Completion",
+          text: "Compled?",
           align: "center",
           value: "Completed",
+          sortable: false,
           width: "50px",
         },
       ],
@@ -424,5 +428,9 @@ export default {
 body {
   border: 2px solid rgb(0, 153, 255);
   border-radius: 5px;
+}
+
+.complete {
+  align-items: flex-end !important;
 }
 </style>

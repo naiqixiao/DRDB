@@ -4,8 +4,24 @@
       <v-col cols="12" md="12">
         <span class="headline">Family information</span>
       </v-col>
-      <v-col cols="12" md="6" dense v-for="item in searchingFields" :key="item.label">
-        <v-text-field :label="item.label" v-model="currentFamily[item.field]" readonly dense></v-text-field>
+      <v-col
+        cols="12"
+        md="6"
+        dense
+        v-for="item in searchingFields"
+        :key="item.label"
+      >
+        <v-text-field
+          :label="item.label"
+          v-model="currentFamily[item.field]"
+          readonly
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          placeholder="  "
+          outlined
+          dense
+        ></v-text-field>
       </v-col>
     </v-row>
 
@@ -19,14 +35,24 @@
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6" md="3" v-for="field in editableFields" :key="field.label">
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                  v-for="field in editableFields"
+                  :key="field.label"
+                >
                   <div v-if="field.options">
                     <v-combobox
                       justify="start"
                       :items="options[field.options]"
                       v-model="editedItem[field.field]"
-                      filled
                       :label="field.label"
+                      height="48px"
+                      background-color="textbackground"
+                      hide-details
+                      placeholder="  "
+                      outlined
                       dense
                     ></v-combobox>
                   </div>
@@ -35,7 +61,11 @@
                       :label="field.label"
                       v-model="editedItem[field.field]"
                       :rules="rules[field.rules]"
-                      filled
+                      height="48px"
+                      background-color="textbackground"
+                      hide-details
+                      placeholder="  "
+                      outlined
                       dense
                     ></v-text-field>
                   </div>
@@ -43,7 +73,11 @@
                     <v-text-field
                       :label="field.label"
                       v-model="editedItem[field.field]"
-                      filled
+                      height="48px"
+                      background-color="textbackground"
+                      hide-details
+                      placeholder="  "
+                      outlined
                       dense
                     ></v-text-field>
                   </div>
@@ -54,16 +88,24 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialog = false">Cancel</v-btn>
+            <v-btn color="green darken-1" text @click="dialog = false"
+              >Cancel</v-btn
+            >
             <v-btn color="green darken-1" text @click="save">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </div>
 
-    <v-row justify="space-around">
+    <v-row justify="end">
       <v-col cols="12" md="3" dense>
-        <v-btn color="purple" text @click.stop="editFamily" :disabled="!currentFamily.id">Edit</v-btn>
+        <v-btn
+          color="primary"
+          fab
+          @click.stop="editFamily"
+          :disabled="!currentFamily.id"
+          ><v-icon>edit</v-icon></v-btn
+        >
       </v-col>
     </v-row>
   </v-container>
@@ -75,7 +117,7 @@ import store from "@/store";
 
 export default {
   props: {
-    currentFamily: Object
+    currentFamily: Object,
   },
 
   data() {
@@ -95,7 +137,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null
+        RecruitmentMethod: null,
       },
       familyTemplate: {
         id: null,
@@ -110,7 +152,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null
+        RecruitmentMethod: null,
       },
       searchingFields: [
         { label: "Family ID", field: "id" },
@@ -118,18 +160,18 @@ export default {
         { label: "Email", field: "Email", rules: "email" },
         { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" }
+        { label: "Father's Name", field: "NameDad", rules: "name" },
       ],
       otherInfo: [
         {
           label: "Mother's Language",
           field: "LanguageMom",
-          options: "language"
+          options: "language",
         },
         {
           label: "Father's Language",
           field: "LanguageDad",
-          options: "language"
+          options: "language",
         },
         { label: "English %", field: "EnglishPercent" },
         { label: "Mother's Race", field: "RaceMom", options: "race" },
@@ -138,10 +180,10 @@ export default {
         {
           label: "Recruited via",
           field: "RecruitmentMethod",
-          options: "recruitmentMethod"
+          options: "recruitmentMethod",
         },
         { label: "Last Contact Date", field: "LastContactDate" },
-        { label: "Next ContactDate", field: "NextContactDate" }
+        { label: "Next ContactDate", field: "NextContactDate" },
       ],
       options: {
         language: ["English", "French", "Chinese", "Spanish", "Hindi"],
@@ -150,36 +192,36 @@ export default {
           "Hospital",
           "Events",
           "SocialMedia",
-          "PreviousParticipation"
-        ]
+          "PreviousParticipation",
+        ],
       },
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         email: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         phone: [
-          value => {
+          (value) => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          value => !!value || "Required.",
-          value => (value && value.length == 10) || "Have to be 10 digits"
-        ]
+          (value) => !!value || "Required.",
+          (value) => (value && value.length == 10) || "Have to be 10 digits",
+        ],
       },
-      editableFields: []
+      editableFields: [],
     };
   },
 
@@ -216,15 +258,14 @@ export default {
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.familyTemplate);
       }, 300);
-    }
+    },
   },
 
-  computed: {}
+  computed: {},
 };
 </script>
 
 <style scoped>
-
 /deep/ .v-text-field .v-input__control .v-input__slot {
   width: "150px";
   dense: true;

@@ -17,12 +17,11 @@
           </template>
 
           <template #item.Active="{ item }">
-            <v-switch
+            <v-simple-checkbox
               v-model="item.Active"
-              class="ma-2"
-              @change="changePersonnelStatus(item)"
+              @input="changePersonnelStatus(item)"
               dense
-            ></v-switch>
+            ></v-simple-checkbox>
           </template>
         </v-data-table>
       </v-col>
@@ -39,8 +38,13 @@
                 :key="field.label"
               >
                 <v-text-field
+                  height="48px"
+                  background-color="textbackground"
+                  hide-details
                   :label="field.label"
                   v-model="currentPersonnel[field.field]"
+                  placeholder="  "
+                  outlined
                   dense
                 ></v-text-field>
               </v-col>
@@ -171,18 +175,21 @@ export default {
         {
           text: "Email",
           align: "center",
+          sortable: false,
           value: "Email",
           width: "60px",
         },
         {
           text: "Role",
           align: "center",
+          sortable: false,
           value: "Role",
           width: "50px",
         },
 
         {
           text: "Active?",
+          sortable: false,
           align: "center",
           value: "Active",
           width: "50px",

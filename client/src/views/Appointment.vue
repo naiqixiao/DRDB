@@ -6,7 +6,12 @@
           @keydown.enter="searchSchedule"
           :label="item.label"
           v-model="queryString[item.field]"
-          prepend-icon="mdi-magnify"
+          append-icon="mdi-magnify"
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          placeholder="  "
+          outlined
           dense
         ></v-text-field>
       </v-col>
@@ -14,10 +19,14 @@
         <v-select
           @blur="searchScheduleByStatus"
           v-model="queryString.Status"
-          prepend-icon="mdi-magnify"
           :items="Status"
           label="Status"
           multiple
+          append-icon="mdi-magnify"
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          outlined
           dense
         ></v-select>
       </v-col>
@@ -27,9 +36,13 @@
           ref="textfieldAfter"
           label="After"
           v-model="queryString.AppointmentTimeAfter"
-          prepend-icon="mdi-magnify"
           append-icon="event"
           @click:append="dialogPickerAfter = true"
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          placeholder="  "
+          outlined
           dense
         ></v-text-field>
       </v-col>
@@ -39,22 +52,22 @@
           ref="textfieldBefore"
           label="Before"
           v-model="queryString.AppointmentTimeBefore"
-          prepend-icon="mdi-magnify"
           append-icon="event"
           @click:append="dialogPickerBefore = true"
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          placeholder="  "
+          outlined
           dense
         ></v-text-field>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="12" md="2">
-        <v-btn large @click="todayStudies"
-          >Today's Studies</v-btn
-        >
+        <v-btn large @click="todayStudies">Today's Studies</v-btn>
       </v-col>
       <v-col cols="12" md="2">
-        <v-btn large @click="thisWeekStudies"
-          >This week's Studies</v-btn
-        >
+        <v-btn large @click="thisWeekStudies">This week's Studies</v-btn>
       </v-col>
     </v-row>
     <v-row justify="center">
@@ -264,7 +277,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .theme--light.v-icon {
   color: var(--v-primary-base) !important;
 }

@@ -27,10 +27,10 @@
         </v-card-actions> -->
       </v-card>
     </v-col>
-    <v-row align="center" justify="center">
+    <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="purple" fab large @click.stop="updateExperimenters"
-          >+</v-btn
+        <v-btn color="primary" fab large @click.stop="updateExperimenters"
+          ><v-icon>add</v-icon></v-btn
         >
       </v-col>
     </v-row>

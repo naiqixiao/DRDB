@@ -10,6 +10,11 @@
         return-object
         label="Studies"
         @change="searchChild"
+        height="48px"
+        background-color="textbackground"
+        hide-details
+        outlined
+        dense
       ></v-select>
 
       <h4>{{ selectedStudy.StudyName }}</h4>
@@ -60,9 +65,14 @@
       <v-row justify="space-around">
         <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
           <v-text-field
+            height="48px"
+            background-color="textbackground"
+            hide-details
             :label="field.label"
             v-model="currentFamily[field.field]"
             readonly
+            placeholder="  "
+            outlined
             dense
           ></v-text-field>
         </v-col>
@@ -70,9 +80,14 @@
       <v-row justify="space-around">
         <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
           <v-text-field
+            height="48px"
+            background-color="textbackground"
+            hide-details
             :label="field.label"
             v-model="currentChild[field.field]"
             readonly
+            placeholder="  "
+            outlined
             dense
           ></v-text-field>
         </v-col>
@@ -90,6 +105,11 @@
             label="Parents' response"
             @change="chooseResponse"
             :disabled="!currentChild"
+            height="48px"
+            background-color="textbackground"
+            hide-details
+            outlined
+            dense
           ></v-select>
         </v-col>
 
