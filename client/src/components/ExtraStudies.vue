@@ -1,7 +1,5 @@
 <template>
-  <v-row dense
-  align="center"
-  >
+  <v-row dense align="center">
     <v-col cols="12" md="2">
       <h3>{{ child.Name }}</h3>
     </v-col>
@@ -29,7 +27,7 @@
         dense
       ></v-select>
     </v-col>
-    <v-col cols="12" md="2">
+    <v-col cols="12" md="2" v-if="this.response == 'Confirmed'">
       <v-select
         :items="potentialExperimenters"
         :item-value="'id'"
@@ -61,6 +59,7 @@ export default {
     currentStudy: Object,
     participationDate: Date,
     index: Number,
+    response: String,
   },
   data() {
     return {

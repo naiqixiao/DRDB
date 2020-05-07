@@ -76,9 +76,9 @@
       </v-row>
       <v-row justify="start">
         <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Child information:</h4>
-          </v-col>
+          <v-divider></v-divider>
+          <h4 class="text-left">Child information:</h4>
+        </v-col>
         <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
           <v-text-field
             height="48px"
@@ -110,11 +110,11 @@
         <v-spacer></v-spacer>
       </v-row>
 
-      <v-row justify="space-around">
+      <v-row justify="space-around" align="center">
         <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Schedule this child</h4>
-          </v-col>
+          <v-divider></v-divider>
+          <h4 class="text-left">Schedule this child</h4>
+        </v-col>
         <v-col cols="12" md="9">
           <v-select
             :items="Responses"
@@ -135,7 +135,7 @@
             color="primary"
             fab
             @click.stop="scheduleChild"
-            :disabled="!currentChild.id"
+            :disabled="response == null"
           >
             <v-icon> {{ scheduleButtonIcon }}</v-icon>
           </v-btn>
@@ -241,9 +241,9 @@
                   <template>
                     <v-container fluid>
                       <v-row
-                        class="grey lighten-5"
                         style="height: 100px;"
                         justify="space-around"
+                        align="center"
                       >
                         <v-col cols="12" md="3">
                           <v-text-field
@@ -279,6 +279,7 @@
                             :targetChild="currentChild"
                             :currentStudy="selectedStudy"
                             :index="index"
+                            :response="response"
                             :potentialStudies="
                               potentialStudies(appointment.Child)
                                 .potentialStudyList
@@ -288,7 +289,7 @@
                             @emitSelectedStudy="receiveSelectedStudy"
                             align="start"
                           ></ExtraStudies>
-                          <v-row v-if="index === 0">
+                          <v-row v-if="index === 0 && response === 'Confirmed'">
                             <div class="title">
                               Additional appointment(s) for:
                             </div>
@@ -341,6 +342,7 @@
                 </v-btn>
 
                 <v-btn
+                  v-if="response == 'Confirmed'"
                   text
                   :disabled="!manualCalendar"
                   @click="createCalendarbyScheduleId"
@@ -580,6 +582,8 @@ export default {
           console.log(error.response);
         }
       }
+
+      this.response = null;
     },
 
     editChild() {
@@ -624,7 +628,7 @@ export default {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedItem = Object.assign({}, this.currentChild);
 
-      if (!this.scheduleId) {
+      if (!this.scheduleId & (this.appointments.length === 0)) {
         var newAppointment = Object.assign({}, this.defaultAppointment);
         newAppointment.FK_Child = this.currentChild.id;
         newAppointment.FK_Family = this.currentChild.FK_Family;
@@ -639,7 +643,16 @@ export default {
         this.appointments.push(newAppointment);
       }
 
-      this.dialogSchedule = true;
+      switch (this.response) {
+        case "Confirmed":
+        case "Interested":
+        case "Left a message":
+          this.dialogSchedule = true;
+          break;
+
+        case "Rejected":
+          break;
+      }
     },
 
     receiveSelectedStudy(selectedStudy) {
@@ -778,7 +791,6 @@ export default {
         default:
           newSchedule = {
             AppointmentTime: null,
-            Status: this.response,
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
           };
@@ -788,6 +800,8 @@ export default {
             this.response === "Interested"
           ) {
             newSchedule.Status = "TBD";
+          } else {
+            newSchedule.Status = "Rejected";
           }
           break;
       }
@@ -797,7 +811,22 @@ export default {
 
         this.scheduleId = newStudySchedule.data.id;
 
-        this.manualCalendar = true;
+        switch (this.response) {
+          case "Confirmed":
+            this.manualCalendar = true;
+            break;
+
+          case "Interested":
+          case "Left a message":
+            this.e1 = 2;
+            this.emailDialog = true;
+            break;
+
+          case "Rejected":
+            this.e1 = 3;
+            this.nextContactDialog = true;
+            break;
+        }
         // var calendarEvent = newSchedule;
 
         // calendarEvent.scheduleId = newStudySchedule.data.id;

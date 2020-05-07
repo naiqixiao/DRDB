@@ -213,6 +213,7 @@
                           potentialStudies(appointment.Child).potentialStudyList
                         "
                         :index="index"
+                        response="Confirmed"
                         @selectStudy="selectStudy"
                         @deleteAppointment="deleteAppointment"
                         @emitSelectedStudy="receiveSelectedStudy"

@@ -61,9 +61,9 @@ app.use("/cal", calRoutes);
 app.use("/gmail", gmailRoutes);
 
 
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', function(req, res){
+//   res.sendFile(__dirname + '/index.html');
+// });
 
 // Error handling
 app.use((req, res, next) => {
