@@ -232,4 +232,8 @@ export default {
 .v-stepper__items {
   background-color: var(--v-background-base);
 }
+
+// .theme--light.v-card {
+//   background-color: var(--v-background-base) !important;
+// }
 </style>

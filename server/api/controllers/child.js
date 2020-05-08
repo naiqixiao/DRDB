@@ -13,13 +13,13 @@ exports.create = asyncHandler(async (req, res) => {
     // match siblings and update sibling table
     var Children = await model.child.findAll({
       attributes: ["id"],
-      where: { FK_Family: child.FK_Family, id: { [Op.ne]: child.id } }
+      where: { FK_Family: child.FK_Family, id: { [Op.ne]: child.id } },
     });
 
     if (Children.length > 0) {
       var siblings = [];
 
-      Children.forEach(sibling => {
+      Children.forEach((sibling) => {
         siblings.push({ FK_Child: child.id, Sibling: sibling.id });
         siblings.push({ FK_Child: sibling.id, Sibling: child.id });
       });
@@ -63,7 +63,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.minAge && req.query.maxAge) {
     queryString.Age = {
-      [Op.between]: [req.query.minAge * 30.5 - 5, req.query.maxAge * 30.5 - 5]
+      [Op.between]: [req.query.minAge * 30.5 - 5, req.query.maxAge * 30.5 - 5],
     };
   }
   if (req.query.pastParticipants) {
@@ -81,19 +81,34 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.family,
         include: [
           {
-            model: model.conversations
-          }
-        ]
+            model: model.conversations,
+          },
+          {
+            model: model.child,
+            include: [{ model: model.appointment, attributes: ["FK_Study"] }],
+          },
+          {
+            model: model.appointment,
+            include: [
+              { model: model.child, attributes: ["Name", "DoB"] },
+              {
+                model: model.study,
+                attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+              },
+              { model: model.schedule },
+            ],
+          },
+        ],
       },
       {
         model: model.child,
         as: "sibling",
         through: {
-          model: model.sibling
+          model: model.sibling,
         },
-        include: [{ model: model.appointment, include: [model.schedule] }]
-      }
-    ]
+        include: [{ model: model.appointment, include: [model.schedule] }],
+      },
+    ],
   });
 
   res.status(200).json(children);
@@ -109,7 +124,7 @@ exports.update = asyncHandler(async (req, res) => {
   }
 
   const child = await model.child.update(updatedChildInfo, {
-    where: { id: ID }
+    where: { id: ID },
   });
 
   res.status(200).json(child);
@@ -118,7 +133,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a child with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const child = await model.child.destroy({
-    where: req.query
+    where: req.query,
   });
 
   res.status(200).json(child);

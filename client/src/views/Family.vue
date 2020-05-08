@@ -51,7 +51,7 @@
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
 
-            <h4 class="text-left">Parents information:</h4>
+            <h4 class="text-left">Family information:</h4>
           </v-col>
           <v-col
             cols="12"

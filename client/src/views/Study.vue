@@ -37,7 +37,7 @@
             cols="12"
             sm="6"
             md="4"
-            v-for="field in studyFields"
+            v-for="field in this.$studyBasicFields"
             :key="field.label"
           >
             <v-text-field
@@ -73,7 +73,7 @@
             cols="12"
             sm="6"
             md="4"
-            v-for="field in criteriaFields"
+            v-for="field in this.$studyCriteriaFields"
             :key="field.label"
           >
             <v-text-field
@@ -125,7 +125,7 @@
                       cols="12"
                       sm="6"
                       md="3"
-                      v-for="field in studyFields"
+                      v-for="field in this.$studyBasicFields"
                       :key="field.label"
                     >
                       <div v-if="field.options">
@@ -134,6 +134,7 @@
                           :items="options[field.options]"
                           v-model="editedStudy[field.field]"
                           :label="field.label"
+                          hide-details
                           dense
                         ></v-combobox>
                       </div>
@@ -141,7 +142,7 @@
                         <v-text-field
                           :label="field.label"
                           v-model="editedStudy[field.field]"
-                          :rules="rules[field.rules]"
+                          :rules="$rules[field.rules]"
                           dense
                         ></v-text-field>
                       </div>
@@ -248,22 +249,7 @@ export default {
         },
       ],
       dialog: false,
-      studyFields: [
-        { label: "Study Name", field: "StudyName" },
 
-        {
-          label: "Study Type",
-          field: "StudyType",
-          options: "studyType",
-        },
-        { label: "Premature Participants", field: "PrematureParticipant" },
-      ],
-
-      criteriaFields: [
-        { label: "Min Age", field: "MinAge" },
-        { label: "Max Age", field: "MaxAge" },
-        { label: "Premature Participants", field: "PrematureParticipant" },
-      ],
       options: {
         studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"],
       },
