@@ -58,7 +58,7 @@ export default {
       conv: "",
       headers: [
         { text: "Time", align: "center", value: "Time", sortable: false },
-        { text: "Conversation", align: "left", value: "Conversation", sortable: false },
+        { text: "Conversation", align: "center", value: "Conversation", sortable: false },
         { text: "Actions", align: "center", value: "actions", sortable: false },
       ],
     };

@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card outlined>
     <v-row dense>
       <v-col cols="12" md="6">
         <v-text-field

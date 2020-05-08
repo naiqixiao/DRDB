@@ -1,6 +1,6 @@
 <template>
-  <v-row dense align="center">
-    <v-col cols="12" md="2">
+  <v-row  align="end" justify="space-around">
+    <v-col cols="12" md="1">
       <h3>{{ child.Name }}</h3>
     </v-col>
     <v-col cols="12" md="2">
@@ -14,6 +14,7 @@
         label="Studies"
         disabled
         dense
+        hide-details
       ></v-select>
       <v-select
         v-else
@@ -24,10 +25,11 @@
         v-model="selectedStudy"
         return-object
         label="Studies"
+        hide-details
         dense
       ></v-select>
     </v-col>
-    <v-col cols="12" md="2" v-if="this.response == 'Confirmed'">
+    <v-col cols="12" md="3" v-if="response == 'Confirmed'">
       <v-select
         :items="potentialExperimenters"
         :item-value="'id'"
@@ -36,14 +38,18 @@
         return-object
         label="Experimenters"
         multiple
+        hide-details
         dense
       ></v-select>
     </v-col>
     <v-col cols="12" md="2" v-if="index > 0">
-      <v-btn color="green darken-2" text @click="deleteAppointment">
-        delete</v-btn
+      <v-btn text icon color="primary" @click="deleteAppointment">
+        <v-icon>delete</v-icon>
+        </v-btn
       >
     </v-col>
+    <v-col cols="12" md="2" v-else></v-col>
+    <v-col cols="12" md="1"></v-col>
   </v-row>
 </template>
 

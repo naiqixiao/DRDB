@@ -228,4 +228,8 @@ export default {
 #app .v-list-item__content {
   text-align: start !important;
 }
+
+.v-stepper__items {
+  background-color: var(--v-background-base);
+}
 </style>
