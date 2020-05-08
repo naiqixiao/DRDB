@@ -1001,8 +1001,6 @@ export default {
       }, 300);
     },
 
-
-
     scheduleChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedChild = Object.assign({}, this.currentChild);

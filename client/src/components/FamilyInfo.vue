@@ -33,65 +33,113 @@
           </v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-container>
-              <v-row>
-                <v-col
-                  cols="12"
-                  sm="6"
-                  md="3"
-                  v-for="field in editableFields"
-                  :key="field.label"
-                >
-                  <div v-if="field.options">
-                    <v-combobox
-                      justify="start"
-                      :items="options[field.options]"
-                      v-model="editedItem[field.field]"
-                      :label="field.label"
-                      height="48px"
-                      background-color="textbackground"
-                      hide-details
-                      placeholder="  "
-                      outlined
-                      dense
-                    ></v-combobox>
-                  </div>
-                  <div v-else-if="field.rules">
-                    <v-text-field
-                      :label="field.label"
-                      v-model="editedItem[field.field]"
-                      :rules="rules[field.rules]"
-                      height="48px"
-                      background-color="textbackground"
-                      hide-details
-                      placeholder="  "
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </div>
-                  <div v-else>
-                    <v-text-field
-                      :label="field.label"
-                      v-model="editedItem[field.field]"
-                      height="48px"
-                      background-color="textbackground"
-                      hide-details
-                      placeholder="  "
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
+            <v-row>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Family information:</h4>
+                <v-spacer></v-spacer>
+                <span class="headline">{{
+                  "Family ID: " + editedItem.id
+                }}</span>
+              </v-col>
+              <v-col
+                cols="12"
+                :md="field.width"
+                v-for="field in this.$familyBasicInfo"
+                :key="field.label"
+              >
+                <div v-if="field.options">
+                  <v-combobox
+                    justify="start"
+                    :items="options[field.options]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    :label="field.label"
+                    dense
+                  ></v-combobox>
+                </div>
+                <div v-else-if="field.rules">
+                  <v-text-field
+                    :label="field.label"
+                    :rules="rules[field.rules]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+                <div v-else>
+                  <v-text-field
+                    :label="field.label"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+              </v-col>
+
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Contact information:</h4>
+              </v-col>
+              <v-col
+                cols="12"
+                :md="field.width"
+                v-for="field in this.$familyContactInfo"
+                :key="field.label"
+              >
+                <div v-if="field.options">
+                  <v-combobox
+                    justify="start"
+                    :items="options[field.options]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    :label="field.label"
+                    dense
+                  ></v-combobox>
+                </div>
+                <div v-else-if="field.rules">
+                  <v-text-field
+                    :label="field.label"
+                    :rules="rules[field.rules]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+                <div v-else>
+                  <v-text-field
+                    :label="field.label"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+              </v-col>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Notes:</h4>
+              </v-col>
+              <v-col md="8" class="subtitle">
+                <v-textarea
+                  label=""
+                  outlined
+                  no-resize
+                  rows="3"
+                  solo
+                  v-model="editedItem.Note"
+                ></v-textarea
+              ></v-col>
+            </v-row>
           </v-form>
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+            <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+            <v-btn color="primary" @click="save">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

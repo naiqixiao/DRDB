@@ -177,57 +177,115 @@
       <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
-            <span class="headline">Family information</span>
+            <span class="headline">Edit family information</span>
+            <v-spacer></v-spacer>
+            <span class="headline">{{ "Family ID: " + editedItem.id }}</span>
           </v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-container>
-              <v-row>
-                <v-col
-                  cols="12"
-                  sm="6"
-                  md="3"
-                  v-for="field in editableFields"
-                  :key="field.label"
-                >
-                  <div v-if="field.options">
-                    <v-combobox
-                      justify="start"
-                      :items="this.$options[field.options]"
-                      v-model="editedItem[field.field]"
-                      filled
-                      :label="field.label"
-                      dense
-                    ></v-combobox>
-                  </div>
-                  <div v-else-if="field.rules">
-                    <v-text-field
-                      :label="field.label"
-                      v-model="editedItem[field.field]"
-                      :rules="this.$rules[field.rules]"
-                      filled
-                      dense
-                    ></v-text-field>
-                  </div>
-                  <div v-else>
-                    <v-text-field
-                      :label="field.label"
-                      v-model="editedItem[field.field]"
-                      filled
-                      dense
-                    ></v-text-field>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
+            <v-row>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Family information:</h4>
+              </v-col>
+              <v-col
+                cols="12"
+                :md="field.width"
+                v-for="field in this.$familyBasicInfo"
+                :key="field.label"
+              >
+                <div v-if="field.options">
+                  <v-combobox
+                    justify="start"
+                    :items="options[field.options]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    :label="field.label"
+                    dense
+                  ></v-combobox>
+                </div>
+                <div v-else-if="field.rules">
+                  <v-text-field
+                    :label="field.label"
+                    :rules="rules[field.rules]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+                <div v-else>
+                  <v-text-field
+                    :label="field.label"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+              </v-col>
+
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Contact information:</h4>
+              </v-col>
+              <v-col
+                cols="12"
+                :md="field.width"
+                v-for="field in this.$familyContactInfo"
+                :key="field.label"
+              >
+                <div v-if="field.options">
+                  <v-combobox
+                    justify="start"
+                    :items="options[field.options]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    :label="field.label"
+                    dense
+                  ></v-combobox>
+                </div>
+                <div v-else-if="field.rules">
+                  <v-text-field
+                    :label="field.label"
+                    :rules="rules[field.rules]"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+                <div v-else>
+                  <v-text-field
+                    :label="field.label"
+                    v-model="editedItem[field.field]"
+                    outlined
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </div>
+              </v-col>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Notes:</h4>
+              </v-col>
+              <v-col md="8" class="subtitle">
+                <v-textarea
+                  label=""
+                  outlined
+                  no-resize
+                  rows="3"
+                  solo
+                  v-model="editedItem.Note"
+                ></v-textarea
+              ></v-col>
+            </v-row>
           </v-form>
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="dialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+            <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+            <v-btn color="primary" @click="save">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -292,11 +350,8 @@
       </v-col>
 
       <v-col cols="12" md="3">
-        <ParticipationHistory
-        :family=currentFamily
-         />
-        
-         </v-col>
+        <ParticipationHistory :family="currentFamily" />
+      </v-col>
     </v-row>
 
     <template>
@@ -393,6 +448,56 @@ export default {
       },
       Families: [],
       editableFields: [],
+      options: {
+        language: ["English", "French", "Chinese", "Spanish", "Hindi"],
+        race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
+        recruitmentMethod: [
+          "Hospital",
+          "Events",
+          "SocialMedia",
+          "PreviousParticipation",
+        ],
+      },
+
+      rules: {
+        name: [
+          (value) => !!value || "Required.",
+          (value) => {
+            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
+            return pattern.test(value) || "Invalid Name.";
+          },
+          (value) => (value && value.length <= 30) || "Max 30 characters",
+        ],
+        email: [
+          (value) => !!value || "Required.",
+          (value) => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return pattern.test(value) || "Invalid e-mail.";
+          },
+          (value) => (value && value.length <= 30) || "Max 30 characters",
+        ],
+        phone: [
+          (value) => {
+            const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+            return pattern.test(value) || "Invalid phone.";
+          },
+          (value) => !!value || "Required.",
+          (value) => (value && value.length == 10) || "Have to be 10 digits",
+        ],
+        dob: [
+          (value) => !!value || "Required.",
+          (value) => {
+            var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+            return pattern.test(value) || "Invalid Date of Birth.";
+          },
+        ],
+        birthWeight: [
+          (value) => {
+            var pattern = /^[0-9]{1,2}[:.,-]?$/;
+            return pattern.test(value) || "Invalid Birth Weight.";
+          },
+        ],
+      },
     };
   },
 
@@ -562,8 +667,7 @@ export default {
     },
   },
 
-  updated() {
-  },
+  updated() {},
 };
 </script>
 
