@@ -563,7 +563,6 @@ export default {
   },
 
   updated() {
-    // console.log("page updated~~");
   },
 };
 </script>

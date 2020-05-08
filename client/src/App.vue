@@ -224,4 +224,8 @@ export default {
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
+
+#app .v-list-item__content {
+  text-align: start !important;
+}
 </style>

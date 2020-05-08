@@ -3,11 +3,12 @@
   <v-row justify="space-around">
     <v-col cols="12" md="4">
       <v-row style="height: 60px;" dense>
-        <v-col cols="12" md="12" class="justify-start">
+        <v-col cols="12" md="12">
           <h1 class="text-left">Choose a study</h1>
         </v-col>
       </v-row>
       <v-select
+        class="selection"
         :items="studies"
         :item-value="'id'"
         :item-text="'StudyName'"
@@ -27,9 +28,7 @@
       <h4>{{ selectedStudy.MaxAge }}</h4>
       <p>{{ selectedStudy.Description }}</p>
 
-      <v-btn @click.stop="dialogEmail = true" color="green" text
-        >Email test</v-btn
-      >
+      <v-btn @click.stop="dialogEmail = true" color="primary">Email test</v-btn>
       <EmailDialog
         :dialog="dialogEmail"
         :emailTemplate="selectedStudy.EmailTemplate"
@@ -55,7 +54,7 @@
           ></Page>
         </v-col>
       </v-row>
-      <v-row justify="start">
+      <v-row justify="start" align="center">
         <v-col md="12" class="subtitle">
           <v-divider></v-divider>
           <h4 class="text-left">Family information:</h4>
@@ -73,8 +72,80 @@
             dense
           ></v-text-field>
         </v-col>
+        <v-col cols="12" md="2" style="text-align: center;">
+          <v-btn
+            color="primary"
+            fab
+            @click.stop="editFamily"
+            :disabled="!currentFamily.id"
+            ><v-icon>edit</v-icon></v-btn
+          >
+        </v-col>
       </v-row>
-      <v-row justify="start">
+
+      <v-dialog
+        v-model="dialogFamilyEdit"
+        max-width="1200px"
+        :retain-focus="false"
+      >
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Family information</span>
+          </v-card-title>
+
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-container>
+              <v-row>
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                  v-for="field in editableFields"
+                  :key="field.label"
+                >
+                  <div v-if="field.options">
+                    <v-combobox
+                      justify="start"
+                      :items="this.$options[field.options]"
+                      v-model="editedItem[field.field]"
+                      filled
+                      :label="field.label"
+                      dense
+                    ></v-combobox>
+                  </div>
+                  <div v-else-if="field.rules">
+                    <v-text-field
+                      :label="field.label"
+                      v-model="editedItem[field.field]"
+                      :rules="this.$rules[field.rules]"
+                      filled
+                      dense
+                    ></v-text-field>
+                  </div>
+                  <div v-else>
+                    <v-text-field
+                      :label="field.label"
+                      v-model="editedItem[field.field]"
+                      filled
+                      dense
+                    ></v-text-field>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-form>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="green darken-1" text @click="dialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn color="green darken-1" text @click="save">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-row justify="start" align="center">
         <v-col md="12" class="subtitle">
           <v-divider></v-divider>
           <h4 class="text-left">Child information:</h4>
@@ -96,9 +167,7 @@
         <v-col cols="12" md="5">
           <AgeDisplay :DoB="currentChild.DoB" />
         </v-col>
-      </v-row>
-      <v-row justify="space-around">
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="2" style="text-align: center;">
           <v-btn
             color="primary"
             fab
@@ -107,21 +176,19 @@
             ><v-icon>edit</v-icon></v-btn
           >
         </v-col>
-        <v-spacer></v-spacer>
       </v-row>
 
       <v-row justify="space-around" align="center">
         <v-col md="12" class="subtitle">
           <v-divider></v-divider>
-          <h4 class="text-left">Schedule this child</h4>
+          <h4 class="text-left">Schedule a study for this child</h4>
         </v-col>
         <v-col cols="12" md="9">
           <v-select
             :items="Responses"
             v-model="response"
             label="Parents' response"
-            @change="chooseResponse"
-            :disabled="!currentChild"
+            :disabled="!currentChild.id"
             height="48px"
             background-color="textbackground"
             hide-details
@@ -156,7 +223,11 @@
           </v-card>
         </v-dialog>
 
-        <v-dialog v-model="dialogEdit" max-width="760px" :retain-focus="false">
+        <v-dialog
+          v-model="dialogChildEdit"
+          max-width="760px"
+          :retain-focus="false"
+        >
           <v-card>
             <v-card-title>
               <span class="headline">Child's information</span>
@@ -203,10 +274,8 @@
 
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="dialogChild = false"
-                >Cancel</v-btn
-              >
-              <v-btn color="green darken-1" text @click="save">Save</v-btn>
+              <v-btn color="primary" @click="dialogChild = false">Cancel</v-btn>
+              <v-btn color="primary" @click="save">Save</v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -295,8 +364,7 @@
                             </div>
                             <v-col cols="12" md="2">
                               <v-btn
-                                color="green darken-2"
-                                text
+                                color="primary"
                                 @click="newAppointment(currentChild)"
                                 :disabled="
                                   potentialStudies(currentChild)
@@ -312,8 +380,7 @@
                               :key="child.id"
                             >
                               <v-btn
-                                color="green darken-2"
-                                text
+                                color="primary"
                                 @click="newAppointment(child)"
                                 :disabled="
                                   potentialStudies(child).selectableStudies
@@ -330,15 +397,14 @@
                   </template>
                 </v-card>
                 <v-btn
-                  text
-                  color="green darken-1"
+                  color="primary"
                   :disabled="!studyDateTime"
                   @click="continue12()"
                 >
                   <v-icon dark left v-show="scheduleId"
                     >mdi-checkbox-marked-circle</v-icon
                   >
-                  Schedule
+                  {{ scheduleButtonText }}
                 </v-btn>
 
                 <v-btn
@@ -362,10 +428,10 @@
                     Email: currentFamily.Email,
                     scheduleTime: studyDateTime,
                   }"
-                  emailType="Confirmation"
+                  :emailType="emailType"
                 ></Email>
 
-                <v-btn text color="green darken-2" @click="continue23()">
+                <v-btn color="primary" @click="continue23()">
                   Send Email
                 </v-btn>
               </v-stepper-content>
@@ -452,7 +518,8 @@ export default {
       dialogEmail: false,
       e1: 1,
       emailDialog: false,
-      dialogEdit: false,
+      dialogChildEdit: false,
+      dialogFamilyEdit: false,
       dialogSchedule: false,
       dobPicker: false,
       datePicker: false,
@@ -462,6 +529,8 @@ export default {
       Children: [],
       elegibleExperimenters: [],
       scheduleButtonIcon: "event",
+      scheduleButtonText: "Schedule",
+      emailType: "Confirmation",
       appointments: [],
       Experimenters: [],
       studyTime: "09:00AM",
@@ -589,7 +658,7 @@ export default {
     editChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedItem = Object.assign({}, this.currentChild);
-      this.dialogEdit = true;
+      this.dialogChildEdit = true;
     },
 
     async save() {
@@ -617,7 +686,7 @@ export default {
     },
 
     close() {
-      this.dialogEdit = false;
+      this.dialogChildEdit = false;
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -643,16 +712,7 @@ export default {
         this.appointments.push(newAppointment);
       }
 
-      switch (this.response) {
-        case "Confirmed":
-        case "Interested":
-        case "Left a message":
-          this.dialogSchedule = true;
-          break;
-
-        case "Rejected":
-          break;
-      }
+      this.dialogSchedule = true;
     },
 
     receiveSelectedStudy(selectedStudy) {
@@ -998,25 +1058,6 @@ export default {
       }, 100);
     },
 
-    chooseResponse() {
-      switch (this.response) {
-        case "Confirmed": {
-          this.scheduleButtonIcon = "event";
-          break;
-        }
-        case "Left a Message":
-        case "Interested": {
-          this.scheduleButtonIcon = "email";
-          break;
-        }
-
-        case "Rejected": {
-          this.scheduleButtonIcon = "sentiment_dissatisfied";
-          break;
-        }
-      }
-    },
-
     closeEmail() {
       this.dialogEmail = false;
     },
@@ -1092,22 +1133,52 @@ export default {
   },
 
   watch: {
-    dialogEdit(val) {
+    dialogChildEdit(val) {
       val || this.close();
     },
 
     dialogSchedule(val) {
       val || this.closeSchedule();
     },
+
+    response(val) {
+      switch (val) {
+        case "Confirmed": {
+          this.scheduleButtonIcon = "event";
+          this.scheduleButtonText = "Schedule";
+          this.studyTime = "09:00AM";
+          this.emailType = "Confirmation";
+          break;
+        }
+        case "Left a message":
+        case "Interested": {
+          this.scheduleButtonIcon = "email";
+          this.scheduleButtonText = "Confirm a tentative schedule";
+          this.studyTime = "";
+          this.emailType = "Introduction";
+          break;
+        }
+
+        case "Rejected": {
+          this.scheduleButtonIcon = "sentiment_dissatisfied";
+          this.scheduleButtonText = "Confirm a rejection";
+          this.studyTime = "";
+          this.emailType = "Introduction";
+          break;
+        }
+
+        default:
+          this.scheduleButtonIcon = "event";
+          this.scheduleButtonText = "Schedule";
+          this.studyTime = "";
+          break;
+      }
+    },
   },
 };
 </script>
 
-<style scoped>
-/deep/ .v-pagination__item {
-  display: none;
-}
-/deep/ .v-pagination__more {
-  display: none;
-}
+<style lang="scss" scoped>
+
+
 </style>

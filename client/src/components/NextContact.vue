@@ -169,7 +169,14 @@ export default {
               .add(7, "days")
               .format("YYYY-MM-DD");
 
-            this.nextContactNote = "7 days after their participation.";
+            this.nextContactNote =
+              "The family is about to participate a study on " +
+              moment().format("YYYY-MM-DD") +
+              ". Contact the family at least 7 days (" +
+              moment(this.studyDate)
+                .add(7, "days")
+                .format("YYYY-MM-DD") +
+              ") after their participation.";
             break;
 
           case "Interested":
@@ -179,17 +186,41 @@ export default {
               .add(2, "days")
               .format("YYYY-MM-DD");
             this.nextContactNote =
-              "Left a message or sent an email, follow up in 2 days.";
+              "Left a message or sent an email on " +
+              moment().format("YYYY-MM-DD") +
+              ", follow up in 2 days.";
             break;
 
           case "Rescheduling":
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(2, "days")
+              .format("YYYY-MM-DD");
+            this.nextContactNote =
+              "Rescheduling the family, need to confirm the rescheduled date and time. - " +
+              moment().format("YYYY-MM-DD");
+            break;
+
           case "No Show":
             this.nextContactDate = moment()
               .startOf("day")
               .add(2, "days")
               .format("YYYY-MM-DD");
             this.nextContactNote =
-              "Rescheduling or No Show, need to reschedule after 2 day.";
+              "The family didn't show up on " +
+              moment().format("YYYY-MM-DD") +
+              ". Need to contact again to reschedule.";
+            break;
+
+          case "Rejected":
+            this.nextContactDate = moment()
+              .startOf("day")
+              .add(7, "days")
+              .format("YYYY-MM-DD");
+            this.nextContactNote =
+              "Rejected participation on " +
+              moment().format("YYYY-MM-DD") +
+              ", to contact the family after 7 days.";
             break;
 
           case "Cancelled":
@@ -198,7 +229,9 @@ export default {
               .add(7, "days")
               .format("YYYY-MM-DD");
             this.nextContactNote =
-              "Cancelled a study, to contact the family after 7 days.";
+              "Cancelled a study on " +
+              moment().format("YYYY-MM-DD") +
+              ", to contact the family after 7 days.";
             break;
         }
       } else {
@@ -216,7 +249,14 @@ export default {
             .add(7, "days")
             .format("YYYY-MM-DD");
 
-          this.nextContactNote = "7 days after their participation.";
+          this.nextContactNote =
+            "The family is about to participate a study on " +
+            moment().format("YYYY-MM-DD") +
+            ". Contact the family at least 7 days (" +
+            moment(this.studyDate)
+              .add(7, "days")
+              .format("YYYY-MM-DD") +
+            ") after their participation.";
           break;
 
         case "Interested":
@@ -226,17 +266,41 @@ export default {
             .add(2, "days")
             .format("YYYY-MM-DD");
           this.nextContactNote =
-            "Left a message or sent an email, follow up in 2 days.";
+            "Left a message or sent an email on " +
+            moment().format("YYYY-MM-DD") +
+            ", follow up in 2 days.";
           break;
 
         case "Rescheduling":
+          this.nextContactDate = moment()
+            .startOf("day")
+            .add(2, "days")
+            .format("YYYY-MM-DD");
+          this.nextContactNote =
+            "Rescheduling the family, need to confirm the rescheduled date and time. - " +
+            moment().format("YYYY-MM-DD");
+          break;
+
         case "No Show":
           this.nextContactDate = moment()
             .startOf("day")
             .add(2, "days")
             .format("YYYY-MM-DD");
           this.nextContactNote =
-            "Rescheduling or No Show, need to reschedule after 2 day.";
+            "The family didn't show up on " +
+            moment().format("YYYY-MM-DD") +
+            ". Need to contact again to reschedule.";
+          break;
+
+        case "Rejected":
+          this.nextContactDate = moment()
+            .startOf("day")
+            .add(7, "days")
+            .format("YYYY-MM-DD");
+          this.nextContactNote =
+            "Rejected participation on " +
+            moment().format("YYYY-MM-DD") +
+            ", to contact the family after 7 days.";
           break;
 
         case "Cancelled":
@@ -245,7 +309,9 @@ export default {
             .add(7, "days")
             .format("YYYY-MM-DD");
           this.nextContactNote =
-            "Cancelled a study, to contact the family after 7 days.";
+            "Cancelled a study on " +
+            moment().format("YYYY-MM-DD") +
+            ", to contact the family after 7 days.";
           break;
       }
     } else {

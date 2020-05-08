@@ -107,15 +107,15 @@ export default {
             break;
 
           case "Introduction":
-            this.emailSubject = "Elgible study for " + this.data.childName;
+            this.emailSubject = "An elgible study for " + this.data.childName;
             break;
 
           case "Reminder":
-            this.emailSubject = "See you tomorrow!" + this.data.childName;
+            this.emailSubject = "See you tomorrow! " + this.data.childName;
             break;
 
           case "ThankYou":
-            this.emailSubject = "Thank you!";
+            this.emailSubject = "Thank you for your participation!";
             break;
         }
       } else {
@@ -139,15 +139,15 @@ export default {
           break;
 
         case "Introduction":
-          this.emailSubject = "Elgible study for " + this.data.childName;
+          this.emailSubject = "An elgible study for " + this.data.childName;
           break;
 
         case "Reminder":
-          this.emailSubject = "See you tomorrow!" + this.data.childName;
+          this.emailSubject = "See you tomorrow! " + this.data.childName;
           break;
 
         case "ThankYou":
-          this.emailSubject = "Thank you!";
+          this.emailSubject = "Thank you for your participation!";
           break;
       }
     } else {
