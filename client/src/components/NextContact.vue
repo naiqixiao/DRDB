@@ -171,7 +171,7 @@ export default {
 
             this.nextContactNote =
               "The family is about to participate in a study on " +
-              moment().format("YYYY-MM-DD") +
+              moment(this.studyDate).format("YYYY-MM-DD") +
               ". Contact the family at least 7 days (" +
               moment(this.studyDate)
                 .add(7, "days")
@@ -251,7 +251,7 @@ export default {
 
           this.nextContactNote =
             "The family is about to participate in a study on " +
-            moment().format("YYYY-MM-DD") +
+            moment(this.studyDate).format("YYYY-MM-DD") +
             ". Contact the family at least 7 days (" +
             moment(this.studyDate)
               .add(7, "days")

@@ -447,7 +447,7 @@
                       style="height: 60px;"
                       align="center"
                       justify="start"
-                      v-if="this.response == 'Confirmed'"
+                      v-if="response == 'Confirmed'"
                     >
                       <v-col cols="12" md="3" class="text-left">
                         <div class="title" style="padding-left: 8px;">
@@ -491,7 +491,7 @@
                       </v-col>
                     </v-row>
                     <v-divider></v-divider>
-                    <v-row>
+                    <v-row dense>
                       <v-col
                         cols="12"
                         md="12"
@@ -706,7 +706,6 @@ import ExtraStudies from "@/components/ExtraStudies";
 
 import Conversation from "@/components/Conversation";
 
-// import EmailDialog from "@/components/EmailDialog";
 import Email from "@/components/Email";
 import NextContact from "@/components/NextContact";
 
@@ -722,7 +721,6 @@ export default {
     ExtraStudies,
     Email,
     NextContact,
-    // EmailDialog,
     Page,
     AppointmentTableBrief,
     ParticipationHistory,
