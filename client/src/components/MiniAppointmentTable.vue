@@ -25,10 +25,10 @@
         </v-card-actions>
       </v-card>
     </v-col>
-    <v-row align="center" justify="center">
-      <v-col cols="12" md="2" dense>
+    <v-row align="end" justify="end">
+      <v-col cols="12" md="2" >
         <v-btn color="purple" fab large @click.stop="editNewAppointments"
-          >+</v-btn
+          ><v-icon>add</v-icon></v-btn
         >
       </v-col>
     </v-row>
@@ -79,7 +79,6 @@
           </v-container>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-4" text @click="show">Show</v-btn>
             <v-btn color="green darken-1" text @click="closeNewAppointment"
               >Cancel</v-btn
             >
@@ -127,7 +126,6 @@ import personnel from "@/services/personnel";
 import family from "@/services/family";
 import appointment from "@/services/appointment";
 import store from "@/store";
-
 
 export default {
   components: {
@@ -246,15 +244,15 @@ export default {
       }
     },
 
-    show() {
-      this.Experimenters = [];
+    // show() {
+    //   this.Experimenters = [];
 
-      for (var i = 0; i < this.newAppointments.length; i++) {
-        this.$refs.newAppointments[i].selectStudy();
-      }
-      console.log(this.newAppointments);
-      console.log(this.Experimenters);
-    },
+    //   for (var i = 0; i < this.newAppointments.length; i++) {
+    //     this.$refs.newAppointments[i].selectStudy();
+    //   }
+    //   console.log(this.newAppointments);
+    //   console.log(this.Experimenters);
+    // },
 
     async saveNewAppointments() {
       this.Experimenters = [];

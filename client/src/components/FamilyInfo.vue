@@ -29,7 +29,9 @@
       <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
         <v-card>
           <v-card-title>
-            <span class="headline">Family information</span>
+            <span class="headline">Edit family information</span>
+            <v-spacer></v-spacer>
+            <span class="headline">{{ "Family ID: " + editedItem.id }}</span>
           </v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
@@ -37,10 +39,6 @@
               <v-col md="12" class="subtitle">
                 <v-divider></v-divider>
                 <h4 class="text-left">Family information:</h4>
-                <v-spacer></v-spacer>
-                <span class="headline">{{
-                  "Family ID: " + editedItem.id
-                }}</span>
               </v-col>
               <v-col
                 cols="12"

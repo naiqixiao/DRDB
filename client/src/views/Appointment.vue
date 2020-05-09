@@ -123,7 +123,7 @@
 import ScheduleTable from "@/components/ScheduleTable";
 import FamilyInfo from "@/components/FamilyInfo";
 
-import family from "@/services/family";
+// import family from "@/services/family";
 import schedule from "@/services/schedule";
 
 export default {
@@ -248,12 +248,14 @@ export default {
       this.queryString = Object.assign({}, this.defaultQueryString);
     },
 
-    async updateFamily(familyId) {
-      var queryStringFamily = {
-        id: familyId,
-      };
-      const Results = await family.search(queryStringFamily);
-      this.currentFamily = Results.data[0];
+    updateFamily(family) {
+      // var queryStringFamily = {
+      //   id: familyId,
+      // };
+      // const Results = await family.search(queryStringFamily);
+      // this.currentFamily = Results.data[0];
+
+      this.currentFamily = family;
     },
 
     beforeDatePick() {

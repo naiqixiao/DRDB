@@ -150,9 +150,14 @@ exports.search = asyncHandler(async (req, res) => {
       {
         model: model.appointment,
         include: [
-          { model: model.family, attributes: ["id"] },
+          {
+            model: model.family,
+          },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.study,
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+          },
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
@@ -194,9 +199,14 @@ exports.today = asyncHandler(async (req, res) => {
       {
         model: model.appointment,
         include: [
-          { model: model.family, attributes: ["id"] },
+          {
+            model: model.family,
+          },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.study,
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+          },
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
@@ -241,9 +251,14 @@ exports.week = asyncHandler(async (req, res) => {
       {
         model: model.appointment,
         include: [
-          { model: model.family, attributes: ["id"] },
+          {
+            model: model.family,
+          },
           { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge"] },
+          {
+            model: model.study,
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+          },
           {
             model: model.personnel,
             through: { model: model.experimenterAssignment },
@@ -334,12 +349,15 @@ exports.update = asyncHandler(async (req, res) => {
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id"] },
+            {
+              model: model.family,
+            },
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"],
+              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
             },
+
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
@@ -374,12 +392,15 @@ exports.complete = asyncHandler(async (req, res) => {
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id"] },
+            {
+              model: model.family,
+            },
             { model: model.child, attributes: ["Name", "DoB"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge"],
+              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
             },
+
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },

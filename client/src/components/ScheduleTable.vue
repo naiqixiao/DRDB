@@ -3,57 +3,17 @@
     hide-default-footer
     disable-pagination
     fixed-header
-    height="720"
+    height="720px"
     single-select
     no-data-text="No study schedule to display."
     :headers="this.$headersSchedule"
     :items="Schedules"
     class="elevation-1"
     @click:row="rowSelected"
+    @item-expanded="rowSelected2"
     show-expand
     single-expand
   >
-    <template #top>
-      <v-dialog v-model="dialog" max-width="760px" :retain-focus="false">
-        <v-card>
-          <v-card-title class="headline"
-            >Select study date and time.</v-card-title
-          >
-          <template>
-            <v-container fluid>
-              <v-row
-                class="grey lighten-5"
-                style="height: 400px;"
-                justify="space-around"
-              >
-                <v-col cols="12" lg="5">
-                  <v-date-picker
-                    v-model="studyDate"
-                    show-current
-                    :min="earliestDate"
-                    :max="latestDate"
-                  ></v-date-picker>
-                </v-col>
-                <v-col cols="12" lg="3">
-                  <v-combobox
-                    v-model="studyTime"
-                    :items="studyTimeSlots"
-                    label="Study time"
-                  ></v-combobox>
-                  <h3>{{ studyDateTime }}</h3>
-                </v-col>
-              </v-row>
-            </v-container>
-          </template>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="close">Cancel</v-btn>
-            <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </template>
-
     <template #item.Child="{ item }">
       <ChildNameSchedule :item="item" />
     </template>
@@ -72,33 +32,33 @@
 
     <template #item.actions="{ item }">
       <v-icon
-        @click="updateSchedule(item, 'Confirmed')"
-        :disabled="item.Status === 'Confirmed' || item.Completed == 1"
+        @click.stop="updateSchedule(item, 'Confirmed')"
+        :disabled="item.Status === 'Confirmed' || item.Completed == true"
         >event</v-icon
       >
       <v-icon
-        @click="updateSchedule(item, 'Rescheduling')"
+        @click.stop="updateSchedule(item, 'Rescheduling')"
         :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
-            item.Completed == 1
+            item.Completed == true
         "
         >update</v-icon
       >
       <v-icon
-        @click="updateSchedule(item, 'No Show')"
+        @click.stop="updateSchedule(item, 'No Show')"
         :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
-            item.Completed == 1
+            item.Completed == true
         "
         >sentiment_dissatisfied</v-icon
       >
       <v-icon
-        @click="updateSchedule(item, 'Cancelled')"
-        :disabled="item.Status === 'Cancelled' || item.Completed == 1"
+        @click.stop="updateSchedule(item, 'Cancelled')"
+        :disabled="item.Status === 'Cancelled' || item.Completed == true"
         >not_interested</v-icon
       >
     </template>
@@ -114,7 +74,7 @@
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row class="grey lighten-5" justify="space-around">
+        <v-row justify="space-around">
           <v-col cols="12" md="12">
             <MiniAppointmentTable
               :Appointments="item.Appointments"
@@ -123,6 +83,165 @@
           </v-col>
         </v-row>
       </td>
+    </template>
+
+    <template #top>
+      <v-dialog
+        v-model="nextContactDialog"
+        max-width="800px"
+        :retain-focus="false"
+      >
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Notes for the next contact</span>
+          </v-card-title>
+          <NextContact
+            ref="NextContact"
+            :familyId="editedSchedule.Appointments[0].FK_Family"
+            :studyDate="nextContactDate"
+            :contactType="contactType"
+            :nextContactDialog="nextContactDialog"
+            @nextContactDone="updateNextContactFrontend"
+          ></NextContact>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="nextContactDialog = false"
+              >Cancel</v-btn
+            >
+            <v-btn color="primary" @click="updateNextContact">Save</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialog" max-width="1000px">
+        <v-stepper v-model="e1">
+          <v-stepper-header>
+            <v-stepper-step
+              :complete="e1 > 1"
+              editable
+              step="1"
+              @click="emailDialog = false"
+              >Reschedule</v-stepper-step
+            >
+
+            <v-divider></v-divider>
+
+            <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
+
+            <v-divider></v-divider>
+
+            <v-stepper-step step="3">Next contact</v-stepper-step>
+          </v-stepper-header>
+
+          <v-stepper-items>
+            <v-stepper-content step="1">
+              <v-card outlined>
+                <v-card-title class="headline"
+                  >Select study date and time.</v-card-title
+                >
+                <v-row justify="space-around">
+                  <v-col cols="12" lg="6">
+                    <v-date-picker
+                      v-model="studyDate"
+                      show-current
+                      :min="earliestDate"
+                      :max="latestDate"
+                    ></v-date-picker>
+                  </v-col>
+                  <v-col cols="12" lg="3">
+                    <v-combobox
+                      v-model="studyTime"
+                      :items="studyTimeSlots"
+                      label="Study time"
+                      hide-details
+                      dense
+                    ></v-combobox>
+                  </v-col>
+                </v-row>
+              </v-card>
+              <v-divider></v-divider>
+              <v-row justify="space-between" align="center">
+                <v-col cols="12" md="2"></v-col>
+                <v-col cols="12" md="6">
+                  <v-btn
+                    color="primary"
+                    :disabled="!studyDateTime"
+                    @click="continue12()"
+                  >
+                    <v-icon dark left v-show="scheduleUpdated"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >
+                    Confirm
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn
+                    :disabled="!scheduleNextPage"
+                    @click="scheduleNextStep"
+                  >
+                    Next</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-stepper-content>
+            <v-stepper-content step="2">
+              <Email
+                ref="Email"
+                :dialog="emailDialog"
+                :emailTemplate="
+                  editedSchedule.Appointments[0].Study.EmailTemplate
+                "
+                :data="{
+                  nameMom: editedSchedule.Appointments[0].Family.NameMom,
+                  childName: editedSchedule.Appointments[0].Child.Name,
+                  Email: editedSchedule.Appointments[0].Family.Email,
+                  scheduleTime: studyDateTime,
+                }"
+                emailType="Confirmation"
+              ></Email>
+              <v-divider></v-divider>
+              <v-row justify="space-between" align="center">
+                <v-col cols="12" md="2"></v-col>
+                <v-col cols="12" md="6">
+                  <v-btn color="primary" @click="continue23()"
+                    ><v-icon dark left v-show="emailSent"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >
+                    Send Email
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn
+                    :disabled="!scheduleNextPage"
+                    @click="scheduleNextStep"
+                  >
+                    Next</v-btn
+                  >
+                </v-col>
+              </v-row>
+            </v-stepper-content>
+
+            <v-stepper-content step="3">
+              <NextContact
+                ref="NextContactStepper"
+                :familyId="editedSchedule.Appointments[0].FK_Family"
+                :studyDate="studyDate"
+                contactType="Confirmed"
+                :nextContactDialog="nextContactDialogStepper"
+                @nextContactDone="updateNextContactFrontend"
+              ></NextContact>
+              <v-divider></v-divider>
+              <v-row dense justify="center" align="center">
+                <v-col>
+                  <v-btn color="primary" @click="completeSchedule()">
+                    Complete
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-stepper-content>
+          </v-stepper-items>
+        </v-stepper>
+      </v-dialog>
     </template>
   </v-data-table>
 </template>
@@ -133,6 +252,9 @@ import AgeByParticipationSchedule from "@/components/AgeByParticipationSchedule"
 import ChildNameSchedule from "@/components/ChildNameSchedule";
 import StudyNameSchedule from "@/components/StudyNameSchedule";
 import MiniAppointmentTable from "@/components/MiniAppointmentTable";
+
+import NextContact from "@/components/NextContact";
+import Email from "@/components/Email";
 
 import schedule from "@/services/schedule";
 
@@ -145,6 +267,8 @@ export default {
     ChildNameSchedule,
     StudyNameSchedule,
     MiniAppointmentTable,
+    Email,
+    NextContact,
   },
   props: {
     Schedules: Array,
@@ -152,22 +276,52 @@ export default {
   },
   data() {
     return {
+      e1: 1,
+      contactType: "",
       dialog: false,
       editedIndex: -1,
-      editedItem: {},
+      editedSchedule: {
+        Appointments: [
+          {
+            FK_Family: 1,
+            Study: { EmailTemplate: "" },
+            Family: { NameMom: "" },
+            Child: { Name: "" },
+          },
+        ],
+      },
       earliestDate: new Date(),
       latestDate: new Date(),
       studyDate: null,
       studyTime: "09:00AM",
+      emailDialog: false,
+      scheduleNextPage: false,
+      emailSent: false,
+      scheduleUpdated: false,
+      response: "Confirmed",
+      nextContactDate: "",
+      nextContactDialog: false,
+      nextContactDialogStepper: false,
+      defaultSchedule: {
+        Appointments: [
+          {
+            FK_Family: 1,
+            Study: { EmailTemplate: "" },
+            Family: { NameMom: "" },
+            Child: { Name: "" },
+          },
+        ],
+      },
     };
   },
   methods: {
     async updateSchedule(item, status) {
-      console.log(item);
+      this.$emit("rowSelected", item.Appointments[0].Family);
+      this.response = status;
       switch (status) {
         case "Confirmed":
           this.editedIndex = this.Schedules.indexOf(item);
-          this.editedItem = Object.assign({}, item);
+          this.editedSchedule = Object.assign({}, item);
           this.datePickerRange();
           this.dialog = true;
           break;
@@ -216,6 +370,13 @@ export default {
             item.updatedAt = new Date().toISOString();
 
             console.log("appointment updated!");
+
+            this.editedSchedule = Object.assign({}, item);
+
+            // next contact
+            this.contactType = status;
+            this.nextContactDate = this.TodaysDate;
+            this.nextContactDialog = true;
           } catch (error) {
             console.log(error.response);
           }
@@ -223,76 +384,157 @@ export default {
       }
     },
 
-    close() {
-      this.dialog = false;
-      setTimeout(() => {
-        this.editedItem = {};
-        this.editedIndex = -1;
-        this.studyDate = null;
-        this.studyTime = "09:00AM";
-      }, 300);
+    async updateNextContact() {
+      try {
+        await this.$refs.NextContact.updateNextContact();
+
+        this.nextContactDialog = false;
+      } catch (error) {
+        console.log(error);
+      }
     },
 
-    async save() {
+    updateNextContactFrontend(nextContact) {
+      this.$emit("nextContactDone", nextContact);
+    },
+
+    async reschedule() {
       try {
         if (this.editedIndex > -1) {
-          this.editedItem.Status = "Confirmed";
+          this.editedSchedule.Status = "Confirmed";
 
-          this.editedItem.AppointmentTime = moment(
+          this.editedSchedule.AppointmentTime = moment(
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.editedItem.Appointments.map((appointment) => {
-            return appointment.Study.StudyName;
-          });
+          var studyNames = this.editedSchedule.Appointments.map(
+            (appointment) => {
+              return appointment.Study.StudyName;
+            }
+          );
 
-          var childNames = this.editedItem.Appointments.map((appointment) => {
-            return appointment.FK_Child;
-          });
+          var childNames = this.editedSchedule.Appointments.map(
+            (appointment) => {
+              return appointment.FK_Child;
+            }
+          );
 
           childNames = Array.from(new Set(childNames));
 
-          this.editedItem.summary =
+          this.editedSchedule.summary =
             studyNames.join(" + ") +
             ", Family: " +
-            this.editedItem.Appointments[0].FK_Family +
+            this.editedSchedule.Appointments[0].FK_Family +
             ", Child: " +
             childNames.join(" + ");
 
-          this.editedItem.start = {
+          this.editedSchedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
             timeZone: "America/Toronto",
           };
-          this.editedItem.end = {
+          this.editedSchedule.end = {
             dateTime: moment(this.studyDateTime)
               .add(1, "h") // might change if multiple studies are scheduled for one visit
               .toISOString(true),
             timeZone: "America/Toronto",
           };
 
-          const calendarEvent = await schedule.update(this.editedItem);
+          const calendarEvent = await schedule.update(this.editedSchedule);
 
-          this.editedItem.calendarEventId = calendarEvent.calendarEventId;
-          this.editedItem.eventURL = calendarEvent.eventURL;
-          this.editedItem.updatedAt = new Date().toISOString();
+          this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
+          this.editedSchedule.eventURL = calendarEvent.eventURL;
+          this.editedSchedule.updatedAt = new Date().toISOString();
 
-          Object.assign(this.Schedules[this.editedIndex], this.editedItem);
+          Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
         }
 
+        // this.close();
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
+    async continue12() {
+      try {
+        await this.reschedule();
+
+        this.scheduleUpdated = true;
+        this.scheduleNextPage = true;
+      } catch (error) {
+        console.log(error);
+        alert("Failed to update the appointment, please try again.");
+      }
+    },
+
+    async continue23() {
+      try {
+        await this.$refs.Email.sendEmail();
+
+        this.emailSent = true;
+        this.scheduleNextPage = true;
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
+    async completeSchedule() {
+      try {
+        await this.$refs.NextContactStepper.updateNextContact();
+        // this.$emit("newSchedule");
         this.close();
       } catch (error) {
         console.log(error.response);
       }
     },
 
+    scheduleNextStep() {
+      switch (this.e1) {
+        case 1:
+          if (this.response != "Rejected") {
+            this.emailDialog = true;
+          } else {
+            this.e1 = 2; // skip email if parents rejected participation.
+            this.nextContactDialogStepper = true;
+          }
+          break;
+
+        case 2:
+          this.nextContactDialogStepper = true;
+          break;
+      }
+
+      this.e1 += 1;
+      this.scheduleNextPage = false;
+    },
+
+    close() {
+      this.dialog = false;
+      setTimeout(() => {
+        this.editedSchedule = Object.assign({}, this.defaultSchedule);
+        this.editedIndex = -1;
+        this.studyDate = null;
+        this.studyTime = "09:00AM";
+        this.e1 = 1;
+        this.emailDialog = false;
+        this.nextContactDialogStepper = false;
+        this.emailSent = false;
+        this.scheduleNextPage = false;
+        this.scheduleUpdated = false;
+      }, 300);
+    },
+
     rowSelected(item, row) {
       row.select(true);
-      this.$emit("rowSelected", item.Appointments[0].FK_Family);
+      this.$emit("rowSelected", item.Appointments[0].Family);
+    },
+
+    rowSelected2(item) {
+      this.$emit("rowSelected", item.item.Appointments[0].Family);
     },
 
     datePickerRange() {
-      if (this.editedItem.Appointments) {
-        var minAges = this.editedItem.Appointments.map((appointment) => {
+      if (this.editedSchedule.Appointments) {
+        var minAges = this.editedSchedule.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MinAge * 30.5),
             "days"
@@ -305,7 +547,7 @@ export default {
 
         this.earliestDate = MinAge.toISOString(true);
 
-        var maxAges = this.editedItem.Appointments.map((appointment) => {
+        var maxAges = this.editedSchedule.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MaxAge * 30.5),
             "days"
@@ -348,6 +590,11 @@ export default {
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
     },
+    TodaysDate() {
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
+    },
   },
   watch: {
     dialog(val) {
@@ -358,8 +605,6 @@ export default {
 </script>
 
 <style scoped>
-
-
 .theme--light.v-icon {
   color: var(--v-primary-base);
   font-size: 28px;

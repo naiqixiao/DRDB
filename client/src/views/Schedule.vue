@@ -159,7 +159,9 @@
             <v-card-title>
               <span class="headline">Edit family information</span>
               <v-spacer></v-spacer>
-              <span class="headline">{{"Family ID: " + currentFamily.id}}</span>
+              <span class="headline">{{
+                "Family ID: " + currentFamily.id
+              }}</span>
             </v-card-title>
 
             <v-form ref="formFamily" v-model="validFamily" lazy-validation>
@@ -561,6 +563,7 @@
                       </v-col>
                     </v-row>
                   </v-card>
+                  <v-divider></v-divider>
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
@@ -606,7 +609,7 @@
                     }"
                     :emailType="emailType"
                   ></Email>
-
+                  <v-divider></v-divider>
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
@@ -949,7 +952,7 @@ export default {
 
           Object.assign(this.Children[this.editedIndex], this.currentChild);
 
-          console.log("Family Info is updated!")
+          console.log("Family Info is updated!");
 
           this.closeFamily();
         } catch (error) {
@@ -991,7 +994,6 @@ export default {
     },
 
     closeFamily() {
-      
       this.dialogFamilyEdit = false;
       setTimeout(() => {
         this.editedFamily = {};
@@ -1460,7 +1462,7 @@ export default {
     dialogChildEdit(val) {
       val || this.closeChild();
     },
-    
+
     dialogFamilyEdit(val) {
       val || this.closeFamily();
     },

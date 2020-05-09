@@ -25,7 +25,7 @@
       <v-icon
         @click.stop="updateSchedule(item, 'Confirmed')"
         :disabled="
-          item.Schedule.Status === 'Confirmed' || item.Schedule.Completed == 1
+          item.Schedule.Status === 'Confirmed' || item.Schedule.Completed == true
         "
         >event</v-icon
       >
@@ -35,7 +35,7 @@
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
-            item.Schedule.Completed == 1
+            item.Schedule.Completed == true
         "
         >update</v-icon
       >
@@ -45,19 +45,19 @@
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
-            item.Schedule.Completed == 1
+            item.Schedule.Completed == true
         "
         >sentiment_dissatisfied</v-icon
       >
       <v-icon
         @click.stop="updateSchedule(item, 'Cancelled')"
         :disabled="
-          item.Schedule.Status === 'Cancelled' || item.Schedule.Completed == 1
+          item.Schedule.Status === 'Cancelled' || item.Schedule.Completed == true
         "
         >not_interested</v-icon
       >
 
-      <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+      <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -97,28 +97,36 @@
                       v-model="studyTime"
                       :items="studyTimeSlots"
                       label="Study time"
+                      hide-details
+                      dense
                     ></v-combobox>
-                    <h3>{{ studyDateTime }}</h3>
                   </v-col>
                 </v-row>
-                <!-- <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn color="green darken-1" text @click="close"
-                    >Cancel</v-btn
-                  >
-                  <v-btn color="green darken-1" text @click="save"
-                    >Confirm</v-btn
-                  >
-                </v-card-actions> -->
               </v-card>
-              <v-btn
-                text
-                color="green darken-1"
-                :disabled="!studyDateTime"
-                @click="continue12()"
-              >
-                Confirm
-              </v-btn>
+              <v-divider></v-divider>
+              <v-row justify="space-between" align="center">
+                <v-col cols="12" md="2"></v-col>
+                <v-col cols="12" md="6">
+                  <v-btn
+                    color="primary"
+                    :disabled="!studyDateTime"
+                    @click="continue12()"
+                  >
+                    <v-icon dark left v-show="scheduleUpdated"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >
+                    Confirm
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn
+                    :disabled="!scheduleNextPage"
+                    @click="scheduleNextStep"
+                  >
+                    Next</v-btn
+                  >
+                </v-col>
+              </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
               <Email
@@ -133,24 +141,45 @@
                 }"
                 emailType="Confirmation"
               ></Email>
-
-              <v-btn text color="green darken-2" @click="continue23()">
-                Send Email
-              </v-btn>
+              <v-divider></v-divider>
+              <v-row justify="space-between" align="center">
+                <v-col cols="12" md="2"></v-col>
+                <v-col cols="12" md="6">
+                  <v-btn color="primary" @click="continue23()"
+                    ><v-icon dark left v-show="emailSent"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >
+                    Send Email
+                  </v-btn>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn
+                    :disabled="!scheduleNextPage"
+                    @click="scheduleNextStep"
+                  >
+                    Next</v-btn
+                  >
+                </v-col>
+              </v-row>
             </v-stepper-content>
 
             <v-stepper-content step="3">
               <NextContact
-                ref="NextContact"
+                ref="NextContactStepper"
                 :familyId="family.id"
                 :studyDate="studyDate"
                 contactType="Confirmed"
                 :nextContactDialog="nextContactDialogStepper"
                 @nextContactDone="updateNextContactFrontend"
               ></NextContact>
-              <v-btn text color="primary" @click="completeSchedule()">
-                Complete
-              </v-btn>
+              <v-divider></v-divider>
+              <v-row dense justify="center" align="center">
+                <v-col>
+                  <v-btn color="primary" @click="completeSchedule()">
+                    Complete
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
@@ -244,6 +273,9 @@ export default {
       },
       studyDate: null,
       studyTime: "09:00AM",
+      scheduleNextPage: false,
+      emailSent: false,
+      scheduleUpdated: false,
     };
   },
   methods: {
@@ -305,28 +337,6 @@ export default {
           }
           break;
       }
-    },
-
-    close() {
-      this.dialog = false;
-      setTimeout(() => {
-        // this.editedItem = {
-        //   Study: {
-        //     MinAge: 6,
-        //     MaxAge: 18,
-        //   },
-        //   Child: {
-        //     Name: null,
-        //     DoB: new Date(),
-        //   },
-        // };
-        // this.editedIndex = -1;
-        this.studyDate = null;
-        this.studyTime = "09:00AM";
-        this.e1 = 1;
-        this.emailDialog = false;
-        this.nextContactDialogStepper = false;
-      }, 300);
     },
 
     async updateNextContact() {
@@ -404,18 +414,21 @@ export default {
       try {
         await this.reschedule();
 
-        this.e1 = 2;
-        this.emailDialog = true;
+        this.scheduleUpdated = true;
+        this.scheduleNextPage = true;
       } catch (error) {
         console.log(error);
+        alert("Failed to update the appointment, please try again.");
       }
     },
 
     async continue23() {
       try {
         await this.$refs.Email.sendEmail();
-        this.e1 = 3;
-        this.nextContactDialogStepper = true;
+        // this.e1 = 3;
+        // this.nextContactDialogStepper = true;
+        this.emailSent = true;
+        this.scheduleNextPage = true;
       } catch (error) {
         console.log(error.response);
       }
@@ -423,13 +436,47 @@ export default {
 
     async completeSchedule() {
       try {
-        await this.$refs.NextContact.updateNextContact();
+        await this.$refs.NextContactStepper.updateNextContact();
         this.$emit("newSchedule");
         this.close();
         this.e1 = 1;
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    scheduleNextStep() {
+      switch (this.e1) {
+        case 1:
+          if (this.response != "Rejected") {
+            this.emailDialog = true;
+          } else {
+            this.e1 = 2; // skip email if parents rejected participation.
+            this.nextContactDialogStepper = true;
+          }
+          break;
+
+        case 2:
+          this.nextContactDialogStepper = true;
+          break;
+      }
+
+      this.e1 += 1;
+      this.scheduleNextPage = false;
+    },
+
+    close() {
+      this.dialog = false;
+      setTimeout(() => {
+        this.studyDate = null;
+        this.studyTime = "09:00AM";
+        this.e1 = 1;
+        this.emailDialog = false;
+        this.nextContactDialogStepper = false;
+        this.emailSent = false;
+        this.scheduleNextPage = false;
+        this.scheduleUpdated = false;
+      }, 300);
     },
   },
 
