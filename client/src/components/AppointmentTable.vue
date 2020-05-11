@@ -84,7 +84,7 @@
                   >Select study date and time.</v-card-title
                 >
                 <v-row justify="space-around">
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" md="6">
                     <v-date-picker
                       v-model="studyDate"
                       show-current

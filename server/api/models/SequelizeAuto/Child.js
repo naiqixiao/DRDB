@@ -26,6 +26,10 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false
       },
+      Language: {
+        type: DataTypes.STRING(10),
+        allowNull: true
+      },
       Hearingloss: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

@@ -16,7 +16,6 @@
 //     });
 // }
 
-
 module.exports = function(sequelize, DataTypes) {
   const Personnel = sequelize.define(
     "Personnel",
@@ -57,6 +56,11 @@ module.exports = function(sequelize, DataTypes) {
         },
       },
       Active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: "1",
+      },
+      temporaryPassword: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "1",

@@ -11,5 +11,12 @@ export default {
   },
   check_login(){
     return api().post("user/checklogin");
-  }
+  },
+  changePassword(credentials) {
+    credentials.lab = store.state.lab;
+    return api().post("user/changePassword", credentials);
+  },
+  resetPassword(credentials) {
+    return api().post("user/resetPassword", credentials);
+  },
 };
