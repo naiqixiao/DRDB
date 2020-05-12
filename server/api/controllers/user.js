@@ -267,7 +267,9 @@ exports.changePassword = asyncHandler(async (req, res) => {
           "<p>Lab manager</p>",
       };
 
-      await sendEmail(req.oAuth2Client, emailContent);
+      const oAuth2Client = await generalAuth();
+
+      await sendEmail(oAuth2Client, emailContent);
     } catch (error) {
       throw error;
     }
@@ -306,6 +308,10 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       }
     );
 
+    res.status(200).send({
+      message: "Password reset!",
+    });
+
     try {
       var emailContent = {
         to: personnel.Email,
@@ -328,10 +334,6 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     } catch (error) {
       throw error;
     }
-
-    res.status(200).send({
-      message: "Password reset!",
-    });
   } catch (error) {
     throw error;
   }

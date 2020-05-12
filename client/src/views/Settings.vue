@@ -1,90 +1,138 @@
 <template>
-  <div>
-    <v-data-table :headers="headers" :items="desserts" class="elevation-1">
-      <template v-slot:item.glutenfree="{ item }">
-        <v-simple-checkbox
-          v-model="item.glutenfree"
-        ></v-simple-checkbox>
-      </template>
-    </v-data-table>
-  </div>
+  <v-row justify="center" align="center">
+    <v-col cols="12" md="6">
+      <v-btn color="primary" @click.stop="dialog = true">Change password</v-btn>
+    </v-col>
+
+    <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
+      <v-card outlined>
+        <v-card-title class="headline">Change password</v-card-title>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-row v-if="!changeTemporaryPassword" justify="center">
+            <v-col cols="12" md="6" class="subtitle">
+              <v-divider></v-divider>
+              <h4 class="text-left">Current password:</h4>
+              <v-text-field
+                v-model="password"
+                type="password"
+                hide-details
+                dense
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row justify="center">
+            <v-col cols="12" md="12">
+              <v-divider></v-divider>
+            </v-col>
+            <v-col cols="12" md="6" class="subtitle">
+              <h4 class="text-left">New password:</h4>
+              <v-text-field
+                v-model="newPassword"
+                type="password"
+                :rules="[newPasswordRule]"
+                clearable
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <br />
+          <v-row justify="center">
+            <v-col cols="12" md="6" class="subtitle">
+              <h4 class="text-left">Confirm new password:</h4>
+              <v-text-field
+                v-model="newPasswordVerify"
+                clearable
+                type="password"
+                :rules="[passwordConfirmationRule]"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-form>
+
+        <v-card-actions>
+          <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+          <v-btn
+            color="primary"
+            :disabled="
+              passwordConfirmationRule != true ||
+                newPassword == null ||
+                password == null ||
+                newPasswordRule != true
+            "
+            @click="changePassword"
+            >Confirm</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
 </template>
 
 <script>
+import login from "@/services/login";
+
 export default {
   data() {
     return {
-      desserts: [
-        {
-          name: "Frozen Yogurt",
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0,
-          iron: "1%",
-          glutenfree: true
-        },
-        {
-          name: "Ice cream sandwich",
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3,
-          iron: "1%",
-          glutenfree: false
-        },
-        {
-          name: "Eclair",
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0,
-          iron: "7%",
-          glutenfree: false
-        },
-        {
-          name: "Jelly bean",
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0,
-          iron: "0%",
-          glutenfree: true
-        },
-        {
-          name: "Lollipop",
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0,
-          iron: "2%",
-          glutenfree: true
-        },
-        {
-          name: "KitKat",
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7,
-          iron: "6%",
-          glutenfree: false
-        }
-      ],
-      headers: [
-        {
-          text: "Dessert (100g serving)",
-          align: "start",
-          sortable: false,
-          value: "name"
-        },
-        { text: "Calories", value: "calories" },
-        { text: "Fat (g)", value: "fat" },
-        { text: "Carbs (g)", value: "carbs" },
-        { text: "Protein (g)", value: "protein" },
-        { text: "Iron (%)", value: "iron" },
-        { text: "Gluten-Free", value: "glutenfree" }
-      ]
+      password: null,
+      newPassword: null,
+      newPasswordVerify: null,
+      dialog: false,
+      changeTemporaryPassword: false,
+      valid: true,
     };
-  }
+  },
+
+  methods: {
+    async changePassword() {
+      try {
+        const response = await login.changePassword({
+          Email: this.$store.state.user,
+          Password: this.password,
+          newPassword: this.newPassword,
+        });
+
+        this.close();
+
+        this.$store.dispatch("setToken", response.data.token);
+        this.$store.dispatch("setUser", response.data.user);
+        this.$store.dispatch("setUserID", response.data.userID);
+        this.$store.dispatch("setLab", response.data.lab);
+        this.$store.dispatch("setStudies", response.data.studies);
+
+        alert("Your password is successfully changed!");
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
+    close() {
+      this.dialog = false;
+      setTimeout(() => {
+        this.password = null;
+        this.newPassword = null;
+        this.newPasswordVerify = null;
+      }, 300);
+    },
+  },
+  computed: {
+    passwordConfirmationRule() {
+      return (
+        this.newPassword === this.newPasswordVerify || "Password must match"
+      );
+    },
+
+    newPasswordRule() {
+      return (
+        this.newPassword !== this.password ||
+        "New password must be different from the current one."
+      );
+    },
+  },
+
+  watch: {
+    dialog(val) {
+      val || this.close();
+    },
+  },
 };
 </script>
