@@ -448,4 +448,18 @@ body {
 .complete {
   align-items: flex-end !important;
 }
+
+.theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
+  color: var(--v-secondary-base) !important;
+}
+
+.v-data-table
+  /deep/
+  tbody
+  /deep/
+  tr:hover:not(.v-data-table__expanded__content) {
+  /* border-bottom-width: 2px !important; */
+  background-color: var(--v-secondary-lighten1) !important;
+}
+
 </style>

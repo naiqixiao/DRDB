@@ -7,15 +7,15 @@ const { OAuth2 } = google.auth;
 
 module.exports = asyncHandler(async (req, res, next) => {
   try {
-
-    if(req.body.lab) {
+    if (req.body.lab) {
       var lab = req.body.lab;
     } else {
       var lab = req.query.lab;
     }
-    
-    const credentialsPath =
-      "api/google/lab" + lab + "/credentials.json";
+
+    console.log(req.body);
+
+    const credentialsPath = "api/google/lab" + lab + "/credentials.json";
     const tokenPath = "api/google/lab" + lab + "/token.json";
 
     const credentials = await fs.promises.readFile(credentialsPath);
@@ -31,7 +31,7 @@ module.exports = asyncHandler(async (req, res, next) => {
     next();
   } catch (error) {
     return res.status(401).send({
-      message: "Auth failed.",
+      message: "Google Authentication Failed.",
     });
   }
 });

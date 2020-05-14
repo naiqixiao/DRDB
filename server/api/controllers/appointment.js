@@ -12,7 +12,7 @@ const { google } = require("googleapis");
 
 // add an appointment (child, family, & study) to an existing schedule.
 exports.create = asyncHandler(async (req, res) => {
-  var newAppointmentInfo = req.body;
+  var newAppointmentInfo = req.body.appointment;
 
   try {
     const appointments = await model.appointment.bulkCreate(newAppointmentInfo);
@@ -88,6 +88,7 @@ exports.create = asyncHandler(async (req, res) => {
     };
 
     try {
+      
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
@@ -99,6 +100,7 @@ exports.create = asyncHandler(async (req, res) => {
         resource: updatedScheduleInfo,
         sendUpdates: "all",
       });
+
     } catch (err) {
       throw err;
     }
@@ -253,7 +255,10 @@ exports.update = asyncHandler(async (req, res) => {
     };
 
     try {
-      const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
 
       await calendar.events.patch({
         calendarId: "primary",
@@ -335,7 +340,10 @@ exports.delete = asyncHandler(async (req, res) => {
     };
 
     try {
-      const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
 
       await calendar.events.patch({
         calendarId: "primary",

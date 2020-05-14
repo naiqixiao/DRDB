@@ -200,6 +200,10 @@ export default {
   background-color: var(--v-background-base);
 }
 
+.theme--light.v-data-table.v-data-table-header th.sortable.active {
+  color: var(--v-secondary-base);
+}
+
 .theme--light.v-data-table
   .v-data-table-header
   th.sortable

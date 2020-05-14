@@ -79,10 +79,10 @@
           </v-container>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="closeNewAppointment"
+            <v-btn color="primary" @click="closeNewAppointment"
               >Cancel</v-btn
             >
-            <v-btn color="green darken-1" text @click="saveNewAppointments"
+            <v-btn color="primary" @click="saveNewAppointments"
               >Confirm</v-btn
             >
           </v-card-actions>
@@ -243,16 +243,6 @@ export default {
         });
       }
     },
-
-    // show() {
-    //   this.Experimenters = [];
-
-    //   for (var i = 0; i < this.newAppointments.length; i++) {
-    //     this.$refs.newAppointments[i].selectStudy();
-    //   }
-    //   console.log(this.newAppointments);
-    //   console.log(this.Experimenters);
-    // },
 
     async saveNewAppointments() {
       this.Experimenters = [];
