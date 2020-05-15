@@ -263,12 +263,19 @@
                 ></v-col>
               </v-row>
             </v-form>
-
             <v-card-actions>
-              <v-btn color="primary" @click="dialogFamilyEdit = false"
-                >Cancel</v-btn
-              >
-              <v-btn color="primary" @click="saveFamily">Save</v-btn>
+              <v-row justify="space-between" style="height: 50px">
+                <v-col md="4"></v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="dialogFamilyEdit = false"
+                    >Cancel</v-btn
+                  >
+                </v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="saveFamily">Save</v-btn>
+                </v-col>
+                <v-col md="4"></v-col>
+              </v-row>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -405,13 +412,19 @@
                   </v-row>
                 </v-container>
               </v-form>
-
               <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" @click="dialogChildEdit = false"
-                  >Cancel</v-btn
-                >
-                <v-btn color="primary" @click="saveChild">Save</v-btn>
+                <v-row justify="space-between" style="height: 50px">
+                  <v-col md="4"></v-col>
+                  <v-col md="2">
+                    <v-btn color="primary" @click="dialogChildEdit = false"
+                      >Cancel</v-btn
+                    >
+                  </v-col>
+                  <v-col md="2">
+                    <v-btn color="primary" @click="saveChild">Save</v-btn>
+                  </v-col>
+                  <v-col md="4"></v-col>
+                </v-row>
               </v-card-actions>
             </v-card>
           </v-dialog>

@@ -52,9 +52,20 @@
               </v-select>
             </v-col>
           </v-row>
+
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="dialogExperimenter = false"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="save">Confirm</v-btn>
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -81,8 +92,7 @@ export default {
   },
   methods: {
     updateExperimenters() {
-
-      this.editedExperimenter = this.Experimenters
+      this.editedExperimenter = this.Experimenters;
       this.dialogExperimenter = true;
     },
 
@@ -104,7 +114,7 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-    }
+    },
   },
   computed: {},
   watch: {

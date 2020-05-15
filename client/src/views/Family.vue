@@ -281,11 +281,17 @@
               ></v-col>
             </v-row>
           </v-form>
-
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
-            <v-btn color="primary" @click="save">Save</v-btn>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="save">Save</v-btn>
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -308,16 +314,18 @@
             @nextContactDone="updateNextContactFrontend"
           ></NextContact>
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              color="green darken-1"
-              text
-              @click="nextContactDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn color="green darken-1" text @click="updateNextContact"
-              >Save</v-btn
-            >
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="nextContactDialog = false"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="updateNextContact">Save</v-btn>
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -570,10 +578,6 @@ export default {
       this.editedIndex = this.Families.indexOf(this.currentFamily);
       this.editedItem = Object.assign({}, this.currentFamily);
       this.editableFields = Object.assign({}, this.$familyFields);
-      // this.editableFields.shift();
-      // this.editableFields.pop();
-      // this.editableFields.pop();
-      console.log(this.editableFields);
       this.dialog = true;
     },
 

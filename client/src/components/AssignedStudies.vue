@@ -29,9 +29,18 @@
                 </v-select>
               </v-col>
             </v-row>
+
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="green darken-1" text @click="save">Confirm</v-btn>
+              <v-row justify="space-between" style="height: 50px">
+                <v-col md="4"></v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="close = false">Cancel</v-btn>
+                </v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="save">Save</v-btn>
+                </v-col>
+                <v-col md="4"></v-col>
+              </v-row>
             </v-card-actions>
           </v-card>
         </v-dialog>
@@ -89,10 +98,15 @@ export default {
         console.error(error.response);
       }
     },
+
+    close() {
+      this.dialogStudy = false;
+      this.editedStudies = {};
+    },
   },
   computed: {},
   watch: {
-    dialog(val) {
+    dialogStudy(val) {
       val || this.close();
     },
   },

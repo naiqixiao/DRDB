@@ -237,6 +237,11 @@ export default {
   background-color: var(--v-background-base);
 }
 
+.v-card__actions {
+
+  padding-top: 0px !important;
+}
+
 // .theme--light.v-card {
 //   background-color: var(--v-background-base) !important;
 // }

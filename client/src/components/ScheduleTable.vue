@@ -103,12 +103,20 @@
             :nextContactDialog="nextContactDialog"
             @nextContactDone="updateNextContactFrontend"
           ></NextContact>
+
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="nextContactDialog = false"
-              >Cancel</v-btn
-            >
-            <v-btn color="primary" @click="updateNextContact">Save</v-btn>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="nextContactDialog = false"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="updateNextContact">Save</v-btn>
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>

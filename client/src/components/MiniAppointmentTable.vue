@@ -26,7 +26,7 @@
       </v-card>
     </v-col>
     <v-row align="end" justify="end">
-      <v-col cols="12" md="2" >
+      <v-col cols="12" md="2">
         <v-btn color="purple" fab large @click.stop="editNewAppointments"
           ><v-icon>add</v-icon></v-btn
         >
@@ -77,14 +77,22 @@
               </v-col>
             </v-row>
           </v-container>
+
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="closeNewAppointment"
-              >Cancel</v-btn
-            >
-            <v-btn color="primary" @click="saveNewAppointments"
-              >Confirm</v-btn
-            >
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="closeNewAppointment"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="saveNewAppointments"
+                  >Confirm</v-btn
+                >
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -106,16 +114,28 @@
               dense
             ></v-select>
           </v-col>
+
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="green darken-1" text @click="saveExperimenters"
-              >Save</v-btn
-            >
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="4"></v-col>
+              <v-col md="2">
+                <v-btn
+                  color="primary"
+                  @click="dialogUpdateExperimenters = false"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="green darken-1" text @click="saveExperimenters"
+                  >Save</v-btn
+                >
+              </v-col>
+              <v-col md="4"></v-col>
+            </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
     </div>
-
   </v-row>
 </template>
 
@@ -129,10 +149,10 @@ import store from "@/store";
 
 export default {
   components: {
-    NewAppointments
+    NewAppointments,
   },
   props: {
-    Appointments: Array
+    Appointments: Array,
   },
 
   data() {
@@ -146,7 +166,7 @@ export default {
       editedAppointment: {},
       selectedExperimenters: [],
       index: -1,
-      Experimenters: []
+      Experimenters: [],
     };
   },
   methods: {
@@ -172,7 +192,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach(study => {
+      store.state.studies.forEach((study) => {
         if (
           child.Age >= study.MinAge * 30.5 - 5 &&
           child.Age <= study.MaxAge * 30.5 - 5
@@ -184,14 +204,14 @@ export default {
       var uniquePreviousStudies = [];
 
       if (child.Appointments) {
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           uniquePreviousStudies.push(appointment.FK_Study);
         });
         uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
       }
 
       var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
+        (study) => !uniquePreviousStudies.includes(study)
       );
 
       // check the selected studies.
@@ -205,16 +225,16 @@ export default {
       }
 
       var selectableStudies = potentialStudies.filter(
-        study => !currentSelectedStudies.includes(study)
+        (study) => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter(study =>
+      var potentialStudyList = store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
       return {
         potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies
+        selectableStudies: selectableStudies,
       };
     },
 
@@ -238,7 +258,7 @@ export default {
       if (this.Experimenters.lenth < 1) {
         this.Experimenters = extraAppointments.attendees;
       } else {
-        extraAppointments.attendees.forEach(experimenter => {
+        extraAppointments.attendees.forEach((experimenter) => {
           this.Experimenters.push(experimenter);
         });
       }
@@ -260,7 +280,7 @@ export default {
           this.newAppointments[i].id = createdAppointments.data[i].id;
         }
 
-        this.newAppointments.forEach(appointment => {
+        this.newAppointments.forEach((appointment) => {
           this.Appointments.push(appointment);
         });
 
@@ -269,7 +289,6 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-
     },
 
     closeNewAppointment() {
@@ -309,10 +328,10 @@ export default {
       this.editedAppointment.Personnels = this.selectedExperimenters;
 
       var updatedExperimenters = this.selectedExperimenters.map(
-        experimenter => {
+        (experimenter) => {
           return {
             FK_Appointment: this.editedAppointment.id,
-            FK_Experimenter: experimenter.id
+            FK_Experimenter: experimenter.id,
           };
         }
       );
@@ -320,7 +339,7 @@ export default {
       try {
         await appointment.update({
           updatedExperimenters: updatedExperimenters,
-          scheduleId: this.editedAppointment.FK_Schedule
+          scheduleId: this.editedAppointment.FK_Schedule,
         });
 
         this.Appointments[this.index] = this.editedAppointment;
@@ -336,7 +355,7 @@ export default {
       this.selectedExperimenters = [];
       this.index = -1;
       this.dialogUpdateExperimenters = false;
-    }
+    },
   },
 
   computed: {},
@@ -346,7 +365,7 @@ export default {
       if (this.editedAppointment.FK_Study) {
         try {
           var queryString = {
-            study: this.editedAppointment.FK_Study
+            study: this.editedAppointment.FK_Study,
           };
 
           const results = await personnel.search(queryString);
@@ -361,7 +380,7 @@ export default {
       } else {
         return [];
       }
-    }
+    },
   },
 
   watch: {
@@ -375,8 +394,8 @@ export default {
 
     dialogAddAppointments(val) {
       val || this.closeNewAppointment();
-    }
-  }
+    },
+  },
 };
 </script>
 

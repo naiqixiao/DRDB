@@ -25,10 +25,18 @@
           ></vue-editor>
         </v-col>
       </v-row>
+
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="green darken-1" text @click="cancel">Cancel</v-btn>
-        <v-btn color="green darken-1" text @click="sendEmail">Send</v-btn>
+        <v-row justify="space-between" style="height: 50px">
+          <v-col md="4"></v-col>
+          <v-col md="2">
+            <v-btn color="primary" @click="cancel">Cancel</v-btn>
+          </v-col>
+          <v-col md="2">
+            <v-btn color="primary" @click="sendEmail">Save</v-btn>
+          </v-col>
+          <v-col md="4"></v-col>
+        </v-row>
       </v-card-actions>
     </v-card>
   </v-dialog>

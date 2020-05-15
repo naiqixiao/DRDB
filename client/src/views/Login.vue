@@ -73,13 +73,23 @@
         </v-form>
 
         <v-card-actions>
-          <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
-          <v-btn
-            color="primary"
-            :disabled="passwordConfirmationRule != true || newPassword == null"
-            @click="changePassword"
-            >Confirm</v-btn
-          >
+          <v-row justify="space-between" style="height: 50px">
+            <v-col md="4"></v-col>
+            <v-col md="2">
+              <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+            </v-col>
+            <v-col md="2">
+              <v-btn
+                color="primary"
+                :disabled="
+                  passwordConfirmationRule != true || newPassword == null
+                "
+                @click="changePassword"
+                >Confirm</v-btn
+              >
+            </v-col>
+            <v-col md="4"></v-col>
+          </v-row>
         </v-card-actions>
       </v-card>
     </v-dialog>
