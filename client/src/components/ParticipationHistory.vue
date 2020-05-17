@@ -97,7 +97,7 @@ export default {
 
       var chartOptions = {
         colors: chartColors,
-        title: "Previous participations",
+        title: "Family participation history",
         width: 400,
         height: 300,
         chartArea: { left: 20, top:40, width: "80%", height: "80%" },

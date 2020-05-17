@@ -12,20 +12,10 @@
             <v-card-title class="title"
               >{{ child.Name }}
               <v-spacer></v-spacer>
-              <v-icon
-                v-if="child.Sex == 'M'"
-                :color="
-                  child.Sex == 'M' ? 'light-blue darken-4' : 'pink darken-1'
-                "
-                large
+              <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large
                 >mdi-human-male</v-icon
               >
-              <v-icon
-                v-else
-                :color="
-                  child.Sex == 'M' ? 'light-blue darken-4' : 'pink darken-1'
-                "
-                large
+              <v-icon v-else color="pink darken-1" large
                 >mdi-human-female</v-icon
               >
             </v-card-title>

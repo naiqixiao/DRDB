@@ -2,26 +2,28 @@
   <v-container fluid>
     <v-row justify="space-around">
       <v-col cols="12" md="4">
-        <v-row style="height: 60px;" dense>
+        <v-row  dense>
           <v-col cols="12" md="12">
             <h1 class="text-left">Choose a study</h1>
           </v-col>
+          <v-col cols="12" md="12">
+            <v-select
+              class="selection"
+              :items="studies"
+              :item-value="'id'"
+              :item-text="'StudyName'"
+              v-model="selectedStudy"
+              return-object
+              label="Studies"
+              @change="searchChild"
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+            ></v-select>
+          </v-col>
         </v-row>
-        <v-select
-          class="selection"
-          :items="studies"
-          :item-value="'id'"
-          :item-text="'StudyName'"
-          v-model="selectedStudy"
-          return-object
-          label="Studies"
-          @change="searchChild"
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-        ></v-select>
 
         <v-row>
           <v-col md="12" class="subtitle">
@@ -1195,7 +1197,6 @@ export default {
         var calendarEvent = newSchedule;
 
         calendarEvent.scheduleId = newStudySchedule.data.id;
-        // console.log(this.potentialStudies(this.currentChild));
 
         console.log("New Scheduled Created!");
 

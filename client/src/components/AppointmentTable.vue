@@ -554,7 +554,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 .theme--light.v-icon {
   color: var(--v-primary-base);
   font-size: 28px;

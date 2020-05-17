@@ -153,10 +153,10 @@ exports.search = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB"] },
+          { model: model.child, attributes: ["Name", "DoB", "Sex"] },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
           },
           {
             model: model.personnel,
@@ -202,10 +202,10 @@ exports.today = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB"] },
+          { model: model.child, attributes: ["Name", "DoB", "Sex"] },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
           },
           {
             model: model.personnel,
@@ -254,10 +254,10 @@ exports.week = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB"] },
+          { model: model.child, attributes: ["Name", "DoB", "Sex"] },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
           },
           {
             model: model.personnel,
@@ -352,10 +352,10 @@ exports.update = asyncHandler(async (req, res) => {
             {
               model: model.family,
             },
-            { model: model.child, attributes: ["Name", "DoB"] },
+            { model: model.child, attributes: ["Name", "DoB", "Sex"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
             },
 
             {
@@ -395,10 +395,10 @@ exports.complete = asyncHandler(async (req, res) => {
             {
               model: model.family,
             },
-            { model: model.child, attributes: ["Name", "DoB"] },
+            { model: model.child, attributes: ["Name", "DoB", "Sex"] },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
             },
 
             {

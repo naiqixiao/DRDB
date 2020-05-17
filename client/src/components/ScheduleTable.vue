@@ -74,13 +74,13 @@
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row justify="space-around">
-          <v-col cols="12" md="12">
+        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0)">
+          <!-- <v-col cols="12" md="12">
+          </v-col> -->
             <MiniAppointmentTable
               :Appointments="item.Appointments"
               @updateSchedule="updateSchedule"
             ></MiniAppointmentTable>
-          </v-col>
         </v-row>
       </td>
     </template>
@@ -612,7 +612,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 .theme--light.v-icon {
   color: var(--v-primary-base);
   font-size: 28px;

@@ -200,14 +200,14 @@ export default {
   background-color: var(--v-background-base);
 }
 
-.theme--light.v-data-table.v-data-table-header th.sortable.active {
-  color: var(--v-secondary-base);
-}
-
 .theme--light.v-data-table
   .v-data-table-header
   th.sortable
   .v-data-table-header__icon {
+  color: var(--v-secondary-base) !important;
+}
+
+.theme--light.v-data-table.v-data-table-header th.sortable.active {
   color: var(--v-secondary-base) !important;
 }
 
@@ -219,6 +219,11 @@ export default {
 
 .theme--light.v-data-table--dense tbody tr {
   height: 35px !important;
+}
+
+.v-data-table tbody tr.v-data-table__expanded__content {
+  padding-left: 0px !important;
+  background-color: var(--v-textbackground-lighten4) !important;
 }
 
 .conv-textarea {
@@ -238,7 +243,6 @@ export default {
 }
 
 .v-card__actions {
-
   padding-top: 0px !important;
 }
 

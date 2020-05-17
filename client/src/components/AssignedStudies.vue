@@ -2,13 +2,29 @@
   <div>
     <v-row dense justify="start">
       <v-col cols="12" md="4" v-for="study in Studies" :key="study.id" dense>
-        <v-card class="mx-auto" width="360px" height="120px">
-          <v-card-title>{{ study.StudyName }}</v-card-title>
+        <v-card class="child-card d-flex flex-column">
+          <v-card-title class="title" style="padding: 8px"
+            >{{ study.StudyName }}
+            <v-spacer></v-spacer>
+            {{ " (" + study.StudyType + ")" }}
+          </v-card-title>
 
-          <v-card-text align="start">{{
-            "Age range: " + study.MinAge + " to " + study.MaxAge
-          }}</v-card-text>
-          <h4 align="end">{{ "Type: " + study.StudyType }}</h4>
+          <v-card-text
+            class="body-1"
+            align="start"
+            style="padding: 8px; color: var(--v-primary)"
+            >{{
+              "Age range: " + study.MinAge + " to " + study.MaxAge + " months"
+            }}</v-card-text
+          >
+          <v-card-text
+            class="body-1"
+            align="end"
+            style="padding: 8px; color: red"
+            >{{
+              study.Completed ? "Completed" : "In progress"
+            }}</v-card-text
+          >
         </v-card>
       </v-col>
 
@@ -49,7 +65,7 @@
     <v-row align="center" justify="end">
       <v-col cols="12" md="2" dense>
         <v-btn color="primary" fab large @click.stop="updateStudies"
-          ><v-icon>add</v-icon></v-btn
+          ><v-icon>edit</v-icon></v-btn
         >
       </v-col>
     </v-row>

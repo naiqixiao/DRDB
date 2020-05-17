@@ -1,23 +1,45 @@
 <template>
-  <v-row dense>
+  <v-row dense style="background-color: rgba(0, 0, 0, 0)">
     <v-col
       cols="12"
       md="2"
+      style="padding: 12px !important"
       v-for="(appointment, indexAppointments) in Appointments"
       :key="appointment.id"
-      dense
     >
-      <v-card class="mx-auto" width="360px" height="160px">
-        <v-card-title>{{ appointment.Child.Name }}</v-card-title>
+      <v-card class="child-card d-flex flex-column" height="150px">
+        <v-card-title class="title" style="padding: 8px"
+          >{{ appointment.Child.Name }}
+          <v-spacer></v-spacer>
+          <v-icon
+            v-if="appointment.Child.Sex == 'M'"
+            color="light-blue darken-4"
+            >mdi-human-male</v-icon
+          >
+          <v-icon v-else color="pink darken-1">mdi-human-female</v-icon>
+        </v-card-title>
 
-        <v-card-text align="start">{{
-          appointment.Study.StudyName
-        }}</v-card-text>
+        <v-card-text
+          class="body-1"
+          align="start"
+          style="padding: 8px; color: var(--v-primary)"
+          >{{
+            appointment.Study.StudyName +
+              " (" +
+              appointment.Study.StudyType +
+              ")"
+          }}
+        </v-card-text>
+        <v-spacer></v-spacer>
         <v-card-actions>
-          <v-icon @click="updateExperimenters(appointment, indexAppointments)"
+          <v-icon
+            color="primary"
+            @click="updateExperimenters(appointment, indexAppointments)"
             >how_to_reg</v-icon
           >
+          <v-spacer></v-spacer>
           <v-icon
+            color="primary"
             @click="removeAppointment(indexAppointments)"
             :disabled="Appointments.length == 1"
             >delete</v-icon
@@ -399,4 +421,5 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+</style>

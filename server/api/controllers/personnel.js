@@ -52,7 +52,7 @@ exports.search = asyncHandler(async (req, res) => {
       // model.appointment,
       {
         model: model.study,
-        attributes: ["id", "StudyName", "MinAge", "MaxAge", "StudyType"],
+        attributes: ["id", "StudyName", "MinAge", "MaxAge", "StudyType", "Completed"],
         through: {
           model: model.experimenter,
         },

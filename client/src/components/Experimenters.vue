@@ -7,15 +7,22 @@
       :key="experimenter.id"
       dense
     >
-      <v-card class="mx-auto" width="360px" height="120px">
-        <v-card-title>{{
-          experimenter.Name + " (" + experimenter.Initial + ")"
-        }}</v-card-title>
+      <v-card
+        class="child-card d-flex flex-column"
+      >
+        <v-card-title class="title" style="padding: 8px"
+          >{{ experimenter.Name + " (" + experimenter.Initial + ")" }}
+          <v-spacer></v-spacer>
 
-        <v-card-text align="start">{{
-          "Email: " + experimenter.Email
-        }}</v-card-text>
-        <h4 align="end">{{ "Role: " + experimenter.Role }}</h4>
+          {{ experimenter.Role }}
+        </v-card-title>
+
+        <v-card-text
+          class="body-1"
+          align="start"
+          style="padding: 8px; color: var(--v-primary)"
+          >{{ "Email: " + experimenter.Email }}</v-card-text
+        >
 
         <!-- <v-card-actions>
           <v-btn
@@ -30,7 +37,7 @@
     <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
         <v-btn color="primary" fab large @click.stop="updateExperimenters"
-          ><v-icon>add</v-icon></v-btn
+          ><v-icon>edit</v-icon></v-btn
         >
       </v-col>
     </v-row>

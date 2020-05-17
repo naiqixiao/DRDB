@@ -241,7 +241,7 @@ export default {
           width: "60px",
         },
         {
-          text: "Updated Time",
+          text: "Updated at",
           align: "center",
           value: "updatedAt",
           width: "50px",
@@ -401,10 +401,10 @@ export default {
     close() {
       this.dialog = false;
 
-      setTimeout(() => {
-        // this.editedStudy = [];
-        // this.editedIndex = -1;
-      }, 300);
+      // setTimeout(() => {
+      //   // this.editedStudy = [];
+      //   // this.editedIndex = -1;
+      // }, 300);
     },
 
     async deleteStudy() {
@@ -446,7 +446,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 body {
   border: 2px solid rgb(0, 153, 255);
   border-radius: 5px;

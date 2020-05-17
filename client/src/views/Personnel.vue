@@ -53,23 +53,24 @@
               <v-col cols="12" md="12">
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="createPersonnel"
-                      >Add</v-btn
+                    <v-btn color="primary" fab @click.stop="createPersonnel"
+                      ><v-icon>add</v-icon></v-btn
                     >
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="editPersonnel"
-                      >Edit</v-btn
+                    <v-btn fab @click.stop="editPersonnel"
+                      ><v-icon>edit</v-icon></v-btn
                     >
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn color="purple" text @click.stop="deletePersonnel"
-                      >Delete</v-btn
+                    <v-btn fab @click.stop="deletePersonnel"
+                      ><v-icon>delete</v-icon></v-btn
                     >
                   </v-col>
                 </v-row>
               </v-col>
 
+               <v-divider></v-divider>
               <v-col cols="12" md="12">
                 <h3 justify="start">Assigned studies</h3>
 
@@ -383,7 +384,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="css" scoped>
 .theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
   color: var(--v-secondary-base) !important;
 }
