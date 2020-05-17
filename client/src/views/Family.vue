@@ -609,7 +609,7 @@ export default {
             this.Families.push(this.editedItem);
             this.page = this.Families.length;
             console.log("Family is creted!");
-            this.$emit("searchFamily", this.editedItem);
+            // this.$emit("searchFamily", this.editedItem);
           }
         } catch (error) {
           console.log(error.response);

@@ -1138,7 +1138,7 @@ export default {
           });
 
           var childNames = this.appointments.map((appointment) => {
-            return appointment.FK_Child;
+            return appointment.Child.IdWithinFamily;
           });
 
           studyNames = Array.from(new Set(studyNames));
@@ -1228,7 +1228,7 @@ export default {
       });
 
       var childNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.FK_Child;
+        return appointment.Child.IdWithinFamily;
       });
 
       studyNames = Array.from(new Set(studyNames));

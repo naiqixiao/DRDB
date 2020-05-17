@@ -318,7 +318,7 @@ export default {
             ", Family: " +
             item.FK_Family +
             ", Child: " +
-            item.FK_Child;
+            item.Child.IdWithinFamily;
 
           try {
             await schedule.update(item.Schedule);
@@ -382,7 +382,7 @@ export default {
             ", Family: " +
             this.editedItem.FK_Family +
             ", Child: " +
-            this.editedItem.FK_Child;
+            this.editedItem.Child.IdWithinFamily;
 
           this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),

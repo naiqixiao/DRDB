@@ -27,9 +27,17 @@ exports.create = asyncHandler(async (req, res) => {
       await model.sibling.bulkCreate(siblings);
     }
 
+    // update child id within the family
+    const alphabet = "abcdefghijk".split("");
+    IdWithinFamily = alphabet[Children.length];
+
+    await model.child.update({"IdWithinFamily": IdWithinFamily}, {
+      where: { id: child.id },
+    });
+    
     res.status(200).send(child);
 
-    console.log("Child is creted and siblings are updated!");
+    console.log("Child is created and siblings are updated!");
   } catch (error) {
     res.status(500).send(error);
   }

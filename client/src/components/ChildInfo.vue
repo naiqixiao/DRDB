@@ -8,9 +8,9 @@
     <div v-if="Children">
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
-          <v-card class="child-card" height="174px">
+          <v-card class="child-card d-flex flex-column" height="174px">
             <v-card-title class="title"
-              >{{ child.Name }}
+              >{{ child.Name + " (" +  currentFamily.id + child.IdWithinFamily + ")" }}
               <v-spacer></v-spacer>
               <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large
                 >mdi-human-male</v-icon
@@ -23,6 +23,7 @@
             <v-card-text align="start">
               <AgeDisplay class="subtitle-1 pl-md-2" :DoB="child.DoB" />
             </v-card-text>
+            <v-spacer></v-spacer>
             <v-card-actions>
               <v-btn
                 small
@@ -53,10 +54,7 @@
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="child in 4" :key="child">
           <v-card class="placeholder-card" height="174px">
-            <v-card-title class="title"> {{ "Child " + child }} </v-card-title>
-            <v-card-text align="start">
-              Age
-            </v-card-text>
+            <v-card-title class="title"> {{ "Child " + alphabet[child - 1] }} </v-card-title>
           </v-card>
         </v-col>
       </v-row>
@@ -426,6 +424,7 @@ export default {
   },
   data() {
     return {
+      alphabet: "abcdefghij".split(""),
       dialogChild: false,
       dialogSchedule: false,
       e1: 1,
@@ -600,7 +599,7 @@ export default {
           });
 
           var childNames = this.appointments.map((appointment) => {
-            return appointment.FK_Child;
+            return appointment.Child.IdWithinFamily;
           });
 
           studyNames = Array.from(new Set(studyNames));
@@ -687,7 +686,7 @@ export default {
       });
 
       var childNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.FK_Child;
+        return appointment.Child.IdWithinFamily;
       });
 
       studyNames = Array.from(new Set(studyNames));

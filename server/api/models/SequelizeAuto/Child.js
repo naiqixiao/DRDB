@@ -26,6 +26,10 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false
       },
+      IdWithinFamily: {
+        type: DataTypes.STRING(1),
+        allowNull: true
+      },
       Language: {
         type: DataTypes.STRING(10),
         allowNull: true

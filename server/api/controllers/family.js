@@ -40,56 +40,36 @@ exports.create = asyncHandler(async (req, res) => {
       include: [
         model.conversations,
         model.child,
-        { model: model.appointment, include: [model.schedule] }
-      ]
+        { model: model.appointment, include: [model.schedule] },
+      ],
     });
 
     res.status(200).send(newFamily);
   } catch (error) {
     throw error;
   }
-
-  // update sinbing table
-  // if (newFamily.Children.length > 1) {
-  //   const Children = await model.child.findAll({
-  //     attributes: ["id"],
-  //     where: { FK_Family: newFamily.id }
-  //   });
-
-  //   var siblings = [];
-
-  //   for (var i = 0; i < Children.length; i++) {
-  //     var childId = Children[i].id;
-
-  //     Children.forEach(sibling => {
-  //       if (sibling.id != childId) {
-  //         siblings.push({ FK_Child: childId, Sibling: sibling.id });
-  //       }
-  //     });
-  //   }
-
-  //   await model.sibling.bulkCreate(siblings);
-  // }
 });
 
 // batch upload families
 exports.batchCreate = asyncHandler(async (req, res) => {
   var newFamilyInfo = req.body;
 
+  const alphabet = "abcdefghijk".split("");
+
   const newFamily = await model.family.bulkCreate(newFamilyInfo, {
     include: [
       model.conversations,
       model.child,
-      { model: model.appointment, include: [model.schedule] }
-    ]
+      { model: model.appointment, include: [model.schedule] },
+    ],
   });
 
-  // update sibbling table
+  // update sibbling table & assign child id within each family
   for (var i = 0; i < newFamily.length; i++) {
     if (newFamily[i].Children.length > 1) {
       var Children = await model.child.findAll({
         attributes: ["id"],
-        where: { FK_Family: newFamily[i].id }
+        where: { FK_Family: newFamily[i].id },
       });
 
       var siblings = [];
@@ -97,10 +77,16 @@ exports.batchCreate = asyncHandler(async (req, res) => {
       for (var j = 0; j < Children.length; j++) {
         var childId = Children[j].id;
 
-        Children.forEach(sibling => {
+        Children.forEach((sibling) => {
           if (sibling.id != childId) {
             siblings.push({ FK_Child: childId, Sibling: sibling.id });
           }
+        });
+
+        // assign child id within each family
+        Children[j].IdWithinFamily = alphabet[Children.length];
+        await model.child.update(Children[j], {
+          where: { id: Children[j].id },
         });
       }
 
@@ -142,18 +128,28 @@ exports.search = asyncHandler(async (req, res) => {
       model.conversations,
       {
         model: model.child,
-        include: [{ model: model.appointment, attributes: ["FK_Study"] }]
+        include: [{ model: model.appointment, attributes: ["FK_Study"] }],
       },
       {
         model: model.appointment,
         include: [
-          { model: model.child, attributes: ["Name", "DoB"] },
-          { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"] },
-          { model: model.schedule }
-        ]
-      }
-    ]
+          { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+          {
+            model: model.study,
+            attributes: [
+              "StudyName",
+              "MinAge",
+              "MaxAge",
+              "EmailTemplate",
+              "StudyType",
+            ],
+          },
+          { model: model.schedule },
+        ],
+      },
+    ],
   });
+
   res.status(200).send(families);
   console.log("Search successful!");
 });
@@ -164,7 +160,7 @@ exports.update = asyncHandler(async (req, res) => {
   var updatedFamilyInfo = req.body;
 
   const family = await model.family.update(updatedFamilyInfo, {
-    where: { id: ID }
+    where: { id: ID },
   });
   res.status(200).send(family);
   console.log("Family Information Updated!");
@@ -173,7 +169,49 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a family with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const family = await model.family.destroy({
-    where: req.query
+    where: req.query,
   });
   res.status(200).json(family);
+});
+
+
+// a special function to assign child ids within a family
+exports.searchSpecial = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  if (req.query.id) {
+    queryString.id = req.query.id;
+  }
+  if (req.query.Email) {
+    queryString.Email = { [Op.like]: `${req.query.Email}%` };
+  }
+  if (req.query.NameMom) {
+    queryString.NameMom = { [Op.like]: `${req.query.NameMom}%` };
+  }
+  if (req.query.NameDad) {
+    queryString.NameDad = { [Op.like]: `${req.query.NameDad}%` };
+  }
+  if (req.query.Phone) {
+    queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
+  }
+
+  const alphabet = "abcdefghijk".split("");
+
+  const families = await model.family.findAll({
+    where: queryString,
+    include: [model.child],
+  });
+
+  families.forEach((family) => {
+    family.Children.forEach(async (child, index) => {
+      child.IdWithinFamily = alphabet[index];
+
+      await model.child.update({"IdWithinFamily": child.IdWithinFamily}, {
+        where: { id: child.id },
+      });
+    });
+  });
+
+  res.status(200).send(families);
+  console.log("Search successful!");
 });

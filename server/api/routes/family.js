@@ -10,6 +10,8 @@ router.post("/addBatch", checkAuth, FamilyController.batchCreate);
 
 router.get("/", checkAuth, FamilyController.search);
 
+router.get("/special", checkAuth, FamilyController.searchSpecial);
+
 router.post("/", checkAuth, FamilyController.update);
 
 router.delete("/", checkAuth, FamilyController.delete);

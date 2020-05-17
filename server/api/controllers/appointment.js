@@ -40,7 +40,7 @@ exports.create = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
             {
               model: model.study,
               attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
@@ -60,7 +60,7 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     var childNames = Schedule.Appointments.map((appointment) => {
-      return appointment.FK_Child;
+      return appointment.Child.IdWithinFamily;
     });
 
     studyNames = Array.from(new Set(studyNames));
@@ -207,7 +207,7 @@ exports.update = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
             {
               model: model.study,
               attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
@@ -227,7 +227,7 @@ exports.update = asyncHandler(async (req, res) => {
     });
 
     var childNames = Schedule.Appointments.map((appointment) => {
-      return appointment.FK_Child;
+      return appointment.Child.IdWithinFamily;
     });
 
     studyNames = Array.from(new Set(studyNames));
@@ -288,7 +288,7 @@ exports.delete = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
             {
               model: model.study,
               attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
@@ -312,7 +312,7 @@ exports.delete = asyncHandler(async (req, res) => {
     });
 
     var childNames = updatedAppointments.map((appointment) => {
-      return appointment.FK_Child;
+      return appointment.Child.IdWithinFamily;
     });
 
     studyNames = Array.from(new Set(studyNames));

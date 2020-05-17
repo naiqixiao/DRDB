@@ -153,7 +153,7 @@ exports.search = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+          { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
           {
             model: model.study,
             attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],

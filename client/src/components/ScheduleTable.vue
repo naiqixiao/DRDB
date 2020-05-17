@@ -357,7 +357,7 @@ export default {
           });
 
           var childNames = item.Appointments.map((appointment) => {
-            return appointment.FK_Child;
+            return appointment.Child.IdWithinFamily;
           });
 
           childNames = Array.from(new Set(childNames));
@@ -423,7 +423,7 @@ export default {
 
           var childNames = this.editedSchedule.Appointments.map(
             (appointment) => {
-              return appointment.FK_Child;
+              return appointment.Child.IdWithinFamily;
             }
           );
 
