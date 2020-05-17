@@ -65,8 +65,9 @@
             <v-row>
               <v-col cols="12" md="2" v-for="child in Children" :key="child.id">
                 <v-btn
-                  color="green darken-2"
-                  text
+                  class="text-capitalize"
+                  rounded
+                  color="primary"
                   @click="newAppointmentSlot(child)"
                   :disabled="
                     potentialStudies(child).selectableStudies.length < 1
@@ -421,5 +422,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
