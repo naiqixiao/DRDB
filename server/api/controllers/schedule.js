@@ -153,10 +153,19 @@ exports.search = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+          {
+            model: model.child,
+            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+          },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
+            attributes: [
+              "StudyName",
+              "MinAge",
+              "MaxAge",
+              "EmailTemplate",
+              "StudyType",
+            ],
           },
           {
             model: model.personnel,
@@ -202,10 +211,19 @@ exports.today = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+          {
+            model: model.child,
+            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+          },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
+            attributes: [
+              "StudyName",
+              "MinAge",
+              "MaxAge",
+              "EmailTemplate",
+              "StudyType",
+            ],
           },
           {
             model: model.personnel,
@@ -254,10 +272,19 @@ exports.week = asyncHandler(async (req, res) => {
           {
             model: model.family,
           },
-          { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+          {
+            model: model.child,
+            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+          },
           {
             model: model.study,
-            attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
+            attributes: [
+              "StudyName",
+              "MinAge",
+              "MaxAge",
+              "EmailTemplate",
+              "StudyType",
+            ],
           },
           {
             model: model.personnel,
@@ -287,7 +314,7 @@ exports.update = asyncHandler(async (req, res) => {
   });
 
   switch (updatedScheduleInfo.Status) {
-    case "Confirmed": {
+    case "Confirmed":
       if (updatedScheduleInfo.calendarEventId) {
         await calendar.events.patch({
           calendarId: "primary",
@@ -313,14 +340,15 @@ exports.update = asyncHandler(async (req, res) => {
       }
 
       break;
-    }
 
-    case "No Show":
-    case "TBD":
-    case "Rescheduling":
-    case "Cancelled":
-    case "Rejected": {
+    // case "No Show":
+    // case "TBD":
+    // case "Rescheduling":
+    // case "Cancelled":
+    // case "Rejected":
+      default:
       // update the calendar event, if an appointment is rescheduled.
+
       if (updatedScheduleInfo.calendarEventId) {
         // check if there was an calendar event created before.
 
@@ -339,7 +367,6 @@ exports.update = asyncHandler(async (req, res) => {
       }
 
       break;
-    }
   }
 
   try {
@@ -352,10 +379,19 @@ exports.update = asyncHandler(async (req, res) => {
             {
               model: model.family,
             },
-            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+              ],
             },
 
             {
@@ -395,10 +431,19 @@ exports.complete = asyncHandler(async (req, res) => {
             {
               model: model.family,
             },
-            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate", "StudyType"],
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+              ],
             },
 
             {

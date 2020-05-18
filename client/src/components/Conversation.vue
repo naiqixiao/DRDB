@@ -16,6 +16,9 @@
         <template #item.Time="{ value }">
           <DateDisplay :date="value" :format="'short'" />
         </template>
+        <template #item.Conversation="{ value }">
+          <div style="text-align: left">{{value}}</div>
+        </template>
 
         <template #item.actions="{ item }">
           <v-icon @click="deleteItem(item)">delete</v-icon>
@@ -57,9 +60,27 @@ export default {
     return {
       conv: "",
       headers: [
-        { text: "Time", align: "center", value: "Time", sortable: false },
-        { text: "Conversation", align: "center", value: "Conversation", sortable: false },
-        { text: "Actions", align: "center", value: "actions", sortable: false },
+        {
+          text: "Time",
+          align: "center",
+          value: "Time",
+          sortable: false,
+          width: "15%",
+        },
+        {
+          text: "Conversation",
+          align: "center",
+          value: "Conversation",
+          sortable: false,
+          width: "75%",
+        },
+        {
+          text: "Actions",
+          align: "center",
+          value: "actions",
+          sortable: false,
+          width: "10%",
+        },
       ],
     };
   },
@@ -102,7 +123,6 @@ export default {
 
 <style lang="scss" scoped>
 .noPadding {
-
   padding: 8px 0px 12px 0px !important;
 }
 </style>

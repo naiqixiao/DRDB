@@ -175,21 +175,21 @@ export default {
           text: "Name",
           align: "center",
           value: "Name",
-          width: "80px",
+          width: "27%",
         },
         {
           text: "Email",
           align: "center",
           sortable: false,
           value: "Email",
-          width: "60px",
+          width: "35%",
         },
         {
           text: "Role",
           align: "center",
           sortable: false,
           value: "Role",
-          width: "50px",
+          width: "20%",
         },
 
         {
@@ -197,7 +197,7 @@ export default {
           sortable: false,
           align: "center",
           value: "Active",
-          width: "50px",
+          width: "18%",
         },
       ],
       dialog: false,

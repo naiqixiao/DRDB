@@ -111,7 +111,6 @@ export default {
         width: "3",
         options: "recruitmentMethod",
       },
-      
     ];
 
     Vue.prototype.$options = {
@@ -153,37 +152,37 @@ export default {
         text: "Child",
         align: "center",
         value: "Child",
-        width: "40px",
+        width: "13%",
       },
       {
         text: "Study",
         align: "center",
         value: "Study",
-        width: "40px",
+        width: "15%",
       },
       {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "80px",
+        width: "22%",
       },
       {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "60px",
+        width: "10%",
       },
       {
         text: "Status",
         align: "center",
         value: "Status",
-        width: "60px",
+        width: "10%",
       },
       {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "60px",
+        width: "12%",
       },
 
       {
@@ -191,48 +190,48 @@ export default {
         align: "center",
         value: "actions",
         sortable: false,
-        width: "100px",
+        width: "18%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Completed",
         sortable: false,
-        width: "20px",
+        width: "10%",
       },
     ];
 
     Vue.prototype.$headersAppointments = [
-      { text: "Child", align: "center", value: "Child.Name", width: "50px" },
+      { text: "Child", align: "center", value: "Child.Name", width: "8%", },
       {
         text: "Study",
         align: "center",
         value: "Study.StudyName",
-        width: "50px",
+        width: "15%",
       },
       {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "100px",
+        width: "20%",
       },
       {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "60px",
+        width: "10%",
       },
       {
         text: "Status",
         align: "center",
         value: "Schedule.Status",
-        width: "80px",
+        width: "10%",
       },
       {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "60px",
+        width: "12%",
       },
 
       {
@@ -240,48 +239,48 @@ export default {
         align: "center",
         value: "actions",
         sortable: false,
-        width: "80px",
+        width: "15%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Schedule.Completed",
         sortable: false,
-        width: "20px",
+        width: "10%",
       },
     ];
 
     Vue.prototype.$headersAppointmentsBrief = [
-      { text: "Child", align: "center", value: "Child.Name", width: "50px" },
+      { text: "Child", align: "center", value: "Child.Name", width: "10%" },
       {
         text: "Study",
         align: "center",
         value: "Study.StudyName",
-        width: "50px",
+        width: "20%",
       },
       {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "100px",
+        width: "20%",
       },
       {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "60px",
+        width: "15%",
       },
       {
         text: "Status",
         align: "center",
         value: "Schedule.Status",
-        width: "80px",
+        width: "15%",
       },
       {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "60px",
+        width: "10%",
       },
     ];
 

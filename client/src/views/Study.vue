@@ -232,19 +232,19 @@ export default {
           sortable: false,
           align: "center",
           value: "StudyName",
-          width: "80px",
+          width: "35%",
         },
         {
           text: "Type",
           align: "center",
           value: "StudyType",
-          width: "60px",
+          width: "23%",
         },
         {
-          text: "Updated at",
+          text: "Updated time",
           align: "center",
           value: "updatedAt",
-          width: "50px",
+          width: "25%",
         },
 
         {
@@ -252,7 +252,7 @@ export default {
           align: "center",
           value: "Completed",
           sortable: false,
-          width: "50px",
+          width: "17%",
         },
       ],
       dialog: false,
