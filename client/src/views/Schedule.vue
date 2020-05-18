@@ -584,7 +584,7 @@
                     <v-col cols="12" md="6">
                       <v-btn
                         color="primary"
-                        :disabled="!studyDateTime"
+                        :disabled="!studyDate"
                         @click="continue12()"
                       >
                         <v-icon dark left v-show="scheduleId"
@@ -1134,25 +1134,16 @@ export default {
       switch (this.response) {
         case "Confirmed":
           var studyNames = this.appointments.map((appointment) => {
-            return appointment.Study.StudyName;
-          });
-
-          var childNames = this.appointments.map((appointment) => {
-            return appointment.Child.IdWithinFamily;
+            return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
           });
 
           studyNames = Array.from(new Set(studyNames));
-          childNames = Array.from(new Set(childNames));
 
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             summary:
-              studyNames.join(" + ") +
-              ", Family: " +
-              this.currentChild.FK_Family +
-              ", Child: " +
-              childNames.join(" + "),
+              studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             location: "Psychology Building, McMaster University",
@@ -1223,16 +1214,13 @@ export default {
       const currentSchedules = await schedule.search(queryString);
 
       const currentSchedule = currentSchedules.data[0];
+      
       var studyNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.Study.StudyName;
-      });
+        return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
 
-      var childNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.Child.IdWithinFamily;
       });
 
       studyNames = Array.from(new Set(studyNames));
-      childNames = Array.from(new Set(childNames));
 
       const attendees = [];
 
@@ -1247,11 +1235,7 @@ export default {
 
       var calendarEvent = {
         summary:
-          studyNames.join(" + ") +
-          ", Family: " +
-          currentSchedule.Appointments[0].FK_Family +
-          ", Child: " +
-          childNames.join(" + "),
+          studyNames.join(" + "),
         location: "Psychology Building, McMaster University",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),

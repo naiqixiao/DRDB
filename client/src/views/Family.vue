@@ -10,7 +10,7 @@
           </v-col>
 
           <v-spacer></v-spacer>
-          <v-col cols="12" md="4" style="text-align: end;">
+          <v-col cols="12" md="4" class="text-center">
             <Page
               :page="page"
               :NofPages="Families ? Families.length : 0"

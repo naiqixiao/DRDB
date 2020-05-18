@@ -8,8 +8,16 @@
       :key="appointment.id"
     >
       <v-card class="child-card d-flex flex-column" height="150px">
-        <v-card-title class="title" style="padding: 8px"
-          >{{ appointment.Child.Name }}
+        <v-card-title class="title" style="padding: 8px;">
+          <span
+            class="d-inline-block text-truncate"
+            style="max-width: 90px; padding-right: 2px;"
+          >
+            {{ appointment.Child.Name }}
+          </span>
+          <span class="body-1" style="color: var(--v-primary); ">
+            {{ "(" +appointment.FK_Family + appointment.Child.IdWithinFamily + ")"}}
+          </span>
           <v-spacer></v-spacer>
           <v-icon
             v-if="appointment.Child.Sex == 'M'"
@@ -422,4 +430,8 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.v-card-title {
+  vertical-align: bottom;
+}
+</style>

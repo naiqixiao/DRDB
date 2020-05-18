@@ -1,10 +1,12 @@
 <template>
-  <div class="pagination-container" >
+  <div class="pagination-container">
     <v-btn class="ma-0" text icon @click="previousPage" :disabled="page <= 1">
       <v-icon large>navigate_before </v-icon></v-btn
     >
 
-    <span class="title">{{ page + " / " + NofPages }}</span>
+    <div class="title" style="width:45px">{{ page }}</div>
+    <div class="title" style="padding-left: 8px; padding-right: 8px;">{{" / " }}</div>
+    <div class="title" style="width:45px; text-align: left">{{ NofPages }}</div>
 
     <v-btn
       class="ma-0"
@@ -36,11 +38,10 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style>
 .pagination-container {
   text-align: end;
   display: flex;
-  justify-content: space-around;
   align-items: center;
 }
 </style>

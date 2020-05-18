@@ -307,18 +307,26 @@ export default {
           //   this.$emit("alert");
           // }
 
-          var studyNames = this.Appointments.map((appointment) => {
-            return appointment.Study.StudyName;
+          var currentSchedules = await schedule.search({
+            id: item.FK_Schedule,
           });
 
+          var currentSchedule = currentSchedules.data[0];
+
+          var studyNames = currentSchedule.Appointments.map((appointment) => {
+            return (
+              appointment.Study.StudyName +
+              " (" +
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
+            );
+          });
+
+          studyNames = Array.from(new Set(studyNames));
+
           item.Schedule.summary =
-            item.Schedule.Status.toUpperCase() +
-            " - " +
-            studyNames.join(" + ") +
-            ", Family: " +
-            item.FK_Family +
-            ", Child: " +
-            item.Child.IdWithinFamily;
+            item.Schedule.Status.toUpperCase() + " - " + studyNames.join(" + ");
 
           try {
             await schedule.update(item.Schedule);
@@ -367,22 +375,27 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = "";
-
-          this.Appointments.forEach((appointment) => {
+          var studyNames = this.Appointments.map((appointment) => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
-              studyNames += appointment.Study.StudyName + " + ";
+              return (
+                appointment.Study.StudyName +
+                " (" +
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
+              );
+            } else {
+              return null;
             }
           });
 
-          studyNames = studyNames.slice(0, studyNames.length - 3);
+          studyNames = studyNames.filter(function(el) {
+            return el != null;
+          });
 
-          this.editedItem.Schedule.summary =
-            studyNames +
-            ", Family: " +
-            this.editedItem.FK_Family +
-            ", Child: " +
-            this.editedItem.Child.IdWithinFamily;
+          studyNames = Array.from(new Set(studyNames));
+
+          this.editedItem.Schedule.summary = studyNames.join(" + ");
 
           this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),

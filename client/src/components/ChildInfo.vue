@@ -9,8 +9,16 @@
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
           <v-card class="child-card d-flex flex-column" height="174px">
-            <v-card-title class="title"
-              >{{ child.Name + " (" +  currentFamily.id + child.IdWithinFamily + ")" }}
+            <v-card-title class="title">
+              <div
+                class="d-inline-block text-truncate"
+                style="max-width: 130px; padding-right: 4px;"
+              >
+                {{ child.Name }}
+              </div>
+              <div>
+                {{ " (" + currentFamily.id + child.IdWithinFamily + ")" }}
+              </div>
               <v-spacer></v-spacer>
               <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large
                 >mdi-human-male</v-icon
@@ -54,7 +62,9 @@
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="child in 4" :key="child">
           <v-card class="placeholder-card" height="174px">
-            <v-card-title class="title"> {{ "Child " + alphabet[child - 1] }} </v-card-title>
+            <v-card-title class="title">
+              {{ "Child " + alphabet[child - 1] }}
+            </v-card-title>
           </v-card>
         </v-col>
       </v-row>
@@ -288,7 +298,7 @@
                 <v-col cols="12" md="6">
                   <v-btn
                     color="primary"
-                    :disabled="!studyDateTime"
+                    :disabled="!studyDate"
                     @click="continue12()"
                   >
                     <v-icon dark left v-show="scheduleId"
@@ -595,25 +605,17 @@ export default {
       switch (this.response) {
         case "Confirmed":
           var studyNames = this.appointments.map((appointment) => {
-            return appointment.Study.StudyName;
-          });
+        return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
 
-          var childNames = this.appointments.map((appointment) => {
-            return appointment.Child.IdWithinFamily;
           });
 
           studyNames = Array.from(new Set(studyNames));
-          childNames = Array.from(new Set(childNames));
 
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             summary:
-              studyNames.join(" + ") +
-              ", Family: " +
-              this.currentChild.FK_Family +
-              ", Child: " +
-              childNames.join(" + "),
+              studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             location: "Psychology Building, McMaster University",
@@ -682,15 +684,10 @@ export default {
 
       const currentSchedule = currentSchedules.data[0];
       var studyNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.Study.StudyName;
-      });
-
-      var childNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.Child.IdWithinFamily;
+        return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
       });
 
       studyNames = Array.from(new Set(studyNames));
-      childNames = Array.from(new Set(childNames));
 
       const attendees = [];
 
@@ -705,11 +702,7 @@ export default {
 
       var calendarEvent = {
         summary:
-          studyNames.join(" + ") +
-          ", Family: " +
-          currentSchedule.Appointments[0].FK_Family +
-          ", Child: " +
-          childNames.join(" + "),
+          studyNames.join(" + "),
         location: "Psychology Building, McMaster University",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),

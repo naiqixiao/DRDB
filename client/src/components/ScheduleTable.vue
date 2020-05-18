@@ -74,13 +74,16 @@
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0)">
+        <v-row
+          justify="space-between"
+          style="background-color: rgba(0, 0, 0, 0)"
+        >
           <!-- <v-col cols="12" md="12">
           </v-col> -->
-            <MiniAppointmentTable
-              :Appointments="item.Appointments"
-              @updateSchedule="updateSchedule"
-            ></MiniAppointmentTable>
+          <MiniAppointmentTable
+            :Appointments="item.Appointments"
+            @updateSchedule="updateSchedule"
+          ></MiniAppointmentTable>
         </v-row>
       </td>
     </template>
@@ -353,24 +356,20 @@ export default {
 
           // name by combining all study names within a schedule
           var studyNames = item.Appointments.map((appointment) => {
-            return appointment.Study.StudyName;
+            return (
+              appointment.Study.StudyName +
+              " (" +
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
+            );
           });
 
-          var childNames = item.Appointments.map((appointment) => {
-            return appointment.Child.IdWithinFamily;
-          });
-
-          childNames = Array.from(new Set(childNames));
+          studyNames = Array.from(new Set(studyNames));
 
           // Calendar event title
           item.summary =
-            item.Status.toUpperCase() +
-            " - " +
-            studyNames.join(" + ") +
-            ", Family: " +
-            item.Appointments[0].FK_Family +
-            ", Child: " +
-            childNames.join(" + ");
+            item.Status.toUpperCase() + " - " + studyNames.join(" + ");
 
           try {
             await schedule.update(item);
@@ -417,24 +416,19 @@ export default {
 
           var studyNames = this.editedSchedule.Appointments.map(
             (appointment) => {
-              return appointment.Study.StudyName;
+              return (
+                appointment.Study.StudyName +
+                " (" +
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
+              );
             }
           );
 
-          var childNames = this.editedSchedule.Appointments.map(
-            (appointment) => {
-              return appointment.Child.IdWithinFamily;
-            }
-          );
+          studyNames = Array.from(new Set(studyNames));
 
-          childNames = Array.from(new Set(childNames));
-
-          this.editedSchedule.summary =
-            studyNames.join(" + ") +
-            ", Family: " +
-            this.editedSchedule.Appointments[0].FK_Family +
-            ", Child: " +
-            childNames.join(" + ");
+          this.editedSchedule.summary = studyNames.join(" + ");
 
           this.editedSchedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),

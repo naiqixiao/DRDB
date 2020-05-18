@@ -56,15 +56,11 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     var studyNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Study.StudyName;
-    });
+      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
 
-    var childNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Child.IdWithinFamily;
     });
 
     studyNames = Array.from(new Set(studyNames));
-    childNames = Array.from(new Set(childNames));
 
     var attendees = [];
 
@@ -79,11 +75,7 @@ exports.create = asyncHandler(async (req, res) => {
 
     const updatedScheduleInfo = {
       summary:
-        studyNames.join(" + ") +
-        ", Family: " +
-        req.query.FK_Family +
-        ", Child: " +
-        childNames.join(" + "),
+        studyNames.join(" + "),
       attendees: attendees,
     };
 
@@ -223,15 +215,11 @@ exports.update = asyncHandler(async (req, res) => {
     });
 
     var studyNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Study.StudyName;
-    });
+      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
 
-    var childNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Child.IdWithinFamily;
     });
 
     studyNames = Array.from(new Set(studyNames));
-    childNames = Array.from(new Set(childNames));
 
     var attendees = [];
 
@@ -246,11 +234,7 @@ exports.update = asyncHandler(async (req, res) => {
 
     const updatedScheduleInfo = {
       summary:
-        studyNames.join(" + ") +
-        ", Family: " +
-        req.query.FK_Family +
-        ", Child: " +
-        childNames.join(" + "),
+        studyNames.join(" + "),
       attendees: attendees,
     };
 
@@ -308,15 +292,10 @@ exports.delete = asyncHandler(async (req, res) => {
     );
 
     var studyNames = updatedAppointments.map((appointment) => {
-      return appointment.Study.StudyName;
-    });
-
-    var childNames = updatedAppointments.map((appointment) => {
-      return appointment.Child.IdWithinFamily;
+      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
     });
 
     studyNames = Array.from(new Set(studyNames));
-    childNames = Array.from(new Set(childNames));
 
     var attendees = [];
 
@@ -331,11 +310,7 @@ exports.delete = asyncHandler(async (req, res) => {
 
     const updatedScheduleInfo = {
       summary:
-        studyNames.join(" + ") +
-        ", Family: " +
-        req.query.FK_Family +
-        ", Child: " +
-        childNames.join(" + "),
+        studyNames.join(" + "),
       attendees: attendees,
     };
 
