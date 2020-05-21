@@ -16,7 +16,12 @@
             {{ appointment.Child.Name }}
           </span>
           <span class="body-1" style="color: var(--v-primary); ">
-            {{ "(" +appointment.FK_Family + appointment.Child.IdWithinFamily + ")"}}
+            {{
+              "(" +
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
+            }}
           </span>
           <v-spacer></v-spacer>
           <v-icon
@@ -66,7 +71,7 @@
     <div>
       <v-dialog v-model="dialogAddAppointments" max-width="1200px">
         <v-card>
-          <v-card-title class="headline"
+          <v-card-title class="title"
             >Add appointments to the current schedule</v-card-title
           >
           <v-container fluid>
@@ -130,22 +135,26 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogUpdateExperimenters" max-width="1200px">
-        <v-card>
-          <h2>Update experimenters for the current appointment</h2>
-          <v-col cols="12" md="3">
-            <v-select
-              :items="potentialExperimenters"
-              :item-value="'id'"
-              :item-text="'Name'"
-              v-model="selectedExperimenters"
-              return-object
-              label="Experimenters"
-              multiple
-              dense
-            ></v-select>
-          </v-col>
-
+      <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
+        <v-card height="300px" class="d-flex flex-column">
+          <v-card-title class="title"
+            >Update experimenters for the current appointment</v-card-title
+          >
+          <v-row justify="center">
+            <v-col cols="12" md="3">
+              <v-select
+                :items="potentialExperimenters"
+                :item-value="'id'"
+                :item-text="'Name'"
+                v-model="selectedExperimenters"
+                return-object
+                label="Experimenters"
+                multiple
+                dense
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-spacer></v-spacer>
           <v-card-actions>
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
@@ -157,9 +166,7 @@
                 >
               </v-col>
               <v-col md="2">
-                <v-btn color="green darken-1" text @click="saveExperimenters"
-                  >Save</v-btn
-                >
+                <v-btn color="primay" @click="saveExperimenters">Save</v-btn>
               </v-col>
               <v-col md="4"></v-col>
             </v-row>

@@ -1228,7 +1228,7 @@ export default {
         appointment.Personnels.forEach((experimenter) => {
           attendees.push({
             displayName: experimenter.Name,
-            email: experimenter.Calendar + ".CAL",
+            email: experimenter.Calendar// + ".CAL",
           });
         });
       });

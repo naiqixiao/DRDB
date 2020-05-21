@@ -1,7 +1,7 @@
 <template>
   <v-row  align="end" justify="space-around">
-    <v-col cols="12" md="1">
-      <h3>{{ child.Name }}</h3>
+    <v-col cols="12" md="2" >
+      <h3 >{{ child.Name }}</h3>
     </v-col>
     <v-col cols="12" md="2">
       <v-select
@@ -49,7 +49,7 @@
       >
     </v-col>
     <v-col cols="12" md="2" v-else></v-col>
-    <v-col cols="12" md="1"></v-col>
+    <v-col cols="12" md="2"></v-col>
   </v-row>
 </template>
 
@@ -91,7 +91,7 @@ export default {
       const attendees = this.selectedExperimenters.map((experimenter) => {
         return {
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL",
+          email: experimenter.Calendar// + ".CAL",
         };
       });
 

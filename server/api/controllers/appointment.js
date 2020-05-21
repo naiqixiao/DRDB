@@ -68,7 +68,7 @@ exports.create = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL",
+          email: experimenter.Calendar// + ".CAL",
         });
       });
     });
@@ -227,7 +227,7 @@ exports.update = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL",
+          email: experimenter.Calendar// + ".CAL",
         });
       });
     });
@@ -303,7 +303,7 @@ exports.delete = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL",
+          email: experimenter.Calendar// + ".CAL",
         });
       });
     });
