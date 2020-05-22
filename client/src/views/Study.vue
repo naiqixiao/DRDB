@@ -3,13 +3,14 @@
     <v-row>
       <v-col cols="12" md="4">
         <v-data-table
+          hide-default-footer
+          disable-pagination
           fixed-header
           height="900"
           single-select
           no-data-text="No study to display."
           :headers="headersStudy"
           :items="Studies"
-          class="elevation-1"
           @click:row="rowSelected"
         >
           <template #item.updatedAt="{ value }">
@@ -31,7 +32,7 @@
         <v-row>
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
-            <h4 class="text-left">Basic information:</h4>
+            <h4 class="text-left">Study information:</h4>
           </v-col>
           <v-col
             cols="12"
@@ -92,7 +93,11 @@
             <v-divider></v-divider>
             <h4 class="text-left">Email template:</h4>
           </v-col>
-          <body v-html="currentStudy.EmailTemplate" align="start"></body>
+          <body
+            v-html="currentStudy.EmailTemplate"
+            align="start"
+            class="template"
+          ></body>
 
           <v-col cols="12" md="2" dense>
             <v-btn color="primary" fab @click.stop="createStudy"
@@ -112,7 +117,7 @@
         </v-row>
 
         <div>
-          <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+          <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
             <v-card>
               <v-card-title>
                 <span class="headline">Study information</span>
@@ -120,7 +125,7 @@
 
               <v-form ref="form" v-model="valid" lazy-validation>
                 <v-container>
-                  <v-row>
+                  <v-row justify="space-around">
                     <v-col
                       cols="12"
                       sm="6"
@@ -134,8 +139,11 @@
                           :items="options[field.options]"
                           v-model="editedStudy[field.field]"
                           :label="field.label"
+                          height="48px"
+                          background-color="textbackground"
                           hide-details
-                          dense
+                          placeholder="  "
+                          outlined
                         ></v-combobox>
                       </div>
                       <div v-else-if="field.rules">
@@ -143,22 +151,31 @@
                           :label="field.label"
                           v-model="editedStudy[field.field]"
                           :rules="$rules[field.rules]"
-                          dense
+                          height="48px"
+                          background-color="textbackground"
+                          hide-details
+                          placeholder="  "
+                          outlined
                         ></v-text-field>
                       </div>
                       <div v-else>
                         <v-text-field
                           :label="field.label"
                           v-model="editedStudy[field.field]"
-                          dense
+                          height="48px"
+                          background-color="textbackground"
+                          hide-details
+                          placeholder="  "
+                          outlined
                         ></v-text-field>
                       </div>
                     </v-col>
                   </v-row>
 
-                  <v-row>
-                    <v-col cols="12" md="8">
-                      <h3>Study summary & email template</h3>
+                  <v-row justify="space-around">
+                    <v-col cols="12" md="10">
+                      <v-divider></v-divider>
+                      <h3>Study summary</h3>
 
                       <v-textarea
                         label="Study summary"
@@ -167,7 +184,15 @@
                         rows="3"
                         solo
                         v-model="editedStudy.Description"
+                        hide-details
                       ></v-textarea>
+                    </v-col>
+                  </v-row>
+
+                  <v-row justify="space-around">
+                    <v-col cols="12" md="10">
+                      <v-divider></v-divider>
+                      <h3>Email template</h3>
                       <vue-editor
                         v-model="editedStudy.EmailTemplate"
                         :editor-toolbar="customToolbar"
@@ -467,5 +492,13 @@ body {
   tr:hover:not(.v-data-table__expanded__content) {
   /* border-bottom-width: 2px !important; */
   background-color: var(--v-secondary-lighten1) !important;
+}
+
+.template {
+  background-color: var(--v-textbackground-base);
+  border-color: var(--v-primary-base);
+  margin: 8px 8px 8px 8px;
+  padding: 8px 8px 8px 8px;
+  border-width: 1px;
 }
 </style>

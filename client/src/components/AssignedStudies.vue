@@ -29,10 +29,13 @@
       </v-col>
 
       <div>
-        <v-dialog v-model="dialogStudy" max-width="1200px">
+        <v-dialog v-model="dialogStudy" max-width="600px">
           <v-card>
-            <v-row align="center" justify="center">
-              <v-col cols="12" lg="10">
+            <v-card-title class="title" style="padding: 8px"
+            >{{"Assign studies to " + personnelName}}
+          </v-card-title>
+            <v-row justify="center" align="center" style="height: 200px;">
+              <v-col cols="12" md="6">
                 <v-select
                   :items="labStudies"
                   :item-value="'id'"
@@ -41,6 +44,11 @@
                   return-object
                   label="Studies"
                   multiple
+                  hide-details
+                  height="48px"
+                  placeholder="  "
+                  outlined
+                  dense
                 >
                 </v-select>
               </v-col>
@@ -48,14 +56,14 @@
 
             <v-card-actions>
               <v-row justify="space-between" style="height: 50px">
-                <v-col md="4"></v-col>
+                <v-col md="3"></v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="close = false">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="save">Save</v-btn>
                 </v-col>
-                <v-col md="4"></v-col>
+                <v-col md="3"></v-col>
               </v-row>
             </v-card-actions>
           </v-card>
@@ -81,6 +89,7 @@ export default {
     Studies: Array,
     labStudies: Array,
     personnelId: Number,
+    personnelName: String
   },
 
   data() {

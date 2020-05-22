@@ -246,7 +246,7 @@ export default {
   padding-top: 0px !important;
 }
 
-// .theme--light.v-card {
-//   background-color: var(--v-background-base) !important;
-// }
+.v-application p {
+    margin-bottom: 8px !important;
+}
 </style>

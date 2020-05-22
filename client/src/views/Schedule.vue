@@ -28,7 +28,7 @@
         <v-row>
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
-            <h4 class="text-left">Basic information:</h4>
+            <h4 class="text-left">Study information:</h4>
           </v-col>
           <v-col
             cols="12"
@@ -367,7 +367,7 @@
 
           <v-dialog
             v-model="dialogChildEdit"
-            max-width="760px"
+            max-width="800px"
             :retain-focus="false"
           >
             <v-card>

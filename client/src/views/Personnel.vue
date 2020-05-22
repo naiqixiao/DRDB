@@ -3,6 +3,8 @@
     <v-row>
       <v-col cols="12" md="4">
         <v-data-table
+          hide-default-footer
+          disable-pagination
           fixed-header
           height="900"
           single-select
@@ -27,6 +29,10 @@
       </v-col>
 
       <v-col cols="12" md="8">
+        <v-col md="12" class="subtitle">
+          <v-divider></v-divider>
+          <h4 class="text-left">Personnel information:</h4>
+        </v-col>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container>
             <v-row>
@@ -38,11 +44,11 @@
                 :key="field.label"
               >
                 <v-text-field
-                  height="48px"
                   background-color="textbackground"
-                  hide-details
                   :label="field.label"
                   v-model="currentPersonnel[field.field]"
+                  hide-details
+                  height="48px"
                   placeholder="  "
                   outlined
                   dense
@@ -70,14 +76,16 @@
                 </v-row>
               </v-col>
 
-               <v-divider></v-divider>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Assigned studies:</h4>
+              </v-col>
               <v-col cols="12" md="12">
-                <h3 justify="start">Assigned studies</h3>
-
                 <AssignedStudies
                   :Studies="currentPersonnel.Studies"
                   :labStudies="labStudies"
                   :personnelId="currentPersonnel.id"
+                  :personnelName="currentPersonnel.Name"
                   @updatedStudies="updatedStudies"
                 ></AssignedStudies>
               </v-col>
@@ -85,7 +93,7 @@
           </v-container>
 
           <div>
-            <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+            <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
               <v-card>
                 <v-card-title>
                   <span class="headline">Lab member information</span>
@@ -97,7 +105,7 @@
                       <v-col
                         cols="12"
                         sm="6"
-                        md="3"
+                        md="4"
                         v-for="field in personnelFields"
                         :key="field.label"
                       >
@@ -107,6 +115,10 @@
                             :items="options[field.options]"
                             v-model="editedPersonnel[field.field]"
                             :label="field.label"
+                            hide-details
+                            height="48px"
+                            placeholder="  "
+                            outlined
                             dense
                           ></v-combobox>
                         </div>
@@ -115,6 +127,10 @@
                             :label="field.label"
                             v-model="editedPersonnel[field.field]"
                             :rules="rules[field.rules]"
+                            hide-details
+                            height="48px"
+                            placeholder="  "
+                            outlined
                             dense
                           ></v-text-field>
                         </div>
@@ -122,6 +138,10 @@
                           <v-text-field
                             :label="field.label"
                             v-model="editedPersonnel[field.field]"
+                            hide-details
+                            height="48px"
+                            placeholder="  "
+                            outlined
                             dense
                           ></v-text-field>
                         </div>
