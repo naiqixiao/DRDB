@@ -70,7 +70,8 @@
         <v-btn large @click="thisWeekStudies">This week's Studies</v-btn>
       </v-col>
     </v-row>
-    <v-row justify="center">
+
+    <v-row justify="center" style="padding-top: 28px">
       <v-col cols="12" md="3">
         <template>
           <FamilyInfo :currentFamily="currentFamily"></FamilyInfo>

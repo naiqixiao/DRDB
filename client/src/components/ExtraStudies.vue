@@ -1,9 +1,9 @@
 <template>
-  <v-row  align="end" justify="space-around">
-    <v-col cols="12" md="2" >
-      <h3 >{{ child.Name }}</h3>
+  <v-row align="end" justify="space-around">
+    <v-col cols="12" md="2" style="display: flex; justify-content: flex-end;">
+      <h3 class="name">{{ child.Name + ":"}}</h3>
     </v-col>
-    <v-col cols="12" md="2">
+    <v-col cols="12" md="2" > 
       <v-select
         v-if="index == 0 && currentStudy"
         :items="potentialStudies"
@@ -45,8 +45,7 @@
     <v-col cols="12" md="2" v-if="index > 0">
       <v-btn text icon color="primary" @click="deleteAppointment">
         <v-icon>delete</v-icon>
-        </v-btn
-      >
+      </v-btn>
     </v-col>
     <v-col cols="12" md="2" v-else></v-col>
     <v-col cols="12" md="2"></v-col>
@@ -91,7 +90,7 @@ export default {
       const attendees = this.selectedExperimenters.map((experimenter) => {
         return {
           displayName: experimenter.Name,
-          email: experimenter.Calendar// + ".CAL",
+          email: experimenter.Calendar, // + ".CAL",
         };
       });
 
@@ -176,4 +175,10 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
+<style scoped>
+.name {
+  height: 30px;
+  display: flex;
+  align-items: flex-end;
+}
+</style>
