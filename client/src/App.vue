@@ -162,6 +162,14 @@ export default {
   font-weight: 700;
 }
 
+.theme--light.v-text-field.v-text-field--solo:not(.v-text-field--solo-flat)
+  > .v-input__control
+  > .v-input__slot {
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+
 .theme--light.v-data-table {
   border-top-left-radius: 10px !important;
   border-top-right-radius: 10px !important;
@@ -228,8 +236,8 @@ export default {
 
 .conv-textarea {
   border-radius: 10px !important;
-  border-style: solid !important;
-  border-width: thin !important;
+  // border-style: solid !important;
+  // border-width: thin !important;
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
@@ -247,6 +255,11 @@ export default {
 }
 
 .v-application p {
-    margin-bottom: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#app .v-list-item__title {
+  font-size: 1rem;
+  font-weight: 800;
 }
 </style>
