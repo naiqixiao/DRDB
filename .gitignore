@@ -5,6 +5,7 @@ server/api/middleware/calendar.js
 server/api/controllers/calendar.js
 server/SequelizeTest.js
 server/index.html
+server/public
 server/node_modules
 server/node_modules/.bin/acorn
 server/node_modules/.bin/atob

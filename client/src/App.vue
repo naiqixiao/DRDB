@@ -53,19 +53,6 @@ export default {
   text-align: center;
 }
 
-// #nav {
-//   padding: 30px;
-
-//   a {
-//     font-weight: bold;
-//     color: #ffffff;
-
-//     &.router-link-exact-active {
-//       color: #fafafa;
-//     }
-//   }
-// }
-
 .v-application {
   background-color: var(--v-background-base) !important;
 }
