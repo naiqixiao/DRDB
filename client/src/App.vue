@@ -148,7 +148,7 @@ export default {
   padding: 8px 8px 8px 8px !important;
 }
 
-.v-content {
+.v-main {
   padding-top: 56px !important;
 }
 
@@ -215,8 +215,9 @@ export default {
   color: var(--v-secondary-base) !important;
 }
 
-.theme--light.v-data-table.v-data-table-header th.sortable.active {
+.theme--light.v-data-table.v-data-table--fixed-header thead th {
   color: var(--v-secondary-base) !important;
+  font-weight: 600 !important;
 }
 
 .theme--light.v-data-table--dense th {
