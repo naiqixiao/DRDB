@@ -100,14 +100,16 @@ exports.signup = asyncHandler(async (req, res) => {
       var emailContent = {
         to: newUser.Email,
         subject:
-          "Your user account has been created for Developmental Research Database.",
+          "Your user account has been created for Developmental Research System.",
         body:
           "<p>Hello " +
           newUser.Name.split(" ")[0] +
           ",</p> " +
-          "<p>You temporary password is: <b>" +
+          "<p>Welcoe to the developmental research management system!</p>" +
+          "<p>Your role is <b>" + newUser.Role +
+          "</b>, and your temporary password is <b><em>" +
           password +
-          "</b></p> <p>Please login with your email to change your password.</p> " +
+          "</em></b>. Please login with your email to change your password.</p> " +
           "<p> </p>" +
           "<p>Thank you! </p>" +
           "<p>Lab manager</p>",
@@ -264,8 +266,8 @@ exports.changePassword = asyncHandler(async (req, res) => {
           "<p>Hello " +
           personnel.Name.split(" ")[0] +
           ",</p> " +
-          "<p>You login password has recently been changed. </p>" +
-          "<p>If you didn't change your password, please let your lab manager know as soon as possible.</p> " +
+          "<p>Your login password has recently been changed. </p>" +
+          "<p>If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
           "<p> </p>" +
           "<p>Thank you!</p>" +
           "<p>Lab manager</p>",
