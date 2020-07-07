@@ -37,9 +37,10 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.Active = req.query.Active;
   }
 
-  if (req.query.lab) {
-    queryString.FK_Lab = req.query.lab;
+  if (req.query.FK_Lab) {
+    queryString.FK_Lab = req.query.FK_Lab;
   }
+
   if (req.query.study) {
     queryString["$Studies.id$"] = req.query.study;
   }
