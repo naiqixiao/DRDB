@@ -103,7 +103,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "Your user account has been created for Developmental Research Database.",
         body:
           "<p>Hello " +
-          personnel.Name.split(" ")[0] +
+          newUser.Name.split(" ")[0] +
           ",</p> " +
           "<p>You temporary password is: <b>" +
           password +
@@ -113,7 +113,11 @@ exports.signup = asyncHandler(async (req, res) => {
           "<p>Lab manager</p>",
       };
 
-      await sendEmail(req.oAuth2Client, emailContent);
+      // await sendEmail(req.oAuth2Client, emailContent);
+      const oAuth2Client = await generalAuth();
+
+      await sendEmail(oAuth2Client, emailContent);
+
     } catch (error) {
       throw error;
     }
