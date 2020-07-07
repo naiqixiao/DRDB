@@ -1,6 +1,22 @@
 const Sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
+// const sequelize = new Sequelize("DRDB", "naiqi", "Flying124~", {
+//   host: "drdbmysql.mysql.database.azure.com",
+//   dialect: "mysql",
+//   logging: false,
+//   define: {
+//     // timestamps: false,
+//     freezeTableName: true,
+//   },
+//   timeZone: "America/Toronto",
+//   pool: {
+//     max: 10,
+//     min: 0,
+//     acquire: 30000,
+//     idle: 10000,
+//   },
+// });
 const sequelize = new Sequelize("DRDB", "admin", "password", {
   host: "localhost",
   dialect: "mysql",

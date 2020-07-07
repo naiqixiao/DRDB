@@ -1,7 +1,10 @@
 server/api/models/DRDB_SQL.js
 server/api/middleware/credentials.json
 server/api/middleware/token.json
+<<<<<<< HEAD
 server/api/middleware/calendar.js
+=======
+>>>>>>> 9e03d99094f3988fd267e4b350feecc73b155fe9
 server/SequelizeTest.js
 server/index.html
 server/public
@@ -8719,12 +8722,22 @@ client/src/services/appointment copy.js
 
 server/api/controllers/gmail_old.js
 
+<<<<<<< HEAD
 server/api/google/lab1/credentials.json
 server/api/google/lab1/index.js
 server/api/google/lab1/token.json
+=======
+>>>>>>> 9e03d99094f3988fd267e4b350feecc73b155fe9
 server/api/google/lab2/credentials.json
 server/api/google/lab2/index.js
 server/api/google/lab2/token.json
 server/api/google/lab3/credentials.json
 server/api/google/lab3/index.js
 server/api/google/lab3/token.json
+server/api/google/lab1/credentials.json
+server/api/google/lab1/index.js
+server/api/google/lab1/token.json
+
+server/api/google/general/credentials.json
+server/api/google/general/index.js
+server/api/google/general/token.json
