@@ -2,7 +2,6 @@ server/api/models/DRDB_SQL.js
 server/api/middleware/credentials.json
 server/api/middleware/token.json
 server/api/middleware/calendar.js
-server/api/controllers/calendar.js
 server/SequelizeTest.js
 server/index.html
 server/public
@@ -8709,7 +8708,7 @@ server/node_modules/yeast/package.json
 server/node_modules/yeast/README.md
 server/sequelizeAuto.js
 .gitignore
-.gitignore
+
 client/src/views/Family copy.vue
 client/src/components/FamilyInfo.vue
 client/src/components/FamilyInfo.vue
@@ -8717,17 +8716,14 @@ client/src/components/FamilyInfo.vue
 server/api/controllers/appointment_old.js
 server/api/models/SequelizeAuto/Appointment_old.js
 client/src/services/appointment copy.js
-server/api/controllers/gmail.js
-server/gmail/credentials.json
-server/gmail/index.js
-server/gmail/token.json
-server/api/google/gmail/credentials.json
-server/api/google/gmail/index.js
-server/api/google/lab2/credentials.json
-server/api/google/lab2/index.js
+
 server/api/controllers/gmail_old.js
+
 server/api/google/lab1/credentials.json
 server/api/google/lab1/index.js
+server/api/google/lab1/token.json
+server/api/google/lab2/credentials.json
+server/api/google/lab2/index.js
 server/api/google/lab2/token.json
 server/api/google/lab3/credentials.json
 server/api/google/lab3/index.js
