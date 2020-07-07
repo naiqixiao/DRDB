@@ -43,25 +43,25 @@ const gmailRoutes = require("./api/routes/gmail");
 
 const extAPIRoutes = require("./api/routes/externalAPIs");
 
-app.use("/user", userRoutes);
+app.use("/api/user", userRoutes);
 
-app.use("/family", familyRoutes);
-app.use("/child", childRoutes);
-app.use("/conversation", conversationRoutes);
+app.use("/api/family", familyRoutes);
+app.use("/api/child", childRoutes);
+app.use("/api/conversation", conversationRoutes);
 
-app.use("/study", studyRoutes);
-app.use("/personnel", personnelRoutes);
-app.use("/lab", labRoutes);
-app.use("/experimenter", experimenterRoutes);
+app.use("/api/study", studyRoutes);
+app.use("/api/personnel", personnelRoutes);
+app.use("/api/lab", labRoutes);
+app.use("/api/experimenter", experimenterRoutes);
 
-app.use("/appointment", appointmentRoutes);
-app.use("/experimentAssignment", experimenterAssignmentRoutes);
-app.use("/schedule", scheduleRoutes);
+app.use("/api/appointment", appointmentRoutes);
+app.use("/api/experimentAssignment", experimenterAssignmentRoutes);
+app.use("/api/schedule", scheduleRoutes);
 
-app.use("/cal", calRoutes);
-app.use("/gmail", gmailRoutes);
+app.use("/api/cal", calRoutes);
+app.use("/api/gmail", gmailRoutes);
 
-app.use("/extAPIs", extAPIRoutes);
+app.use("/api/extAPIs", extAPIRoutes);
 
 // app.get('/', function(req, res){
 //   res.sendFile(__dirname + '/index.html');
