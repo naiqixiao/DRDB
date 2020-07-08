@@ -81,9 +81,9 @@
 
         <v-col md="12" class="subtitle">
           <v-divider></v-divider>
-          <h4 class="text-left">Email template:</h4>
+          <h4 class="text-left" v-show="currentStudy.id">Email template:</h4>
         </v-col>
-        <body v-html="currentStudy.EmailTemplate" align="start" class="template"></body>
+        <body v-html="currentStudy.EmailTemplate" align="start" class="template" v-show="currentStudy.id"></body>
 
         <v-col cols="12" md="2" dense>
           <v-btn color="primary" fab @click.stop="createStudy">
@@ -91,12 +91,12 @@
           </v-btn>
         </v-col>
         <v-col cols="12" md="2" dense>
-          <v-btn color="primary" fab @click.stop="editStudy" :disabled="!currentStudy">
+          <v-btn color="primary" fab @click.stop="editStudy" :disabled="!currentStudy.id">
             <v-icon>edit</v-icon>
           </v-btn>
         </v-col>
         <v-col cols="12" md="2" dense>
-          <v-btn color="primary" fab @click.stop="deleteStudy" :disabled="!currentStudy">
+          <v-btn color="primary" fab @click.stop="deleteStudy" :disabled="!currentStudy.id">
             <v-icon>delete</v-icon>
           </v-btn>
         </v-col>
@@ -305,11 +305,12 @@ export default {
 
         this.Studies = Result.data;
 
-        if (length(this.Studies) > 0) {
+        if (this.Studies.length > 0) {
           this.editedIndex = this.editedIndex === -1 ? 0 : this.editedIndex;
           this.currentStudy = this.Studies[this.editedIndex];
         }
       } catch (error) {
+
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
