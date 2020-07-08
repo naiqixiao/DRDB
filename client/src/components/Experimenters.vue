@@ -1,19 +1,10 @@
 <template>
   <v-row dense>
-    <v-col
-      cols="12"
-      md="12"
-      v-for="experimenter in Experimenters"
-      :key="experimenter.id"
-      dense
-    >
-      <v-card
-        class="child-card d-flex flex-column"
-      >
-        <v-card-title class="title" style="padding: 8px"
-          >{{ experimenter.Name + " (" + experimenter.Initial + ")" }}
+    <v-col cols="12" md="12" v-for="experimenter in Experimenters" :key="experimenter.id" dense>
+      <v-card class="child-card d-flex flex-column">
+        <v-card-title class="title" style="padding: 8px">
+          {{ experimenter.Name + " (" + experimenter.Initial + ")" }}
           <v-spacer></v-spacer>
-
           {{ experimenter.Role }}
         </v-card-title>
 
@@ -21,8 +12,7 @@
           class="body-1"
           align="start"
           style="padding: 8px; color: var(--v-primary)"
-          >{{ "Email: " + experimenter.Email }}</v-card-text
-        >
+        >{{ "Email: " + experimenter.Email }}</v-card-text>
 
         <!-- <v-card-actions>
           <v-btn
@@ -31,14 +21,14 @@
             :disabled="Experimenters.length == 1"
             >Delete</v-btn
           >
-        </v-card-actions> -->
+        </v-card-actions>-->
       </v-card>
     </v-col>
     <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="primary" fab large @click.stop="updateExperimenters"
-          ><v-icon>edit</v-icon></v-btn
-        >
+        <v-btn color="primary" fab large @click.stop="updateExperimenters" :disabled="!studyId">
+          <v-icon>edit</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -55,8 +45,7 @@
                 return-object
                 label="Experimenters"
                 multiple
-              >
-              </v-select>
+              ></v-select>
             </v-col>
           </v-row>
 
@@ -64,9 +53,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogExperimenter = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="dialogExperimenter = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="save">Confirm</v-btn>
@@ -88,13 +75,13 @@ export default {
   props: {
     Experimenters: Array,
     labMembers: Array,
-    studyId: Number,
+    studyId: Number
   },
 
   data() {
     return {
       dialogExperimenter: false,
-      editedExperimenter: [],
+      editedExperimenter: []
     };
   },
   methods: {
@@ -104,10 +91,10 @@ export default {
     },
 
     async save() {
-      var newExperimenters = this.editedExperimenter.map((experimenter) => {
+      var newExperimenters = this.editedExperimenter.map(experimenter => {
         return {
           FK_Study: this.studyId,
-          FK_Experimenter: experimenter.id,
+          FK_Experimenter: experimenter.id
         };
       });
 
@@ -121,14 +108,14 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-    },
+    }
   },
   computed: {},
   watch: {
     dialog(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 
