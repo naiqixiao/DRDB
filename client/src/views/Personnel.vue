@@ -59,7 +59,11 @@
                     </v-btn>
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn fab @click.stop="deletePersonnel" :disabled="!currentPersonnel.id">
+                    <v-btn
+                      fab
+                      @click.stop="deletePersonnel"
+                      :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
+                    >
                       <v-icon>delete</v-icon>
                     </v-btn>
                   </v-col>
@@ -263,8 +267,10 @@ export default {
 
         this.Personnels = Result.data;
 
-        this.editedIndex = this.editedIndex === -1 ? 0 : this.editedIndex;
-        this.currentPersonnel = this.Personnels[this.editedIndex];
+        if (this.Personnels.length > 0) {
+          this.editedIndex = this.editedIndex === -1 ? 0 : this.editedIndex;
+          this.currentPersonnel = this.Personnels[this.editedIndex];
+        }
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
