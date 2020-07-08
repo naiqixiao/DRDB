@@ -83,7 +83,12 @@
           <v-divider></v-divider>
           <h4 class="text-left" v-show="currentStudy.id">Email template:</h4>
         </v-col>
-        <body v-html="currentStudy.EmailTemplate" align="start" class="template" v-show="currentStudy.id"></body>
+        <body
+          v-html="currentStudy.EmailTemplate"
+          align="start"
+          class="template"
+          v-show="currentStudy.id"
+        ></body>
 
         <v-col cols="12" md="2" dense>
           <v-btn color="primary" fab @click.stop="createStudy">
@@ -112,6 +117,11 @@
             <v-form ref="form" v-model="valid" lazy-validation>
               <v-container>
                 <v-row justify="space-around">
+                  <v-col md="12" class="subtitle">
+                    <v-divider></v-divider>
+                    <h4 class="text-left">Basic information:</h4>
+                  </v-col>
+
                   <v-col
                     cols="12"
                     sm="6"
@@ -130,6 +140,7 @@
                         hide-details
                         placeholder="  "
                         outlined
+                        dense
                       ></v-combobox>
                     </div>
                     <div v-else-if="field.rules">
@@ -142,6 +153,7 @@
                         hide-details
                         placeholder="  "
                         outlined
+                        dense
                       ></v-text-field>
                     </div>
                     <div v-else>
@@ -153,16 +165,45 @@
                         hide-details
                         placeholder="  "
                         outlined
+                        dense
                       ></v-text-field>
                     </div>
                   </v-col>
                 </v-row>
 
-                <v-row justify="space-around">
-                  <v-col cols="12" md="10">
+                <v-row>
+                  <v-col md="12" class="subtitle">
                     <v-divider></v-divider>
-                    <h3>Study summary</h3>
+                    <h4 class="text-left">Study criteria:</h4>
+                  </v-col>
 
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    v-for="field in this.$studyCriteriaFields"
+                    :key="field.label"
+                  >
+                    <v-text-field
+                      height="48px"
+                      background-color="textbackground"
+                      hide-details
+                      :label="field.label"
+                      v-model="editedStudy[field.field]"
+                      placeholder="  "
+                      outlined
+                      dense
+                    ></v-text-field>
+                  </v-col>
+                </v-row>
+
+                <v-row justify="space-around">
+                  <v-col md="12" class="subtitle">
+                    <v-divider></v-divider>
+                    <h4 class="text-left">Study summary:</h4>
+                  </v-col>
+
+                  <v-col cols="12" md="10">
                     <v-textarea
                       label="Study summary"
                       outlined
@@ -176,9 +217,12 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                  <v-col cols="12" md="10">
+                  <v-col md="12" class="subtitle">
                     <v-divider></v-divider>
-                    <h3>Email template</h3>
+                    <h4 class="text-left">Email template:</h4>
+                  </v-col>
+
+                  <v-col cols="12" md="10">
                     <vue-editor v-model="editedStudy.EmailTemplate" :editor-toolbar="customToolbar"></vue-editor>
                   </v-col>
                 </v-row>
@@ -270,8 +314,30 @@ export default {
       },
 
       Studies: [],
-      currentStudy: {},
-      editedStudy: {},
+      currentStudy: {
+        StudyName: null,
+        FK_Lab: this.$store.state.lab,
+        MinAge: null,
+        MaxAge: null,
+        Description: "",
+        EmailTemplate: "",
+        Completed: 0,
+        StudyType: null,
+        PrematureParticipant: 0,
+        updatedAt: new Date().toISOString()
+      },
+      editedStudy: {
+        StudyName: null,
+        FK_Lab: this.$store.state.lab,
+        MinAge: null,
+        MaxAge: null,
+        Description: "",
+        EmailTemplate: "",
+        Completed: 0,
+        StudyType: null,
+        PrematureParticipant: 0,
+        updatedAt: new Date().toISOString()
+      },
       defaultStudy: {
         StudyName: null,
         FK_Lab: this.$store.state.lab,
@@ -310,7 +376,6 @@ export default {
           this.currentStudy = this.Studies[this.editedIndex];
         }
       } catch (error) {
-
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
