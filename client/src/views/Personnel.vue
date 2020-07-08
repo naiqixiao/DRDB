@@ -19,11 +19,7 @@
           </template>
 
           <template #item.Active="{ item }">
-            <v-simple-checkbox
-              v-model="item.Active"
-              @input="changePersonnelStatus(item)"
-              dense
-            ></v-simple-checkbox>
+            <v-simple-checkbox v-model="item.Active" @input="changePersonnelStatus(item)" dense></v-simple-checkbox>
           </template>
         </v-data-table>
       </v-col>
@@ -36,13 +32,7 @@
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container>
             <v-row>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-                v-for="field in personnelFields"
-                :key="field.label"
-              >
+              <v-col cols="12" sm="6" md="4" v-for="field in personnelFields" :key="field.label">
                 <v-text-field
                   background-color="textbackground"
                   :label="field.label"
@@ -59,19 +49,19 @@
               <v-col cols="12" md="12">
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
-                    <v-btn color="primary" fab @click.stop="createPersonnel"
-                      ><v-icon>add</v-icon></v-btn
-                    >
+                    <v-btn color="primary" fab @click.stop="createPersonnel">
+                      <v-icon>add</v-icon>
+                    </v-btn>
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn fab @click.stop="editPersonnel"
-                      ><v-icon>edit</v-icon></v-btn
-                    >
+                    <v-btn fab @click.stop="editPersonnel" :disabled="!currentPersonnel.id">
+                      <v-icon>edit</v-icon>
+                    </v-btn>
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn fab @click.stop="deletePersonnel"
-                      ><v-icon>delete</v-icon></v-btn
-                    >
+                    <v-btn fab @click.stop="deletePersonnel" :disabled="!currentPersonnel.id">
+                      <v-icon>delete</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
               </v-col>
@@ -149,7 +139,7 @@
                     </v-row>
 
                     <v-row>
-                      <v-col cols="12" md="8"> </v-col>
+                      <v-col cols="12" md="8"></v-col>
                     </v-row>
                   </v-container>
                 </v-form>
@@ -186,7 +176,7 @@ import store from "@/store";
 export default {
   components: {
     DateDisplay,
-    AssignedStudies,
+    AssignedStudies
   },
   data() {
     return {
@@ -195,21 +185,21 @@ export default {
           text: "Name",
           align: "center",
           value: "Name",
-          width: "27%",
+          width: "27%"
         },
         {
           text: "Email",
           align: "center",
           sortable: false,
           value: "Email",
-          width: "35%",
+          width: "35%"
         },
         {
           text: "Role",
           align: "center",
           sortable: false,
           value: "Role",
-          width: "20%",
+          width: "20%"
         },
 
         {
@@ -217,8 +207,8 @@ export default {
           sortable: false,
           align: "center",
           value: "Active",
-          width: "18%",
-        },
+          width: "18%"
+        }
       ],
       dialog: false,
       personnelFields: [
@@ -228,9 +218,9 @@ export default {
         {
           label: "Role",
           field: "Role",
-          options: "role",
+          options: "role"
         },
-        { label: "Calendar ID", field: "Calendar" },
+        { label: "Calendar ID", field: "Calendar" }
       ],
       options: {
         role: [
@@ -240,8 +230,8 @@ export default {
           "Undergrad",
           "RA",
           "Lab manager",
-          "Staff",
-        ],
+          "Staff"
+        ]
       },
 
       Personnels: [],
@@ -254,18 +244,18 @@ export default {
         Email: null,
         Calendar: null,
         Role: null,
-        Active: 1,
+        Active: 1
       },
       editedIndex: -1,
       labStudies: [],
-      valid: true,
+      valid: true
     };
   },
 
   methods: {
     async searchPersonnel() {
       var queryString = {
-        FK_Lab: store.state.lab,
+        FK_Lab: store.state.lab
       };
 
       try {
@@ -279,7 +269,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -288,7 +278,7 @@ export default {
     async searchLabStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0,
+        Completed: 0
       };
 
       try {
@@ -299,7 +289,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -314,7 +304,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -359,7 +349,7 @@ export default {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
             this.$router.push({
-              name: "Login",
+              name: "Login"
             });
           }
         }
@@ -379,7 +369,7 @@ export default {
 
     async deletePersonnel() {
       var personnelInfo = {
-        id: this.currentPersonnel.id,
+        id: this.currentPersonnel.id
       };
 
       try {
@@ -395,12 +385,12 @@ export default {
 
     updatedStudies(updatedStudies) {
       this.currentPersonnel.Studies = updatedStudies;
-    },
+    }
   },
   mounted: function() {
     this.searchPersonnel();
     this.searchLabStudies();
-  },
+  }
 };
 </script>
 

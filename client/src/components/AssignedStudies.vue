@@ -3,37 +3,32 @@
     <v-row dense justify="start">
       <v-col cols="12" md="4" v-for="study in Studies" :key="study.id" dense>
         <v-card class="child-card d-flex flex-column">
-          <v-card-title class="title" style="padding: 8px"
-            >{{ study.StudyName }}
+          <v-card-title class="title" style="padding: 8px">
+            {{ study.StudyName }}
             <v-spacer></v-spacer>
             {{ " (" + study.StudyType + ")" }}
           </v-card-title>
 
-          <v-card-text
-            class="body-1"
-            align="start"
-            style="padding: 8px; color: var(--v-primary)"
-            >{{
-              "Age range: " + study.MinAge + " to " + study.MaxAge + " months"
-            }}</v-card-text
-          >
-          <v-card-text
-            class="body-1"
-            align="end"
-            style="padding: 8px; color: red"
-            >{{
-              study.Completed ? "Completed" : "In progress"
-            }}</v-card-text
-          >
+          <v-card-text class="body-1" align="start" style="padding: 8px; color: var(--v-primary)">
+            {{
+            "Age range: " + study.MinAge + " to " + study.MaxAge + " months"
+            }}
+          </v-card-text>
+          <v-card-text class="body-1" align="end" style="padding: 8px; color: red">
+            {{
+            study.Completed ? "Completed" : "In progress"
+            }}
+          </v-card-text>
         </v-card>
       </v-col>
 
       <div>
         <v-dialog v-model="dialogStudy" max-width="600px">
           <v-card>
-            <v-card-title class="title" style="padding: 8px"
-            >{{"Assign studies to " + personnelName}}
-          </v-card-title>
+            <v-card-title
+              class="title"
+              style="padding: 8px"
+            >{{"Assign studies to " + personnelName}}</v-card-title>
             <v-row justify="center" align="center" style="height: 200px;">
               <v-col cols="12" md="6">
                 <v-select
@@ -49,8 +44,7 @@
                   placeholder="  "
                   outlined
                   dense
-                >
-                </v-select>
+                ></v-select>
               </v-col>
             </v-row>
 
@@ -72,9 +66,9 @@
     </v-row>
     <v-row align="center" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="primary" fab large @click.stop="updateStudies"
-          ><v-icon>edit</v-icon></v-btn
-        >
+        <v-btn color="primary" fab large @click.stop="updateStudies" :disabled="!personnelId">
+          <v-icon>edit</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
   </div>
@@ -95,7 +89,7 @@ export default {
   data() {
     return {
       dialogStudy: false,
-      editedStudies: [],
+      editedStudies: []
     };
   },
   methods: {
@@ -105,10 +99,10 @@ export default {
     },
 
     async save() {
-      var newStudies = this.editedStudies.map((study) => {
+      var newStudies = this.editedStudies.map(study => {
         return {
           FK_Experimenter: this.personnelId,
-          FK_Study: study.id,
+          FK_Study: study.id
         };
       });
 
@@ -127,14 +121,14 @@ export default {
     close() {
       this.dialogStudy = false;
       this.editedStudies = {};
-    },
+    }
   },
   computed: {},
   watch: {
     dialogStudy(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 
