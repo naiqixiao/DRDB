@@ -1236,7 +1236,7 @@ export default {
       var calendarEvent = {
         summary:
           studyNames.join(" + "),
-        location: "Psychology Building, McMaster University",
+        location: "OISE, University of Toronto",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
           timeZone: "America/Toronto",

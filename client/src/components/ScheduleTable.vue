@@ -34,8 +34,7 @@
       <v-icon
         @click.stop="updateSchedule(item, 'Confirmed')"
         :disabled="item.Status === 'Confirmed' || item.Completed == true"
-        >event</v-icon
-      >
+      >event</v-icon>
       <v-icon
         @click.stop="updateSchedule(item, 'Rescheduling')"
         :disabled="
@@ -44,8 +43,7 @@
             item.Status === 'TBD' ||
             item.Completed == true
         "
-        >update</v-icon
-      >
+      >update</v-icon>
       <v-icon
         @click.stop="updateSchedule(item, 'No Show')"
         :disabled="
@@ -54,13 +52,21 @@
             item.Status === 'TBD' ||
             item.Completed == true
         "
-        >sentiment_dissatisfied</v-icon
-      >
+      >sentiment_dissatisfied</v-icon>
       <v-icon
         @click.stop="updateSchedule(item, 'Cancelled')"
         :disabled="item.Status === 'Cancelled' || item.Completed == true"
-        >not_interested</v-icon
-      >
+      >not_interested</v-icon>
+    </template>
+
+    <template #item.Reminded="{ item }">
+      <v-simple-checkbox
+        v-model="item.Reminded"
+        class="mr-0 pa-0"
+        @input="updateSchedule(item, 'Reminded')"
+        dense
+        :disabled="remindIconEnable(item)"
+      ></v-simple-checkbox>
     </template>
 
     <template #item.Completed="{ item }">
@@ -69,31 +75,22 @@
         class="mr-0 pa-0"
         @input="updateSchedule(item, 'Completed')"
         dense
+        :disabled="completeIconEnable(item)"
       ></v-simple-checkbox>
     </template>
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row
-          justify="space-between"
-          style="background-color: rgba(0, 0, 0, 0)"
-        >
+        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0)">
           <!-- <v-col cols="12" md="12">
-          </v-col> -->
-          <MiniAppointmentTable
-            :Appointments="item.Appointments"
-            @updateSchedule="updateSchedule"
-          ></MiniAppointmentTable>
+          </v-col>-->
+          <MiniAppointmentTable :Appointments="item.Appointments" @updateSchedule="updateSchedule"></MiniAppointmentTable>
         </v-row>
       </td>
     </template>
 
     <template #top>
-      <v-dialog
-        v-model="nextContactDialog"
-        max-width="800px"
-        :retain-focus="false"
-      >
+      <v-dialog v-model="nextContactDialog" max-width="800px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
@@ -111,9 +108,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -132,8 +127,7 @@
               editable
               step="1"
               @click="emailDialog = false"
-              >Reschedule</v-stepper-step
-            >
+            >Reschedule</v-stepper-step>
 
             <v-divider></v-divider>
 
@@ -147,9 +141,7 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-card outlined>
-                <v-card-title class="headline"
-                  >Select study date and time.</v-card-title
-                >
+                <v-card-title class="headline">Select study date and time.</v-card-title>
                 <v-row justify="space-around">
                   <v-col cols="12" lg="6">
                     <v-date-picker
@@ -174,24 +166,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn
-                    color="primary"
-                    :disabled="!studyDateTime"
-                    @click="continue12()"
-                  >
-                    <v-icon dark left v-show="scheduleUpdated"
-                      >mdi-checkbox-marked-circle</v-icon
-                    >
-                    Confirm
+                  <v-btn color="primary" :disabled="!studyDateTime" @click="continue12()">
+                    <v-icon dark left v-show="scheduleUpdated">mdi-checkbox-marked-circle</v-icon>Confirm
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn
-                    :disabled="!scheduleNextPage"
-                    @click="scheduleNextStep"
-                  >
-                    Next</v-btn
-                  >
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -214,20 +194,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" @click="continue23()"
-                    ><v-icon dark left v-show="emailSent"
-                      >mdi-checkbox-marked-circle</v-icon
-                    >
-                    Send Email
+                  <v-btn color="primary" @click="continue23()">
+                    <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn
-                    :disabled="!scheduleNextPage"
-                    @click="scheduleNextStep"
-                  >
-                    Next</v-btn
-                  >
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -244,9 +216,7 @@
               <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()">
-                    Complete
-                  </v-btn>
+                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -279,11 +249,11 @@ export default {
     StudyNameSchedule,
     MiniAppointmentTable,
     Email,
-    NextContact,
+    NextContact
   },
   props: {
     Schedules: Array,
-    studyTimeSlots: Array,
+    studyTimeSlots: Array
   },
   data() {
     return {
@@ -297,9 +267,9 @@ export default {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
             Family: { NameMom: "" },
-            Child: { Name: "" },
-          },
-        ],
+            Child: { Name: "" }
+          }
+        ]
       },
       earliestDate: new Date(),
       latestDate: new Date(),
@@ -319,10 +289,10 @@ export default {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
             Family: { NameMom: "" },
-            Child: { Name: "" },
-          },
-        ],
-      },
+            Child: { Name: "" }
+          }
+        ]
+      }
     };
   },
   methods: {
@@ -347,6 +317,16 @@ export default {
           item.updatedAt = new Date().toISOString();
           break;
 
+        case "Reminded":
+          try {
+            await schedule.remind(item);
+          } catch (error) {
+            console.log(error.response);
+          }
+
+          item.updatedAt = new Date().toISOString();
+          break;
+
         default:
           item.Status = status;
 
@@ -355,7 +335,7 @@ export default {
           }
 
           // name by combining all study names within a schedule
-          var studyNames = item.Appointments.map((appointment) => {
+          var studyNames = item.Appointments.map(appointment => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -414,17 +394,15 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.editedSchedule.Appointments.map(
-            (appointment) => {
-              return (
-                appointment.Study.StudyName +
-                " (" +
-                appointment.FK_Family +
-                appointment.Child.IdWithinFamily +
-                ")"
-              );
-            }
-          );
+          var studyNames = this.editedSchedule.Appointments.map(appointment => {
+            return (
+              appointment.Study.StudyName +
+              " (" +
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
+            );
+          });
 
           studyNames = Array.from(new Set(studyNames));
 
@@ -432,13 +410,13 @@ export default {
 
           this.editedSchedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto",
+            timeZone: "America/Toronto"
           };
           this.editedSchedule.end = {
             dateTime: moment(this.studyDateTime)
               .add(1, "h") // might change if multiple studies are scheduled for one visit
               .toISOString(true),
-            timeZone: "America/Toronto",
+            timeZone: "America/Toronto"
           };
 
           const calendarEvent = await schedule.update(this.editedSchedule);
@@ -536,7 +514,7 @@ export default {
 
     datePickerRange() {
       if (this.editedSchedule.Appointments) {
-        var minAges = this.editedSchedule.Appointments.map((appointment) => {
+        var minAges = this.editedSchedule.Appointments.map(appointment => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MinAge * 30.5),
             "days"
@@ -549,7 +527,7 @@ export default {
 
         this.earliestDate = MinAge.toISOString(true);
 
-        var maxAges = this.editedSchedule.Appointments.map((appointment) => {
+        var maxAges = this.editedSchedule.Appointments.map(appointment => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MaxAge * 30.5),
             "days"
@@ -561,6 +539,54 @@ export default {
         this.latestDate = MaxAge.toISOString(true);
       }
     },
+
+    remindIconEnable(item) {
+      var iconDisable = true;
+      var daysAheadofSchedule = 1;
+
+      if (moment(item.AppointmentTime).day() == 1) {
+        daysAheadofSchedule = 3;
+      }
+
+      switch (item.Status) {
+        case "Confirmed":
+          if (
+            moment(item.AppointmentTime).startOf("day") >=
+              moment()
+                .startOf("day")
+                .subtract(daysAheadofSchedule, "d") &&
+            moment(item.AppointmentTime).startOf("day") <
+              moment()
+                .startOf("day")
+                .add(1, "d")
+          ) {
+            iconDisable = false;
+          }
+
+          break;
+        default:
+          break;
+      }
+
+      return iconDisable;
+    },
+
+    completeIconEnable(item) {
+      var iconDisable = true;
+
+      switch (item.Status) {
+        case "Confirmed":
+          if (new Date(item.AppointmentTime) <= new Date()) {
+            iconDisable = false;
+          }
+
+          break;
+        default:
+          break;
+      }
+
+      return iconDisable;
+    }
   },
 
   computed: {
@@ -596,13 +622,13 @@ export default {
       return moment()
         .startOf("day")
         .format("YYYY-MM-DD");
-    },
+    }
   },
   watch: {
     dialog(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 

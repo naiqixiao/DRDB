@@ -24,6 +24,10 @@ export default {
     schedule.lab = store.state.lab;
     return api().post("schedule/complete", schedule);
   },
+  remind(schedule) {
+    schedule.lab = store.state.lab;
+    return api().post("schedule/remind", schedule);
+  },
   delete(schedule) {
     schedule.lab = store.state.lab;
     return api().delete("schedule/", {

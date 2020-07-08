@@ -1,0 +1,11 @@
+DROP EVENT test_event_01;
+
+CREATE EVENT IF NOT EXISTS test_event_01
+ON SCHEDULE EVERY 1 Day
+STARTS CURRENT_TIMESTAMP
+DO 
+	UPDATE DRDB.Child 
+    set Age = DATEDIFF(CURDATE(), DoB);
+    
+    
+SELECT * FROM information_schema.EVENTS

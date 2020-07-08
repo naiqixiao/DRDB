@@ -223,12 +223,23 @@
       </v-dialog>
     </template>
 
+   <template #item.Schedule.Reminded="{ item }">
+      <v-simple-checkbox
+        v-model="item.Schedule.Reminded"
+        class="mr-0 pa-0"
+        @input="updateSchedule(item, 'Reminded')"
+        dense
+        :disabled="remindIconEnable(item)"
+      ></v-simple-checkbox>
+    </template>
+
     <template #item.Schedule.Completed="{ item }">
       <v-simple-checkbox
         v-model="item.Schedule.Completed"
         class="ma-0 pa-0"
         @input="updateSchedule(item, 'Completed')"
         dense
+        :disabled="completeIconEnable(item)"
       ></v-simple-checkbox>
     </template>
   </v-data-table>
@@ -290,6 +301,14 @@ export default {
           this.editedIndex = this.Appointments.indexOf(item);
           this.editedItem = Object.assign({}, item);
           this.dialog = true;
+          break;
+
+        case "Reminded":
+          try {
+            await schedule.remind(item.Schedule);
+          } catch (error) {
+            console.log(error);
+          }
           break;
 
         case "Completed":
@@ -496,6 +515,55 @@ export default {
         this.scheduleUpdated = false;
       }, 300);
     },
+
+    remindIconEnable(item) {
+      var iconDisable = true;
+      var daysAheadofSchedule = 1;
+
+      if (moment(item.Schedule.AppointmentTime).day() == 1) {
+        daysAheadofSchedule = 3;
+      }
+
+      switch (item.Schedule.Status) {
+        case "Confirmed":
+          if (
+            moment(item.Schedule.AppointmentTime).startOf("day") >=
+              moment()
+                .startOf("day")
+                .subtract(daysAheadofSchedule, "d") &&
+            moment(item.Schedule.AppointmentTime).startOf("day") <
+              moment()
+                .startOf("day")
+                .add(1, "d")
+          ) {
+            iconDisable = false;
+          }
+
+          break;
+        default:
+          break;
+      }
+
+      return iconDisable;
+    },
+
+    completeIconEnable(item) {
+      var iconDisable = true;
+
+      switch (item.Schedule.Status) {
+        case "Confirmed":
+          if (new Date(item.Schedule.AppointmentTime) <= new Date()) {
+            iconDisable = false;
+          }
+
+          break;
+        default:
+          break;
+      }
+
+      return iconDisable;
+    }
+
   },
 
   computed: {

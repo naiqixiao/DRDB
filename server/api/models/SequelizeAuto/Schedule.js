@@ -24,7 +24,7 @@ module.exports = function(sequelize, DataTypes) {
         ),
         allowNull: false
       },
-      ReminderEmail: {
+      Reminded: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"

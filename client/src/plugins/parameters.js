@@ -152,7 +152,7 @@ export default {
         text: "Child",
         align: "center",
         value: "Child",
-        width: "13%",
+        width: "12%",
       },
       {
         text: "Study",
@@ -164,7 +164,7 @@ export default {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "22%",
+        width: "18%",
       },
       {
         text: "Age",
@@ -182,7 +182,7 @@ export default {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "12%",
+        width: "10%",
       },
 
       {
@@ -190,14 +190,21 @@ export default {
         align: "center",
         value: "actions",
         sortable: false,
-        width: "18%",
+        width: "15%",
+      },
+      {
+        text: "Reminder",
+        align: "center",
+        value: "Reminded",
+        sortable: false,
+        width: "8%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Completed",
         sortable: false,
-        width: "10%",
+        width: "8%",
       },
     ];
 
@@ -240,6 +247,13 @@ export default {
         value: "actions",
         sortable: false,
         width: "15%",
+      },
+      {
+        text: "Reminder",
+        align: "center",
+        value: "Schedule.Reminded",
+        sortable: false,
+        width: "8%",
       },
       {
         text: "Complete",

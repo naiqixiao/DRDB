@@ -413,6 +413,29 @@ exports.update = asyncHandler(async (req, res) => {
   }
 });
 
+exports.remind = asyncHandler(async (req, res) => {
+  var updatedScheduleInfo = req.body;
+
+  if (updatedScheduleInfo.id) {
+    var ID = updatedScheduleInfo.id;
+    delete updatedScheduleInfo["id"];
+  }
+
+  try {
+    const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
+      where: { id: ID },
+    });
+
+    res.status(200).send(updatedSchedule);
+
+    console.log("Appointment Reminder Updated.");
+  } catch (error) {
+    console.log("Appointment update error: " + error);
+    throw error;
+  }
+});
+
+
 exports.complete = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
 

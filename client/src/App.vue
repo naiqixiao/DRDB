@@ -12,10 +12,10 @@ export default {
   name: "App",
 
   components: {
-    Header,
+    Header
   },
   watch: {
-    group() {},
+    group() {}
   },
 
   data() {
@@ -36,12 +36,12 @@ export default {
 
         if (this.$route.name != "Login") {
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
     }
-  },
+  }
 };
 </script>
 
