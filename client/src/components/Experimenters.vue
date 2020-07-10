@@ -26,9 +26,22 @@
     </v-col>
     <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="primary" fab large @click.stop="updateExperimenters" :disabled="!studyId">
-          <v-icon>edit</v-icon>
-        </v-btn>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              color="primary"
+              fab
+              large
+              @click.stop="updateExperimenters"
+              :disabled="!studyId"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>edit</v-icon>
+            </v-btn>
+          </template>
+          <span>Assign experimenters to this study</span>
+        </v-tooltip>
       </v-col>
     </v-row>
 

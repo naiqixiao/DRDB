@@ -18,7 +18,19 @@
         </template>
 
         <template #item.Completed="{ item }">
-          <v-simple-checkbox v-model="item.Completed" @input="changeStudyStatus(item)" dense></v-simple-checkbox>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-simple-checkbox
+                class="mr-0 pa-0"
+                v-model="item.Completed"
+                @input="changeStudyStatus(item)"
+                dense
+                v-bind="attrs"
+                v-on="on"
+              ></v-simple-checkbox>
+            </template>
+            <span>Mark whether this study is still on going</span>
+          </v-tooltip>
         </template>
       </v-data-table>
     </v-col>
@@ -91,19 +103,48 @@
         ></body>
 
         <v-col cols="12" md="2" dense>
-          <v-btn color="primary" fab @click.stop="createStudy">
-            <v-icon>add</v-icon>
-          </v-btn>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn color="primary" fab @click.stop="createStudy" v-bind="attrs" v-on="on">
+                <v-icon>add</v-icon>
+              </v-btn>
+            </template>
+            <span>Add a new study</span>
+          </v-tooltip>
         </v-col>
         <v-col cols="12" md="2" dense>
-          <v-btn color="primary" fab @click.stop="editStudy" :disabled="!currentStudy.id">
-            <v-icon>edit</v-icon>
-          </v-btn>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                color="primary"
+                fab
+                @click.stop="editStudy"
+                :disabled="!currentStudy.id"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>edit</v-icon>
+              </v-btn>
+            </template>
+            <span>Edit study information</span>
+          </v-tooltip>
         </v-col>
         <v-col cols="12" md="2" dense>
-          <v-btn color="primary" fab @click.stop="deleteStudy" :disabled="!currentStudy.id">
-            <v-icon>delete</v-icon>
-          </v-btn>
+          <v-tooltip top>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                color="primary"
+                fab
+                @click.stop="deleteStudy"
+                :disabled="!currentStudy.id"
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Delete this study</span>
+          </v-tooltip>
         </v-col>
       </v-row>
 

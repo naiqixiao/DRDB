@@ -4,9 +4,9 @@
       <v-col cols="12" md="5">
         <v-row align="center" dense>
           <v-col cols="12" md="3" style="text-align: start;">
-            <v-btn large @click.stop="searchMode" :disabled="searchStatus"
-              ><v-icon left>mdi-magnify</v-icon>Search</v-btn
-            >
+            <v-btn large @click.stop="searchMode" :disabled="searchStatus">
+              <v-icon left>mdi-magnify</v-icon>Search
+            </v-btn>
           </v-col>
 
           <v-spacer></v-spacer>
@@ -134,41 +134,73 @@
             <v-spacer></v-spacer>
 
             <v-col cols="12" md="1">
-              <v-btn
-                fab
-                @click.stop="
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    fab
+                    @click.stop="
                   contactType = 'NextContact';
                   nextContactDate = TodaysDate;
                   nextContactDialog = !nextContactDialog;
                 "
-                :disabled="!currentFamily.id && !nextContactDialog"
-                ><v-icon>notes</v-icon></v-btn
-              >
+                    :disabled="!currentFamily.id && !nextContactDialog"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>notes</v-icon>
+                  </v-btn>
+                </template>
+                <span>Note down info for next contact</span>
+              </v-tooltip>
             </v-col>
 
             <v-col cols="12" md="1">
-              <v-btn fab @click.stop="editFamily" :disabled="!currentFamily.id"
-                ><v-icon>edit</v-icon></v-btn
-              >
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    fab
+                    @click.stop="editFamily"
+                    :disabled="!currentFamily.id"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>edit</v-icon>
+                  </v-btn>
+                </template>
+                <span>Edit family information</span>
+              </v-tooltip>
             </v-col>
 
             <v-col cols="12" md="1">
-              <v-btn
-                fab
-                @click.stop="
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    fab
+                    @click.stop="
                   contactType = 'NoMoreContact';
                   nextContactDate = TodaysDate;
                   nextContactDialog = !nextContactDialog;
                 "
-                :disabled="!currentFamily.id && !nextContactDialog"
-                ><v-icon color="warning">cancel</v-icon></v-btn
-              >
+                    :disabled="!currentFamily.id && !nextContactDialog"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon color="warning">cancel</v-icon>
+                  </v-btn>
+                </template>
+                <span>Delete family information</span>
+              </v-tooltip>
             </v-col>
 
             <v-col cols="12" md="2" class="text-right">
-              <v-btn color="primary" fab @click.stop="addFamily"
-                ><v-icon>add</v-icon></v-btn
-              >
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn color="primary" fab @click.stop="addFamily" v-bind="attrs" v-on="on">
+                    <v-icon>add</v-icon>
+                  </v-btn>
+                </template>
+                <span>Add a new family</span>
+              </v-tooltip>
             </v-col>
           </v-row>
         </v-row>
@@ -270,15 +302,8 @@
                 <h4 class="text-left">Notes:</h4>
               </v-col>
               <v-col md="8" class="subtitle">
-                <v-textarea
-                  label=""
-                  outlined
-                  no-resize
-                  rows="3"
-                  solo
-                  v-model="editedItem.Note"
-                ></v-textarea
-              ></v-col>
+                <v-textarea label outlined no-resize rows="3" solo v-model="editedItem.Note"></v-textarea>
+              </v-col>
             </v-row>
           </v-form>
           <v-card-actions>
@@ -296,11 +321,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog
-        v-model="nextContactDialog"
-        max-width="800px"
-        :retain-focus="false"
-      >
+      <v-dialog v-model="nextContactDialog" max-width="800px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
@@ -317,9 +338,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -369,8 +388,7 @@
         close-text="Close Alert"
         type="warning"
         dismissible
-        >Cancel the appointment?</v-alert
-      >
+      >Cancel the appointment?</v-alert>
     </template>
   </v-container>
 </template>
@@ -395,7 +413,7 @@ export default {
     Conversation,
     Page,
     NextContact,
-    ParticipationHistory,
+    ParticipationHistory
   },
   data() {
     return {
@@ -422,7 +440,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null,
+        RecruitmentMethod: null
       },
       familyTemplate: {
         id: null,
@@ -437,7 +455,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null,
+        RecruitmentMethod: null
       },
       currentFamily: {
         id: null,
@@ -452,7 +470,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null,
+        RecruitmentMethod: null
       },
       Families: [],
       editableFields: [],
@@ -463,49 +481,49 @@ export default {
           "Hospital",
           "Events",
           "SocialMedia",
-          "PreviousParticipation",
-        ],
+          "PreviousParticipation"
+        ]
       },
 
       rules: {
         name: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         email: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         phone: [
-          (value) => {
+          value => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          (value) => !!value || "Required.",
-          (value) => (value && value.length == 10) || "Have to be 10 digits",
+          value => !!value || "Required.",
+          value => (value && value.length == 10) || "Have to be 10 digits"
         ],
         dob: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          },
+          }
         ],
         birthWeight: [
-          (value) => {
+          value => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          },
-        ],
-      },
+          }
+        ]
+      }
     };
   },
 
@@ -526,7 +544,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -558,7 +576,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -660,7 +678,7 @@ export default {
     previousPage() {
       this.page -= 1;
       this.currentFamily = this.Families[this.page - 1];
-    },
+    }
   },
   watch: {},
   computed: {
@@ -668,10 +686,10 @@ export default {
       return moment()
         .startOf("day")
         .format("YYYY-MM-DD");
-    },
+    }
   },
 
-  updated() {},
+  updated() {}
 };
 </script>
 

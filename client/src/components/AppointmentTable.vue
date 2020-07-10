@@ -22,42 +22,69 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <v-icon
-        @click.stop="updateSchedule(item, 'Confirmed')"
-        :disabled="
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Confirmed')"
+            :disabled="
           item.Schedule.Status === 'Confirmed' ||
             item.Schedule.Completed == true
         "
-        >event</v-icon
-      >
-      <v-icon
-        @click.stop="updateSchedule(item, 'Rescheduling')"
-        :disabled="
+            v-bind="attrs"
+            v-on="on"
+          >event</v-icon>
+        </template>
+        <span>Pick study date and time</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Rescheduling')"
+            :disabled="
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
             item.Schedule.Completed == true
         "
-        >update</v-icon
-      >
-      <v-icon
-        @click.stop="updateSchedule(item, 'No Show')"
-        :disabled="
+            v-bind="attrs"
+            v-on="on"
+          >update</v-icon>
+        </template>
+        <span>Reschedule this appointment</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'No Show')"
+            :disabled="
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
             item.Schedule.Completed == true
         "
-        >sentiment_dissatisfied</v-icon
-      >
-      <v-icon
-        @click.stop="updateSchedule(item, 'Cancelled')"
-        :disabled="
+            v-bind="attrs"
+            v-on="on"
+          >sentiment_dissatisfied</v-icon>
+        </template>
+        <span>No show</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Cancelled')"
+            :disabled="
           item.Schedule.Status === 'Cancelled' ||
             item.Schedule.Completed == true
         "
-        >not_interested</v-icon
-      >
+            v-bind="attrs"
+            v-on="on"
+          >not_interested</v-icon>
+        </template>
+        <span>Cancel this appointment</span>
+      </v-tooltip>
 
       <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
         <v-stepper v-model="e1">
@@ -67,8 +94,7 @@
               editable
               step="1"
               @click="emailDialog = false"
-              >Reschedule for {{ item.Child.Name }}</v-stepper-step
-            >
+            >Reschedule for {{ item.Child.Name }}</v-stepper-step>
 
             <v-divider></v-divider>
 
@@ -82,9 +108,7 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-card outlined>
-                <v-card-title class="headline"
-                  >Select study date and time.</v-card-title
-                >
+                <v-card-title class="headline">Select study date and time.</v-card-title>
                 <v-row justify="space-around">
                   <v-col cols="12" md="6">
                     <v-date-picker
@@ -109,24 +133,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn
-                    color="primary"
-                    :disabled="!studyDateTime"
-                    @click="continue12()"
-                  >
-                    <v-icon dark left v-show="scheduleUpdated"
-                      >mdi-checkbox-marked-circle</v-icon
-                    >
-                    Confirm
+                  <v-btn color="primary" :disabled="!studyDateTime" @click="continue12()">
+                    <v-icon dark left v-show="scheduleUpdated">mdi-checkbox-marked-circle</v-icon>Confirm
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn
-                    :disabled="!scheduleNextPage"
-                    @click="scheduleNextStep"
-                  >
-                    Next</v-btn
-                  >
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -147,20 +159,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" @click="continue23()"
-                    ><v-icon dark left v-show="emailSent"
-                      >mdi-checkbox-marked-circle</v-icon
-                    >
-                    Send Email
+                  <v-btn color="primary" @click="continue23()">
+                    <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn
-                    :disabled="!scheduleNextPage"
-                    @click="scheduleNextStep"
-                  >
-                    Next</v-btn
-                  >
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -177,9 +181,7 @@
               <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()">
-                    Complete
-                  </v-btn>
+                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -187,11 +189,7 @@
         </v-stepper>
       </v-dialog>
 
-      <v-dialog
-        v-model="nextContactDialog"
-        max-width="800px"
-        :retain-focus="false"
-      >
+      <v-dialog v-model="nextContactDialog" max-width="800px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
@@ -209,9 +207,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -223,24 +219,38 @@
       </v-dialog>
     </template>
 
-   <template #item.Schedule.Reminded="{ item }">
-      <v-simple-checkbox
-        v-model="item.Schedule.Reminded"
-        class="mr-0 pa-0"
-        @input="updateSchedule(item, 'Reminded')"
-        dense
-        :disabled="remindIconEnable(item)"
-      ></v-simple-checkbox>
+    <template #item.Schedule.Reminded="{ item }">
+      <v-tooltip top :disabled="remindIconEnable(item)">
+        <template v-slot:activator="{ on, attrs }">
+          <v-simple-checkbox
+            v-model="item.Schedule.Reminded"
+            class="mr-0 pa-0"
+            @input="updateSchedule(item, 'Reminded')"
+            dense
+            :disabled="remindIconEnable(item)"
+            v-bind="attrs"
+            v-on="on"
+          ></v-simple-checkbox>
+        </template>
+        <span>Confirm reminder is sent</span>
+      </v-tooltip>
     </template>
 
     <template #item.Schedule.Completed="{ item }">
-      <v-simple-checkbox
-        v-model="item.Schedule.Completed"
-        class="ma-0 pa-0"
-        @input="updateSchedule(item, 'Completed')"
-        dense
-        :disabled="completeIconEnable(item)"
-      ></v-simple-checkbox>
+      <v-tooltip top :disabled="completeIconEnable(item)">
+        <template v-slot:activator="{ on, attrs }">
+          <v-simple-checkbox
+            v-model="item.Schedule.Completed"
+            class="ma-0 pa-0"
+            @input="updateSchedule(item, 'Completed')"
+            dense
+            :disabled="completeIconEnable(item)"
+            v-bind="attrs"
+            v-on="on"
+          ></v-simple-checkbox>
+        </template>
+        <span>Confirm study is completed</span>
+      </v-tooltip>
     </template>
   </v-data-table>
 </template>
@@ -260,12 +270,12 @@ export default {
     DateDisplay,
     AgeByParticipation,
     NextContact,
-    Email,
+    Email
   },
   props: {
     Appointments: Array,
     studyTimeSlots: Array,
-    family: Object,
+    family: Object
   },
   data() {
     return {
@@ -280,18 +290,18 @@ export default {
       editedItem: {
         Study: {
           MinAge: 6,
-          MaxAge: 18,
+          MaxAge: 18
         },
         Child: {
           Name: null,
-          DoB: new Date(),
-        },
+          DoB: new Date()
+        }
       },
       studyDate: null,
       studyTime: "09:00AM",
       scheduleNextPage: false,
       emailSent: false,
-      scheduleUpdated: false,
+      scheduleUpdated: false
     };
   },
   methods: {
@@ -327,12 +337,12 @@ export default {
           // }
 
           var currentSchedules = await schedule.search({
-            id: item.FK_Schedule,
+            id: item.FK_Schedule
           });
 
           var currentSchedule = currentSchedules.data[0];
 
-          var studyNames = currentSchedule.Appointments.map((appointment) => {
+          var studyNames = currentSchedule.Appointments.map(appointment => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -352,7 +362,7 @@ export default {
             item.Schedule.AppointmentTime = null;
             item.Schedule.updatedAt = new Date().toISOString();
 
-            this.Appointments.forEach((appointment) => {
+            this.Appointments.forEach(appointment => {
               if (appointment.FK_Schedule === item.FK_Schedule) {
                 appointment.Schedule = item.Schedule;
               }
@@ -394,7 +404,7 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.Appointments.map((appointment) => {
+          var studyNames = this.Appointments.map(appointment => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
               return (
                 appointment.Study.StudyName +
@@ -418,13 +428,13 @@ export default {
 
           this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto",
+            timeZone: "America/Toronto"
           };
           this.editedItem.Schedule.end = {
             dateTime: moment(this.studyDateTime)
               .add(1, "h")
               .toISOString(true),
-            timeZone: "America/Toronto",
+            timeZone: "America/Toronto"
           };
 
           const calendarEvent = await schedule.update(this.editedItem.Schedule);
@@ -436,7 +446,7 @@ export default {
 
           Object.assign(this.Appointments[this.editedIndex], this.editedItem);
 
-          this.Appointments.forEach((appointment) => {
+          this.Appointments.forEach(appointment => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
               appointment.Schedule = this.editedItem.Schedule;
             }
@@ -563,7 +573,6 @@ export default {
 
       return iconDisable;
     }
-
   },
 
   computed: {
@@ -624,14 +633,14 @@ export default {
       return moment()
         .startOf("day")
         .format("YYYY-MM-DD");
-    },
+    }
   },
 
   watch: {
     dialog(val) {
       val || this.close();
-    },
-  },
+    }
+  }
 };
 </script>
 

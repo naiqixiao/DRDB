@@ -66,9 +66,22 @@
     </v-row>
     <v-row align="center" justify="end">
       <v-col cols="12" md="2" dense>
-        <v-btn color="primary" fab large @click.stop="updateStudies" :disabled="!personnelId">
-          <v-icon>edit</v-icon>
-        </v-btn>
+        <v-tooltip top>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              color="primary"
+              fab
+              large
+              @click.stop="updateStudies"
+              :disabled="!personnelId"
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>edit</v-icon>
+            </v-btn>
+          </template>
+          <span>Assign studies to this person</span>
+        </v-tooltip>
       </v-col>
     </v-row>
   </div>

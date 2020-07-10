@@ -31,52 +31,97 @@
     </template>
 
     <template #item.actions="{ item }">
-      <v-icon
-        @click.stop="updateSchedule(item, 'Confirmed')"
-        :disabled="item.Status === 'Confirmed' || item.Completed == true"
-      >event</v-icon>
-      <v-icon
-        @click.stop="updateSchedule(item, 'Rescheduling')"
-        :disabled="
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Confirmed')"
+            :disabled="item.Status === 'Confirmed' || item.Completed == true"
+            v-bind="attrs"
+            v-on="on"
+          >event</v-icon>
+        </template>
+        <span>Pick study date and time</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Rescheduling')"
+            :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-      >update</v-icon>
-      <v-icon
-        @click.stop="updateSchedule(item, 'No Show')"
-        :disabled="
+            v-bind="attrs"
+            v-on="on"
+          >update</v-icon>
+        </template>
+        <span>Reschedule this appointment</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'No Show')"
+            :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-      >sentiment_dissatisfied</v-icon>
-      <v-icon
-        @click.stop="updateSchedule(item, 'Cancelled')"
-        :disabled="item.Status === 'Cancelled' || item.Completed == true"
-      >not_interested</v-icon>
+            v-bind="attrs"
+            v-on="on"
+          >sentiment_dissatisfied</v-icon>
+        </template>
+        <span>No show</span>
+      </v-tooltip>
+
+      <v-tooltip top>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Cancelled')"
+            :disabled="item.Status === 'Cancelled' || item.Completed == true"
+            v-bind="attrs"
+            v-on="on"
+          >not_interested</v-icon>
+        </template>
+        <span>Cancel this appointment</span>
+      </v-tooltip>
     </template>
 
     <template #item.Reminded="{ item }">
-      <v-simple-checkbox
-        v-model="item.Reminded"
-        class="mr-0 pa-0"
-        @input="updateSchedule(item, 'Reminded')"
-        dense
-        :disabled="remindIconEnable(item)"
-      ></v-simple-checkbox>
+      <v-tooltip top :disabled="remindIconEnable(item)">
+        <template v-slot:activator="{ on, attrs }">
+          <v-simple-checkbox
+            v-model="item.Reminded"
+            class="mr-0 pa-0"
+            @input="updateSchedule(item, 'Reminded')"
+            dense
+            :disabled="remindIconEnable(item)"
+            v-bind="attrs"
+            v-on="on"
+          ></v-simple-checkbox>
+        </template>
+        <span>Confirm reminder is sent</span>
+      </v-tooltip>
     </template>
 
     <template #item.Completed="{ item }">
-      <v-simple-checkbox
-        v-model="item.Completed"
-        class="mr-0 pa-0"
-        @input="updateSchedule(item, 'Completed')"
-        dense
-        :disabled="completeIconEnable(item)"
-      ></v-simple-checkbox>
+      <v-tooltip top :disabled="completeIconEnable(item)">
+        <template v-slot:activator="{ on, attrs }">
+          <v-simple-checkbox
+            v-model="item.Completed"
+            class="mr-0 pa-0"
+            @input="updateSchedule(item, 'Completed')"
+            dense
+            :disabled="completeIconEnable(item)"
+            v-bind="attrs"
+            v-on="on"
+          ></v-simple-checkbox>
+        </template>
+        <span>Confirm reminder is sent</span>
+      </v-tooltip>
     </template>
 
     <template #expanded-item="{ headers, item }">

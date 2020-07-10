@@ -19,7 +19,19 @@
           </template>
 
           <template #item.Active="{ item }">
-            <v-simple-checkbox v-model="item.Active" @input="changePersonnelStatus(item)" dense></v-simple-checkbox>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-simple-checkbox
+                  class="mr-0 pa-0"
+                  v-model="item.Active"
+                  @input="changePersonnelStatus(item)"
+                  dense
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-simple-checkbox>
+              </template>
+              <span>Mark whether this person is available to run studies</span>
+            </v-tooltip>
           </template>
         </v-data-table>
       </v-col>
@@ -49,23 +61,52 @@
               <v-col cols="12" md="12">
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
-                    <v-btn color="primary" fab @click.stop="createPersonnel">
-                      <v-icon>add</v-icon>
-                    </v-btn>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          color="primary"
+                          fab
+                          @click.stop="createPersonnel"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon>add</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Add a new person to the lab</span>
+                    </v-tooltip>
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn fab @click.stop="editPersonnel" :disabled="!currentPersonnel.id">
-                      <v-icon>edit</v-icon>
-                    </v-btn>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          fab
+                          @click.stop="editPersonnel"
+                          :disabled="!currentPersonnel.id"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon>edit</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Edit personnel information</span>
+                    </v-tooltip>
                   </v-col>
                   <v-col cols="12" md="2" dense>
-                    <v-btn
-                      fab
-                      @click.stop="deletePersonnel"
-                      :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
-                    >
-                      <v-icon>delete</v-icon>
-                    </v-btn>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-btn
+                          fab
+                          @click.stop="deletePersonnel"
+                          :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
+                          v-bind="attrs"
+                          v-on="on"
+                        >
+                          <v-icon>delete</v-icon>
+                        </v-btn>
+                      </template>
+                      <span>Remove this person from the lab</span>
+                    </v-tooltip>
                   </v-col>
                 </v-row>
               </v-col>

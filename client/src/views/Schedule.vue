@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row justify="space-around">
       <v-col cols="12" md="4">
-        <v-row  dense>
+        <v-row dense>
           <v-col cols="12" md="12">
             <h1 class="text-left">Choose a study</h1>
           </v-col>
@@ -30,13 +30,7 @@
             <v-divider></v-divider>
             <h4 class="text-left">Study information:</h4>
           </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-            md="4"
-            v-for="field in this.$studyBasicFields"
-            :key="field.label"
-          >
+          <v-col cols="12" sm="6" md="4" v-for="field in this.$studyBasicFields" :key="field.label">
             <v-text-field
               height="48px"
               background-color="textbackground"
@@ -56,8 +50,8 @@
               rows="3"
               solo
               v-model="selectedStudy.Description"
-            ></v-textarea
-          ></v-col>
+            ></v-textarea>
+          </v-col>
         </v-row>
 
         <v-row>
@@ -102,12 +96,12 @@
             Email: currentFamily.Email,
           }"
           @cancelEmail="closeEmail"
-        ></EmailDialog> -->
+        ></EmailDialog>-->
       </v-col>
 
       <v-col cols="12" md="5">
         <v-row justify="space-around">
-          <v-col cols="12" md="3"> </v-col>
+          <v-col cols="12" md="3"></v-col>
           <v-spacer></v-spacer>
           <v-col cols="12" md="4" style="text-align: end;">
             <Page
@@ -123,12 +117,7 @@
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
           </v-col>
-          <v-col
-            cols="12"
-            md="5"
-            v-for="field in familyField"
-            :key="field.label"
-          >
+          <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
             <v-text-field
               height="48px"
               background-color="textbackground"
@@ -142,28 +131,34 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="2" style="text-align: center;">
-            <v-btn
-              color="primary"
-              fab
-              @click.stop="editFamily"
-              :disabled="!currentFamily.id"
-              ><v-icon>edit</v-icon></v-btn
-            >
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="primary"
+                  fab
+                  @click.stop="editFamily"
+                  :disabled="!currentFamily.id"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>edit</v-icon>
+                </v-btn>
+              </template>
+              <span>Edit family information</span>
+            </v-tooltip>
           </v-col>
         </v-row>
 
-        <v-dialog
-          v-model="dialogFamilyEdit"
-          max-width="1200px"
-          :retain-focus="false"
-        >
+        <v-dialog v-model="dialogFamilyEdit" max-width="1200px" :retain-focus="false">
           <v-card outlined>
             <v-card-title>
               <span class="headline">Edit family information</span>
               <v-spacer></v-spacer>
-              <span class="headline">{{
+              <span class="headline">
+                {{
                 "Family ID: " + currentFamily.id
-              }}</span>
+                }}
+              </span>
             </v-card-title>
 
             <v-form ref="formFamily" v-model="validFamily" lazy-validation>
@@ -254,24 +249,15 @@
                   <h4 class="text-left">Notes:</h4>
                 </v-col>
                 <v-col md="8" class="subtitle">
-                  <v-textarea
-                    label=""
-                    outlined
-                    no-resize
-                    rows="3"
-                    solo
-                    v-model="editedFamily.Note"
-                  ></v-textarea
-                ></v-col>
+                  <v-textarea label outlined no-resize rows="3" solo v-model="editedFamily.Note"></v-textarea>
+                </v-col>
               </v-row>
             </v-form>
             <v-card-actions>
               <v-row justify="space-between" style="height: 50px">
                 <v-col md="4"></v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="dialogFamilyEdit = false"
-                    >Cancel</v-btn
-                  >
+                  <v-btn color="primary" @click="dialogFamilyEdit = false">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="saveFamily">Save</v-btn>
@@ -287,12 +273,7 @@
             <v-divider></v-divider>
             <h4 class="text-left">Child information:</h4>
           </v-col>
-          <v-col
-            cols="12"
-            md="5"
-            v-for="field in childField"
-            :key="field.label"
-          >
+          <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
             <v-text-field
               height="48px"
               background-color="textbackground"
@@ -310,13 +291,21 @@
             <AgeDisplay :DoB="currentChild.DoB" />
           </v-col>
           <v-col cols="12" md="2" style="text-align: center;">
-            <v-btn
-              color="primary"
-              fab
-              @click.stop="editChild"
-              :disabled="!currentChild.id"
-              ><v-icon>edit</v-icon></v-btn
-            >
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="primary"
+                  fab
+                  @click.stop="editChild"
+                  :disabled="!currentChild.id"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>edit</v-icon>
+                </v-btn>
+              </template>
+              <span>Edit child information</span>
+            </v-tooltip>
           </v-col>
         </v-row>
 
@@ -340,14 +329,21 @@
           </v-col>
 
           <v-col cols="12" md="3">
-            <v-btn
-              color="primary"
-              fab
-              @click.stop="scheduleChild"
-              :disabled="response == null"
-            >
-              <v-icon> {{ scheduleButtonIcon }}</v-icon>
-            </v-btn>
+            <v-tooltip top>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  color="primary"
+                  fab
+                  @click.stop="scheduleChild"
+                  :disabled="response == null"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>{{ scheduleButtonIcon }}</v-icon>
+                </v-btn>
+              </template>
+              <span>{{ scheduleButtonTooltip }}</span>
+            </v-tooltip>
           </v-col>
 
           <v-dialog v-model="dobPicker" max-width="360px">
@@ -365,11 +361,7 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog
-            v-model="dialogChildEdit"
-            max-width="800px"
-            :retain-focus="false"
-          >
+          <v-dialog v-model="dialogChildEdit" max-width="800px" :retain-focus="false">
             <v-card>
               <v-card-title>
                 <span class="headline">Child's information</span>
@@ -418,9 +410,7 @@
                 <v-row justify="space-between" style="height: 50px">
                   <v-col md="4"></v-col>
                   <v-col md="2">
-                    <v-btn color="primary" @click="dialogChildEdit = false"
-                      >Cancel</v-btn
-                    >
+                    <v-btn color="primary" @click="dialogChildEdit = false">Cancel</v-btn>
                   </v-col>
                   <v-col md="2">
                     <v-btn color="primary" @click="saveChild">Save</v-btn>
@@ -431,11 +421,7 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog
-            v-model="dialogSchedule"
-            max-width="1000px"
-            :retain-focus="false"
-          >
+          <v-dialog v-model="dialogSchedule" max-width="1000px" :retain-focus="false">
             <v-stepper v-model="e1">
               <v-stepper-header>
                 <v-stepper-step
@@ -443,14 +429,11 @@
                   editable
                   step="1"
                   @click="emailDialog = false"
-                  >Schedule studies for {{ currentChild.Name }}</v-stepper-step
-                >
+                >Schedule studies for {{ currentChild.Name }}</v-stepper-step>
 
                 <v-divider></v-divider>
 
-                <v-stepper-step :complete="e1 > 2" step="2"
-                  >Email</v-stepper-step
-                >
+                <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
 
                 <v-divider></v-divider>
 
@@ -467,9 +450,7 @@
                       v-if="response == 'Confirmed'"
                     >
                       <v-col cols="12" md="3" class="text-left">
-                        <div class="title" style="padding-left: 8px;">
-                          Study date & time:
-                        </div>
+                        <div class="title" style="padding-left: 8px;">Study date & time:</div>
                       </v-col>
                       <v-col cols="12" md="2">
                         <v-text-field
@@ -483,7 +464,7 @@
                           dense
                         ></v-text-field>
                       </v-col>
-                      <v-col cols="12" md="1"> </v-col>
+                      <v-col cols="12" md="1"></v-col>
                       <v-col cols="12" md="2">
                         <v-combobox
                           v-model="studyTime"
@@ -495,16 +476,9 @@
                         ></v-combobox>
                       </v-col>
                     </v-row>
-                    <v-row
-                      style="height: 60px;"
-                      align="center"
-                      justify="start"
-                      v-else
-                    >
+                    <v-row style="height: 60px;" align="center" justify="start" v-else>
                       <v-col cols="12" md="3" class="text-left">
-                        <div class="title" style="padding-left: 8px;">
-                          Study date & time: NA
-                        </div>
+                        <div class="title" style="padding-left: 8px;">Study date & time: NA</div>
                       </v-col>
                     </v-row>
                     <v-divider></v-divider>
@@ -538,9 +512,7 @@
                           style="height: 80px;"
                         >
                           <v-col cols="12" md="4" class="text-left">
-                            <div class="title">
-                              Additional appointment(s) for:
-                            </div>
+                            <div class="title">Additional appointment(s) for:</div>
                           </v-col>
                           <v-col cols="12" md="2" class="text-left">
                             <v-btn
@@ -552,8 +524,7 @@
                                 potentialStudies(currentChild).selectableStudies
                                   .length < 1
                               "
-                              >{{ currentChild.Name }}
-                            </v-btn>
+                            >{{ currentChild.Name }}</v-btn>
                           </v-col>
                           <v-col
                             cols="12"
@@ -570,9 +541,7 @@
                                 potentialStudies(child).selectableStudies
                                   .length < 1
                               "
-                            >
-                              {{ child.Name }}</v-btn
-                            >
+                            >{{ child.Name }}</v-btn>
                           </v-col>
                         </v-row>
                       </v-col>
@@ -582,31 +551,18 @@
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
-                      <v-btn
-                        color="primary"
-                        :disabled="!studyDate"
-                        @click="continue12()"
-                      >
-                        <v-icon dark left v-show="scheduleId"
-                          >mdi-checkbox-marked-circle</v-icon
-                        >
+                      <v-btn color="primary" :disabled="!studyDate" @click="continue12()">
+                        <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>
                         {{ scheduleButtonText }}
                       </v-btn>
 
                       <v-btn
                         v-if="response == 'Confirmed' && manualCalendar"
                         @click="createCalendarbyScheduleId"
-                      >
-                        Create Calendar</v-btn
-                      >
+                      >Create Calendar</v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn
-                        :disabled="!scheduleNextPage"
-                        @click="scheduleNextStep"
-                      >
-                        Next</v-btn
-                      >
+                      <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -628,20 +584,12 @@
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
-                      <v-btn color="primary" @click="continue23()"
-                        ><v-icon dark left v-show="emailSent"
-                          >mdi-checkbox-marked-circle</v-icon
-                        >
-                        Send Email
+                      <v-btn color="primary" @click="continue23()">
+                        <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
                       </v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn
-                        :disabled="!scheduleNextPage"
-                        @click="scheduleNextStep"
-                      >
-                        Next</v-btn
-                      >
+                      <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -658,9 +606,7 @@
                   <v-divider></v-divider>
                   <v-row dense justify="center" align="center">
                     <v-col>
-                      <v-btn color="primary" @click="completeSchedule()">
-                        Complete
-                      </v-btn>
+                      <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -695,10 +641,7 @@
 
     <v-row justify="start">
       <v-col cols="12" md="9">
-        <AppointmentTableBrief
-          :Appointments="currentFamily.Appointments"
-          :family="currentFamily"
-        ></AppointmentTableBrief>
+        <AppointmentTableBrief :Appointments="currentFamily.Appointments" :family="currentFamily"></AppointmentTableBrief>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -741,7 +684,7 @@ export default {
     NextContact,
     Page,
     AppointmentTableBrief,
-    ParticipationHistory,
+    ParticipationHistory
   },
   props: {},
   data() {
@@ -763,6 +706,7 @@ export default {
       Children: [],
       elegibleExperimenters: [],
       scheduleButtonIcon: "event",
+      scheduleButtonTooltip: "",
       scheduleButtonText: "Schedule",
       scheduleNextPage: false,
       emailType: "Confirmation",
@@ -778,8 +722,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       editedChild: {
         Name: null,
@@ -789,8 +733,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       editedFamily: {},
       defaultItem: {
@@ -801,20 +745,20 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null,
-        },
+          Email: null
+        }
       },
       editedIndex: null,
       childField: [
         { label: "Name", field: "Name" },
         { label: "Sex", field: "Sex" },
-        { label: "DoB", field: "DoB" },
+        { label: "DoB", field: "DoB" }
       ],
       familyField: [
         { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" },
+        { label: "Father's Name", field: "NameDad", rules: "name" }
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -828,49 +772,49 @@ export default {
           "Hospital",
           "Events",
           "SocialMedia",
-          "PreviousParticipation",
-        ],
+          "PreviousParticipation"
+        ]
       },
 
       rules: {
         name: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         email: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
+          value => (value && value.length <= 30) || "Max 30 characters"
         ],
         phone: [
-          (value) => {
+          value => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          (value) => !!value || "Required.",
-          (value) => (value && value.length == 10) || "Have to be 10 digits",
+          value => !!value || "Required.",
+          value => (value && value.length == 10) || "Have to be 10 digits"
         ],
         dob: [
-          (value) => !!value || "Required.",
-          (value) => {
+          value => !!value || "Required.",
+          value => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          },
+          }
         ],
         birthWeight: [
-          (value) => {
+          value => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          },
-        ],
-      },
+          }
+        ]
+      }
     };
   },
 
@@ -878,7 +822,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0,
+        Completed: 0
       };
 
       try {
@@ -889,7 +833,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         }
       }
@@ -897,12 +841,12 @@ export default {
 
     async searchChild() {
       var studyQuery = {
-        id: this.selectedStudy.id,
+        id: this.selectedStudy.id
       };
       try {
         const studyInfo = await study.search(studyQuery);
         var pastParticipants = studyInfo.data[0].Appointments.map(
-          (appointment) => {
+          appointment => {
             return appointment.FK_Child;
           }
         );
@@ -932,7 +876,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login",
+            name: "Login"
           });
         } else {
           console.log(error.response);
@@ -1029,7 +973,7 @@ export default {
         newAppointment.Study = {
           StudyName: this.selectedStudy.StudyName,
           MinAge: this.selectedStudy.MinAge,
-          MaxAge: this.selectedStudy.MaxAge,
+          MaxAge: this.selectedStudy.MaxAge
         };
         newAppointment.index = this.appointments.length;
         this.appointments.push(newAppointment);
@@ -1046,7 +990,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach((study) => {
+      store.state.studies.forEach(study => {
         if (
           child.Age >= study.MinAge * 30.5 - 5 &&
           child.Age <= study.MaxAge * 30.5 - 5
@@ -1058,14 +1002,14 @@ export default {
       var uniquePreviousStudies = [];
 
       if (child.Appointments) {
-        child.Appointments.forEach((appointment) => {
+        child.Appointments.forEach(appointment => {
           uniquePreviousStudies.push(appointment.FK_Study);
         });
         uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
       }
 
       var potentialStudies = ElegibleStudies.filter(
-        (study) => !uniquePreviousStudies.includes(study)
+        study => !uniquePreviousStudies.includes(study)
       );
 
       // check the selected studies.
@@ -1079,16 +1023,16 @@ export default {
       }
 
       var selectableStudies = potentialStudies.filter(
-        (study) => !currentSelectedStudies.includes(study)
+        study => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter((study) =>
+      var potentialStudyList = store.state.studies.filter(study =>
         potentialStudies.includes(study.id)
       );
 
       return {
         potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies,
+        selectableStudies: selectableStudies
       };
     },
 
@@ -1116,7 +1060,7 @@ export default {
       if (this.Experimenters.lenth < 1) {
         this.Experimenters = extraAppointments.attendees;
       } else {
-        extraAppointments.attendees.forEach((experimenter) => {
+        extraAppointments.attendees.forEach(experimenter => {
           this.Experimenters.push(experimenter);
         });
       }
@@ -1133,8 +1077,14 @@ export default {
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map((appointment) => {
-            return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
+          var studyNames = this.appointments.map(appointment => {
+            return (
+              appointment.Study.StudyName +
+              " (" +
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
+            );
           });
 
           studyNames = Array.from(new Set(studyNames));
@@ -1142,22 +1092,21 @@ export default {
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
-            summary:
-              studyNames.join(" + "),
+            summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto",
+              timeZone: "America/Toronto"
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto",
+              timeZone: "America/Toronto"
             },
-            attendees: this.Experimenters,
+            attendees: this.Experimenters
           };
 
           break;
@@ -1166,7 +1115,7 @@ export default {
           newSchedule = {
             AppointmentTime: null,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID,
+            ScheduledBy: store.state.userID
           };
 
           if (
@@ -1214,41 +1163,45 @@ export default {
       const currentSchedules = await schedule.search(queryString);
 
       const currentSchedule = currentSchedules.data[0];
-      
-      var studyNames = currentSchedule.Appointments.map((appointment) => {
-        return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
 
+      var studyNames = currentSchedule.Appointments.map(appointment => {
+        return (
+          appointment.Study.StudyName +
+          " (" +
+          appointment.FK_Family +
+          appointment.Child.IdWithinFamily +
+          ")"
+        );
       });
 
       studyNames = Array.from(new Set(studyNames));
 
       const attendees = [];
 
-      currentSchedule.Appointments.forEach((appointment) => {
-        appointment.Personnels.forEach((experimenter) => {
+      currentSchedule.Appointments.forEach(appointment => {
+        appointment.Personnels.forEach(experimenter => {
           attendees.push({
             displayName: experimenter.Name,
-            email: experimenter.Calendar// + ".CAL",
+            email: experimenter.Calendar // + ".CAL",
           });
         });
       });
 
       var calendarEvent = {
-        summary:
-          studyNames.join(" + "),
+        summary: studyNames.join(" + "),
         location: "OISE, University of Toronto",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-          timeZone: "America/Toronto",
+          timeZone: "America/Toronto"
         },
         end: {
           dateTime: moment(currentSchedule.AppointmentTime)
             .add(1, "h")
             .toISOString(true),
-          timeZone: "America/Toronto",
+          timeZone: "America/Toronto"
         },
         attendees: attendees,
-        scheduleId: this.scheduleId,
+        scheduleId: this.scheduleId
       };
 
       try {
@@ -1384,7 +1337,7 @@ export default {
 
     nextContact() {
       this.e1 = 3;
-    },
+    }
   },
 
   computed: {
@@ -1450,7 +1403,7 @@ export default {
       return moment(this.editedChild.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
-    },
+    }
   },
   mounted: function() {
     this.searchStudies();
@@ -1473,14 +1426,26 @@ export default {
       switch (val) {
         case "Confirmed": {
           this.scheduleButtonIcon = "event";
+          this.scheduleButtonTooltip = "Pick study date and time";
           this.scheduleButtonText = "Schedule";
           this.studyTime = "09:00AM";
           this.emailType = "Confirmation";
           break;
         }
-        case "Left a message":
         case "Interested": {
           this.scheduleButtonIcon = "email";
+          this.scheduleButtonTooltip =
+            "Send a study intro email and set a reminder to follow up";
+          this.scheduleButtonText = "Confirm a tentative appointment";
+          this.studyTime = "";
+          this.emailType = "Introduction";
+          break;
+        }
+
+        case "Left a message": {
+          this.scheduleButtonIcon = "email";
+          this.scheduleButtonTooltip =
+            "Note a phone message is left and set a reminder to follow up";
           this.scheduleButtonText = "Confirm a tentative appointment";
           this.studyTime = "";
           this.emailType = "Introduction";
@@ -1489,6 +1454,7 @@ export default {
 
         case "Rejected": {
           this.scheduleButtonIcon = "sentiment_dissatisfied";
+          this.scheduleButtonTooltip = "Mark rejection";
           this.scheduleButtonText = "Confirm rejection";
           this.studyTime = "";
           this.emailType = "Introduction";
@@ -1497,12 +1463,13 @@ export default {
 
         default:
           this.scheduleButtonIcon = "event";
+          this.scheduleButtonTooltip = "";
           this.scheduleButtonText = "Schedule";
           this.studyTime = "";
           break;
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
