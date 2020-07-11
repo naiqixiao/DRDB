@@ -63,14 +63,8 @@
                   <v-col cols="12" md="2" dense>
                     <v-tooltip top>
                       <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          color="primary"
-                          fab
-                          @click.stop="createPersonnel"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon>add</v-icon>
+                        <v-btn fab @click.stop="createPersonnel" v-bind="attrs" v-on="on">
+                          <v-icon class="fabIcon">add</v-icon>
                         </v-btn>
                       </template>
                       <span>Add a new person to the lab</span>
@@ -86,7 +80,7 @@
                           v-bind="attrs"
                           v-on="on"
                         >
-                          <v-icon>edit</v-icon>
+                          <v-icon class="fabIcon">edit</v-icon>
                         </v-btn>
                       </template>
                       <span>Edit personnel information</span>
@@ -102,7 +96,7 @@
                           v-bind="attrs"
                           v-on="on"
                         >
-                          <v-icon>delete</v-icon>
+                          <v-icon class="fabIcon">delete</v-icon>
                         </v-btn>
                       </template>
                       <span>Remove this person from the lab</span>
@@ -460,7 +454,6 @@ export default {
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
-
 }
 
 .theme--light.v-icon {
@@ -468,5 +461,9 @@ export default {
   font-size: 28px;
   padding-left: 2px;
   padding-right: 2px;
+}
+
+.fabIcon {
+  color: var(--v-secondary-base) !important;
 }
 </style>

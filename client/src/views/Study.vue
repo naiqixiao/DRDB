@@ -22,7 +22,7 @@
           <v-tooltip top>
             <template v-slot:activator="{ on, attrs }">
               <v-simple-checkbox
-                class="mr-0 pa-0"
+                class="checkbox"
                 v-model="item.Completed"
                 @input="changeStudyStatus(item)"
                 dense
@@ -109,8 +109,8 @@
         <v-col cols="12" md="2" dense>
           <v-tooltip top>
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" fab @click.stop="createStudy" v-bind="attrs" v-on="on">
-                <v-icon>add</v-icon>
+              <v-btn fab @click.stop="createStudy" v-bind="attrs" v-on="on">
+                <v-icon class="fabIcon">add</v-icon>
               </v-btn>
             </template>
             <span>Add a new study</span>
@@ -120,14 +120,13 @@
           <v-tooltip top>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                color="primary"
                 fab
                 @click.stop="editStudy"
                 :disabled="!currentStudy.id"
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-icon>edit</v-icon>
+                <v-icon class="fabIcon">edit</v-icon>
               </v-btn>
             </template>
             <span>Edit study information</span>
@@ -137,14 +136,13 @@
           <v-tooltip top>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                color="primary"
                 fab
                 @click.stop="deleteStudy"
                 :disabled="!currentStudy.id"
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-icon>delete</v-icon>
+                <v-icon class="fabIcon">delete</v-icon>
               </v-btn>
             </template>
             <span>Delete this study</span>
@@ -607,7 +605,6 @@ body {
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
-
 }
 
 .template {
@@ -625,4 +622,7 @@ body {
   padding-right: 2px;
 }
 
+.fabIcon {
+  color: var(--v-secondary-base) !important;
+}
 </style>
