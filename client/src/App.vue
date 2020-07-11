@@ -157,10 +157,10 @@ export default {
   box-shadow: none;
 }
 
-.theme--light.v-data-table {
-  border-top-left-radius: 10px !important;
-  border-top-right-radius: 10px !important;
-}
+// .theme--light.v-data-table {
+//   border-top-left-radius: 10px !important;
+//   border-top-right-radius: 10px !important;
+// }
 
 .theme--light.v-data-table th {
   font-size: 16px;
@@ -182,10 +182,12 @@ export default {
   padding-right: 8px !important;
 }
 
+
 .theme--light.v-data-table.v-data-table--fixed-header thead th {
   border-bottom-width: 2px;
   color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;
+  font-size: 16px !important;
 }
 
 .theme--light.v-data-table tbody tr:nth-of-type(odd) {

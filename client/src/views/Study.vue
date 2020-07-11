@@ -12,6 +12,7 @@
         :headers="headersStudy"
         :items="Studies"
         @click:row="rowSelected"
+        class="elevation-1"
       >
         <template #item.updatedAt="{ value }">
           <DateDisplay :date="value" :format="'short'" />
@@ -589,17 +590,24 @@ body {
   align-items: flex-end !important;
 }
 
-.theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
+/* .theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
   color: var(--v-secondary-base) !important;
-}
+} */
 
-.v-data-table
+/* .v-data-table
   /deep/
   tbody
   /deep/
   tr:hover:not(.v-data-table__expanded__content) {
-  /* border-bottom-width: 2px !important; */
   background-color: var(--v-secondary-lighten1) !important;
+} */
+
+/deep/ tr.v-data-table__selected {
+  /* color: var(--v-secondary-lighten1) !important; */
+  /* margin: 2px !important;
+  border-style: double   !important; */
+  background-color: var(--v-secondary-lighten1) !important;
+
 }
 
 .template {
@@ -609,4 +617,12 @@ body {
   padding: 8px 8px 8px 8px;
   border-width: 1px;
 }
+
+.theme--light.v-icon {
+  color: var(--v-primary-base);
+  font-size: 28px;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
 </style>
