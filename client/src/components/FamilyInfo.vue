@@ -7,7 +7,7 @@
       <v-col cols="12" md="6" dense v-for="item in searchingFields" :key="item.label">
         <v-text-field
           :label="item.label"
-          v-model="currentFamily[item.field]"
+          :value="item.label === 'Phone' ? PhoneFormated(currentFamily[item.field]) : currentFamily[item.field]"
           readonly
           height="48px"
           background-color="textbackground"
@@ -303,6 +303,17 @@ export default {
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.familyTemplate);
       }, 300);
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+        return null;
+      }
     }
   },
 

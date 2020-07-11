@@ -341,8 +341,8 @@ export default {
     };
 
     Vue.prototype.$studyCriteriaFields = [
-      { label: "Min Age (months)", field: "MinAge" },
-      { label: "Max Age (months)", field: "MaxAge" },
+      { label: "Min Age", field: "MinAge" },
+      { label: "Max Age", field: "MaxAge" },
       { label: "Premature Participants", field: "PrematureParticipant" },
     ];
 

@@ -52,6 +52,7 @@
             placeholder="  "
             outlined
             dense
+            readonly
           ></v-text-field>
         </v-col>
         <v-col md="12" class="subtitle">
@@ -62,6 +63,7 @@
             rows="3"
             solo
             v-model="currentStudy.Description"
+            readonly
           ></v-textarea>
         </v-col>
       </v-row>
@@ -84,8 +86,9 @@
             background-color="textbackground"
             hide-details
             :label="field.label"
-            v-model="currentStudy[field.field]"
+            :value="field.label !== 'Premature Participants' ? AgeFormated2(currentStudy[field.field]): currentStudy[field.field]"
             placeholder="  "
+            readonly
             outlined
             dense
           ></v-text-field>
@@ -542,6 +545,19 @@ export default {
 
     updateExperimenters(updatedExperimenters) {
       this.currentStudy.Personnels = updatedExperimenters;
+    },
+
+    AgeFormated2(Age) {
+      var formated = "";
+      if (Age) {
+        var years = Math.floor(Age / 12);
+        var months = Age % 12;
+        // months = months.toFixed(1);
+        var Y = years > 0 ? years + " y " : "";
+        var M = months + " m";
+        formated = Y + M;
+      }
+      return formated;
     }
   },
 

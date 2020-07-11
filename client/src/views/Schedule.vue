@@ -74,7 +74,7 @@
               background-color="textbackground"
               hide-details
               :label="field.label"
-              v-model="selectedStudy[field.field]"
+              :value="field.label !== 'Premature Participants' ? AgeFormated2(selectedStudy[field.field]): selectedStudy[field.field]"
               placeholder="  "
               outlined
               dense
@@ -1350,6 +1350,20 @@ export default {
         // var days = Math.floor((Age % 365) % 30.5);
         var Y = years > 0 ? years + " year(s) " : "";
         var M = months + " month(s)";
+        formated = Y + M;
+      }
+      return formated;
+    },
+    
+    AgeFormated2(Age) {
+      var formated = "";
+      if (Age) {
+
+        var years = Math.floor(Age / 12);
+        var months = (Age % 12);
+        // months = months.toFixed(1);
+        var Y = years > 0 ? years + " y " : "";
+        var M = months + " m";
         formated = Y + M;
       }
       return formated;

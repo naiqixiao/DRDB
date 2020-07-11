@@ -11,8 +11,7 @@
 
           <v-card-text class="body-1" align="start" style="padding: 8px; color: var(--v-primary)">
             {{
-            "Age range: " + study.MinAge + " to " + study.MaxAge + " months"
-            }}
+            "Age range: " + AgeFormated2(study.MinAge) + " to " + AgeFormated2(study.MaxAge) }}
           </v-card-text>
           <v-card-text class="body-1" align="end" style="padding: 8px; color: red">
             {{
@@ -134,6 +133,18 @@ export default {
     close() {
       this.dialogStudy = false;
       this.editedStudies = {};
+    },
+
+    AgeFormated2(Age) {
+      var formated = "";
+      if (Age) {
+        var years = Math.floor(Age / 12);
+        var months = Age % 12;
+        var Y = years > 0 ? years + " y " : "";
+        var M = months + " m";
+        formated = Y + M;
+      }
+      return formated;
     }
   },
   computed: {},
