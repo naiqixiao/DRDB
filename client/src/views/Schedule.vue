@@ -40,6 +40,7 @@
               placeholder="  "
               outlined
               dense
+              readonly
             ></v-text-field>
           </v-col>
           <v-col md="12" class="subtitle">
@@ -50,6 +51,7 @@
               rows="3"
               solo
               v-model="selectedStudy.Description"
+              readonly
             ></v-textarea>
           </v-col>
         </v-row>
@@ -76,6 +78,7 @@
               placeholder="  "
               outlined
               dense
+              readonly
             ></v-text-field>
           </v-col>
         </v-row>
@@ -116,6 +119,19 @@
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
+          </v-col>
+          <v-col cols="12" md="5">
+            <v-text-field
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              label="Phone"
+              :value="PhoneFormated(currentFamily.Phone)"
+              readonly
+              placeholder="  "
+              outlined
+              dense
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
             <v-text-field
@@ -273,6 +289,7 @@
             <v-divider></v-divider>
             <h4 class="text-left">Child information:</h4>
           </v-col>
+
           <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
             <v-text-field
               height="48px"
@@ -288,7 +305,17 @@
           </v-col>
 
           <v-col cols="12" md="5">
-            <AgeDisplay :DoB="currentChild.DoB" />
+            <v-text-field
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              label="Age"
+              :value="AgeFormated(currentChild.DoB)"
+              readonly
+              placeholder="  "
+              outlined
+              dense
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="2" style="text-align: center;">
             <v-tooltip top>
@@ -662,7 +689,6 @@ import calendar from "@/services/calendar";
 
 import moment from "moment";
 
-import AgeDisplay from "@/components/AgeDisplay";
 import ExtraStudies from "@/components/ExtraStudies";
 
 import Conversation from "@/components/Conversation";
@@ -677,7 +703,6 @@ import Page from "@/components/Page";
 
 export default {
   components: {
-    AgeDisplay,
     Conversation,
     ExtraStudies,
     Email,
@@ -755,7 +780,7 @@ export default {
         { label: "DoB", field: "DoB" }
       ],
       familyField: [
-        { label: "Phone", field: "Phone", rules: "phone" },
+        // { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
         { label: "Father's Name", field: "NameDad", rules: "name" }
@@ -1310,6 +1335,35 @@ export default {
         this.emailSent = false;
         this.scheduleNextPage = false;
       }, 300);
+    },
+
+    AgeFormated(DoB) {
+      var formated = "";
+      if (DoB) {
+        var Age = Math.floor(
+          (new Date() - new Date(DoB)) / (1000 * 60 * 60 * 24)
+        );
+
+        var years = Math.floor(Age / 365);
+        var months = (Age % 365) / 30.5;
+        months = months.toFixed(1);
+        // var days = Math.floor((Age % 365) % 30.5);
+        var Y = years > 0 ? years + " year(s) " : "";
+        var M = months + " month(s)";
+        formated = Y + M;
+      }
+      return formated;
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+        return null;
+      }
     },
 
     nextPage() {

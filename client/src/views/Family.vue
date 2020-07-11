@@ -36,9 +36,9 @@
                 height="48px"
                 background-color="textbackground"
                 hide-details
-                @keydown.enter="searchFamily"
+                @keydown.enter="searchFamily(item.label, $event.target.value)"
                 :label="item.label"
-                v-model="currentFamily[item.field]"
+                :value="item.label === 'Phone' ? PhoneFormated(currentFamily[item.field]) : currentFamily[item.field]"
                 :append-icon="searchStatus ? 'mdi-magnify' : undefined"
                 :readonly="!searchStatus"
                 placeholder="  "
@@ -557,7 +557,10 @@ export default {
       this.page = 0;
     },
 
-    async searchFamily() {
+    async searchFamily(item, field) {
+      if (item && field) {
+        this.currentFamily[item] = field;
+      }
       this.queryString = this.currentFamily;
 
       try {
@@ -678,6 +681,17 @@ export default {
     previousPage() {
       this.page -= 1;
       this.currentFamily = this.Families[this.page - 1];
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+        return null;
+      }
     }
   },
   watch: {},

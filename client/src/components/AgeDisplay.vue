@@ -1,10 +1,20 @@
 <template >
-  <p v-if="DoB">
-    {{ 'Age: ' + AgeFormated(DoB) }}
-  </p>
-  <p v-else>
-    {{ "DoB is not available." }}
-  </p>
+  <span v-if="DoB">
+    <!-- <v-text-field
+      height="48px"
+      background-color="textbackground"
+      hide-details
+      label="Age"
+      :value="AgeFormated(DoB)"
+      readonly
+      placeholder="  "
+      outlined
+      dense
+    ></v-text-field> -->
+
+    {{ AgeFormated(DoB) }}
+  </span>
+  <span v-else>{{ "DoB is not available." }}</span>
 </template>
 
 <script>
@@ -14,15 +24,13 @@ export default {
   },
   methods: {
     AgeFormated(DoB) {
-
       var Age = Math.floor(
-        (new Date() - new Date(DoB)) /
-          (1000 * 60 * 60 * 24)
+        (new Date() - new Date(DoB)) / (1000 * 60 * 60 * 24)
       );
 
       var years = Math.floor(Age / 365);
       var months = (Age % 365) / 30.5;
-      months = months.toFixed(1)
+      months = months.toFixed(1);
       // var days = Math.floor((Age % 365) % 30.5);
       var Y = years > 0 ? years + " year(s) " : "";
       var M = months + " month(s)";
