@@ -329,6 +329,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
           "<p>You login password is reset, and the temporary passwor is: <b>" +
           password +
           "</b></p> <p>Please login to change your password.</p> " +
+          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
           "<p> </p>" +
           "<p>Thank you! </p>" +
           "<p>Lab manager</p>",
