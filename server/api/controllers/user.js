@@ -110,6 +110,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "</b>, and your temporary password is <b><em>" +
           password +
           "</em></b>. Please login with your email to change your password.</p> " +
+          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
           "<p> </p>" +
           "<p>Thank you! </p>" +
           "<p>Lab manager</p>",
