@@ -178,6 +178,13 @@ Personnel.hasMany(Schedule, {
   foreignKey: "ScheduledBy",
 });
 
+
+// Feedback
+const Feedback = sequelize.import("../models/SequelizeAuto/Feedback");
+Feedback.belongsTo(Personnel, {
+  foreignKey: "CreatedBy",
+});
+
 // Syncronize with database
 sequelize.sync({ force: false }).then(() => {
   exports.family = Family;
@@ -191,5 +198,6 @@ sequelize.sync({ force: false }).then(() => {
   exports.experimenter = Experimenter;
   exports.sibling = Sibling;
   exports.experimenterAssignment = ExperimenterAssignment;
+  exports.feedback = Feedback;
   exports.sequelize = sequelize;
 });

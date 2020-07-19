@@ -1,11 +1,7 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" clipped-right>
-      <v-app-bar-nav-icon
-        x-large
-        class="title-text ma-2"
-        @click.stop="drawer = !drawer"
-      ></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon x-large class="title-text ma-2" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
         <h2 class="title-text title-p-4 ma-2">{{ this.$route.name }}</h2>
@@ -14,6 +10,14 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items align="end">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon @click.stop="feedbackDialog = true" v-bind="attrs" v-on="on">
+              <v-icon>feedback</v-icon>
+            </v-btn>
+          </template>
+          <span>Send us your questions, issues, requests, and suggestions!</span>
+        </v-tooltip>
         <h2 class="title-text title ma-3">{{ this.$store.state.user }}</h2>
       </v-toolbar-items>
     </v-app-bar>
@@ -42,6 +46,46 @@
       </template>
     </v-navigation-drawer>
 
+    <v-dialog v-model="feedbackDialog" max-width="800px" :retain-focus="false">
+      <v-card outlined>
+        <v-card-title>
+          <span class="headline">Send us your questions and suggestions!</span>
+        </v-card-title>
+
+        <v-container>
+          <v-row>
+            <v-col cols="12" sm="10" md="10">
+              <v-text-field v-model="currentFeedback.Title" label="Title"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="10" md="10">
+              <vue-editor
+                ref="feedbackContent"
+                v-model="currentFeedback.Content"
+                :editor-toolbar="customToolbar"
+              ></vue-editor>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <v-card-actions>
+          <v-row justify="space-between" style="height: 50px">
+            <v-col md="4"></v-col>
+            <v-col md="2">
+              <v-btn color="primary" @click="feedbackDialog = false">Cancel</v-btn>
+            </v-col>
+            <v-col md="2">
+              <v-btn
+                color="primary"
+                @click="createFeedback"
+                :disabled="currentFeedback.Title == '' || currentFeedback.Content == ''"
+              >Send</v-btn>
+            </v-col>
+            <v-col md="4"></v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-main>
       <router-view />
     </v-main>
@@ -49,60 +93,73 @@
 </template>
 
 <script>
+import { VueEditor } from "vue2-editor";
+import feedback from "@/services/feedback";
+
 export default {
   name: "Header",
-  watch: {
-    group() {
-      this.drawer = false;
-    },
+  components: {
+    VueEditor
   },
 
   data() {
     return {
       drawer: false,
+      feedbackDialog: false,
+      currentFeedback: {
+        Title: "",
+        Content: "",
+        CurrentPage: "",
+        CreatedBy: ""
+      },
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ color: [] }, { background: [] }]
+      ],
       navs: [
         {
           address: "/",
           label: "Home",
-          icon: "home",
+          icon: "home"
         },
         {
           address: "/family",
           label: "Family information",
-          icon: "face",
+          icon: "face"
         },
         {
           address: "/schedule",
           label: "Schedule studies",
-          icon: "phone",
+          icon: "phone"
         },
         {
           address: "/appointment",
           label: "Study appointments",
-          icon: "mdi-format-list-bulleted-square",
+          icon: "mdi-format-list-bulleted-square"
         },
         {
           address: "/study",
           label: "Study management",
-          icon: "description",
+          icon: "description"
         },
         {
           address: "/personnel",
           label: "Personnel management",
-          icon: "perm_identity",
+          icon: "perm_identity"
         },
 
         {
           address: "/settings",
           label: "Settings",
-          icon: "dashboard",
+          icon: "dashboard"
         },
         {
           address: "/login",
           label: "Login",
-          icon: "fingerprint",
-        },
-      ],
+          icon: "fingerprint"
+        }
+      ]
     };
   },
 
@@ -113,11 +170,45 @@ export default {
       this.$store.dispatch("setUserID", null);
 
       this.$router.push({
-        name: "Login",
+        name: "Login"
       });
     },
+
+    async createFeedback() {
+      this.currentFeedback.CreatedBy = this.$store.state.userID;
+      this.currentFeedback.CurrentPage = this.$route.name;
+      this.currentFeedback.Email = this.$store.state.user;
+
+      console.log(this.currentFeedback);
+      try {
+        await feedback.create(this.currentFeedback);
+
+        this.closeFeedback();
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
+    closeFeedback() {
+      this.feedbackDialog = false;
+      setTimeout(() => {
+        this.currentFeedback.Title = "";
+        this.currentFeedback.Content = "";
+        this.currentFeedback.CreatedBy = "";
+        this.currentFeedback.CurrentPage = "";
+        this.currentFeedback.Email = "";
+      }, 300);
+    }
   },
 
+  watch: {
+    group() {
+      this.drawer = false;
+    },
+    feedbackDialog(val) {
+      val || this.closeFeedback();
+    }
+  }
 };
 </script>
 
@@ -131,7 +222,10 @@ export default {
   color: var(--v-secondary-base) !important;
 }
 
-.v-app-bar, .v-app-bar--clipped, .v-app-bar--fixed, .v-toolbar__content {
+.v-app-bar,
+.v-app-bar--clipped,
+.v-app-bar--fixed,
+.v-toolbar__content {
   height: 56px !important;
 }
 </style>

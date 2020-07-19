@@ -1,3 +1,5 @@
+/* jshint indent: 1 */
+
 module.exports = function(sequelize, DataTypes) {
 	return sequelize.define('Feedback', {
 		id: {
@@ -7,7 +9,7 @@ module.exports = function(sequelize, DataTypes) {
 			primaryKey: true
 		},
 		Content: {
-			type: DataTypes.TEXT,
+			type: 'LONGTEXT',
 			allowNull: false
 		},
 		CreatedBy: {
@@ -36,7 +38,11 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		Title: {
 			type: DataTypes.STRING(45),
-			allowNull: true
+			allowNull: false
+		},
+		Email: {
+			type: DataTypes.STRING(45),
+			allowNull: false
 		}
 	}, {
 		sequelize,
