@@ -42,6 +42,7 @@ const calRoutes = require("./api/routes/calendar");
 const gmailRoutes = require("./api/routes/gmail");
 
 const extAPIRoutes = require("./api/routes/externalAPIs");
+const feedbackRoutes = require("./api/routes/feedback");
 
 app.use("/api/user", userRoutes);
 
@@ -62,6 +63,8 @@ app.use("/api/cal", calRoutes);
 app.use("/api/gmail", gmailRoutes);
 
 app.use("/api/extAPIs", extAPIRoutes);
+
+app.use("/api/feedback", feedbackRoutes);
 
 // app.get('/', function(req, res){
 //   res.sendFile(__dirname + '/index.html');

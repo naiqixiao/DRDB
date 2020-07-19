@@ -25,6 +25,7 @@
     "nodemon": "^2.0.4",
     "objection": "^2.2.1",
     "sequelize": "^5.22.3",
+    "sequelize-auto": "^0.5.2",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
