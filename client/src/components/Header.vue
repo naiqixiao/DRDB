@@ -179,7 +179,7 @@ export default {
       this.currentFeedback.CurrentPage = this.$route.name;
       this.currentFeedback.Email = this.$store.state.user;
 
-      console.log(this.currentFeedback);
+      // console.log(this.currentFeedback);
       try {
         await feedback.create(this.currentFeedback);
 
