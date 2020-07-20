@@ -115,7 +115,8 @@ export default {
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ list: "ordered" }, { list: "bullet" }],
-        [{ color: [] }, { background: [] }]
+        [{ color: [] }, { background: [] }],
+        // ["image", "code-block"]
       ],
       navs: [
         {
@@ -178,6 +179,26 @@ export default {
       this.currentFeedback.CreatedBy = this.$store.state.userID;
       this.currentFeedback.CurrentPage = this.$route.name;
       this.currentFeedback.Email = this.$store.state.user;
+
+      // // create a new dov container
+      // var div = document.createElement("div");
+
+      // // assing your HTML to div's innerHTML
+      // div.innerHTML = this.currentFeedback.Content;
+
+      // // get all <a> elements from div
+      // var elements = div.getElementsByTagName("img");
+
+      // // remove all <a> elements
+      // while (elements[0]) elements[0].parentNode.removeChild(elements[0]);
+
+      // // get div's innerHTML into a new variable
+      // var repl = div.innerHTML;
+
+      // // display it
+      // console.log(repl);
+
+      // this.currentFeedback.Content = repl;
 
       // console.log(this.currentFeedback);
       try {

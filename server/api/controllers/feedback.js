@@ -83,7 +83,7 @@ exports.create = asyncHandler(async (req, res) => {
     const feedback = await model.feedback.create(newFeedback);
 
     var emailContent = {
-      to: "appleid@kangleelab.com",
+      to: "testuser@kangleelab.com",
       cc: newFeedback.Email,
       subject: "[DRDB feedback] " + newFeedback.Title,
       body:
