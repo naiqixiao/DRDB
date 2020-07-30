@@ -28,7 +28,7 @@
             @click.stop="updateSchedule(item, 'Confirmed')"
             :disabled="
           item.Schedule.Status === 'Confirmed' ||
-            item.Schedule.Completed == true
+            item.Schedule.Completed == true || item.Study.FK_Lab != $store.state.lab
         "
             v-bind="attrs"
             v-on="on"
@@ -45,7 +45,7 @@
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
-            item.Schedule.Completed == true
+            item.Schedule.Completed == true || item.Study.FK_Lab != $store.state.lab
         "
             v-bind="attrs"
             v-on="on"
@@ -62,7 +62,7 @@
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
-            item.Schedule.Completed == true
+            item.Schedule.Completed == true || item.Study.FK_Lab != $store.state.lab
         "
             v-bind="attrs"
             v-on="on"
@@ -77,7 +77,7 @@
             @click.stop="updateSchedule(item, 'Cancelled')"
             :disabled="
           item.Schedule.Status === 'Cancelled' ||
-            item.Schedule.Completed == true
+            item.Schedule.Completed == true || item.Study.FK_Lab != $store.state.lab
         "
             v-bind="attrs"
             v-on="on"
@@ -228,7 +228,7 @@
               class="mr-0 pa-0"
               @input="updateSchedule(item, 'Reminded')"
               dense
-              :disabled="remindIconEnable(item)"
+              :disabled="remindIconEnable(item) || item.Study.FK_Lab != $store.state.lab"
             ></v-simple-checkbox>
           </div>
         </template>
@@ -245,7 +245,7 @@
               class="ma-0 pa-0"
               @input="updateSchedule(item, 'Completed')"
               dense
-              :disabled="completeIconEnable(item)"
+              :disabled="completeIconEnable(item) || item.Study.FK_Lab != $store.state.lab"
             ></v-simple-checkbox>
           </div>
         </template>
