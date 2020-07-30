@@ -31,10 +31,13 @@ exports.create = asyncHandler(async (req, res) => {
     const alphabet = "abcdefghijk".split("");
     IdWithinFamily = alphabet[Children.length];
 
-    await model.child.update({"IdWithinFamily": IdWithinFamily}, {
-      where: { id: child.id },
-    });
-    
+    await model.child.update(
+      { IdWithinFamily: IdWithinFamily },
+      {
+        where: { id: child.id },
+      }
+    );
+
     res.status(200).send(child);
 
     console.log("Child is created and siblings are updated!");
@@ -101,7 +104,14 @@ exports.search = asyncHandler(async (req, res) => {
               { model: model.child, attributes: ["Name", "DoB"] },
               {
                 model: model.study,
-                attributes: ["StudyName", "MinAge", "MaxAge", "EmailTemplate"],
+                attributes: [
+                  "StudyName",
+                  "MinAge",
+                  "MaxAge",
+                  "EmailTemplate",
+                  "StudyType",
+                  "FK_Lab"
+                ],
               },
               { model: model.schedule },
             ],

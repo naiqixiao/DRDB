@@ -232,6 +232,7 @@ exports.today = asyncHandler(async (req, res) => {
               "MaxAge",
               "EmailTemplate",
               "StudyType",
+              "FK_Lab",
             ],
           },
           {
@@ -297,6 +298,7 @@ exports.week = asyncHandler(async (req, res) => {
               "MaxAge",
               "EmailTemplate",
               "StudyType",
+              "FK_Lab",
             ],
           },
           {

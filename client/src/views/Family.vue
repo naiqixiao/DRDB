@@ -573,6 +573,7 @@ export default {
           this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
         }
+
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");

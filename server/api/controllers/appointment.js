@@ -40,7 +40,10 @@ exports.create = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
             {
               model: model.study,
               attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
@@ -56,8 +59,13 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     var studyNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
-
+      return (
+        appointment.Study.StudyName +
+        " (" +
+        appointment.FK_Family +
+        appointment.Child.IdWithinFamily +
+        ")"
+      );
     });
 
     studyNames = Array.from(new Set(studyNames));
@@ -68,19 +76,17 @@ exports.create = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar// + ".CAL",
+          email: experimenter.Calendar, // + ".CAL",
         });
       });
     });
 
     const updatedScheduleInfo = {
-      summary:
-        studyNames.join(" + "),
+      summary: studyNames.join(" + "),
       attendees: attendees,
     };
 
     try {
-      
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
@@ -92,7 +98,6 @@ exports.create = asyncHandler(async (req, res) => {
         resource: updatedScheduleInfo,
         sendUpdates: "all",
       });
-
     } catch (err) {
       throw err;
     }
@@ -144,7 +149,10 @@ exports.search = asyncHandler(async (req, res) => {
     include: [
       { model: model.family, attributes: ["id"] },
       { model: model.child, attributes: ["Name", "DoB", "Sex"] },
-      { model: model.study, attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"] },
+      {
+        model: model.study,
+        attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab"],
+      },
       {
         model: model.personnel,
         through: { model: model.experimenterAssignment },
@@ -199,10 +207,19 @@ exports.update = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "StudyType",
+                "FK_Lab",
+              ],
             },
             {
               model: model.personnel,
@@ -215,8 +232,13 @@ exports.update = asyncHandler(async (req, res) => {
     });
 
     var studyNames = Schedule.Appointments.map((appointment) => {
-      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
-
+      return (
+        appointment.Study.StudyName +
+        " (" +
+        appointment.FK_Family +
+        appointment.Child.IdWithinFamily +
+        ")"
+      );
     });
 
     studyNames = Array.from(new Set(studyNames));
@@ -227,14 +249,13 @@ exports.update = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar// + ".CAL",
+          email: experimenter.Calendar, // + ".CAL",
         });
       });
     });
 
     const updatedScheduleInfo = {
-      summary:
-        studyNames.join(" + "),
+      summary: studyNames.join(" + "),
       attendees: attendees,
     };
 
@@ -272,10 +293,19 @@ exports.delete = asyncHandler(async (req, res) => {
           model: model.appointment,
           include: [
             { model: model.family, attributes: ["id"] },
-            { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "StudyType",
+                "FK_Lab",
+              ],
             },
             {
               model: model.personnel,
@@ -292,7 +322,13 @@ exports.delete = asyncHandler(async (req, res) => {
     );
 
     var studyNames = updatedAppointments.map((appointment) => {
-      return appointment.Study.StudyName + " (" + appointment.FK_Family + appointment.Child.IdWithinFamily + ")";
+      return (
+        appointment.Study.StudyName +
+        " (" +
+        appointment.FK_Family +
+        appointment.Child.IdWithinFamily +
+        ")"
+      );
     });
 
     studyNames = Array.from(new Set(studyNames));
@@ -303,14 +339,13 @@ exports.delete = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar// + ".CAL",
+          email: experimenter.Calendar, // + ".CAL",
         });
       });
     });
 
     const updatedScheduleInfo = {
-      summary:
-        studyNames.join(" + "),
+      summary: studyNames.join(" + "),
       attendees: attendees,
     };
 

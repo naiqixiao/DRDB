@@ -142,6 +142,7 @@ exports.search = asyncHandler(async (req, res) => {
               "MaxAge",
               "EmailTemplate",
               "StudyType",
+              "FK_Lab",
             ],
           },
           { model: model.schedule },

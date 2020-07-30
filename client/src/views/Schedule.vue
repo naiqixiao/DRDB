@@ -890,6 +890,8 @@ export default {
           this.page = 0;
           this.currentChild = {};
         }
+
+        // console.log(this.Children);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
