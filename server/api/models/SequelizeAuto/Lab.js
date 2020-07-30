@@ -18,6 +18,11 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false,
         unique: true
       },
+      Email: {
+        type: DataTypes.STRING(45),
+        allowNull: true,
+        unique: true
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

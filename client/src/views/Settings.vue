@@ -1,10 +1,12 @@
 <template>
   <v-container fluid>
-    <v-row justify="center" align="center" style="height: 400px;">
+    <v-row align="start" style="height: 200px;">
+      <v-col md="12" class="subtitle">
+        <v-divider></v-divider>
+        <h4 class="text-left">User account:</h4>
+      </v-col>
       <v-col cols="12" md="6">
-        <v-btn color="primary" @click.stop="dialog = true"
-          >Change password</v-btn
-        >
+        <v-btn color="primary" @click.stop="dialog = true">Change password</v-btn>
       </v-col>
 
       <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
@@ -15,12 +17,7 @@
               <v-col cols="12" md="6" class="subtitle">
                 <v-divider></v-divider>
                 <h4 class="text-left">Current password:</h4>
-                <v-text-field
-                  v-model="password"
-                  type="password"
-                  hide-details
-                  dense
-                ></v-text-field>
+                <v-text-field v-model="password" type="password" hide-details dense></v-text-field>
               </v-col>
             </v-row>
             <v-row justify="center">
@@ -66,8 +63,7 @@
                       newPasswordRule != true
                   "
                   @click="changePassword"
-                  >Confirm</v-btn
-                >
+                >Confirm</v-btn>
               </v-col>
               <v-col md="4"></v-col>
             </v-row>
@@ -76,24 +72,49 @@
       </v-dialog>
     </v-row>
 
-    <v-row justify="center" align="center">
+    <v-row justify="center" align="center" style="height: 200px;">
+      <v-col md="12" class="subtitle">
+        <v-divider></v-divider>
+        <h4 class="text-left">Lab email account:</h4>
+      </v-col>
+      <v-col cols="12" md="2">
+        <v-text-field
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          label="Associated lab email"
+          :value="this.labEmail"
+          readonly
+          placeholder="No email is set up"
+          outlined
+          dense
+        ></v-text-field>
+      </v-col>
+
       <v-col cols="12" md="6">
-        <v-btn color="primary" @click="googleCredentialsURL"
-          >Setup Google Account</v-btn
-        >
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="googleCredentialsURL"
+                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+              >Setup Google Account</v-btn>
+            </div>
+          </template>
+          <span>Only PI and lab manager can change the associated lab email.</span>
+        </v-tooltip>
       </v-col>
 
       <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false">
         <v-card outlined>
-          <v-card-title class="headline"
-            >Paste Google sign in code</v-card-title
-          >
+          <v-card-title class="headline">Paste Google sign in code</v-card-title>
           <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
 
           <v-row justify="center">
             <v-col cols="12" md="8" class="subtitle">
               <v-textarea
-                label="Sign in code"
+                label="Paste the sign-in code here."
                 outlined
                 no-resize
                 rows="1"
@@ -108,17 +129,10 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogGoogle = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="dialogGoogle = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn
-                  color="primary"
-                  :disabled="!signInCode"
-                  @click="googleSetToken"
-                  >Confirm</v-btn
-                >
+                <v-btn color="primary" :disabled="!signInCode" @click="googleSetToken">Confirm</v-btn>
               </v-col>
               <v-col md="4"></v-col>
             </v-row>
@@ -144,6 +158,7 @@ export default {
       valid: true,
       dialogGoogle: false,
       signInCode: null,
+      labEmail: "Lab email is not set up yet.",
     };
   },
 
@@ -190,6 +205,8 @@ export default {
       try {
         const response = await externalAPIs.googleSetToken(this.signInCode);
 
+        this.labEmail = response.data.Email;
+
         console.log(response.data);
       } catch (error) {
         console.log(error.response);
@@ -224,6 +241,16 @@ export default {
     dialogGoogle(val) {
       val || this.extAPIsClose();
     },
+  },
+
+  async mounted() {
+    try {
+      const profile = await externalAPIs.googleGetEmailAddress();
+
+      this.labEmail = profile.data.data.emailAddress;
+    } catch (error) {
+      console.log(error.response);
+    }
   },
 };
 </script>

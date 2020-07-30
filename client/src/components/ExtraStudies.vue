@@ -15,6 +15,7 @@
         disabled
         dense
         hide-details
+        chiip
       ></v-select>
       <v-select
         v-else
@@ -27,6 +28,7 @@
         label="Studies"
         hide-details
         dense
+        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="3" v-if="response == 'Confirmed'">
@@ -40,6 +42,7 @@
         multiple
         hide-details
         dense
+        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="2" v-if="index > 0">

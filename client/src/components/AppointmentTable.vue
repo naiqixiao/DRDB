@@ -23,65 +23,65 @@
 
     <template v-slot:item.actions="{ item }">
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Confirmed')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Confirmed')"
+              :disabled="
           item.Schedule.Status === 'Confirmed' ||
             item.Schedule.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >event</v-icon>
+            >event</v-icon>
+          </div>
         </template>
         <span>Pick study date and time</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Rescheduling')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Rescheduling')"
+              :disabled="
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
             item.Schedule.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >update</v-icon>
+            >update</v-icon>
+          </div>
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'No Show')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'No Show')"
+              :disabled="
           item.Schedule.Status === 'Rescheduling' ||
             item.Schedule.Status === 'No Show' ||
             item.Schedule.Status === 'TBD' ||
             item.Schedule.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >sentiment_dissatisfied</v-icon>
+            >sentiment_dissatisfied</v-icon>
+          </div>
         </template>
         <span>No show</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Cancelled')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Cancelled')"
+              :disabled="
           item.Schedule.Status === 'Cancelled' ||
             item.Schedule.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >not_interested</v-icon>
+            >not_interested</v-icon>
+          </div>
         </template>
         <span>Cancel this appointment</span>
       </v-tooltip>
@@ -221,16 +221,16 @@
 
     <template #item.Schedule.Reminded="{ item }">
       <v-tooltip top :disabled="remindIconEnable(item)">
-        <template v-slot:activator="{ on, attrs }">
-          <v-simple-checkbox
-            v-model="item.Schedule.Reminded"
-            class="mr-0 pa-0"
-            @input="updateSchedule(item, 'Reminded')"
-            dense
-            :disabled="remindIconEnable(item)"
-            v-bind="attrs"
-            v-on="on"
-          ></v-simple-checkbox>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-simple-checkbox
+              v-model="item.Schedule.Reminded"
+              class="mr-0 pa-0"
+              @input="updateSchedule(item, 'Reminded')"
+              dense
+              :disabled="remindIconEnable(item)"
+            ></v-simple-checkbox>
+          </div>
         </template>
         <span>Confirm reminder is sent</span>
       </v-tooltip>
@@ -238,16 +238,16 @@
 
     <template #item.Schedule.Completed="{ item }">
       <v-tooltip top :disabled="completeIconEnable(item)">
-        <template v-slot:activator="{ on, attrs }">
-          <v-simple-checkbox
-            v-model="item.Schedule.Completed"
-            class="ma-0 pa-0"
-            @input="updateSchedule(item, 'Completed')"
-            dense
-            :disabled="completeIconEnable(item)"
-            v-bind="attrs"
-            v-on="on"
-          ></v-simple-checkbox>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-simple-checkbox
+              v-model="item.Schedule.Completed"
+              class="ma-0 pa-0"
+              @input="updateSchedule(item, 'Completed')"
+              dense
+              :disabled="completeIconEnable(item)"
+            ></v-simple-checkbox>
+          </div>
         </template>
         <span>Confirm study is completed</span>
       </v-tooltip>
@@ -270,12 +270,12 @@ export default {
     DateDisplay,
     AgeByParticipation,
     NextContact,
-    Email
+    Email,
   },
   props: {
     Appointments: Array,
     studyTimeSlots: Array,
-    family: Object
+    family: Object,
   },
   data() {
     return {
@@ -290,18 +290,18 @@ export default {
       editedItem: {
         Study: {
           MinAge: 6,
-          MaxAge: 18
+          MaxAge: 18,
         },
         Child: {
           Name: null,
-          DoB: new Date()
-        }
+          DoB: new Date(),
+        },
       },
       studyDate: null,
       studyTime: "09:00AM",
       scheduleNextPage: false,
       emailSent: false,
-      scheduleUpdated: false
+      scheduleUpdated: false,
     };
   },
   methods: {
@@ -337,12 +337,12 @@ export default {
           // }
 
           var currentSchedules = await schedule.search({
-            id: item.FK_Schedule
+            id: item.FK_Schedule,
           });
 
           var currentSchedule = currentSchedules.data[0];
 
-          var studyNames = currentSchedule.Appointments.map(appointment => {
+          var studyNames = currentSchedule.Appointments.map((appointment) => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -362,7 +362,7 @@ export default {
             item.Schedule.AppointmentTime = null;
             item.Schedule.updatedAt = new Date().toISOString();
 
-            this.Appointments.forEach(appointment => {
+            this.Appointments.forEach((appointment) => {
               if (appointment.FK_Schedule === item.FK_Schedule) {
                 appointment.Schedule = item.Schedule;
               }
@@ -404,7 +404,7 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.Appointments.map(appointment => {
+          var studyNames = this.Appointments.map((appointment) => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
               return (
                 appointment.Study.StudyName +
@@ -418,7 +418,7 @@ export default {
             }
           });
 
-          studyNames = studyNames.filter(function(el) {
+          studyNames = studyNames.filter(function (el) {
             return el != null;
           });
 
@@ -428,13 +428,11 @@ export default {
 
           this.editedItem.Schedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
           this.editedItem.Schedule.end = {
-            dateTime: moment(this.studyDateTime)
-              .add(1, "h")
-              .toISOString(true),
-            timeZone: "America/Toronto"
+            dateTime: moment(this.studyDateTime).add(1, "h").toISOString(true),
+            timeZone: "America/Toronto",
           };
 
           const calendarEvent = await schedule.update(this.editedItem.Schedule);
@@ -446,7 +444,7 @@ export default {
 
           Object.assign(this.Appointments[this.editedIndex], this.editedItem);
 
-          this.Appointments.forEach(appointment => {
+          this.Appointments.forEach((appointment) => {
             if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
               appointment.Schedule = this.editedItem.Schedule;
             }
@@ -538,13 +536,9 @@ export default {
         case "Confirmed":
           if (
             moment(item.Schedule.AppointmentTime).startOf("day") >=
-              moment()
-                .startOf("day")
-                .subtract(daysAheadofSchedule, "d") &&
+              moment().startOf("day").subtract(daysAheadofSchedule, "d") &&
             moment(item.Schedule.AppointmentTime).startOf("day") <
-              moment()
-                .startOf("day")
-                .add(1, "d")
+              moment().startOf("day").add(1, "d")
           ) {
             iconDisable = false;
           }
@@ -572,11 +566,11 @@ export default {
       }
 
       return iconDisable;
-    }
+    },
   },
 
   computed: {
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -604,7 +598,7 @@ export default {
       studyDateTime = new Date(studyDateTime);
       return studyDateTime;
     },
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment(new Date())
           .add(1, "days")
@@ -615,32 +609,28 @@ export default {
             )
           )
       ) {
-        return moment(new Date())
-          .add(1, "days")
-          .toISOString(true);
+        return moment(new Date()).add(1, "days").toISOString(true);
       } else {
         return moment(this.editedItem.Child.DoB)
           .add(Math.floor(this.editedItem.Study.MinAge * 30.5), "days")
           .toISOString(true);
       }
     },
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.editedItem.Child.DoB)
         .add(Math.floor(this.editedItem.Study.MaxAge * 30.5), "days")
         .toISOString(true);
     },
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
-    }
+      return moment().startOf("day").format("YYYY-MM-DD");
+    },
   },
 
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -670,6 +660,5 @@ export default {
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
-
 }
 </style>

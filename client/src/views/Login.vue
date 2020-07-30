@@ -1,12 +1,7 @@
 <template>
   <v-row justify="center" align="center" style="height: 600px;">
     <v-col cols="12" lg="3">
-      <v-text-field
-        label="Email"
-        :rules="this.$rules.email"
-        v-model="email"
-        clearable
-      ></v-text-field>
+      <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
       <br />
       <v-text-field
         label="Password"
@@ -17,9 +12,7 @@
       ></v-text-field>
       <br />
       <div class="danger-alert" v-html="error" />
-      <v-btn rounded color="primary" v-if="error" @click="resetPassword"
-        >Forgot Password?</v-btn
-      >
+      <v-btn rounded color="primary" v-if="error" @click="resetPassword">Forgot Password?</v-btn>
       <br />
       <div class="text-center">
         <v-btn rounded color="primary" @click.stop="login">Login</v-btn>
@@ -28,20 +21,13 @@
 
     <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
       <v-card outlined>
-        <v-card-title class="headline"
-          >Welcome to the system! Please set your password.</v-card-title
-        >
+        <v-card-title class="headline">Welcome to the system! Please set your password.</v-card-title>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-row v-if="!changeTemporaryPassword" justify="center">
             <v-col cols="12" md="6" class="subtitle">
               <v-divider></v-divider>
               <h4 class="text-left">Current password:</h4>
-              <v-text-field
-                v-model="password"
-                type="password"
-                hide-details
-                dense
-              ></v-text-field>
+              <v-text-field v-model="password" type="password" hide-details dense></v-text-field>
             </v-col>
           </v-row>
           <v-row justify="center">
@@ -50,12 +36,7 @@
             </v-col>
             <v-col cols="12" md="6" class="subtitle">
               <h4 class="text-left">New password:</h4>
-              <v-text-field
-                v-model="newPassword"
-                type="password"
-                clearable
-                hide-details
-              ></v-text-field>
+              <v-text-field v-model="newPassword" type="password" clearable hide-details></v-text-field>
             </v-col>
           </v-row>
           <br />
@@ -85,8 +66,7 @@
                   passwordConfirmationRule != true || newPassword == null
                 "
                 @click="changePassword"
-                >Confirm</v-btn
-              >
+              >Confirm</v-btn>
             </v-col>
             <v-col md="4"></v-col>
           </v-row>
@@ -132,6 +112,8 @@ export default {
           this.$store.dispatch("setUserID", response.data.userID);
           this.$store.dispatch("setLab", response.data.lab);
           this.$store.dispatch("setStudies", response.data.studies);
+          this.$store.dispatch("setRole", response.data.role);
+          this.$store.dispatch("setLabEmail", response.data.labEmail);
           this.$router.push({
             name: "Family information",
           });

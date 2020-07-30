@@ -94,7 +94,7 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
-                  <v-select v-model="editedItem.Sex" :items="this.$Sex" filled label="Sex"></v-select>
+                  <v-select v-model="editedItem.Sex" :items="this.$Sex" filled label="Sex" chip></v-select>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -325,17 +325,12 @@
 
     <v-row align-content="end" justify="end" style="height: 120px;" dense>
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            class="c1"
-            fab
-            @click.stop="addChild"
-            :disabled="!familyId"
-            v-bind="attrs"
-            v-on="on"
-          >
-            <v-icon>add</v-icon>
-          </v-btn>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-btn class="c1" fab @click.stop="addChild" :disabled="!familyId">
+              <v-icon>add</v-icon>
+            </v-btn>
+          </div>
         </template>
         <span>Add a child to this family</span>
       </v-tooltip>
@@ -362,13 +357,13 @@ export default {
     AgeDisplay,
     ExtraStudies,
     Email,
-    NextContact
+    NextContact,
   },
   props: {
     Children: Array,
     familyId: Number,
     currentFamily: Object,
-    studyTimeSlots: Array
+    studyTimeSlots: Array,
   },
   data() {
     return {
@@ -391,7 +386,7 @@ export default {
         FK_Family: null,
         FK_Child: null,
         FK_Study: null,
-        Experimenters: []
+        Experimenters: [],
       },
 
       editedItem: {
@@ -406,7 +401,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       currentChild: {
         Name: null,
@@ -420,7 +415,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       defaultItem: {
         Name: null,
@@ -434,7 +429,7 @@ export default {
         Illness: 0,
         Note: null,
         BirthWeight: null,
-        Appointments: []
+        Appointments: [],
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: "Confirmed",
@@ -443,7 +438,7 @@ export default {
       nextContactDialog: false,
       emailDialog: false,
       emailTemplate: "",
-      studyDate: null
+      studyDate: null,
     };
   },
   methods: {
@@ -456,7 +451,7 @@ export default {
       if (this.Experimenters.lenth < 1) {
         this.Experimenters = extraAppointments.attendees;
       } else {
-        extraAppointments.attendees.forEach(experimenter => {
+        extraAppointments.attendees.forEach((experimenter) => {
           this.Experimenters.push(experimenter);
         });
       }
@@ -485,7 +480,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach(study => {
+      store.state.studies.forEach((study) => {
         if (
           child.Age >= study.MinAge * 30.5 - 5 &&
           child.Age <= study.MaxAge * 30.5 - 5
@@ -497,14 +492,14 @@ export default {
       var uniquePreviousStudies = [];
 
       if (child.Appointments) {
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           uniquePreviousStudies.push(appointment.FK_Study);
         });
         uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
       }
 
       var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
+        (study) => !uniquePreviousStudies.includes(study)
       );
 
       // check the selected studies.
@@ -518,16 +513,16 @@ export default {
       }
 
       var selectableStudies = potentialStudies.filter(
-        study => !currentSelectedStudies.includes(study)
+        (study) => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter(study =>
+      var potentialStudyList = store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
       return {
         potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies
+        selectableStudies: selectableStudies,
       };
     },
 
@@ -542,7 +537,7 @@ export default {
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map(appointment => {
+          var studyNames = this.appointments.map((appointment) => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -563,15 +558,15 @@ export default {
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
-            attendees: this.Experimenters
+            attendees: this.Experimenters,
           };
 
           break;
@@ -581,7 +576,7 @@ export default {
             AppointmentTime: null,
             Status: this.response,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID
+            ScheduledBy: store.state.userID,
           };
 
           if (
@@ -625,7 +620,7 @@ export default {
       const currentSchedules = await schedule.search(queryString);
 
       const currentSchedule = currentSchedules.data[0];
-      var studyNames = currentSchedule.Appointments.map(appointment => {
+      var studyNames = currentSchedule.Appointments.map((appointment) => {
         return (
           appointment.Study.StudyName +
           " (" +
@@ -639,11 +634,11 @@ export default {
 
       const attendees = [];
 
-      currentSchedule.Appointments.forEach(appointment => {
-        appointment.Personnels.forEach(experimenter => {
+      currentSchedule.Appointments.forEach((appointment) => {
+        appointment.Personnels.forEach((experimenter) => {
           attendees.push({
             displayName: experimenter.Name,
-            email: experimenter.Calendar // + ".CAL",
+            email: experimenter.Calendar, // + ".CAL",
           });
         });
       });
@@ -653,16 +648,16 @@ export default {
         location: "Psychology Building, McMaster University",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-          timeZone: "America/Toronto"
+          timeZone: "America/Toronto",
         },
         end: {
           dateTime: moment(currentSchedule.AppointmentTime)
             .add(1, "h")
             .toISOString(true),
-          timeZone: "America/Toronto"
+          timeZone: "America/Toronto",
         },
         attendees: attendees,
-        scheduleId: this.scheduleId
+        scheduleId: this.scheduleId,
       };
 
       try {
@@ -874,14 +869,14 @@ export default {
       setTimeout(() => {
         this.$refs.studyDate.focus();
       }, 100);
-    }
+    },
   },
   computed: {
-    ElegibleStudies: function() {
+    ElegibleStudies: function () {
       if (this.Children) {
-        var elegibleStudies = this.Children.map(child => {
+        var elegibleStudies = this.Children.map((child) => {
           let studyIds = [];
-          store.state.studies.forEach(study => {
+          store.state.studies.forEach((study) => {
             if (
               child.Age >= study.MinAge * 30.5 - 5 &&
               child.Age <= study.MaxAge * 30.5 - 5
@@ -898,17 +893,17 @@ export default {
       }
     },
 
-    UniquePreviousStudies: function() {
-      return this.Children.map(child => {
+    UniquePreviousStudies: function () {
+      return this.Children.map((child) => {
         let studyIds = [];
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           studyIds.push(appointment.FK_Study);
         });
 
         return studyIds;
       });
     },
-    PotentialStudies: function() {
+    PotentialStudies: function () {
       var PotentialStudies = [];
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
@@ -917,10 +912,10 @@ export default {
         previousStudies = Array.from(new Set(previousStudies));
 
         let potentialStudyIds = elegibleStudy.filter(
-          study => !previousStudies.includes(study)
+          (study) => !previousStudies.includes(study)
         );
 
-        var PotentialStudyList = store.state.studies.filter(study =>
+        var PotentialStudyList = store.state.studies.filter((study) =>
           potentialStudyIds.includes(study.id)
         );
 
@@ -930,7 +925,7 @@ export default {
       return PotentialStudies;
     },
 
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -959,10 +954,10 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function() {
+    earliestDate: function () {
       if (!this.dialogSchedule) {
         if (this.selectedStudy.length > 0) {
-          var minAges = this.selectedStudy.map(study => {
+          var minAges = this.selectedStudy.map((study) => {
             return moment(this.editedItem.DoB).add(
               Math.floor(study.MinAge * 30.5),
               "days"
@@ -985,7 +980,7 @@ export default {
     latestDate() {
       if (!this.dialogSchedule) {
         if (this.selectedStudy.length > 0) {
-          var maxAges = this.selectedStudy.map(study => {
+          var maxAges = this.selectedStudy.map((study) => {
             return moment(this.editedItem.DoB).add(
               Math.floor(study.MaxAge * 30.5),
               "days"
@@ -999,11 +994,9 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment(new Date())
-          .add(60, "days")
-          .toISOString(true);
+        return moment(new Date()).add(60, "days").toISOString(true);
       }
-    }
+    },
   },
   watch: {
     dialogChild(val) {
@@ -1012,8 +1005,8 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
-    }
-  }
+    },
+  },
 };
 </script>
 

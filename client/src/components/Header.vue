@@ -11,14 +11,18 @@
 
       <v-toolbar-items align="end">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon @click.stop="feedbackDialog = true" v-bind="attrs" v-on="on">
-              <v-icon>feedback</v-icon>
-            </v-btn>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn icon @click.stop="feedbackDialog = true">
+                <v-icon>feedback</v-icon>
+              </v-btn>
+            </div>
           </template>
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
-        <h2 class="title-text title ma-3">{{ this.$store.state.user }}</h2>
+        <h2
+          class="title-text title ma-3"
+        >{{ this.$store.state.user + ' ('+ this.$store.state.role + ')'}}</h2>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -99,7 +103,7 @@ import feedback from "@/services/feedback";
 export default {
   name: "Header",
   components: {
-    VueEditor
+    VueEditor,
   },
 
   data() {
@@ -110,7 +114,7 @@ export default {
         Title: "",
         Content: "",
         CurrentPage: "",
-        CreatedBy: ""
+        CreatedBy: "",
       },
       customToolbar: [
         ["bold", "italic", "underline"],
@@ -122,45 +126,45 @@ export default {
         {
           address: "/",
           label: "Home",
-          icon: "home"
+          icon: "home",
         },
         {
           address: "/family",
           label: "Family information",
-          icon: "face"
+          icon: "face",
         },
         {
           address: "/schedule",
           label: "Schedule studies",
-          icon: "phone"
+          icon: "phone",
         },
         {
           address: "/appointment",
           label: "Study appointments",
-          icon: "mdi-format-list-bulleted-square"
+          icon: "mdi-format-list-bulleted-square",
         },
         {
           address: "/study",
           label: "Study management",
-          icon: "description"
+          icon: "description",
         },
         {
           address: "/personnel",
           label: "Personnel management",
-          icon: "perm_identity"
+          icon: "perm_identity",
         },
 
         {
           address: "/settings",
           label: "Settings",
-          icon: "dashboard"
+          icon: "dashboard",
         },
         {
           address: "/login",
           label: "Login",
-          icon: "fingerprint"
-        }
-      ]
+          icon: "fingerprint",
+        },
+      ],
     };
   },
 
@@ -169,9 +173,11 @@ export default {
       this.$store.dispatch("setToken", null);
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setUserID", null);
+      this.$store.dispatch("setLabEmail", null);
+      this.$store.dispatch("setRole", null);
 
       this.$router.push({
-        name: "Login"
+        name: "Login",
       });
     },
 
@@ -219,7 +225,7 @@ export default {
         this.currentFeedback.CurrentPage = "";
         this.currentFeedback.Email = "";
       }, 300);
-    }
+    },
   },
 
   watch: {
@@ -228,8 +234,8 @@ export default {
     },
     feedbackDialog(val) {
       val || this.closeFeedback();
-    }
-  }
+    },
+  },
 };
 </script>
 

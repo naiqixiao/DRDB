@@ -20,15 +20,15 @@
 
         <template #item.Completed="{ item }">
           <v-tooltip top>
-            <template v-slot:activator="{ on, attrs }">
-              <v-simple-checkbox
-                class="checkbox"
-                v-model="item.Completed"
-                @input="changeStudyStatus(item)"
-                dense
-                v-bind="attrs"
-                v-on="on"
-              ></v-simple-checkbox>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-simple-checkbox
+                  class="checkbox"
+                  v-model="item.Completed"
+                  @input="changeStudyStatus(item)"
+                  dense
+                ></v-simple-checkbox>
+              </div>
             </template>
             <span>Mark whether this study is still on going</span>
           </v-tooltip>
@@ -108,42 +108,36 @@
 
         <v-col cols="12" md="2" dense>
           <v-tooltip top>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn fab @click.stop="createStudy" v-bind="attrs" v-on="on">
-                <v-icon class="fabIcon">add</v-icon>
-              </v-btn>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn fab @click.stop="createStudy">
+                  <v-icon class="fabIcon">add</v-icon>
+                </v-btn>
+              </div>
             </template>
             <span>Add a new study</span>
           </v-tooltip>
         </v-col>
         <v-col cols="12" md="2" dense>
           <v-tooltip top>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                fab
-                @click.stop="editStudy"
-                :disabled="!currentStudy.id"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-icon class="fabIcon">edit</v-icon>
-              </v-btn>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn fab @click.stop="editStudy" :disabled="!currentStudy.id">
+                  <v-icon class="fabIcon">edit</v-icon>
+                </v-btn>
+              </div>
             </template>
             <span>Edit study information</span>
           </v-tooltip>
         </v-col>
         <v-col cols="12" md="2" dense>
           <v-tooltip top>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                fab
-                @click.stop="deleteStudy"
-                :disabled="!currentStudy.id"
-                v-bind="attrs"
-                v-on="on"
-              >
-                <v-icon class="fabIcon">delete</v-icon>
-              </v-btn>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn fab @click.stop="deleteStudy" :disabled="!currentStudy.id">
+                  <v-icon class="fabIcon">delete</v-icon>
+                </v-btn>
+              </div>
             </template>
             <span>Delete this study</span>
           </v-tooltip>
@@ -173,7 +167,7 @@
                     :key="field.label"
                   >
                     <div v-if="field.options">
-                      <v-combobox
+                      <v-select
                         justify="start"
                         :items="options[field.options]"
                         v-model="editedStudy[field.field]"
@@ -184,7 +178,8 @@
                         placeholder="  "
                         outlined
                         dense
-                      ></v-combobox>
+                        chip
+                      ></v-select>
                     </div>
                     <div v-else-if="field.rules">
                       <v-text-field
@@ -317,7 +312,7 @@ export default {
   components: {
     DateDisplay,
     Experimenters,
-    VueEditor
+    VueEditor,
   },
   data() {
     return {
@@ -327,19 +322,19 @@ export default {
           sortable: false,
           align: "center",
           value: "StudyName",
-          width: "35%"
+          width: "35%",
         },
         {
           text: "Type",
           align: "center",
           value: "StudyType",
-          width: "23%"
+          width: "23%",
         },
         {
           text: "Updated time",
           align: "center",
           value: "updatedAt",
-          width: "25%"
+          width: "25%",
         },
 
         {
@@ -347,13 +342,13 @@ export default {
           align: "center",
           value: "Completed",
           sortable: false,
-          width: "17%"
-        }
+          width: "17%",
+        },
       ],
       dialog: false,
 
       options: {
-        studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"]
+        studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"],
       },
 
       Studies: [],
@@ -367,7 +362,7 @@ export default {
         Completed: 0,
         StudyType: null,
         PrematureParticipant: 0,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       },
       editedStudy: {
         StudyName: null,
@@ -379,7 +374,7 @@ export default {
         Completed: 0,
         StudyType: null,
         PrematureParticipant: 0,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       },
       defaultStudy: {
         StudyName: null,
@@ -391,22 +386,22 @@ export default {
         Completed: 0,
         StudyType: null,
         PrematureParticipant: 0,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       },
       editedIndex: -1,
       labMembers: [],
       valid: true,
       customToolbar: [
         ["bold", "italic", "underline"],
-        [{ color: [] }, { background: [] }]
-      ]
+        [{ color: [] }, { background: [] }],
+      ],
     };
   },
 
   methods: {
     async searchStudies() {
       var queryString = {
-        FK_Lab: this.$store.state.lab
+        FK_Lab: this.$store.state.lab,
       };
 
       try {
@@ -422,7 +417,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -431,7 +426,7 @@ export default {
     async searchLabMembers() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
-        Active: 1
+        Active: 1,
       };
 
       try {
@@ -440,14 +435,14 @@ export default {
         this.labMembers = Result.data;
 
         //  exclude PIs
-        this.labMembers = this.labMembers.filter(member => {
+        this.labMembers = this.labMembers.filter((member) => {
           return member.Role !== "PI";
         });
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -462,7 +457,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -508,7 +503,7 @@ export default {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
             this.$router.push({
-              name: "Login"
+              name: "Login",
             });
           }
         }
@@ -528,7 +523,7 @@ export default {
 
     async deleteStudy() {
       var studyInfo = {
-        id: this.currentStudy.id
+        id: this.currentStudy.id,
       };
 
       try {
@@ -557,7 +552,7 @@ export default {
         formated = Y + M;
       }
       return formated;
-    }
+    },
   },
 
   computed: {
@@ -568,13 +563,13 @@ export default {
         .join("");
 
       return htmlText;
-    }
+    },
   },
 
-  mounted: function() {
+  mounted: function () {
     this.searchStudies();
     this.searchLabMembers();
-  }
+  },
 };
 </script>
 

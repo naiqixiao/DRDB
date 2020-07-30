@@ -27,18 +27,18 @@
     <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
         <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              color="primary"
-              fab
-              large
-              @click.stop="updateExperimenters"
-              :disabled="!studyId"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon>edit</v-icon>
-            </v-btn>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                fab
+                large
+                @click.stop="updateExperimenters"
+                :disabled="!studyId"
+              >
+                <v-icon>edit</v-icon>
+              </v-btn>
+            </div>
           </template>
           <span>Assign experimenters to this study</span>
         </v-tooltip>
@@ -58,6 +58,7 @@
                 return-object
                 label="Experimenters"
                 multiple
+                chip
               ></v-select>
             </v-col>
           </v-row>
@@ -88,13 +89,13 @@ export default {
   props: {
     Experimenters: Array,
     labMembers: Array,
-    studyId: Number
+    studyId: Number,
   },
 
   data() {
     return {
       dialogExperimenter: false,
-      editedExperimenter: []
+      editedExperimenter: [],
     };
   },
   methods: {
@@ -104,10 +105,10 @@ export default {
     },
 
     async save() {
-      var newExperimenters = this.editedExperimenter.map(experimenter => {
+      var newExperimenters = this.editedExperimenter.map((experimenter) => {
         return {
           FK_Study: this.studyId,
-          FK_Experimenter: experimenter.id
+          FK_Experimenter: experimenter.id,
         };
       });
 
@@ -121,14 +122,14 @@ export default {
       } catch (error) {
         console.error(error.response);
       }
-    }
+    },
   },
   computed: {},
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 

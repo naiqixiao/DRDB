@@ -135,20 +135,20 @@
 
             <v-col cols="12" md="1">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    fab
-                    @click.stop="
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      fab
+                      @click.stop="
                   contactType = 'NextContact';
                   nextContactDate = TodaysDate;
                   nextContactDialog = !nextContactDialog;
                 "
-                    :disabled="!currentFamily.id && !nextContactDialog"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>notes</v-icon>
-                  </v-btn>
+                      :disabled="!currentFamily.id && !nextContactDialog"
+                    >
+                      <v-icon>notes</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
                 <span>Note down info for next contact</span>
               </v-tooltip>
@@ -156,16 +156,12 @@
 
             <v-col cols="12" md="1">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    fab
-                    @click.stop="editFamily"
-                    :disabled="!currentFamily.id"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>edit</v-icon>
-                  </v-btn>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn fab @click.stop="editFamily" :disabled="!currentFamily.id">
+                      <v-icon>edit</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
                 <span>Edit family information</span>
               </v-tooltip>
@@ -173,20 +169,20 @@
 
             <v-col cols="12" md="1">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    fab
-                    @click.stop="
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      fab
+                      @click.stop="
                   contactType = 'NoMoreContact';
                   nextContactDate = TodaysDate;
                   nextContactDialog = !nextContactDialog;
                 "
-                    :disabled="!currentFamily.id && !nextContactDialog"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon color="warning">cancel</v-icon>
-                  </v-btn>
+                      :disabled="!currentFamily.id && !nextContactDialog"
+                    >
+                      <v-icon color="warning">cancel</v-icon>
+                    </v-btn>
+                  </div>
                 </template>
                 <span>Delete family information</span>
               </v-tooltip>
@@ -227,14 +223,15 @@
                 :key="field.label"
               >
                 <div v-if="field.options">
-                  <v-combobox
+                  <v-select
                     justify="start"
                     :items="options[field.options]"
                     v-model="editedItem[field.field]"
                     outlined
                     :label="field.label"
                     dense
-                  ></v-combobox>
+                    chip
+                  ></v-select>
                 </div>
                 <div v-else-if="field.rules">
                   <v-text-field
@@ -268,14 +265,15 @@
                 :key="field.label"
               >
                 <div v-if="field.options">
-                  <v-combobox
+                  <v-select
                     justify="start"
                     :items="options[field.options]"
                     v-model="editedItem[field.field]"
                     outlined
                     :label="field.label"
                     dense
-                  ></v-combobox>
+                    chip
+                  ></v-select>
                 </div>
                 <div v-else-if="field.rules">
                   <v-text-field
@@ -413,7 +411,7 @@ export default {
     Conversation,
     Page,
     NextContact,
-    ParticipationHistory
+    ParticipationHistory,
   },
   data() {
     return {
@@ -440,7 +438,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null
+        RecruitmentMethod: null,
       },
       familyTemplate: {
         id: null,
@@ -455,7 +453,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null
+        RecruitmentMethod: null,
       },
       currentFamily: {
         id: null,
@@ -470,7 +468,7 @@ export default {
         RaceMom: null,
         RaceDad: null,
         Vehicle: null,
-        RecruitmentMethod: null
+        RecruitmentMethod: null,
       },
       Families: [],
       editableFields: [],
@@ -481,49 +479,49 @@ export default {
           "Hospital",
           "Events",
           "SocialMedia",
-          "PreviousParticipation"
-        ]
+          "PreviousParticipation",
+        ],
       },
 
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         email: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         phone: [
-          value => {
+          (value) => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          value => !!value || "Required.",
-          value => (value && value.length == 10) || "Have to be 10 digits"
+          (value) => !!value || "Required.",
+          (value) => (value && value.length == 10) || "Have to be 10 digits",
         ],
         dob: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          }
+          },
         ],
         birthWeight: [
-          value => {
+          (value) => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          }
-        ]
-      }
+          },
+        ],
+      },
     };
   },
 
@@ -544,7 +542,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -579,7 +577,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -692,18 +690,16 @@ export default {
         }
         return null;
       }
-    }
+    },
   },
   watch: {},
   computed: {
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
-    }
+      return moment().startOf("day").format("YYYY-MM-DD");
+    },
   },
 
-  updated() {}
+  updated() {},
 };
 </script>
 

@@ -43,6 +43,7 @@
                   placeholder="  "
                   outlined
                   dense
+                  chip
                 ></v-select>
               </v-col>
             </v-row>
@@ -66,18 +67,12 @@
     <v-row align="center" justify="end">
       <v-col cols="12" md="2" dense>
         <v-tooltip top>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              color="primary"
-              fab
-              large
-              @click.stop="updateStudies"
-              :disabled="!personnelId"
-              v-bind="attrs"
-              v-on="on"
-            >
-              <v-icon>edit</v-icon>
-            </v-btn>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn color="primary" fab large @click.stop="updateStudies" :disabled="!personnelId">
+                <v-icon>edit</v-icon>
+              </v-btn>
+            </div>
           </template>
           <span>Assign studies to this person</span>
         </v-tooltip>
@@ -95,13 +90,13 @@ export default {
     Studies: Array,
     labStudies: Array,
     personnelId: Number,
-    personnelName: String
+    personnelName: String,
   },
 
   data() {
     return {
       dialogStudy: false,
-      editedStudies: []
+      editedStudies: [],
     };
   },
   methods: {
@@ -111,10 +106,10 @@ export default {
     },
 
     async save() {
-      var newStudies = this.editedStudies.map(study => {
+      var newStudies = this.editedStudies.map((study) => {
         return {
           FK_Experimenter: this.personnelId,
-          FK_Study: study.id
+          FK_Study: study.id,
         };
       });
 
@@ -145,14 +140,14 @@ export default {
         formated = Y + M;
       }
       return formated;
-    }
+    },
   },
   computed: {},
   watch: {
     dialogStudy(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 

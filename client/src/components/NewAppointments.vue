@@ -14,6 +14,7 @@
         return-object
         label="Studies"
         dense
+        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="3">
@@ -26,6 +27,7 @@
         label="Experimenters"
         multiple
         dense
+        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="2">

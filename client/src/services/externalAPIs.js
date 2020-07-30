@@ -14,4 +14,10 @@ export default {
 
     return api().post("extAPIs/", code);
   },
+
+  googleGetEmailAddress() {
+    const lab = { lab: store.state.lab };
+    
+    return api().post("extAPIs/email", lab);
+  },
 };

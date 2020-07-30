@@ -32,93 +32,93 @@
 
     <template #item.actions="{ item }">
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Confirmed')"
-            :disabled="item.Status === 'Confirmed' || item.Completed == true"
-            v-bind="attrs"
-            v-on="on"
-          >event</v-icon>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Confirmed')"
+              :disabled="item.Status === 'Confirmed' || item.Completed == true"
+            >event</v-icon>
+          </div>
         </template>
         <span>Pick study date and time</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Rescheduling')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Rescheduling')"
+              :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >update</v-icon>
+            >update</v-icon>
+          </div>
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'No Show')"
-            :disabled="
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'No Show')"
+              :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-            v-bind="attrs"
-            v-on="on"
-          >sentiment_dissatisfied</v-icon>
+            >sentiment_dissatisfied</v-icon>
+          </div>
         </template>
         <span>No show</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            @click.stop="updateSchedule(item, 'Cancelled')"
-            :disabled="item.Status === 'Cancelled' || item.Completed == true"
-            v-bind="attrs"
-            v-on="on"
-          >not_interested</v-icon>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              @click.stop="updateSchedule(item, 'Cancelled')"
+              :disabled="item.Status === 'Cancelled' || item.Completed == true"
+            >not_interested</v-icon>
+          </div>
         </template>
         <span>Cancel this appointment</span>
       </v-tooltip>
     </template>
 
     <template #item.Reminded="{ item }">
-      <v-tooltip top :disabled="remindIconEnable(item)">
-        <template v-slot:activator="{ on, attrs }">
-          <v-simple-checkbox
-            v-model="item.Reminded"
-            class="mr-0 pa-0"
-            @input="updateSchedule(item, 'Reminded')"
-            dense
-            :disabled="remindIconEnable(item)"
-            v-bind="attrs"
-            v-on="on"
-          ></v-simple-checkbox>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-simple-checkbox
+              v-model="item.Reminded"
+              class="mr-0 pa-0"
+              @input="updateSchedule(item, 'Reminded')"
+              dense
+              :disabled="remindIconEnable(item)"
+            ></v-simple-checkbox>
+          </div>
         </template>
         <span>Confirm reminder is sent</span>
       </v-tooltip>
     </template>
 
     <template #item.Completed="{ item }">
-      <v-tooltip top :disabled="completeIconEnable(item)">
-        <template v-slot:activator="{ on, attrs }">
-          <v-simple-checkbox
-            v-model="item.Completed"
-            class="mr-0 pa-0"
-            @input="updateSchedule(item, 'Completed')"
-            dense
-            :disabled="completeIconEnable(item)"
-            v-bind="attrs"
-            v-on="on"
-          ></v-simple-checkbox>
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-simple-checkbox
+              v-model="item.Completed"
+              class="mr-0 pa-0"
+              @input="updateSchedule(item, 'Completed')"
+              dense
+              :disabled="completeIconEnable(item)"
+            ></v-simple-checkbox>
+          </div>
         </template>
         <span>Confirm reminder is sent</span>
       </v-tooltip>
@@ -294,11 +294,11 @@ export default {
     StudyNameSchedule,
     MiniAppointmentTable,
     Email,
-    NextContact
+    NextContact,
   },
   props: {
     Schedules: Array,
-    studyTimeSlots: Array
+    studyTimeSlots: Array,
   },
   data() {
     return {
@@ -312,9 +312,9 @@ export default {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
             Family: { NameMom: "" },
-            Child: { Name: "" }
-          }
-        ]
+            Child: { Name: "" },
+          },
+        ],
       },
       earliestDate: new Date(),
       latestDate: new Date(),
@@ -334,10 +334,10 @@ export default {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
             Family: { NameMom: "" },
-            Child: { Name: "" }
-          }
-        ]
-      }
+            Child: { Name: "" },
+          },
+        ],
+      },
     };
   },
   methods: {
@@ -380,7 +380,7 @@ export default {
           }
 
           // name by combining all study names within a schedule
-          var studyNames = item.Appointments.map(appointment => {
+          var studyNames = item.Appointments.map((appointment) => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -439,15 +439,17 @@ export default {
             this.studyDateTime
           ).toISOString(true);
 
-          var studyNames = this.editedSchedule.Appointments.map(appointment => {
-            return (
-              appointment.Study.StudyName +
-              " (" +
-              appointment.FK_Family +
-              appointment.Child.IdWithinFamily +
-              ")"
-            );
-          });
+          var studyNames = this.editedSchedule.Appointments.map(
+            (appointment) => {
+              return (
+                appointment.Study.StudyName +
+                " (" +
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
+              );
+            }
+          );
 
           studyNames = Array.from(new Set(studyNames));
 
@@ -455,13 +457,13 @@ export default {
 
           this.editedSchedule.start = {
             dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
           this.editedSchedule.end = {
             dateTime: moment(this.studyDateTime)
               .add(1, "h") // might change if multiple studies are scheduled for one visit
               .toISOString(true),
-            timeZone: "America/Toronto"
+            timeZone: "America/Toronto",
           };
 
           const calendarEvent = await schedule.update(this.editedSchedule);
@@ -559,7 +561,7 @@ export default {
 
     datePickerRange() {
       if (this.editedSchedule.Appointments) {
-        var minAges = this.editedSchedule.Appointments.map(appointment => {
+        var minAges = this.editedSchedule.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MinAge * 30.5),
             "days"
@@ -572,7 +574,7 @@ export default {
 
         this.earliestDate = MinAge.toISOString(true);
 
-        var maxAges = this.editedSchedule.Appointments.map(appointment => {
+        var maxAges = this.editedSchedule.Appointments.map((appointment) => {
           return moment(appointment.Child.DoB).add(
             Math.floor(appointment.Study.MaxAge * 30.5),
             "days"
@@ -597,13 +599,9 @@ export default {
         case "Confirmed":
           if (
             moment(item.AppointmentTime).startOf("day") >=
-              moment()
-                .startOf("day")
-                .subtract(daysAheadofSchedule, "d") &&
+              moment().startOf("day").subtract(daysAheadofSchedule, "d") &&
             moment(item.AppointmentTime).startOf("day") <
-              moment()
-                .startOf("day")
-                .add(1, "d")
+              moment().startOf("day").add(1, "d")
           ) {
             iconDisable = false;
           }
@@ -631,11 +629,11 @@ export default {
       }
 
       return iconDisable;
-    }
+    },
   },
 
   computed: {
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -664,16 +662,14 @@ export default {
       return studyDateTime;
     },
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
-    }
+      return moment().startOf("day").format("YYYY-MM-DD");
+    },
   },
   watch: {
     dialog(val) {
       val || this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -703,6 +699,5 @@ export default {
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
-
 }
 </style>

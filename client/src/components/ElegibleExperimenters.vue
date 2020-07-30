@@ -7,6 +7,7 @@
     return-object
     label="Experimenters"
     multiple
+    chip
   ></v-select>
 </template>
 

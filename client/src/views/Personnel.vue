@@ -20,15 +20,15 @@
 
           <template #item.Active="{ item }">
             <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-simple-checkbox
-                  class="mr-0 pa-0"
-                  v-model="item.Active"
-                  @input="changePersonnelStatus(item)"
-                  dense
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-simple-checkbox>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-simple-checkbox
+                    class="mr-0 pa-0"
+                    v-model="item.Active"
+                    @input="changePersonnelStatus(item)"
+                    dense
+                  ></v-simple-checkbox>
+                </div>
               </template>
               <span>Mark whether this person is available to run studies</span>
             </v-tooltip>
@@ -62,42 +62,40 @@
                 <v-row justify="space-around">
                   <v-col cols="12" md="2" dense>
                     <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn fab @click.stop="createPersonnel" v-bind="attrs" v-on="on">
-                          <v-icon class="fabIcon">add</v-icon>
-                        </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-btn fab @click.stop="createPersonnel">
+                            <v-icon class="fabIcon">add</v-icon>
+                          </v-btn>
+                        </div>
                       </template>
                       <span>Add a new person to the lab</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="12" md="2" dense>
                     <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          fab
-                          @click.stop="editPersonnel"
-                          :disabled="!currentPersonnel.id"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon class="fabIcon">edit</v-icon>
-                        </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-btn fab @click.stop="editPersonnel" :disabled="!currentPersonnel.id">
+                            <v-icon class="fabIcon">edit</v-icon>
+                          </v-btn>
+                        </div>
                       </template>
                       <span>Edit personnel information</span>
                     </v-tooltip>
                   </v-col>
                   <v-col cols="12" md="2" dense>
                     <v-tooltip top>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          fab
-                          @click.stop="deletePersonnel"
-                          :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <v-icon class="fabIcon">delete</v-icon>
-                        </v-btn>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-btn
+                            fab
+                            @click.stop="deletePersonnel"
+                            :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
+                          >
+                            <v-icon class="fabIcon">delete</v-icon>
+                          </v-btn>
+                        </div>
                       </template>
                       <span>Remove this person from the lab</span>
                     </v-tooltip>
@@ -139,9 +137,9 @@
                         :key="field.label"
                       >
                         <div v-if="field.options">
-                          <v-combobox
+                          <v-select
                             justify="start"
-                            :items="options[field.options]"
+                            :items="$store.state.role == 'PI' || $store.state.role == 'Lab manager' ? options.fullRoles : options.limitedRoles"
                             v-model="editedPersonnel[field.field]"
                             :label="field.label"
                             hide-details
@@ -149,7 +147,8 @@
                             placeholder="  "
                             outlined
                             dense
-                          ></v-combobox>
+                            chip
+                          ></v-select>
                         </div>
                         <div v-else-if="field.rules">
                           <v-text-field
@@ -215,7 +214,7 @@ import store from "@/store";
 export default {
   components: {
     DateDisplay,
-    AssignedStudies
+    AssignedStudies,
   },
   data() {
     return {
@@ -224,21 +223,21 @@ export default {
           text: "Name",
           align: "center",
           value: "Name",
-          width: "27%"
+          width: "27%",
         },
         {
           text: "Email",
           align: "center",
           sortable: false,
           value: "Email",
-          width: "35%"
+          width: "35%",
         },
         {
           text: "Role",
           align: "center",
           sortable: false,
           value: "Role",
-          width: "20%"
+          width: "20%",
         },
 
         {
@@ -246,8 +245,8 @@ export default {
           sortable: false,
           align: "center",
           value: "Active",
-          width: "18%"
-        }
+          width: "18%",
+        },
       ],
       dialog: false,
       personnelFields: [
@@ -257,20 +256,21 @@ export default {
         {
           label: "Role",
           field: "Role",
-          options: "role"
+          options: "role",
         },
-        { label: "Calendar ID", field: "Calendar" }
+        { label: "Calendar ID", field: "Calendar" },
       ],
       options: {
-        role: [
+        fullRoles: [
           "PostDoc",
           "PI",
           "GradStudent",
           "Undergrad",
           "RA",
           "Lab manager",
-          "Staff"
-        ]
+          "Staff",
+        ],
+        limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"],
       },
 
       Personnels: [],
@@ -283,18 +283,18 @@ export default {
         Email: null,
         Calendar: null,
         Role: null,
-        Active: 1
+        Active: 1,
       },
       editedIndex: -1,
       labStudies: [],
-      valid: true
+      valid: true,
     };
   },
 
   methods: {
     async searchPersonnel() {
       var queryString = {
-        FK_Lab: store.state.lab
+        FK_Lab: store.state.lab,
       };
 
       try {
@@ -310,7 +310,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -319,7 +319,7 @@ export default {
     async searchLabStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0
+        Completed: 0,
       };
 
       try {
@@ -330,7 +330,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -345,7 +345,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -390,7 +390,7 @@ export default {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
             this.$router.push({
-              name: "Login"
+              name: "Login",
             });
           }
         }
@@ -410,7 +410,7 @@ export default {
 
     async deletePersonnel() {
       var personnelInfo = {
-        id: this.currentPersonnel.id
+        id: this.currentPersonnel.id,
       };
 
       try {
@@ -426,12 +426,12 @@ export default {
 
     updatedStudies(updatedStudies) {
       this.currentPersonnel.Studies = updatedStudies;
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this.searchPersonnel();
     this.searchLabStudies();
-  }
+  },
 };
 </script>
 

@@ -28,6 +28,7 @@
           hide-details
           outlined
           dense
+          chip
         ></v-select>
       </v-col>
       <v-col cols="12" md="2">

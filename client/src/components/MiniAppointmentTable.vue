@@ -151,6 +151,7 @@
                 label="Experimenters"
                 multiple
                 dense
+                chip
               ></v-select>
             </v-col>
           </v-row>

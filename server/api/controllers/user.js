@@ -176,7 +176,9 @@ exports.login = asyncHandler(async (req, res) => {
     temporaryPassword: personnel.temporaryPassword,
     user: personnel.Email,
     userID: personnel.id,
+    role: personnel.Role,
     lab: personnel.FK_Lab,
+    labEmail: personnel.Lab.Email,
     token: token,
     studies: personnel.Lab.Studies,
   });

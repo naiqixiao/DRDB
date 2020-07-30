@@ -14,6 +14,8 @@ export default new Vuex.Store({
     lab: null,
     studies: null,
     isUserLoggedIn: false,
+    role: null,
+    labEmail: null,
   },
   mutations: {
     setToken(state, token) {
@@ -32,6 +34,12 @@ export default new Vuex.Store({
     setStudies(state, studies) {
       state.studies = studies;
     },
+    setLabEmail(state, labEmail) {
+      state.labEmail = labEmail;
+    },
+    setRole(state, role) {
+      state.role = role;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -48,6 +56,12 @@ export default new Vuex.Store({
     },
     setStudies({ commit }, studies) {
       commit("setStudies", studies);
+    },
+    setLabEmail({ commit }, labEmail) {
+      commit("setLabEmail", labEmail);
+    },
+    setRole({ commit }, role) {
+      commit("setRole", role);
     },
   },
 });

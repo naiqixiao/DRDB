@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
+const model = require("../models/DRDB");
 
 const { google } = require("googleapis");
 const { OAuth2 } = google.auth;
@@ -60,13 +61,48 @@ exports.googleToken = asyncHandler(async (req, res) => {
     ).installed;
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
-    const token = await oAuth2Client.getToken(code);
+    var token = await oAuth2Client.getToken(code);
 
     oAuth2Client.setCredentials(token.tokens);
 
+    const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+    const profile = await gmail.users.getProfile({ userId: "me" });
+    
+    // update lab email info.
+    await model.lab.update(
+      { Email: profile.data.emailAddress },
+      {
+        where: { id: req.body.lab },
+      }
+    );
+    
     await fs.promises.writeFile(tokenPath, JSON.stringify(token.tokens));
 
-    res.status(200).send({ message: "Google account is successfully set up!" });
+    res.status(200).send({
+      message: "Google account is successfully set up!",
+      Email: profile.data.emailAddress,
+    });
+  } catch (error) {
+    return res.send(error);
+  }
+});
+
+exports.googleEmail = asyncHandler(async (req, res) => {
+  try {
+    const gmail = google.gmail({ version: "v1", auth: req.oAuth2Client });
+
+    const profile = await gmail.users.getProfile({ userId: "me" });
+
+    // update lab email info.
+    await model.lab.update(
+      { Email: profile.data.emailAddress },
+      {
+        where: { id: req.body.lab },
+      }
+    );
+
+    res.status(200).send(profile);
   } catch (error) {
     return res.send(error);
   }

@@ -148,17 +148,12 @@
           </v-col>
           <v-col cols="12" md="2" style="text-align: center;">
             <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="primary"
-                  fab
-                  @click.stop="editFamily"
-                  :disabled="!currentFamily.id"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>edit</v-icon>
-                </v-btn>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn color="primary" fab @click.stop="editFamily" :disabled="!currentFamily.id">
+                    <v-icon>edit</v-icon>
+                  </v-btn>
+                </div>
               </template>
               <span>Edit family information</span>
             </v-tooltip>
@@ -190,14 +185,15 @@
                   :key="field.label"
                 >
                   <div v-if="field.options">
-                    <v-combobox
+                    <v-select
                       justify="start"
                       :items="options[field.options]"
                       v-model="editedFamily[field.field]"
                       outlined
                       :label="field.label"
                       dense
-                    ></v-combobox>
+                      chip
+                    ></v-select>
                   </div>
                   <div v-else-if="field.rules">
                     <v-text-field
@@ -231,14 +227,15 @@
                   :key="field.label"
                 >
                   <div v-if="field.options">
-                    <v-combobox
+                    <v-select
                       justify="start"
                       :items="options[field.options]"
                       v-model="editedFamily[field.field]"
                       outlined
                       :label="field.label"
                       dense
-                    ></v-combobox>
+                      chip
+                    ></v-select>
                   </div>
                   <div v-else-if="field.rules">
                     <v-text-field
@@ -319,17 +316,12 @@
           </v-col>
           <v-col cols="12" md="2" style="text-align: center;">
             <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="primary"
-                  fab
-                  @click.stop="editChild"
-                  :disabled="!currentChild.id"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>edit</v-icon>
-                </v-btn>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn color="primary" fab @click.stop="editChild" :disabled="!currentChild.id">
+                    <v-icon>edit</v-icon>
+                  </v-btn>
+                </div>
               </template>
               <span>Edit child information</span>
             </v-tooltip>
@@ -357,17 +349,17 @@
 
           <v-col cols="12" md="3">
             <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  color="primary"
-                  fab
-                  @click.stop="scheduleChild"
-                  :disabled="response == null"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>{{ scheduleButtonIcon }}</v-icon>
-                </v-btn>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn
+                    color="primary"
+                    fab
+                    @click.stop="scheduleChild"
+                    :disabled="response == null"
+                  >
+                    <v-icon>{{ scheduleButtonIcon }}</v-icon>
+                  </v-btn>
+                </div>
               </template>
               <span>{{ scheduleButtonTooltip }}</span>
             </v-tooltip>
@@ -421,6 +413,7 @@
                         hide-details
                         dense
                         label="Sex"
+                        chip
                       ></v-select>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
@@ -709,7 +702,7 @@ export default {
     NextContact,
     Page,
     AppointmentTableBrief,
-    ParticipationHistory
+    ParticipationHistory,
   },
   props: {},
   data() {
@@ -747,8 +740,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedChild: {
         Name: null,
@@ -758,8 +751,8 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedFamily: {},
       defaultItem: {
@@ -770,20 +763,20 @@ export default {
           NameMom: null,
           NameDad: null,
           Phone: null,
-          Email: null
-        }
+          Email: null,
+        },
       },
       editedIndex: null,
       childField: [
         { label: "Name", field: "Name" },
         { label: "Sex", field: "Sex" },
-        { label: "DoB", field: "DoB" }
+        { label: "DoB", field: "DoB" },
       ],
       familyField: [
         // { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" }
+        { label: "Father's Name", field: "NameDad", rules: "name" },
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -797,49 +790,49 @@ export default {
           "Hospital",
           "Events",
           "SocialMedia",
-          "PreviousParticipation"
-        ]
+          "PreviousParticipation",
+        ],
       },
 
       rules: {
         name: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
             return pattern.test(value) || "Invalid Name.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         email: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             return pattern.test(value) || "Invalid e-mail.";
           },
-          value => (value && value.length <= 30) || "Max 30 characters"
+          (value) => (value && value.length <= 30) || "Max 30 characters",
         ],
         phone: [
-          value => {
+          (value) => {
             const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
             return pattern.test(value) || "Invalid phone.";
           },
-          value => !!value || "Required.",
-          value => (value && value.length == 10) || "Have to be 10 digits"
+          (value) => !!value || "Required.",
+          (value) => (value && value.length == 10) || "Have to be 10 digits",
         ],
         dob: [
-          value => !!value || "Required.",
-          value => {
+          (value) => !!value || "Required.",
+          (value) => {
             var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
             return pattern.test(value) || "Invalid Date of Birth.";
-          }
+          },
         ],
         birthWeight: [
-          value => {
+          (value) => {
             var pattern = /^[0-9]{1,2}[:.,-]?$/;
             return pattern.test(value) || "Invalid Birth Weight.";
-          }
-        ]
-      }
+          },
+        ],
+      },
     };
   },
 
@@ -847,7 +840,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
-        Completed: 0
+        Completed: 0,
       };
 
       try {
@@ -858,7 +851,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
@@ -866,12 +859,12 @@ export default {
 
     async searchChild() {
       var studyQuery = {
-        id: this.selectedStudy.id
+        id: this.selectedStudy.id,
       };
       try {
         const studyInfo = await study.search(studyQuery);
         var pastParticipants = studyInfo.data[0].Appointments.map(
-          appointment => {
+          (appointment) => {
             return appointment.FK_Child;
           }
         );
@@ -901,7 +894,7 @@ export default {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         } else {
           console.log(error.response);
@@ -998,7 +991,7 @@ export default {
         newAppointment.Study = {
           StudyName: this.selectedStudy.StudyName,
           MinAge: this.selectedStudy.MinAge,
-          MaxAge: this.selectedStudy.MaxAge
+          MaxAge: this.selectedStudy.MaxAge,
         };
         newAppointment.index = this.appointments.length;
         this.appointments.push(newAppointment);
@@ -1015,7 +1008,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach(study => {
+      store.state.studies.forEach((study) => {
         if (
           child.Age >= study.MinAge * 30.5 - 5 &&
           child.Age <= study.MaxAge * 30.5 - 5
@@ -1027,14 +1020,14 @@ export default {
       var uniquePreviousStudies = [];
 
       if (child.Appointments) {
-        child.Appointments.forEach(appointment => {
+        child.Appointments.forEach((appointment) => {
           uniquePreviousStudies.push(appointment.FK_Study);
         });
         uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
       }
 
       var potentialStudies = ElegibleStudies.filter(
-        study => !uniquePreviousStudies.includes(study)
+        (study) => !uniquePreviousStudies.includes(study)
       );
 
       // check the selected studies.
@@ -1048,16 +1041,16 @@ export default {
       }
 
       var selectableStudies = potentialStudies.filter(
-        study => !currentSelectedStudies.includes(study)
+        (study) => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter(study =>
+      var potentialStudyList = store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
       return {
         potentialStudyList: potentialStudyList,
-        selectableStudies: selectableStudies
+        selectableStudies: selectableStudies,
       };
     },
 
@@ -1085,7 +1078,7 @@ export default {
       if (this.Experimenters.lenth < 1) {
         this.Experimenters = extraAppointments.attendees;
       } else {
-        extraAppointments.attendees.forEach(experimenter => {
+        extraAppointments.attendees.forEach((experimenter) => {
           this.Experimenters.push(experimenter);
         });
       }
@@ -1102,7 +1095,7 @@ export default {
 
       switch (this.response) {
         case "Confirmed":
-          var studyNames = this.appointments.map(appointment => {
+          var studyNames = this.appointments.map((appointment) => {
             return (
               appointment.Study.StudyName +
               " (" +
@@ -1123,15 +1116,15 @@ export default {
             location: "Psychology Building, McMaster University",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
             end: {
               dateTime: moment(this.studyDateTime)
                 .add(1, "h")
                 .toISOString(true),
-              timeZone: "America/Toronto"
+              timeZone: "America/Toronto",
             },
-            attendees: this.Experimenters
+            attendees: this.Experimenters,
           };
 
           break;
@@ -1140,7 +1133,7 @@ export default {
           newSchedule = {
             AppointmentTime: null,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID
+            ScheduledBy: store.state.userID,
           };
 
           if (
@@ -1189,7 +1182,7 @@ export default {
 
       const currentSchedule = currentSchedules.data[0];
 
-      var studyNames = currentSchedule.Appointments.map(appointment => {
+      var studyNames = currentSchedule.Appointments.map((appointment) => {
         return (
           appointment.Study.StudyName +
           " (" +
@@ -1203,11 +1196,11 @@ export default {
 
       const attendees = [];
 
-      currentSchedule.Appointments.forEach(appointment => {
-        appointment.Personnels.forEach(experimenter => {
+      currentSchedule.Appointments.forEach((appointment) => {
+        appointment.Personnels.forEach((experimenter) => {
           attendees.push({
             displayName: experimenter.Name,
-            email: experimenter.Calendar // + ".CAL",
+            email: experimenter.Calendar, // + ".CAL",
           });
         });
       });
@@ -1217,16 +1210,16 @@ export default {
         location: "OISE, University of Toronto",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-          timeZone: "America/Toronto"
+          timeZone: "America/Toronto",
         },
         end: {
           dateTime: moment(currentSchedule.AppointmentTime)
             .add(1, "h")
             .toISOString(true),
-          timeZone: "America/Toronto"
+          timeZone: "America/Toronto",
         },
         attendees: attendees,
-        scheduleId: this.scheduleId
+        scheduleId: this.scheduleId,
       };
 
       try {
@@ -1354,13 +1347,12 @@ export default {
       }
       return formated;
     },
-    
+
     AgeFormated2(Age) {
       var formated = "";
       if (Age) {
-
         var years = Math.floor(Age / 12);
-        var months = (Age % 12);
+        var months = Age % 12;
         // months = months.toFixed(1);
         var Y = years > 0 ? years + " y " : "";
         var M = months + " m";
@@ -1405,7 +1397,7 @@ export default {
 
     nextContact() {
       this.e1 = 3;
-    }
+    },
   },
 
   computed: {
@@ -1417,7 +1409,7 @@ export default {
       }
     },
 
-    studyDateTime: function() {
+    studyDateTime: function () {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -1446,7 +1438,7 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment(new Date())
           .add(1, "days")
@@ -1457,9 +1449,7 @@ export default {
             )
           )
       ) {
-        return moment(new Date())
-          .add(1, "days")
-          .toISOString(true);
+        return moment(new Date()).add(1, "days").toISOString(true);
       } else {
         return moment(this.editedChild.DoB)
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -1467,13 +1457,13 @@ export default {
       }
     },
 
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.editedChild.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
-    }
+    },
   },
-  mounted: function() {
+  mounted: function () {
     this.searchStudies();
   },
 
@@ -1536,8 +1526,8 @@ export default {
           this.studyTime = "";
           break;
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
