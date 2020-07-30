@@ -15,6 +15,26 @@
           dense
         ></v-text-field>
       </v-col>
+    </v-row>
+    <v-row justify="space-between">
+      <v-col cols="12" md="2">
+        <v-select
+          @blur="searchSchedule"
+          v-model="queryString.StudyName"
+          :items="$store.state.studies"
+          :item-value="'id'"
+          :item-text="'StudyName'"
+          label="Study Name"
+          append-icon="mdi-magnify"
+          height="48px"
+          multiple
+          background-color="textbackground"
+          hide-details
+          outlined
+          dense
+          chip
+        ></v-select>
+      </v-col>
       <v-col cols="12" md="2">
         <v-select
           @blur="searchScheduleByStatus"
@@ -165,7 +185,7 @@ export default {
         { label: "Phone", field: "Phone" },
         { label: "Mother's Name", field: "NameMom" },
         { label: "Father's Name", field: "NameDad" },
-        { label: "Study Name", field: "StudyName" },
+        // { label: "Study Name", field: "StudyName"},
       ],
       Status: [
         "Confirmed",
@@ -181,19 +201,22 @@ export default {
 
   methods: {
     async searchSchedule() {
-      try {
-        const Result = await schedule.search(this.queryString);
-        this.Schedules = Result.data;
-      } catch (error) {
-        if (error.response.status === 401) {
-          alert("Authentication failed, please login.");
-          this.$router.push({
-            name: "Login",
-          });
+      console.log(this.queryString);
+      if (this.queryString.StudyName) {
+        try {
+          const Result = await schedule.search(this.queryString);
+          this.Schedules = Result.data;
+        } catch (error) {
+          if (error.response.status === 401) {
+            alert("Authentication failed, please login.");
+            this.$router.push({
+              name: "Login",
+            });
+          }
         }
-      }
 
-      this.queryString = Object.assign({}, this.defaultQueryString);
+        this.queryString = Object.assign({}, this.defaultQueryString);
+      }
     },
 
     async searchScheduleByStatus() {

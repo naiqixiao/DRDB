@@ -136,9 +136,11 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Appointments.FK_Family$"] = req.query.FamilyId;
   }
   if (req.query.StudyName) {
-    queryString["$Appointments.Study.StudyName$"] = {
-      [Op.like]: `${req.query.StudyName}%`,
-    };
+    queryString["$Appointments.FK_Study$"] = req.query.StudyName;
+    
+    // {
+    //   [Op.like]: `${req.query.StudyName}%`,
+    // };
   }
   if (req.query.StudyId) {
     queryString["$Appointments.FK_Study$"] = req.query.StudyId;
