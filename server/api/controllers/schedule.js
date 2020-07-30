@@ -144,6 +144,10 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Appointments.FK_Study$"] = req.query.StudyId;
   }
 
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
+
   const schedule = await model.schedule.findAll({
     where: queryString,
     include: [
@@ -165,6 +169,7 @@ exports.search = asyncHandler(async (req, res) => {
               "MaxAge",
               "EmailTemplate",
               "StudyType",
+              "FK_Lab",
             ],
           },
           {
@@ -201,6 +206,10 @@ exports.today = asyncHandler(async (req, res) => {
       ),
     ],
   };
+
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
 
   const schedule = await model.schedule.findAll({
     where: queryString,
@@ -262,6 +271,10 @@ exports.week = asyncHandler(async (req, res) => {
       ),
     ],
   };
+
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
 
   const schedule = await model.schedule.findAll({
     where: queryString,
@@ -346,7 +359,7 @@ exports.update = asyncHandler(async (req, res) => {
     // case "Rescheduling":
     // case "Cancelled":
     // case "Rejected":
-      default:
+    default:
       // update the calendar event, if an appointment is rescheduled.
 
       if (updatedScheduleInfo.calendarEventId) {
@@ -434,7 +447,6 @@ exports.remind = asyncHandler(async (req, res) => {
     throw error;
   }
 });
-
 
 exports.complete = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;

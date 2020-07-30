@@ -6,15 +6,22 @@ export default {
     return api().post("schedule/add", schedule);
   },
   search(schedule) {
+    schedule.lab = store.state.lab;
     return api().get("schedule/", {
       params: schedule,
     });
   },
   today() {
-    return api().get("schedule/today");
+    const schedule = {lab: store.state.lab};
+    return api().get("schedule/today", {
+      params: schedule,
+    });
   },
   week() {
-    return api().get("schedule/week");
+    const schedule = {lab: store.state.lab};
+    return api().get("schedule/week", {
+      params: schedule,
+    });
   },
   update(schedule) {
     schedule.lab = store.state.lab;

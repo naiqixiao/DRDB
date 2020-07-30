@@ -184,6 +184,8 @@ export default {
       try {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
+
+        console.log(this.Schedules);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");

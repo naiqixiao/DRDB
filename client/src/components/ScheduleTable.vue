@@ -32,59 +32,59 @@
 
     <template #item.actions="{ item }">
       <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-icon
-              @click.stop="updateSchedule(item, 'Confirmed')"
-              :disabled="item.Status === 'Confirmed' || item.Completed == true"
-            >event</v-icon>
-          </div>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Confirmed')"
+            :disabled="item.Status === 'Confirmed' || item.Completed == true"
+            v-bind="attrs"
+            v-on="on"
+          >event</v-icon>
         </template>
         <span>Pick study date and time</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-icon
-              @click.stop="updateSchedule(item, 'Rescheduling')"
-              :disabled="
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Rescheduling')"
+            :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-            >update</v-icon>
-          </div>
+            v-bind="attrs"
+            v-on="on"
+          >update</v-icon>
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-icon
-              @click.stop="updateSchedule(item, 'No Show')"
-              :disabled="
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'No Show')"
+            :disabled="
           item.Status === 'Rescheduling' ||
             item.Status === 'No Show' ||
             item.Status === 'TBD' ||
             item.Completed == true
         "
-            >sentiment_dissatisfied</v-icon>
-          </div>
+            v-bind="attrs"
+            v-on="on"
+          >sentiment_dissatisfied</v-icon>
         </template>
         <span>No show</span>
       </v-tooltip>
 
       <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-icon
-              @click.stop="updateSchedule(item, 'Cancelled')"
-              :disabled="item.Status === 'Cancelled' || item.Completed == true"
-            >not_interested</v-icon>
-          </div>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            @click.stop="updateSchedule(item, 'Cancelled')"
+            :disabled="item.Status === 'Cancelled' || item.Completed == true"
+            v-bind="attrs"
+            v-on="on"
+          >not_interested</v-icon>
         </template>
         <span>Cancel this appointment</span>
       </v-tooltip>
