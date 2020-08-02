@@ -23,7 +23,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
     "nodemon": "^2.0.4",
-    "objection": "^2.2.1",
+    "objection": "^2.2.2",
     "sequelize": "^5.22.3",
     "sequelize-auto": "^0.5.3",
     "socket.io": "^2.3.0"
