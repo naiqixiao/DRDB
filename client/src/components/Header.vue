@@ -9,7 +9,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-toolbar-items align="end">
+      <v-toolbar-items v-if="this.$store.state.user != null" align="end">
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <div v-on="on">
@@ -20,9 +20,7 @@
           </template>
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
-        <h2
-          class="title-text title ma-3"
-        >{{ this.$store.state.user + ' ('+ this.$store.state.role + ')'}}</h2>
+        <h2 class="title-text title ma-3">{{ $store.state.user + ' ('+ $store.state.role + ')' }}</h2>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -186,27 +184,6 @@ export default {
       this.currentFeedback.CurrentPage = this.$route.name;
       this.currentFeedback.Email = this.$store.state.user;
 
-      // // create a new dov container
-      // var div = document.createElement("div");
-
-      // // assing your HTML to div's innerHTML
-      // div.innerHTML = this.currentFeedback.Content;
-
-      // // get all <a> elements from div
-      // var elements = div.getElementsByTagName("img");
-
-      // // remove all <a> elements
-      // while (elements[0]) elements[0].parentNode.removeChild(elements[0]);
-
-      // // get div's innerHTML into a new variable
-      // var repl = div.innerHTML;
-
-      // // display it
-      // console.log(repl);
-
-      // this.currentFeedback.Content = repl;
-
-      // console.log(this.currentFeedback);
       try {
         await feedback.create(this.currentFeedback);
 
