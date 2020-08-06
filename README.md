@@ -21,7 +21,7 @@ sudo apt install git
 sudo apt install nginx
 ```
 
-### Download the latest version
+### Download the latest version of the system
 
 ```
 cd ~
@@ -89,7 +89,7 @@ npm install
 - update Line 4 with the MySQL username and password that you created in the previous step.
 - for example, the following line indicates username of 'admin' and password of 'password'
 
-### Run backend server with pm2
+#### Run backend server with pm2
 ```
 cd ~/DRDB/server
 pm2 start server.js 
@@ -106,10 +106,10 @@ deploy frontend server
 cd ~/DRDB/client
 npm run build
 ```
-### Configurate nginx
+#### Configurate nginx
 Instructions: https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
 
-### Run frontend server with nginx
+#### Run frontend server with nginx
 copy the ready-to-be-deployed frontend codes to ngnix folder
 ```
 cd ~/DRDB/client
