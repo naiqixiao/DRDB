@@ -27,7 +27,7 @@ sudo apt install nginx
 cd ~
 git clone https://github.com/naiqixiao/DRDB
 ```
-All frontend and backend codes should be downloaded in "~/DRDB" folder.
+All frontend and backend codes should be downloaded to "~/DRDB" folder.
 
 ### MySQL database setup
 * Create a *user* and *password*
