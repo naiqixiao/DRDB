@@ -24,9 +24,9 @@
     "mysql2": "^2.1.0",
     "nodemon": "^2.0.4",
     "objection": "^2.2.2",
+    "pm2": "^4.4.0",
     "sequelize": "^5.22.3",
-    "sequelize-auto": "^0.5.3",
-    "socket.io": "^2.3.0"
+    "sequelize-auto": "^0.5.3"
   },
   "devDependencies": {
     "prettier": "^1.19.1"
