@@ -155,9 +155,15 @@ cd ~/DRDB/client
 npm run build
 ```
 
-#### Configurate nginx
+#### Configure nginx
 
 Instructions: https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
+
+##### You might need to run the following script to enable firewall
+
+```
+sudo ufw enable
+```
 
 #### Run frontend server with nginx
 
@@ -165,15 +171,19 @@ Instructions: https://www.digitalocean.com/community/tutorials/how-to-install-ng
 
 ```
 cd ~/DRDB/client
-sudo cp -r dist /var/www/html/DRDB/
+sudo cp -r -T dist /var/www/html/DRDB
 ```
 
-- Configurate and restart ngnix
+- Configure ngnix
 
 ```
+# Use the following script to configure ngnix services
+
 sudo nano /etc/nginx/sites-available/default
 
-root /var/www/html/dist;
+# Change 'root /var/www/html;' to 'root /var/www/html/DRDB;'
+
+# Change ' location / {} ' to 
 
 location /api/ {
     proxy_pass http://localhost:3000;
@@ -183,11 +193,14 @@ location /api/ {
     proxy_set_header Host $host;
     proxy_cache_bypass $http_upgrade;
 }
+```
 
+- Restart ngnix service
+```
 sudo systemctl restart nginx
 ```
 
-You should be able to access the system with the ip address of your server.
+You should be able to access the system with the ip address of your server by now.
 
 ## How to upgrade the system
 
