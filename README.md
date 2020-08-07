@@ -32,7 +32,9 @@ All frontend and backend codes should be downloaded to "~/DRDB" folder.
 ### MySQL database setup
 * Create a *user* and *password*
 ```
-# in Terminal, enter mysql shell with root 
+# in Terminal, enter mysql shell with root
+# if you haven't set password for root, press 'Enter' key when the password prompt shows up.
+
 mysql -u root -p 
 ```
 ```
@@ -48,7 +50,25 @@ mysql>  GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';
 # reload all the privileges
 mysql>  FLUSH PRIVILEGES;
 ```
+* Create a database under the user that you just created.
+```
+# in Terminal, log in to the MySQL Server using the user just created.
+mysql -u newuser -p
+```
+```
+# in MySQL shell, enter the following script to create a database named DRDB.
+
+mysql>  CREATE DATABASE IF NOT EXISTS DRDB;
+```
+
+```
+# quit MySQL shell.
+
+mysql>  EXIT
+```
+
 * Import sample database
+
 ```
 # in Terminal, import the sample database with the user just created.
 # the sample sql database is in /DRDB/MySQL/Backup.sql
@@ -80,10 +100,10 @@ UPDATE DRDB.Child
 ```
 
 ### Backend setup and configuration
-install all required modules
+* Install all required modules
 ```
 cd ~/DRDB/server
-npm install
+sudo npm install
 ```
 - open '~/DRDB/server/api/models/DRDB.js'
 - update Line 4 with the MySQL username and password that you created in the previous step.
@@ -92,6 +112,9 @@ npm install
 #### Run backend server with pm2
 ```
 cd ~/DRDB/server
+
+sudo npm install --save pm2 -g
+
 pm2 start server.js 
 ```
 
@@ -99,7 +122,7 @@ pm2 start server.js
 install all required modules
 ```
 cd ~/DRDB/client
-npm install
+sudo npm install
 ```
 deploy frontend server
 ```
@@ -117,6 +140,8 @@ sudo cp -r dist /var/www/html/DRDB/
 ```
 restart ngnix
 ```
+sudo nano /etc/nginx/sites-available/default
+
 sudo systemctl restart nginx
 ```
 You should be able to access the system with the ip address of your server.
