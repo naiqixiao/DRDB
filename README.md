@@ -55,11 +55,13 @@ mysql>  CREATE USER 'newuser'@'localhost' IDENTIFIED BY 'password';
 
 # provide the user with access to the information they will need.
 # replacing the following newuser with the username that you just created.
+
 mysql>  GRANT ALL PRIVILEGES ON * . * TO 'newuser'@'localhost';
 ```
 
 ```
 # reload all the privileges
+
 mysql>  FLUSH PRIVILEGES;
 ```
 
@@ -67,6 +69,7 @@ mysql>  FLUSH PRIVILEGES;
 
 ```
 # in Terminal, log in to the MySQL Server using the user just created.
+
 mysql -u newuser -p
 ```
 
@@ -104,7 +107,8 @@ mysql -u newuser -p
 
 ```
 # the following code should be entered in mysql shell, where you should see commend line starts with 'mysql>  '
-use DRDB;
+
+USE DRDB;
 DROP EVENT age_update;
 
 CREATE EVENT
