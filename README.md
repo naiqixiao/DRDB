@@ -2,7 +2,7 @@ DRDB system from PNB, McMaster University
 
 This is an open source system to manage participant database, study, study schedules, and research personnels.
 
-## How to deploy the system on Linux server
+## How to deploy the system on Linux (Ubuntu) sever 
 
 ### Prerequisites
 
