@@ -75,11 +75,11 @@ exports.create = asyncHandler(async (req, res) => {
     await model.experimenterAssignment.bulkCreate(experimenterAssignment);
 
     res.status(200).send(schedule);
+    console.log("appointment created!");
   } catch (error) {
     throw error;
   }
 
-  console.log("appointment created!");
 });
 
 // Retrieve appointments from the database.
