@@ -8744,6 +8744,5 @@ server/api/google/lab7/credentials.json
 server/api/google/lab7/index.js
 server/api/google/lab7/token.json
 
-server/api/google/general/credentials.json
 server/api/google/general/index.js
 server/api/google/general/token.json
