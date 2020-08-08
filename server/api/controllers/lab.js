@@ -6,11 +6,13 @@ const fs = require("fs");
 // Create and Save a new family
 exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
+  console.log(newLabInfo);
   try {
     const lab = await model.lab.create(newLabInfo, {
       include: [model.study, model.personnel],
     });
 
+    console.log(lab);
     // create a folder to store credentials
     const labFolderPath = "api/google/lab" + lab.id;
     const credentialsPath = "api/google/general/credentials.json";

@@ -1,6 +1,4 @@
-server/api/models/DRDB_SQL.js
-server/api/middleware/credentials.json
-server/api/middleware/token.json
+server/api/models/DRDB_Seq.js
 <<<<<<< HEAD
 server/api/middleware/calendar.js
 =======
@@ -8713,9 +8711,6 @@ server/sequelizeAuto.js
 .gitignore
 
 client/src/views/Family copy.vue
-client/src/components/FamilyInfo.vue
-client/src/components/FamilyInfo.vue
-client/src/components/FamilyInfo.vue
 server/api/controllers/appointment_old.js
 server/api/models/SequelizeAuto/Appointment_old.js
 client/src/services/appointment copy.js
