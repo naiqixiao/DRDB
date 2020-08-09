@@ -113,6 +113,26 @@ export default {
       },
     ];
 
+    Vue.prototype.$labInfo = [
+      {
+        label: "Lab's Name",
+        field: "LabName",
+        rules: "required",
+      }
+    ];
+    Vue.prototype.$labPI = [
+      { label: "Name of PI/Manager", field: "Name", rules: "name" },
+      { label: "Initial", field: "Initial", rules: "required" },
+      { label: "Email of PI/Manager", field: "Email", rules: "email" },
+      {
+        label: "Role",
+        field: "Role",
+        options: "role",
+        rules: "required",
+      },
+      { label: "Calendar of PI/Manager", field: "Calendar", rules: "email" },
+    ];
+
     Vue.prototype.$options = {
       language: ["English", "French", "Chinese", "Spanish", "Hindi"],
       race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
@@ -209,7 +229,7 @@ export default {
     ];
 
     Vue.prototype.$headersAppointments = [
-      { text: "Child", align: "center", value: "Child.Name", width: "8%", },
+      { text: "Child", align: "center", value: "Child.Name", width: "8%" },
       {
         text: "Study",
         align: "center",
@@ -304,7 +324,7 @@ export default {
       name: [
         (value) => !!value || "Required.",
         (value) => {
-          var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
+          var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/;
           return pattern.test(value) || "Invalid Name.";
         },
         (value) => (value && value.length <= 30) || "Max 30 characters",
@@ -338,6 +358,7 @@ export default {
           return pattern.test(value) || "Invalid Birth Weight.";
         },
       ],
+      required: [(value) => !!value || "Required."],
     };
 
     Vue.prototype.$studyCriteriaFields = [

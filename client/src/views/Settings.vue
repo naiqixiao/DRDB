@@ -3,9 +3,9 @@
     <v-row align="start" style="height: 200px;">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
-        <h4 class="text-left">User account:</h4>
+        <h4 class="text-left">User account settings:</h4>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="5">
         <v-btn color="primary" @click.stop="dialog = true">Change password</v-btn>
       </v-col>
 
@@ -49,7 +49,7 @@
           </v-form>
           <v-card-actions>
             <v-row justify="space-between" style="height: 50px">
-              <v-col md="4"></v-col>
+              <v-col md="3"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
               </v-col>
@@ -65,7 +65,7 @@
                   @click="changePassword"
                 >Confirm</v-btn>
               </v-col>
-              <v-col md="4"></v-col>
+              <v-col md="3"></v-col>
             </v-row>
           </v-card-actions>
         </v-card>
@@ -75,7 +75,7 @@
     <v-row justify="center" align="center" style="height: 200px;">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
-        <h4 class="text-left">Lab email account:</h4>
+        <h4 class="text-left">Lab email account settings:</h4>
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
@@ -97,7 +97,7 @@
             <div v-on="on">
               <v-btn
                 color="primary"
-                @click.stop="googleCredentialsURL"
+                @click.stop="googleCredentialsURL('lab')"
                 :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
               >Setup Google Account</v-btn>
             </div>
@@ -127,14 +127,134 @@
           <!-- </v-form> -->
           <v-card-actions>
             <v-row justify="space-between" style="height: 50px">
-              <v-col md="4"></v-col>
+              <v-col md="3"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="dialogGoogle = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn color="primary" :disabled="!signInCode" @click="googleSetToken">Confirm</v-btn>
+                <v-btn
+                  color="primary"
+                  :disabled="!signInCode"
+                  @click=" setAdmin ? setAdminToken() : setLabToken()"
+                >Confirm</v-btn>
               </v-col>
-              <v-col md="4"></v-col>
+              <v-col md="3"></v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+
+    <v-row justify="center" align="center" style="height: 200px;">
+      <v-col md="12" class="subtitle">
+        <v-divider></v-divider>
+        <h4 class="text-left">Administration email account settings:</h4>
+      </v-col>
+      <v-col cols="12" md="2">
+        <v-text-field
+          height="48px"
+          background-color="textbackground"
+          hide-details
+          label="Administration email"
+          :value="this.adminEmail"
+          readonly
+          placeholder="No email is set up"
+          outlined
+          dense
+        ></v-text-field>
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="googleCredentialsURL('admin')"
+                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+              >Setup Admin Account</v-btn>
+            </div>
+          </template>
+          <span>Only PI and lab manager can change the adminstration email.</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="createNewLab"
+                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+              >Create a Lab</v-btn>
+            </div>
+          </template>
+          <span>Only PI and lab manager can create new lab.</span>
+        </v-tooltip>
+      </v-col>
+
+      <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false">
+        <v-card outlined>
+          <v-card-title class="headline">Lab and PI/Manager information</v-card-title>
+
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-row justify="space-around">
+              <v-col cols="12" md="4">
+                <v-text-field
+                  height="48px"
+                  background-color="textbackground"
+                  hide-details
+                  label="Lab's Name"
+                  v-model="currentLab.LabName"
+                  placeholder="  "
+                  :rules="$rules.required"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="4" v-for="item in this.$labPI" :key="item.label">
+                <div v-if="item.options">
+                  <v-select
+                    justify="start"
+                    :items="roleOptions"
+                    v-model="currentLab.Personnels[0][item.field]"
+                    :label="item.label"
+                    hide-details
+                    height="48px"
+                    placeholder="  "
+                    :rules="$rules[item.rules]"
+                    outlined
+                    dense
+                    chip
+                  ></v-select>
+                </div>
+                <div v-else>
+                  <v-text-field
+                    height="48px"
+                    background-color="textbackground"
+                    hide-details
+                    :label="item.label"
+                    v-model="currentLab.Personnels[0][item.field]"
+                    placeholder="  "
+                    :rules="$rules[item.rules]"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </div>
+              </v-col>
+            </v-row>
+          </v-form>
+
+          <v-card-actions>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="3"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="closeNewLab">Cancel</v-btn>
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click=" saveNewLab">Confirm</v-btn>
+              </v-col>
+              <v-col md="3"></v-col>
             </v-row>
           </v-card-actions>
         </v-card>
@@ -145,6 +265,7 @@
 
 <script>
 import login from "@/services/login";
+import lab from "@/services/lab";
 import externalAPIs from "@/services/externalAPIs";
 
 export default {
@@ -157,8 +278,25 @@ export default {
       changeTemporaryPassword: false,
       valid: true,
       dialogGoogle: false,
+      setAdmin: false,
       signInCode: null,
       labEmail: "Lab email is not set up yet.",
+      adminEmail: "Admin email is not set up yet.",
+      dialogNewLab: false,
+      currentLab: {
+        LabName: "",
+        PI: "",
+        Personnels: [
+          {
+            Name: "",
+            Initial: "",
+            Role: "",
+            Email: "",
+            Calendar: "",
+          },
+        ],
+      },
+      roleOptions: ["PI", "Lab manager"],
     };
   },
 
@@ -185,6 +323,44 @@ export default {
       }
     },
 
+    createNewLab() {
+      this.dialogNewLab = true;
+    },
+
+    async saveNewLab() {
+      var validationResults = this.$refs.form.validate();
+
+      if (validationResults) {
+        try {
+          // const newLab = {
+          //   LabName: "RHPCS",
+          //   PI: "TP",
+          //   Personnels: [
+          //     {
+          //       Name: "Todd Pfaff",
+          //       Initial: "TP",
+          //       Role: "PI",
+          //       Email: "xiaon8@mcmaster.ca",
+          //       Calendar: "xiaon8@mcmaster.ca",
+          //     },
+          //   ],
+          // };
+
+          this.currentLab.PI = this.currentLab.Personnels[0].Initial;
+
+          await lab.create(this.currentLab);
+
+          alert(
+            "A new lab is created!\nPI's account is created! \nA sample study is created!"
+          );
+        } catch (error) {
+          console.log(error.response);
+        }
+      }
+
+      this.closeNewLab();
+    },
+
     close() {
       this.dialog = false;
       setTimeout(() => {
@@ -194,27 +370,70 @@ export default {
       }, 300);
     },
 
-    async googleCredentialsURL() {
+    closeNewLab() {
+      this.dialogNewLab = false;
+      setTimeout(() => {
+        this.currentLab = {
+          LabName: "",
+          PI: "",
+          Personnels: [
+            {
+              Name: "",
+              Initial: "",
+              Role: "",
+              Email: "",
+              Calendar: "",
+            },
+          ],
+        };
+      }, 300);
+    },
+
+    async googleCredentialsURL(accountType) {
+      switch (accountType) {
+        case "lab":
+          this.setAdmin = false;
+          break;
+        case "admin":
+          this.setAdmin = true;
+          break;
+      }
+
       this.dialogGoogle = true;
 
       const redentialsURL = await externalAPIs.googleCredentialsURL();
       window.open(redentialsURL.data, "_blank");
     },
 
-    async googleSetToken() {
+    async setLabToken() {
       try {
-        const response = await externalAPIs.googleSetToken(this.signInCode);
+        const response = await externalAPIs.setLabToken(this.signInCode);
 
         this.labEmail = response.data.Email;
 
+        alert("Lab email account is successfully setup!");
         console.log(response.data);
       } catch (error) {
         console.log(error.response);
       }
-      this.extAPIsClose();
+      this.closeExtAPIs();
     },
 
-    extAPIsClose() {
+    async setAdminToken() {
+      try {
+        const response = await externalAPIs.setAdminToken(this.signInCode);
+
+        this.adminEmail = response.data.Email;
+
+        alert("Admin email account is successfully setup!");
+        console.log(response.data);
+      } catch (error) {
+        console.log(error.response);
+      }
+      this.closeExtAPIs();
+    },
+
+    closeExtAPIs() {
       this.dialogGoogle = false;
       this.signInCode = null;
     },
@@ -239,7 +458,10 @@ export default {
       val || this.close();
     },
     dialogGoogle(val) {
-      val || this.extAPIsClose();
+      val || this.closeExtAPIs();
+    },
+    dialogNewLab(val) {
+      val || this.closeNewLab();
     },
   },
 
@@ -247,7 +469,8 @@ export default {
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
 
-      this.labEmail = profile.data.data.emailAddress;
+      this.labEmail = profile.data.labEmail;
+      this.adminEmail = profile.data.adminEmail;
     } catch (error) {
       console.log(error.response);
     }

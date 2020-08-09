@@ -7,23 +7,23 @@ const { google } = require("googleapis");
 const fs = require("fs");
 const { OAuth2 } = google.auth;
 
-async function generalAuth() {
-  const credentialsPath = "api/google/general/credentials.json";
-  const tokenPath = "api/google/general/token.json";
+// function generalAuth() {
+//   const credentialsPath = "api/google/general/credentials.json";
+//   const tokenPath = "api/google/general/token.json";
 
-  const credentials = await fs.promises.readFile(credentialsPath);
+//   const credentials = fs.readFileSync(credentialsPath);
 
-  const { client_secret, client_id, redirect_uris } = JSON.parse(
-    credentials
-  ).installed;
+//   const { client_secret, client_id, redirect_uris } = JSON.parse(
+//     credentials
+//   ).installed;
 
-  const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+//   const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
-  const token = await fs.promises.readFile(tokenPath);
-  oAuth2Client.setCredentials(JSON.parse(token));
+//   const token = fs.readFileSync(tokenPath);
+//   oAuth2Client.setCredentials(JSON.parse(token));
 
-  return oAuth2Client;
-}
+//   return oAuth2Client;
+// }
 
 function makeBody(to, from, cc, subject, body) {
   var message = [
@@ -53,7 +53,21 @@ function makeBody(to, from, cc, subject, body) {
   return encodedMail;
 }
 
-async function sendEmail(oAuth2Client, emailContent) {
+async function sendEmail(emailContent) {
+  const credentialsPath = "api/google/general/credentials.json";
+  const tokenPath = "api/google/general/token.json";
+
+  const credentials = fs.readFileSync(credentialsPath);
+
+  const { client_secret, client_id, redirect_uris } = JSON.parse(
+    credentials
+  ).installed;
+
+  const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+
+  const token = fs.readFileSync(tokenPath);
+  oAuth2Client.setCredentials(JSON.parse(token));
+
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
   var raw = makeBody(
@@ -84,7 +98,7 @@ exports.signup = asyncHandler(async (req, res) => {
       .toString(36)
       .substring(2);
 
-    const hashPassword = await bcrypt.hash(password, 10);
+    const hashPassword = bcrypt.hashSync(password, 10);
 
     var newUser = req.body;
 
@@ -106,7 +120,8 @@ exports.signup = asyncHandler(async (req, res) => {
           newUser.Name.split(" ")[0] +
           ",</p> " +
           "<p>Welcoe to the developmental research management system!</p>" +
-          "<p>Your role is <b>" + newUser.Role +
+          "<p>Your role is <b>" +
+          newUser.Role +
           "</b>, and your temporary password is <b><em>" +
           password +
           "</em></b>. Please login with your email to change your password.</p> " +
@@ -116,11 +131,9 @@ exports.signup = asyncHandler(async (req, res) => {
           "<p>Lab manager</p>",
       };
 
-      // await sendEmail(req.oAuth2Client, emailContent);
-      const oAuth2Client = await generalAuth();
+      // const oAuth2Client = generalAuth();
 
-      await sendEmail(oAuth2Client, emailContent);
-
+      await sendEmail(emailContent);
     } catch (error) {
       throw error;
     }
@@ -152,7 +165,7 @@ exports.login = asyncHandler(async (req, res) => {
     });
   }
 
-  const isPasswordValid = await bcrypt.compare(Password, personnel.Password);
+  const isPasswordValid = bcrypt.compareSync(Password, personnel.Password);
 
   if (!isPasswordValid) {
     return res.status(403).send({
@@ -208,7 +221,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
   }
 
-  const isPasswordValid = await bcrypt.compare(Password, personnel.Password);
+  const isPasswordValid = bcrypt.compareSync(Password, personnel.Password);
 
   if (!isPasswordValid) {
     return res.status(403).send({
@@ -216,7 +229,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
   }
 
-  const hashNewPassword = await bcrypt.hash(newPassword, 10);
+  const hashNewPassword = bcrypt.hashSync(newPassword, 10);
 
   try {
     await model.personnel.update(
@@ -276,9 +289,9 @@ exports.changePassword = asyncHandler(async (req, res) => {
           "<p>Lab manager</p>",
       };
 
-      const oAuth2Client = await generalAuth();
+      // const oAuth2Client = generalAuth();
 
-      await sendEmail(oAuth2Client, emailContent);
+      await sendEmail(emailContent);
     } catch (error) {
       throw error;
     }
@@ -292,7 +305,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     .toString(36)
     .substring(2);
 
-  const hashPassword = await bcrypt.hash(password, 10);
+  const hashPassword = bcrypt.hashSync(password, 10);
 
   try {
     const { Email } = req.body;
@@ -338,9 +351,9 @@ exports.resetPassword = asyncHandler(async (req, res) => {
           "<p>Lab manager</p>",
       };
 
-      const oAuth2Client = await generalAuth();
+      // const oAuth2Client = generalAuth();
 
-      await sendEmail(oAuth2Client, emailContent);
+      await sendEmail(emailContent);
     } catch (error) {
       throw error;
     }

@@ -9,6 +9,8 @@ router.get("/", checkAuth, ExtController.googleCredentialsURL);
 
 router.post("/", checkAuth, ExtController.googleToken);
 
+router.post("/admin", checkAuth, ExtController.adminToken);
+
 router.post("/email", oAuth2, ExtController.googleEmail);
 
 module.exports = router;

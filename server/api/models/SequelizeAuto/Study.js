@@ -13,7 +13,7 @@ module.exports = function(sequelize, DataTypes) {
       StudyName: {
         type: DataTypes.STRING(45),
         allowNull: false,
-        unique: true
+        unique: false
       },
       MinAge: {
         type: DataTypes.DECIMAL(5, 2),

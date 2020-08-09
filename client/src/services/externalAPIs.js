@@ -6,13 +6,21 @@ export default {
     return api().get("extAPIs/");
   },
 
-  googleSetToken(signInCode) {
+  setLabToken(signInCode) {
     const code = {
       lab: store.state.lab,
       signInCode: signInCode,
     };
 
     return api().post("extAPIs/", code);
+  },
+
+  setAdminToken(signInCode) {
+    const code = {
+      signInCode: signInCode,
+    };
+
+    return api().post("extAPIs/admin", code);
   },
 
   googleGetEmailAddress() {
