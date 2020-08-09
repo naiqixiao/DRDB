@@ -36,6 +36,11 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
       scope: SCOPES,
     });
 
+    // check lab folder
+    if (!fs.existsSync("api/google/labs")) {
+      fs.mkdirSync("api/google/labs");
+    }
+
     res.status(200).send(authUrl);
   } catch (error) {
     return res.send(error);
@@ -54,6 +59,15 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/labs/lab" + lab + "/token.json";
+
+    // check lab folder
+    if (!fs.existsSync("api/google/labs")) {
+      fs.mkdirSync("api/google/labs");
+    }
+
+    if (!fs.existsSync("api/google/labs/lab" + lab)) {
+      fs.mkdirSync("api/google/labs/lab" + lab);
+    }
 
     const credentials = fs.readFileSync(credentialsPath);
     const { client_secret, client_id, redirect_uris } = JSON.parse(

@@ -136,20 +136,20 @@ exports.create = asyncHandler(async (req, res) => {
 
     // create lab folder
     const labFolderPath = "api/google/labs/lab" + lab.id;
-    const credentialsPath = "api/google/general/credentials.json";
+    // const credentialsPath = "api/google/general/credentials.json";
+
+    if (!fs.existsSync("api/google/labs")) {
+      fs.mkdirSync("api/google/labs");
+    }
 
     if (!fs.existsSync(labFolderPath)) {
       fs.mkdirSync(labFolderPath);
-      fs.copyFileSync(credentialsPath, labFolderPath + "/credentials.json");
+      // fs.copyFileSync(credentialsPath, labFolderPath + "/credentials.json");
     }
-
-    // create a sample study
-
-    // await model.study.create(sampleStudyInfo);
 
     res
       .status(200)
-      .send("lab created!\n PI is created! \n A sample study is created!");
+      .send("lab created!");
   } catch (error) {
     throw error;
   }
@@ -201,7 +201,7 @@ exports.delete = asyncHandler(async (req, res) => {
   const labFolderPath = "api/google/labs/lab" + req.query.lab;
 
   if (!fs.existsSync(labFolderPath)) {
-    fs.unlinkSync(labFolderPath + "/credentials.json");
+    // fs.unlinkSync(labFolderPath + "/credentials.json");
     fs.unlinkSync(labFolderPath + "/token.json");
     fs.rmdirSync(labFolderPath);
   }
