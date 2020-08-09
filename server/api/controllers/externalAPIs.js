@@ -170,8 +170,6 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   } catch (error) {
     var labEmail = null;
   }
-  console.log(req.body.lab);
-  console.log(labEmail);
 
   // admin profile
   try {
