@@ -337,8 +337,8 @@
             <v-select
               :items="Responses"
               v-model="response"
-              label="Parents' response"
-              :disabled="!currentChild.id"
+              :label="currentChild.scheduled ? 'This family is already scheduled.' : 'Parents\'\ response' "
+              :disabled="!currentChild.id || currentChild.scheduled"
               height="48px"
               background-color="textbackground"
               hide-details
@@ -1158,6 +1158,14 @@ export default {
 
         calendarEvent.scheduleId = newStudySchedule.data.id;
 
+        // attach schedule info to the current appointments.
+        newStudySchedule.data.updatedAt = moment().toString();
+
+        this.appointments.forEach((appointment) => {
+          appointment.FK_Schedule = newStudySchedule.data.id;
+          appointment.Schedule = newStudySchedule.data;
+        });
+
         console.log("New Scheduled Created!");
 
         return { calendarEvent: calendarEvent };
@@ -1305,6 +1313,36 @@ export default {
     async completeSchedule() {
       // update next contact date and content for the family.
       try {
+        // update the current appointment view
+
+        var childIndies = []; // the indices of children within the current family.
+        this.Children.forEach((child, index) => {
+          if (child.FK_Family == this.currentChild.FK_Family) {
+            childIndies.push(index);
+          }
+        });
+
+        for (var i = 0; i < this.appointments.length; i++) {
+          // this.currentFamily.Appointments.push(this.appointments[i]);
+          // this.Children[this.page - 1].Family.Appointments.push(
+          //   this.appointments[i]
+          // );
+
+          childIndies.forEach((childIndex) => {
+            this.Children[childIndex].Family.Appointments.push(
+              this.appointments[i]
+            );
+          });
+        }
+
+        // mark the child/family been scheduled. So no others will schedule this family again.
+        this.currentChild.scheduled = true;
+
+        childIndies.forEach((childIndex) => {
+          this.Children[childIndex].scheduled = true;
+        });
+
+        //
         await this.$refs.NextContact.updateNextContact();
         this.resetSchedule();
         this.closeSchedule();
