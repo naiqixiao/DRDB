@@ -118,7 +118,7 @@ export default {
         label: "Lab's Name",
         field: "LabName",
         rules: "required",
-      }
+      },
     ];
     Vue.prototype.$labPI = [
       { label: "Name of PI/Manager", field: "Name", rules: "name" },
@@ -131,6 +131,25 @@ export default {
         rules: "required",
       },
       { label: "Calendar of PI/Manager", field: "Calendar", rules: "email" },
+    ];
+
+    Vue.prototype.$studyCriteriaFields = [
+      { label: "Min Age", field: "MinAge", width: "5" },
+      { label: "Max Age", field: "MaxAge", width: "5" },
+      { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3"},
+      { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
+      { label: "Vision Loss Participants", field: "VisionLossParticipant", options: "inclusion", width: "3" },
+      { label: "Hearing Loss Participants", field: "HearingLossParticipant", options: "inclusion", width: "3" },
+    ];
+
+    Vue.prototype.$studyBasicFields = [
+      { label: "Study Name", field: "StudyName" },
+
+      {
+        label: "Study Type",
+        field: "StudyType",
+        options: "studyType",
+      },
     ];
 
     Vue.prototype.$options = {
@@ -360,22 +379,5 @@ export default {
       ],
       required: [(value) => !!value || "Required."],
     };
-
-    Vue.prototype.$studyCriteriaFields = [
-      { label: "Min Age", field: "MinAge" },
-      { label: "Max Age", field: "MaxAge" },
-      { label: "Premature Participants", field: "PrematureParticipant" },
-    ];
-
-    Vue.prototype.$studyBasicFields = [
-      { label: "Study Name", field: "StudyName" },
-
-      {
-        label: "Study Type",
-        field: "StudyType",
-        options: "studyType",
-      },
-      // { label: "Premature Participants", field: "PrematureParticipant" },
-    ];
   },
 };

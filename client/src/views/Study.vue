@@ -43,7 +43,7 @@
           <v-divider></v-divider>
           <h4 class="text-left">Study information:</h4>
         </v-col>
-        <v-col cols="12" sm="6" md="4" v-for="field in this.$studyBasicFields" :key="field.label">
+        <v-col cols="12" sm="6" md="5" v-for="field in this.$studyBasicFields" :key="field.label">
           <v-text-field
             height="48px"
             background-color="textbackground"
@@ -78,7 +78,7 @@
         <v-col
           cols="12"
           sm="6"
-          md="4"
+          :md="field.width"
           v-for="field in this.$studyCriteriaFields"
           :key="field.label"
         >
@@ -87,7 +87,7 @@
             background-color="textbackground"
             hide-details
             :label="field.label"
-            :value="field.label !== 'Premature Participants' ? AgeFormated2(currentStudy[field.field]): currentStudy[field.field]"
+            :value="field.label == 'MinAge' || field.label == 'MaxAge' ? AgeFormated2(currentStudy[field.field]): currentStudy[field.field]"
             placeholder="  "
             readonly
             outlined
@@ -162,7 +162,7 @@
                   <v-col
                     cols="12"
                     sm="6"
-                    md="3"
+                    md="4"
                     v-for="field in this.$studyBasicFields"
                     :key="field.label"
                   >
@@ -209,7 +209,7 @@
                   </v-col>
                 </v-row>
 
-                <v-row>
+                <v-row justify="space-around">
                   <v-col md="12" class="subtitle">
                     <v-divider></v-divider>
                     <h4 class="text-left">Study criteria:</h4>
@@ -218,20 +218,37 @@
                   <v-col
                     cols="12"
                     sm="6"
-                    md="4"
+                    :md="field.width"
                     v-for="field in this.$studyCriteriaFields"
                     :key="field.label"
                   >
-                    <v-text-field
-                      height="48px"
-                      background-color="textbackground"
-                      hide-details
-                      :label="field.label"
-                      v-model="editedStudy[field.field]"
-                      placeholder="  "
-                      outlined
-                      dense
-                    ></v-text-field>
+                    <div v-if="field.options">
+                      <v-select
+                        justify="start"
+                        :items="inclusionOptions"
+                        v-model="editedStudy[field.field]"
+                        :label="field.label"
+                        height="48px"
+                        background-color="textbackground"
+                        hide-details
+                        placeholder="  "
+                        outlined
+                        dense
+                        chip
+                      ></v-select>
+                    </div>
+                    <div v-else>
+                      <v-text-field
+                        height="48px"
+                        background-color="textbackground"
+                        hide-details
+                        :label="field.label"
+                        v-model="editedStudy[field.field]"
+                        placeholder="  "
+                        outlined
+                        dense
+                      ></v-text-field>
+                    </div>
                   </v-col>
                 </v-row>
 
@@ -361,7 +378,10 @@ export default {
         EmailTemplate: "",
         Completed: 0,
         StudyType: null,
-        PrematureParticipant: 0,
+        PrematureParticipant: "",
+        IllParticipant: "",
+        VisionLossParticipant: "",
+        HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
       },
       editedStudy: {
@@ -373,7 +393,10 @@ export default {
         EmailTemplate: "",
         Completed: 0,
         StudyType: null,
-        PrematureParticipant: 0,
+        PrematureParticipant: "",
+        IllParticipant: "",
+        VisionLossParticipant: "",
+        HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
       },
       defaultStudy: {
@@ -385,7 +408,10 @@ export default {
         EmailTemplate: "",
         Completed: 0,
         StudyType: null,
-        PrematureParticipant: 0,
+        PrematureParticipant: "",
+        IllParticipant: "",
+        VisionLossParticipant: "",
+        HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
       },
       editedIndex: -1,
@@ -395,6 +421,7 @@ export default {
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],
       ],
+      inclusionOptions: ["Include", "Exclude", "Only"],
     };
   },
 

@@ -31,20 +31,89 @@ export default {
       });
     },
 
+    studyElegibility(study, child) {
+      var age =
+        child.Age >= study.MinAge * 30.5 - 5 &&
+        child.Age <= study.MaxAge * 30.5 - 5;
+
+      var hearing = false;
+
+      switch (study.HearingLossParticipant) {
+        case "Only":
+          child.HearingLoss ? (hearing = true) : (hearing = false);
+          break;
+
+        case "Exclude":
+          child.HearingLoss ? (hearing = false) : (hearing = true);
+
+          break;
+
+        case "Include":
+          hearing = true;
+          break;
+      }
+
+      var vision = false;
+      switch (study.VisionLossParticipant) {
+        case "Only":
+          child.VisionLoss ? (vision = true) : (vision = false);
+          break;
+
+        case "Exclude":
+          child.VisionLoss ? (vision = false) : (vision = true);
+
+          break;
+
+        case "Include":
+          vision = true;
+          break;
+      }
+
+      var premature = false;
+      switch (study.PrematureParticipant) {
+        case "Only":
+          child.PrematureBirth ? (premature = true) : (premature = false);
+          break;
+
+        case "Exclude":
+          child.PrematureBirth ? (premature = false) : (premature = true);
+
+          break;
+
+        case "Include":
+          premature = true;
+          break;
+      }
+
+      var illness = false;
+      switch (study.IllParticipant) {
+        case "Only":
+          child.Illness ? (illness = true) : (illness = false);
+          break;
+
+        case "Exclude":
+          child.Illness ? (illness = false) : (illness = true);
+
+          break;
+
+        case "Include":
+          illness = true;
+          break;
+      }
+
+      return age && hearing && vision && premature && illness;
+    },
+
     clear() {
       this.selectedStudy = [];
     },
-
   },
   computed: {
     PotentialStudies() {
       var ElegibleStudies = [];
 
       store.state.studies.forEach((study) => {
-        if (
-          this.child.Age >= study.MinAge * 30.5 &&
-          this.child.Age <= study.MaxAge * 30.5
-        ) {
+        if (this.studyElegibility(study, this.child)) {
           ElegibleStudies.push(study.id);
         }
       });

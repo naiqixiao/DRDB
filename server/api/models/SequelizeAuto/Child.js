@@ -34,7 +34,7 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.STRING(10),
         allowNull: true
       },
-      Hearingloss: {
+      HearingLoss: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: "0"

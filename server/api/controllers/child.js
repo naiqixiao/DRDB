@@ -80,8 +80,20 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.pastParticipants) {
     queryString.id = { [Op.notIn]: req.query.pastParticipants };
   }
-  if (req.query.Prematurity) {
-    queryString.PrematureBirth = req.query.Prematurity;
+  if (req.query.PrematureParticipant) {
+    queryString.PrematureBirth = req.query.PrematureParticipant;
+  }
+  
+  if (req.query.IllParticipant) {
+    queryString.Illness = req.query.IllParticipant;
+  }
+  
+  if (req.query.VisionLossParticipant) {
+    queryString.VisionLoss = req.query.VisionLossParticipant;
+  }
+  
+  if (req.query.HearingLossParticipant) {
+    queryString.HearingLoss = req.query.HearingLossParticipant;
   }
 
   const children = await model.child.findAll({

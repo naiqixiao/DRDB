@@ -65,7 +65,7 @@
           <v-col
             cols="12"
             sm="6"
-            md="4"
+            :md="field.width"
             v-for="field in this.$studyCriteriaFields"
             :key="field.label"
           >
@@ -74,7 +74,7 @@
               background-color="textbackground"
               hide-details
               :label="field.label"
-              :value="field.label !== 'Premature Participants' ? AgeFormated2(selectedStudy[field.field]): selectedStudy[field.field]"
+              :value="field.label == 'MinAge' || field.label == 'MaxAge' ? AgeFormated2(selectedStudy[field.field]): selectedStudy[field.field]"
               placeholder="  "
               outlined
               dense
@@ -878,6 +878,54 @@ export default {
       queryString.minAge = this.selectedStudy.MinAge;
       queryString.maxAge = this.selectedStudy.MaxAge;
 
+      switch (this.selectedStudy.PrematureParticipant) {
+        // case "Include":
+        //   break;
+        case "Exclude":
+          queryString.PrematureParticipant = 0;
+          break;
+
+        case "Only":
+          queryString.PrematureParticipant = 1;
+          break;
+      }
+
+      switch (this.selectedStudy.IllParticipant) {
+        // case "Include":
+        //   break;
+        case "Exclude":
+          queryString.IllParticipant = 0;
+          break;
+
+        case "Only":
+          queryString.IllParticipant = 1;
+          break;
+      }
+
+      switch (this.selectedStudy.VisionLossParticipant) {
+        // case "Include":
+        //   break;
+        case "Exclude":
+          queryString.VisionLossParticipant = 0;
+          break;
+
+        case "Only":
+          queryString.VisionLossParticipant = 1;
+          break;
+      }
+
+      switch (this.selectedStudy.HearingLossParticipant) {
+        // case "Include":
+        //   break;
+        case "Exclude":
+          queryString.HearingLossParticipant = 0;
+          break;
+
+        case "Only":
+          queryString.HearingLossParticipant = 1;
+          break;
+      }
+
       try {
         const Results = await child.search(queryString);
 
@@ -1011,10 +1059,7 @@ export default {
       var ElegibleStudies = [];
 
       store.state.studies.forEach((study) => {
-        if (
-          child.Age >= study.MinAge * 30.5 - 5 &&
-          child.Age <= study.MaxAge * 30.5 - 5
-        ) {
+        if (this.studyElegibility(study, child)) {
           ElegibleStudies.push(study.id);
         }
       });
@@ -1323,11 +1368,6 @@ export default {
         });
 
         for (var i = 0; i < this.appointments.length; i++) {
-          // this.currentFamily.Appointments.push(this.appointments[i]);
-          // this.Children[this.page - 1].Family.Appointments.push(
-          //   this.appointments[i]
-          // );
-
           childIndies.forEach((childIndex) => {
             this.Children[childIndex].Family.Appointments.push(
               this.appointments[i]
@@ -1368,6 +1408,79 @@ export default {
         this.emailSent = false;
         this.scheduleNextPage = false;
       }, 300);
+    },
+
+    studyElegibility(study, child) {
+      var age =
+        child.Age >= study.MinAge * 30.5 - 5 &&
+        child.Age <= study.MaxAge * 30.5 - 5;
+
+      var hearing = false;
+
+      switch (study.HearingLossParticipant) {
+        case "Only":
+          child.HearingLoss ? (hearing = true) : (hearing = false);
+          break;
+
+        case "Exclude":
+          child.HearingLoss ? (hearing = false) : (hearing = true);
+
+          break;
+
+        case "Include":
+          hearing = true;
+          break;
+      }
+
+      var vision = false;
+      switch (study.VisionLossParticipant) {
+        case "Only":
+          child.VisionLoss ? (vision = true) : (vision = false);
+          break;
+
+        case "Exclude":
+          child.VisionLoss ? (vision = false) : (vision = true);
+
+          break;
+
+        case "Include":
+          vision = true;
+          break;
+      }
+
+      var premature = false;
+      switch (study.PrematureParticipant) {
+        case "Only":
+          child.PrematureBirth ? (premature = true) : (premature = false);
+          break;
+
+        case "Exclude":
+          child.PrematureBirth ? (premature = false) : (premature = true);
+
+          break;
+
+        case "Include":
+          premature = true;
+          break;
+      }
+
+      var illness = false;
+      switch (study.IllParticipant) {
+        case "Only":
+          child.Illness ? (illness = true) : (illness = false);
+          break;
+
+        case "Exclude":
+          child.Illness ? (illness = false) : (illness = true);
+
+          break;
+
+        case "Include":
+          illness = true;
+          break;
+      }
+
+      return age && hearing && vision && premature && illness;
     },
 
     AgeFormated(DoB) {
@@ -1445,7 +1558,12 @@ export default {
       if (this.currentChild) {
         return this.currentChild.Family;
       } else {
-        return null;
+        return {
+          NameMom: null,
+          NameDad: null,
+          Phone: null,
+          Email: null,
+        };
       }
     },
 

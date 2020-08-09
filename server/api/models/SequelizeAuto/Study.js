@@ -45,9 +45,24 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: false
       },
       PrematureParticipant: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.ENUM('Include','Exclude','Only'),
         allowNull: false,
-        defaultValue: "0"
+        defaultValue: "Include"
+      },
+      VisionLossParticipant: {
+        type: DataTypes.ENUM('Include','Exclude','Only'),
+        allowNull: false,
+        defaultValue: "Include"
+      },
+      HearingLossParticipant: {
+        type: DataTypes.ENUM('Include','Exclude','Only'),
+        allowNull: false,
+        defaultValue: "Include"
+      },
+      IllParticipant: {
+        type: DataTypes.ENUM('Include','Exclude','Only'),
+        allowNull: false,
+        defaultValue: "Include"
       },
       createdAt: {
         type: DataTypes.DATE,

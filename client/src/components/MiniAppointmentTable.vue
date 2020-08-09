@@ -12,35 +12,26 @@
           <span
             class="d-inline-block text-truncate"
             style="max-width: 90px; padding-right: 2px;"
-          >
-            {{ appointment.Child.Name }}
-          </span>
+          >{{ appointment.Child.Name }}</span>
           <span class="body-1" style="color: var(--v-primary); ">
             {{
-              "(" +
-                appointment.FK_Family +
-                appointment.Child.IdWithinFamily +
-                ")"
+            "(" +
+            appointment.FK_Family +
+            appointment.Child.IdWithinFamily +
+            ")"
             }}
           </span>
           <v-spacer></v-spacer>
-          <v-icon
-            v-if="appointment.Child.Sex == 'M'"
-            color="light-blue darken-4"
-            >mdi-human-male</v-icon
-          >
+          <v-icon v-if="appointment.Child.Sex == 'M'" color="light-blue darken-4">mdi-human-male</v-icon>
           <v-icon v-else color="pink darken-1">mdi-human-female</v-icon>
         </v-card-title>
 
-        <v-card-text
-          class="body-1"
-          align="start"
-          style="padding: 8px; color: var(--v-primary)"
-          >{{
-            appointment.Study.StudyName +
-              " (" +
-              appointment.Study.StudyType +
-              ")"
+        <v-card-text class="body-1" align="start" style="padding: 8px; color: var(--v-primary)">
+          {{
+          appointment.Study.StudyName +
+          " (" +
+          appointment.Study.StudyType +
+          ")"
           }}
         </v-card-text>
         <v-spacer></v-spacer>
@@ -48,32 +39,28 @@
           <v-icon
             color="primary"
             @click="updateExperimenters(appointment, indexAppointments)"
-            >how_to_reg</v-icon
-          >
+          >how_to_reg</v-icon>
           <v-spacer></v-spacer>
           <v-icon
             color="primary"
             @click="removeAppointment(indexAppointments)"
             :disabled="Appointments.length == 1"
-            >delete</v-icon
-          >
+          >delete</v-icon>
         </v-card-actions>
       </v-card>
     </v-col>
     <v-row align="end" justify="end">
       <v-col cols="12" md="2">
-        <v-btn color="purple" fab large @click.stop="editNewAppointments"
-          ><v-icon>add</v-icon></v-btn
-        >
+        <v-btn color="purple" fab large @click.stop="editNewAppointments">
+          <v-icon>add</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
 
     <div>
       <v-dialog v-model="dialogAddAppointments" max-width="1200px">
         <v-card>
-          <v-card-title class="title"
-            >Add appointments to the current schedule</v-card-title
-          >
+          <v-card-title class="title">Add appointments to the current schedule</v-card-title>
           <v-container fluid>
             <v-row>
               <v-col cols="12" md="2" v-for="child in Children" :key="child.id">
@@ -85,9 +72,7 @@
                   :disabled="
                     potentialStudies(child).selectableStudies.length < 1
                   "
-                >
-                  {{ child.Name }}</v-btn
-                >
+                >{{ child.Name }}</v-btn>
               </v-col>
             </v-row>
             <v-row>
@@ -118,14 +103,10 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="closeNewAppointment"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="closeNewAppointment">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="saveNewAppointments"
-                  >Confirm</v-btn
-                >
+                <v-btn color="primary" @click="saveNewAppointments">Confirm</v-btn>
               </v-col>
               <v-col md="4"></v-col>
             </v-row>
@@ -137,9 +118,7 @@
     <div>
       <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
         <v-card height="300px" class="d-flex flex-column">
-          <v-card-title class="title"
-            >Update experimenters for the current appointment</v-card-title
-          >
+          <v-card-title class="title">Update experimenters for the current appointment</v-card-title>
           <v-row justify="center">
             <v-col cols="12" md="3">
               <v-select
@@ -160,11 +139,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn
-                  color="primary"
-                  @click="dialogUpdateExperimenters = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="dialogUpdateExperimenters = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primay" @click="saveExperimenters">Save</v-btn>
@@ -228,14 +203,84 @@ export default {
       this.dialogAddAppointments = true;
     },
 
+    studyElegibility(study, child) {
+      var age =
+        child.Age >= study.MinAge * 30.5 - 5 &&
+        child.Age <= study.MaxAge * 30.5 - 5;
+
+      var hearing = false;
+
+      switch (study.HearingLossParticipant) {
+        case "Only":
+          child.HearingLoss ? (hearing = true) : (hearing = false);
+          break;
+
+        case "Exclude":
+          child.HearingLoss ? (hearing = false) : (hearing = true);
+
+          break;
+
+        case "Include":
+          hearing = true;
+          break;
+      }
+
+      var vision = false;
+      switch (study.VisionLossParticipant) {
+        case "Only":
+          child.VisionLoss ? (vision = true) : (vision = false);
+          break;
+
+        case "Exclude":
+          child.VisionLoss ? (vision = false) : (vision = true);
+
+          break;
+
+        case "Include":
+          vision = true;
+          break;
+      }
+
+      var premature = false;
+      switch (study.PrematureParticipant) {
+        case "Only":
+          child.PrematureBirth ? (premature = true) : (premature = false);
+          break;
+
+        case "Exclude":
+          child.PrematureBirth ? (premature = false) : (premature = true);
+
+          break;
+
+        case "Include":
+          premature = true;
+          break;
+      }
+
+      var illness = false;
+      switch (study.IllParticipant) {
+        case "Only":
+          child.Illness ? (illness = true) : (illness = false);
+          break;
+
+        case "Exclude":
+          child.Illness ? (illness = false) : (illness = true);
+
+          break;
+
+        case "Include":
+          illness = true;
+          break;
+      }
+
+      return age && hearing && vision && premature && illness;
+    },
+
     potentialStudies(child) {
       var ElegibleStudies = [];
 
       store.state.studies.forEach((study) => {
-        if (
-          child.Age >= study.MinAge * 30.5 - 5 &&
-          child.Age <= study.MaxAge * 30.5 - 5
-        ) {
+        if (this.studyElegibility(study, child)) {
           ElegibleStudies.push(study.id);
         }
       });
