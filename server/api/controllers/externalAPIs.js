@@ -140,19 +140,41 @@ exports.adminToken = asyncHandler(async (req, res) => {
 
 exports.googleEmail = asyncHandler(async (req, res) => {
   try {
-    const gmail = google.gmail({ version: "v1", auth: req.oAuth2Client });
+    const credentialsPath = "api/google/general/credentials.json";
+    const tokenPath = "api/google/labs/lab" + req.body.lab + "/token.json";
+
+    const credentials = fs.readFileSync(credentialsPath);
+
+    const { client_secret, client_id, redirect_uris } = JSON.parse(
+      credentials
+    ).installed;
+
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+
+    const token = fs.readFileSync(tokenPath);
+    oAuth2Client.setCredentials(JSON.parse(token));
+
+    const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
     const profile = await gmail.users.getProfile({ userId: "me" });
 
+    var labEmail = profile.data.emailAddress;
+
     // update lab email info.
     await model.lab.update(
-      { Email: profile.data.emailAddress },
+      { Email: labEmail },
       {
         where: { id: req.body.lab },
       }
     );
+  } catch (error) {
+    var labEmail = null;
+  }
+  console.log(req.body.lab);
+  console.log(labEmail);
 
-    // admin profile
+  // admin profile
+  try {
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/general/token.json";
 
@@ -171,11 +193,13 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const profile2 = await adminGmail.users.getProfile({ userId: "me" });
 
-    res.status(200).send({
-      labEmail: profile.data.emailAddress,
-      adminEmail: profile2.data.emailAddress,
-    });
+    var adminEmail = profile2.data.emailAddress;
   } catch (error) {
-    return res.send(error);
+    var adminEmail = null;
   }
+
+  res.status(200).send({
+    labEmail: labEmail,
+    adminEmail: adminEmail,
+  });
 });

@@ -11,6 +11,6 @@ router.post("/", checkAuth, ExtController.googleToken);
 
 router.post("/admin", checkAuth, ExtController.adminToken);
 
-router.post("/email", oAuth2, ExtController.googleEmail);
+router.post("/email", checkAuth, ExtController.googleEmail);
 
 module.exports = router;

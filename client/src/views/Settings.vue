@@ -1,5 +1,23 @@
 <template>
   <v-container fluid>
+    <div v-if="!$store.state.labEmailStatus">
+      <v-alert
+        border="left"
+        type="error"
+        color="#c73460"
+        dense
+        style="font-weight: 600"
+      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+    </div>
+    <div v-if="!$store.state.adminEmailStatus">
+      <v-alert
+        border="left"
+        type="warning"
+        color="#c7792c"
+        dense
+        style="font-weight: 600"
+      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+    </div>
     <v-row align="start" style="height: 200px;">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
@@ -412,9 +430,11 @@ export default {
         this.labEmail = response.data.Email;
 
         alert("Lab email account is successfully setup!");
-        console.log(response.data);
+        // console.log(response.data);
+        this.$store.dispatch("setLabEmailStatus", true);
       } catch (error) {
-        console.log(error.response);
+        // console.log(error.response);
+        this.$store.dispatch("setLabEmailStatus", false);
       }
       this.closeExtAPIs();
     },
@@ -426,9 +446,9 @@ export default {
         this.adminEmail = response.data.Email;
 
         alert("Admin email account is successfully setup!");
-        console.log(response.data);
+        this.$store.dispatch("setAdminEmailStatus", true);
       } catch (error) {
-        console.log(error.response);
+        this.$store.dispatch("setAdminEmailStatus", false);
       }
       this.closeExtAPIs();
     },

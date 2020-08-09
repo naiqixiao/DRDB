@@ -173,7 +173,10 @@ export default {
       this.$store.dispatch("setUserID", null);
       this.$store.dispatch("setLabEmail", null);
       this.$store.dispatch("setRole", null);
+      this.$store.dispatch("setStudies", null);
 
+      this.$store.dispatch("setLabEmailStatus", null);
+      this.$store.dispatch("setAdminEmailStatus", null);
       this.$router.push({
         name: "Login",
       });

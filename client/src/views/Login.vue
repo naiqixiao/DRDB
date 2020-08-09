@@ -1,5 +1,6 @@
 <template>
   <v-row justify="center" align="center" style="height: 600px;">
+   
     <v-col cols="12" lg="3">
       <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
       <br />
@@ -78,6 +79,7 @@
 
 <script>
 import login from "@/services/login";
+import externalAPIs from "@/services/externalAPIs";
 
 export default {
   data() {
@@ -114,6 +116,19 @@ export default {
           this.$store.dispatch("setStudies", response.data.studies);
           this.$store.dispatch("setRole", response.data.role);
           this.$store.dispatch("setLabEmail", response.data.labEmail);
+          
+          const profile = await externalAPIs.googleGetEmailAddress();
+
+          var labEmail = profile.data.labEmail;
+          var adminEmail = profile.data.adminEmail;
+
+          if (labEmail) {
+            this.$store.dispatch("setLabEmailStatus", true);
+          }
+          if (adminEmail) {
+            this.$store.dispatch("setAdminEmailStatus", true);
+          }
+
           this.$router.push({
             name: "Family information",
           });

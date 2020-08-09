@@ -16,6 +16,8 @@ export default new Vuex.Store({
     isUserLoggedIn: false,
     role: null,
     labEmail: null,
+    labEmailStatus: null,
+    adminEmailStatus: null,
   },
   mutations: {
     setToken(state, token) {
@@ -40,6 +42,12 @@ export default new Vuex.Store({
     setRole(state, role) {
       state.role = role;
     },
+    setLabEmailStatus(state, labEmailStatus) {
+      state.labEmailStatus = labEmailStatus;
+    },
+    setAdminEmailStatus(state, adminEmailStatus) {
+      state.adminEmailStatus = adminEmailStatus;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -62,6 +70,12 @@ export default new Vuex.Store({
     },
     setRole({ commit }, role) {
       commit("setRole", role);
+    },
+    setLabEmailStatus({ commit }, labEmailStatus) {
+      commit("setLabEmailStatus", labEmailStatus);
+    },
+    setAdminEmailStatus({ commit }, adminEmailStatus) {
+      commit("setAdminEmailStatus", adminEmailStatus);
     },
   },
 });
