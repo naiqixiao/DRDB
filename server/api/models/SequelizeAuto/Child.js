@@ -51,7 +51,8 @@ module.exports = function(sequelize, DataTypes) {
       },
       Illness: {
         type: DataTypes.BOOLEAN,
-        allowNull: true
+        allowNull: false,
+        defaultValue: "0"
       },
       Note: {
         type: DataTypes.TEXT,
