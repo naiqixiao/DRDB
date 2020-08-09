@@ -102,7 +102,10 @@ exports.create = asyncHandler(async (req, res) => {
           "<p>Dear ${{nameMom}},</p><p>\nI am emailing you today to let you know that we currently have a new study going on that <strong>${{childName}} </strong>is eligible to participate in, so I have included a short summary of it below in case you are interested.</p>",
         Completed: false,
         StudyType: "Behavioural",
-        PrematureParticipant: 0,
+        PrematureParticipant: "Include",
+        HearingLossParticipant: "Include",
+        VisionLossParticipant: "Include",
+        IllParticipant: "Include",
       },
     ];
 
@@ -147,9 +150,7 @@ exports.create = asyncHandler(async (req, res) => {
       // fs.copyFileSync(credentialsPath, labFolderPath + "/credentials.json");
     }
 
-    res
-      .status(200)
-      .send("lab created!");
+    res.status(200).send("lab created!");
   } catch (error) {
     throw error;
   }
