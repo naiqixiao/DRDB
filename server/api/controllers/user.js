@@ -191,6 +191,7 @@ exports.login = asyncHandler(async (req, res) => {
     userID: personnel.id,
     role: personnel.Role,
     lab: personnel.FK_Lab,
+    labName: personnel.Lab.LabName,
     labEmail: personnel.Lab.Email,
     token: token,
     studies: personnel.Lab.Studies,

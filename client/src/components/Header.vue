@@ -20,7 +20,7 @@
           </template>
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
-        <h2 class="title-text title ma-3">{{ $store.state.user + ' ('+ $store.state.role + ')' }}</h2>
+        <h2 class="title-text title ma-3">{{ $store.state.labName + ": " +$store.state.user + ' ('+ $store.state.role + ')' }}</h2>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -172,6 +172,7 @@ export default {
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setUserID", null);
       this.$store.dispatch("setLabEmail", null);
+      this.$store.dispatch("setLabName", null);
       this.$store.dispatch("setRole", null);
       this.$store.dispatch("setStudies", null);
 

@@ -33,9 +33,7 @@ async function sendEmail(oAuth2Client, emailContent) {
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
   var raw = makeBody(
-    // emailContent.to,
-    // "g.jaeger0226@gmail.com",
-    "testuser@kangleelab.com",
+    emailContent.to,
     emailContent.from,
     emailContent.cc,
     emailContent.subject,

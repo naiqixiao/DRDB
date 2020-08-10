@@ -16,6 +16,7 @@ export default new Vuex.Store({
     isUserLoggedIn: false,
     role: null,
     labEmail: null,
+    labName: null,
     labEmailStatus: null,
     adminEmailStatus: null,
   },
@@ -38,6 +39,9 @@ export default new Vuex.Store({
     },
     setLabEmail(state, labEmail) {
       state.labEmail = labEmail;
+    },
+    setLabName(state, labName) {
+      state.labName = labName;
     },
     setRole(state, role) {
       state.role = role;
@@ -67,6 +71,9 @@ export default new Vuex.Store({
     },
     setLabEmail({ commit }, labEmail) {
       commit("setLabEmail", labEmail);
+    },
+    setLabName({ commit }, labName) {
+      commit("setLabName", labName);
     },
     setRole({ commit }, role) {
       commit("setRole", role);

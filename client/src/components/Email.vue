@@ -2,21 +2,13 @@
   <v-card outlined>
     <v-row dense>
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model="data.Email"
-          label="Email"
-          :rules="this.$rules.email"
-        ></v-text-field>
+        <v-text-field v-model="data.Email" label="Email" :rules="this.$rules.email"></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="10">
-        <vue-editor
-          ref="emailBody"
-          v-model="emailBody"
-          :editor-toolbar="customToolbar"
-        ></vue-editor>
+        <vue-editor ref="emailBody" v-model="emailBody" :editor-toolbar="customToolbar"></vue-editor>
       </v-col>
     </v-row>
   </v-card>
@@ -77,9 +69,10 @@ export default {
     async sendEmail() {
       // send email with the current email body
       var emailContent = {
-        from: "Gabriel (Naiqi) Xiao <naiqi.xiao@kangleelab.com>",
+        from: this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        to: this.data.Email,
+        to: this.$store.state.labEmail,
+        //to: this.data.Email,
         subject: this.emailSubject,
         body: this.$refs.emailBody.value,
       };

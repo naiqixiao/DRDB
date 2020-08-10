@@ -428,10 +428,11 @@ export default {
         const response = await externalAPIs.setLabToken(this.signInCode);
 
         this.labEmail = response.data.Email;
+        this.$store.dispatch("setLabEmailStatus", true);
+        this.$store.dispatch("setLabEmail", this.labEmail);
 
         alert("Lab email account is successfully setup!");
         // console.log(response.data);
-        this.$store.dispatch("setLabEmailStatus", true);
       } catch (error) {
         // console.log(error.response);
         this.$store.dispatch("setLabEmailStatus", false);

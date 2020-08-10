@@ -3,6 +3,27 @@ const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 
+function shuffle(array) {
+  // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
 // Create and Save a new child of an existing family
 exports.create = asyncHandler(async (req, res) => {
   const newChildInfo = req.body;
@@ -83,15 +104,15 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.PrematureParticipant) {
     queryString.PrematureBirth = req.query.PrematureParticipant;
   }
-  
+
   if (req.query.IllParticipant) {
     queryString.Illness = req.query.IllParticipant;
   }
-  
+
   if (req.query.VisionLossParticipant) {
     queryString.VisionLoss = req.query.VisionLossParticipant;
   }
-  
+
   if (req.query.HearingLossParticipant) {
     queryString.HearingLoss = req.query.HearingLossParticipant;
   }
@@ -122,7 +143,7 @@ exports.search = asyncHandler(async (req, res) => {
                   "MaxAge",
                   "EmailTemplate",
                   "StudyType",
-                  "FK_Lab"
+                  "FK_Lab",
                 ],
               },
               { model: model.schedule },
@@ -140,6 +161,8 @@ exports.search = asyncHandler(async (req, res) => {
       },
     ],
   });
+
+  shuffle(children);
 
   res.status(200).json(children);
 });

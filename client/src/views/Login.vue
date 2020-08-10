@@ -116,6 +116,7 @@ export default {
           this.$store.dispatch("setStudies", response.data.studies);
           this.$store.dispatch("setRole", response.data.role);
           this.$store.dispatch("setLabEmail", response.data.labEmail);
+          this.$store.dispatch("setLabName", response.data.labName);
           
           const profile = await externalAPIs.googleGetEmailAddress();
 
@@ -123,6 +124,7 @@ export default {
           var adminEmail = profile.data.adminEmail;
 
           if (labEmail) {
+            // this.$store.dispatch("setLabEmail", labEmail);
             this.$store.dispatch("setLabEmailStatus", true);
           }
           if (adminEmail) {

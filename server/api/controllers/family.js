@@ -2,6 +2,27 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 
+function shuffle(array) {
+  // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
 // Create and Save a new family
 
 //   {
@@ -133,7 +154,10 @@ exports.search = asyncHandler(async (req, res) => {
       {
         model: model.appointment,
         include: [
-          { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+          {
+            model: model.child,
+            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+          },
           {
             model: model.study,
             attributes: [
@@ -150,6 +174,8 @@ exports.search = asyncHandler(async (req, res) => {
       },
     ],
   });
+
+  shuffle(families);
 
   res.status(200).send(families);
   console.log("Search successful!");
@@ -174,7 +200,6 @@ exports.delete = asyncHandler(async (req, res) => {
   });
   res.status(200).json(family);
 });
-
 
 // a special function to assign child ids within a family
 exports.searchSpecial = asyncHandler(async (req, res) => {
@@ -207,9 +232,12 @@ exports.searchSpecial = asyncHandler(async (req, res) => {
     family.Children.forEach(async (child, index) => {
       child.IdWithinFamily = alphabet[index];
 
-      await model.child.update({"IdWithinFamily": child.IdWithinFamily}, {
-        where: { id: child.id },
-      });
+      await model.child.update(
+        { IdWithinFamily: child.IdWithinFamily },
+        {
+          where: { id: child.id },
+        }
+      );
     });
   });
 
