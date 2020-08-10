@@ -96,30 +96,6 @@ cd ~/DRDB
 mysql -u newuser -p DRDB < MySQL/Backup.sql
 ```
 
-- Setup daily age update script
-
-```
-# participants's ages are supposed to update everyday.
-# in Terminal, login to mysql with the username created.
-
-mysql -u newuser -p
-```
-
-```
-# the following code should be entered in mysql shell, where you should see commend line starts with 'mysql>  '
-
-USE DRDB;
-DROP EVENT age_update;
-
-CREATE EVENT
-IF NOT EXISTS age_update
-ON SCHEDULE EVERY 1 Day
-STARTS CURRENT_TIMESTAMP
-DO
-UPDATE DRDB.Child
-    set Age = DATEDIFF(CURDATE(), DoB);
-```
-
 ### Backend setup and configuration
 
 - Install all required modules
