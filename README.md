@@ -6,7 +6,7 @@ This is an open source system to manage participant database, study, study sched
 
 ### Prerequisites
 
-- NodeJS & npm
+- Node.js & npm
 
 ```
 sudo apt update
