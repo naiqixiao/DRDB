@@ -12,6 +12,7 @@
     "core-js": "^3.6.5",
     "material-design-icons-iconfont": "^5.0.1",
     "moment": "^2.27.0",
+    "serialize-javascript": "^4.0.0",
     "vue": "^2.6.11",
     "vue-async-computed": "^3.8.2",
     "vue-google-charts": "^0.3.3",
