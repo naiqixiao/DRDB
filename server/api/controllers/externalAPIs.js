@@ -18,6 +18,7 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
       "https://www.googleapis.com/auth/gmail.modify",
       "https://www.googleapis.com/auth/gmail.compose",
       "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/gmail.settings.basic",
       "https://www.googleapis.com/auth/calendar",
       "https://www.googleapis.com/auth/calendar.events",
     ];
@@ -156,18 +157,35 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const profile = await gmail.users.getProfile({ userId: "me" });
+    // const profile = await gmail.users.getProfile({ userId: "me" });
 
-    var labEmail = profile.data.emailAddress;
+    const sendAs = await gmail.users.settings.sendAs.list({
+      userId: "me",
+    });
 
-    // update lab email info.
-    await model.lab.update(
-      { Email: labEmail },
-      {
-        where: { id: req.body.lab },
+    // console.log(sendAs.data)
+    var sendAsEmail = {};
+
+    sendAs.data.sendAs.forEach((email) => {
+      if (email.isDefault) {
+        sendAsEmail = email;
       }
-    );
+    });
+
+    var labEmail = sendAsEmail.sendAsEmail;
+
+    if (sendAsEmail.displayName != "") {
+      var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
+    } else {
+      var labInfo = { Email: labEmail };
+    }
+    
+    // update lab email info.
+    await model.lab.update(labInfo, {
+      where: { id: req.body.lab },
+    });
   } catch (error) {
+    console.log(error);
     var labEmail = null;
   }
 
@@ -199,5 +217,6 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   res.status(200).send({
     labEmail: labEmail,
     adminEmail: adminEmail,
+    labName: sendAsEmail.displayName
   });
 });

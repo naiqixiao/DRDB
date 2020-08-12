@@ -18,7 +18,7 @@
         style="font-weight: 600"
       >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
     </div>
-    
+
     <v-row justify="space-around">
       <v-col cols="12" md="4">
         <v-row dense>
@@ -104,21 +104,19 @@
         <!-- <h4>{{ selectedStudy.StudyName }}</h4>
         <h4>{{ selectedStudy.MinAge }}</h4>
         <h4>{{ selectedStudy.MaxAge }}</h4>
-        <p>{{ selectedStudy.Description }}</p>
+        <p>{{ selectedStudy.Description }}</p>-->
 
-        <v-btn @click.stop="dialogEmail = true" color="primary"
-          >Email test</v-btn
-        >
+        <v-btn @click.stop="dialogEmail = true" color="primary">Email test</v-btn>
         <EmailDialog
           :dialog="dialogEmail"
           :emailTemplate="selectedStudy.EmailTemplate"
           :data="{
             NameMom: currentFamily.NameMom,
             ChildName: currentChild.Name,
-            Email: currentFamily.Email,
+            Email: 'nx@kangleelab.com',
           }"
           @cancelEmail="closeEmail"
-        ></EmailDialog>-->
+        ></EmailDialog>
       </v-col>
 
       <v-col cols="12" md="5">
@@ -610,15 +608,16 @@
                   <Email
                     ref="Email"
                     :dialog="emailDialog"
-                    :emailTemplate="selectedStudy.EmailTemplate"
-                    :data="{
+                    :appointments="appointments"
+                    :emailType="emailType"
+                  ></Email>
+                  <!--  :emailTemplate="selectedStudy.EmailTemplate"
+                   "{
                       nameMom: currentFamily.NameMom,
                       childName: currentChild.Name,
                       Email: currentFamily.Email,
                       scheduleTime: studyDateTime,
-                    }"
-                    :emailType="emailType"
-                  ></Email>
+                  }"-->
                   <v-divider></v-divider>
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
@@ -706,6 +705,7 @@ import ExtraStudies from "@/components/ExtraStudies";
 import Conversation from "@/components/Conversation";
 
 import Email from "@/components/Email";
+import EmailDialog from "@/components/EmailDialog";
 import NextContact from "@/components/NextContact";
 
 import AppointmentTableBrief from "@/components/AppointmentTableBrief";
@@ -718,6 +718,7 @@ export default {
     Conversation,
     ExtraStudies,
     Email,
+    EmailDialog,
     NextContact,
     Page,
     AppointmentTableBrief,
@@ -1227,11 +1228,15 @@ export default {
 
         this.appointments.forEach((appointment) => {
           appointment.FK_Schedule = newStudySchedule.data.id;
-          appointment.Schedule = newStudySchedule.data;
+          appointment.Schedule = newStudySchedule.data; // show appointment time in the appointmentBrief table
+          // appointment.Schedule.AppointmentTime = newStudySchedule.data.AppointmentTime; // show appointment time in the appointmentBrief table
+          // appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt; // show appointment updated time in the appointmentBrief table
         });
 
         console.log("New Scheduled Created!");
-
+        // console.log(newSchedule);
+        // console.log(this.appointments);
+        
         return { calendarEvent: calendarEvent };
       } catch (error) {
         console.log(error.response);
@@ -1421,7 +1426,7 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
-        this.appointments = [];
+        this.appointments = null;
         this.emailDialog = false;
         this.nextContactDialog = false;
         this.emailSent = false;

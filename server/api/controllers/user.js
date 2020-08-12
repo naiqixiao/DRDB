@@ -81,7 +81,7 @@ async function sendEmail(emailContent) {
   try {
     const result = await gmail.users.messages.send({
       userId: "me",
-      resource: {
+      requestBody: {
         raw: raw,
       },
     });
@@ -187,6 +187,7 @@ exports.login = asyncHandler(async (req, res) => {
   res.status(200).send({
     message: "Auth succsessful.",
     temporaryPassword: personnel.temporaryPassword,
+    name: personnel.Name,
     user: personnel.Email,
     userID: personnel.id,
     role: personnel.Role,

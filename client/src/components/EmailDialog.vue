@@ -33,7 +33,7 @@
             <v-btn color="primary" @click="cancel">Cancel</v-btn>
           </v-col>
           <v-col md="2">
-            <v-btn color="primary" @click="sendEmail">Save</v-btn>
+            <v-btn color="primary" @click="sendEmail">Send</v-btn>
           </v-col>
           <v-col md="4"></v-col>
         </v-row>
@@ -96,8 +96,7 @@ export default {
     async sendEmail() {
       // send email with the current email body
       var emailContent = {
-        from: "Gabriel (Naiqi) Xiao <naiqi.xiao@kangleelab.com>",
-        // cc: "lab email <nx@kangleelab.com>",
+        from: "McMaster Baby Lab <babylab@mcmaster.ca>",
         to: this.data.Email,
         subject: this.emailSubject,
         body: this.$refs.emailBody.value,

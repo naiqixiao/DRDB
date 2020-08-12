@@ -1,6 +1,5 @@
 <template>
   <v-row justify="center" align="center" style="height: 600px;">
-   
     <v-col cols="12" lg="3">
       <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
       <br />
@@ -111,13 +110,14 @@ export default {
         } else {
           this.$store.dispatch("setToken", response.data.token);
           this.$store.dispatch("setUser", response.data.user);
+          this.$store.dispatch("setName", response.data.name);
           this.$store.dispatch("setUserID", response.data.userID);
           this.$store.dispatch("setLab", response.data.lab);
           this.$store.dispatch("setStudies", response.data.studies);
           this.$store.dispatch("setRole", response.data.role);
           this.$store.dispatch("setLabEmail", response.data.labEmail);
           this.$store.dispatch("setLabName", response.data.labName);
-          
+
           const profile = await externalAPIs.googleGetEmailAddress();
 
           var labEmail = profile.data.labEmail;

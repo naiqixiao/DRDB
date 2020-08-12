@@ -43,7 +43,7 @@ async function sendEmail(oAuth2Client, emailContent) {
   try {
     const result = await gmail.users.messages.send({
       userId: "me",
-      resource: {
+      requestBody: {
         raw: raw,
       },
     });

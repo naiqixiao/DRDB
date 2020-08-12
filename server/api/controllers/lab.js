@@ -64,7 +64,7 @@ async function sendEmail(emailContent) {
   try {
     await gmail.users.messages.send({
       userId: "me",
-      resource: {
+      requestBody: {
         raw: raw,
       },
     });

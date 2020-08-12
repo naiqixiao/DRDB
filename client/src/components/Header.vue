@@ -10,6 +10,9 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items v-if="this.$store.state.user != null" align="end">
+        <h2
+          class="title-text title ma-3"
+        >{{ $store.state.labName + ": " +$store.state.name + ' ('+ $store.state.role + ')' }}</h2>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
             <div v-on="on">
@@ -20,7 +23,6 @@
           </template>
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
-        <h2 class="title-text title ma-3">{{ $store.state.labName + ": " +$store.state.user + ' ('+ $store.state.role + ')' }}</h2>
       </v-toolbar-items>
     </v-app-bar>
 
@@ -170,6 +172,7 @@ export default {
     logout() {
       this.$store.dispatch("setToken", null);
       this.$store.dispatch("setUser", null);
+      this.$store.dispatch("setName", null);
       this.$store.dispatch("setUserID", null);
       this.$store.dispatch("setLabEmail", null);
       this.$store.dispatch("setLabName", null);
