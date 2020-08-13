@@ -39,14 +39,14 @@ exports.create = asyncHandler(async (req, res) => {
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id"] },
+            { model: model.family, attributes: ["id", "Email", "NameMom"] },
             {
               model: model.child,
               attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
             },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "StudyType"],
+              attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab", "EmailTemplate"],
             },
             {
               model: model.personnel,
@@ -98,11 +98,11 @@ exports.create = asyncHandler(async (req, res) => {
         resource: updatedScheduleInfo,
         sendUpdates: "all",
       });
-    } catch (err) {
-      throw err;
+    } catch (error) {
+      throw error;
     }
 
-    res.status(200).send(appointments);
+    res.status(200).send(Schedule);
   } catch (error) {
     res.status(500).send(error);
   }
@@ -147,11 +147,12 @@ exports.search = asyncHandler(async (req, res) => {
   const appointment = await model.appointment.findAll({
     where: queryString,
     include: [
-      { model: model.family, attributes: ["id"] },
-      { model: model.child, attributes: ["Name", "DoB", "Sex"] },
+      { model: model.family, attributes: ["id", "Email", "NameMom"] },
+      { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
       {
         model: model.study,
-        attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab"],
+        attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab", "EmailTemplate"],
+
       },
       {
         model: model.personnel,
@@ -206,7 +207,7 @@ exports.update = asyncHandler(async (req, res) => {
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id"] },
+            { model: model.family, attributes: ["id", "Email", "NameMom"] },
             {
               model: model.child,
               attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
@@ -219,6 +220,7 @@ exports.update = asyncHandler(async (req, res) => {
                 "MaxAge",
                 "StudyType",
                 "FK_Lab",
+                "EmailTemplate"
               ],
             },
             {
@@ -292,7 +294,7 @@ exports.delete = asyncHandler(async (req, res) => {
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id"] },
+            { model: model.family, attributes: ["id", "Email", "NameMom"] },
             {
               model: model.child,
               attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
@@ -305,6 +307,7 @@ exports.delete = asyncHandler(async (req, res) => {
                 "MaxAge",
                 "StudyType",
                 "FK_Lab",
+                "EmailTemplate"
               ],
             },
             {

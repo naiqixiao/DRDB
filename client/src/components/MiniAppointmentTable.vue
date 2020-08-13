@@ -356,16 +356,18 @@ export default {
       }
 
       try {
-        const createdAppointments = await appointment.create(
-          this.newAppointments
-        );
+        const updatedSchedule = await appointment.create(this.newAppointments);
 
-        for (i = 0; i < this.newAppointments.length; i++) {
-          this.newAppointments[i].id = createdAppointments.data[i].id;
-        }
-
-        this.newAppointments.forEach((appointment) => {
-          this.Appointments.push(appointment);
+        // this.Appointments = updatedSchedule.data.Appointments;
+        // for (i = 0; i < this.newAppointments.length; i++) {
+        //   this.newAppointments[i].id = createdAppointments.data[i].id;
+        // }
+        updatedSchedule.data.Appointments.forEach((newAppointment) => {
+          this.Appointments.forEach((appointment) => {
+            if ((newAppointment.id !== appointment.id)) {
+              this.Appointments.push(newAppointment);
+            }
+          });
         });
 
         console.log(this.Appointments);
@@ -373,7 +375,7 @@ export default {
         this.closeNewAppointment();
         console.log("Appointments updated.");
       } catch (error) {
-        console.error(error.response);
+        console.error(error);
       }
     },
 
@@ -398,7 +400,7 @@ export default {
           console.log("Appointment deleted.");
         }
       } catch (error) {
-        console.error(error.response);
+        console.error(error);
       }
     },
 
@@ -423,14 +425,16 @@ export default {
       );
 
       try {
-        await appointment.update({
+        const Schedule = await appointment.update({
           updatedExperimenters: updatedExperimenters,
           scheduleId: this.editedAppointment.FK_Schedule,
         });
 
         this.Appointments[this.index] = this.editedAppointment;
+
+        console.log(Schedule.data);
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
 
       this.closeUpdateExperimenter();
@@ -461,7 +465,7 @@ export default {
 
           return results.data;
         } catch (error) {
-          console.log(error.response);
+          console.log(error);
         }
       } else {
         return [];
