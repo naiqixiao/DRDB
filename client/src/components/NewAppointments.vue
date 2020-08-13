@@ -73,6 +73,8 @@ export default {
         Child: {
           Name: this.child.Name,
           DoB: this.child.DoB,
+          IdWithinFamily: this.child.IdWithinFamily,
+          Sex: this.child.Sex,
         },
         Study: {
           StudyName: this.selectedStudy.StudyName,

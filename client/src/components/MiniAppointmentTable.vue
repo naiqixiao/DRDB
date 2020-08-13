@@ -368,6 +368,8 @@ export default {
           this.Appointments.push(appointment);
         });
 
+        console.log(this.Appointments);
+
         this.closeNewAppointment();
         console.log("Appointments updated.");
       } catch (error) {

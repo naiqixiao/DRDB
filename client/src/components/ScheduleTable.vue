@@ -127,8 +127,6 @@
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
         <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0)">
-          <!-- <v-col cols="12" md="12">
-          </v-col>-->
           <MiniAppointmentTable :Appointments="item.Appointments" @updateSchedule="updateSchedule"></MiniAppointmentTable>
         </v-row>
       </td>
@@ -227,15 +225,6 @@
                 :appointments="editedSchedule.Appointments"
                 emailType="Confirmation"
               ></Email>
-              <!-- :emailTemplate="
-                  editedSchedule.Appointments[0].Study.EmailTemplate
-                "
-                :data="{
-                  nameMom: editedSchedule.Appointments[0].Family.NameMom,
-                  childName: editedSchedule.Appointments[0].Child.Name,
-                  Email: editedSchedule.Appointments[0].Family.Email,
-                  scheduleTime: studyDateTime,
-              }"-->
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
