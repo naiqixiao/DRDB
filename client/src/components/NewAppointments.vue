@@ -1,7 +1,7 @@
 <template>
   <v-row align="end" justify="space-around">
-    <v-col cols="12" md="1">
-      <h3>{{ child.Name }}</h3>
+    <v-col cols="12" md="2" style="display: flex; justify-content: flex-end;">
+      <h3 class="name">{{ child.Name + ":"}}</h3>
     </v-col>
 
     <v-col cols="12" md="2">
@@ -35,7 +35,7 @@
         <v-icon>delete</v-icon>
       </v-btn>
     </v-col>
-    <v-col cols="12" md="1"></v-col>
+    <!-- <v-col cols="12" md="1"></v-col> -->
   </v-row>
 </template>
 
@@ -80,7 +80,7 @@ export default {
           StudyName: this.selectedStudy.StudyName,
           MinAge: this.selectedStudy.MinAge,
           MaxAge: this.selectedStudy.MaxAge,
-          StudyType: this.selectedStudy.StudyType
+          StudyType: this.selectedStudy.StudyType,
         },
         Experimenters: experimenterIds,
       };
@@ -169,4 +169,11 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>
+<style scoped>
+.name {
+  height: 30px;
+  display: flex;
+  align-items: flex-end;
+}
+</style>
+

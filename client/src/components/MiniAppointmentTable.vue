@@ -60,7 +60,7 @@
     <div>
       <v-dialog v-model="dialogAddAppointments" max-width="1200px">
         <v-card>
-          <v-card-title class="title">Add appointments to the current schedule</v-card-title>
+          <v-card-title class="title">Add study appointment(s) to the visit</v-card-title>
           <v-container fluid>
             <v-row>
               <v-col cols="12" md="2" v-for="child in Children" :key="child.id">
@@ -118,7 +118,7 @@
     <div>
       <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
         <v-card height="300px" class="d-flex flex-column">
-          <v-card-title class="title">Update experimenters for the current appointment</v-card-title>
+          <v-card-title class="title">Update experimenters for the current study appointments</v-card-title>
           <v-row justify="center">
             <v-col cols="12" md="3">
               <v-select
