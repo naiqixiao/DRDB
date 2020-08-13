@@ -54,7 +54,7 @@
                 height="48px"
                 background-color="textbackground"
                 hide-details
-                @keydown.enter="searchFamily(item.label, $event.target.value)"
+                @keydown.enter="searchFamily(item.field, $event.target.value)"
                 :label="item.label"
                 :value="item.label === 'Phone' ? PhoneFormated(currentFamily[item.field]) : currentFamily[item.field]"
                 :append-icon="searchStatus ? 'mdi-magnify' : undefined"

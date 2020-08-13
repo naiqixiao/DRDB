@@ -219,22 +219,20 @@ export default {
 
   methods: {
     async searchSchedule() {
-      console.log(this.queryString);
-      if (this.queryString.StudyName) {
-        try {
-          const Result = await schedule.search(this.queryString);
-          this.Schedules = Result.data;
-        } catch (error) {
-          if (error.response.status === 401) {
-            alert("Authentication failed, please login.");
-            this.$router.push({
-              name: "Login",
-            });
-          }
+      // console.log(this.queryString);
+      try {
+        const Result = await schedule.search(this.queryString);
+        this.Schedules = Result.data;
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
         }
-
-        this.queryString = Object.assign({}, this.defaultQueryString);
       }
+
+      this.queryString = Object.assign({}, this.defaultQueryString);
     },
 
     async searchScheduleByStatus() {

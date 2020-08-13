@@ -3,7 +3,7 @@
     <v-row dense>
       <v-col cols="12" md="6">
         <v-text-field
-          :value="appointments ? appointments[0].Child.Family.Email : ''"
+          :value="appointments[0].Child.Family.Email"
           label="Email"
           :rules="this.$rules.email"
         ></v-text-field>

@@ -42,7 +42,6 @@ const { google } = require("googleapis");
 
 exports.create = asyncHandler(async (req, res) => {
   var newScheduleInfo = req.body;
-
   // if (newScheduleInfo.Status == "Confirmed") {
   //   // Create a calendar event
   //   const calEvent = await google.calendar.events.insert({
@@ -77,9 +76,9 @@ exports.create = asyncHandler(async (req, res) => {
     res.status(200).send(schedule);
     console.log("appointment created!");
   } catch (error) {
+    console.log(error);
     throw error;
   }
-
 });
 
 // Retrieve appointments from the database.
@@ -137,7 +136,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.StudyName) {
     queryString["$Appointments.FK_Study$"] = req.query.StudyName;
-    
+
     // {
     //   [Op.like]: `${req.query.StudyName}%`,
     // };

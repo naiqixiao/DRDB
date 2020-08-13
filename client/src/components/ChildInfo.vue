@@ -124,7 +124,7 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogSchedule" max-width="1000px" :retain-focus="false" persistent>
+      <v-dialog v-model="dialogSchedule" max-width="1000px" :retain-focus="false">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -263,13 +263,7 @@
               <Email
                 ref="Email"
                 :dialog="emailDialog"
-                :emailTemplate="emailTemplate"
-                :data="{
-                  nameMom: currentFamily.NameMom,
-                  childName: currentChild.Name,
-                  Email: currentFamily.Email,
-                  scheduleTime: studyDateTime,
-                }"
+                :appointments="appointments"
                 emailType="Confirmation"
               ></Email>
 
@@ -590,13 +584,19 @@ export default {
       try {
         const newStudySchedule = await schedule.create(newSchedule);
 
-        this.scheduleId = newStudySchedule.data.id;
-
         var calendarEvent = newSchedule;
 
-        calendarEvent.scheduleId = newStudySchedule.data.id;
+        this.scheduleId = newStudySchedule.data.id;
 
-        // this.manualCalendar = true;
+        calendarEvent.scheduleId = this.scheduleId;
+
+        // attach schedule info to the current appointments.
+        newStudySchedule.data.updatedAt = moment().toString();
+
+        this.appointments.forEach((appointment) => {
+          appointment.FK_Schedule = newStudySchedule.data.id;
+          appointment.Schedule = newStudySchedule.data;
+        });
 
         console.log("New Scheduled Created!");
 
@@ -604,7 +604,7 @@ export default {
 
         return { calendarEvent: calendarEvent };
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -667,7 +667,7 @@ export default {
           this.emailDialog = true;
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -702,14 +702,14 @@ export default {
             alert(
               "Calendar event wasn't created successfully, please try again."
             );
-            console.log(error.response);
+            console.log(error);
             this.manualCalendar = true;
           }
         } else {
           this.scheduleNextPage = true;
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -721,7 +721,7 @@ export default {
         this.emailSent = true;
         this.scheduleNextPage = true;
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
         alert("Email wasn't sent successfully, please try again.");
       }
     },
@@ -734,7 +734,7 @@ export default {
         this.resetSchedule();
         this.closeSchedule();
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -762,10 +762,9 @@ export default {
       setTimeout(() => {
         this.e1 = 1;
         this.scheduleId = null;
-        this.appointments = [];
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
-        this.response = null;
+        // this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
         this.selectedStudy = [];
@@ -833,7 +832,7 @@ export default {
           }
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -846,6 +845,8 @@ export default {
     },
 
     Schedule(child, index) {
+      this.appointments = [];
+
       this.currentChildIndex = index;
       this.currentChild = Object.assign({}, child);
 
@@ -855,6 +856,9 @@ export default {
       newAppointment.Child = child;
       newAppointment.FK_Family = child.FK_Family;
       newAppointment.index = this.appointments.length;
+      newAppointment.Child.Family = {};
+      newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
+      newAppointment.Child.Family.NameMom = this.currentFamily.NameMom; // family email information used for sending email
 
       this.appointments.push(newAppointment);
 

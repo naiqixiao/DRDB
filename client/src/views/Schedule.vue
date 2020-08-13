@@ -106,7 +106,7 @@
         <h4>{{ selectedStudy.MaxAge }}</h4>
         <p>{{ selectedStudy.Description }}</p>-->
 
-        <v-btn @click.stop="dialogEmail = true" color="primary">Email test</v-btn>
+        <!-- <v-btn @click.stop="dialogEmail = true" color="primary">Email test</v-btn>
         <EmailDialog
           :dialog="dialogEmail"
           :emailTemplate="selectedStudy.EmailTemplate"
@@ -116,7 +116,7 @@
             Email: 'nx@kangleelab.com',
           }"
           @cancelEmail="closeEmail"
-        ></EmailDialog>
+        ></EmailDialog>-->
       </v-col>
 
       <v-col cols="12" md="5">
@@ -611,13 +611,6 @@
                     :appointments="appointments"
                     :emailType="emailType"
                   ></Email>
-                  <!--  :emailTemplate="selectedStudy.EmailTemplate"
-                   "{
-                      nameMom: currentFamily.NameMom,
-                      childName: currentChild.Name,
-                      Email: currentFamily.Email,
-                      scheduleTime: studyDateTime,
-                  }"-->
                   <v-divider></v-divider>
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
@@ -705,7 +698,7 @@ import ExtraStudies from "@/components/ExtraStudies";
 import Conversation from "@/components/Conversation";
 
 import Email from "@/components/Email";
-import EmailDialog from "@/components/EmailDialog";
+// import EmailDialog from "@/components/EmailDialog";
 import NextContact from "@/components/NextContact";
 
 import AppointmentTableBrief from "@/components/AppointmentTableBrief";
@@ -718,7 +711,7 @@ export default {
     Conversation,
     ExtraStudies,
     Email,
-    EmailDialog,
+    // EmailDialog,
     NextContact,
     Page,
     AppointmentTableBrief,
@@ -1052,7 +1045,8 @@ export default {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedChild = Object.assign({}, this.currentChild);
 
-      if (!this.scheduleId & (this.appointments.length === 0)) {
+      if (!this.scheduleId) {
+        this.appointments = [];
         var newAppointment = Object.assign({}, this.defaultAppointment);
         newAppointment.FK_Child = this.currentChild.id;
         newAppointment.FK_Family = this.currentChild.FK_Family;
@@ -1228,15 +1222,13 @@ export default {
 
         this.appointments.forEach((appointment) => {
           appointment.FK_Schedule = newStudySchedule.data.id;
-          appointment.Schedule = newStudySchedule.data; // show appointment time in the appointmentBrief table
-          // appointment.Schedule.AppointmentTime = newStudySchedule.data.AppointmentTime; // show appointment time in the appointmentBrief table
-          // appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt; // show appointment updated time in the appointmentBrief table
+          appointment.Schedule = {};
+          appointment.Schedule.AppointmentTime =
+            newStudySchedule.data.AppointmentTime;
         });
 
         console.log("New Scheduled Created!");
-        // console.log(newSchedule);
-        // console.log(this.appointments);
-        
+
         return { calendarEvent: calendarEvent };
       } catch (error) {
         console.log(error.response);
@@ -1426,7 +1418,6 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
-        this.appointments = null;
         this.emailDialog = false;
         this.nextContactDialog = false;
         this.emailSent = false;

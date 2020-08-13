@@ -224,7 +224,10 @@
               <Email
                 ref="Email"
                 :dialog="emailDialog"
-                :emailTemplate="
+                :appointments="editedSchedule.Appointments"
+                emailType="Confirmation"
+              ></Email>
+              <!-- :emailTemplate="
                   editedSchedule.Appointments[0].Study.EmailTemplate
                 "
                 :data="{
@@ -232,9 +235,7 @@
                   childName: editedSchedule.Appointments[0].Child.Name,
                   Email: editedSchedule.Appointments[0].Family.Email,
                   scheduleTime: studyDateTime,
-                }"
-                emailType="Confirmation"
-              ></Email>
+              }"-->
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
@@ -349,6 +350,10 @@ export default {
           this.editedIndex = this.Schedules.indexOf(item);
           this.editedSchedule = Object.assign({}, item);
           this.datePickerRange();
+          this.editedSchedule.Appointments[0].Child.Family = {};
+          this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Appointments[0].Family.Email;
+          this.editedSchedule.Appointments[0].Child.Family.NameMom = this.editedSchedule.Appointments[0].Family.NameMom;
+
           this.dialog = true;
           break;
 
@@ -356,7 +361,7 @@ export default {
           try {
             await schedule.complete(item);
           } catch (error) {
-            console.log(error.response);
+            console.log(error);
           }
 
           item.updatedAt = new Date().toISOString();
@@ -366,7 +371,7 @@ export default {
           try {
             await schedule.remind(item);
           } catch (error) {
-            console.log(error.response);
+            console.log(error);
           }
 
           item.updatedAt = new Date().toISOString();
@@ -401,7 +406,7 @@ export default {
             item.AppointmentTime = null;
             item.updatedAt = new Date().toISOString();
 
-            console.log("appointment updated!");
+            console.log("Study appointment updated!");
 
             this.editedSchedule = Object.assign({}, item);
 
@@ -410,7 +415,7 @@ export default {
             this.nextContactDate = this.TodaysDate;
             this.nextContactDialog = true;
           } catch (error) {
-            console.log(error.response);
+            console.log(error);
           }
           break;
       }
@@ -472,12 +477,15 @@ export default {
           this.editedSchedule.eventURL = calendarEvent.eventURL;
           this.editedSchedule.updatedAt = new Date().toISOString();
 
+          this.editedSchedule.Appointments[0].Schedule = {};
+          this.editedSchedule.Appointments[0].Schedule.AppointmentTime = this.editedSchedule.AppointmentTime;
+
           Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
         }
 
         // this.close();
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -500,7 +508,7 @@ export default {
         this.emailSent = true;
         this.scheduleNextPage = true;
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -510,7 +518,7 @@ export default {
         // this.$emit("newSchedule");
         this.close();
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -537,8 +545,6 @@ export default {
     close() {
       this.dialog = false;
       setTimeout(() => {
-        this.editedSchedule = Object.assign({}, this.defaultSchedule);
-        this.editedIndex = -1;
         this.studyDate = null;
         this.studyTime = "09:00AM";
         this.e1 = 1;

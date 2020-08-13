@@ -146,13 +146,7 @@
               <Email
                 ref="Email"
                 :dialog="emailDialog"
-                :emailTemplate="item.Study.EmailTemplate"
-                :data="{
-                  nameMom: family.NameMom,
-                  childName: item.Child.Name,
-                  Email: family.Email,
-                  scheduleTime: studyDateTime,
-                }"
+                :appointments="appointmentsOfCurrentSchedule"
                 emailType="Confirmation"
               ></Email>
               <v-divider></v-divider>
@@ -302,6 +296,7 @@ export default {
       scheduleNextPage: false,
       emailSent: false,
       scheduleUpdated: false,
+      appointmentsOfCurrentSchedule: [],
     };
   },
   methods: {
@@ -310,6 +305,16 @@ export default {
         case "Confirmed":
           this.editedIndex = this.Appointments.indexOf(item);
           this.editedItem = Object.assign({}, item);
+
+          // create an array of appointments of the same schedule, used for creating email
+          this.appointmentsOfCurrentSchedule = [];
+          this.Appointments.forEach((appointment) => {
+            if (appointment.FK_Schedule === this.editedItem.FK_Schedule) {
+              appointment.Child.Family = this.family;
+              this.appointmentsOfCurrentSchedule.push(appointment);
+            }
+          });
+
           this.dialog = true;
           break;
 
@@ -449,6 +454,8 @@ export default {
               appointment.Schedule = this.editedItem.Schedule;
             }
           });
+
+          this.appointmentsOfCurrentSchedule[0].Schedule = this.editedItem.Schedule;
         }
       } catch (error) {
         console.log(error);
