@@ -99,7 +99,7 @@ exports.create = asyncHandler(async (req, res) => {
         MaxAge: "15.50",
         Description: "Study description....",
         EmailTemplate:
-          "<p>Dear ${{nameMom}},</p><p>\nI am emailing you today to let you know that we currently have a new study going on that <strong>${{childName}} </strong>is eligible to participate in, so I have included a short summary of it below in case you are interested.</p>",
+          "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
         Completed: false,
         StudyType: "Behavioural",
         PrematureParticipant: "Include",
@@ -129,6 +129,7 @@ exports.create = asyncHandler(async (req, res) => {
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
         "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password.</p> " +
+        // "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
         "<p> </p>" +
         "<p>Thank you! </p>" +
