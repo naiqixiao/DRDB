@@ -861,7 +861,7 @@ export default {
 
         this.studies = Result.data;
       } catch (error) {
-        if (error.response.status === 401) {
+        if (error.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
             name: "Login",
@@ -882,7 +882,7 @@ export default {
           }
         );
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
 
       var queryString = {};
@@ -954,13 +954,13 @@ export default {
 
         // console.log(this.Children);
       } catch (error) {
-        if (error.response.status === 401) {
+        if (error.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({
             name: "Login",
           });
         } else {
-          console.log(error.response);
+          console.log(error);
         }
       }
 
@@ -996,7 +996,7 @@ export default {
 
           this.closeFamily();
         } catch (error) {
-          console.log(error.response);
+          console.log(error);
         }
       }
     },
@@ -1021,7 +1021,7 @@ export default {
           this.closeChild();
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -1225,13 +1225,14 @@ export default {
           appointment.Schedule = {};
           appointment.Schedule.AppointmentTime =
             newStudySchedule.data.AppointmentTime;
+          appointment.Schedule.Status = newStudySchedule.data.Status;
         });
 
         console.log("New Scheduled Created!");
 
         return { calendarEvent: calendarEvent };
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -1243,7 +1244,7 @@ export default {
       try {
         await calendar.create(calendarEvent);
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -1304,7 +1305,7 @@ export default {
           this.scheduleNextPage = true;
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -1327,14 +1328,14 @@ export default {
             alert(
               "Calendar event wasn't created successfully, please try again."
             );
-            console.log(error.response);
+            console.log(error);
             this.manualCalendar = true;
           }
         } else {
           this.scheduleNextPage = true;
         }
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 
@@ -1346,7 +1347,7 @@ export default {
         this.emailSent = true;
         this.scheduleNextPage = true;
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
         alert("Email wasn't sent successfully, please try again.");
       }
     },
@@ -1403,7 +1404,7 @@ export default {
         this.resetSchedule();
         this.closeSchedule();
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 

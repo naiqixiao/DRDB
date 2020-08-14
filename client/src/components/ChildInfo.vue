@@ -595,7 +595,10 @@ export default {
 
         this.appointments.forEach((appointment) => {
           appointment.FK_Schedule = newStudySchedule.data.id;
-          appointment.Schedule = newStudySchedule.data;
+          appointment.Schedule = {};
+          appointment.Schedule.Status = newStudySchedule.data.Status;
+          appointment.Schedule.AppointmentTime =
+            newStudySchedule.data.AppointmentTime;
         });
 
         console.log("New Scheduled Created!");
