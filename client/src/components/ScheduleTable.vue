@@ -10,8 +10,6 @@
     :items="Schedules"
     class="elevation-1"
     @click:row="rowSelected"
-    @item-expanded="rowSelected2"
-    show-expand
     single-expand
   >
     <template #item.Child="{ item }">
@@ -126,8 +124,12 @@
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0)">
-          <MiniAppointmentTable :Appointments="item.Appointments" @updateSchedule="updateSchedule"></MiniAppointmentTable>
+        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll;">
+          <MiniAppointmentTable
+            :Appointments="item.Appointments"
+            :Index="Schedules.indexOf(item)"
+            @updateSchedule="updateSchedule"
+          ></MiniAppointmentTable>
         </v-row>
       </td>
     </template>
@@ -547,13 +549,10 @@ export default {
 
     rowSelected(item, row) {
       row.select(true);
+      row.expand(true);
       this.$emit("rowSelected", item.Appointments[0].Family);
     },
-
-    rowSelected2(item) {
-      this.$emit("rowSelected", item.item.Appointments[0].Family);
-    },
-
+    
     datePickerRange() {
       if (this.editedSchedule.Appointments) {
         var minAges = this.editedSchedule.Appointments.map((appointment) => {

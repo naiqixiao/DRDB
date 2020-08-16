@@ -1,14 +1,14 @@
 <template>
   <div>
-    <v-row style="height: 48px;" dense>
+    <!-- <v-row style="height: 48px;" dense>
       <v-col cols="12" md="12" class="justify-start">
         <h1 class="text-left">Child information</h1>
       </v-col>
-    </v-row>
-    <div v-if="Children">
+    </v-row> -->
+    <div v-if="familyId">
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
-          <v-card class="child-card d-flex flex-column" height="174px">
+          <v-card class="child-card d-flex flex-column" height="160px">
             <v-card-title class="title">
               <div
                 class="d-inline-block text-truncate"
@@ -42,12 +42,40 @@
             </v-card-actions>
           </v-card>
         </v-col>
+        <v-col cols="6">
+          <v-card
+            class="child-card d-flex align-center justify-center"
+            style="border-width: medium !important; border-style: dashed !important;"
+            height="160px"
+          >
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn
+                    dark
+                    outlined
+                    class="c1"
+                    fab
+                    color="primary"
+                    x-large
+                    style="border-width: medium; border-style: dashed !important;"
+                    @click.stop="addChild"
+                    :disabled="!familyId"
+                  >
+                    <v-icon dark>add</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Add a child to this family</span>
+            </v-tooltip>
+          </v-card>
+        </v-col>
       </v-row>
     </div>
     <div v-else>
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="child in 4" :key="child">
-          <v-card class="placeholder-card" height="174px">
+          <v-card class="placeholder-card" height="160px">
             <v-card-title class="title">{{ "Child " + alphabet[child - 1] }}</v-card-title>
           </v-card>
         </v-col>
@@ -315,7 +343,7 @@
         </v-card>
       </v-dialog>
     </div>
-    <v-spacer></v-spacer>
+    <!-- <v-spacer></v-spacer>
 
     <v-row align-content="end" justify="end" style="height: 120px;" dense>
       <v-tooltip top>
@@ -328,7 +356,7 @@
         </template>
         <span>Add a child to this family</span>
       </v-tooltip>
-    </v-row>
+    </v-row> -->
   </div>
 </template>
 
@@ -1088,7 +1116,7 @@ export default {
 .child-card {
   border-radius: 10px !important;
   border-style: solid !important;
-  border-width: thin !important;
+  border-width: medium !important;
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
@@ -1096,7 +1124,7 @@ export default {
 .placeholder-card {
   border-radius: 10px !important;
   border-style: dashed !important;
-  border-width: thin !important;
+  border-width: medium !important;
   border-color: var(--v-primary-lighten4) !important;
   background-color: var(--v-textbackground-lighten4) !important;
 }

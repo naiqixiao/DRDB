@@ -191,13 +191,13 @@ export default {
         text: "Child",
         align: "center",
         value: "Child",
-        width: "12%",
+        width: "16%",
       },
       {
         text: "Study",
         align: "center",
         value: "Study",
-        width: "15%",
+        width: "18%",
       },
       {
         text: "Study Time",
@@ -209,19 +209,19 @@ export default {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "10%",
+        width: "13%",
       },
       {
         text: "Status",
         align: "center",
         value: "Status",
-        width: "10%",
+        width: "8%",
       },
       {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "10%",
+        width: "8%",
       },
 
       {
@@ -236,14 +236,14 @@ export default {
         align: "center",
         value: "Reminded",
         sortable: false,
-        width: "8%",
+        width: "5%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Completed",
         sortable: false,
-        width: "8%",
+        width: "5%",
       },
     ];
 
@@ -259,7 +259,7 @@ export default {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "20%",
+        width: "16%",
       },
       {
         text: "Age",
@@ -315,7 +315,7 @@ export default {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "20%",
+        width: "15%",
       },
       {
         text: "Age",

@@ -9,14 +9,14 @@
 
       <v-spacer></v-spacer>
 
-      <v-toolbar-items v-if="this.$store.state.user != null" align="end">
+      <v-toolbar-items v-if="this.$store.state.user != null" class="d-flex align-center">
         <h2
           class="title-text title ma-3"
         >{{ $store.state.labName + ": " +$store.state.name + ' ('+ $store.state.role + ')' }}</h2>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn icon @click.stop="feedbackDialog = true">
+        <v-tooltip bottom >
+          <template v-slot:activator="{ on }" >
+            <div v-on="on" style="height:48px !important;">
+              <v-btn icon @click.stop="feedbackDialog = true" >
                 <v-icon>feedback</v-icon>
               </v-btn>
             </div>

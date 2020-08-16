@@ -372,7 +372,9 @@ exports.delete = asyncHandler(async (req, res) => {
       where: { id: req.query.id },
     });
 
-    res.status(200).send("appointment deleted.");
+    res.status(200).send({
+      AppointmentTime: Schedule.AppointmentTime
+    });
   } catch (error) {
     res.status(500).send(error);
   }

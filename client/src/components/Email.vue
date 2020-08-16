@@ -1,7 +1,8 @@
 <template>
-  <v-card outlined>
-    <v-row dense>
-      <v-col cols="12" md="6">
+  <v-card outlined class="d-flex flex-column">
+    <v-row dense justify="start">
+      <v-col cols="12" md="1"></v-col>
+      <v-col cols="12" md="8">
         <v-text-field
           :value="appointments[0].Child.Family.Email"
           label="Email"
@@ -10,8 +11,8 @@
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="10">
+    <v-row justify="center">
+      <v-col cols="12" md="11" style="overflow-y: scroll;">
         <vue-editor ref="emailBody" v-model="emailBody" :editor-toolbar="customToolbar"></vue-editor>
       </v-col>
     </v-row>

@@ -366,14 +366,20 @@
       </v-dialog>
 
       <v-col cols="12" md="4">
-        <ChildInfo
-          :Children="currentFamily.Children"
-          :familyId="parseInt(currentFamily.id)"
-          :currentFamily="currentFamily"
-          :studyTimeSlots="this.$studyTimeSlots"
-          @newSchedule="updateFamilyAppointment"
-        ></ChildInfo>
+        <v-col cols="12" md="12" class="justify-start">
+          <h1 class="text-left">Child information</h1>
+        </v-col>
+        <v-col style="overflow-y: scroll; padding: 0px !important; height: 400px !important">
+          <ChildInfo
+            :Children="currentFamily.Children"
+            :familyId="parseInt(currentFamily.id)"
+            :currentFamily="currentFamily"
+            :studyTimeSlots="this.$studyTimeSlots"
+            @newSchedule="updateFamilyAppointment"
+          ></ChildInfo>
+        </v-col>
       </v-col>
+
       <v-col cols="12" md="3">
         <Conversation
           :Conversation="currentFamily.Conversations"
@@ -591,7 +597,6 @@ export default {
           this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
         }
-
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");

@@ -1,6 +1,6 @@
 <template>
   <v-row align="end" justify="space-around">
-    <v-col cols="12" md="2" style="display: flex; justify-content: flex-end;">
+    <v-col cols="12" md="2" class="d-flex align-end">
       <h3 class="name">{{ child.Name + ":"}}</h3>
     </v-col>
     <v-col cols="12" md="2" > 

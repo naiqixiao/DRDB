@@ -210,6 +210,7 @@
                       :label="field.label"
                       dense
                       chip
+                      hide-details
                     ></v-select>
                   </div>
                   <div v-else-if="field.rules">
@@ -252,6 +253,7 @@
                       :label="field.label"
                       dense
                       chip
+                      hide-details
                     ></v-select>
                   </div>
                   <div v-else-if="field.rules">
