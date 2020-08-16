@@ -28,7 +28,6 @@
           height="48px"
           background-color="textbackground"
           hide-details
-          placeholder="  "
           outlined
           dense
         ></v-text-field>
@@ -80,7 +79,6 @@
           height="48px"
           background-color="textbackground"
           hide-details
-          placeholder="  "
           outlined
           dense
         ></v-text-field>
@@ -96,7 +94,6 @@
           height="48px"
           background-color="textbackground"
           hide-details
-          placeholder="  "
           outlined
           dense
         ></v-text-field>
