@@ -195,8 +195,8 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        to: this.$store.state.labEmail,
-        //to: appointments[0].Child.Family.Email,
+        //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
+        to: this.appointments[0].Child.Family.NameMom + "<" + this.$store.state.labEmail + ">",
         subject: this.emailSubject,
         body: this.$refs.emailBody.value,
       };
