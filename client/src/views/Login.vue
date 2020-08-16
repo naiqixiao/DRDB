@@ -11,7 +11,7 @@
         @keydown.enter="login"
       ></v-text-field>
       <br />
-      <div class="danger-alert" v-html="error" />
+      <!-- <div class="danger-alert" v-html="error" /> -->
       <v-btn rounded color="primary" v-if="error" @click="resetPassword">Forgot Password?</v-btn>
       <br />
       <div class="text-center">

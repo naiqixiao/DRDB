@@ -69,17 +69,34 @@ export default {
 
       // opening line, confirming the schedule date and time
       if (this.appointments) {
-        var opening =
-          "<p>Dear " +
-          this.appointments[0].Child.Family.NameMom.split(" ")[0] +
-          ",</p>" +
-          "<p>Thanks for your support to our research! This is a confirmation for your visit with " +
-          this.childNames() +
-          moment(this.appointments[0].Schedule.AppointmentTime).format(
-            " [on] dddd [(]MMM Do[)] [at] h:mma"
-          ) +
-          ".</p>" +
-          "<p></p>";
+        var opening = "";
+        switch (this.emailType) {
+          case "Confirmation":
+            opening =
+              "<p>Dear " +
+              this.appointments[0].Child.Family.NameMom.split(" ")[0] +
+              ",</p>" +
+              "<p>Thanks for your support to our research! This is a confirmation for your visit with " +
+              this.childNames() +
+              moment(this.appointments[0].Schedule.AppointmentTime).format(
+                " [on] dddd [(]MMM Do[)] [at] h:mma"
+              ) +
+              ".</p>"
+            break;
+
+          case "ScheduleUpdate":
+            opening =
+              "<p>Dear " +
+              this.appointmentsForEmail[0].Child.Family.NameMom.split(" ")[0] +
+              ",</p>" +
+              "<p>This is an update on your visit with " +
+              this.childNames() +
+              moment(
+                this.appointmentsForEmail[0].Schedule.AppointmentTime
+              ).format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
+              ".</p>"
+            break;
+        }
       }
       // specific content for each schedueld study.
       // const pattern = /\$\{\{([^}]+)\}\}/g;
@@ -153,15 +170,11 @@ export default {
       // closing
       var closing =
         "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
-        "<p></p>" +
-        "<p>Best,</p>" +
-        "<p>" +
+        "<p>Best,<br>" +
         this.$store.state.name +
-        "</p>" +
-        "<p>" +
+        "<br>" +
         this.$store.state.role +
-        "</p>" +
-        "<p>" +
+        "<br>" +
         this.$store.state.labName +
         "</p>";
 
@@ -196,7 +209,11 @@ export default {
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
         //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
-        to: this.appointments[0].Child.Family.NameMom + "<" + this.$store.state.labEmail + ">",
+        to:
+          this.appointments[0].Child.Family.NameMom +
+          "<" +
+          this.$store.state.labEmail +
+          ">",
         subject: this.emailSubject,
         body: this.$refs.emailBody.value,
       };
@@ -219,6 +236,16 @@ export default {
             this.emailSubject =
               "Study appointment for " +
               this.childNames() +
+              " on " +
+              moment(this.appointments[0].Schedule.AppointmentTime).format(
+                "MMM D (ddd), [at] h:mma"
+              );
+            break;
+
+          case "ScheduleUpdate":
+            this.emailSubject =
+              "An update on your visit " +
+              // this.childNames() +
               " on " +
               moment(this.appointments[0].Schedule.AppointmentTime).format(
                 "MMM D (ddd), [at] h:mma"
@@ -253,6 +280,16 @@ export default {
           this.emailSubject =
             "Study appointment for " +
             this.childNames() +
+            " on " +
+            moment(this.appointments[0].Schedule.AppointmentTime).format(
+              "MMM D (ddd), [at] h:mma"
+            );
+          break;
+
+        case "ScheduleUpdate":
+          this.emailSubject =
+            "An update on your visit " +
+            // this.childNames() +
             " on " +
             moment(this.appointments[0].Schedule.AppointmentTime).format(
               "MMM D (ddd), [at] h:mma"

@@ -165,7 +165,7 @@
 
     <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
       <v-card height="300px" class="d-flex flex-column">
-        <v-card-title class="title">Update experimenters for the current study appointments</v-card-title>
+        <v-card-title class="title">Update experimenters for the current study A</v-card-title>
         <v-row justify="center">
           <v-col cols="12" md="3">
             <v-select
@@ -203,7 +203,7 @@
           ref="Email"
           :dialog="dialogEmail"
           :appointments="Appointments"
-          emailType="Confirmation"
+          emailType="ScheduleUpdate"
         ></Email>
         <v-divider></v-divider>
         <v-card-actions>
@@ -232,6 +232,8 @@ import personnel from "@/services/personnel";
 import family from "@/services/family";
 import appointment from "@/services/appointment";
 import store from "@/store";
+import email from "@/services/email";
+import moment from "moment";
 
 import Email from "@/components/Email";
 
@@ -258,9 +260,9 @@ export default {
       index: -1,
       Experimenters: [],
       previousIndex: -1,
-      // previousAppointments: [],
       appointmentUpdated: false,
       dialogEmail: false,
+      appointmentsForEmail: [],
     };
   },
   methods: {
@@ -458,6 +460,7 @@ export default {
         //
 
         this.appointmentUpdated = true;
+        this.appointmentsForEmail = this.Appointments;
 
         this.closeNewAppointment();
 
@@ -500,6 +503,7 @@ export default {
           //
           this.appointmentUpdated = true;
 
+          this.appointmentsForEmail = this.Appointments;
           console.log("Appointment deleted.");
         }
       } catch (error) {
@@ -568,6 +572,111 @@ export default {
     closeEmail() {
       this.dialogEmail = false;
     },
+
+    childNames() {
+      var nameList = this.Appointments.map((appointment) => {
+        return appointment.Child.Name;
+      });
+
+      nameList = Array.from(new Set(nameList));
+
+      var childNames = "";
+
+      if (nameList.length <= 2) {
+        childNames = nameList.join(" and ");
+      } else {
+        childNames = "your " + nameList.length + " children";
+      }
+      return childNames;
+    },
+
+    async autoEmail() {
+      // send an email to parents about appointment updates.
+      // this email will be sent automatically, if researchers forgot to send.
+      const emailSubject =
+        "An update on your visit " +
+        // this.childNames() +
+        " on " +
+        moment(this.appointmentsForEmail[0].Schedule.AppointmentTime).format(
+          "MMM D (ddd), [at] h:mma"
+        );
+      const opening =
+        "<p>Dear " +
+        this.appointmentsForEmail[0].Child.Family.NameMom.split(" ")[0] +
+        ",</p>" +
+        "<p>This is an update on your visit with " +
+        this.childNames() +
+        moment(this.appointmentsForEmail[0].Schedule.AppointmentTime).format(
+          " [on] dddd [(]MMM Do[)] [at] h:mma"
+        ) +
+        ".</p>"
+
+      var emailBodyList = [];
+
+      this.appointmentsForEmail.forEach((appointment) => {
+        var emailBody = appointment.Study.EmailTemplate;
+
+        if (appointment.Child.Sex == "F") {
+          emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+          emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+          emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+        } else {
+          emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+          emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+          emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+        }
+
+        emailBody = emailBody.replace(
+          /\${{childName}}/g,
+          appointment.Child.Name || ""
+        );
+
+        emailBody = emailBody.replace(/\. he/g, ". He");
+        emailBody = emailBody.replace(/\. his/g, ". His");
+        emailBody = emailBody.replace(/\. she/g, ". She");
+        emailBody = emailBody.replace(/\. her/g, ". Her");
+
+        emailBodyList.push(emailBody);
+      });
+
+      // location
+      const location =
+        "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
+
+      // closing
+      const closing =
+        "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
+        "<p>Best,<br>" +
+        this.$store.state.name +
+        "<br>" +
+        this.$store.state.role +
+        "<br>" +
+        this.$store.state.labName +
+        "</p>";
+
+      const emailBody =
+        opening + emailBodyList.join("<p></p>") + location + closing;
+
+      const emailContent = {
+        from:
+          this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
+        // cc: "lab email <nx@kangleelab.com>",
+        //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
+        to:
+          this.appointmentsForEmail[0].Child.Family.NameMom +
+          "<" +
+          this.$store.state.labEmail +
+          ">",
+        subject: emailSubject,
+        body: emailBody,
+      };
+
+      try {
+        await email.send(emailContent);
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 
   computed: {},
@@ -613,59 +722,38 @@ export default {
     },
   },
 
-  // async beforeDestroy() {
-  //   if (this.appointmentUpdated) {
-  //     // const choice = confirm("I'm closing...");
+  async beforeDestroy() {
+    if (this.appointmentUpdated) {
+      try {
+        await this.autoEmail();
 
-  //     // switch (choice) {
-  //     //   case true:
-  //     //     // console.log(this.Index);
-  //     //     // this.previousAppointments = this.Appointments;
+        this.appointmentUpdated = false;
+        alert("An email about the appointment updates is sent to parents.");
+      } catch (error) {
+        alert(
+          "No email about the appointment updates is sent to parents./nPlease send an email manually."
+        );
+      }
+    }
+  },
 
-  //     //     this.dialogEmail = true;
-  //     //     break;
+  async beforeUpdate() {
+    if (this.appointmentUpdated && this.previousIndex != this.Index) {
+      try {
+        await this.autoEmail();
 
-  //     //   case false:
-  //     //     this.appointmentUpdated = false;
-  //     //     break;
-  //     // }
+        this.appointmentUpdated = false;
+        alert("An email about the appointment updates is sent to parents.");
+      } catch (error) {
+                this.appointmentUpdated = false;
 
-  //     await this.sendEmail();
-  //   }
-
-  //   this.appointmentUpdated = false;
-  // },
-
-  // async beforeUpdate() {
-  //   if (
-  //     this.appointmentUpdated &&
-  //     this.previousIndex != this.Index &&
-  //     this.previousIndex >= 0
-  //   ) {
-  //     // console.log(this.previousIndex);
-  //     // console.log(this.previousAppointments);
-
-  //     // const choice = confirm("I'm about to be updated...");
-
-  //     // switch (choice) {
-  //     //   case true:
-  //     //     // console.log(this.Index);
-  //     //     // this.previousAppointments = this.Appointments;
-  //     //     this.dialogEmail = true;
-  //     //     break;
-
-  //     //   case false:
-  //     //     this.appointmentUpdated = false;
-  //     //     break;
-  //     // }
-  //     this.dialogEmail = true;
-
-  //     await this.sendEmail();
-
-  //     this.appointmentUpdated = false;
-  //   }
-  //   this.previousIndex = this.Index;
-  // },
+        alert(
+          "No email about the appointment updates is sent to parents./nPlease send an email manually."
+        );
+      }
+    }
+    this.previousIndex = this.Index;
+  },
 };
 </script>
 
