@@ -179,7 +179,7 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     } else {
       var labInfo = { Email: labEmail };
     }
-    
+
     // update lab email info.
     await model.lab.update(labInfo, {
       where: { id: req.body.lab },
@@ -213,6 +213,7 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   } catch (error) {
     var adminEmail = null;
   }
+
 
   res.status(200).send({
     labEmail: labEmail,

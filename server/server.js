@@ -5,10 +5,25 @@ require("dotenv").config();
 const port = process.env.port || 3000;
 
 const server = http.createServer(app);
+
+
+// Send reminder emails to parents the day before their appointment
+var cron = require('node-cron');
+
+const ReminderController = require("./api/controllers/reminder");
+
+cron.schedule('0 16 * * *', async () => {
+
+  const resonse = await ReminderController.reminderEmail();
+
+  console.log(resonse);
+
+});
+
 // const io = require("socket.io")(server);
 
 // io.on("connection", function(socket) {
-  
+
 //   //socket.broadcast.emit('hi');
 
 //   console.log("a user connected");
@@ -64,7 +79,7 @@ const server = http.createServer(app);
 //   // });
 // });
 
-const Server = server.listen(port, function() {
+const Server = server.listen(port, function () {
   console.log("Listening to port " + port);
 });
 
@@ -74,20 +89,20 @@ process.on('SIGINT', shutDown);
 let connections = [];
 
 Server.on('connection', connection => {
-    connections.push(connection);
-    connection.on('close', () => connections = connections.filter(curr => curr !== connection));
+  connections.push(connection);
+  connection.on('close', () => connections = connections.filter(curr => curr !== connection));
 });
 
 function shutDown() {
   console.log('Received kill signal, shutting down gracefully');
   Server.close(() => {
-      console.log('Closed out remaining connections');
-      process.exit(0);
+    console.log('Closed out remaining connections');
+    process.exit(0);
   });
 
   setTimeout(() => {
-      console.error('Could not close connections in time, forcefully shutting down');
-      process.exit(1);
+    console.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
   }, 10000);
 
   connections.forEach(curr => curr.end());

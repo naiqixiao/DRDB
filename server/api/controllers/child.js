@@ -3,6 +3,8 @@ const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 
+const moment = require('moment');
+
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   var currentIndex = array.length,
@@ -87,7 +89,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.FK_Family = req.query.FamilyId;
   }
 
-  // queryString["$Family.NextContactDate$"] = { [Op.lt]: new Date() };
+  queryString.NextContactDate = { [Op.lte]: moment().startOf("day").toDate() };
   queryString["$Family.NoMoreContact$"] = 0;
 
   if (req.query.id) {

@@ -1,6 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
+const moment = require('moment');
 
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -138,7 +139,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
   }
 
-  // queryString.NextContactDate = { [Op.lt]: new Date() };
+  queryString.NextContactDate = { [Op.lte]: moment().startOf("day").toDate() };
   queryString.NoMoreContact = 0;
 
   // console.log(req.query);

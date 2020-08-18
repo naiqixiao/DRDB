@@ -165,7 +165,7 @@
 
     <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
       <v-card height="300px" class="d-flex flex-column">
-        <v-card-title class="title">Update experimenters for the current study A</v-card-title>
+        <v-card-title class="title">Update experimenters for the current study</v-card-title>
         <v-row justify="center">
           <v-col cols="12" md="3">
             <v-select
@@ -176,6 +176,7 @@
               return-object
               label="Experimenters"
               multiple
+              hide-details
               dense
               chip
             ></v-select>

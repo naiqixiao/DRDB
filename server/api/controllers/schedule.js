@@ -2,6 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
+const moment = require('moment');
 
 // Create and Save an appointment
 
@@ -153,6 +154,9 @@ exports.search = asyncHandler(async (req, res) => {
     where: queryString,
     include: [
       {
+        model: model.personnel,
+      },
+      {
         model: model.appointment,
         include: [
           {
@@ -192,19 +196,8 @@ exports.today = asyncHandler(async (req, res) => {
 
   queryString.AppointmentTime = {
     [Op.between]: [
-      new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        new Date().getDate()
-      ),
-      new Date(
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        ).getTime() +
-          24 * 60 * 60 * 1000
-      ),
+      moment().startOf("day").toDate(),
+      moment().startOf("day").add(1, "days").toDate()
     ],
   };
 
@@ -215,6 +208,9 @@ exports.today = asyncHandler(async (req, res) => {
   const schedule = await model.schedule.findAll({
     where: queryString,
     include: [
+      {
+        model: model.personnel,
+      },
       {
         model: model.appointment,
         include: [
@@ -235,6 +231,9 @@ exports.today = asyncHandler(async (req, res) => {
               "StudyType",
               "FK_Lab",
             ],
+            include: [
+              { model: model.lab }
+            ]
           },
           {
             model: model.personnel,
@@ -255,22 +254,9 @@ exports.week = asyncHandler(async (req, res) => {
 
   queryString.AppointmentTime = {
     [Op.between]: [
-      new Date(
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        ).getTime() -
-          24 * 60 * 60 * 1000 * new Date().getDay()
-      ),
-      new Date(
-        new Date(
-          new Date().getFullYear(),
-          new Date().getMonth(),
-          new Date().getDate()
-        ).getTime() +
-          24 * 60 * 60 * 1000 * (7 - new Date().getDay())
-      ),
+      moment().weekday(0).startOf("day").toDate(),
+      moment().weekday(7).startOf("day").toDate()
+
     ],
   };
 
@@ -281,6 +267,9 @@ exports.week = asyncHandler(async (req, res) => {
   const schedule = await model.schedule.findAll({
     where: queryString,
     include: [
+      {
+        model: model.personnel,
+      },
       {
         model: model.appointment,
         include: [
