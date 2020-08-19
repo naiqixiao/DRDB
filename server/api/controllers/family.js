@@ -139,7 +139,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
   }
 
-  queryString.NextContactDate = { [Op.lte]: moment().startOf("day").toDate() };
+  // queryString.NextContactDate = { [Op.lte]: moment().startOf("day").toDate() };
   queryString.NoMoreContact = 0;
 
   // console.log(req.query);
