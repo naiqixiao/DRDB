@@ -969,7 +969,7 @@ export default {
       }
 
       this.response = null;
-      this.$store.dispatch("setLoadingStatus", false);
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 500);
     },
 
     editFamily() {
