@@ -1,8 +1,8 @@
 const Sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
-const sequelize = new Sequelize("DRDB", "admin", "password", {
-  host: "localhost",
+const sequelize = new Sequelize("pnb_drdb", "pnb_drdb", "kohta37ahtae", {
+  host: "mysql",
   dialect: "mysql",
   logging: false,
   define: {
@@ -17,6 +17,23 @@ const sequelize = new Sequelize("DRDB", "admin", "password", {
     idle: 10000,
   },
 });
+
+// const sequelize = new Sequelize("pnb_drdb", "pnb_drdb", "kohta37ahtae", {
+//   host: "mysql",
+//   dialect: "mysql",
+//   logging: false,
+//   define: {
+//     // timestamps: false,
+//     freezeTableName: true,
+//   },
+//   timeZone: "America/Toronto",
+//   pool: {
+//     max: 10,
+//     min: 0,
+//     acquire: 30000,
+//     idle: 10000,
+//   },
+// });
 
 sequelize
   .authenticate()
