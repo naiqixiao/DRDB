@@ -1,8 +1,14 @@
 const Sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
+<<<<<<< HEAD:server/api/models/DRDB.js
 const sequelize = new Sequelize("pnb_drdb", "pnb_drdb", "kohta37ahtae", {
   host: "mysql",
+=======
+const sequelize = new Sequelize("DRDB", "admin", "password", {
+  // "pnb_drdb", "pnb_drdb", "kohta37ahtae"
+  host: "localhost",
+>>>>>>> c97dae7b6a61b6ff9585cd816c4c518e5a425da4:server/api/models/DRDB_sample.js
   dialect: "mysql",
   logging: false,
   define: {
