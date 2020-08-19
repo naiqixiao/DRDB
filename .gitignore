@@ -1,10 +1,7 @@
 server/api/models/DRDB_Seq.js
 server/api/models/DRDB_SQL.js
 
-<<<<<<< HEAD
 server/api/middleware/calendar.js
-=======
->>>>>>> 9e03d99094f3988fd267e4b350feecc73b155fe9
 server/SequelizeTest.js
 server/index.html
 server/public
@@ -8746,3 +8743,9 @@ server/api/google/labs
 
 server/api/google/general/index.js
 server/api/google/general/token.json
+server/api/models/DRDB.js.rej
+server/api/models/DRDB.js.orig
+client/._.DS_Store
+.DS_Store
+._.DS_Store
+server/api/models/DRDB.js
