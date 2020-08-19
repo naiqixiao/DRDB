@@ -13,10 +13,10 @@
         <h2
           class="title-text title ma-3"
         >{{ $store.state.labName + ": " +$store.state.name + ' ('+ $store.state.role + ')' }}</h2>
-        <v-tooltip bottom >
-          <template v-slot:activator="{ on }" >
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on }">
             <div v-on="on" style="height:48px !important;">
-              <v-btn icon @click.stop="feedbackDialog = true" >
+              <v-btn icon @click.stop="feedbackDialog = true">
                 <v-icon>feedback</v-icon>
               </v-btn>
             </div>
@@ -24,6 +24,14 @@
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
       </v-toolbar-items>
+      <v-progress-linear
+        :active="$store.state.loadingStatus"
+        :indeterminate="$store.state.loadingStatus"
+        height="5"
+        absolute
+        bottom
+        color="secondary darken2"
+      ></v-progress-linear>
     </v-app-bar>
 
     <v-navigation-drawer app v-model="drawer" temporary width="300" clipped>
@@ -165,6 +173,7 @@ export default {
           icon: "fingerprint",
         },
       ],
+      loadingStrip: false,
     };
   },
 
@@ -181,6 +190,7 @@ export default {
 
       this.$store.dispatch("setLabEmailStatus", null);
       this.$store.dispatch("setAdminEmailStatus", null);
+      this.$store.dispatch("setLoadingStatus", false);
       this.$router.push({
         name: "Login",
       });

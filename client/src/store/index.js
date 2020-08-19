@@ -20,6 +20,7 @@ export default new Vuex.Store({
     labName: null,
     labEmailStatus: null,
     adminEmailStatus: null,
+    loadingStatus: false
   },
   mutations: {
     setToken(state, token) {
@@ -56,6 +57,9 @@ export default new Vuex.Store({
     setAdminEmailStatus(state, adminEmailStatus) {
       state.adminEmailStatus = adminEmailStatus;
     },
+    setLoadingStatus(state, loadingStatus) {
+      state.loadingStatus = loadingStatus;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -90,6 +94,9 @@ export default new Vuex.Store({
     },
     setAdminEmailStatus({ commit }, adminEmailStatus) {
       commit("setAdminEmailStatus", adminEmailStatus);
+    },
+    setLoadingStatus({ commit }, loadingStatus) {
+      commit("setLoadingStatus", loadingStatus);
     },
   },
 });

@@ -95,6 +95,8 @@ export default {
   },
   methods: {
     async login() {
+      this.$store.dispatch("setLoadingStatus", true);
+
       try {
         const response = await login.login({
           Email: this.email,
@@ -138,6 +140,8 @@ export default {
       } catch (error) {
         this.error = error.response.data.error;
       }
+
+      this.$store.dispatch("setLoadingStatus", false);
     },
 
     async resetPassword() {

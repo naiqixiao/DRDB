@@ -120,6 +120,7 @@ export default {
         rules: "required",
       },
     ];
+
     Vue.prototype.$labPI = [
       { label: "Name of PI/Manager", field: "Name", rules: "name" },
       { label: "Initial", field: "Initial", rules: "required" },
@@ -136,7 +137,7 @@ export default {
     Vue.prototype.$studyCriteriaFields = [
       { label: "Min Age", field: "MinAge", width: "5" },
       { label: "Max Age", field: "MaxAge", width: "5" },
-      { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3"},
+      { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3" },
       { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
       { label: "Vision Loss Participants", field: "VisionLossParticipant", options: "inclusion", width: "3" },
       { label: "Hearing Loss Participants", field: "HearingLossParticipant", options: "inclusion", width: "3" },

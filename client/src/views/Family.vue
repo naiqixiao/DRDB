@@ -580,6 +580,8 @@ export default {
     },
 
     async searchFamily(item, field) {
+      this.$store.dispatch("setLoadingStatus", true);
+
       if (item && field) {
         this.currentFamily[item] = field;
       }
@@ -605,6 +607,10 @@ export default {
           });
         }
       }
+
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+
+      // this.$store.dispatch("setLoadingStatus", false);
     },
 
     addFamily() {

@@ -873,6 +873,8 @@ export default {
     },
 
     async searchChild() {
+      this.$store.dispatch("setLoadingStatus", true);
+
       var studyQuery = {
         id: this.selectedStudy.id,
       };
@@ -967,6 +969,7 @@ export default {
       }
 
       this.response = null;
+      this.$store.dispatch("setLoadingStatus", false);
     },
 
     editFamily() {

@@ -216,7 +216,7 @@ export default {
 
   methods: {
     async searchSchedule() {
-      // console.log(this.queryString);
+      this.$store.dispatch("setLoadingStatus", true);
       try {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
@@ -230,9 +230,12 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
     async searchScheduleByStatus() {
+      this.$store.dispatch("setLoadingStatus", true);
+
       if (this.queryString.Status) {
         try {
           const Result = await schedule.search(this.queryString);
@@ -248,9 +251,12 @@ export default {
 
         this.queryString = Object.assign({}, this.defaultQueryString);
       }
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
     async todayStudies() {
+      this.$store.dispatch("setLoadingStatus", true);
+
       try {
         const Result = await schedule.today();
         this.Schedules = Result.data;
@@ -269,9 +275,11 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
     async thisWeekStudies() {
+      this.$store.dispatch("setLoadingStatus", true);
       try {
         const Result = await schedule.week();
         this.Schedules = Result.data;
@@ -287,6 +295,7 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
     updateFamily(family) {
