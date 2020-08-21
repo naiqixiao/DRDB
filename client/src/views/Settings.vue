@@ -129,20 +129,6 @@
             <div v-on="on">
               <v-btn
                 color="primary"
-                @click.stop="createNewLab"
-                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
-              >Create a Lab</v-btn>
-            </div>
-          </template>
-          <span>Only PI and lab manager can create new lab.</span>
-        </v-tooltip>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn
-                color="primary"
                 @click.stop="dialogEditLab = true"
                 :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
               >Update Lab Info</v-btn>
@@ -222,6 +208,21 @@
             </div>
           </template>
           <span>Only the Administrator can change the adminstration email.</span>
+        </v-tooltip>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="createNewLab"
+                :disabled=" $store.state.role != 'Admin'"
+              >Create a Lab</v-btn>
+            </div>
+          </template>
+          <span>Only the Administrator can create new lab.</span>
         </v-tooltip>
       </v-col>
       
