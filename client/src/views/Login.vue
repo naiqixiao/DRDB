@@ -1,6 +1,6 @@
 <template>
-  <v-row justify="center" align="center" style="height: 600px;">
-    <v-col cols="12" lg="3">
+  <v-row justify="center" align="center" style="height: 900px;">
+    <v-col cols="12" lg="3" >
       <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
       <br />
       <v-text-field
@@ -11,12 +11,14 @@
         @keydown.enter="login"
       ></v-text-field>
       <br />
-      <!-- <div class="danger-alert" v-html="error" /> -->
       <v-btn rounded color="primary" v-if="error" @click="resetPassword">Forgot Password?</v-btn>
       <br />
       <div class="text-center">
         <v-btn rounded color="primary" @click.stop="login">Login</v-btn>
       </div>
+    </v-col>
+    <v-col cols="12" lg="12" class="d-flex align-end justify-end">
+      <h4>V1.0.20200821</h4>
     </v-col>
 
     <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
@@ -55,7 +57,7 @@
 
         <v-card-actions>
           <v-row justify="space-between" style="height: 50px">
-            <v-col md="4"></v-col>
+            <v-col md="2"></v-col>
             <v-col md="2">
               <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
             </v-col>
@@ -68,7 +70,7 @@
                 @click="changePassword"
               >Confirm</v-btn>
             </v-col>
-            <v-col md="4"></v-col>
+            <v-col md="2"></v-col>
           </v-row>
         </v-card-actions>
       </v-card>

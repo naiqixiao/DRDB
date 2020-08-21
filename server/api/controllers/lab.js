@@ -53,6 +53,10 @@ async function sendEmail(emailContent) {
 
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
+  const profile = await gmail.users.getProfile({ userId: "me" });
+
+  emailContent.from = "Administrator" + "<" + profile.data.emailAddress + ">";
+
   var raw = makeBody(
     emailContent.to,
     emailContent.from,
@@ -69,7 +73,6 @@ async function sendEmail(emailContent) {
       },
     });
 
-    console.log("sent");
   } catch (error) {
     console.log(error);
     return error;
@@ -96,8 +99,8 @@ exports.create = asyncHandler(async (req, res) => {
       {
         StudyName: "Sample study for " + newLabInfo.LabName,
         MinAge: "8.00",
-        MaxAge: "15.50",
-        Description: "Study description....",
+        MaxAge: "18.00",
+        Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
         EmailTemplate:
           "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
         Completed: false,
@@ -128,12 +131,14 @@ exports.create = asyncHandler(async (req, res) => {
         newLabInfo.Personnels[0].Role +
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
-        "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password.</p> " +
+        "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
         // "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
-        "<p> </p>" +
-        "<p>Thank you! </p>" +
-        "<p>Lab manager</p>",
+
+        "<p><a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
+
+        "<p>Thank you!<br>" +
+        "Developmental Research Management System</p>",
     };
 
     await sendEmail(emailContent);
@@ -181,20 +186,14 @@ exports.search = asyncHandler(async (req, res) => {
 
 // Update a Lab by the id in the request
 exports.update = asyncHandler(async (req, res) => {
-  var ID = req.query.id;
   var updatedLabInfo = req.body;
 
-  if (updatedLabInfo.id) {
-    delete updatedLabInfo["id"];
-  }
-
   const lab = await model.lab.update(updatedLabInfo, {
-    where: { id: ID },
-    include: [model.study, model.personnel],
+    where: { id: updatedLabInfo.lab },
   });
 
   res.status(200).send(lab);
-  console.log("lab Information Updated!");
+  console.log("Lab Information Updated!");
 });
 
 // Delete a Lab with the specified id in the request

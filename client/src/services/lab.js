@@ -1,4 +1,5 @@
 import api from "./api";
+import store from "@/store";
 
 export default {
   create(labInfo) {
@@ -10,6 +11,7 @@ export default {
     });
   },
   update(labInfo) {
+    labInfo.lab = store.state.lab
     return api().post("lab/", labInfo);
   },
   delete(labInfo) {

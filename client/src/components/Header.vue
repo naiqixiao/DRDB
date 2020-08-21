@@ -53,7 +53,10 @@
 
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn block @click="logout">Logout</v-btn>
+          <v-btn 
+          block @click="logout"
+          :disabled="!$store.state.userID"
+          >Logout</v-btn>
         </div>
       </template>
     </v-navigation-drawer>
@@ -132,7 +135,7 @@ export default {
       ],
       navs: [
         {
-          address: "/",
+          address: "/home",
           label: "Home",
           icon: "home",
         },
@@ -168,7 +171,7 @@ export default {
           icon: "dashboard",
         },
         {
-          address: "/login",
+          address: "/",
           label: "Login",
           icon: "fingerprint",
         },
@@ -179,6 +182,9 @@ export default {
 
   methods: {
     logout() {
+      // console.log(this.$route.name);
+      console.log("log out complete!");
+
       this.$store.dispatch("setToken", null);
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setName", null);
@@ -191,9 +197,12 @@ export default {
       this.$store.dispatch("setLabEmailStatus", null);
       this.$store.dispatch("setAdminEmailStatus", null);
       this.$store.dispatch("setLoadingStatus", false);
-      this.$router.push({
-        name: "Login",
-      });
+
+      if (this.$route.name != "Login") {
+        this.$router.push({
+          name: "Login",
+        });
+      }
     },
 
     async createFeedback() {
@@ -230,6 +239,7 @@ export default {
       val || this.closeFeedback();
     },
   },
+
 };
 </script>
 

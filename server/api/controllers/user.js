@@ -70,6 +70,10 @@ async function sendEmail(emailContent) {
 
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
+  const profile = await gmail.users.getProfile({ userId: "me" });
+
+  emailContent.from = "Developmental Research Management System" + "<" + profile.data.emailAddress + ">";
+
   var raw = makeBody(
     emailContent.to,
     emailContent.from,
@@ -119,16 +123,17 @@ exports.signup = asyncHandler(async (req, res) => {
           "<p>Hello " +
           newUser.Name.split(" ")[0] +
           ",</p> " +
-          "<p>Welcoe to the developmental research management system!</p>" +
-          "<p>Your role is <b>" +
+          "<p>Welcoe to the developmental research management system!<br>" +
+          "Your role is <b>" +
           newUser.Role +
           "</b>, and your temporary password is <b><em>" +
           password +
-          "</em></b>. Please login with your email to change your password.</p> " +
-          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
+          "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
+          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
+          "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
-          "<p>Thank you! </p>" +
-          "<p>Lab manager</p>",
+          "<p>Thank you! <br>" +
+          "Developmental Research Management System</p>",
       };
 
       // const oAuth2Client = generalAuth();
@@ -139,7 +144,7 @@ exports.signup = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     res.status(400).send({
-      message: "This email account has already been registered. Please log in.",
+      message: "The entered information (Initial, Email, or CalendarID) already exists in the system./n Please double check or enter new information.",
       error: error,
     });
   }
@@ -284,11 +289,11 @@ exports.changePassword = asyncHandler(async (req, res) => {
           "<p>Hello " +
           personnel.Name.split(" ")[0] +
           ",</p> " +
-          "<p>Your login password has recently been changed. </p>" +
-          "<p>If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
+          "<p>Your login password has recently been changed. <br>" +
+          "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
           "<p> </p>" +
-          "<p>Thank you!</p>" +
-          "<p>Lab manager</p>",
+          "<p>Thank you!<br>" +
+          "Developmental Research Management System</p>",
       };
 
       // const oAuth2Client = generalAuth();
@@ -339,18 +344,19 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     try {
       var emailContent = {
         to: personnel.Email,
-        subject: "Your password for Developmental Research Database is reset",
+        subject: "Your password for Developmental Research Management System is reset",
         body:
           "<p>Hello " +
           personnel.Name.split(" ")[0] +
           ",</p> " +
           "<p>You login password is reset, and the temporary passwor is: <b>" +
           password +
-          "</b></p> <p>Please login to change your password.</p> " +
-          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
+          "</b></p> <p>Please login to change your password.<br> " +
+          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
+          "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
-          "<p>Thank you! </p>" +
-          "<p>Lab manager</p>",
+          "<p>Thank you! <br>" +
+          "Developmental Research Management System</p>",
       };
 
       // const oAuth2Client = generalAuth();

@@ -158,7 +158,7 @@
                         <div v-if="field.options">
                           <v-select
                             justify="start"
-                            :items="$store.state.role == 'PI' || $store.state.role == 'Lab manager' ? options.fullRoles : options.limitedRoles"
+                            :items="$store.state.role == 'Admin' || $store.state.role == 'PI' || $store.state.role == 'Lab manager' ? options.fullRoles : options.limitedRoles"
                             v-model="editedPersonnel[field.field]"
                             :label="field.label"
                             hide-details
@@ -302,7 +302,7 @@ export default {
         Email: null,
         Calendar: null,
         Role: null,
-        Active: 1,
+        Active: true,
       },
       editedIndex: -1,
       labStudies: [],
@@ -394,7 +394,7 @@ export default {
           const Result = await login.register(this.editedPersonnel);
           this.editedPersonnel.id = Result.data.id;
           this.Personnels.push(this.editedPersonnel);
-          console.log(Result.data.Email + " has been added to the system!");
+          alert(Result.data.Email + " has been added to the system!");
         } catch (error) {
           alert(error.response.data.message);
           console.log(error.response);

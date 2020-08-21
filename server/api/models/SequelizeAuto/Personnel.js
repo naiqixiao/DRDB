@@ -16,7 +16,7 @@
 //     });
 // }
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   const Personnel = sequelize.define(
     "Personnel",
     {
@@ -43,7 +43,8 @@ module.exports = function(sequelize, DataTypes) {
           "Undergrad",
           "RA",
           "Lab manager",
-          "Staff"
+          "Staff",
+          "Admin"
         ),
         allowNull: false,
       },

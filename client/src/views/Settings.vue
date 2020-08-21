@@ -109,18 +109,46 @@
         ></v-text-field>
       </v-col>
 
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="3">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
               <v-btn
                 color="primary"
                 @click.stop="googleCredentialsURL('lab')"
-                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
               >Setup Google Account</v-btn>
             </div>
           </template>
           <span>Only PI and lab manager can change the associated lab email.</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="createNewLab"
+                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+              >Create a Lab</v-btn>
+            </div>
+          </template>
+          <span>Only PI and lab manager can create new lab.</span>
+        </v-tooltip>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <div v-on="on">
+              <v-btn
+                color="primary"
+                @click.stop="dialogEditLab = true"
+                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+              >Update Lab Info</v-btn>
+            </div>
+          </template>
+          <span>Only PI and lab manager can change lab information.</span>
         </v-tooltip>
       </v-col>
 
@@ -189,34 +217,25 @@
               <v-btn
                 color="primary"
                 @click.stop="googleCredentialsURL('admin')"
-                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
+                :disabled=" $store.state.role != 'Admin'"
               >Setup Admin Account</v-btn>
             </div>
           </template>
-          <span>Only PI and lab manager can change the adminstration email.</span>
+          <span>Only the Administrator can change the adminstration email.</span>
         </v-tooltip>
       </v-col>
-      <v-col cols="12" md="4">
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn
-                color="primary"
-                @click.stop="createNewLab"
-                :disabled=" $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
-              >Create a Lab</v-btn>
-            </div>
-          </template>
-          <span>Only PI and lab manager can create new lab.</span>
-        </v-tooltip>
-      </v-col>
+      
 
       <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false">
         <v-card outlined>
           <v-card-title class="headline">Lab and PI/Manager information</v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
-            <v-row justify="space-around">
+            <v-row>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Lab information:</h4>
+              </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
                   height="48px"
@@ -229,6 +248,10 @@
                   outlined
                   dense
                 ></v-text-field>
+              </v-col>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">PI/Lab Manager information:</h4>
               </v-col>
               <v-col cols="12" md="4" v-for="item in this.$labPI" :key="item.label">
                 <div v-if="item.options">
@@ -270,7 +293,44 @@
                 <v-btn color="primary" @click="closeNewLab">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn color="primary" @click=" saveNewLab">Confirm</v-btn>
+                <v-btn color="primary" @click="saveNewLab">Confirm</v-btn>
+              </v-col>
+              <v-col md="3"></v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialogEditLab" max-width="800px" :retain-focus="false">
+        <v-card outlined>
+          <v-card-title class="headline">Lab information</v-card-title>
+
+          <v-form ref="formEdit" v-model="valid" lazy-validation>
+            <v-row justify="space-around">
+              <v-col cols="12" md="4">
+                <v-text-field
+                  height="48px"
+                  background-color="textbackground"
+                  hide-details
+                  label="Lab's Name"
+                  v-model="editedLab.LabName"
+                  placeholder="  "
+                  :rules="$rules.required"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-form>
+
+          <v-card-actions>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="3"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="closeEditLab">Cancel</v-btn>
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="saveEditLab">Confirm</v-btn>
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -301,6 +361,7 @@ export default {
       labEmail: "Lab email is not set up yet.",
       adminEmail: "Admin email is not set up yet.",
       dialogNewLab: false,
+      dialogEditLab: false,
       currentLab: {
         LabName: "",
         PI: "",
@@ -313,6 +374,9 @@ export default {
             Calendar: "",
           },
         ],
+      },
+      editedLab: {
+        LabName: null,
       },
       roleOptions: ["PI", "Lab manager"],
     };
@@ -379,6 +443,24 @@ export default {
       this.closeNewLab();
     },
 
+    async saveEditLab() {
+      var validationResults = this.$refs.formEdit.validate();
+
+      if (validationResults) {
+        try {
+          await lab.update(this.editedLab);
+
+          this.$store.dispatch("setLabName", this.editedLab.LabName);
+
+          alert("Lab information is updated!");
+        } catch (error) {
+          console.log(error.response);
+        }
+      }
+
+      this.closeEditLab();
+    },
+
     close() {
       this.dialog = false;
       setTimeout(() => {
@@ -403,6 +485,15 @@ export default {
               Calendar: "",
             },
           ],
+        };
+      }, 300);
+    },
+
+    closeEditLab() {
+      this.dialogEditLab = false;
+      setTimeout(() => {
+        this.editedLab = {
+          LabName: "",
         };
       }, 300);
     },
@@ -483,6 +574,9 @@ export default {
     },
     dialogNewLab(val) {
       val || this.closeNewLab();
+    },
+    dialogEditLab(val) {
+      val || this.closeEditLab();
     },
   },
 
