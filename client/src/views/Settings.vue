@@ -225,7 +225,6 @@
           <span>Only the Administrator can create new lab.</span>
         </v-tooltip>
       </v-col>
-      
 
       <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false">
         <v-card outlined>
@@ -588,10 +587,20 @@ export default {
       this.labEmail = profile.data.labEmail;
       this.adminEmail = profile.data.adminEmail;
 
-      this.$store.dispatch("setLabEmail", profile.data.labEmail);
-
-      if (profile.data.labName != "") {
+      if (profile.data.labName) {
         this.$store.dispatch("setLabName", profile.data.labName);
+      }
+
+      if (this.labEmail) {
+        // this.$store.dispatch("setLabEmail", labEmail);
+        this.$store.dispatch("setLabEmailStatus", true);
+      } else {
+        this.$store.dispatch("setLabEmailStatus", false);
+      }
+      if (this.adminEmail) {
+        this.$store.dispatch("setAdminEmailStatus", true);
+      } else {
+        this.$store.dispatch("setAdminEmailStatus", false);
       }
     } catch (error) {
       console.log(error.response);

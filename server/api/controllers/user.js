@@ -185,7 +185,7 @@ exports.login = asyncHandler(async (req, res) => {
     },
     process.env.JWT_KEY,
     {
-      expiresIn: "12h",
+      expiresIn: "2h",
     }
   );
 
@@ -273,35 +273,38 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
     res.status(200).send({
       message: "Password update succsessful!",
+      temporaryPassword: personnel.temporaryPassword,
+      name: personnel.Name,
       user: personnel.Email,
       userID: personnel.id,
+      role: personnel.Role,
       lab: personnel.FK_Lab,
+      labName: personnel.Lab.LabName,
+      labEmail: personnel.Lab.Email,
       token: token,
       studies: personnel.Lab.Studies,
     });
 
-    try {
-      var emailContent = {
-        to: personnel.Name + "<" + personnel.Email + ">",
-        subject:
-          "Your login password is updated.",
-        body:
-          "<p>Hello " +
-          personnel.Name.split(" ")[0] +
-          ",</p> " +
-          "<p>Your login password has recently been changed. <br>" +
-          "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
-          "<p> </p>" +
-          "<p>Thank you!<br>" +
-          "Developmental Research Management System</p>",
-      };
 
-      // const oAuth2Client = generalAuth();
+    var emailContent = {
+      to: personnel.Name + "<" + personnel.Email + ">",
+      subject:
+        "Your login password is updated.",
+      body:
+        "<p>Hello " +
+        personnel.Name.split(" ")[0] +
+        ",</p> " +
+        "<p>Your login password has recently been changed. <br>" +
+        "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
+        "<p> </p>" +
+        "<p>Thank you!<br>" +
+        "Developmental Research Management System</p>",
+    };
 
-      await sendEmail(emailContent);
-    } catch (error) {
-      throw error;
-    }
+    // const oAuth2Client = generalAuth();
+
+    await sendEmail(emailContent);
+
   } catch (error) {
     throw error;
   }

@@ -1,6 +1,6 @@
 <template>
   <v-row justify="center" align="center" style="height: 900px;">
-    <v-col cols="12" lg="3" >
+    <v-col cols="12" lg="3">
       <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
       <br />
       <v-text-field
@@ -124,14 +124,14 @@ export default {
 
           const profile = await externalAPIs.googleGetEmailAddress();
 
-          var labEmail = profile.data.labEmail;
-          var adminEmail = profile.data.adminEmail;
-
-          if (labEmail) {
+          if (profile.data.labEmail) {
+            // var labEmail = profile.data.labEmail;
             // this.$store.dispatch("setLabEmail", labEmail);
             this.$store.dispatch("setLabEmailStatus", true);
           }
-          if (adminEmail) {
+
+          if (profile.data.adminEmail) {
+            // var adminEmail = profile.data.adminEmail;
             this.$store.dispatch("setAdminEmailStatus", true);
           }
 
@@ -175,15 +175,33 @@ export default {
 
         this.error = null;
 
-        this.close();
-
         this.$store.dispatch("setToken", response.data.token);
         this.$store.dispatch("setUser", response.data.user);
+        this.$store.dispatch("setName", response.data.name);
         this.$store.dispatch("setUserID", response.data.userID);
         this.$store.dispatch("setLab", response.data.lab);
         this.$store.dispatch("setStudies", response.data.studies);
+        this.$store.dispatch("setRole", response.data.role);
+        this.$store.dispatch("setLabEmail", response.data.labEmail);
+        this.$store.dispatch("setLabName", response.data.labName);
 
-        alert("Your password is set! Welcome!");
+
+        const profile = await externalAPIs.googleGetEmailAddress();
+
+        if (profile.data.labEmail) {
+          // var labEmail = profile.data.labEmail;
+          // this.$store.dispatch("setLabEmail", labEmail);
+          this.$store.dispatch("setLabEmailStatus", true);
+        }
+
+        if (profile.data.adminEmail) {
+          // var adminEmail = profile.data.adminEmail;
+          this.$store.dispatch("setAdminEmailStatus", true);
+        }
+
+        alert("Your password is set! \nWelcome!");
+
+        this.close();
 
         this.$router.push({
           name: "Family information",
@@ -196,7 +214,6 @@ export default {
     close() {
       this.dialog = false;
       setTimeout(() => {
-        this.$store.dispatch("setToken", null);
         this.password = null;
         this.newPassword = null;
         this.newPasswordVerify = null;

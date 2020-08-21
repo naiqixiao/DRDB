@@ -357,7 +357,7 @@
               :items="Responses"
               v-model="response"
               :label="currentChild.scheduled ? 'This family is already scheduled.' : 'Parents\'\ response' "
-              :disabled="!currentChild.id || currentChild.scheduled"
+              :disabled="!currentChild.id || currentChild.scheduled || !$store.state.labEmailStatus"
               height="48px"
               background-color="textbackground"
               hide-details

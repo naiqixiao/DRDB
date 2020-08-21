@@ -152,38 +152,43 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
-    const token = fs.readFileSync(tokenPath);
-    oAuth2Client.setCredentials(JSON.parse(token));
-
-    const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-    // const profile = await gmail.users.getProfile({ userId: "me" });
-
-    const sendAs = await gmail.users.settings.sendAs.list({
-      userId: "me",
-    });
-
-    // console.log(sendAs.data)
     var sendAsEmail = {};
 
-    sendAs.data.sendAs.forEach((email) => {
-      if (email.isDefault) {
-        sendAsEmail = email;
+    if (fs.existsSync(tokenPath)) {
+
+      const token = fs.readFileSync(tokenPath);
+      oAuth2Client.setCredentials(JSON.parse(token));
+
+      const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+      const sendAs = await gmail.users.settings.sendAs.list({
+        userId: "me",
+      });
+
+      sendAs.data.sendAs.forEach((email) => {
+        if (email.isDefault) {
+          sendAsEmail = email;
+        }
+      });
+
+      var labEmail = sendAsEmail.sendAsEmail;
+
+      if (sendAsEmail.displayName != "") {
+        var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
+      } else {
+        var labInfo = { Email: labEmail };
       }
-    });
 
-    var labEmail = sendAsEmail.sendAsEmail;
+      // update lab email info.
+      await model.lab.update(labInfo, {
+        where: { id: req.body.lab },
+      });
 
-    if (sendAsEmail.displayName != "") {
-      var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
     } else {
-      var labInfo = { Email: labEmail };
+      var labEmail = null;
+      sendAsEmail.displayName = null
     }
 
-    // update lab email info.
-    await model.lab.update(labInfo, {
-      where: { id: req.body.lab },
-    });
   } catch (error) {
     console.log(error);
     var labEmail = null;
@@ -210,7 +215,10 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     const profile2 = await adminGmail.users.getProfile({ userId: "me" });
 
     var adminEmail = profile2.data.emailAddress;
+
   } catch (error) {
+
+    console.log(error)
     var adminEmail = null;
   }
 
