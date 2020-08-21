@@ -55,7 +55,7 @@ async function sendEmail(emailContent) {
 
   const profile = await gmail.users.getProfile({ userId: "me" });
 
-  emailContent.from = "Administrator" + "<" + profile.data.emailAddress + ">";
+  emailContent.from = "Developmental Research Management System" + "<" + profile.data.emailAddress + ">";
 
   var raw = makeBody(
     emailContent.to,
@@ -121,7 +121,7 @@ exports.create = asyncHandler(async (req, res) => {
     var emailContent = {
       to: newLabInfo.Personnels[0].Email,
       subject:
-        "Your user account has been created for Developmental Research System.",
+        "Your user account has been created",
       body:
         "<p>Hello " +
         newLabInfo.Personnels[0].Name.split(" ")[0] +

@@ -118,7 +118,7 @@ exports.signup = asyncHandler(async (req, res) => {
       var emailContent = {
         to: newUser.Email,
         subject:
-          "Your user account has been created for Developmental Research System.",
+          "Your user account has been created!",
         body:
           "<p>Hello " +
           newUser.Name.split(" ")[0] +
@@ -284,7 +284,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
       var emailContent = {
         to: personnel.Email,
         subject:
-          "Your login password for Developmental Research Database is updated.",
+          "Your login password is updated.",
         body:
           "<p>Hello " +
           personnel.Name.split(" ")[0] +
@@ -344,7 +344,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     try {
       var emailContent = {
         to: personnel.Email,
-        subject: "Your password for Developmental Research Management System is reset",
+        subject: "Your password is reset",
         body:
           "<p>Hello " +
           personnel.Name.split(" ")[0] +
