@@ -128,57 +128,25 @@ export default {
         emailBody = emailBody.replace(/\. she/g, ". She");
         emailBody = emailBody.replace(/\. her/g, ". Her");
 
-        //  Replace variables from the template with the actual values from the data object.
-        // If no value is available, replace with the empty string.
-        // for (var i = 0; i < templateVars.length; ++i) {
-        //   // normalizeHeader ignores ${"} so we can call it directly here.
-
-        //   switch (templateVars) {
-        //     case "${{his/her}}":
-        //       if (appointment.Child.Sex == "F") {
-        //         emailBody = emailBody.replace(templateVars[i], "her" || "");
-        //       } else {
-        //         emailBody = emailBody.replace(templateVars[i], "his" || "");
-        //       }
-        //       break;
-
-        //     case "${{he/she}}":
-        //       if (appointment.Child.Sex == "F") {
-        //         emailBody = emailBody.replace(templateVars[i], "she" || "");
-        //       } else {
-        //         emailBody = emailBody.replace(templateVars[i], "he" || "");
-        //       }
-
-        //       break;
-
-        //     case "${{childName}}":
-        //       emailBody = emailBody.replace(
-        //         templateVars[i],
-        //         appointment.Child.Name || ""
-        //       );
-        //       break;
-        //   }
-        // }
-
         emailBodyList.push(emailBody);
       });
 
       // location
-      var location =
+      const location =
         "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
 
       // closing
-      var closing =
+      const closing =
         "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
-        "<p>Best,<br>" +
+        "<p>Best,</p><p>" +
         this.$store.state.name +
-        "<br>" +
+        "</p><p>" +
         this.$store.state.role +
-        "<br>" +
+        "</p><p>" +
         this.$store.state.labName +
         "</p>";
 
-      var email = opening + emailBodyList.join("<p></p>") + location + closing;
+      const email = opening + emailBodyList.join("<p></p>") + location + closing;
 
       // if (this.emailTemplate) {
       //   var email = this.emailTemplate;
