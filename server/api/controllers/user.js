@@ -116,7 +116,7 @@ exports.signup = asyncHandler(async (req, res) => {
 
     try {
       var emailContent = {
-        to: newUser.Email,
+        to: newUser.Name + "<" + newUser.Email + ">",
         subject:
           "Your user account has been created!",
         body:
@@ -282,7 +282,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
     try {
       var emailContent = {
-        to: personnel.Email,
+        to: personnel.Name + "<" + personnel.Email + ">",
         subject:
           "Your login password is updated.",
         body:
@@ -343,7 +343,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 
     try {
       var emailContent = {
-        to: personnel.Email,
+        to: personnel.Name + "<" + personnel.Email + ">",
         subject: "Your password is reset",
         body:
           "<p>Hello " +

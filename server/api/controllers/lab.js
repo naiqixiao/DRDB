@@ -119,9 +119,9 @@ exports.create = asyncHandler(async (req, res) => {
     // Send email to the associated personnel
 
     var emailContent = {
-      to: newLabInfo.Personnels[0].Email,
+      to: newLabInfo.Personnels[0].Name + "<" + newLabInfo.Personnels[0].Email + ">",
       subject:
-        "Your user account has been created",
+        "Your user account has been created!",
       body:
         "<p>Hello " +
         newLabInfo.Personnels[0].Name.split(" ")[0] +
