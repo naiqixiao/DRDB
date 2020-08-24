@@ -387,7 +387,7 @@
         ></Conversation>
       </v-col>
     </v-row>
-    <v-row justify="start" dense>
+    <v-row justify="start" dense height = "300">
       <v-col cols="12" md="9">
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
@@ -399,6 +399,7 @@
       </v-col>
 
       <v-col cols="12" md="3">
+        <!-- <ParticipationHistory :family="currentFamily" /> -->
         <ParticipationHistory :family="currentFamily" />
       </v-col>
     </v-row>
@@ -421,7 +422,8 @@ import AppointmentTable from "@/components/AppointmentTable";
 import Conversation from "@/components/Conversation";
 import Page from "@/components/Page";
 import NextContact from "@/components/NextContact";
-import ParticipationHistory from "@/components/ParticipationHistory";
+// import ParticipationHistory from "@/components/ParticipationHistory";
+import ParticipationHistory from "@/components/ParticipationHistoryChart";
 
 import family from "@/services/family";
 import store from "@/store";

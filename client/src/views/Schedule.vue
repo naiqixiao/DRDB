@@ -704,7 +704,7 @@ import Email from "@/components/Email";
 import NextContact from "@/components/NextContact";
 
 import AppointmentTableBrief from "@/components/AppointmentTableBrief";
-import ParticipationHistory from "@/components/ParticipationHistory";
+import ParticipationHistory from "@/components/ParticipationHistoryChart";
 
 import Page from "@/components/Page";
 
