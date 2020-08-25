@@ -732,7 +732,7 @@ export default {
         alert("An email about the appointment updates is sent to parents.");
       } catch (error) {
         alert(
-          "No email about the appointment updates is sent to parents./nPlease send an email manually."
+          "No email about the appointment updates is sent to parents.\nPlease send an email manually."
         );
       }
     }
@@ -749,7 +749,7 @@ export default {
                 this.appointmentUpdated = false;
 
         alert(
-          "No email about the appointment updates is sent to parents./nPlease send an email manually."
+          "No email about the appointment updates is sent to parents.\nPlease send an email manually."
         );
       }
     }

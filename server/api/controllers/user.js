@@ -144,13 +144,19 @@ exports.signup = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     res.status(400).send({
-      message: "The entered information (Initial, Email, or CalendarID) already exists in the system./n Please double check or enter new information.",
+      message: "The entered information (Initial, Email, or CalendarID) already exists in the system.\n Please double check or enter new information.",
       error: error,
     });
   }
 });
 
 exports.login = asyncHandler(async (req, res) => {
+  const logFolder = "api/logs";
+  const logFile = logFolder + "/login.txt";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
   const { Email, Password } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
@@ -165,6 +171,15 @@ exports.login = asyncHandler(async (req, res) => {
   });
 
   if (!personnel) {
+    // log the login information.
+    var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     return res.status(401).send({
       error: "The login information was incorrect",
     });
@@ -173,7 +188,16 @@ exports.login = asyncHandler(async (req, res) => {
   const isPasswordValid = bcrypt.compareSync(Password, personnel.Password);
 
   if (!isPasswordValid) {
-    return res.status(403).send({
+    // log the login information.
+    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
+    return res.status(401).send({
       error: "The login information was incorrect",
     });
   }
@@ -190,13 +214,7 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  const logFolder = "api/logs";
-  const logFile = logFolder + "/login.txt";
-  const logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString()
-
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
+  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)

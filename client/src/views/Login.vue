@@ -1,24 +1,42 @@
 <template>
   <v-row justify="center" align="center" style="height: 900px;">
-    <v-col cols="12" lg="3">
-      <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
-      <br />
-      <v-text-field
-        label="Password"
-        type="password"
-        v-model="password"
-        clearable
-        @keydown.enter="login"
-      ></v-text-field>
-      <br />
-      <v-btn rounded color="primary" v-if="error" @click="resetPassword">Forgot Password?</v-btn>
-      <br />
+    <v-col cols="12" md="3">
+      <v-form ref="formLogin" v-model="validLogin" lazy-validation>
+        <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
+        <br />
+        <v-text-field
+          label="Password"
+          type="password"
+          v-model="password"
+          clearable
+          @keydown.enter="login"
+          :rules="this.$rules.required"
+        ></v-text-field>
+      </v-form>
+    </v-col>
+    <v-col cols="12" md="3">
       <div class="text-center">
-        <v-btn rounded color="primary" @click.stop="login">Login</v-btn>
+        <v-btn
+          rounded
+          color="primary"
+          large
+          @click.stop="login"
+          :disabled="!validLogin || !email"
+        >Login</v-btn>
+      </div>
+      <div class="text-center" v-if="error">
+        <br />
+        <v-btn
+          rounded
+          color="primary"
+          large
+          @click="resetPassword"
+          :disabled="!email"
+        >Reset Password?</v-btn>
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.0.20200824</h4>
+      <h4>V1.0.20200825</h4>
     </v-col>
 
     <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
@@ -93,57 +111,65 @@ export default {
       dialog: false,
       changeTemporaryPassword: false,
       valid: true,
+      validLogin: false,
     };
   },
   methods: {
     async login() {
-      this.$store.dispatch("setLoadingStatus", true);
+      var validationResults = this.$refs.formLogin.validate();
 
-      try {
-        const response = await login.login({
-          Email: this.email,
-          Password: this.password,
-        });
-
-        if (response.data.temporaryPassword) {
-          // reset password
-          this.changeTemporaryPassword = response.data.temporaryPassword;
-          this.$store.dispatch("setToken", response.data.token);
-
-          this.dialog = true;
-        } else {
-          this.$store.dispatch("setToken", response.data.token);
-          this.$store.dispatch("setUser", response.data.user);
-          this.$store.dispatch("setName", response.data.name);
-          this.$store.dispatch("setUserID", response.data.userID);
-          this.$store.dispatch("setLab", response.data.lab);
-          this.$store.dispatch("setStudies", response.data.studies);
-          this.$store.dispatch("setRole", response.data.role);
-          this.$store.dispatch("setLabEmail", response.data.labEmail);
-          this.$store.dispatch("setLabName", response.data.labName);
-
-          const profile = await externalAPIs.googleGetEmailAddress();
-
-          if (profile.data.labEmail) {
-            // var labEmail = profile.data.labEmail;
-            // this.$store.dispatch("setLabEmail", labEmail);
-            this.$store.dispatch("setLabEmailStatus", true);
-          }
-
-          if (profile.data.adminEmail) {
-            // var adminEmail = profile.data.adminEmail;
-            this.$store.dispatch("setAdminEmailStatus", true);
-          }
-
-          this.$router.push({
-            name: "Family information",
+      if (validationResults) {
+        this.$store.dispatch("setLoadingStatus", true);
+        try {
+          const response = await login.login({
+            Email: this.email,
+            Password: this.password,
           });
-        }
-      } catch (error) {
-        this.error = error.response.data.error;
-      }
 
-      this.$store.dispatch("setLoadingStatus", false);
+          this.error = null;
+
+          if (response.data.temporaryPassword) {
+            // reset password
+            this.changeTemporaryPassword = response.data.temporaryPassword;
+            this.$store.dispatch("setToken", response.data.token);
+
+            this.dialog = true;
+          } else {
+            this.$store.dispatch("setToken", response.data.token);
+            this.$store.dispatch("setUser", response.data.user);
+            this.$store.dispatch("setName", response.data.name);
+            this.$store.dispatch("setUserID", response.data.userID);
+            this.$store.dispatch("setLab", response.data.lab);
+            this.$store.dispatch("setStudies", response.data.studies);
+            this.$store.dispatch("setRole", response.data.role);
+            this.$store.dispatch("setLabEmail", response.data.labEmail);
+            this.$store.dispatch("setLabName", response.data.labName);
+
+            const profile = await externalAPIs.googleGetEmailAddress();
+
+            if (profile.data.labEmail) {
+              // var labEmail = profile.data.labEmail;
+              // this.$store.dispatch("setLabEmail", labEmail);
+              this.$store.dispatch("setLabEmailStatus", true);
+            }
+
+            if (profile.data.adminEmail) {
+              // var adminEmail = profile.data.adminEmail;
+              this.$store.dispatch("setAdminEmailStatus", true);
+            }
+
+            this.$router.push({
+              name: "Family information",
+            });
+          }
+        } catch (error) {
+          this.error = error.response.data.error;
+
+          alert(error.response.data.error);
+        }
+
+        this.$store.dispatch("setLoadingStatus", false);
+      }
     },
 
     async resetPassword() {
@@ -155,8 +181,13 @@ export default {
 
           this.error = null;
           alert(
-            "Your password is reset, please find the temporary passowrd in your email inbox."
+            "Your password is reset, please find the temporary passowrd in your email (" +
+              this.email +
+              ") inbox."
           );
+          this.email = null;
+          this.password = null;
+          this.error = null;
         } catch (error) {
           this.error = error.response.data.error;
         }
@@ -184,7 +215,6 @@ export default {
         this.$store.dispatch("setRole", response.data.role);
         this.$store.dispatch("setLabEmail", response.data.labEmail);
         this.$store.dispatch("setLabName", response.data.labName);
-
 
         const profile = await externalAPIs.googleGetEmailAddress();
 
