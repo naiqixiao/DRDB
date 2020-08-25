@@ -189,6 +189,16 @@ exports.login = asyncHandler(async (req, res) => {
     }
   );
 
+  // log the login information.
+  const logFile = "api/logs/login.txt";
+  const logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString()
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).send({
     message: "Auth succsessful.",
     temporaryPassword: personnel.temporaryPassword,
