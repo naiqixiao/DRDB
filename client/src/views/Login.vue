@@ -121,9 +121,14 @@ export default {
       if (validationResults) {
         this.$store.dispatch("setLoadingStatus", true);
         try {
+          const KKK = await fetch("https://api.ipify.org/?format=json");
+
+          var ip = await KKK.json();
+
           const response = await login.login({
             Email: this.email,
             Password: this.password,
+            IP: ip.ip,
           });
 
           this.error = null;

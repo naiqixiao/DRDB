@@ -129,6 +129,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "</b>, and your temporary password is <b><em>" +
           password +
           "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
+          "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
           "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
           "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
@@ -157,7 +158,7 @@ exports.login = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const { Email, Password } = req.body;
+  const { Email, Password, IP } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
@@ -172,7 +173,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   if (!personnel) {
     // log the login information.
-    var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + "\r\n"
+    var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -189,7 +190,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   if (!isPasswordValid) {
     // log the login information.
-    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + "\r\n"
+    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -214,7 +215,7 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + "\r\n"
+  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + " - " + IP + "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)
