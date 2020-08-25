@@ -190,8 +190,13 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  const logFile = "api/logs/login.txt";
+  const logFolder = "api/logs";
+  const logFile = logFolder + "/login.txt";
   const logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString()
+
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)
