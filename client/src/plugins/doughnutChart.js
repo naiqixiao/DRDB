@@ -11,14 +11,20 @@ export default {
       title: {
         display: true,
         text: "Participation history",
-        fontSize: 16
+        fontSize: 18,
+        fontColor: "#344955",
+        fontStyle: "bold",
+        padding: 8
       },
       legend: {
         position: "right",
-        align: "start"
+        align: "end",
+        boxWidth: 15,
+        fontColor: "#344955",
+        padding: 4
       },
       animation: {
-        duration: 300
+        duration: 700,
       },
 
     };
