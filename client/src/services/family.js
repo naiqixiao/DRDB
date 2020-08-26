@@ -1,20 +1,41 @@
 import api from "./api";
+import store from "@/store";
 
 export default {
-  search(queryString) {
+  create(familyInfo) {
+    familyInfo.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+
+    return api().post("family/add", familyInfo);
+  },
+  search(familyInfo) {
     return api().get("family/", {
-      params: queryString
+      params: familyInfo
     });
   },
-  update(queryString) {
-    return api().post("family/", queryString);
+  update(familyInfo) {
+    familyInfo.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+    return api().post("family/", familyInfo);
   },
-  create(queryString) {
-    return api().post("family/add", queryString);
-  },
-  delete(queryString) {
+  delete(familyInfo) {
+
+    familyInfo.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     return api().delete("family/", {
-      params: queryString
+      params: familyInfo
     });
   }
 };

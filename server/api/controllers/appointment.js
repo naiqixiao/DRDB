@@ -102,6 +102,31 @@ exports.create = asyncHandler(async (req, res) => {
       throw error;
     }
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Added] " + User.Name + " (" + User.Email + ") " + "added a study appointment to a schedule (" +
+      Schedule.id + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(Schedule);
   } catch (error) {
     res.status(500).send(error);
@@ -277,6 +302,31 @@ exports.update = asyncHandler(async (req, res) => {
       throw err;
     }
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Updated] " + User.Name + " (" + User.Email + ") " + "added a study appointment (" +
+      Schedule.id + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(Schedule);
 
     console.log("Appointment Information Updated.");
@@ -371,6 +421,31 @@ exports.delete = asyncHandler(async (req, res) => {
     await model.appointment.destroy({
       where: { id: req.query.id },
     });
+
+    // Log
+    const User = req.query.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "delelete a study appointment to a schedule (" +
+      Schedule.id + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
 
     res.status(200).send({
       AppointmentTime: Schedule.AppointmentTime

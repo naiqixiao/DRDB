@@ -3,6 +3,13 @@ import store from "@/store";
 
 export default {
   create(schedule) {
+    schedule.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+
     return api().post("schedule/add", schedule);
   },
   search(schedule) {
@@ -12,30 +19,54 @@ export default {
     });
   },
   today() {
-    const schedule = {lab: store.state.lab};
+    const schedule = { lab: store.state.lab };
     return api().get("schedule/today", {
       params: schedule,
     });
   },
   week() {
-    const schedule = {lab: store.state.lab};
+    const schedule = { lab: store.state.lab };
     return api().get("schedule/week", {
       params: schedule,
     });
   },
   update(schedule) {
+    schedule.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     schedule.lab = store.state.lab;
     return api().post("schedule/", schedule);
   },
   complete(schedule) {
+    schedule.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     schedule.lab = store.state.lab;
     return api().post("schedule/complete", schedule);
   },
   remind(schedule) {
+    schedule.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     schedule.lab = store.state.lab;
     return api().post("schedule/remind", schedule);
   },
   delete(schedule) {
+    schedule.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     schedule.lab = store.state.lab;
     return api().delete("schedule/", {
       params: schedule,

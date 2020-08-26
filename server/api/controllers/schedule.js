@@ -74,6 +74,31 @@ exports.create = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.bulkCreate(experimenterAssignment);
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Created] " + User.Name + " (" + User.Email + ") " + "created a study appointment (" +
+      schedule.id + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(schedule);
     console.log("appointment created!");
   } catch (error) {
@@ -409,6 +434,31 @@ exports.update = asyncHandler(async (req, res) => {
       ],
     });
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Update] " + User.Name + " (" + User.Email + ") " + "updated a study appointment (" +
+      ID + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(updatedSchedule);
 
     console.log("Appointment Information Updated.");
@@ -430,6 +480,31 @@ exports.remind = asyncHandler(async (req, res) => {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
       where: { id: ID },
     });
+
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Remind] " + User.Name + " (" + User.Email + ") " + "sent a reminding email for a study appointment (" +
+      ID + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
 
     res.status(200).send(updatedSchedule);
 
@@ -483,6 +558,31 @@ exports.complete = asyncHandler(async (req, res) => {
       ],
     });
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Complete] " + User.Name + " (" + User.Email + ") " + "marked the study appointment (" +
+      ID + ") as completed at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(updatedSchedule);
 
     console.log("Appointment Information Updated.");
@@ -512,6 +612,31 @@ exports.delete = asyncHandler(async (req, res) => {
   await model.schedule.destroy({
     where: { id: req.query.id },
   });
+
+  // Log
+  const User = req.query.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  if (User.LabName) {
+    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+  } else {
+    var logFile = logFolder + "/login.txt";
+  }
+
+  var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "deleted a study appointment (" +
+    req.query.id + ") " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
 
   res.status(200).send("schedule deleted.");
 });

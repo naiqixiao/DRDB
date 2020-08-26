@@ -66,6 +66,27 @@ exports.create = asyncHandler(async (req, res) => {
       ],
     });
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    const logFile = logFolder + "/login.txt";
+
+    var logInfo = "[Family Created] " + User.Name + " (" + User.Email + ") from " +
+      User.LabName + " added a family (" +
+      newFamily.id + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(newFamily);
   } catch (error) {
     throw error;
@@ -190,6 +211,28 @@ exports.update = asyncHandler(async (req, res) => {
   const family = await model.family.update(updatedFamilyInfo, {
     where: { id: ID },
   });
+
+  // Log
+  const User = req.body.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const logFile = logFolder + "/login.txt";
+
+  var logInfo = "[Family Updated] " + User.Name + " (" + User.Email + ") from " +
+    User.LabName + " updated family information (" +
+    ID + ") at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).send(family);
   console.log("Family Information Updated!");
 });
@@ -197,8 +240,30 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a family with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const family = await model.family.destroy({
-    where: req.query,
+    where: req.query.id,
   });
+
+  // Log
+  const User = req.query.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const logFile = logFolder + "/login.txt";
+
+  var logInfo = "[Family Deleted] " + User.Name + " (" + User.Email + ") from " +
+    User.LabName + " deleted family (" +
+    ID + ") at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).json(family);
 });
 
