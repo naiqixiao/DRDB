@@ -61,6 +61,27 @@ exports.create = asyncHandler(async (req, res) => {
       }
     );
 
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    const logFile = logFolder + "/login.txt";
+
+    var logInfo = "[Child Created] " + User.Name + " (" + User.Email + ") from " +
+      User.LabName + " added a child to a family (" +
+      child.FK_Family + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
     res.status(200).send(child);
 
     console.log("Child is created and siblings are updated!");
@@ -183,14 +204,56 @@ exports.update = asyncHandler(async (req, res) => {
     where: { id: ID },
   });
 
+  // Log
+  const User = req.body.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const logFile = logFolder + "/login.txt";
+
+  var logInfo = "[Child Updated] " + User.Name + " (" + User.Email + ") from " +
+    User.LabName + " updated a child's information (" +
+    ID + ") at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).json(child);
 });
 
 // Delete a child with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const child = await model.child.destroy({
-    where: req.query,
+    where: req.query.id,
   });
+
+  // Log
+  const User = req.query.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const logFile = logFolder + "/login.txt";
+
+  var logInfo = "[Child Deleted] " + User.Name + " (" + User.Email + ") from " +
+    User.LabName + " deleted a child (" +
+    req.query.id + ") from the database at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
 
   res.status(200).json(child);
 });

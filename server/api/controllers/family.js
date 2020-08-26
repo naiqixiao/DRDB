@@ -223,7 +223,7 @@ exports.update = asyncHandler(async (req, res) => {
   const logFile = logFolder + "/login.txt";
 
   var logInfo = "[Family Updated] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " updated family information (" +
+    User.LabName + " updated a family's information (" +
     ID + ") at " +
     new Date().toString() + " - " + User.IP + "\r\n"
 
@@ -255,7 +255,7 @@ exports.delete = asyncHandler(async (req, res) => {
 
   var logInfo = "[Family Deleted] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " deleted family (" +
-    ID + ") at " +
+    ID + ") from the database at " +
     new Date().toString() + " - " + User.IP + "\r\n"
 
   if (fs.existsSync(logFile)) {
