@@ -231,7 +231,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a child with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const child = await model.child.destroy({
-    where: req.query.id,
+    where: {id: req.query.id},
   });
 
   // Log

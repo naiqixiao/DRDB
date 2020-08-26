@@ -241,7 +241,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a family with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const family = await model.family.destroy({
-    where: req.query.id,
+    where: {id: req.query.id},
   });
 
   // Log

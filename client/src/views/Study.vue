@@ -395,7 +395,7 @@ export default {
         MaxAge: null,
         Description: "",
         EmailTemplate: "",
-        Completed: 0,
+        Completed: false,
         StudyType: null,
         PrematureParticipant: "",
         IllParticipant: "",
@@ -410,7 +410,7 @@ export default {
         MaxAge: null,
         Description: "",
         EmailTemplate: "",
-        Completed: 0,
+        Completed: false,
         StudyType: null,
         PrematureParticipant: "",
         IllParticipant: "",
@@ -425,7 +425,7 @@ export default {
         MaxAge: null,
         Description: "",
         EmailTemplate: "",
-        Completed: 0,
+        Completed: false,
         StudyType: null,
         PrematureParticipant: "",
         IllParticipant: "",
@@ -576,7 +576,7 @@ export default {
         await study.delete(studyInfo);
         var index = this.Studies.indexOf(this.currentStudy);
         this.Studies.splice(index, 1);
-
+        this.$store.dispatch("setStudies", this.Studies);
         this.currentStudy = Object.assign({}, this.defaultStudy);
       } catch (error) {
         console.log(error.response);

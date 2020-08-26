@@ -145,7 +145,6 @@ exports.create = asyncHandler(async (req, res) => {
 
     // create lab folder
     const labFolderPath = "api/google/labs/lab" + lab.id;
-    // const credentialsPath = "api/google/general/credentials.json";
 
     if (!fs.existsSync("api/google/labs")) {
       fs.mkdirSync("api/google/labs");
@@ -153,7 +152,27 @@ exports.create = asyncHandler(async (req, res) => {
 
     if (!fs.existsSync(labFolderPath)) {
       fs.mkdirSync(labFolderPath);
-      // fs.copyFileSync(credentialsPath, labFolderPath + "/credentials.json");
+    }
+
+    // Log
+    const User = req.body.User;
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    const logFile = logFolder + "/login.txt";
+
+    var logInfo = "[Lab Created] " + User.Name + " (" + User.Email + ") from " +
+      User.LabName + " created a lab (" +
+      newLabInfo.LabName + ") at " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
     }
 
     res.status(200).send("lab created!");
@@ -192,6 +211,31 @@ exports.update = asyncHandler(async (req, res) => {
     where: { id: updatedLabInfo.lab },
   });
 
+  // Log
+  const User = req.body.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  if (User.LabName) {
+    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+  } else {
+    var logFile = logFolder + "/login.txt";
+  }
+
+  var logInfo = "[Lab Updated] " + User.Name + " (" + User.Email + ") updated lab information (" +
+    updatedLabInfo.LabName + ") at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).send(lab);
   console.log("Lab Information Updated!");
 });
@@ -208,8 +252,29 @@ exports.delete = asyncHandler(async (req, res) => {
   }
 
   const lab = await model.lab.destroy({
-    where: req.query,
+    where: { id: req.query.id },
   });
+
+  // Log
+  var User = JSON.parse(req.query.User);
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const logFile = logFolder + "/login.txt";
+
+  var logInfo = "[Lab Deleted] " + User.Name + " (" + User.Email + ") from " +
+    User.LabName + " deleted lab (" +
+    req.query.id + ") from the database at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
 
   res.status(200).json(lab);
   console.log("Lab removal succeeds.");

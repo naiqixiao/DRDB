@@ -1,6 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
+const fs = require("fs");
 
 // Create and Save a new personnel
 exports.create = asyncHandler(async (req, res) => {
@@ -80,6 +81,32 @@ exports.update = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.findOne({
     where: { id: ID },
   });
+
+  // Log
+  const User = req.body.User;
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  if (User.LabName) {
+    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+  } else {
+    var logFile = logFolder + "/login.txt";
+  }
+
+  var logInfo = "[Personnel Updated] " + User.Name + " (" + User.Email + ") " + "update personnel information (" +
+    personnel.Name + ") at " +
+    new Date().toString() + " - " + User.IP + "\r\n";
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).send(personnel);
   console.log("Personnel Information Updated!");
 });
@@ -87,8 +114,34 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.destroy({
-    where: req.query,
+    where: { id: req.query.id },
   });
+
+  // Log
+  var User = JSON.parse(req.query.User);
+
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  if (User.LabName) {
+    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+  } else {
+    var logFile = logFolder + "/login.txt";
+  }
+
+  var logInfo = "[Personnel Deleted] " + User.Name + " (" + User.Email + ") " + "removed (" +
+    req.query.id + ") from the database at " +
+    new Date().toString() + " - " + User.IP + "\r\n"
+
+  if (fs.existsSync(logFile)) {
+    fs.appendFileSync(logFile, logInfo)
+  } else {
+    fs.writeFileSync(logFile, logInfo)
+  }
+
   res.status(200).json(personnel);
   console.log(personnel.id + " deleted.");
 });

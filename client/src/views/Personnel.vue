@@ -440,6 +440,8 @@ export default {
 
       try {
         await personnel.delete(personnelInfo);
+        alert(this.currentPersonnel.Name + " is removed from the system.");
+
         var index = this.Personnels.indexOf(this.currentPersonnel);
         this.Personnels.splice(index, 1);
 
