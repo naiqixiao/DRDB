@@ -8720,15 +8720,10 @@ server/api/models/DRDB.js
 
 server/api/google/general/index.js
 server/api/google/general/token.json
-<<<<<<< HEAD
 server/api/models/DRDB.js.rej
 server/api/models/DRDB.js.orig
 client/._.DS_Store
 .DS_Store
 ._.DS_Store
 server/api/models/DRDB.js
-=======
-server/api/models/DRDB.js
-server/api/models/DRDB_SQLw.js
->>>>>>> c97dae7b6a61b6ff9585cd816c4c518e5a425da4
-server/api/logs/login.txt
+server/api/logs

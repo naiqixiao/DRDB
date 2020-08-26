@@ -204,7 +204,7 @@ exports.login = asyncHandler(async (req, res) => {
   const isPasswordValid = bcrypt.compareSync(Password, personnel.Password);
 
   if (!isPasswordValid) {
-    
+
     // log the login information.
     var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
 
@@ -382,7 +382,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
   const hashPassword = bcrypt.hashSync(password, 10);
 
   try {
-    const { Email } = req.body;
+    const { Email, User } = req.body;
     const personnel = await model.personnel.findOne({
       where: {
         Email: Email,
@@ -403,6 +403,28 @@ exports.resetPassword = asyncHandler(async (req, res) => {
         },
       }
     );
+
+    // log
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Password Reset] " + personnel.Name + " (" + personnel.Email + ") " + "reset password at " + new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
 
     res.status(200).send({
       message: "Password reset!",
@@ -426,12 +448,14 @@ exports.resetPassword = asyncHandler(async (req, res) => {
           "Developmental Research Management System</p>",
       };
 
-      // const oAuth2Client = generalAuth();
-
       await sendEmail(emailContent);
+
+
     } catch (error) {
       throw error;
     }
+
+
   } catch (error) {
     throw error;
   }

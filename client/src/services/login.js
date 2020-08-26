@@ -37,7 +37,6 @@ export default {
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
-
     }
     return api().post("user/resetPassword", credentials);
   },

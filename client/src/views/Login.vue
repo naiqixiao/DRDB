@@ -134,23 +134,22 @@ export default {
 
           this.error = null;
 
+          this.$store.dispatch("setToken", response.data.token);
+          this.$store.dispatch("setUser", response.data.user);
+          this.$store.dispatch("setName", response.data.name);
+          this.$store.dispatch("setUserID", response.data.userID);
+          this.$store.dispatch("setLab", response.data.lab);
+          this.$store.dispatch("setStudies", response.data.studies);
+          this.$store.dispatch("setRole", response.data.role);
+          this.$store.dispatch("setLabEmail", response.data.labEmail);
+          this.$store.dispatch("setLabName", response.data.labName);
+
           if (response.data.temporaryPassword) {
             // reset password
             this.changeTemporaryPassword = response.data.temporaryPassword;
-            this.$store.dispatch("setToken", response.data.token);
 
             this.dialog = true;
           } else {
-            this.$store.dispatch("setToken", response.data.token);
-            this.$store.dispatch("setUser", response.data.user);
-            this.$store.dispatch("setName", response.data.name);
-            this.$store.dispatch("setUserID", response.data.userID);
-            this.$store.dispatch("setLab", response.data.lab);
-            this.$store.dispatch("setStudies", response.data.studies);
-            this.$store.dispatch("setRole", response.data.role);
-            this.$store.dispatch("setLabEmail", response.data.labEmail);
-            this.$store.dispatch("setLabName", response.data.labName);
-
             const profile = await externalAPIs.googleGetEmailAddress();
 
             if (profile.data.labEmail) {
@@ -180,6 +179,12 @@ export default {
 
     async resetPassword() {
       if (this.email) {
+        const KKK = await fetch("https://api.ipify.org/?format=json");
+
+        var ip = await KKK.json();
+
+        this.$store.dispatch("setIP", ip.ip);
+
         try {
           await login.resetPassword({
             Email: this.email,
