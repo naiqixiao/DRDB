@@ -106,7 +106,9 @@ export default {
     },
 
     async save() {
-      var newStudies = this.editedStudies.map((study) => {
+      var newStudies = {};
+
+      newStudies.studies = this.editedStudies.map((study) => {
         return {
           FK_Experimenter: this.personnelId,
           FK_Study: study.id,

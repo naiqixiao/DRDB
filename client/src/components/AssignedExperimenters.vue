@@ -105,12 +105,15 @@ export default {
     },
 
     async save() {
-      var newExperimenters = this.editedExperimenter.map((experimenter) => {
-        return {
-          FK_Study: this.studyId,
-          FK_Experimenter: experimenter.id,
-        };
-      });
+      var newExperimenters = {};
+      newExperimenters.experimenters = this.editedExperimenter.map(
+        (experimenter) => {
+          return {
+            FK_Study: this.studyId,
+            FK_Experimenter: experimenter.id,
+          };
+        }
+      );
 
       try {
         await experimenter.postExperimenters(newExperimenters);

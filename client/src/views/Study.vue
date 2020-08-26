@@ -324,12 +324,12 @@
     <v-col cols="12" md="3">
       <h3>Experimenters</h3>
 
-      <Experimenters
+      <AssignedExperimenters
         :Experimenters="currentStudy.Personnels"
         :labMembers="labMembers"
         :studyId="currentStudy.id"
         @updatedExperimenters="updateExperimenters"
-      ></Experimenters>
+      ></AssignedExperimenters>
     </v-col>
   </v-row>
 </v-container>
@@ -337,7 +337,7 @@
 
 <script>
 import DateDisplay from "@/components/DateDisplay";
-import Experimenters from "@/components/Experimenters";
+import AssignedExperimenters from "@/components/AssignedExperimenters";
 
 import study from "@/services/study";
 import personnel from "@/services/personnel";
@@ -347,7 +347,7 @@ import { VueEditor } from "vue2-editor";
 export default {
   components: {
     DateDisplay,
-    Experimenters,
+    AssignedExperimenters,
     VueEditor,
   },
   data() {
