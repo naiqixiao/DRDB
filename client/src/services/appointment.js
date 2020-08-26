@@ -36,6 +36,7 @@ export default {
 
   delete(removedAppointment) {
     removedAppointment.lab = store.state.lab;
+    
     removedAppointment.User = {
       IP: store.state.ip,
       Name: store.state.name,

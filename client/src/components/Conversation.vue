@@ -109,7 +109,7 @@ export default {
         confirm("Are you sure you want to delete this conversation record?")
       ) {
         try {
-          await conversation.delete(item.id);
+          await conversation.delete({ id: item.id });
           this.Conversation.splice(index, 1);
           console.log("conversation deleted.");
         } catch (error) {

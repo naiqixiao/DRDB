@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const moment = require('moment');
-
+const fs = require("fs");
 // Create and Save an appointment
 
 // {
@@ -614,7 +614,7 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  const User = req.query.User;
+  var User = JSON.parse(req.query.User);
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {

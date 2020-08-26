@@ -2,6 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const moment = require('moment');
+const fs = require("fs");
 
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -244,7 +245,7 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  const User = req.query.User;
+  var User = JSON.parse(req.query.User);
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {

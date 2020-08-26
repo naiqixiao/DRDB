@@ -1,10 +1,24 @@
 import api from "./api";
+import store from "@/store";
 
 export default {
   create(conversation) {
+    conversation.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
     return api().post("conversation/", conversation);
   },
-  delete(conversationId) {
-    return api().delete("conversation/", { params: { id: conversationId } });
+  delete(conversation) {
+
+    conversation.User = {
+      IP: store.state.ip,
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+    return api().delete("conversation/", { params: conversation });
   }
 };
