@@ -125,10 +125,11 @@ export default {
 
           var ip = await KKK.json();
 
+          this.$store.dispatch("setIP", ip.ip);
+
           const response = await login.login({
             Email: this.email,
             Password: this.password,
-            IP: ip.ip,
           });
 
           this.error = null;

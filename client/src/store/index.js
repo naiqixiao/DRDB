@@ -20,7 +20,8 @@ export default new Vuex.Store({
     labName: null,
     labEmailStatus: null,
     adminEmailStatus: null,
-    loadingStatus: false
+    loadingStatus: false,
+    ip: null
   },
   mutations: {
     setToken(state, token) {
@@ -60,6 +61,9 @@ export default new Vuex.Store({
     setLoadingStatus(state, loadingStatus) {
       state.loadingStatus = loadingStatus;
     },
+    setIP(state, ip) {
+      state.ip = ip;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -97,6 +101,9 @@ export default new Vuex.Store({
     },
     setLoadingStatus({ commit }, loadingStatus) {
       commit("setLoadingStatus", loadingStatus);
+    },
+    setIP({ commit }, ip) {
+      commit("setIP", ip);
     },
   },
 });

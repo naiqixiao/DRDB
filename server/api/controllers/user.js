@@ -97,6 +97,11 @@ async function sendEmail(emailContent) {
 }
 
 exports.signup = asyncHandler(async (req, res) => {
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
   try {
     const password = Math.random()
       .toString(36)
@@ -105,6 +110,7 @@ exports.signup = asyncHandler(async (req, res) => {
     const hashPassword = bcrypt.hashSync(password, 10);
 
     var newUser = req.body;
+    var User = req.body.User;
 
     newUser.Password = hashPassword;
     newUser.temporaryPassword = true;
@@ -112,7 +118,6 @@ exports.signup = asyncHandler(async (req, res) => {
     const newPersonnel = await model.personnel.create(newUser);
 
     res.status(200).send(newPersonnel);
-    console.log("User created!");
 
     try {
       var emailContent = {
@@ -129,7 +134,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "</b>, and your temporary password is <b><em>" +
           password +
           "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
-          "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
+          // "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
           "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
           "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
@@ -137,9 +142,19 @@ exports.signup = asyncHandler(async (req, res) => {
           "Developmental Research Management System</p>",
       };
 
-      // const oAuth2Client = generalAuth();
-
       await sendEmail(emailContent);
+
+      // log
+      const logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+      var logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + " - " + User.IP + "\r\n"
+
+      if (fs.existsSync(logFile)) {
+        fs.appendFileSync(logFile, logInfo)
+      } else {
+        fs.writeFileSync(logFile, logInfo)
+      }
+
     } catch (error) {
       throw error;
     }
@@ -189,6 +204,7 @@ exports.login = asyncHandler(async (req, res) => {
   const isPasswordValid = bcrypt.compareSync(Password, personnel.Password);
 
   if (!isPasswordValid) {
+    
     // log the login information.
     var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
 
@@ -243,7 +259,12 @@ exports.loginChecked = asyncHandler(async (req, res) => {
 });
 
 exports.changePassword = asyncHandler(async (req, res) => {
-  const { Email, Password, newPassword } = req.body;
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const { Email, Password, newPassword, User } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
@@ -335,9 +356,18 @@ exports.changePassword = asyncHandler(async (req, res) => {
         "Developmental Research Management System</p>",
     };
 
-    // const oAuth2Client = generalAuth();
-
     await sendEmail(emailContent);
+
+    // log
+    const logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    var logInfo = "[Change Password] " + User.Name + " (" + User.Email + ") " + "chagned password at " + new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
 
   } catch (error) {
     throw error;
