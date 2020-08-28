@@ -590,7 +590,11 @@
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
-                      <v-btn color="primary" :disabled="!studyDate" @click="continue12()">
+                      <v-btn
+                        color="primary"
+                        :disabled=" response === 'Confirmed' ? !studyDate : false"
+                        @click="continue12()"
+                      >
                         <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>
                         {{ scheduleButtonText }}
                       </v-btn>
@@ -631,6 +635,7 @@
                   <NextContact
                     ref="NextContact"
                     :familyId="currentFamily.id"
+                    :labId="$store.state.lab"
                     :studyDate="studyDate"
                     :contactType="response"
                     :nextContactDialog="nextContactDialog"
@@ -1231,6 +1236,7 @@ export default {
           appointment.Schedule.AppointmentTime =
             newStudySchedule.data.AppointmentTime;
           appointment.Schedule.Status = newStudySchedule.data.Status;
+          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;
         });
 
         console.log("New Scheduled Created!");

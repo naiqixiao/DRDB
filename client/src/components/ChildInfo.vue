@@ -312,6 +312,7 @@
               <NextContact
                 ref="NextContact"
                 :familyId="currentFamily.id"
+                :labId="$store.state.lab"
                 :studyDate="studyDate"
                 :contactType="response"
                 :nextContactDialog="nextContactDialog"

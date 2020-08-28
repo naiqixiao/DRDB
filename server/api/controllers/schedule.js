@@ -371,11 +371,6 @@ exports.update = asyncHandler(async (req, res) => {
 
       break;
 
-    // case "No Show":
-    // case "TBD":
-    // case "Rescheduling":
-    // case "Cancelled":
-    // case "Rejected":
     default:
       // update the calendar event, if an appointment is rescheduled.
 
@@ -525,38 +520,13 @@ exports.complete = asyncHandler(async (req, res) => {
 
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
-      where: { id: ID },
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.family,
-            },
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
-            },
-            {
-              model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "StudyType",
-              ],
-            },
+      where: { id: ID }
+    })
 
-            {
-              model: model.personnel,
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
-            },
-          ],
-        },
-      ],
-    });
+    // update family by removing AssignedLab from the family
+    updateFamilyInfo = { AssignedLab: null };
+
+    await model.family.update(updateFamilyInfo, { where: { id: updatedScheduleInfo.familyId } });
 
     // Log
     const User = req.body.User;

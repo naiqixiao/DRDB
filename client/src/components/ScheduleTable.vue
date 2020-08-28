@@ -124,7 +124,10 @@
 
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
-        <v-row justify="space-between" style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll;">
+        <v-row
+          justify="space-between"
+          style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll;"
+        >
           <MiniAppointmentTable
             :Appointments="item.Appointments"
             :Index="Schedules.indexOf(item)"
@@ -143,6 +146,7 @@
           <NextContact
             ref="NextContact"
             :familyId="editedSchedule.Appointments[0].FK_Family"
+            :labId="$store.state.lab"
             :studyDate="nextContactDate"
             :contactType="contactType"
             :nextContactDialog="nextContactDialog"
@@ -245,6 +249,7 @@
               <NextContact
                 ref="NextContactStepper"
                 :familyId="editedSchedule.Appointments[0].FK_Family"
+                :labId="$store.state.lab"
                 :studyDate="studyDate"
                 contactType="Confirmed"
                 :nextContactDialog="nextContactDialogStepper"
@@ -253,7 +258,7 @@
               <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
+                  <v-btn color="primary" @click="completeSchedule">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -350,6 +355,7 @@ export default {
 
         case "Completed":
           try {
+            item.familyId = item.Appointments[0].FK_Family;
             await schedule.complete(item);
           } catch (error) {
             console.log(error);
@@ -552,7 +558,7 @@ export default {
       row.expand(true);
       this.$emit("rowSelected", item.Appointments[0].Family);
     },
-    
+
     datePickerRange() {
       if (this.editedSchedule.Appointments) {
         var minAges = this.editedSchedule.Appointments.map((appointment) => {

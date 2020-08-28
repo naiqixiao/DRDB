@@ -167,6 +167,7 @@
               <NextContact
                 ref="NextContactStepper"
                 :familyId="family.id"
+                :labId="$store.state.lab"
                 :studyDate="studyDate"
                 contactType="Confirmed"
                 :nextContactDialog="nextContactDialogStepper"
@@ -175,7 +176,7 @@
               <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
+                  <v-btn color="primary" @click="completeSchedule">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -191,6 +192,7 @@
           <NextContact
             ref="NextContact"
             :familyId="family.id"
+            :labId="$store.state.lab"
             :studyDate="nextContactDate"
             :contactType="contactType"
             :nextContactDialog="nextContactDialog"
@@ -328,6 +330,7 @@ export default {
 
         case "Completed":
           try {
+            item.Schedule.familyId = item.FK_Family;
             await schedule.complete(item.Schedule);
           } catch (error) {
             console.log(error);

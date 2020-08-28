@@ -5,14 +5,7 @@
         <v-card-title>When to contact this family again?</v-card-title>
         <v-row align="center" justify="start">
           <v-col cols="12" md="2">
-            <v-text-field
-              class="pa=3"
-              label="After"
-              suffix="days"
-              hide-details
-              v-model="daysAfter"
-            >
-            </v-text-field>
+            <v-text-field class="pa=3" label="After" suffix="days" hide-details v-model="daysAfter"></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field
@@ -31,8 +24,7 @@
         <v-card-title>No more contact this family?</v-card-title>
         <v-row align="center" justify="start">
           <v-col cols="12" md="4">
-            <v-switch v-model="neverContact" label="No more contact">
-            </v-switch>
+            <v-switch v-model="neverContact" label="No more contact"></v-switch>
           </v-col>
         </v-row>
       </div>
@@ -77,6 +69,7 @@ export default {
   components: {},
   props: {
     familyId: Number,
+    labId: Number,
     studyDate: String,
     contactType: String,
     nextContactDialog: Boolean,
@@ -89,6 +82,7 @@ export default {
       nextContactNote: "",
       dialogNextContact: false,
       datePicker: false,
+      Lab: this.labId,
     };
   },
   methods: {
@@ -123,10 +117,9 @@ export default {
         id: this.familyId,
         NextContactNote: this.nextContactNote,
         NextContactDate: this.nextContactDate,
-        LastContactDate: moment()
-          .startOf("day")
-          .format("YYYY-MM-DD"),
+        LastContactDate: moment().startOf("day").format("YYYY-MM-DD"),
         NoMoreContact: this.neverContact,
+        AssignedLab: this.Lab,
       };
 
       try {
@@ -173,9 +166,7 @@ export default {
               "The family is about to participate in a study on " +
               moment(this.studyDate).format("YYYY-MM-DD") +
               ". Contact the family at least 7 days (" +
-              moment(this.studyDate)
-                .add(7, "days")
-                .format("YYYY-MM-DD") +
+              moment(this.studyDate).add(7, "days").format("YYYY-MM-DD") +
               ") after their participation.";
             break;
 
@@ -221,6 +212,8 @@ export default {
               "Rejected participation on " +
               moment().format("YYYY-MM-DD") +
               ", to contact the family after 7 days.";
+
+            this.Lab = null;
             break;
 
           case "Cancelled":
@@ -232,6 +225,8 @@ export default {
               "Cancelled a study on " +
               moment().format("YYYY-MM-DD") +
               ", to contact the family after 7 days.";
+
+            this.Lab = null;
             break;
         }
       } else {
@@ -253,9 +248,7 @@ export default {
             "The family is about to participate in a study on " +
             moment(this.studyDate).format("YYYY-MM-DD") +
             ". Contact the family at least 7 days (" +
-            moment(this.studyDate)
-              .add(7, "days")
-              .format("YYYY-MM-DD") +
+            moment(this.studyDate).add(7, "days").format("YYYY-MM-DD") +
             ") after their participation.";
           break;
 
@@ -301,6 +294,8 @@ export default {
             "Rejected participation on " +
             moment().format("YYYY-MM-DD") +
             ", to contact the family after 7 days.";
+
+          this.Lab = null;
           break;
 
         case "Cancelled":
@@ -312,6 +307,8 @@ export default {
             "Cancelled a study on " +
             moment().format("YYYY-MM-DD") +
             ", to contact the family after 7 days.";
+
+          this.Lab = null;
           break;
       }
     } else {

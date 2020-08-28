@@ -101,6 +101,13 @@ Study.belongsTo(Lab, {
   foreignKey: "FK_Lab",
 });
 
+Lab.hasMany(Family, {
+  foreignKey: "AssignedLab",
+});
+Family.belongsTo(Lab, {
+  foreignKey: "AssignedLab",
+});
+
 Personnel.belongsToMany(Study, {
   through: "Experimenter",
   foreignKey: "FK_Experimenter",

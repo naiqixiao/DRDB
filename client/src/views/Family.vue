@@ -26,6 +26,11 @@
               <v-icon left>mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
+          <v-col cols="12" md="3" style="text-align: start;">
+            <v-btn large @click="followupSearch">
+              <v-icon left>mdi-phone</v-icon>Follow-ups
+            </v-btn>
+          </v-col>
 
           <v-spacer></v-spacer>
           <v-col cols="12" md="4" class="text-center">
@@ -345,6 +350,7 @@
           <NextContact
             ref="NextContact"
             :familyId="currentFamily.id"
+            :labId="$store.state.lab"
             :studyDate="nextContactDate"
             :contactType="contactType"
             :nextContactDialog="nextContactDialog"
@@ -387,7 +393,7 @@
         ></Conversation>
       </v-col>
     </v-row>
-    <v-row justify="start" dense height = "300">
+    <v-row justify="start" dense height="300">
       <v-col cols="12" md="9">
         <AppointmentTable
           :Appointments="currentFamily.Appointments"
@@ -465,6 +471,7 @@ export default {
         RaceDad: null,
         Vehicle: null,
         RecruitmentMethod: null,
+        NextContactDate: null,
       },
       familyTemplate: {
         id: null,
@@ -480,6 +487,7 @@ export default {
         RaceDad: null,
         Vehicle: null,
         RecruitmentMethod: null,
+        NextContactDate: null,
       },
       currentFamily: {
         id: null,
@@ -495,6 +503,7 @@ export default {
         RaceDad: null,
         Vehicle: null,
         RecruitmentMethod: null,
+        NextContactDate: null,
       },
       Families: [],
       editableFields: [],
@@ -611,8 +620,36 @@ export default {
       }
 
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    },
 
-      // this.$store.dispatch("setLoadingStatus", false);
+    async followupSearch() {
+      this.$store.dispatch("setLoadingStatus", true);
+
+      this.queryString.NextContactDate = moment().startOf("day").toString();
+      this.queryString.AssignedLab = this.$store.state.lab
+
+      try {
+        const Results = await family.search(this.queryString);
+        if (Results.data.length > 0) {
+          this.Families = Results.data;
+          this.page = 1;
+          this.currentFamily = this.Families[this.page - 1];
+          this.searchStatus = !this.searchStatus;
+        } else {
+          alert("No family needs to be followed up.");
+          this.page = 0;
+          this.currentFamily = Object.assign({}, this.familyTemplate);
+        }
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
+
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
     addFamily() {
@@ -691,6 +728,7 @@ export default {
       this.currentFamily.NextContactDate = nextContact.NextContactDate;
       this.currentFamily.NoMoreContact = nextContact.NoMoreContact;
       this.currentFamily.LastContactDate = nextContact.LastContactDate;
+      this.currentFamily.AssignedLab = nextContact.AssignedLab;
 
       Object.assign(this.Families[this.page - 1], this.currentFamily);
 

@@ -161,10 +161,22 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
   }
 
-  // queryString.NextContactDate = { [Op.lte]: moment().startOf("day").toDate() };
-  queryString.NoMoreContact = 0;
+  if (req.query.NextContactDate) {
+    queryString.NextContactDate = {
 
-  // console.log(req.query);
+      [Op.lte]: moment().startOf("day").toDate(),
+      // [Op.between]: [
+      //   moment().subtract(6, 'months').startOf("day").toDate(),
+      //   moment().startOf("day").toDate()
+      // ]
+    }
+  }
+
+  if (req.query.AssignedLab) {
+    queryString.AssignedLab = req.query.AssignedLab;
+  }
+
+  queryString.NoMoreContact = 0;
 
   const families = await model.family.findAll({
     where: queryString,
@@ -241,7 +253,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a family with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const family = await model.family.destroy({
-    where: {id: req.query.id},
+    where: { id: req.query.id },
   });
 
   // Log

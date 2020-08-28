@@ -221,7 +221,7 @@ export default {
             break;
 
           case "Introduction":
-            this.emailSubject = "An elgible study for " + this.childNames();
+            this.emailSubject = "An eligible study for " + this.childNames();
             break;
 
           case "Reminder":

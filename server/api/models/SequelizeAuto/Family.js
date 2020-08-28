@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   return sequelize.define(
     "Family",
     {
@@ -79,6 +79,14 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: true,
         references: {
           model: "Personnel",
+          key: "id"
+        }
+      },
+      AssignedLab: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Lab",
           key: "id"
         }
       },
