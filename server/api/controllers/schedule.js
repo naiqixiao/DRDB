@@ -213,6 +213,10 @@ exports.search = asyncHandler(async (req, res) => {
           model: model.personnel,
         },
       ],
+      order: [
+        
+        ['AppointmentTime', 'ASC'],
+      ],
     });
     res.status(200).send(schedule);
     console.log("Search successful!");
@@ -271,6 +275,10 @@ exports.today = asyncHandler(async (req, res) => {
         {
           model: model.personnel,
         },
+      ],
+      order: [
+        
+        ['AppointmentTime', 'ASC'],
       ],
     });
     res.status(200).send(schedule);
@@ -331,6 +339,10 @@ exports.week = asyncHandler(async (req, res) => {
         {
           model: model.personnel,
         },
+      ],
+      order: [
+        
+        ['AppointmentTime', 'ASC'],
       ],
     });
     res.status(200).send(schedule);

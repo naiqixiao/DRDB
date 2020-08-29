@@ -111,7 +111,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   queryString["$Family.NextContactDate$"] = { [Op.lte]: moment().startOf("day").toDate() };
-  
+
   queryString["$Family.NoMoreContact$"] = 0;
 
   if (req.query.id) {
@@ -184,6 +184,9 @@ exports.search = asyncHandler(async (req, res) => {
         include: [{ model: model.appointment, include: [model.schedule] }],
       },
     ],
+    order: [
+      [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
+    ]
   });
 
   shuffle(children);
@@ -231,7 +234,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a child with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const child = await model.child.destroy({
-    where: {id: req.query.id},
+    where: { id: req.query.id },
   });
 
   // Log

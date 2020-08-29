@@ -11,11 +11,19 @@
     height="380px"
     calculate-widths
   >
-    <template #item.AppointmentTime="{ item }">
-      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" :status="item.Schedule.Status"/>
+    <template #item.Schedule.AppointmentTime="{ item }">
+      <DateDisplay
+        :date="item.Schedule.AppointmentTime"
+        :format="'long'"
+        :status="item.Schedule.Status"
+      />
     </template>
-    <template #item.updatedAt="{ item }">
-      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" :status="item.Schedule.Status"/>
+    <template #item.Schedule.updatedAt="{ item }">
+      <DateDisplay
+        :date="item.Schedule.updatedAt"
+        :format="'short'"
+        :status="item.Schedule.Status"
+      />
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
@@ -44,6 +52,22 @@ export default {
       },
     };
   },
+  // computed: {
+  //   sortableAppointments() {
+  //     if (this.Appointments) {
+  //       return this.Appointments.map((appointment) => {
+  //         return {
+  //           ...appointment,
+  //           sortableAppointmentTime:
+  //             appointment.Schedule.AppointmentTime &&
+  //             new Date(appointment.Schedule.AppointmentTime).toISOString(),
+  //         };
+  //       });
+  //     } else {
+  //       return [];
+  //     }
+  //   },
+  // },
 };
 </script>
 
@@ -73,6 +97,5 @@ export default {
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
-
 }
 </style>

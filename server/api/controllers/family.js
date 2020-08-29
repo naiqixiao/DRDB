@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const moment = require('moment');
 const fs = require("fs");
+const Sequelize = require("sequelize");
 
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -172,6 +173,7 @@ exports.search = asyncHandler(async (req, res) => {
     }
   }
 
+
   if (req.query.AssignedLab) {
     queryString.AssignedLab = req.query.AssignedLab;
   }
@@ -184,7 +186,9 @@ exports.search = asyncHandler(async (req, res) => {
       model.conversations,
       {
         model: model.child,
-        include: [{ model: model.appointment, attributes: ["FK_Study"] }],
+        include: [{
+          model: model.appointment, attributes: ["FK_Study"]
+        }],
       },
       {
         model: model.appointment,
@@ -208,6 +212,9 @@ exports.search = asyncHandler(async (req, res) => {
         ],
       },
     ],
+    order: [
+      [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
+    ]
   });
 
   shuffle(families);

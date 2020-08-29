@@ -11,17 +11,17 @@
     height="380px"
     calculate-widths
   >
-    <template #item.AppointmentTime="{ item }">
+    <template #item.Schedule.AppointmentTime="{ item }">
       <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" :status="item.Schedule.Status"/>
     </template>
-    <template #item.updatedAt="{ item }">
+    <template #item.Schedule.updatedAt="{ item }">
       <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" :status="item.Schedule.Status"/>
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
     </template>
 
-    <template v-slot:item.actions="{ item }">
+    <template #item.actions="{ item }">
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-icon

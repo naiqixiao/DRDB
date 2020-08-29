@@ -259,7 +259,7 @@ export default {
       {
         text: "Study Time",
         align: "center",
-        value: "AppointmentTime",
+        value: "Schedule.AppointmentTime",
         width: "16%",
       },
       {
@@ -277,7 +277,7 @@ export default {
       {
         text: "Updated",
         align: "center",
-        value: "updatedAt",
+        value: "Schedule.updatedAt",
         width: "12%",
       },
 
@@ -315,7 +315,8 @@ export default {
       {
         text: "Study Time",
         align: "center",
-        value: "AppointmentTime",
+        value: "Schedule.AppointmentTime",
+        sortable: true,
         width: "15%",
       },
       {
@@ -333,7 +334,7 @@ export default {
       {
         text: "Updated",
         align: "center",
-        value: "updatedAt",
+        value: "Schedule.updatedAt",
         width: "10%",
       },
     ];
