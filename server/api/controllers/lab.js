@@ -51,11 +51,25 @@ async function sendEmail(emailContent) {
   const token = fs.readFileSync(tokenPath);
   oAuth2Client.setCredentials(JSON.parse(token));
 
-  const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+  // const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-  const profile = await gmail.users.getProfile({ userId: "me" });
+  // const profile = await gmail.users.getProfile({ userId: "me" });
 
-  emailContent.from = "Developmental Research Management System" + "<" + profile.data.emailAddress + ">";
+  const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+  const adminSendAs = await adminGmail.users.settings.sendAs.list({
+    userId: "me",
+  });
+
+  adminSendAs.data.sendAs.forEach((email) => {
+    if (email.isDefault) {
+      sendAsEmail = email;
+    }
+  });
+
+  var adminEmail = adminSendAs.sendAsEmail;
+
+  emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
 
   var raw = makeBody(
     emailContent.to,
@@ -66,7 +80,7 @@ async function sendEmail(emailContent) {
   );
 
   try {
-    await gmail.users.messages.send({
+    await adminGmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
@@ -74,7 +88,6 @@ async function sendEmail(emailContent) {
     });
 
   } catch (error) {
-    console.log(error);
     return error;
   }
 }
@@ -97,7 +110,7 @@ exports.create = asyncHandler(async (req, res) => {
 
     newLabInfo.Studies = [
       {
-        StudyName: "Sample study for " + newLabInfo.LabName,
+        StudyName: "Sample study",
         MinAge: "8.00",
         MaxAge: "18.00",
         Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
@@ -117,7 +130,6 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     // Send email to the associated personnel
-
     var emailContent = {
       to: newLabInfo.Personnels[0].Name + "<" + newLabInfo.Personnels[0].Email + ">",
       subject:

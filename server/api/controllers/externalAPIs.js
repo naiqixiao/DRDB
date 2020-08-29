@@ -82,11 +82,26 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const profile = await gmail.users.getProfile({ userId: "me" });
+    const sendAs = await gmail.users.settings.sendAs.list({
+      userId: "me",
+    });
 
+    sendAs.data.sendAs.forEach((email) => {
+      if (email.isDefault) {
+        sendAsEmail = email;
+      }
+    });
+
+    var labEmail = sendAsEmail.sendAsEmail;
+
+    // if (sendAsEmail.displayName != "") {
+    //   var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
+    // } else {
+    //   var labInfo = { Email: labEmail };
+    // }
     // update lab email info.
     await model.lab.update(
-      { Email: profile.data.emailAddress },
+      { Email: labEmail },
       {
         where: { id: req.body.lab },
       }
@@ -124,15 +139,29 @@ exports.adminToken = asyncHandler(async (req, res) => {
 
     oAuth2Client.setCredentials(token.tokens);
 
-    const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+    // const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const profile = await gmail.users.getProfile({ userId: "me" });
+    // const profile = await gmail.users.getProfile({ userId: "me" });
+
+    const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+    const adminSendAs = await adminGmail.users.settings.sendAs.list({
+      userId: "me",
+    });
+
+    adminSendAs.data.sendAs.forEach((email) => {
+      if (email.isDefault) {
+        sendAsEmail = email;
+      }
+    });
+
+    var adminEmail = adminSendAs.sendAsEmail;
 
     fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
 
     res.status(200).send({
       message: "Admin account is successfully set up!",
-      Email: profile.data.emailAddress,
+      Email: adminEmail,
     });
   } catch (error) {
     return res.send(error);
@@ -212,9 +241,21 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const profile2 = await adminGmail.users.getProfile({ userId: "me" });
+    // const profile2 = await adminGmail.users.getProfile({ userId: "me" });
 
-    var adminEmail = profile2.data.emailAddress;
+    // var adminEmail = profile2.data.emailAddress;
+
+    const adminSendAs = await adminGmail.users.settings.sendAs.list({
+      userId: "me",
+    });
+
+    adminSendAs.data.sendAs.forEach((email) => {
+      if (email.isDefault) {
+        sendAsEmail = email;
+      }
+    });
+
+    var adminEmail = adminSendAs.sendAsEmail;
 
   } catch (error) {
 

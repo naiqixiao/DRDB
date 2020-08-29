@@ -68,11 +68,21 @@ async function sendEmail(emailContent) {
   const token = fs.readFileSync(tokenPath);
   oAuth2Client.setCredentials(JSON.parse(token));
 
-  const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+  const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-  const profile = await gmail.users.getProfile({ userId: "me" });
+  const adminSendAs = await adminGmail.users.settings.sendAs.list({
+    userId: "me",
+  });
 
-  emailContent.from = "Developmental Research Management System" + "<" + profile.data.emailAddress + ">";
+  adminSendAs.data.sendAs.forEach((email) => {
+    if (email.isDefault) {
+      sendAsEmail = email;
+    }
+  });
+
+  var adminEmail = adminSendAs.sendAsEmail;
+
+  emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
 
   var raw = makeBody(
     emailContent.to,
@@ -83,7 +93,7 @@ async function sendEmail(emailContent) {
   );
 
   try {
-    const result = await gmail.users.messages.send({
+    const result = await adminGmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
