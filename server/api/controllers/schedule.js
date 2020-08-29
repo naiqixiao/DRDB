@@ -102,7 +102,6 @@ exports.create = asyncHandler(async (req, res) => {
     res.status(200).send(schedule);
     console.log("appointment created!");
   } catch (error) {
-    console.log(error);
     throw error;
   }
 });
@@ -138,27 +137,30 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   if (req.query.Email) {
-    queryString["$Appointments.Family.Email$"] = {
+    // queryString["$Appointments.Family.Email$"] = {
+    //   [Op.like]: `${req.query.Email}%`,
+    // };
+    queryString["$Family.Email$"] = {
       [Op.like]: `${req.query.Email}%`,
     };
   }
   if (req.query.NameMom) {
-    queryString["$Appointments.Family.NameMom$"] = {
+    queryString["$Family.NameMom$"] = {
       [Op.like]: `${req.query.NameMom}%`,
     };
   }
   if (req.query.NameDad) {
-    queryString["$Appointments.Family.NameDad$"] = {
+    queryString["$Family.NameDad$"] = {
       [Op.like]: `${req.query.NameDad}%`,
     };
   }
   if (req.query.Phone) {
-    queryString["$Appointments.Family.Phone$"] = {
+    queryString["$Family.Phone$"] = {
       [Op.like]: `${req.query.Phone}%`,
     };
   }
   if (req.query.FamilyId) {
-    queryString["$Appointments.FK_Family$"] = req.query.FamilyId;
+    queryString["$FK_Family$"] = req.query.FamilyId;
   }
   if (req.query.StudyName) {
     queryString["$Appointments.FK_Study$"] = req.query.StudyName;
@@ -175,44 +177,48 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  const schedule = await model.schedule.findAll({
-    where: queryString,
-    include: [
-      {
-        model: model.personnel,
-      },
-      {
-        model: model.appointment,
-        include: [
-          {
-            model: model.family,
-          },
-          {
-            model: model.child,
-            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
-          },
-          {
-            model: model.study,
-            attributes: [
-              "StudyName",
-              "MinAge",
-              "MaxAge",
-              "EmailTemplate",
-              "StudyType",
-              "FK_Lab",
-            ],
-          },
-          {
-            model: model.personnel,
-            through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"],
-          },
-        ],
-      },
-    ],
-  });
-  res.status(200).send(schedule);
-  console.log("Search successful!");
+  try {
+    const schedule = await model.schedule.findAll({
+      where: queryString,
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
+            {
+              model: model.study,
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+                "FK_Lab",
+              ],
+            },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
+      ],
+    });
+    res.status(200).send(schedule);
+    console.log("Search successful!");
+  } catch (error) {
+    throw error
+  }
 });
 
 // Retrieve today's appointments from the database.
@@ -230,47 +236,48 @@ exports.today = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  const schedule = await model.schedule.findAll({
-    where: queryString,
-    include: [
-      {
-        model: model.personnel,
-      },
-      {
-        model: model.appointment,
-        include: [
-          {
-            model: model.family,
-          },
-          {
-            model: model.child,
-            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
-          },
-          {
-            model: model.study,
-            attributes: [
-              "StudyName",
-              "MinAge",
-              "MaxAge",
-              "EmailTemplate",
-              "StudyType",
-              "FK_Lab",
-            ],
-            include: [
-              { model: model.lab }
-            ]
-          },
-          {
-            model: model.personnel,
-            through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"],
-          },
-        ],
-      },
-    ],
-  });
-  res.status(200).send(schedule);
-  console.log("Search successful!");
+  try {
+    const schedule = await model.schedule.findAll({
+      where: queryString,
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
+            {
+              model: model.study,
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+                "FK_Lab",
+              ],
+            },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
+      ],
+    });
+    res.status(200).send(schedule);
+    console.log("Search successful!");
+  } catch (error) {
+    throw error
+  }
 });
 
 // Retrieve today's appointments from the database.
@@ -289,44 +296,48 @@ exports.week = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  const schedule = await model.schedule.findAll({
-    where: queryString,
-    include: [
-      {
-        model: model.personnel,
-      },
-      {
-        model: model.appointment,
-        include: [
-          {
-            model: model.family,
-          },
-          {
-            model: model.child,
-            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
-          },
-          {
-            model: model.study,
-            attributes: [
-              "StudyName",
-              "MinAge",
-              "MaxAge",
-              "EmailTemplate",
-              "StudyType",
-              "FK_Lab",
-            ],
-          },
-          {
-            model: model.personnel,
-            through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar"],
-          },
-        ],
-      },
-    ],
-  });
-  res.status(200).send(schedule);
-  console.log("Search successful!");
+  try {
+    const schedule = await model.schedule.findAll({
+      where: queryString,
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
+            {
+              model: model.study,
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+                "FK_Lab",
+              ],
+            },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
+      ],
+    });
+    res.status(200).send(schedule);
+    console.log("Search successful!");
+  } catch (error) {
+    throw error
+  }
 });
 
 // Update an appointment by the id in the request
@@ -399,11 +410,11 @@ exports.update = asyncHandler(async (req, res) => {
       where: { id: ID },
       include: [
         {
+          model: model.family,
+        },
+        {
           model: model.appointment,
           include: [
-            {
-              model: model.family,
-            },
             {
               model: model.child,
               attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
@@ -526,7 +537,7 @@ exports.complete = asyncHandler(async (req, res) => {
     // update family by removing AssignedLab from the family
     updateFamilyInfo = { AssignedLab: null };
 
-    await model.family.update(updateFamilyInfo, { where: { id: updatedScheduleInfo.familyId } });
+    await model.family.update(updateFamilyInfo, { where: { id: updatedScheduleInfo.FK_Family } });
 
     // Log
     const User = req.body.User;
@@ -564,49 +575,120 @@ exports.complete = asyncHandler(async (req, res) => {
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
-  const schedule = await model.schedule.findOne({
-    where: { id: req.query.id },
-  });
 
-  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
-
-  // remove calendar event, if it exists.
-  if (schedule.calendarEventId) {
-    await calendar.events.delete({
-      calendarId: "primary",
-      eventId: schedule.calendarEventId,
-      sendUpdates: "all",
+  try {
+    const schedule = await model.schedule.findOne({
+      where: { id: req.query.id },
     });
+
+    const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
+    // remove calendar event, if it exists.
+    if (schedule.calendarEventId) {
+      await calendar.events.delete({
+        calendarId: "primary",
+        eventId: schedule.calendarEventId,
+        sendUpdates: "all",
+      });
+    }
+
+    await model.schedule.destroy({
+      where: { id: req.query.id },
+    });
+
+    // Log
+    var User = JSON.parse(req.query.User);
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder)
+    }
+
+    if (User.LabName) {
+      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+
+    } else {
+      var logFile = logFolder + "/login.txt";
+    }
+
+    var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "deleted a study appointment (" +
+      req.query.id + ") " +
+      new Date().toString() + " - " + User.IP + "\r\n"
+
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo)
+    } else {
+      fs.writeFileSync(logFile, logInfo)
+    }
+
+    res.status(200).send("schedule deleted.");
+  } catch (error) {
+    throw error
   }
-
-  await model.schedule.destroy({
-    where: { id: req.query.id },
-  });
-
-  // Log
-  var User = JSON.parse(req.query.User);
-
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_login.txt";
-
-  } else {
-    var logFile = logFolder + "/login.txt";
-  }
-
-  var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "deleted a study appointment (" +
-    req.query.id + ") " +
-    new Date().toString() + " - " + User.IP + "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
-
-  res.status(200).send("schedule deleted.");
 });
+
+exports.special = asyncHandler(async (req, res) => {
+  var queryString = {}
+  queryString["$Appointments.Study.FK_Lab$"] = 2;
+
+  try {
+    var schedules = await model.schedule.findAll({
+      where: queryString,
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
+            {
+              model: model.study,
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "StudyType",
+                "FK_Lab",
+              ],
+            },
+            {
+              model: model.personnel,
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar"],
+            },
+          ],
+        },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
+      ],
+    });
+
+    schedules.forEach((schedule) => {
+      // if (schedule.Appointments[0].FK_Family) {
+
+      //   var x = {};
+      //   x.FK_Family = schedule.Appointments[0].FK_Family;
+
+      //   await model.schedule.update(x, { where: { id: schedule.id } })
+
+      // }
+      schedule.Appointments.forEach(async (appointment) => {
+        var x = {};
+        x.FK_Family = schedule.FK_Family;
+        await model.appointment.update(x, { where: { id: appointment.id } })
+      })
+
+    });
+
+    res.status(200).send(schedules);
+    console.log("Search successful!");
+  } catch (error) {
+    throw error
+  }
+})

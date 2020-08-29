@@ -12,10 +12,10 @@
     calculate-widths
   >
     <template #item.AppointmentTime="{ item }">
-      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" />
+      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" :status="item.Schedule.Status"/>
     </template>
     <template #item.updatedAt="{ item }">
-      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" />
+      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" :status="item.Schedule.Status"/>
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />

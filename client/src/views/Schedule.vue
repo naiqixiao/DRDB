@@ -1170,7 +1170,7 @@ export default {
             return (
               appointment.Study.StudyName +
               " (" +
-              appointment.FK_Family +
+              this.currentFamily.id +
               appointment.Child.IdWithinFamily +
               ")"
             );
@@ -1181,6 +1181,7 @@ export default {
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
+            FK_Family: this.currentFamily.id,
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
@@ -1205,6 +1206,7 @@ export default {
             AppointmentTime: null,
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
+            FK_Family: this.currentFamily.id,
           };
 
           if (
@@ -1269,7 +1271,7 @@ export default {
         return (
           appointment.Study.StudyName +
           " (" +
-          appointment.FK_Family +
+          currentSchedule.FK_Family +
           appointment.Child.IdWithinFamily +
           ")"
         );

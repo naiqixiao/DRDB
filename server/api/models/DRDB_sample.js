@@ -147,6 +147,13 @@ Family.hasMany(Appointment, {
   foreignKey: "FK_Family",
 });
 
+Schedule.belongsTo(Family, {
+  foreignKey: "FK_Family",
+});
+Family.hasMany(Schedule, {
+  foreignKey: "FK_Family",
+});
+
 Appointment.belongsTo(Child, {
   foreignKey: "FK_Child",
 });

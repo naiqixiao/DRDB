@@ -12,10 +12,10 @@
     calculate-widths
   >
     <template #item.AppointmentTime="{ item }">
-      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" />
+      <DateDisplay :date="item.Schedule.AppointmentTime" :format="'long'" :status="item.Schedule.Status"/>
     </template>
     <template #item.updatedAt="{ item }">
-      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" />
+      <DateDisplay :date="item.Schedule.updatedAt" :format="'short'" :status="item.Schedule.Status"/>
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
@@ -330,7 +330,6 @@ export default {
 
         case "Completed":
           try {
-            item.Schedule.familyId = item.FK_Family;
             await schedule.complete(item.Schedule);
           } catch (error) {
             console.log(error);
@@ -354,7 +353,7 @@ export default {
             return (
               appointment.Study.StudyName +
               " (" +
-              appointment.FK_Family +
+              this.family.id +
               appointment.Child.IdWithinFamily +
               ")"
             );
@@ -417,7 +416,7 @@ export default {
               return (
                 appointment.Study.StudyName +
                 " (" +
-                appointment.FK_Family +
+                this.family.id +
                 appointment.Child.IdWithinFamily +
                 ")"
               );

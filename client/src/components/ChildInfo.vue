@@ -4,7 +4,7 @@
       <v-col cols="12" md="12" class="justify-start">
         <h1 class="text-left">Child information</h1>
       </v-col>
-    </v-row> -->
+    </v-row>-->
     <div v-if="familyId">
       <v-row dense align="start" style="height: 345px;">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
@@ -181,7 +181,7 @@
                   v-if="response == 'Confirmed'"
                 >
                   <v-col cols="12" md="3" class="text-left">
-                    <div class="title" style="padding-left: 8px;">Study date & time:</div>
+                    <div class="title" style="padding-left: 8px;">{{"Study date & time:"}}</div>
                   </v-col>
                   <v-col cols="12" md="2">
                     <v-text-field
@@ -207,7 +207,7 @@
                 </v-row>
                 <v-row style="height: 60px;" align="center" justify="start" v-else>
                   <v-col cols="12" md="3" class="text-left">
-                    <div class="title" style="padding-left: 8px;">Study date & time: NA</div>
+                    <div class="title" style="padding-left: 8px;">{{"Study date & time: NA"}}</div>
                   </v-col>
                 </v-row>
                 <v-divider></v-divider>
@@ -357,7 +357,7 @@
         </template>
         <span>Add a child to this family</span>
       </v-tooltip>
-    </v-row> -->
+    </v-row>-->
   </div>
 </template>
 
@@ -561,7 +561,7 @@ export default {
             return (
               appointment.Study.StudyName +
               " (" +
-              appointment.FK_Family +
+              this.familyId +
               appointment.Child.IdWithinFamily +
               ")"
             );
@@ -572,6 +572,7 @@ export default {
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
+            FK_Family: this.familyId,
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
@@ -595,6 +596,7 @@ export default {
           newSchedule = {
             AppointmentTime: null,
             Status: this.response,
+            FK_Family: this.familyId,
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
           };
@@ -653,7 +655,7 @@ export default {
         return (
           appointment.Study.StudyName +
           " (" +
-          appointment.FK_Family +
+          this.familyId +
           appointment.Child.IdWithinFamily +
           ")"
         );
@@ -877,24 +879,30 @@ export default {
     },
 
     Schedule(child, index) {
-      this.appointments = [];
+      if (this.currentFamily.AssignedLab) {
+        alert(
+          "This family is currently being scheduled by an other study.\nYou can recruit this child after they finish the current study."
+        );
+      } else {
+        this.appointments = [];
 
-      this.currentChildIndex = index;
-      this.currentChild = Object.assign({}, child);
+        this.currentChildIndex = index;
+        this.currentChild = Object.assign({}, child);
 
-      var newAppointment = Object.assign({}, this.defaultAppointment);
+        var newAppointment = Object.assign({}, this.defaultAppointment);
 
-      newAppointment.FK_Child = child.id;
-      newAppointment.Child = child;
-      newAppointment.FK_Family = child.FK_Family;
-      newAppointment.index = this.appointments.length;
-      newAppointment.Child.Family = {};
-      newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
-      newAppointment.Child.Family.NameMom = this.currentFamily.NameMom; // family email information used for sending email
+        newAppointment.FK_Child = child.id;
+        newAppointment.Child = child;
+        newAppointment.FK_Family = child.FK_Family;
+        newAppointment.index = this.appointments.length;
+        newAppointment.Child.Family = {};
+        newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
+        newAppointment.Child.Family.NameMom = this.currentFamily.NameMom; // family email information used for sending email
 
-      this.appointments.push(newAppointment);
+        this.appointments.push(newAppointment);
 
-      this.dialogSchedule = true;
+        this.dialogSchedule = true;
+      }
     },
 
     datePick() {

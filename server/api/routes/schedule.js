@@ -19,6 +19,9 @@ router.post("/remind", checkAuth, oAuth2, ScheduleController.remind);
 
 router.post("/complete", checkAuth, oAuth2, ScheduleController.complete);
 
+
 router.delete("/", checkAuth, oAuth2, ScheduleController.delete);
+
+router.post("/special", checkAuth, ScheduleController.special);
 
 module.exports = router;

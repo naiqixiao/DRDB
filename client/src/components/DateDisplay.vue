@@ -1,6 +1,7 @@
 <template>
   <span v-if="date">{{ DateFormat(new Date(date), format) }}</span>
-  <span v-else>{{ "TBD" }}</span>
+  <!-- <span v-else-if="type === 'B'">{{ "TBD" }}</span> -->
+  <span v-else>{{ status == "Cancelled" ? "NA" : "TBD" }}</span>
 </template>
 
 <script>
@@ -10,6 +11,7 @@ export default {
   props: {
     date: String,
     format: String,
+    status: String
   },
   methods: {
     DateFormat(date, format) {

@@ -9,9 +9,11 @@
         single-select
         no-data-text="No conversation is stored."
         :headers="headers"
-        class="elevation-1"
         :items="Conversation"
+        class="elevation-1"
         justify-center
+        calculate-widths
+        disable-pagination
       >
         <template #item.Time="{ value }">
           <DateDisplay :date="value" :format="'short'" />
@@ -65,21 +67,21 @@ export default {
           align: "center",
           value: "Time",
           sortable: false,
-          width: "15%",
+          width: "25%",
         },
         {
           text: "Conversation",
           align: "center",
           value: "Conversation",
           sortable: false,
-          width: "75%",
+          width: "67%",
         },
         {
-          text: "Actions",
+          text: "",
           align: "center",
           value: "actions",
           sortable: false,
-          width: "10%",
+          width: "8%",
         },
       ],
     };

@@ -46,6 +46,15 @@ module.exports = function(sequelize, DataTypes) {
           key: "id"
         }
       },
+      FK_Family: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: "0",
+        references: {
+          model: "Family",
+          key: "id"
+        }
+      },
       eventURL: {
         type: DataTypes.STRING(150),
         allowNull: true

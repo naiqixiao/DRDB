@@ -405,7 +405,6 @@
       </v-col>
 
       <v-col cols="12" md="3">
-        <!-- <ParticipationHistory :family="currentFamily" /> -->
         <ParticipationHistory :family="currentFamily" />
       </v-col>
     </v-row>

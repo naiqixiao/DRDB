@@ -18,11 +18,11 @@
     <template #item.Study="{ item }">
       <StudyNameSchedule :item="item" />
     </template>
-    <template #item.AppointmentTime="{ value }">
-      <DateDisplay :date="value" :format="'long'" />
+    <template #item.AppointmentTime="{ item, value }">
+      <DateDisplay :date="value" :format="'long'" :status="item.Status" />
     </template>
-    <template #item.updatedAt="{ value }">
-      <DateDisplay :date="value" :format="'short'" />
+    <template #item.updatedAt="{ item, value }">
+      <DateDisplay :date="value" :format="'short'" :status="item.Status" />
     </template>
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipationSchedule :item="item" />
@@ -145,7 +145,7 @@
           </v-card-title>
           <NextContact
             ref="NextContact"
-            :familyId="editedSchedule.Appointments[0].FK_Family"
+            :familyId="editedSchedule.FK_Family"
             :labId="$store.state.lab"
             :studyDate="nextContactDate"
             :contactType="contactType"
@@ -248,7 +248,7 @@
             <v-stepper-content step="3">
               <NextContact
                 ref="NextContactStepper"
-                :familyId="editedSchedule.Appointments[0].FK_Family"
+                :familyId="editedSchedule.FK_Family"
                 :labId="$store.state.lab"
                 :studyDate="studyDate"
                 contactType="Confirmed"
@@ -304,6 +304,8 @@ export default {
       dialog: false,
       editedIndex: -1,
       editedSchedule: {
+        FK_Family: 1,
+        Family: { NameMom: "" },
         Appointments: [
           {
             FK_Family: 1,
@@ -326,6 +328,8 @@ export default {
       nextContactDialog: false,
       nextContactDialogStepper: false,
       defaultSchedule: {
+        FK_Family: 1,
+        Family: { NameMom: "" },
         Appointments: [
           {
             FK_Family: 1,
@@ -339,7 +343,7 @@ export default {
   },
   methods: {
     async updateSchedule(item, status) {
-      this.$emit("rowSelected", item.Appointments[0].Family);
+      this.$emit("rowSelected", item.Family);
       this.response = status;
       switch (status) {
         case "Confirmed":
@@ -347,15 +351,14 @@ export default {
           this.editedSchedule = Object.assign({}, item);
           this.datePickerRange();
           this.editedSchedule.Appointments[0].Child.Family = {};
-          this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Appointments[0].Family.Email;
-          this.editedSchedule.Appointments[0].Child.Family.NameMom = this.editedSchedule.Appointments[0].Family.NameMom;
+          this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+          this.editedSchedule.Appointments[0].Child.Family.NameMom = this.editedSchedule.Family.NameMom;
 
           this.dialog = true;
           break;
 
         case "Completed":
           try {
-            item.familyId = item.Appointments[0].FK_Family;
             await schedule.complete(item);
           } catch (error) {
             console.log(error);
@@ -386,7 +389,7 @@ export default {
             return (
               appointment.Study.StudyName +
               " (" +
-              appointment.FK_Family +
+              item.FK_Family +
               appointment.Child.IdWithinFamily +
               ")"
             );
@@ -446,7 +449,7 @@ export default {
               return (
                 appointment.Study.StudyName +
                 " (" +
-                appointment.FK_Family +
+                this.editedSchedule.FK_Family +
                 appointment.Child.IdWithinFamily +
                 ")"
               );
@@ -556,7 +559,7 @@ export default {
     rowSelected(item, row) {
       row.select(true);
       row.expand(true);
-      this.$emit("rowSelected", item.Appointments[0].Family);
+      this.$emit("rowSelected", item.Family);
     },
 
     datePickerRange() {
