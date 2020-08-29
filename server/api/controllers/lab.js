@@ -61,13 +61,15 @@ async function sendEmail(emailContent) {
     userId: "me",
   });
 
+  var sendAsEmail = {};
+
   adminSendAs.data.sendAs.forEach((email) => {
     if (email.isDefault) {
       sendAsEmail = email;
     }
   });
 
-  var adminEmail = adminSendAs.sendAsEmail;
+  var adminEmail = sendAsEmail.sendAsEmail;
 
   emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
 

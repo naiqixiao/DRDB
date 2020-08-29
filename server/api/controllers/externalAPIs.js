@@ -149,13 +149,15 @@ exports.adminToken = asyncHandler(async (req, res) => {
       userId: "me",
     });
 
+    var sendAsEmail = {};
+
     adminSendAs.data.sendAs.forEach((email) => {
       if (email.isDefault) {
         sendAsEmail = email;
       }
     });
 
-    var adminEmail = adminSendAs.sendAsEmail;
+    var adminEmail = sendAsEmail.sendAsEmail;
 
     fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
 
@@ -255,14 +257,12 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       }
     });
 
-    var adminEmail = adminSendAs.sendAsEmail;
+    var adminEmail = sendAsEmail.sendAsEmail;
 
   } catch (error) {
-
-    console.log(error)
     var adminEmail = null;
+    console.log(error);
   }
-
 
   res.status(200).send({
     labEmail: labEmail,
