@@ -180,7 +180,6 @@ exports.signup = asyncHandler(async (req, res) => {
 
 exports.login = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
-  const logFile = logFolder + "/login.txt";
   if (!fs.existsSync(logFolder)) {
     fs.mkdirSync(logFolder)
   }
@@ -200,6 +199,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   if (!personnel) {
     // log the login information.
+    const logFile = logFolder + "/login.txt";
     var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
@@ -218,6 +218,7 @@ exports.login = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
 
     // log the login information.
+    const logFile = logFolder + "/login.txt";
     var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
@@ -243,6 +244,7 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
+  const logFile = logFolder + "/" + personnel.Lab.LabName + "_login.txt";
   var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + " - " + IP + "\r\n"
 
   if (fs.existsSync(logFile)) {
@@ -319,18 +321,6 @@ exports.changePassword = asyncHandler(async (req, res) => {
       }
     );
 
-    const personnel = await model.personnel.findOne({
-      where: {
-        Email: Email,
-      },
-      include: [
-        {
-          model: model.lab,
-          include: [{ model: model.study }],
-        },
-      ],
-    });
-
     const token = jwt.sign(
       {
         email: personnel.Email,
@@ -344,7 +334,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
     res.status(200).send({
       message: "Password update succsessful!",
-      temporaryPassword: personnel.temporaryPassword,
+      token: token,
       name: personnel.Name,
       user: personnel.Email,
       userID: personnel.id,
@@ -352,8 +342,11 @@ exports.changePassword = asyncHandler(async (req, res) => {
       lab: personnel.FK_Lab,
       labName: personnel.Lab.LabName,
       labEmail: personnel.Lab.Email,
-      token: token,
       studies: personnel.Lab.Studies,
+      emailOpening: personnel.Lab.EmailOpening,
+      emailClosing: personnel.Lab.EmailClosing,
+      location: personnel.Lab.Location,
+      transportationInstructions: personnel.Lab.TransportationInstructions,
     });
 
 
@@ -371,6 +364,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
         "<p>Thank you!<br>" +
         "Developmental Research Management System</p>",
     };
+
 
     await sendEmail(emailContent);
 

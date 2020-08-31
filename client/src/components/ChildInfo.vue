@@ -273,7 +273,7 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" :disabled="!studyDate" @click="continue12()">
+                  <v-btn color="primary" :disabled="!studyDate || !appointments[0].FK_Study" @click="continue12()">
                     <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>Schedule
                   </v-btn>
 

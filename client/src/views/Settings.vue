@@ -649,9 +649,9 @@ export default {
       this.labEmail = profile.data.labEmail;
       this.adminEmail = profile.data.adminEmail;
 
-      if (profile.data.labName) {
-        this.$store.dispatch("setLabName", profile.data.labName);
-      }
+      // if (profile.data.labName) {
+      //   this.$store.dispatch("setLabName", profile.data.labName);
+      // }
 
       if (this.labEmail) {
         // this.$store.dispatch("setLabEmail", labEmail);

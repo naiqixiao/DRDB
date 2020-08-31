@@ -147,7 +147,10 @@ export default {
           this.$store.dispatch("setEmailOpening", response.data.emailOpening);
           this.$store.dispatch("setEmailClosing", response.data.emailClosing);
           this.$store.dispatch("setLocation", response.data.location);
-          this.$store.dispatch("setTransportationInstructions", response.data.transportationInstructions);
+          this.$store.dispatch(
+            "setTransportationInstructions",
+            response.data.transportationInstructions
+          );
 
           if (response.data.temporaryPassword) {
             // reset password
@@ -232,6 +235,14 @@ export default {
         this.$store.dispatch("setLabEmail", response.data.labEmail);
         this.$store.dispatch("setLabName", response.data.labName);
 
+        this.$store.dispatch("setEmailOpening", response.data.emailOpening);
+        this.$store.dispatch("setEmailClosing", response.data.emailClosing);
+        this.$store.dispatch("setLocation", response.data.location);
+        this.$store.dispatch(
+          "setTransportationInstructions",
+          response.data.transportationInstructions
+        );
+
         const profile = await externalAPIs.googleGetEmailAddress();
 
         if (profile.data.labEmail) {
@@ -245,6 +256,8 @@ export default {
           this.$store.dispatch("setAdminEmailStatus", true);
         }
 
+        this.changeTemporaryPassword = false;
+
         alert("Your password is set! \nWelcome!");
 
         this.close();
@@ -253,7 +266,7 @@ export default {
           name: "Family information",
         });
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
 

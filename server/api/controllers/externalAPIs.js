@@ -204,11 +204,12 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
       var labEmail = sendAsEmail.sendAsEmail;
 
-      if (sendAsEmail.displayName != "") {
-        var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
-      } else {
-        var labInfo = { Email: labEmail };
-      }
+      // if (sendAsEmail.displayName != "") {
+      //   var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
+      // } else {
+      //   var labInfo = { Email: labEmail };
+      // }
+      var labInfo = { Email: labEmail };
 
       // update lab email info.
       await model.lab.update(labInfo, {
