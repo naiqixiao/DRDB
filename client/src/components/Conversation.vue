@@ -34,7 +34,6 @@
         outlined
         no-resize
         rows="4"
-        solo
         hide-details
         v-model="conv"
         :disabled="!familyId"

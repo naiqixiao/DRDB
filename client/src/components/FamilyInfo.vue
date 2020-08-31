@@ -132,7 +132,7 @@
               <h4 class="text-left">Notes:</h4>
             </v-col>
             <v-col md="8" class="subtitle">
-              <v-textarea label outlined no-resize rows="3" solo v-model="editedItem.Note"></v-textarea>
+              <v-textarea label outlined no-resize rows="3" v-model="editedItem.Note"></v-textarea>
             </v-col>
           </v-row>
         </v-form>

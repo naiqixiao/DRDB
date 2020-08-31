@@ -148,7 +148,6 @@
                 outlined
                 no-resize
                 rows="3"
-                solo
                 hide-details
                 readonly
                 v-model="currentFamily.NextContactNote"
@@ -323,7 +322,7 @@
                 <h4 class="text-left">Notes:</h4>
               </v-col>
               <v-col md="8" class="subtitle">
-                <v-textarea label outlined no-resize rows="3" solo v-model="editedItem.Note"></v-textarea>
+                <v-textarea label outlined no-resize rows="3" v-model="editedItem.Note"></v-textarea>
               </v-col>
             </v-row>
           </v-form>
@@ -625,7 +624,7 @@ export default {
       this.$store.dispatch("setLoadingStatus", true);
 
       this.queryString.NextContactDate = moment().startOf("day").toString();
-      this.queryString.AssignedLab = this.$store.state.lab
+      this.queryString.AssignedLab = this.$store.state.lab;
 
       try {
         const Results = await family.search(this.queryString);

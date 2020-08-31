@@ -81,7 +81,6 @@
             outlined
             no-resize
             rows="3"
-            solo
             v-model="currentStudy.Description"
             readonly
           ></v-textarea>
@@ -283,7 +282,6 @@
                       outlined
                       no-resize
                       rows="3"
-                      solo
                       v-model="editedStudy.Description"
                       hide-details
                     ></v-textarea>

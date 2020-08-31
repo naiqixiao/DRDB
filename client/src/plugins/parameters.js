@@ -134,6 +134,13 @@ export default {
       { label: "Calendar of PI/Manager", field: "Calendar", rules: "email" },
     ];
 
+    Vue.prototype.$labEmailTemplate = [
+      { label: "Email Opening", field: "EmailOpening", placeholder: "The opening sentence to parents" },
+      { label: "Email Closing", field: "EmailClosing", placeholder: "The closing sentence to parents. It usually mentions how the parents can reach the lab." },
+      { label: "Transportation Instructions", field: "TransportationInstructions", placeholder: "Instructions for how to come to the lab." },
+      { label: "Lab Location", field: "Location", placeholder: "Lab location, showing in calendar events." },
+    ];
+
     Vue.prototype.$studyCriteriaFields = [
       { label: "Min Age", field: "MinAge", width: "5" },
       { label: "Max Age", field: "MaxAge", width: "5" },

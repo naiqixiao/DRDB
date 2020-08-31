@@ -36,7 +36,6 @@
             label="Notes for next contact"
             no-resize
             rows="3"
-            solo
             hide-details
             v-model="nextContactNote"
           ></v-textarea>

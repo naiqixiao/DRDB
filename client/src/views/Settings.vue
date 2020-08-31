@@ -129,7 +129,7 @@
             <div v-on="on">
               <v-btn
                 color="primary"
-                @click.stop="dialogEditLab = true"
+                @click.stop="editLabInfo"
                 :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
               >Update Lab Info</v-btn>
             </div>
@@ -150,7 +150,6 @@
                 outlined
                 no-resize
                 rows="1"
-                solo
                 v-model="signInCode"
                 hide-details
               ></v-textarea>
@@ -249,6 +248,24 @@
                   dense
                 ></v-text-field>
               </v-col>
+              <!-- <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Email Components:</h4>
+              </v-col>
+              <v-col cols="12" md="12" v-for="item in this.$labEmailTemplate" :key="item.label">
+                <v-textarea
+                  class="conv-textarea"
+                  :label="item.label"
+                  :placeholder="item.placeholder"
+                  outlined
+                  no-resize
+                  rows="3"
+                  hide-details
+                  v-model="currentLab[item.field]"
+                  :rules="$rules.required"
+                ></v-textarea>
+              </v-col>-->
+
               <v-col md="12" class="subtitle">
                 <v-divider></v-divider>
                 <h4 class="text-left">PI/Lab Manager information:</h4>
@@ -306,8 +323,8 @@
           <v-card-title class="headline">Lab information</v-card-title>
 
           <v-form ref="formEdit" v-model="valid" lazy-validation>
-            <v-row justify="space-around">
-              <v-col cols="12" md="4">
+            <v-row justify="start">
+              <v-col cols="12" md="6">
                 <v-text-field
                   height="48px"
                   background-color="textbackground"
@@ -319,6 +336,25 @@
                   outlined
                   dense
                 ></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Email Components:</h4>
+              </v-col>
+              <v-col cols="12" md="12" v-for="item in this.$labEmailTemplate" :key="item.label">
+                <v-textarea
+                  class="conv-textarea"
+                  :label="item.label"
+                  :placeholder="item.placeholder"
+                  outlined
+                  no-resize
+                  rows="3"
+                  hide-details
+                  v-model="editedLab[item.field]"
+                  :rules="$rules.required"
+                ></v-textarea>
               </v-col>
             </v-row>
           </v-form>
@@ -409,6 +445,16 @@ export default {
       this.dialogNewLab = true;
     },
 
+    editLabInfo() {
+      this.editedLab.LabName = this.$store.state.labName;
+      this.editedLab.EmailOpening = this.$store.state.emailOpening;
+      this.editedLab.EmailClosing = this.$store.state.emailClosing;
+      this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
+      this.editedLab.Location = this.$store.state.location;
+
+      this.dialogEditLab = true;
+    },
+
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
 
@@ -452,6 +498,14 @@ export default {
 
           this.$store.dispatch("setLabName", this.editedLab.LabName);
 
+          this.$store.dispatch("setEmailOpening", this.editedLab.EmailOpening);
+          this.$store.dispatch("setEmailClosing", this.editedLab.EmailClosing);
+          this.$store.dispatch("setLocation", this.editedLab.Location);
+          this.$store.dispatch(
+            "setTransportationInstructions",
+            this.editedLab.TransportationInstructions
+          );
+
           alert("Lab information is updated!");
         } catch (error) {
           console.log(error.response);
@@ -474,7 +528,11 @@ export default {
       this.dialogNewLab = false;
       setTimeout(() => {
         this.currentLab = {
-          LabName: "",
+          LabName: null,
+          EmailOpening: null,
+          EmailClosing: null,
+          ransportationInstructions: null,
+          Location: null,
           PI: "",
           Personnels: [
             {
@@ -493,7 +551,11 @@ export default {
       this.dialogEditLab = false;
       setTimeout(() => {
         this.editedLab = {
-          LabName: "",
+          LabName: null,
+          EmailOpening: null,
+          EmailClosing: null,
+          ransportationInstructions: null,
+          Location: null,
         };
       }, 300);
     },
