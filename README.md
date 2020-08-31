@@ -96,6 +96,23 @@ cd ~/DRDB
 mysql -u newuser -p DRDB < MySQL/Backup.sql
 ```
 
+```
+# in Terminal, log in MySQL with the username
+mysql -u newuser -p
+
+# in MySQL, enter the following command to setup automatic Age caculation.
+
+USE DRDB
+
+CREATE EVENT
+IF NOT EXISTS age_update
+ON SCHEDULE EVERY 1 Day
+STARTS CURRENT_TIMESTAMP
+DO
+UPDATE DRDB.Child 
+    set Age = DATEDIFF(CURDATE(), DoB);
+```
+
 ### Backend setup and configuration
 
 - Install all required modules

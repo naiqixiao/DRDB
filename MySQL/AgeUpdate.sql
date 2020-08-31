@@ -1,3 +1,5 @@
+USE DRDB
+
 DROP EVENT age_update;
 
 CREATE EVENT
