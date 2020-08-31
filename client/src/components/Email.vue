@@ -138,7 +138,9 @@ export default {
       // closing
       const closing =
         // "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
-        "<p>" + this.$store.state.emailClosing + "</p>";
+        "<p>" +
+        this.$store.state.emailClosing +
+        "</p>" +
         "<p>Best,</p><p>" +
         this.$store.state.name +
         "</p><p>" +
@@ -185,7 +187,7 @@ export default {
           this.$store.state.labEmail +
           ">",
         subject: this.emailSubject,
-        body: this.$refs.emailBody.value,
+        body: this.formatedBody(this.$refs.emailBody.value),
       };
 
       try {
@@ -193,6 +195,22 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+
+    // this function is to replace the last few </p><p> with <br>, giving a better look to the emails.
+    formatedBody(emailBody) {
+      const k = emailBody.split("</p><p>");
+      var formattedEmailBody = "";
+
+      for (var i = 0; i < k.length; i++) {
+        if (i < k.length - 3) {
+          formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
+        } else {
+          formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        }
+      }
+
+      return formattedEmailBody;
     },
   },
 
