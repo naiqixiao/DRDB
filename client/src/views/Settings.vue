@@ -218,7 +218,7 @@
               <v-btn
                 color="primary"
                 @click.stop="createNewLab"
-                :disabled=" $store.state.role != 'Admin'"
+                :disabled=" $store.state.role != 'Admin' || !$store.state.adminEmailStatus"
               >Create a Lab</v-btn>
             </div>
           </template>
