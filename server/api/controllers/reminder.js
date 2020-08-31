@@ -37,7 +37,7 @@ function emailBody(schedule) {
         "<p>Dear " +
         schedule.Appointments[0].Family.NameMom.split(" ")[0] +
         ",</p>" +
-        "<p>This is a reminder for your visit to McMaster University with " +
+        "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with " +
         childNames(schedule.Appointments) +
         moment(schedule.AppointmentTime).format(
             " [on] dddd [(]MMM Do[)] [at] h:mma"
@@ -74,11 +74,11 @@ function emailBody(schedule) {
 
     // location
     const location =
-        "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
+        "<p>" + schedule.Appointments[0].Study.Lab.TransportationInstructions + "</p>"
 
     // closing
     const closing =
-        "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
+        "<p>" + schedule.Appointments[0].Study.Lab.EmailClosing + "</p>" +
         "<p>Best,<br>" +
         schedule.Personnel.Name +
         "<br>" +
@@ -111,7 +111,6 @@ function emailBody(schedule) {
 
     return emailContent;
 }
-
 
 function makeBody(to, from, cc, subject, body) {
     var message = [

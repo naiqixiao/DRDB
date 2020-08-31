@@ -642,11 +642,11 @@ export default {
 
       // location
       const location =
-        "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
+        "<p>" + this.$store.state.transportationInstructions + "</p>";
 
       // closing
       const closing =
-        "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
+        "<p>" + this.$store.state.emailClosing + "</p>";
         "<p>Best,<br>" +
         this.$store.state.name +
         "<br>" +

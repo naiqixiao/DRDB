@@ -576,7 +576,7 @@ export default {
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
-            location: "Psychology Building, McMaster University",
+            location: this.$store.state.location,
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
@@ -676,7 +676,7 @@ export default {
 
       var calendarEvent = {
         summary: studyNames.join(" + "),
-        location: "Psychology Building, McMaster University",
+        location: this.$store.state.location,
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
           timeZone: "America/Toronto",

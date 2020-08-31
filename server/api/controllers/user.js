@@ -146,7 +146,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "</b>, and your temporary password is <b><em>" +
           password +
           "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
-          // "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
+          // "</em></b>. Please login with your email and temporary password at <a href='http://aphd-app-01.oise.utoronto.ca/'>http://aphd-app-01.oise.utoronto.ca/</a> to set your password.</p> " +
           "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
           "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
@@ -263,6 +263,10 @@ exports.login = asyncHandler(async (req, res) => {
     labEmail: personnel.Lab.Email,
     token: token,
     studies: personnel.Lab.Studies,
+    emailOpening: personnel.Lab.EmailOpening,
+    emailClosing: personnel.Lab.EmailClosing,
+    location: personnel.Lab.Location,
+    transportationInstructions: personnel.Lab.TransportationInstructions,
   });
 });
 

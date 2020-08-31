@@ -23,6 +23,22 @@ module.exports = function(sequelize, DataTypes) {
         allowNull: true,
         unique: true
       },
+      EmailOpening: {
+        type: 'MEDIUMTEXT',
+        allowNull: true
+      },
+      EmailClosing: {
+        type: 'MEDIUMTEXT',
+        allowNull: true
+      },
+      Location: {
+        type: 'MEDIUMTEXT',
+        allowNull: true
+      },
+      TransportationInstructions: {
+        type: 'MEDIUMTEXT',
+        allowNull: true
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

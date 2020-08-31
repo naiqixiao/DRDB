@@ -98,6 +98,13 @@ async function sendEmail(emailContent) {
 exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
+
+    newLabInfo.EmailOpening = "";
+    newLabInfo.EmailClosing = "Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX.";
+    newLabInfo.Location = "Psychology Building, McMaster University";
+    newLabInfo.TransportationInstructions = "Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.";
+
+
     newLabInfo.Personnels.forEach((personnel) => {
       var password = Math.random()
         .toString(36)
@@ -146,7 +153,7 @@ exports.create = asyncHandler(async (req, res) => {
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
         "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).</p> " +
-        // "</em></b>. Please login with your email and temporary password at <a href='http://34.95.52.219'>http://34.95.52.219</a> to set your password.</p> " +
+        // "</em></b>. Please login with your email and temporary password at <a href='http://aphd-app-01.oise.utoronto.ca/'>http://aphd-app-01.oise.utoronto.ca/</a> to set your password.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
 
         "<p><a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +

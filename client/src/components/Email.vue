@@ -81,7 +81,7 @@ export default {
               moment(this.appointments[0].Schedule.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"
               ) +
-              ".</p>"
+              ".</p>";
             break;
 
           case "ScheduleUpdate":
@@ -94,7 +94,7 @@ export default {
               moment(
                 this.appointmentsForEmail[0].Schedule.AppointmentTime
               ).format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
-              ".</p>"
+              ".</p>";
             break;
         }
       }
@@ -133,11 +133,12 @@ export default {
 
       // location
       const location =
-        "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
-
+        // "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
+        "<p>" + this.$store.state.transportationInstructions + "</p>";
       // closing
       const closing =
-        "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
+        // "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
+        "<p>" + this.$store.state.emailClosing + "</p>";
         "<p>Best,</p><p>" +
         this.$store.state.name +
         "</p><p>" +
@@ -146,7 +147,8 @@ export default {
         this.$store.state.labName +
         "</p>";
 
-      const email = opening + emailBodyList.join("<p></p>") + location + closing;
+      const email =
+        opening + emailBodyList.join("<p></p>") + location + closing;
 
       // if (this.emailTemplate) {
       //   var email = this.emailTemplate;

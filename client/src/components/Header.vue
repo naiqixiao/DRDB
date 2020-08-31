@@ -53,10 +53,7 @@
 
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn 
-          block @click="logout"
-          :disabled="!$store.state.userID"
-          >Logout</v-btn>
+          <v-btn block @click="logout" :disabled="!$store.state.userID">Logout</v-btn>
         </div>
       </template>
     </v-navigation-drawer>
@@ -182,7 +179,6 @@ export default {
 
   methods: {
     logout() {
-      // console.log(this.$route.name);
       console.log("log out complete!");
 
       this.$store.dispatch("setToken", null);
@@ -197,6 +193,11 @@ export default {
       this.$store.dispatch("setLabEmailStatus", null);
       this.$store.dispatch("setAdminEmailStatus", null);
       this.$store.dispatch("setLoadingStatus", false);
+
+      this.$store.dispatch("setEmailOpening", null);
+      this.$store.dispatch("setEmailClosing", null);
+      this.$store.dispatch("setLocation", null);
+      this.$store.dispatch("setTransportationInstructions", null);
 
       if (this.$route.name != "Login") {
         this.$router.push({
@@ -239,7 +240,6 @@ export default {
       val || this.closeFeedback();
     },
   },
-
 };
 </script>
 

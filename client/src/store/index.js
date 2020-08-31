@@ -21,7 +21,11 @@ export default new Vuex.Store({
     labEmailStatus: null,
     adminEmailStatus: null,
     loadingStatus: false,
-    ip: null
+    ip: null,
+    emailOpening: null,
+    emailClosing: null,
+    location: null,
+    transportationInstructions: null,
   },
   mutations: {
     setToken(state, token) {
@@ -64,6 +68,18 @@ export default new Vuex.Store({
     setIP(state, ip) {
       state.ip = ip;
     },
+    setEmailOpening(state, emailOpening) {
+      state.emailOpening = emailOpening;
+    },
+    setEmailClosing(state, emailClosing) {
+      state.emailClosing = emailClosing;
+    },
+    setLocation(state, location) {
+      state.location = location;
+    },
+    setTransportationInstructions(state, transportationInstructions) {
+      state.transportationInstructions = transportationInstructions;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -104,6 +120,18 @@ export default new Vuex.Store({
     },
     setIP({ commit }, ip) {
       commit("setIP", ip);
+    },
+    setEmailOpening({ commit }, emailOpening) {
+      commit("setEmailOpening", emailOpening);
+    },
+    setEmailClosing({ commit }, emailClosing) {
+      commit("setEmailClosing", emailClosing);
+    },
+    setLocation({ commit }, location) {
+      commit("setLocation", location);
+    },
+    setTransportationInstructions({ commit }, transportationInstructions) {
+      commit("setTransportationInstructions", transportationInstructions);
     },
   },
 });

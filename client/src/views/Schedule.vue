@@ -1184,8 +1184,8 @@ export default {
             FK_Family: this.currentFamily.id,
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID,
-            location: "Psychology Building, McMaster University",
+            ScheduledBy: this.$store.state.userID,
+            location: this.$store.state.location,
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
