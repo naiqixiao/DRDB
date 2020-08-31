@@ -225,7 +225,7 @@
         </v-tooltip>
       </v-col>
 
-      <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false">
+      <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false" persistent>
         <v-card outlined>
           <v-card-title class="headline">Lab and PI/Manager information</v-card-title>
 
@@ -318,7 +318,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialogEditLab" max-width="800px" :retain-focus="false">
+      <v-dialog v-model="dialogEditLab" max-width="800px" :retain-focus="false" persistent>
         <v-card outlined>
           <v-card-title class="headline">Lab information</v-card-title>
 

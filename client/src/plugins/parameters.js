@@ -355,7 +355,7 @@ export default {
           var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/;
           return pattern.test(value) || "Invalid Name.";
         },
-        (value) => (value && value.length <= 30) || "Max 30 characters",
+        (value) => (value && value.length <= 50) || "Max 50 characters",
       ],
       email: [
         (value) => !!value || "Required.",
@@ -363,7 +363,7 @@ export default {
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
           return pattern.test(value) || "Invalid e-mail.";
         },
-        (value) => (value && value.length <= 30) || "Max 30 characters",
+        (value) => (value && value.length <= 50) || "Max 50 characters",
       ],
       phone: [
         (value) => {

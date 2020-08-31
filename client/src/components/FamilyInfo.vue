@@ -68,7 +68,7 @@
               <div v-else-if="field.rules">
                 <v-text-field
                   :label="field.label"
-                  :rules="rules[field.rules]"
+                  :rules="$rules[field.rules]"
                   v-model="editedItem[field.field]"
                   outlined
                   hide-details
@@ -110,7 +110,7 @@
               <div v-else-if="field.rules">
                 <v-text-field
                   :label="field.label"
-                  :rules="rules[field.rules]"
+                  :rules="$rules[field.rules]"
                   v-model="editedItem[field.field]"
                   outlined
                   hide-details
@@ -235,32 +235,6 @@ export default {
           "Events",
           "SocialMedia",
           "PreviousParticipation",
-        ],
-      },
-      rules: {
-        name: [
-          (value) => !!value || "Required.",
-          (value) => {
-            var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$/;
-            return pattern.test(value) || "Invalid Name.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        email: [
-          (value) => !!value || "Required.",
-          (value) => {
-            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return pattern.test(value) || "Invalid e-mail.";
-          },
-          (value) => (value && value.length <= 30) || "Max 30 characters",
-        ],
-        phone: [
-          (value) => {
-            const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-            return pattern.test(value) || "Invalid phone.";
-          },
-          (value) => !!value || "Required.",
-          (value) => (value && value.length == 10) || "Have to be 10 digits",
         ],
       },
       editableFields: [],

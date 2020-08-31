@@ -173,7 +173,7 @@
                           <v-text-field
                             :label="field.label"
                             v-model="editedPersonnel[field.field]"
-                            :rules="rules[field.rules]"
+                            :rules="$rules[field.rules]"
                             hide-details
                             height="48px"
                             placeholder="  "
