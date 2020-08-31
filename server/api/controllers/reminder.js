@@ -37,12 +37,12 @@ function emailBody(schedule) {
         "<p>Dear " +
         schedule.Appointments[0].Family.NameMom.split(" ")[0] +
         ",</p>" +
-        "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with " +
+        "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
         childNames(schedule.Appointments) +
         moment(schedule.AppointmentTime).format(
             " [on] dddd [(]MMM Do[)] [at] h:mma"
         ) +
-        ".</p>"
+        "</b>.</p>"
     // var emailBodyList = [];
 
     // schedule.Appointments.forEach((appointment) => {

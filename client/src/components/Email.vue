@@ -76,12 +76,12 @@ export default {
               "<p>Dear " +
               this.appointments[0].Child.Family.NameMom.split(" ")[0] +
               ",</p>" +
-              "<p>Thanks for your support to our research! This is a confirmation for your visit with " +
+              "<p>Thanks for your support to our research! This is a confirmation for your visit with <b>" +
               this.childNames() +
               moment(this.appointments[0].Schedule.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"
               ) +
-              ".</p>";
+              "</b>.</p>";
             break;
 
           case "ScheduleUpdate":
@@ -89,12 +89,12 @@ export default {
               "<p>Dear " +
               this.appointmentsForEmail[0].Child.Family.NameMom.split(" ")[0] +
               ",</p>" +
-              "<p>This is an update on your visit with " +
+              "<p>This is an update on your visit with <b>" +
               this.childNames() +
               moment(
                 this.appointmentsForEmail[0].Schedule.AppointmentTime
               ).format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
-              ".</p>";
+              "</b>.</p>";
             break;
         }
       }
