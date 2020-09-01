@@ -210,6 +210,6 @@ git pull
 cd ~/DRDB/client
 npm update
 
-# cd ~/DRDB/server
+cd ~/DRDB/server
 npm update
 ```
