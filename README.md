@@ -201,4 +201,15 @@ You should be able to access the system with the ip address of your server by no
 
 ## How to upgrade the system
 
-TBD
+```
+cd ~/DRDB
+
+git pull
+
+# update npm packages for client and server folders
+cd ~/DRDB/client
+npm update
+
+# cd ~/DRDB/server
+npm update
+```
