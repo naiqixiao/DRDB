@@ -70,6 +70,11 @@ module.exports = function (sequelize, DataTypes) {
         type: DataTypes.STRING(255),
         allowNull: false,
       },
+      Phone: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        unique: true,
+      },
       Email: {
         type: DataTypes.STRING(45),
         allowNull: false,

@@ -20,11 +20,13 @@ module.exports = function (sequelize, DataTypes) {
       },
       Email: {
         type: DataTypes.STRING(40),
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       Phone: {
         type: DataTypes.STRING(10),
-        allowNull: false
+        allowNull: false,
+        unique: true
       },
       RaceMom: {
         type: DataTypes.STRING(10),

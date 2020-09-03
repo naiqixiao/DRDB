@@ -123,8 +123,9 @@ export default {
 
     Vue.prototype.$labPI = [
       { label: "Name of PI/Manager", field: "Name", rules: "name" },
-      { label: "Initial", field: "Initial", rules: "required" },
+      { label: "Initials", field: "Initial", rules: "required" },
       { label: "Email of PI/Manager", field: "Email", rules: "email" },
+      { label: "Phone", field: "Phone", rules: "phone" },
       {
         label: "Role",
         field: "Role",
@@ -148,6 +149,12 @@ export default {
       { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
       { label: "Vision Loss Participants", field: "VisionLossParticipant", options: "inclusion", width: "3" },
       { label: "Hearing Loss Participants", field: "HearingLossParticipant", options: "inclusion", width: "3" },
+    ];
+
+    Vue.prototype.$studyPointofContact = [
+      { label: "Name", field: "Name"},
+      { label: "Email", field: "Email"},
+      { label: "Phone", field: "Phone"},
     ];
 
     Vue.prototype.$studyBasicFields = [

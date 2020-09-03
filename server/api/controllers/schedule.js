@@ -83,10 +83,10 @@ exports.create = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Created] " + User.Name + " (" + User.Email + ") " + "created a study appointment (" +
@@ -461,10 +461,10 @@ exports.update = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Update] " + User.Name + " (" + User.Email + ") " + "updated a study appointment (" +
@@ -508,10 +508,10 @@ exports.remind = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Remind] " + User.Name + " (" + User.Email + ") " + "sent a reminding email for a study appointment (" +
@@ -560,10 +560,10 @@ exports.complete = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Complete] " + User.Name + " (" + User.Email + ") " + "marked the study appointment (" +
@@ -617,10 +617,10 @@ exports.delete = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "deleted a study appointment (" +

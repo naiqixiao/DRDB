@@ -157,7 +157,7 @@ exports.signup = asyncHandler(async (req, res) => {
       await sendEmail(emailContent);
 
       // log
-      const logFile = logFolder + "/" + User.LabName + "_login.txt";
+      const logFile = logFolder + "/" + User.LabName + "_log.txt";
 
       var logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + " - " + User.IP + "\r\n"
 
@@ -199,7 +199,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   if (!personnel) {
     // log the login information.
-    const logFile = logFolder + "/login.txt";
+    const logFile = logFolder + "/log.txt";
     var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
@@ -218,7 +218,7 @@ exports.login = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
 
     // log the login information.
-    const logFile = logFolder + "/login.txt";
+    const logFile = logFolder + "/log.txt";
     var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
@@ -244,7 +244,7 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  const logFile = logFolder + "/" + personnel.Lab.LabName + "_login.txt";
+  const logFile = logFolder + "/" + personnel.Lab.LabName + "_log.txt";
   var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + " - " + IP + "\r\n"
 
   if (fs.existsSync(logFile)) {
@@ -369,7 +369,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     await sendEmail(emailContent);
 
     // log
-    const logFile = logFolder + "/" + User.LabName + "_login.txt";
+    const logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     var logInfo = "[Change Password] " + User.Name + " (" + User.Email + ") " + "chagned password at " + new Date().toString() + " - " + User.IP + "\r\n"
 
@@ -421,10 +421,10 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Password Reset] " + personnel.Name + " (" + personnel.Email + ") " + "reset password at " + new Date().toString() + " - " + User.IP + "\r\n"

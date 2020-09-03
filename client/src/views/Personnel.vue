@@ -128,7 +128,7 @@
               </v-col>
               <v-col cols="12" md="12">
                 <AssignedStudies
-                  :Studies="currentPersonnel.Studies"
+                  :Studies="currentPersonnel.AssignedStudies"
                   :labStudies="labStudies"
                   :personnelId="currentPersonnel.id"
                   :personnelName="currentPersonnel.Name"
@@ -161,6 +161,7 @@
                             :items="$store.state.role == 'Admin' || $store.state.role == 'PI' || $store.state.role == 'Lab manager' ? options.fullRoles : options.limitedRoles"
                             v-model="editedPersonnel[field.field]"
                             :label="field.label"
+                            :rules="$rules[field.rules]"
                             hide-details
                             height="48px"
                             placeholder="  "
@@ -269,15 +270,17 @@ export default {
       ],
       dialog: false,
       personnelFields: [
-        { label: "Name", field: "Name" },
-        { label: "Initial", field: "Initial" },
-        { label: "Email", field: "Email" },
+        { label: "Name", field: "Name", rules: "name" },
+        { label: "Initials", field: "Initial", rules: "required" },
         {
           label: "Role",
           field: "Role",
           options: "role",
+          rules: "required"
         },
-        { label: "Calendar ID", field: "Calendar" },
+        { label: "Email", field: "Email", rules: "email" },
+        { label: "Calendar ID", field: "Calendar", rules: "email" },
+        { label: "Phone", field: "Phone", rules: "email"},
       ],
       options: {
         fullRoles: [
@@ -452,7 +455,7 @@ export default {
     },
 
     updatedStudies(updatedStudies) {
-      this.currentPersonnel.Studies = updatedStudies;
+      this.currentPersonnel.AssignedStudies = updatedStudies;
     },
   },
   mounted: function () {

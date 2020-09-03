@@ -16,7 +16,7 @@ exports.create = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const logFile = logFolder + "/login.txt";
+  const logFile = logFolder + "/log.txt";
 
   var logInfo = "[Conversation Created] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " created a conversation at " +
@@ -46,7 +46,7 @@ exports.delete = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const logFile = logFolder + "/login.txt";
+  const logFile = logFolder + "/log.txt";
 
   var logInfo = "[Conversation Deleted] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " deleted a conversation at " +

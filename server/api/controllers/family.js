@@ -76,7 +76,7 @@ exports.create = asyncHandler(async (req, res) => {
       fs.mkdirSync(logFolder)
     }
 
-    const logFile = logFolder + "/login.txt";
+    const logFile = logFolder + "/log.txt";
 
     var logInfo = "[Family Created] " + User.Name + " (" + User.Email + ") from " +
       User.LabName + " added a family (" +
@@ -240,7 +240,7 @@ exports.update = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const logFile = logFolder + "/login.txt";
+  const logFile = logFolder + "/log.txt";
 
   var logInfo = "[Family Updated] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " updated a family's information (" +
@@ -271,7 +271,7 @@ exports.delete = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const logFile = logFolder + "/login.txt";
+  const logFile = logFolder + "/log.txt";
 
   var logInfo = "[Family Deleted] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " deleted family (" +

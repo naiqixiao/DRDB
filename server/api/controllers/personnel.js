@@ -43,7 +43,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   if (req.query.study) {
-    queryString["$Studies.id$"] = req.query.study;
+    queryString["$AssignedStudies.id$"] = req.query.study;
   }
 
   // console.log(queryString)
@@ -54,10 +54,14 @@ exports.search = asyncHandler(async (req, res) => {
       // model.appointment,
       {
         model: model.study,
-        attributes: ["id", "StudyName", "MinAge", "MaxAge", "StudyType", "Completed"],
+        as: "AssignedStudies",
         through: {
           model: model.experimenter,
         },
+      },
+      {
+        model: model.study,
+        as: "StudyinCharge",
       },
     ],
   });
@@ -91,10 +95,10 @@ exports.update = asyncHandler(async (req, res) => {
   }
 
   if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+    var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
   } else {
-    var logFile = logFolder + "/login.txt";
+    var logFile = logFolder + "/log.txt";
   }
 
   var logInfo = "[Personnel Updated] " + User.Name + " (" + User.Email + ") " + "update personnel information (" +
@@ -126,10 +130,10 @@ exports.delete = asyncHandler(async (req, res) => {
   }
 
   if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+    var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
   } else {
-    var logFile = logFolder + "/login.txt";
+    var logFile = logFolder + "/log.txt";
   }
 
   var logInfo = "[Personnel Deleted] " + User.Name + " (" + User.Email + ") " + "removed (" +

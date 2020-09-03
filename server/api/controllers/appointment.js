@@ -111,10 +111,10 @@ exports.create = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Added] " + User.Name + " (" + User.Email + ") " + "added a study appointment to a schedule (" +
@@ -311,10 +311,10 @@ exports.update = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Updated] " + User.Name + " (" + User.Email + ") " + "added a study appointment (" +
@@ -431,10 +431,10 @@ exports.delete = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "delelete a study appointment to a schedule (" +

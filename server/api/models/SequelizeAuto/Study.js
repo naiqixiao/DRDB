@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   return sequelize.define(
     "Study",
     {
@@ -38,29 +38,45 @@ module.exports = function(sequelize, DataTypes) {
       },
       FK_Lab: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+          model: {
+            tableName: 'Lab',
+          },
+          key: 'id'
+        }
+      },
+      FK_Personnel: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: {
+            tableName: 'Personnel',
+          },
+          key: 'id'
+        }
       },
       StudyType: {
         type: DataTypes.ENUM("Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"),
         allowNull: false
       },
       PrematureParticipant: {
-        type: DataTypes.ENUM('Include','Exclude','Only'),
+        type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
         allowNull: false,
         defaultValue: "Include"
       },
       VisionLossParticipant: {
-        type: DataTypes.ENUM('Include','Exclude','Only'),
+        type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
         allowNull: false,
         defaultValue: "Include"
       },
       HearingLossParticipant: {
-        type: DataTypes.ENUM('Include','Exclude','Only'),
+        type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
         allowNull: false,
         defaultValue: "Include"
       },
       IllParticipant: {
-        type: DataTypes.ENUM('Include','Exclude','Only'),
+        type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
         allowNull: false,
         defaultValue: "Include"
       },

@@ -99,7 +99,7 @@ exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
 
-    newLabInfo.EmailOpening = "";
+    newLabInfo.EmailOpening = "Email opening (currently not used).";
     newLabInfo.EmailClosing = "Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX.";
     newLabInfo.Location = "Psychology Building, McMaster University";
     newLabInfo.TransportationInstructions = "Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.";
@@ -117,29 +117,33 @@ exports.create = asyncHandler(async (req, res) => {
       personnel.temporaryPassword = true;
     });
 
-    newLabInfo.Studies = [
-      {
-        StudyName: "Sample study",
-        MinAge: "8.00",
-        MaxAge: "18.00",
-        Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
-        EmailTemplate:
-          "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
-        Completed: false,
-        StudyType: "Behavioural",
-        PrematureParticipant: "Include",
-        HearingLossParticipant: "Include",
-        VisionLossParticipant: "Include",
-        IllParticipant: "Include",
-      },
-    ];
-
     const lab = await model.lab.create(newLabInfo, {
-      include: [model.study, model.personnel],
+      include: [model.personnel],
     });
 
+    // create a sample study
+    const sampleStudy =
+    {
+      StudyName: "Sample study",
+      MinAge: "8.00",
+      MaxAge: "18.00",
+      Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
+      EmailTemplate:
+        "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
+      Completed: false,
+      StudyType: "Behavioural",
+      PrematureParticipant: "Include",
+      HearingLossParticipant: "Include",
+      VisionLossParticipant: "Include",
+      IllParticipant: "Include",
+      FK_Personnel: lab.Personnels[0].id,
+      FK_Lab: lab.id
+    };
+
+    await model.study.create(sampleStudy);
+
     // Send email to the associated personnel
-    var emailContent = {
+    const emailContent = {
       to: newLabInfo.Personnels[0].Name + "<" + newLabInfo.Personnels[0].Email + ">",
       subject:
         "Your user account has been created!",
@@ -183,7 +187,7 @@ exports.create = asyncHandler(async (req, res) => {
       fs.mkdirSync(logFolder)
     }
 
-    const logFile = logFolder + "/login.txt";
+    const logFile = logFolder + "/log.txt";
 
     var logInfo = "[Lab Created] " + User.Name + " (" + User.Email + ") from " +
       User.LabName + " created a lab (" +
@@ -196,7 +200,7 @@ exports.create = asyncHandler(async (req, res) => {
       fs.writeFileSync(logFile, logInfo)
     }
 
-    res.status(200).send("lab created!");
+    res.status(200).send('a new lab is created.');
   } catch (error) {
     throw error;
   }
@@ -241,10 +245,10 @@ exports.update = asyncHandler(async (req, res) => {
   }
 
   if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_login.txt";
+    var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
   } else {
-    var logFile = logFolder + "/login.txt";
+    var logFile = logFolder + "/log.txt";
   }
 
   var logInfo = "[Lab Updated] " + User.Name + " (" + User.Email + ") updated lab information (" +
@@ -284,7 +288,7 @@ exports.delete = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const logFile = logFolder + "/login.txt";
+  const logFile = logFolder + "/log.txt";
 
   var logInfo = "[Lab Deleted] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " deleted lab (" +

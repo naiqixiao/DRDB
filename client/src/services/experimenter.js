@@ -22,7 +22,6 @@ export default {
       LabName: store.state.labName
     }
 
-    console.log(studies)
     return api().post("experimenter/studies", studies);
   }
 };

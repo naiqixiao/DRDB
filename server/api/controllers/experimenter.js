@@ -22,10 +22,10 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +
@@ -63,10 +63,10 @@ exports.updateStudies = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +

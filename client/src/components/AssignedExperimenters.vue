@@ -59,6 +59,8 @@
                 label="Experimenters"
                 multiple
                 chip
+                outlined
+                dense
               ></v-select>
             </v-col>
           </v-row>

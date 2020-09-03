@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
   return sequelize.define(
     "Experimenter",
     {
@@ -14,16 +14,20 @@ module.exports = function(sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Personnel",
-          key: "id"
+          model: {
+            tableName: 'Personnel',
+          },
+          key: 'id'
         }
       },
       FK_Study: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Study",
-          key: "id"
+          model: {
+            tableName: 'Study',
+          },
+          key: 'id'
         }
       },
       createdAt: {
@@ -38,6 +42,7 @@ module.exports = function(sequelize, DataTypes) {
       }
     },
     {
+      sequelize,
       tableName: "Experimenter"
     }
   );

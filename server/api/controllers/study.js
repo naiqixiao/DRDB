@@ -9,7 +9,6 @@ exports.create = asyncHandler(async (req, res) => {
 
   try {
     const study = await model.study.create(newStudyInfo);
-    console.log("Study created: " + study.id);
 
     // Log
     const User = req.body.User;
@@ -20,10 +19,10 @@ exports.create = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Study Created] " + User.Name + " (" + User.Email + ") " + "created a study (" +
@@ -54,6 +53,11 @@ exports.search = asyncHandler(async (req, res) => {
         model.lab,
         {
           model: model.personnel,
+          as: 'PointofContact'
+        },
+        {
+          model: model.personnel,
+          as: 'Experimenters',
           through: {
             model: model.experimenter,
           },
@@ -66,6 +70,7 @@ exports.search = asyncHandler(async (req, res) => {
     res.status(200).send(study);
   } catch (error) {
     res.status(500).send(error);
+    console.log(error)
   }
 });
 
@@ -85,6 +90,21 @@ exports.update = asyncHandler(async (req, res) => {
 
     const study = await model.study.findOne({
       where: { id: ID },
+      include: [
+        model.appointment,
+        model.lab,
+        {
+          model: model.personnel,
+          as: 'PointofContact'
+        },
+        {
+          model: model.personnel,
+          as: 'Experimenters',
+          through: {
+            model: model.experimenter,
+          },
+        },
+      ],
     });
 
     // Log
@@ -96,10 +116,10 @@ exports.update = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Study Updated] " + User.Name + " (" + User.Email + ") " + "update a study's information (" +
@@ -135,10 +155,10 @@ exports.delete = asyncHandler(async (req, res) => {
     }
 
     if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_login.txt";
+      var logFile = logFolder + "/" + User.LabName + "_log.txt";
 
     } else {
-      var logFile = logFolder + "/login.txt";
+      var logFile = logFolder + "/log.txt";
     }
 
     var logInfo = "[Study Deleted] " + User.Name + " (" + User.Email + ") " + "deleted a study (" +

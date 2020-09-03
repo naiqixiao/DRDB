@@ -56,9 +56,8 @@
     </v-col>
 
     <v-col cols="12" md="5">
-      <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
       <v-row>
-        <v-col md="12" class="subtitle">
+        <v-col md="12">
           <v-divider></v-divider>
           <h4 class="text-left">Study information:</h4>
         </v-col>
@@ -75,20 +74,42 @@
             readonly
           ></v-text-field>
         </v-col>
-        <v-col md="12" class="subtitle">
+        <v-col md="12">
           <v-textarea
             label="Study summary"
+            background-color="textbackground"
             outlined
             no-resize
             rows="3"
             v-model="currentStudy.Description"
             readonly
+            hide-details
           ></v-textarea>
         </v-col>
       </v-row>
 
+      <v-row justify="space-around">
+        <v-col md="12">
+          <v-divider></v-divider>
+          <h4 class="text-left">Point of Contact:</h4>
+        </v-col>
+        <v-col cols="12" sm="4" v-for="field in this.$studyPointofContact" :key="field.label">
+          <v-text-field
+            height="48px"
+            background-color="textbackground"
+            hide-details
+            :label="field.label"
+            v-model="currentStudy.PointofContact[field.field]"
+            placeholder="  "
+            readonly
+            outlined
+            dense
+          ></v-text-field>
+        </v-col>
+      </v-row>
+
       <v-row>
-        <v-col md="12" class="subtitle">
+        <v-col md="12">
           <v-divider></v-divider>
           <h4 class="text-left">Study criteria:</h4>
         </v-col>
@@ -113,7 +134,7 @@
           ></v-text-field>
         </v-col>
 
-        <v-col md="12" class="subtitle">
+        <v-col md="12">
           <v-divider></v-divider>
           <h4 class="text-left" v-show="currentStudy.id">Email template:</h4>
         </v-col>
@@ -172,7 +193,7 @@
             <v-form ref="form" v-model="valid" lazy-validation>
               <v-container>
                 <v-row justify="space-around">
-                  <v-col md="12" class="subtitle">
+                  <v-col md="12">
                     <v-divider></v-divider>
                     <h4 class="text-left">Basic information:</h4>
                   </v-col>
@@ -225,10 +246,23 @@
                       ></v-text-field>
                     </div>
                   </v-col>
+                  <v-col cols="12" sm="4">
+                    <v-select
+                      height="48px"
+                      :items="labMembers"
+                      :item-value="'id'"
+                      :item-text="'Name'"
+                      v-model="editedStudy.FK_Personnel"
+                      label="Point of Contact"
+                      outlined
+                      dense
+                      hide-details
+                    ></v-select>
+                  </v-col>
                 </v-row>
 
                 <v-row justify="space-around">
-                  <v-col md="12" class="subtitle">
+                  <v-col md="12">
                     <v-divider></v-divider>
                     <h4 class="text-left">Study criteria:</h4>
                   </v-col>
@@ -271,7 +305,7 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                  <v-col md="12" class="subtitle">
+                  <v-col md="12">
                     <v-divider></v-divider>
                     <h4 class="text-left">Study summary:</h4>
                   </v-col>
@@ -289,7 +323,7 @@
                 </v-row>
 
                 <v-row justify="space-around">
-                  <v-col md="12" class="subtitle">
+                  <v-col md="12">
                     <v-divider></v-divider>
                     <h4 class="text-left">Email template:</h4>
                   </v-col>
@@ -323,7 +357,7 @@
       <h3>Experimenters</h3>
 
       <AssignedExperimenters
-        :Experimenters="currentStudy.Personnels"
+        :Experimenters="currentStudy.Experimenters"
         :labMembers="labMembers"
         :studyId="currentStudy.id"
         @updatedExperimenters="updateExperimenters"
@@ -365,7 +399,7 @@ export default {
           width: "23%",
         },
         {
-          text: "Updated time",
+          text: "Updated at",
           align: "center",
           value: "updatedAt",
           width: "25%",
@@ -400,6 +434,11 @@ export default {
         VisionLossParticipant: "",
         HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
+        PointofContact: {
+          Name: null,
+          Email: null,
+          Phone: null,
+        },
       },
       editedStudy: {
         StudyName: null,
@@ -582,7 +621,7 @@ export default {
     },
 
     updateExperimenters(updatedExperimenters) {
-      this.currentStudy.Personnels = updatedExperimenters;
+      this.currentStudy.Experimenters = updatedExperimenters;
     },
 
     AgeFormated2(Age) {

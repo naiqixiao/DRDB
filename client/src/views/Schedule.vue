@@ -55,7 +55,7 @@
               background-color="textbackground"
               hide-details
               :label="field.label"
-              v-model="selectedStudy[field.field]"
+              :value="selectedStudy[field.field]"
               placeholder="  "
               outlined
               dense
@@ -65,12 +65,34 @@
           <v-col md="12" class="subtitle">
             <v-textarea
               label="Study summary"
+              background-color="textbackground"
               outlined
               no-resize
-              rows="3"
-              v-model="selectedStudy.Description"
+              rows="2"
+              :value="selectedStudy.Description"
               readonly
+              hide-details
             ></v-textarea>
+          </v-col>
+        </v-row>
+
+        <v-row justify="space-around">
+          <v-col md="12">
+            <v-divider></v-divider>
+            <h4 class="text-left">Point of Contact:</h4>
+          </v-col>
+          <v-col cols="12" sm="4" v-for="field in this.$studyPointofContact" :key="field.label">
+            <v-text-field
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              :label="field.label"
+              :value="selectedStudy.PointofContact[field.field]"
+              placeholder="  "
+              readonly
+              outlined
+              dense
+            ></v-text-field>
           </v-col>
         </v-row>
 
@@ -739,7 +761,26 @@ export default {
       validChild: true,
       validFamily: true,
       studies: [],
-      selectedStudy: {},
+      selectedStudy: {
+        StudyName: null,
+        FK_Lab: this.$store.state.lab,
+        MinAge: null,
+        MaxAge: null,
+        Description: "",
+        EmailTemplate: "",
+        Completed: false,
+        StudyType: null,
+        PrematureParticipant: "",
+        IllParticipant: "",
+        VisionLossParticipant: "",
+        HearingLossParticipant: "",
+        updatedAt: new Date().toISOString(),
+        PointofContact: {
+          Name: null,
+          Email: null,
+          Phone: null,
+        },
+      },
       Children: [],
       elegibleExperimenters: [],
       scheduleButtonIcon: "event",
@@ -812,7 +853,6 @@ export default {
           "PreviousParticipation",
         ],
       },
-
     };
   },
 
