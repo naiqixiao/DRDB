@@ -273,8 +273,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" :disabled="!studyDate || !appointments[0].FK_Study" @click="continue12()">
-                    <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>Schedule
+                  <v-btn
+                    color="primary"
+                    :disabled="!studyDate || !appointments[0].FK_Study"
+                    @click="continue12()"
+                  >
+                    <v-icon dark left v-show="currentSchedule.id">mdi-checkbox-marked-circle</v-icon>Schedule
                   </v-btn>
 
                   <v-btn
@@ -292,6 +296,8 @@
                 ref="Email"
                 :dialog="emailDialog"
                 :appointments="appointments"
+                :familyInfo="currentFamily"
+                :scheduleInfo="currentSchedule"
                 emailType="Confirmation"
               ></Email>
 
@@ -456,7 +462,9 @@ export default {
       },
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: "Confirmed",
-      scheduleId: null,
+      currentSchedule: {
+        id: null
+      },
       manualCalendar: false,
       nextContactDialog: false,
       emailDialog: false,
@@ -617,19 +625,14 @@ export default {
 
         var calendarEvent = newSchedule;
 
-        this.scheduleId = newStudySchedule.data.id;
-
-        calendarEvent.scheduleId = this.scheduleId;
+        this.currentSchedule = newStudySchedule.data;
+        calendarEvent.scheduleId = this.currentSchedule.id;
 
         // attach schedule info to the current appointments.
         newStudySchedule.data.updatedAt = moment().toString();
 
         this.appointments.forEach((appointment) => {
           appointment.FK_Schedule = newStudySchedule.data.id;
-          appointment.Schedule = {};
-          appointment.Schedule.Status = newStudySchedule.data.Status;
-          appointment.Schedule.AppointmentTime =
-            newStudySchedule.data.AppointmentTime;
         });
 
         console.log("New Scheduled Created!");
@@ -643,11 +646,11 @@ export default {
     },
 
     async deleteUnfinishedSchedule() {
-      await schedule.delete({ id: this.scheduleId });
+      await schedule.delete({ id: this.currentSchedule.id });
     },
 
     async createCalendarbyScheduleId() {
-      var queryString = { id: this.scheduleId };
+      var queryString = { id: this.currentSchedule.id };
       const currentSchedules = await schedule.search(queryString);
 
       const currentSchedule = currentSchedules.data[0];
@@ -688,7 +691,7 @@ export default {
           timeZone: "America/Toronto",
         },
         attendees: attendees,
-        scheduleId: this.scheduleId,
+        scheduleId: this.currentSchedule.id
       };
 
       try {
@@ -719,7 +722,7 @@ export default {
 
     async continue12() {
       try {
-        if (this.scheduleId) {
+        if (this.currentSchedule.id) {
           await this.deleteUnfinishedSchedule();
         }
 
@@ -795,7 +798,7 @@ export default {
     resetSchedule() {
       setTimeout(() => {
         this.e1 = 1;
-        this.scheduleId = null;
+        this.currentSchedule = null;
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         // this.response = null;

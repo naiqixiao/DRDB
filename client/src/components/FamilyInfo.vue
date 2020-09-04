@@ -260,6 +260,7 @@ export default {
 
           await family.update(this.editedItem);
 
+          this.currentFamily = Object.assign({}, this.editedItem);
           console.log("Family information updated!");
         } catch (error) {
           console.log(error.response);

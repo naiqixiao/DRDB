@@ -3,11 +3,7 @@
     <v-row dense justify="start">
       <v-col cols="12" md="1"></v-col>
       <v-col cols="12" md="8">
-        <v-text-field
-          :value="appointments[0].Child.Family.Email"
-          label="Email"
-          :rules="this.$rules.email"
-        ></v-text-field>
+        <v-text-field :value="familyInfo.Email" label="Email" :rules="this.$rules.email"></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
@@ -27,6 +23,8 @@ import moment from "moment";
 export default {
   props: {
     emailType: String,
+    scheduleInfo: Object,
+    familyInfo: Object,
     appointments: Array,
     dialog: Boolean,
   },
@@ -74,11 +72,11 @@ export default {
           case "Confirmation":
             opening =
               "<p>Dear " +
-              this.appointments[0].Child.Family.NameMom.split(" ")[0] +
+              this.familyInfo.NameMom.split(" ")[0] +
               ",</p>" +
               "<p>Thanks for your support to our research! This is a confirmation for your visit with <b>" +
               this.childNames() +
-              moment(this.appointments[0].Schedule.AppointmentTime).format(
+              moment(this.scheduleInfo.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"
               ) +
               "</b>.</p>";
@@ -87,13 +85,13 @@ export default {
           case "ScheduleUpdate":
             opening =
               "<p>Dear " +
-              this.appointmentsForEmail[0].Child.Family.NameMom.split(" ")[0] +
+              this.familyInfo.NameMom.split(" ")[0] +
               ",</p>" +
               "<p>This is an update on your visit with <b>" +
               this.childNames() +
-              moment(
-                this.appointmentsForEmail[0].Schedule.AppointmentTime
-              ).format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
+              moment(this.scheduleInfo.AppointmentTime).format(
+                " [on] dddd [(]MMM Do[)] [at] h:mma"
+              ) +
               "</b>.</p>";
             break;
         }
@@ -180,12 +178,8 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
-        to:
-          this.appointments[0].Child.Family.NameMom +
-          "<" +
-          this.$store.state.labEmail +
-          ">",
+        //to: this.familyInfo.NameMom + "<" + familyInfo.Email + ">",
+        to: this.familyInfo.NameMom + "<" + this.$store.state.labEmail + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
       };
@@ -225,17 +219,15 @@ export default {
               "Study appointment for " +
               this.childNames() +
               " on " +
-              moment(this.appointments[0].Schedule.AppointmentTime).format(
+              moment(this.scheduleInfo.AppointmentTime).format(
                 "MMM D (ddd), [at] h:mma"
               );
             break;
 
           case "ScheduleUpdate":
             this.emailSubject =
-              "An update on your visit " +
-              // this.childNames() +
-              " on " +
-              moment(this.appointments[0].Schedule.AppointmentTime).format(
+              "An update on your visit on " +
+              moment(this.scheduleInfo.AppointmentTime).format(
                 "MMM D (ddd), [at] h:mma"
               );
             break;
@@ -269,17 +261,15 @@ export default {
             "Study appointment for " +
             this.childNames() +
             " on " +
-            moment(this.appointments[0].Schedule.AppointmentTime).format(
+            moment(this.scheduleInfo.AppointmentTime).format(
               "MMM D (ddd), [at] h:mma"
             );
           break;
 
         case "ScheduleUpdate":
           this.emailSubject =
-            "An update on your visit " +
-            // this.childNames() +
-            " on " +
-            moment(this.appointments[0].Schedule.AppointmentTime).format(
+            "An update on your visit on " +
+            moment(this.scheduleInfo.AppointmentTime).format(
               "MMM D (ddd), [at] h:mma"
             );
           break;

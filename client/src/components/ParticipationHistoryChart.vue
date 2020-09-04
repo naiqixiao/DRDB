@@ -1,6 +1,6 @@
 <template>
   <v-card name="participationStatistics" outlined height="380px">
-    <v-card-text v-if="family.Appointments">
+    <v-card-text v-if="family.Appointments || family.Schedules">
       <doughnut-chart :chart-data="datacollection.chartData" :height="280"></doughnut-chart>
     </v-card-text>
   </v-card>
@@ -44,35 +44,46 @@ export default {
   methods: {},
   computed: {
     datacollection() {
-      var schedule = [];
-      this.family.Appointments.forEach((appointment) => {
-        schedule.push({
-          id: appointment.FK_Schedule,
-          status: appointment.Schedule.Status,
-          AppointmentTime: appointment.Schedule.AppointmentTime,
-        });
-      });
-
-      const uniqueSchedule = schedule.reduce((schedule, current) => {
-        const x = schedule.find((item) => item.id === current.id);
-        if (!x) {
-          return schedule.concat([current]);
-        } else {
-          return schedule;
-        }
-      }, []);
-
       var scheduleStatus = {};
       var chartIndices = [];
 
-      uniqueSchedule.forEach((schedule) => {
-        if (scheduleStatus[schedule.status]) {
-          scheduleStatus[schedule.status] += 1;
-        } else {
-          scheduleStatus[schedule.status] = 1;
-          chartIndices.push(this.status.indexOf(schedule.status));
-        }
-      });
+      if (this.family.Schedules) {
+        this.family.Schedules.forEach((schedule) => {
+          if (scheduleStatus[schedule.Status]) {
+            scheduleStatus[schedule.Status] += 1;
+          } else {
+            scheduleStatus[schedule.Status] = 1;
+            chartIndices.push(this.status.indexOf(schedule.Status));
+          }
+        });
+      } else {
+        var schedule = [];
+        this.family.Appointments.forEach((appointment) => {
+          schedule.push({
+            id: appointment.FK_Schedule,
+            status: appointment.Schedule.Status,
+            AppointmentTime: appointment.Schedule.AppointmentTime,
+          });
+        });
+
+        const uniqueSchedule = schedule.reduce((schedule, current) => {
+          const x = schedule.find((item) => item.id === current.id);
+          if (!x) {
+            return schedule.concat([current]);
+          } else {
+            return schedule;
+          }
+        }, []);
+
+        uniqueSchedule.forEach((schedule) => {
+          if (scheduleStatus[schedule.status]) {
+            scheduleStatus[schedule.status] += 1;
+          } else {
+            scheduleStatus[schedule.status] = 1;
+            chartIndices.push(this.status.indexOf(schedule.status));
+          }
+        });
+      }
 
       chartIndices.sort((a, b) => {
         return a - b;

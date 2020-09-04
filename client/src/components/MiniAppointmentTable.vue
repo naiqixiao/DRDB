@@ -4,7 +4,7 @@
       cols="12"
       md="2"
       style="padding: 12px !important"
-      v-for="(appointment, indexAppointments) in Appointments"
+      v-for="(appointment, indexAppointments) in Schedule.Appointments"
       :key="appointment.id"
     >
       <v-card
@@ -58,7 +58,7 @@
                 <v-icon
                   color="primary"
                   @click="removeAppointment(indexAppointments)"
-                  :disabled="Appointments.length == 1"
+                  :disabled="Schedule.Appointments.length == 1"
                 >delete</v-icon>
               </div>
             </template>
@@ -203,7 +203,9 @@
         <Email
           ref="Email"
           :dialog="dialogEmail"
-          :appointments="Appointments"
+          :appointments="Schedule.Appointments"
+          :familyInfo="Schedule.Family"
+          :scheduleInfo="Schedule"
           emailType="ScheduleUpdate"
         ></Email>
         <v-divider></v-divider>
@@ -244,7 +246,7 @@ export default {
     Email,
   },
   props: {
-    Appointments: Array,
+    Schedule: Object,
     Index: Number,
   },
 
@@ -263,7 +265,6 @@ export default {
       previousIndex: -1,
       appointmentUpdated: false,
       dialogEmail: false,
-      appointmentsForEmail: [],
     };
   },
   methods: {
@@ -272,7 +273,7 @@ export default {
 
       newAppointment.FK_Child = child.id;
       newAppointment.Child = child;
-      newAppointment.FK_Schedule = this.Appointments[0].FK_Schedule;
+      newAppointment.FK_Schedule = this.Schedule.id;
       newAppointment.FK_Family = child.FK_Family;
       newAppointment.index = this.newAppointments.length;
 
@@ -280,7 +281,7 @@ export default {
     },
 
     async editNewAppointments() {
-      var queryString = { id: this.Appointments[0].FK_Family };
+      var queryString = { id: this.Schedule.FK_Family };
       var Results = await family.search(queryString);
       this.Children = Results.data[0].Children;
       this.dialogAddAppointments = true;
@@ -442,26 +443,27 @@ export default {
         const updatedSchedule = await appointment.create(this.newAppointments);
 
         updatedSchedule.data.Appointments.forEach((newAppointment) => {
-          this.Appointments.forEach((appointment) => {
+          this.Schedule.Appointments.forEach((appointment) => {
             if (newAppointment.id !== appointment.id) {
-              this.Appointments.push(newAppointment);
+              this.Schedule.Appointments.push(newAppointment);
             }
           });
         });
 
-        //Prepare information for email
-        this.Appointments.forEach((appointment) => {
-          appointment.Schedule = {};
-          appointment.Schedule.AppointmentTime =
-            updatedSchedule.data.AppointmentTime;
-          appointment.Schedule.Status = updatedSchedule.data.Status;
-        });
+        this.Schedule.updatedAt = updatedSchedule.data.updatedAt;
 
-        this.Appointments[0].Child.Family = this.Appointments[0].Family;
-        //
+        // //Prepare information for email
+        // this.Schedule.Appointments.forEach((appointment) => {
+        //   appointment.Schedule = {};
+        //   appointment.Schedule.AppointmentTime =
+        //     updatedSchedule.data.AppointmentTime;
+        //   appointment.Schedule.Status = updatedSchedule.data.Status;
+        // });
+
+        // this.Schedule.Appointments[0].Child.Family = this.Schedule.Appointments[0].Family;
+        // //
 
         this.appointmentUpdated = true;
-        this.appointmentsForEmail = this.Appointments;
 
         this.closeNewAppointment();
 
@@ -484,27 +486,18 @@ export default {
 
     async removeAppointment(index) {
       try {
-        if (this.Appointments[index].id) {
+        if (this.Schedule.Appointments[index].id) {
           const updatedSchedule = await appointment.delete({
-            id: this.Appointments[index].id,
-            FK_Schedule: this.Appointments[index].FK_Schedule,
+            id: this.Schedule.Appointments[index].id,
+            FK_Schedule: this.Schedule.id,
           });
 
-          this.Appointments.splice(index, 1);
+          this.Schedule.Appointments.splice(index, 1);
 
-          //Prepare information for email
-          this.Appointments.forEach((appointment) => {
-            appointment.Schedule = {};
-            appointment.Schedule.AppointmentTime =
-              updatedSchedule.data.AppointmentTime;
-            appointment.Schedule.Status = "Confirmed";
-          });
+          this.Schedule.updatedAt = updatedSchedule.data.updatedAt;
 
-          this.Appointments[0].Child.Family = this.Appointments[0].Family;
-          //
           this.appointmentUpdated = true;
 
-          this.appointmentsForEmail = this.Appointments;
           console.log("Appointment deleted.");
         }
       } catch (error) {
@@ -533,12 +526,15 @@ export default {
       );
 
       try {
-        await appointment.update({
+        const updatedSchedule = await appointment.update({
           updatedExperimenters: updatedExperimenters,
           scheduleId: this.editedAppointment.FK_Schedule,
         });
 
-        this.Appointments[this.index] = this.editedAppointment;
+        this.Schedule.Appointments[this.index] = this.editedAppointment;
+
+        this.Schedule.updatedAt = updatedSchedule.data.updatedAt;
+
       } catch (error) {
         console.log(error);
       }
@@ -575,7 +571,7 @@ export default {
     },
 
     childNames() {
-      var nameList = this.Appointments.map((appointment) => {
+      var nameList = this.Schedule.Appointments.map((appointment) => {
         return appointment.Child.Name;
       });
 
@@ -598,23 +594,21 @@ export default {
         "An update on your visit " +
         // this.childNames() +
         " on " +
-        moment(this.appointmentsForEmail[0].Schedule.AppointmentTime).format(
-          "MMM D (ddd), [at] h:mma"
-        );
+        moment(this.Schedule.AppointmentTime).format("MMM D (ddd), [at] h:mma");
       const opening =
         "<p>Dear " +
-        this.appointmentsForEmail[0].Child.Family.NameMom.split(" ")[0] +
+        this.Schedule.Family.NameMom.split(" ")[0] +
         ",</p>" +
         "<p>This is an update on your visit with " +
         this.childNames() +
-        moment(this.appointmentsForEmail[0].Schedule.AppointmentTime).format(
+        moment(this.Schedule.AppointmentTime).format(
           " [on] dddd [(]MMM Do[)] [at] h:mma"
         ) +
-        ".</p>"
+        ".</p>";
 
       var emailBodyList = [];
 
-      this.appointmentsForEmail.forEach((appointment) => {
+      this.Schedule.Appointments.forEach((appointment) => {
         var emailBody = appointment.Study.EmailTemplate;
 
         if (appointment.Child.Sex == "F") {
@@ -645,9 +639,8 @@ export default {
         "<p>" + this.$store.state.transportationInstructions + "</p>";
 
       // closing
-      const closing =
-        "<p>" + this.$store.state.emailClosing + "</p>";
-        "<p>Best,<br>" +
+      const closing = "<p>" + this.$store.state.emailClosing + "</p>";
+      "<p>Best,<br>" +
         this.$store.state.name +
         "<br>" +
         this.$store.state.role +
@@ -663,11 +656,7 @@ export default {
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
         //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
-        to:
-          this.appointmentsForEmail[0].Child.Family.NameMom +
-          "<" +
-          this.$store.state.labEmail +
-          ">",
+        to: this.Schedule.NameMom + "<" + this.$store.state.labEmail + ">",
         subject: emailSubject,
         body: emailBody,
       };
@@ -746,7 +735,7 @@ export default {
         this.appointmentUpdated = false;
         alert("An email about the appointment updates is sent to parents.");
       } catch (error) {
-                this.appointmentUpdated = false;
+        this.appointmentUpdated = false;
 
         alert(
           "No email about the appointment updates is sent to parents.\nPlease send an email manually."

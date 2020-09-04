@@ -276,11 +276,11 @@ export default {
           label: "Role",
           field: "Role",
           options: "role",
-          rules: "required"
+          rules: "required",
         },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Calendar ID", field: "Calendar", rules: "email" },
-        { label: "Phone", field: "Phone", rules: "email"},
+        { label: "Phone", field: "Phone", rules: "phone" },
       ],
       options: {
         fullRoles: [
@@ -380,7 +380,7 @@ export default {
     },
 
     editPersonnel() {
-      this.editedPersonnel = this.currentPersonnel;
+      this.editedPersonnel = Object.assign({}, this.currentPersonnel);
       this.editedIndex = this.Personnels.indexOf(this.currentPersonnel);
       this.dialog = true;
     },
@@ -431,7 +431,8 @@ export default {
       this.dialog = false;
 
       setTimeout(() => {
-        // this.editedPersonnel = [];
+        // this.currentPersonnel = Object.assign({}, this.editedPersonnel);
+        this.editedPersonnel = {};
         // this.editedIndex = -1;
       }, 300);
     },

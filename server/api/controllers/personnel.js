@@ -118,7 +118,7 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.destroy({
-    where: { id: req.query.id },
+    where: { id: req.query.id }
   });
 
   // Log

@@ -214,7 +214,7 @@ exports.search = asyncHandler(async (req, res) => {
         },
       ],
       order: [
-        
+
         ['AppointmentTime', 'ASC'],
       ],
     });
@@ -277,7 +277,6 @@ exports.today = asyncHandler(async (req, res) => {
         },
       ],
       order: [
-        
         ['AppointmentTime', 'ASC'],
       ],
     });
@@ -341,7 +340,7 @@ exports.week = asyncHandler(async (req, res) => {
         },
       ],
       order: [
-        
+
         ['AppointmentTime', 'ASC'],
       ],
     });

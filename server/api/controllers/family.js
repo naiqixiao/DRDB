@@ -191,29 +191,59 @@ exports.search = asyncHandler(async (req, res) => {
         }],
       },
       {
-        model: model.appointment,
+        model: model.schedule,
         include: [
           {
-            model: model.child,
-            attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            model: model.family,
           },
           {
-            model: model.study,
-            attributes: [
-              "StudyName",
-              "MinAge",
-              "MaxAge",
-              "EmailTemplate",
-              "StudyType",
-              "FK_Lab",
-            ],
+            model: model.personnel,
           },
-          { model: model.schedule },
-        ],
-      },
-    ],
-    order: [
-      [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
+          {
+            model: model.appointment,
+            include: [
+              {
+                model: model.child,
+              },
+              {
+                model: model.study,
+              },
+              {
+                model: model.personnel,
+                through: { model: model.experimenterAssignment },
+              },
+            ],
+          }],
+        order: [
+          [model.schedule, 'AppointmentTime', 'DESC'],
+        ]
+      }
+
+      // {
+      //   model: model.appointment,
+      //   include: [
+      //     {
+      //       model: model.child,
+      //       attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+      //     },
+      //     {
+      //       model: model.study,
+      //       attributes: [
+      //         "StudyName",
+      //         "MinAge",
+      //         "MaxAge",
+      //         "EmailTemplate",
+      //         "StudyType",
+      //         "FK_Lab",
+      //       ],
+      //     },
+      //     { model: model.schedule },
+      //   ],
+      // },
+
+      // order: [
+      //   [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
+      // ]
     ]
   });
 

@@ -130,6 +130,7 @@
         >
           <MiniAppointmentTable
             :Appointments="item.Appointments"
+            :Schedule="item"
             :Index="Schedules.indexOf(item)"
             @updateSchedule="updateSchedule"
           ></MiniAppointmentTable>
@@ -229,6 +230,8 @@
                 ref="Email"
                 :dialog="emailDialog"
                 :appointments="editedSchedule.Appointments"
+                :scheduleInfo="editedSchedule"
+                :familyInfo="editedSchedule.Family"
                 emailType="Confirmation"
               ></Email>
               <v-divider></v-divider>
@@ -558,7 +561,7 @@ export default {
 
     rowSelected(item, row) {
       row.select(true);
-      row.expand(true);
+      row.expand(!row.isExpanded);
       this.$emit("rowSelected", item.Family);
     },
 

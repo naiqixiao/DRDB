@@ -8727,3 +8727,4 @@ client/._.DS_Store
 ._.DS_Store
 server/api/models/DRDB.js
 server/api/logs
+client/src/components/AppointmentTable.vue

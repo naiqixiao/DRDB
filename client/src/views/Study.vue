@@ -553,7 +553,7 @@ export default {
     },
 
     editStudy() {
-      this.editedStudy = this.currentStudy;
+      this.editedStudy = Object.assign({}, this.currentStudy);
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
       this.dialog = true;
     },
@@ -598,10 +598,10 @@ export default {
     close() {
       this.dialog = false;
 
-      // setTimeout(() => {
-      //   // this.editedStudy = [];
-      //   // this.editedIndex = -1;
-      // }, 300);
+      setTimeout(() => {
+        this.editedStudy = {};
+        // this.editedIndex = -1;
+      }, 300);
     },
 
     async deleteStudy() {

@@ -28,7 +28,7 @@
     "objection": "^2.2.3",
     "pm2": "^4.4.1",
     "sequelize": "^5.22.3",
-    "sequelize-auto": "^0.5.3"
+    "sequelize-auto": "^0.5.4"
   },
   "devDependencies": {
     "prettier": "^1.19.1"

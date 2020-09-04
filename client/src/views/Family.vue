@@ -394,13 +394,17 @@
     </v-row>
     <v-row justify="start" dense height="300">
       <v-col cols="12" md="9">
-        <AppointmentTable
+        <!-- <AppointmentTable
           :Appointments="currentFamily.Appointments"
           :studyTimeSlots="this.$studyTimeSlots"
           :family="currentFamily"
           @alert="alert = true"
           @nextContactDone="updateNextContactFrontend"
-        ></AppointmentTable>
+        ></AppointmentTable>-->
+        <ScheduleTable
+          :Schedules="currentFamily.Schedules"
+          :studyTimeSlots="this.$studyTimeSlots"
+        ></ScheduleTable>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -422,7 +426,8 @@
 
 <script>
 import ChildInfo from "@/components/ChildInfo";
-import AppointmentTable from "@/components/AppointmentTable";
+import ScheduleTable from "@/components/ScheduleTable";
+// import AppointmentTable from "@/components/AppointmentTable";
 import Conversation from "@/components/Conversation";
 import Page from "@/components/Page";
 import NextContact from "@/components/NextContact";
@@ -436,7 +441,8 @@ import moment from "moment";
 
 export default {
   components: {
-    AppointmentTable,
+    // AppointmentTable,
+    ScheduleTable,
     ChildInfo,
     Conversation,
     Page,

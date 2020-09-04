@@ -33,25 +33,22 @@ exports.create = asyncHandler(async (req, res) => {
     await model.experimenterAssignment.bulkCreate(experimenterAssignment);
 
     // update calendar event
-    const Schedule = await model.schedule.findOne({
+    var Schedule = await model.schedule.findOne({
       where: { id: appointments[0].FK_Schedule },
       include: [
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id", "Email", "NameMom"] },
+            { model: model.family },
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
             },
             {
               model: model.study,
-              attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab", "EmailTemplate"],
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
             },
           ],
         },
@@ -101,6 +98,14 @@ exports.create = asyncHandler(async (req, res) => {
     } catch (error) {
       throw error;
     }
+
+    // Update Schedule updatedAt
+    Schedule.dataValues.updatedAt = new Date();
+
+    await model.schedule.update({ Note: Schedule.Note + "" },
+      {
+        where: { id: Schedule.id }
+      });
 
     // Log
     const User = req.body.User;
@@ -225,33 +230,23 @@ exports.update = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.bulkCreate(updatedAppointmentInfo);
 
-    // // update calendar event
-    const Schedule = await model.schedule.findOne({
+    // update calendar event
+    var Schedule = await model.schedule.findOne({
       where: { id: req.body.scheduleId },
       include: [
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id", "Email", "NameMom"] },
+            { model: model.family },
             {
-              model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              model: model.child
             },
             {
-              model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "StudyType",
-                "FK_Lab",
-                "EmailTemplate"
-              ],
+              model: model.study
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
             },
           ],
         },
@@ -276,7 +271,7 @@ exports.update = asyncHandler(async (req, res) => {
       appointment.Personnels.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar, // + ".CAL",
+          email: experimenter.Calendar,
         });
       });
     });
@@ -301,6 +296,12 @@ exports.update = asyncHandler(async (req, res) => {
     } catch (err) {
       throw err;
     }
+
+    await model.schedule.update({ Note: Schedule.Note + "" },
+      { where: { id: Schedule.id } })
+
+    Schedule.dataValues.updatedAt = new Date();
+
 
     // Log
     const User = req.body.User;
@@ -338,32 +339,22 @@ exports.update = asyncHandler(async (req, res) => {
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
   try {
-    const Schedule = await model.schedule.findOne({
+    var Schedule = await model.schedule.findOne({
       where: { id: req.query.FK_Schedule },
       include: [
         {
           model: model.appointment,
           include: [
-            { model: model.family, attributes: ["id", "Email", "NameMom"] },
+            { model: model.family },
             {
-              model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              model: model.child
             },
             {
-              model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "StudyType",
-                "FK_Lab",
-                "EmailTemplate"
-              ],
+              model: model.study
             },
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
             },
           ],
         },
@@ -422,6 +413,12 @@ exports.delete = asyncHandler(async (req, res) => {
       where: { id: req.query.id },
     });
 
+    // Update Schedule updatedAt
+    await model.schedule.update({ Note: Schedule.Note + "" },
+      { where: { id: req.query.FK_Schedule } })
+
+    Schedule.dataValues.updatedAt = new Date();
+
     // Log
     var User = JSON.parse(req.query.User);
 
@@ -447,9 +444,7 @@ exports.delete = asyncHandler(async (req, res) => {
       fs.writeFileSync(logFile, logInfo)
     }
 
-    res.status(200).send({
-      AppointmentTime: Schedule.AppointmentTime
-    });
+    res.status(200).send(Schedule);
   } catch (error) {
     res.status(500).send(error);
   }
