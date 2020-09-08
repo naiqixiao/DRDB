@@ -3,12 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Developmental Research Management System's documentation!
+Welcome to DRDB System's documentation!
 ====================================================================
 
 .. toctree::
    :maxdepth: 3
    :titlesonly:
+
+   Database
 
 
 Indices and tables
