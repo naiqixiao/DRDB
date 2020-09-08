@@ -3,18 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Developmental Research Management System's documentation!
+Welcome to DRDB System's documentation!
 ====================================================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+   :maxdepth: 3
 
+   Database
 
+* This is a bulleted list.
+* It has two items, the second
+  item uses two lines.
 
-Indices and tables
-==================
+1. This is a numbered list.
+2. It has two items too.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+#. This is a numbered list.
+#. It has two items too.
+

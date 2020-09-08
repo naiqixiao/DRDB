@@ -8729,6 +8729,8 @@ server/api/models/DRDB.js
 server/api/logs
 client/src/components/AppointmentTable.vue
 
-docs/_build
-docs/_static
-docs/_templates
+docs/_build/
+docs/_static/
+docs/_templates/
+docs/_build/doctrees/environment.pickle
+docs/_build/doctrees/environment.pickle

@@ -8,14 +8,16 @@ Welcome to DRDB System's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :titlesonly:
 
    Database
 
+* This is a bulleted list.
+* It has two items, the second
+  item uses two lines.
 
-Indices and tables
-==================
+1. This is a numbered list.
+2. It has two items too.
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+#. This is a numbered list.
+#. It has two items too.
+
