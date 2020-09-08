@@ -10,11 +10,6 @@ Welcome to Developmental Research Management System's documentation!
    :maxdepth: 3
    :titlesonly:
 
-   Database
-   Backend
-   Frontend
-
-
 
 Indices and tables
 ==================
