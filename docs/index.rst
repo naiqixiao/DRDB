@@ -5,6 +5,9 @@
 
 Welcome to DRDB System's documentation!
 ====================================================================
+DRDB system from PNB, McMaster University
+
+This is an open source system to manage participant database, study, study schedules, and research personnels.
 
 .. toctree::
    :maxdepth: 2
