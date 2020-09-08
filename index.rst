@@ -9,7 +9,3 @@ Welcome to Developmental Research Management System's documentation!
 .. toctree::
    :maxdepth: 2
    :titlesonly:
-
-   Database
-   Backend
-   Frontend
