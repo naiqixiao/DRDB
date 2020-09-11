@@ -227,9 +227,11 @@
       <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
-            <span class="headline">Edit family information</span>
+            <span
+              class="headline"
+            >{{editedIndex === -1 ? "Add a new family" : "Edit family information"}}</span>
             <v-spacer></v-spacer>
-            <span class="headline">{{ "Family ID: " + editedItem.id }}</span>
+            <span class="headline">{{ editedIndex === -1 ? "" : "Family ID: " + editedItem.id }}</span>
           </v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
