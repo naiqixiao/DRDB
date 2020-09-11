@@ -393,10 +393,10 @@
                 <div v-on="on">
                   <v-btn
                     color="primary"
-                    fab
+                    large
                     @click.stop="scheduleChild"
                     :disabled="response == null"
-                  >
+                  >{{response === "Rejected" ? "¯\\\_(ツ)_/¯" : ""}}
                     <v-icon>{{ scheduleButtonIcon }}</v-icon>
                   </v-btn>
                 </div>
@@ -1701,8 +1701,8 @@ export default {
         }
 
         case "Rejected": {
-          this.scheduleButtonIcon = "sentiment_dissatisfied";
-          this.scheduleButtonTooltip = "Mark rejection";
+          this.scheduleButtonIcon = "";
+          this.scheduleButtonTooltip = "Whatever, mark rejection";
           this.scheduleButtonText = "Confirm rejection";
           this.studyTime = "";
           this.emailType = "Introduction";
