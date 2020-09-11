@@ -22,7 +22,7 @@ Prerequisites
 
 -  MySQL 8 Server
     -  Instructions: https://phoenixnap.com/kb/how-to-install-mysql-on-ubuntu-18-04
-    
+
 -  git
 
 .. code-block:: shell
@@ -169,7 +169,6 @@ Instructions:
 https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
 
 You might need to run the following script to enable firewall
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 .. code-block:: shell
 
