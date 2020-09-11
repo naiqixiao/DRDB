@@ -129,13 +129,31 @@ Backend setup and configuration
     sudo npm install
 
 -  open '~/DRDB/server/api/models/DRDB.js'
--  update Line 4 with the MySQL username and password that you created
+-  update *Line 4 with the MySQL username and password* that you created
    in the previous step.
 -  for example, the following line indicates username of 'admin' and
    password of 'password'
 
-Run backend server with pm2
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: javascript
+
+    const sequelize = new Sequelize("DRDB", "admin", "password", {
+    host: "localhost",
+    dialect: "mysql",
+    logging: false,
+    define: {
+        // timestamps: false,
+        freezeTableName: true,
+    },
+    timeZone: "America/Toronto",
+    pool: {
+        max: 10,
+        min: 0,
+        acquire: 30000,
+        idle: 10000,
+    },
+    });
+
+- Run backend server with pm2
 
 .. code-block:: shell
 
@@ -163,7 +181,6 @@ deploy frontend server
     npm run build
 
 Configure nginx
-^^^^^^^^^^^^^^^
 
 Instructions:
 https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
@@ -175,7 +192,6 @@ You might need to run the following script to enable firewall
     sudo ufw enable
 
 Run frontend server with nginx
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 -  Copy the ready-to-be-deployed frontend codes to ngnix folder
 
