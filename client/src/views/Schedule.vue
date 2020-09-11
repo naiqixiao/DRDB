@@ -635,6 +635,7 @@
                   <Email
                     ref="Email"
                     :dialog="emailDialog"
+                    :familyInfo="currentFamily"
                     :appointments="appointments"
                     :emailType="emailType"
                   ></Email>

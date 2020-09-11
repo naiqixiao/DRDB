@@ -94,13 +94,46 @@ export default {
               ) +
               "</b>.</p>";
             break;
+
+          case "Introduction":
+            opening =
+              "<p>Dear " +
+              this.familyInfo.NameMom.split(" ")[0] +
+              ",</p>" +
+              "<p>We are " +
+              this.$store.state.labName +
+              " at McMaster University. " +
+              "We would love to have you and " +
+              this.childNames() +
+              " to participate in our study.</p>" +
+              "<p>Here is the information about the study:<br>";
+            break;
+
+          case "ThankYou":
+            opening =
+              "<p>Dear " +
+              this.familyInfo.NameMom.split(" ")[0] +
+              ",</p>" +
+              "<p>Thank you so much for visiting us with " +
+              this.childNames() +
+              "!</p>" +
+              "<p>We are looking forward to seeing you again!</p>";
+            break;
         }
       }
       // specific content for each schedueld study.
       // const pattern = /\$\{\{([^}]+)\}\}/g;
-
+      var emailBody = "";
       this.appointments.forEach((appointment) => {
-        var emailBody = appointment.Study.EmailTemplate;
+        switch (this.emailType) {
+          case "Confirmation":
+          case "ScheduleUpdate":
+            emailBody = appointment.Study.EmailTemplate;
+            break;
+          case "Introduction":
+            emailBody = appointment.Study.Description;
+            break;
+        }
         // Search for all the variables to be replaced, for instance ${"Column name"}
 
         // var templateVars = appointment.Study.EmailTemplate.match(pattern);
@@ -131,11 +164,9 @@ export default {
 
       // location
       const location =
-        // "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.</p>";
         "<p>" + this.$store.state.transportationInstructions + "</p>";
       // closing
       const closing =
-        // "<p>Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX</p>" +
         "<p>" +
         this.$store.state.emailClosing +
         "</p>" +
@@ -147,8 +178,28 @@ export default {
         this.$store.state.labName +
         "</p>";
 
-      const email =
-        opening + emailBodyList.join("<p></p>") + location + closing;
+      var email = "";
+      switch (this.emailType) {
+        case "Confirmation":
+        case "ScheduleUpdate":
+          email = opening + emailBodyList.join("<p></p>") + location + closing;
+          break;
+
+        default:
+          email =
+            opening +
+            "<p>" +
+            this.$store.state.emailClosing +
+            "</p>" +
+            "<p>Best,</p><p>" +
+            this.$store.state.name +
+            "</p><p>" +
+            this.$store.state.role +
+            "</p><p>" +
+            this.$store.state.labName +
+            "</p>";
+          break;
+      }
 
       // if (this.emailTemplate) {
       //   var email = this.emailTemplate;
@@ -275,7 +326,7 @@ export default {
           break;
 
         case "Introduction":
-          this.emailSubject = "An elgible study for " + this.childNames();
+          this.emailSubject = "An eligible study for " + this.childNames();
           break;
 
         case "Reminder":
