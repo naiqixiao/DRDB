@@ -8732,5 +8732,6 @@ client/src/components/AppointmentTable.vue
 docs/_build
 docs/_static/
 docs/_templates/
+
 client/src/components/AppointmentTable.vue
 client/src/components/EmailDialog.vue
