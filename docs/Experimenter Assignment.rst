@@ -1,2 +1,0 @@
-Experimenter Assignment table
-=================================

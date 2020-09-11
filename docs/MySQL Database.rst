@@ -7,21 +7,13 @@ Database Tables
 .. toctree::
    :maxdepth: 3
 
-   Family
-   Child
-   Sibling
-   Conversations
-   Schedule
-   Appointment
-   Lab
-   Study
-   Personnel
-   Experimenter
-   Experimenter Assignment
-   Feedback
+   Family related tables
+   Lab related tables
+   Study schedule related tables
+   Admin related tables
 
-Table relations
---------------------
+Table relation diagram
+--------------------------
 
 .. image:: /img/DRDB_Diagram.png
     :width: 70em
