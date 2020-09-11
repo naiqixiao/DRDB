@@ -636,6 +636,7 @@
                     ref="Email"
                     :dialog="emailDialog"
                     :familyInfo="currentFamily"
+                    :scheduleInfo="currentSchedule"
                     :appointments="appointments"
                     :emailType="emailType"
                   ></Email>
@@ -790,6 +791,7 @@ export default {
       scheduleNextPage: false,
       emailType: "Confirmation",
       emailSent: false,
+      currentSchedule: {},
       appointments: [],
       Experimenters: [],
       studyTime: "09:00AM",
@@ -1163,8 +1165,6 @@ export default {
         this.$refs.extraStudies[i].selectStudy();
       }
 
-      var newSchedule = {};
-
       switch (this.response) {
         case "Confirmed":
           var studyNames = this.appointments.map((appointment) => {
@@ -1179,7 +1179,7 @@ export default {
 
           studyNames = Array.from(new Set(studyNames));
 
-          newSchedule = {
+          this.currentSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             FK_Family: this.currentFamily.id,
@@ -1203,7 +1203,7 @@ export default {
           break;
 
         default:
-          newSchedule = {
+          this.currentSchedule = {
             AppointmentTime: null,
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
@@ -1214,27 +1214,29 @@ export default {
             this.response === "Left a message" ||
             this.response === "Interested"
           ) {
-            newSchedule.Status = "TBD";
+            this.currentSchedule.Status = "TBD";
           } else {
-            newSchedule.Status = "Rejected";
+            this.currentSchedule.Status = "Rejected";
           }
           break;
       }
 
       try {
-        const newStudySchedule = await schedule.create(newSchedule);
+        const newStudySchedule = await schedule.create(this.currentSchedule);
+
+        var calendarEvent = Object.assign({}, this.currentSchedule);
 
         this.scheduleId = newStudySchedule.data.id;
 
-        var calendarEvent = newSchedule;
+        this.currentSchedule.id = this.scheduleId;
 
-        calendarEvent.scheduleId = newStudySchedule.data.id;
+        calendarEvent.scheduleId = this.scheduleId;
 
         // attach schedule info to the current appointments.
         newStudySchedule.data.updatedAt = moment().toString();
 
         this.appointments.forEach((appointment) => {
-          appointment.FK_Schedule = newStudySchedule.data.id;
+          appointment.FK_Schedule = this.scheduleId;
           appointment.Schedule = {};
           appointment.Schedule.AppointmentTime =
             newStudySchedule.data.AppointmentTime;
@@ -1293,7 +1295,7 @@ export default {
 
       var calendarEvent = {
         summary: studyNames.join(" + "),
-        location: "McMaster University",
+        location: this.$store.state.location,
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
           timeZone: "America/Toronto",
