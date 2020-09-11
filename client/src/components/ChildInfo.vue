@@ -860,6 +860,7 @@ export default {
             const newChild = await child.create(this.editedItem);
 
             this.editedItem.id = newChild.data.id;
+            this.editedItem.IdWithinFamily = newChild.data.IdWithinFamily;
 
             this.Children.push(this.editedItem);
 

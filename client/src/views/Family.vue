@@ -401,10 +401,7 @@
           @alert="alert = true"
           @nextContactDone="updateNextContactFrontend"
         ></AppointmentTable>-->
-        <ScheduleTable
-          :Schedules="currentFamily.Schedules"
-          :studyTimeSlots="this.$studyTimeSlots"
-        ></ScheduleTable>
+        <ScheduleTable :Schedules="currentFamily.Schedules" :studyTimeSlots="this.$studyTimeSlots"></ScheduleTable>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -510,7 +507,7 @@ export default {
         NextContactDate: null,
       },
       Families: [],
-      editableFields: [],
+      // editableFields: [],
       options: {
         language: ["English", "French", "Chinese", "Spanish", "Hindi"],
         race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
@@ -619,17 +616,17 @@ export default {
     addFamily() {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.familyTemplate);
-      this.editableFields = Object.assign({}, this.$familyFields);
-      this.editableFields.shift();
-      this.editableFields.pop();
-      this.editableFields.pop();
+      // this.editableFields = Object.assign({}, this.$familyFields);
+      // this.editableFields.shift();
+      // this.editableFields.pop();
+      // this.editableFields.pop();
       this.dialog = true;
     },
 
     editFamily() {
       this.editedIndex = this.Families.indexOf(this.currentFamily);
       this.editedItem = Object.assign({}, this.currentFamily);
-      this.editableFields = Object.assign({}, this.$familyFields);
+      // this.editableFields = Object.assign({}, this.$familyFields);
       this.dialog = true;
     },
 
@@ -657,6 +654,8 @@ export default {
             this.editedItem.id = newfamilyId.data.id;
 
             this.currentFamily = this.editedItem;
+
+            this.currentFamily.Children = [];
 
             this.Families.push(this.editedItem);
             this.page = this.Families.length;

@@ -52,6 +52,7 @@ const Conversations = sequelize.import(
   "../models/SequelizeAuto/Conversations.js"
 );
 
+
 Family.hasMany(Child, {
   foreignKey: "FK_Family",
 });
@@ -109,21 +110,25 @@ Family.belongsTo(Lab, {
 });
 
 Personnel.hasMany(Study, {
-  foreignKey: "PointofContact",
+  foreignKey: "FK_Personnel",
+  as: 'StudyinCharge'
 });
 Study.belongsTo(Personnel, {
-  foreignKey: "PointofContact",
+  foreignKey: "FK_Personnel",
+  as: "PointofContact",
 });
 
 Personnel.belongsToMany(Study, {
   through: "Experimenter",
   foreignKey: "FK_Experimenter",
   otherKey: "FK_Study",
+  as: "AssignedStudies",
 });
 Study.belongsToMany(Personnel, {
   through: "Experimenter",
   foreignKey: "FK_Study",
   otherKey: "FK_Experimenter",
+  as: "Experimenters"
 });
 
 Family.belongsTo(Personnel, {

@@ -61,6 +61,8 @@ exports.create = asyncHandler(async (req, res) => {
       }
     );
 
+    child.IdWithinFamily = IdWithinFamily;
+
     // Log
     const User = req.body.User;
 
