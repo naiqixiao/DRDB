@@ -8735,3 +8735,9 @@ docs/_templates/
 
 client/src/components/AppointmentTable.vue
 client/src/components/EmailDialog.vue
+docs/_build/html/genindex.html
+docs/_build/html/index.html
+docs/_build/html/.buildinfo
+docs/_build/html/genindex.html
+docs/_build/html/search.html
+docs/_build/html/index.html

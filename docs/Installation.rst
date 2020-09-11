@@ -21,8 +21,8 @@ Prerequisites
     sudo apt install npm
 
 -  MySQL 8 Server
--  Instructions:
-   https://phoenixnap.com/kb/how-to-install-mysql-on-ubuntu-18-04
+    -  Instructions: https://phoenixnap.com/kb/how-to-install-mysql-on-ubuntu-18-04
+    
 -  git
 
 .. code-block:: shell
