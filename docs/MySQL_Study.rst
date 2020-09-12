@@ -1,6 +1,5 @@
 Study schedule related tables
 =================================
 
-
-Schedule
-Appointment
+- Schedule
+- Appointment

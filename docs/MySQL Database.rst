@@ -7,10 +7,10 @@ Database Tables
 .. toctree::
    :maxdepth: 3
 
-   Family related tables
-   Lab related tables
-   Study schedule related tables
-   Admin related tables
+   MySQL_Family
+   MySQL_Lab
+   MySQL_Study
+   MySQL_Admin
 
 Table relation diagram
 --------------------------
