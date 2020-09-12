@@ -9,7 +9,7 @@ Database Tables
 
    MySQL_Family
    MySQL_Lab
-   MySQL_Study
+   MySQL_Schedule
    MySQL_Admin
 
 Table relation diagram

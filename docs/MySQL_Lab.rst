@@ -99,16 +99,3 @@ Table colums
     Type: int
 **FK_Study**: *id of the study that this member is assigned to*
     Type: int
-
-
-
-Experimenter Assignment table
--------------------
-**Experimenter Assignment** table stores the study assignment that a lab member is assigned as an experimenter.
-
-Table colums
-^^^^^^^^^^^^^^^^^^^^^^^^^
-**FK_Experimenter**: *id of a lab member*
-    Type: int
-**FK_Appointment**: *id of the study appointment that this member is assigned to*
-    Type: int
