@@ -76,7 +76,7 @@ Conversation API
    - request example:
    - response example: 
 
-- Delete a child
+- Delete a conversation
    - method: **DELETE /api/conversation**
    - description: delete a conversation record from the database
    - request example:
