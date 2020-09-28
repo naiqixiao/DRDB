@@ -16,7 +16,7 @@
     "vue": "^2.6.12",
     "vue-async-computed": "^3.9.0",
     "vue-chartjs": "^3.5.1",
-    "vue-router": "^3.4.4",
+    "vue-router": "^3.4.5",
     "vue2-editor": "^2.10.2",
     "vuetify": "^2.3.10",
     "vuex": "^3.5.1",
