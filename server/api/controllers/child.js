@@ -92,6 +92,52 @@ exports.create = asyncHandler(async (req, res) => {
   }
 });
 
+// batch upload families
+exports.batchCreate = asyncHandler(async (req, res) => {
+
+  try {
+    var newChildrenInfo = req.body;
+
+    const alphabet = "abcdefghijk".split("");
+
+    const newChildren = await model.child.bulkCreate(newChildrenInfo);
+
+    // // update sibbling table & assign child id within each family
+    // for (var i = 0; i < newChildren.length; i++) {
+    //   if (newChildren.length > 1) {
+    //     var Children = await model.child.findAll({
+    //       attributes: ["id"],
+    //       where: { FK_Family: newChildren[i].FK_Family },
+    //     });
+
+    //     var siblings = [];
+
+    //     for (var j = 0; j < Children.length; j++) {
+    //       var childId = Children[j].id;
+
+    //       Children.forEach((sibling) => {
+    //         if (sibling.id != childId) {
+    //           siblings.push({ FK_Child: childId, Sibling: sibling.id });
+    //         }
+    //       });
+
+    //       // assign child id within each family
+    //       Children[j].IdWithinFamily = alphabet[Children.length];
+    //       await model.child.update(Children[j], {
+    //         where: { id: Children[j].id },
+    //       });
+    //     }
+
+    //     await model.sibling.bulkCreate(siblings);
+    //   }
+    // }
+
+    res.status(200).send(newChildren);
+  } catch (error) {
+    throw error;
+  }
+});
+
 // Retrieve all children from the database.
 exports.search = asyncHandler(async (req, res) => {
   var queryString = {};
@@ -266,9 +312,11 @@ exports.delete = asyncHandler(async (req, res) => {
 // Update a sibling table
 exports.siblings = asyncHandler(async (req, res) => {
   const siblings = await model.sequelize.query(
-    "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from DRDB.Child c inner join DRDB.Child s on c.FK_Family  = s.FK_Family where c.Name <> s.Name ",
+    "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from DRDB.Child c inner join DRDB.Child s on c.FK_Family  = s.FK_Family where c.IdWithinFamily <> s.IdWithinFamily ",
     { type: QueryTypes.SELECT }
   );
+
+  console.log(siblings)
 
   const results = await model.sibling.bulkCreate(siblings);
 

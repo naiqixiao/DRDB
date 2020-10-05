@@ -6,6 +6,8 @@ const ChildController = require("../controllers/child");
 
 router.post("/add", checkAuth, ChildController.create);
 
+router.post("/addBatch", checkAuth, ChildController.batchCreate);
+
 router.get("/", checkAuth, ChildController.search);
 
 router.get("/siblings/", checkAuth, ChildController.siblings);
