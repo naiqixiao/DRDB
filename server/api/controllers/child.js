@@ -316,8 +316,6 @@ exports.siblings = asyncHandler(async (req, res) => {
     { type: QueryTypes.SELECT }
   );
 
-  console.log(siblings)
-
   const results = await model.sibling.bulkCreate(siblings);
 
   res.status(200).json(results);
