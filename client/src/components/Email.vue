@@ -72,7 +72,7 @@ export default {
           case "Confirmation":
             opening =
               "<p>Dear " +
-              this.familyInfo.NameMom.split(" ")[0] +
+              this.familyInfo.NamePrimary.split(" ")[0] +
               ",</p>" +
               "<p>Thanks for your support to our research! This is a confirmation for your visit with <b>" +
               this.childNames() +
@@ -85,7 +85,7 @@ export default {
           case "ScheduleUpdate":
             opening =
               "<p>Dear " +
-              this.familyInfo.NameMom.split(" ")[0] +
+              this.familyInfo.NamePrimary.split(" ")[0] +
               ",</p>" +
               "<p>This is an update on your visit with <b>" +
               this.childNames() +
@@ -98,7 +98,7 @@ export default {
           case "Introduction":
             opening =
               "<p>Dear " +
-              this.familyInfo.NameMom.split(" ")[0] +
+              this.familyInfo.NamePrimary.split(" ")[0] +
               ",</p>" +
               "<p>We are " +
               this.$store.state.labName +
@@ -112,7 +112,7 @@ export default {
           case "ThankYou":
             opening =
               "<p>Dear " +
-              this.familyInfo.NameMom.split(" ")[0] +
+              this.familyInfo.NamePrimary.split(" ")[0] +
               ",</p>" +
               "<p>Thank you so much for visiting us with " +
               this.childNames() +
@@ -229,8 +229,8 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: this.familyInfo.NameMom + "<" + familyInfo.Email + ">",
-        to: this.familyInfo.NameMom + "<" + this.$store.state.labEmail + ">",
+        //to: this.familyInfo.NamePrimary + "<" + familyInfo.Email + ">",
+        to: this.familyInfo.NamePrimary + "<" + this.$store.state.labEmail + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
       };

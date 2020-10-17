@@ -308,12 +308,12 @@ export default {
       editedIndex: -1,
       editedSchedule: {
         FK_Family: 1,
-        Family: { NameMom: "" },
+        Family: { NamePrimary: "" },
         Appointments: [
           {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
-            Family: { NameMom: "" },
+            Family: { NamePrimary: "" },
             Child: { Name: "" },
           },
         ],
@@ -332,12 +332,12 @@ export default {
       nextContactDialogStepper: false,
       defaultSchedule: {
         FK_Family: 1,
-        Family: { NameMom: "" },
+        Family: { NamePrimary: "" },
         Appointments: [
           {
             FK_Family: 1,
             Study: { EmailTemplate: "" },
-            Family: { NameMom: "" },
+            Family: { NamePrimary: "" },
             Child: { Name: "" },
           },
         ],
@@ -355,7 +355,7 @@ export default {
           this.datePickerRange();
           this.editedSchedule.Appointments[0].Child.Family = {};
           this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
-          this.editedSchedule.Appointments[0].Child.Family.NameMom = this.editedSchedule.Family.NameMom;
+          this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
           this.dialog = true;
           break;

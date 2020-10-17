@@ -144,14 +144,14 @@ exports.search = asyncHandler(async (req, res) => {
       [Op.like]: `${req.query.Email}%`,
     };
   }
-  if (req.query.NameMom) {
-    queryString["$Family.NameMom$"] = {
-      [Op.like]: `${req.query.NameMom}%`,
+  if (req.query.NamePrimary) {
+    queryString["$Family.NamePrimary$"] = {
+      [Op.like]: `${req.query.NamePrimary}%`,
     };
   }
-  if (req.query.NameDad) {
-    queryString["$Family.NameDad$"] = {
-      [Op.like]: `${req.query.NameDad}%`,
+  if (req.query.NameSecondary) {
+    queryString["$Family.NameSecondary$"] = {
+      [Op.like]: `${req.query.NameSecondary}%`,
     };
   }
   if (req.query.Phone) {

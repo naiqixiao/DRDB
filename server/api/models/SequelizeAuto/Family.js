@@ -10,11 +10,11 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         primaryKey: true
       },
-      NameMom: {
+      NamePrimary: {
         type: DataTypes.STRING(30),
         allowNull: true
       },
-      NameDad: {
+      NameSecondary: {
         type: DataTypes.STRING(30),
         allowNull: true
       },
@@ -28,19 +28,19 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         unique: true
       },
-      RaceMom: {
+      RacePrimary: {
         type: DataTypes.STRING(10),
         allowNull: true
       },
-      RaceDad: {
+      RaceSecondary: {
         type: DataTypes.STRING(10),
         allowNull: true
       },
-      LanguageMom: {
+      LanguagePrimary: {
         type: DataTypes.STRING(10),
         allowNull: true
       },
-      LanguageDad: {
+      LanguageSecondary: {
         type: DataTypes.STRING(10),
         allowNull: true
       },

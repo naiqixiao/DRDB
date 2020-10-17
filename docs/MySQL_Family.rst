@@ -16,13 +16,13 @@ Table colums
     Type: varchar(40)
 **Phone**: *phone number*
     Type: varchar(10)
-**RaceMom**: *mother's (or primary caregiver's) race*
+**RacePrimary**: *mother's (or primary caregiver's) race*
     Type: varchar(20)
-**RaceDad**: *father's (or secondary caregiver's) race*
+**RaceSecondary**: *father's (or secondary caregiver's) race*
     Type: varchar(20)
-**LanguageMom**: *mother's (or primary caregiver's) mostly used language*
+**LanguagePrimary**: *mother's (or primary caregiver's) mostly used language*
     Type: varchar(20)
-**LanguageDad**: *father's (or secondary caregiver's) mostly used language*
+**LanguageSecondary**: *father's (or secondary caregiver's) mostly used language*
     Type: varchar(20)
 **EnglishPercent**: *percentage of english spoken at home*
     Type: int

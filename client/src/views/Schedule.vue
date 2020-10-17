@@ -132,7 +132,7 @@
           :dialog="dialogEmail"
           :emailTemplate="selectedStudy.EmailTemplate"
           :data="{
-            NameMom: currentFamily.NameMom,
+            NamePrimary: currentFamily.NamePrimary,
             ChildName: currentChild.Name,
             Email: 'nx@kangleelab.com',
           }"
@@ -800,8 +800,8 @@ export default {
         Sex: null,
         DoB: null,
         Family: {
-          NameMom: null,
-          NameDad: null,
+          NamePrimary: null,
+          NameSecondary: null,
           Phone: null,
           Email: null,
         },
@@ -811,8 +811,8 @@ export default {
         Sex: null,
         DoB: null,
         Family: {
-          NameMom: null,
-          NameDad: null,
+          NamePrimary: null,
+          NameSecondary: null,
           Phone: null,
           Email: null,
         },
@@ -823,8 +823,8 @@ export default {
         Sex: null,
         DoB: null,
         Family: {
-          NameMom: null,
-          NameDad: null,
+          NamePrimary: null,
+          NameSecondary: null,
           Phone: null,
           Email: null,
         },
@@ -838,8 +838,8 @@ export default {
       familyField: [
         // { label: "Phone", field: "Phone", rules: "phone" },
         { label: "Email", field: "Email", rules: "email" },
-        { label: "Mother's Name", field: "NameMom", rules: "name" },
-        { label: "Father's Name", field: "NameDad", rules: "name" },
+        { label: "Parimary Caregiver", field: "NamePrimary", rules: "name" },
+        { label: "Secondary Caregiver", field: "NameSecondary", rules: "name" },
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -1591,8 +1591,8 @@ export default {
         return this.currentChild.Family;
       } else {
         return {
-          NameMom: null,
-          NameDad: null,
+          NamePrimary: null,
+          NameSecondary: null,
           Phone: null,
           Email: null,
         };

@@ -29,7 +29,7 @@ function shuffle(array) {
 // Create and Save a new family
 
 //   {
-//     "NameMom": "Mom's name",
+//     "NamePrimary": "Mom's name",
 //     "Email": "email@gmail.com",
 //     "Phone": "3927510316",
 //     "Children": [
@@ -152,11 +152,11 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.Email) {
     queryString.Email = { [Op.like]: `${req.query.Email}%` };
   }
-  if (req.query.NameMom) {
-    queryString.NameMom = { [Op.like]: `${req.query.NameMom}%` };
+  if (req.query.NamePrimary) {
+    queryString.NamePrimary = { [Op.like]: `${req.query.NamePrimary}%` };
   }
-  if (req.query.NameDad) {
-    queryString.NameDad = { [Op.like]: `${req.query.NameDad}%` };
+  if (req.query.NameSecondary) {
+    queryString.NameSecondary = { [Op.like]: `${req.query.NameSecondary}%` };
   }
   if (req.query.Phone) {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
@@ -327,11 +327,11 @@ exports.searchSpecial = asyncHandler(async (req, res) => {
   if (req.query.Email) {
     queryString.Email = { [Op.like]: `${req.query.Email}%` };
   }
-  if (req.query.NameMom) {
-    queryString.NameMom = { [Op.like]: `${req.query.NameMom}%` };
+  if (req.query.NamePrimary) {
+    queryString.NamePrimary = { [Op.like]: `${req.query.NamePrimary}%` };
   }
-  if (req.query.NameDad) {
-    queryString.NameDad = { [Op.like]: `${req.query.NameDad}%` };
+  if (req.query.NameSecondary) {
+    queryString.NameSecondary = { [Op.like]: `${req.query.NameSecondary}%` };
   }
   if (req.query.Phone) {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };

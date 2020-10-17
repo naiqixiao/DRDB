@@ -901,7 +901,7 @@ export default {
         newAppointment.index = this.appointments.length;
         newAppointment.Child.Family = {};
         newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
-        newAppointment.Child.Family.NameMom = this.currentFamily.NameMom; // family email information used for sending email
+        newAppointment.Child.Family.NamePrimary = this.currentFamily.NamePrimary; // family email information used for sending email
 
         this.appointments.push(newAppointment);
 

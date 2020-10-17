@@ -597,7 +597,7 @@ export default {
         moment(this.Schedule.AppointmentTime).format("MMM D (ddd), [at] h:mma");
       const opening =
         "<p>Dear " +
-        this.Schedule.Family.NameMom.split(" ")[0] +
+        this.Schedule.Family.NamePrimary.split(" ")[0] +
         ",</p>" +
         "<p>This is an update on your visit with " +
         this.childNames() +
@@ -655,8 +655,8 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: this.appointments[0].Child.Family.NameMom + "<" + appointments[0].Child.Family.Email + ">",
-        to: this.Schedule.NameMom + "<" + this.$store.state.labEmail + ">",
+        //to: this.appointments[0].Child.Family.NamePrimary + "<" + appointments[0].Child.Family.Email + ">",
+        to: this.Schedule.NamePrimary + "<" + this.$store.state.labEmail + ">",
         subject: emailSubject,
         body: emailBody,
       };

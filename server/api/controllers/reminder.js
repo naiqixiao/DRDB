@@ -35,7 +35,7 @@ function emailBody(schedule) {
     // );
     const opening =
         "<p>Dear " +
-        schedule.Appointments[0].Family.NameMom.split(" ")[0] +
+        schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
         ",</p>" +
         "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
         childNames(schedule.Appointments) +
@@ -96,12 +96,12 @@ function emailBody(schedule) {
         from:
             schedule.Appointments[0].Study.Lab.LabName + "<" + schedule.Appointments[0].Study.Lab.Email + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: schedule.Appointments[0].Family.NameMom +
+        //to: schedule.Appointments[0].Family.NamePrimary +
         // "<" +
         // schedule.Appointments[0].Family.Email +
         // ">",
         to:
-            schedule.Appointments[0].Family.NameMom +
+            schedule.Appointments[0].Family.NamePrimary +
             "<" +
             schedule.Appointments[0].Study.Lab.Email +
             ">",
