@@ -8,9 +8,9 @@ Family table
 Table colums
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**NameMom**: *mother's (or primary caregiver's) name*
+**NamePrimary**: *mother's (or primary caregiver's) name*
     Type: varchar(30)
-**NameDad**: *father's (or secondary caregiver's) name*
+**NameSecondary**: *father's (or secondary caregiver's) name*
     Type: varchar(30)
 **Email**: *email address*
     Type: varchar(40)

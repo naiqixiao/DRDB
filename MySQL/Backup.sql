@@ -197,8 +197,8 @@ DROP TABLE IF EXISTS `Family`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Family` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `NameMom` varchar(30) DEFAULT NULL,
-  `NameDad` varchar(30) DEFAULT NULL,
+  `NamePrimary` varchar(30) DEFAULT NULL,
+  `NameSecondary` varchar(30) DEFAULT NULL,
   `Email` varchar(40) NOT NULL,
   `Phone` varchar(10) NOT NULL,
   `RacePrimary` varchar(20) DEFAULT NULL,
