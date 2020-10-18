@@ -2,6 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
+const bcrypt = require("bcrypt");
 
 // Create and Save a new personnel
 exports.create = asyncHandler(async (req, res) => {
@@ -45,6 +46,8 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.study) {
     queryString["$AssignedStudies.id$"] = req.query.study;
   }
+
+  queryString.Retired = false;
 
   // console.log(queryString)
   const personnel = await model.personnel.findAll({
@@ -115,11 +118,30 @@ exports.update = asyncHandler(async (req, res) => {
   console.log("Personnel Information Updated!");
 });
 
-// Delete a Tutorial with the specified id in the request
+// Delete a personnel with the specified id in the request
+// The personnel will not be destroied, but labelled with "retried" in the database.
 exports.delete = asyncHandler(async (req, res) => {
-  const personnel = await model.personnel.destroy({
-    where: { id: req.query.id }
-  });
+
+  // reset password
+  const password = Math.random()
+    .toString(36)
+    .substring(2);
+
+  const hashPassword = bcrypt.hashSync(password, 10);
+
+  const personnel = await model.personnel.update({
+    Password: hashPassword,
+    Retired: true,
+    Active: false
+  },
+    {
+      where: { id: req.query.id }
+    });
+
+  // removed the personnel from assigned study 
+  await model.experimenter.destroy({
+    where: { FK_Experimenter: req.query.id }
+  })
 
   // Log
   var User = JSON.parse(req.query.User);

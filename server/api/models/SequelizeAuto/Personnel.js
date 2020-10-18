@@ -61,6 +61,11 @@ module.exports = function (sequelize, DataTypes) {
         allowNull: false,
         defaultValue: "1",
       },
+      Retired: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: "0",
+      },
       temporaryPassword: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -83,6 +88,11 @@ module.exports = function (sequelize, DataTypes) {
       Calendar: {
         type: DataTypes.STRING(100),
         allowNull: false,
+        unique: true,
+      },
+      ZoomLink: {
+        type: DataTypes.STRING(300),
+        allowNull: true,
         unique: true,
       },
       createdAt: {

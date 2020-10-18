@@ -129,11 +129,39 @@ exports.signup = asyncHandler(async (req, res) => {
     newUser.Password = hashPassword;
     newUser.temporaryPassword = true;
 
-    const newPersonnel = await model.personnel.create(newUser);
+    // check whether the user is in the system (previously being retired).
+    const personnel = await model.personnel.findOne({
+      where: {
+        Email: req.body.Email,
+      }
+    });
 
-    res.status(200).send(newPersonnel);
+    if (personnel && personnel.Retired === false) {
+      res.status(400).send({
+        message: "The entered information (Initial, Email, or CalendarID) already exists in the system.\nPlease double check or enter new information.",
+      });
 
-    try {
+    } else {
+
+      if (!personnel) {
+
+        const newPersonnel = await model.personnel.create(newUser);
+
+        res.status(200).send(newPersonnel);
+
+      } else {
+
+        newUser.Retired = false
+        await model.personnel.update(newUser, {
+          where: {
+            Email: req.body.Email,
+          }
+        });
+
+        res.status(200).send(newUser);
+
+      }
+
       var emailContent = {
         to: newUser.Name + "<" + newUser.Email + ">",
         subject:
@@ -147,7 +175,7 @@ exports.signup = asyncHandler(async (req, res) => {
           newUser.Role +
           "</b>, and your temporary password is <b><em>" +
           password +
-          "</em></b>. Please login with your email and temporary password at <a href=" + config.URL +  ">" + config.URL +  "</a> to set your password (you need to turn on McMaster VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+          "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password (you need to turn on McMaster VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
           "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
           "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
           "<p> </p>" +
@@ -167,15 +195,9 @@ exports.signup = asyncHandler(async (req, res) => {
       } else {
         fs.writeFileSync(logFile, logInfo)
       }
-
-    } catch (error) {
-      throw error;
     }
   } catch (error) {
-    res.status(400).send({
-      message: "The entered information (Initial, Email, or CalendarID) already exists in the system.\n Please double check or enter new information.",
-      error: error,
-    });
+    throw error;
   }
 });
 
@@ -189,6 +211,7 @@ exports.login = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
+      Retired: false
     },
     include: [
       {
@@ -201,7 +224,7 @@ exports.login = asyncHandler(async (req, res) => {
   if (!personnel) {
     // log the login information.
     const logFile = logFolder + "/log.txt";
-    var logInfo = "[Login ERROR] " + Email + " does not exist at " + new Date().toString() + " - " + IP + "\r\n"
+    var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + " - " + IP + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -287,6 +310,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
+      Retired: false
     },
     include: [
       {
@@ -298,7 +322,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 
   if (!personnel) {
     return res.status(401).send({
-      error: "The login information was incorrect",
+      error: "The login information was either incorrect or removed from the system.",
     });
   }
 
@@ -397,12 +421,13 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     const personnel = await model.personnel.findOne({
       where: {
         Email: Email,
+        Retired: false
       },
     });
 
     if (!personnel) {
       return res.status(401).send({
-        error: "The login information was incorrect",
+        error: "The login information was either incorrect or removed from the system.",
       });
     }
 
