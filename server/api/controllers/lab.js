@@ -156,8 +156,7 @@ exports.create = asyncHandler(async (req, res) => {
         newLabInfo.Personnels[0].Role +
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
-        "</em></b>. Please login with your email and temporary password at <a href='http://drdb.mcmaster.ca'>http://drdb.mcmaster.ca</a> to set your password (you need to turn on McMaster VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-        // "</em></b>. Please login with your email and temporary password at <a href='http://aphd-app-01.oise.utoronto.ca/'>http://aphd-app-01.oise.utoronto.ca/</a> to set your password.<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+        "</em></b>. Please login with your email and temporary password at <a href=" + config.URL +  ">" + config.URL +  "</a> to set your password (you need to turn on University VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
 
         "<p><a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +

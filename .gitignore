@@ -8742,3 +8742,4 @@ docs/_build/html/genindex.html
 docs/_build/html/search.html
 docs/_build/html/index.html
 server/ecosystem.config.js
+server/config/general.js
