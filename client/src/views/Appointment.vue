@@ -118,6 +118,7 @@
           :Schedules="Schedules"
           :studyTimeSlots="this.$studyTimeSlots"
           @rowSelected="updateFamily"
+          tableHeight = "720px"
         ></ScheduleTable>
       </v-col>
     </v-row>

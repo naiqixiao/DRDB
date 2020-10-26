@@ -1,5 +1,11 @@
 <template>
-  <v-app style="{background: $vuetify.theme.themes.light.secondary}">
+  <v-app
+    style="
+       {
+        background: $vuetify.theme.themes.light.secondary;
+      }
+    "
+  >
     <Header />
   </v-app>
 </template>
@@ -12,10 +18,10 @@ export default {
   name: "App",
 
   components: {
-    Header
+    Header,
   },
   watch: {
-    group() {}
+    group() {},
   },
 
   data() {
@@ -36,12 +42,12 @@ export default {
 
         if (this.$route.name != "Login") {
           this.$router.push({
-            name: "Login"
+            name: "Login",
           });
         }
       }
     }
-  }
+  },
 };
 </script>
 
@@ -145,8 +151,12 @@ export default {
 }
 
 .theme--light.v-text-field {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
+}
+
+.textfield-family {
+  height: 36px;
 }
 
 .theme--light.v-text-field.v-text-field--solo:not(.v-text-field--solo-flat)
@@ -163,7 +173,7 @@ export default {
 // }
 
 .theme--light.v-data-table th {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   height: 50px;
 }
@@ -182,12 +192,11 @@ export default {
   padding-right: 8px !important;
 }
 
-
 .theme--light.v-data-table.v-data-table--fixed-header thead th {
   border-bottom-width: 2px;
   color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
 }
 
 .theme--light.v-data-table tbody tr:nth-of-type(odd) {
@@ -224,8 +233,12 @@ export default {
   background-color: var(--v-textbackground-lighten4) !important;
 }
 
+.v-textarea textarea {
+      line-height: 20px !important;
+ }
+
 .conv-textarea {
-  border-radius: 10px !important;
+  border-radius: 5px !important;
   // border-style: solid !important;
   // border-width: thin !important;
   border-color: var(--v-primary-base) !important;

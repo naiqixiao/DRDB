@@ -25,7 +25,12 @@ module.exports = function (sequelize, DataTypes) {
       },
       Phone: {
         type: DataTypes.STRING(10),
-        allowNull: false,
+        allowNull: true,
+        unique: true
+      },
+      CellPhone: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
         unique: true
       },
       RacePrimary: {

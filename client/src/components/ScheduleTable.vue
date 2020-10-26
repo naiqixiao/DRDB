@@ -3,7 +3,7 @@
     hide-default-footer
     disable-pagination
     fixed-header
-    height="720px"
+    :height="tableHeight"
     single-select
     no-data-text="No study schedule to display."
     :headers="this.$headersSchedule"
@@ -299,6 +299,7 @@ export default {
   props: {
     Schedules: Array,
     studyTimeSlots: Array,
+    tableHeight: String
   },
   data() {
     return {

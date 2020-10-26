@@ -7,7 +7,9 @@
         color="#c73460"
         dense
         style="font-weight: 600"
-      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Lab email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
+      >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
       <v-alert
@@ -16,17 +18,19 @@
         color="#c7792c"
         dense
         style="font-weight: 600"
-      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Admin email is not been setup properly. Please set it up in the
+        Settings page.</v-alert
+      >
     </div>
     <v-row justify="space-around">
       <v-col cols="12" md="5">
         <v-row align="center" dense>
-          <v-col cols="12" md="3" style="text-align: start;">
+          <v-col cols="12" md="3" style="text-align: start">
             <v-btn large @click.stop="searchMode" :disabled="searchStatus">
               <v-icon left>mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
-          <v-col cols="12" md="3" style="text-align: start;">
+          <v-col cols="12" md="3" style="text-align: start">
             <v-btn large @click="followupSearch">
               <v-icon left>mdi-phone</v-icon>Follow-ups
             </v-btn>
@@ -51,17 +55,21 @@
           <v-col
             cols="12"
             :md="item.width"
-            v-for="item in this.$familyFields.slice(0, 3)"
+            v-for="item in this.$familyFields.slice(0, 4)"
             :key="item.label"
           >
             <div v-if="item.searchable">
               <v-text-field
-                height="48px"
+                class="textfield-family"
                 background-color="textbackground"
                 hide-details
                 @keydown.enter="searchFamily(item.field, $event.target.value)"
                 :label="item.label"
-                :value="item.label === 'Phone' ? PhoneFormated(currentFamily[item.field]) : currentFamily[item.field]"
+                :value="
+                  item.label === 'Phone'
+                    ? PhoneFormated(currentFamily[item.field])
+                    : currentFamily[item.field]
+                "
                 :append-icon="searchStatus ? 'mdi-magnify' : undefined"
                 :readonly="!searchStatus"
                 placeholder="  "
@@ -79,12 +87,12 @@
           <v-col
             cols="12"
             :md="item.width"
-            v-for="item in this.$familyFields.slice(3, 9)"
+            v-for="item in this.$familyFields.slice(4, 13)"
             :key="item.label"
           >
             <div v-if="item.searchable">
               <v-text-field
-                height="48px"
+                class="textfield-family"
                 background-color="textbackground"
                 hide-details
                 @keydown.enter="searchFamily"
@@ -99,7 +107,7 @@
             </div>
             <div v-else>
               <v-text-field
-                height="48px"
+                class="textfield-family"
                 filled
                 hide-details
                 :label="item.label"
@@ -121,12 +129,12 @@
           <v-col
             cols="12"
             :md="item.width"
-            v-for="item in this.$familyFields.slice(9, 12)"
+            v-for="item in this.$familyFields.slice(13, 16)"
             :key="item.label"
           >
             <div>
               <v-text-field
-                height="48px"
+                class="textfield-family"
                 filled
                 hide-details
                 :label="item.label"
@@ -162,10 +170,10 @@
                     <v-btn
                       fab
                       @click.stop="
-                  contactType = 'NextContact';
-                  nextContactDate = TodaysDate;
-                  nextContactDialog = !nextContactDialog;
-                "
+                        contactType = 'NextContact';
+                        nextContactDate = TodaysDate;
+                        nextContactDialog = !nextContactDialog;
+                      "
                       :disabled="!currentFamily.id && !nextContactDialog"
                     >
                       <v-icon>notes</v-icon>
@@ -180,7 +188,11 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
-                    <v-btn fab @click.stop="editFamily" :disabled="!currentFamily.id">
+                    <v-btn
+                      fab
+                      @click.stop="editFamily"
+                      :disabled="!currentFamily.id"
+                    >
                       <v-icon>edit</v-icon>
                     </v-btn>
                   </div>
@@ -196,10 +208,10 @@
                     <v-btn
                       fab
                       @click.stop="
-                  contactType = 'NoMoreContact';
-                  nextContactDate = TodaysDate;
-                  nextContactDialog = !nextContactDialog;
-                "
+                        contactType = 'NoMoreContact';
+                        nextContactDate = TodaysDate;
+                        nextContactDialog = !nextContactDialog;
+                      "
                       :disabled="!currentFamily.id && !nextContactDialog"
                     >
                       <v-icon color="warning">cancel</v-icon>
@@ -213,7 +225,13 @@
             <v-col cols="12" md="2" class="text-right">
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                  <v-btn color="primary" fab @click.stop="addFamily" v-bind="attrs" v-on="on">
+                  <v-btn
+                    color="primary"
+                    fab
+                    @click.stop="addFamily"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
                     <v-icon>add</v-icon>
                   </v-btn>
                 </template>
@@ -227,11 +245,15 @@
       <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
-            <span
-              class="headline"
-            >{{editedIndex === -1 ? "Add a new family" : "Edit family information"}}</span>
+            <span class="headline">{{
+              editedIndex === -1
+                ? "Add a new family"
+                : "Edit family information"
+            }}</span>
             <v-spacer></v-spacer>
-            <span class="headline">{{ editedIndex === -1 ? "" : "Family ID: " + editedItem.id }}</span>
+            <span class="headline">{{
+              editedIndex === -1 ? "" : "Family ID: " + editedItem.id
+            }}</span>
           </v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
@@ -324,7 +346,13 @@
                 <h4 class="text-left">Notes:</h4>
               </v-col>
               <v-col md="8" class="subtitle">
-                <v-textarea label outlined no-resize rows="3" v-model="editedItem.Note"></v-textarea>
+                <v-textarea
+                  label
+                  outlined
+                  no-resize
+                  rows="3"
+                  v-model="editedItem.Note"
+                ></v-textarea>
               </v-col>
             </v-row>
           </v-form>
@@ -343,7 +371,11 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="nextContactDialog" max-width="800px" :retain-focus="false">
+      <v-dialog
+        v-model="nextContactDialog"
+        max-width="800px"
+        :retain-focus="false"
+      >
         <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
@@ -361,7 +393,9 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
+                <v-btn color="primary" @click="nextContactDialog = false"
+                  >Cancel</v-btn
+                >
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -376,7 +410,13 @@
         <v-col cols="12" md="12" class="justify-start">
           <h1 class="text-left">Child information</h1>
         </v-col>
-        <v-col style="overflow-y: scroll; padding: 0px !important; height: 400px !important">
+        <v-col
+          style="
+            overflow-y: scroll;
+            padding: 0px !important;
+            height: 400px !important;
+          "
+        >
           <ChildInfo
             :Children="currentFamily.Children"
             :familyId="parseInt(currentFamily.id)"
@@ -388,10 +428,12 @@
       </v-col>
 
       <v-col cols="12" md="3">
-        <Conversation
+        <NotesConversation
           :Conversation="currentFamily.Conversations"
           :familyId="parseInt(currentFamily.id)"
-        ></Conversation>
+          :notes="currentFamily.Note"
+          @updateNotes="saveNotes"
+        ></NotesConversation>
       </v-col>
     </v-row>
     <v-row justify="start" dense height="300">
@@ -403,7 +445,11 @@
           @alert="alert = true"
           @nextContactDone="updateNextContactFrontend"
         ></AppointmentTable>-->
-        <ScheduleTable :Schedules="currentFamily.Schedules" :studyTimeSlots="this.$studyTimeSlots"></ScheduleTable>
+        <ScheduleTable
+          :Schedules="currentFamily.Schedules"
+          :studyTimeSlots="this.$studyTimeSlots"
+          tableHeight="380px"
+        ></ScheduleTable>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -418,7 +464,8 @@
         close-text="Close Alert"
         type="warning"
         dismissible
-      >Cancel the appointment?</v-alert>
+        >Cancel the appointment?</v-alert
+      >
     </template>
   </v-container>
 </template>
@@ -427,7 +474,7 @@
 import ChildInfo from "@/components/ChildInfo";
 import ScheduleTable from "@/components/ScheduleTable";
 // import AppointmentTable from "@/components/AppointmentTable";
-import Conversation from "@/components/Conversation";
+import NotesConversation from "@/components/NotesConversation";
 import Page from "@/components/Page";
 import NextContact from "@/components/NextContact";
 // import ParticipationHistory from "@/components/ParticipationHistory";
@@ -443,7 +490,7 @@ export default {
     // AppointmentTable,
     ScheduleTable,
     ChildInfo,
-    Conversation,
+    NotesConversation,
     Page,
     NextContact,
     ParticipationHistory,
@@ -701,6 +748,16 @@ export default {
       console.log("Next Contact updated!");
     },
 
+    async saveNotes(newNotes) {
+      this.currentFamily.Note = newNotes;
+
+      this.currentFamily.UpdatedBy = store.state.userID;
+
+      await family.update(this.currentFamily);
+
+      Object.assign(this.Families[this.page - 1], this.currentFamily);
+    },
+
     validate() {
       var validationresults = this.$refs.form.validate();
       console.log(validationresults);
@@ -740,6 +797,6 @@ export default {
 
 <style scoped>
 .subtitle {
-  padding: 4px 0px 2px 8px !important;
+  padding: 4px 0px 0px 8px !important;
 }
 </style>

@@ -7,7 +7,9 @@
         color="#c73460"
         dense
         style="font-weight: 600"
-      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Lab email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
+      >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
       <v-alert
@@ -16,7 +18,9 @@
         color="#c7792c"
         dense
         style="font-weight: 600"
-      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Admin email is not been setup properly. Please set it up in the
+        Settings page.</v-alert
+      >
     </div>
 
     <v-row justify="space-around">
@@ -35,7 +39,6 @@
               return-object
               label="Studies"
               @change="searchChild"
-              height="48px"
               background-color="textbackground"
               hide-details
               outlined
@@ -49,9 +52,15 @@
             <v-divider></v-divider>
             <h4 class="text-left">Study information:</h4>
           </v-col>
-          <v-col cols="12" sm="6" md="4" v-for="field in this.$studyBasicFields" :key="field.label">
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+            v-for="field in this.$studyBasicFields"
+            :key="field.label"
+          >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               :label="field.label"
@@ -81,9 +90,14 @@
             <v-divider></v-divider>
             <h4 class="text-left">Point of Contact:</h4>
           </v-col>
-          <v-col cols="12" sm="4" v-for="field in this.$studyPointofContact" :key="field.label">
+          <v-col
+            cols="12"
+            sm="4"
+            v-for="field in this.$studyPointofContact"
+            :key="field.label"
+          >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               :label="field.label"
@@ -110,11 +124,15 @@
             :key="field.label"
           >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               :label="field.label"
-              :value="field.label == 'MinAge' || field.label == 'MaxAge' ? AgeFormated2(selectedStudy[field.field]): selectedStudy[field.field]"
+              :value="
+                field.label == 'MinAge' || field.label == 'MaxAge'
+                  ? AgeFormated2(selectedStudy[field.field])
+                  : selectedStudy[field.field]
+              "
               placeholder="  "
               outlined
               dense
@@ -144,7 +162,7 @@
         <v-row justify="space-around">
           <v-col cols="12" md="3"></v-col>
           <v-spacer></v-spacer>
-          <v-col cols="12" md="4" style="text-align: end;">
+          <v-col cols="12" md="4" style="text-align: end">
             <Page
               :page="page"
               :NofPages="Children ? Children.length : 0"
@@ -158,37 +176,38 @@
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
           </v-col>
-          <v-col cols="12" md="5">
+          <v-col
+            cols="12"
+            v-for="field in familyField.map((i) => this.$familyFields[i])"
+            :md="field.width"
+            :key="field.label"
+          >
             <v-text-field
-              height="48px"
-              background-color="textbackground"
-              hide-details
-              label="Phone"
-              :value="PhoneFormated(currentFamily.Phone)"
-              readonly
-              placeholder="  "
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="5" v-for="field in familyField" :key="field.label">
-            <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               :label="field.label"
-              v-model="currentFamily[field.field]"
+              :value="
+                field.label === 'Phone' || field.label === 'Cell Phone'
+                  ? PhoneFormated(currentFamily[field.field])
+                  : currentFamily[field.field]
+              "
               readonly
               placeholder="  "
               outlined
               dense
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="2" style="text-align: center;">
+          <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn color="primary" fab @click.stop="editFamily" :disabled="!currentFamily.id">
+                  <v-btn
+                    color="primary"
+                    fab
+                    @click.stop="editFamily"
+                    :disabled="!currentFamily.id"
+                  >
                     <v-icon>edit</v-icon>
                   </v-btn>
                 </div>
@@ -198,15 +217,17 @@
           </v-col>
         </v-row>
 
-        <v-dialog v-model="dialogFamilyEdit" max-width="1200px" :retain-focus="false">
+        <v-dialog
+          v-model="dialogFamilyEdit"
+          max-width="1200px"
+          :retain-focus="false"
+        >
           <v-card outlined>
             <v-card-title>
               <span class="headline">Edit family information</span>
               <v-spacer></v-spacer>
               <span class="headline">
-                {{
-                "Family ID: " + currentFamily.id
-                }}
+                {{ "Family ID: " + currentFamily.id }}
               </span>
             </v-card-title>
 
@@ -302,7 +323,13 @@
                   <h4 class="text-left">Notes:</h4>
                 </v-col>
                 <v-col md="8" class="subtitle">
-                  <v-textarea label outlined no-resize rows="3" v-model="editedFamily.Note"></v-textarea>
+                  <v-textarea
+                    label
+                    outlined
+                    no-resize
+                    rows="3"
+                    v-model="editedFamily.Note"
+                  ></v-textarea>
                 </v-col>
               </v-row>
             </v-form>
@@ -310,7 +337,9 @@
               <v-row justify="space-between" style="height: 50px">
                 <v-col md="4"></v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="dialogFamilyEdit = false">Cancel</v-btn>
+                  <v-btn color="primary" @click="dialogFamilyEdit = false"
+                    >Cancel</v-btn
+                  >
                 </v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="saveFamily">Save</v-btn>
@@ -327,9 +356,14 @@
             <h4 class="text-left">Child information:</h4>
           </v-col>
 
-          <v-col cols="12" md="5" v-for="field in childField" :key="field.label">
+          <v-col
+            cols="12"
+            md="5"
+            v-for="field in childField"
+            :key="field.label"
+          >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               :label="field.label"
@@ -343,7 +377,7 @@
 
           <v-col cols="12" md="5">
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               label="Age"
@@ -354,11 +388,16 @@
               dense
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="2" style="text-align: center;">
+          <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn color="primary" fab @click.stop="editChild" :disabled="!currentChild.id">
+                  <v-btn
+                    color="primary"
+                    fab
+                    @click.stop="editChild"
+                    :disabled="!currentChild.id"
+                  >
                     <v-icon>edit</v-icon>
                   </v-btn>
                 </div>
@@ -377,9 +416,17 @@
             <v-select
               :items="Responses"
               v-model="response"
-              :label="currentChild.scheduled ? 'This family is already scheduled.' : 'Parents\'\ response' "
-              :disabled="!currentChild.id || currentChild.scheduled || !$store.state.labEmailStatus"
-              height="48px"
+              :label="
+                currentChild.scheduled
+                  ? 'This family is already scheduled.'
+                  : 'Parents\'\ response'
+              "
+              :disabled="
+                !currentChild.id ||
+                currentChild.scheduled ||
+                !$store.state.labEmailStatus
+              "
+              class="textfield-family"
               background-color="textbackground"
               hide-details
               outlined
@@ -396,7 +443,7 @@
                     large
                     @click.stop="scheduleChild"
                     :disabled="response == null"
-                  >{{response === "Rejected" ? "¯\\\_(ツ)_/¯" : ""}}
+                    >{{ response === "Rejected" ? "¯\\\_(ツ)_/¯" : "" }}
                     <v-icon>{{ scheduleButtonIcon }}</v-icon>
                   </v-btn>
                 </div>
@@ -420,7 +467,11 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog v-model="dialogChildEdit" max-width="800px" :retain-focus="false">
+          <v-dialog
+            v-model="dialogChildEdit"
+            max-width="800px"
+            :retain-focus="false"
+          >
             <v-card>
               <v-card-title>
                 <span class="headline">Child's information</span>
@@ -470,7 +521,9 @@
                 <v-row justify="space-between" style="height: 50px">
                   <v-col md="4"></v-col>
                   <v-col md="2">
-                    <v-btn color="primary" @click="dialogChildEdit = false">Cancel</v-btn>
+                    <v-btn color="primary" @click="dialogChildEdit = false"
+                      >Cancel</v-btn
+                    >
                   </v-col>
                   <v-col md="2">
                     <v-btn color="primary" @click="saveChild">Save</v-btn>
@@ -481,7 +534,11 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog v-model="dialogSchedule" max-width="1000px" :retain-focus="false">
+          <v-dialog
+            v-model="dialogSchedule"
+            max-width="1000px"
+            :retain-focus="false"
+          >
             <v-stepper v-model="e1">
               <v-stepper-header>
                 <v-stepper-step
@@ -489,11 +546,14 @@
                   editable
                   step="1"
                   @click="emailDialog = false"
-                >Schedule studies for {{ currentChild.Name }}</v-stepper-step>
+                  >Schedule studies for {{ currentChild.Name }}</v-stepper-step
+                >
 
                 <v-divider></v-divider>
 
-                <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
+                <v-stepper-step :complete="e1 > 2" step="2"
+                  >Email</v-stepper-step
+                >
 
                 <v-divider></v-divider>
 
@@ -504,13 +564,15 @@
                 <v-stepper-content step="1">
                   <v-card outlined>
                     <v-row
-                      style="height: 60px;"
+                      style="height: 60px"
                       align="center"
                       justify="start"
                       v-if="response == 'Confirmed'"
                     >
                       <v-col cols="12" md="3" class="text-left">
-                        <div class="title" style="padding-left: 8px;">Study date & time:</div>
+                        <div class="title" style="padding-left: 8px">
+                          Study date & time:
+                        </div>
                       </v-col>
                       <v-col cols="12" md="2">
                         <v-text-field
@@ -536,9 +598,16 @@
                         ></v-combobox>
                       </v-col>
                     </v-row>
-                    <v-row style="height: 60px;" align="center" justify="start" v-else>
+                    <v-row
+                      style="height: 60px"
+                      align="center"
+                      justify="start"
+                      v-else
+                    >
                       <v-col cols="12" md="3" class="text-left">
-                        <div class="title" style="padding-left: 8px;">Study date & time: NA</div>
+                        <div class="title" style="padding-left: 8px">
+                          Study date & time: NA
+                        </div>
                       </v-col>
                     </v-row>
                     <v-divider></v-divider>
@@ -569,10 +638,12 @@
                           v-if="index === 0 && response === 'Confirmed'"
                           align="center"
                           justify="start"
-                          style="height: 80px;"
+                          style="height: 80px"
                         >
                           <v-col cols="12" md="4" class="text-left">
-                            <div class="title">Additional appointment(s) for:</div>
+                            <div class="title">
+                              Additional appointment(s) for:
+                            </div>
                           </v-col>
                           <v-col cols="12" md="2" class="text-left">
                             <v-btn
@@ -584,7 +655,8 @@
                                 potentialStudies(currentChild).selectableStudies
                                   .length < 1
                               "
-                            >{{ currentChild.Name }}</v-btn>
+                              >{{ currentChild.Name }}</v-btn
+                            >
                           </v-col>
                           <v-col
                             cols="12"
@@ -601,7 +673,8 @@
                                 potentialStudies(child).selectableStudies
                                   .length < 1
                               "
-                            >{{ child.Name }}</v-btn>
+                              >{{ child.Name }}</v-btn
+                            >
                           </v-col>
                         </v-row>
                       </v-col>
@@ -613,20 +686,29 @@
                     <v-col cols="12" md="6">
                       <v-btn
                         color="primary"
-                        :disabled=" response === 'Confirmed' ? !studyDate : false"
+                        :disabled="
+                          response === 'Confirmed' ? !studyDate : false
+                        "
                         @click="continue12()"
                       >
-                        <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>
+                        <v-icon dark left v-show="scheduleId"
+                          >mdi-checkbox-marked-circle</v-icon
+                        >
                         {{ scheduleButtonText }}
                       </v-btn>
 
                       <v-btn
                         v-if="response == 'Confirmed' && manualCalendar"
                         @click="createCalendarbyScheduleId"
-                      >Create Calendar</v-btn>
+                        >Create Calendar</v-btn
+                      >
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                      <v-btn
+                        :disabled="!scheduleNextPage"
+                        @click="scheduleNextStep"
+                        >Next</v-btn
+                      >
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -645,11 +727,17 @@
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
                       <v-btn color="primary" @click="continue23()">
-                        <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
+                        <v-icon dark left v-show="emailSent"
+                          >mdi-checkbox-marked-circle</v-icon
+                        >Send Email
                       </v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                      <v-btn
+                        :disabled="!scheduleNextPage"
+                        @click="scheduleNextStep"
+                        >Next</v-btn
+                      >
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -667,7 +755,9 @@
                   <v-divider></v-divider>
                   <v-row dense justify="center" align="center">
                     <v-col>
-                      <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
+                      <v-btn color="primary" @click="completeSchedule()"
+                        >Complete</v-btn
+                      >
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -693,16 +783,21 @@
         </v-row>
       </v-col>
       <v-col cols="12" md="3">
-        <Conversation
+        <NotesConversation
           :Conversation="currentFamily.Conversations"
           :familyId="parseInt(currentFamily.id)"
-        ></Conversation>
+          :notes="currentFamily.Note"
+          @updateNotes="saveNotes"
+        ></NotesConversation>
       </v-col>
     </v-row>
 
     <v-row justify="start">
       <v-col cols="12" md="9">
-        <AppointmentTableBrief :Appointments="currentFamily.Appointments" :family="currentFamily"></AppointmentTableBrief>
+        <AppointmentTableBrief
+          :Appointments="currentFamily.Appointments"
+          :family="currentFamily"
+        ></AppointmentTableBrief>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -725,7 +820,7 @@ import moment from "moment";
 
 import ExtraStudies from "@/components/ExtraStudies";
 
-import Conversation from "@/components/Conversation";
+import NotesConversation from "@/components/NotesConversation";
 
 import Email from "@/components/Email";
 // import EmailDialog from "@/components/EmailDialog";
@@ -738,7 +833,7 @@ import Page from "@/components/Page";
 
 export default {
   components: {
-    Conversation,
+    NotesConversation,
     ExtraStudies,
     Email,
     // EmailDialog,
@@ -836,10 +931,12 @@ export default {
         { label: "DoB", field: "DoB" },
       ],
       familyField: [
-        // { label: "Phone", field: "Phone", rules: "phone" },
-        { label: "Email", field: "Email", rules: "email" },
-        { label: "Parimary Caregiver", field: "NamePrimary", rules: "name" },
-        { label: "Secondary Caregiver", field: "NameSecondary", rules: "name" },
+        1,
+        2,
+        0,
+        3,
+        4,
+        7,
       ],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
@@ -1012,6 +1109,19 @@ export default {
           console.log(error);
         }
       }
+    },
+
+    async saveNotes(newNotes) {
+
+      this.currentFamily.Note = newNotes;
+
+      this.currentFamily.UpdatedBy = store.state.userID;
+
+      await family.update(this.currentFamily);
+
+      this.currentChild.Family = this.currentFamily;
+
+      Object.assign(this.Children[this.page - 1], this.currentChild);
     },
 
     async saveChild() {

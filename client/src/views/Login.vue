@@ -36,7 +36,7 @@
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.0.20201018</h4>
+      <h4>V1.0.20201025</h4>
     </v-col>
 
     <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
