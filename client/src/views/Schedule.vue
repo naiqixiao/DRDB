@@ -930,14 +930,7 @@ export default {
         { label: "Sex", field: "Sex" },
         { label: "DoB", field: "DoB" },
       ],
-      familyField: [
-        1,
-        2,
-        0,
-        3,
-        4,
-        7,
-      ],
+      familyField: [1, 2, 0, 3, 4, 7],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
       studyDate: null,
@@ -996,7 +989,10 @@ export default {
 
       var queryString = {};
 
-      queryString.pastParticipants = pastParticipants;
+      if (pastParticipants) {
+        queryString.pastParticipants = pastParticipants;
+      }
+
       queryString.minAge = this.selectedStudy.MinAge;
       queryString.maxAge = this.selectedStudy.MaxAge;
 
@@ -1061,7 +1057,6 @@ export default {
           this.currentChild = {};
         }
 
-        // console.log(this.Children);
       } catch (error) {
         if (error.status === 401) {
           alert("Authentication failed, please login.");
@@ -1112,7 +1107,6 @@ export default {
     },
 
     async saveNotes(newNotes) {
-
       this.currentFamily.Note = newNotes;
 
       this.currentFamily.UpdatedBy = store.state.userID;

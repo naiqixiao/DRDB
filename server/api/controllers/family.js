@@ -360,3 +360,39 @@ exports.searchSpecial = asyncHandler(async (req, res) => {
   res.status(200).send(families);
   console.log("Search successful!");
 });
+
+
+exports.fillNextContactDate = asyncHandler(async (req, res) => {
+  // var queryString = {};
+
+  // if (req.query.id) {
+  //   queryString.id = req.query.id;
+  // }
+  // if (req.query.Email) {
+  //   queryString.Email = { [Op.like]: `${req.query.Email}%` };
+  // }
+  // if (req.query.NamePrimary) {
+  //   queryString.NamePrimary = { [Op.like]: `${req.query.NamePrimary}%` };
+  // }
+  // if (req.query.NameSecondary) {
+  //   queryString.NameSecondary = { [Op.like]: `${req.query.NameSecondary}%` };
+  // }
+  // if (req.query.Phone) {
+  //   queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
+  // }
+
+  // queryString.Email = { [Op.like]: `` };
+
+  
+  const families = await model.family.findAll();
+  console.log(families.length)
+  
+  families.forEach(async (family) => {
+
+    await model.family.update({ NextContactDate: family.createdAt }, {
+      where: { id: family.id },
+    });
+  });
+
+  res.status(200);
+});
