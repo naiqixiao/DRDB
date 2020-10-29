@@ -158,7 +158,10 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.FK_Family = req.query.FamilyId;
   }
 
-  queryString["$Family.NextContactDate$"] = { [Op.lte]: moment().startOf("day").toDate() };
+  queryString["$Family.NextContactDate$"] = {
+    [Op.or]: [{ [Op.lte]: moment().startOf("day").toDate() },
+    { [Op.eq]: null }]
+  }
 
   queryString["$Family.NoMoreContact$"] = 0;
 
