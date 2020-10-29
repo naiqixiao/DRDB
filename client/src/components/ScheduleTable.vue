@@ -36,7 +36,8 @@
             :disabled="item.Status === 'Confirmed' || item.Completed == true"
             v-bind="attrs"
             v-on="on"
-          >event</v-icon>
+            >event</v-icon
+          >
         </template>
         <span>Pick study date and time</span>
       </v-tooltip>
@@ -46,14 +47,15 @@
           <v-icon
             @click.stop="updateSchedule(item, 'Rescheduling')"
             :disabled="
-          item.Status === 'Rescheduling' ||
-            item.Status === 'No Show' ||
-            item.Status === 'TBD' ||
-            item.Completed == true
-        "
+              item.Status === 'Rescheduling' ||
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Completed == true
+            "
             v-bind="attrs"
             v-on="on"
-          >update</v-icon>
+            >update</v-icon
+          >
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
@@ -63,14 +65,15 @@
           <v-icon
             @click.stop="updateSchedule(item, 'No Show')"
             :disabled="
-          item.Status === 'Rescheduling' ||
-            item.Status === 'No Show' ||
-            item.Status === 'TBD' ||
-            item.Completed == true
-        "
+              item.Status === 'Rescheduling' ||
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Completed == true
+            "
             v-bind="attrs"
             v-on="on"
-          >sentiment_dissatisfied</v-icon>
+            >sentiment_dissatisfied</v-icon
+          >
         </template>
         <span>No show</span>
       </v-tooltip>
@@ -82,7 +85,8 @@
             :disabled="item.Status === 'Cancelled' || item.Completed == true"
             v-bind="attrs"
             v-on="on"
-          >not_interested</v-icon>
+            >not_interested</v-icon
+          >
         </template>
         <span>Cancel this appointment</span>
       </v-tooltip>
@@ -126,7 +130,7 @@
       <td :colspan="headers.length">
         <v-row
           justify="space-between"
-          style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll;"
+          style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll"
         >
           <MiniAppointmentTable
             :Appointments="item.Appointments"
@@ -139,7 +143,11 @@
     </template>
 
     <template #top>
-      <v-dialog v-model="nextContactDialog" max-width="800px" :retain-focus="false">
+      <v-dialog
+        v-model="nextContactDialog"
+        max-width="800px"
+        :retain-focus="false"
+      >
         <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
@@ -158,7 +166,9 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
+                <v-btn color="primary" @click="nextContactDialog = false"
+                  >Cancel</v-btn
+                >
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -177,7 +187,8 @@
               editable
               step="1"
               @click="emailDialog = false"
-            >Reschedule</v-stepper-step>
+              >Reschedule</v-stepper-step
+            >
 
             <v-divider></v-divider>
 
@@ -191,7 +202,9 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-card outlined>
-                <v-card-title class="headline">Select study date and time.</v-card-title>
+                <v-card-title class="headline"
+                  >Select study date and time.</v-card-title
+                >
                 <v-row justify="space-around">
                   <v-col cols="12" lg="6">
                     <v-date-picker
@@ -216,12 +229,20 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" :disabled="!studyDateTime" @click="continue12()">
-                    <v-icon dark left v-show="scheduleUpdated">mdi-checkbox-marked-circle</v-icon>Confirm
+                  <v-btn
+                    color="primary"
+                    :disabled="!studyDateTime"
+                    @click="continue12()"
+                  >
+                    <v-icon dark left v-show="scheduleUpdated"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >Confirm
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep"
+                    >Next</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -238,12 +259,26 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" @click="continue23()" :disabled = !editedSchedule.Family.Email>
-                    <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
+                  <v-btn
+                    color="primary"
+                    @click="continue23()"
+                    :disabled="!editedSchedule.Family.Email"
+                  >
+                    <v-icon dark left v-show="emailSent"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >Send Email
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage & editedSchedule.Family.Email" @click="scheduleNextStep">{{editedSchedule.Family.Email ? 'Next' : 'Skip email'}}</v-btn>
+                  <v-btn
+                    :disabled="
+                      !scheduleNextPage && !!editedSchedule.Family.Email
+                    "
+                    @click="scheduleNextStep"
+                    >{{
+                      !!editedSchedule.Family.Email ? "Next" : "Skip email"
+                    }}</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -261,7 +296,9 @@
               <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule">Complete</v-btn>
+                  <v-btn color="primary" @click="completeSchedule"
+                    >Complete</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -299,7 +336,7 @@ export default {
   props: {
     Schedules: Array,
     studyTimeSlots: Array,
-    tableHeight: String
+    tableHeight: String,
   },
   data() {
     return {
@@ -363,7 +400,7 @@ export default {
 
         case "Completed":
           try {
-            item.Completed = !item.Completed
+            item.Completed = !item.Completed;
             await schedule.complete(item);
           } catch (error) {
             console.log(error);
@@ -374,7 +411,7 @@ export default {
 
         case "Reminded":
           try {
-            item.Reminded = !item.Reminded
+            item.Reminded = !item.Reminded;
             await schedule.remind(item);
           } catch (error) {
             console.log(error);

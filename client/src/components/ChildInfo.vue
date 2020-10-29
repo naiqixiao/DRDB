@@ -372,8 +372,12 @@
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep"
-                    >Next</v-btn
+                  <v-btn
+                    :disabled="!scheduleNextPage && !!currentFamily.Email"
+                    @click="scheduleNextStep"
+                    >{{
+                      !!currentFamily.Email ? "Next" : "Skip email"
+                    }}</v-btn
                   >
                 </v-col>
               </v-row>
