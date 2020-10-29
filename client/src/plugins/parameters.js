@@ -364,7 +364,7 @@ export default {
 
     Vue.prototype.$rules = {
       name: [
-        (value) => !!value || "Required.",
+        // (value) => !!value || "Required.",
         (value) => {
           var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/;
           return pattern.test(value) || "Invalid Name.";
@@ -372,7 +372,7 @@ export default {
         (value) => (value && value.length <= 50) || "Max 50 characters",
       ],
       email: [
-        (value) => !!value || "Required.",
+        // (value) => !!value || "Required.",
         (value) => {
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
           return pattern.test(value) || "Invalid e-mail.";
@@ -384,11 +384,11 @@ export default {
           const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
           return pattern.test(value) || "Invalid phone.";
         },
-        (value) => !!value || "Required.",
+        // (value) => !!value || "Required.",
         (value) => (value && value.length == 10) || "Have to be 10 digits",
       ],
       dob: [
-        (value) => !!value || "Required.",
+        // (value) => !!value || "Required.",
         (value) => {
           var pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
           return pattern.test(value) || "Invalid Date of Birth.";
@@ -400,7 +400,7 @@ export default {
           return pattern.test(value) || "Invalid Birth Weight.";
         },
       ],
-      required: [(value) => !!value || "Required."],
+      // required: [(value) => !!value || "Required."],
     };
   },
 };
