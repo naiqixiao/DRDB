@@ -96,15 +96,15 @@ function emailBody(schedule) {
         from:
             schedule.Appointments[0].Study.Lab.LabName + "<" + schedule.Appointments[0].Study.Lab.Email + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: schedule.Appointments[0].Family.NamePrimary +
-        // "<" +
-        // schedule.Appointments[0].Family.Email +
-        // ">",
-        to:
-            schedule.Appointments[0].Family.NamePrimary +
-            "<" +
-            schedule.Appointments[0].Study.Lab.Email +
-            ">",
+        to: schedule.Appointments[0].Family.NamePrimary +
+        "<" +
+        schedule.Appointments[0].Family.Email +
+        ">",
+        // to:
+        //     schedule.Appointments[0].Family.NamePrimary +
+        //     "<" +
+        //     schedule.Appointments[0].Study.Lab.Email +
+        //     ">",
         subject: emailSubject,
         body: emailBody,
     };

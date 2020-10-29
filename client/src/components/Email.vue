@@ -228,9 +228,8 @@ export default {
       var emailContent = {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
-        // cc: "lab email <nx@kangleelab.com>",
-        //to: this.familyInfo.NamePrimary + "<" + familyInfo.Email + ">",
-        to: this.familyInfo.NamePrimary + "<" + this.$store.state.labEmail + ">",
+        to: this.familyInfo.NamePrimary + "<" + familyInfo.Email + ">",
+        // to: this.familyInfo.NamePrimary + "<" + this.$store.state.labEmail + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
       };
