@@ -1,128 +1,85 @@
-// const Promise = require("bluebird");
-// const bcrypt = Promise.promisifyAll(require("bcrypt"));
+/* jshint indent: 1 */
 
-// function hashPassword(user, options) {
-//   const SALT_FACTOR = 8;
-
-//   if (!user.changed("password")) {
-//     return;
-//   }
-
-//   return bcrypt
-//     .genSaltAsync(SALT_FACTOR)
-//     .then((salt) => bcrypt.hashAsync(user.password, salt, null))
-//     .then((hash) => {
-//       user.setDataValue("password", hash);
-//     });
-// }
-
-module.exports = function (sequelize, DataTypes) {
-  const Personnel = sequelize.define(
-    "Personnel",
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        allowNull: false,
-        primaryKey: true,
-      },
-      Name: {
-        type: DataTypes.STRING(45),
-        allowNull: false,
-      },
-      Initial: {
-        type: DataTypes.STRING(45),
-        allowNull: false,
-        unique: true,
-      },
-      Role: {
-        type: DataTypes.ENUM(
-          "PostDoc",
-          "PI",
-          "GradStudent",
-          "Undergrad",
-          "RA",
-          "Lab manager",
-          "Staff",
-          "Admin"
-        ),
-        allowNull: false,
-      },
-      FK_Lab: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-          model: "Lab",
-          key: "id",
-        },
-      },
-      Active: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: "1",
-      },
-      Retired: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: "0",
-      },
-      temporaryPassword: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: "1",
-      },
-      Password: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-      },
-      Phone: {
-        type: DataTypes.STRING(10),
-        allowNull: true,
-        unique: true,
-      },
-      Email: {
-        type: DataTypes.STRING(45),
-        allowNull: false,
-        unique: true,
-      },
-      Calendar: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        unique: true,
-      },
-      ZoomLink: {
-        type: DataTypes.STRING(300),
-        allowNull: true,
-        unique: true,
-      },
-      createdAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-      },
-      updatedAt: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-      },
-    },
-    {
-      hooks: {
-        // beforeCreate: hashPassword,
-        // beforeUpdate: hashPassword,
-        // beforeSave: hashPassword,
-      },
-    },
-    {
-      tableName: "Personnel",
-    }
-  );
-
-  // Personnel.prototype.comparePassword = function(password) {
-  //   return bcrypt.compareAsync(password, this.Password);
-  // };
-
-  // Personnel.associate = function(models) {};
-
-  return Personnel;
+module.exports = function(sequelize, DataTypes) {
+	return sequelize.define('Personnel', {
+		id: {
+			autoIncrement: true,
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			primaryKey: true
+		},
+		Name: {
+			type: DataTypes.STRING(45),
+			allowNull: false
+		},
+		Initial: {
+			type: DataTypes.STRING(45),
+			allowNull: false,
+			unique: true
+		},
+		Role: {
+			type: DataTypes.ENUM('Admin','PostDoc','PI','GradStudent','Undergrad','RA','Lab manager','Staff'),
+			allowNull: false
+		},
+		FK_Lab: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			references: {
+				model: {
+					tableName: 'Lab',
+				},
+				key: 'id'
+			}
+		},
+		Active: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 1
+		},
+		Password: {
+			type: DataTypes.STRING(255),
+			allowNull: false
+		},
+		Email: {
+			type: DataTypes.STRING(45),
+			allowNull: false,
+			unique: true
+		},
+		Calendar: {
+			type: DataTypes.STRING(100),
+			allowNull: false,
+			unique: true
+		},
+		Phone: {
+			type: DataTypes.STRING(10),
+			allowNull: true
+		},
+		createdAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
+			allowNull: false,
+			defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+		},
+		temporaryPassword: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 0
+		},
+		ZoomLink: {
+			type: DataTypes.STRING(300),
+			allowNull: true
+		},
+		Retired: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 0
+		}
+	}, {
+		sequelize,
+		tableName: 'Personnel'
+	});
 };
