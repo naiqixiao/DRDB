@@ -269,7 +269,6 @@ export default {
       this.editableFields.shift();
       this.editableFields.pop();
       this.editableFields.pop();
-      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 
@@ -283,7 +282,10 @@ export default {
           await family.update(this.editedItem);
 
           this.currentFamily = Object.assign({}, this.editedItem);
+          
           console.log("Family information updated!");
+          this.$refs.form.resetValidation();
+
         } catch (error) {
           console.log(error.response);
         }

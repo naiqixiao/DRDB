@@ -499,7 +499,6 @@ export default {
     },
 
     createNewLab() {
-      this.$refs.form.resetValidation();
       this.dialogNewLab = true;
     },
 
@@ -509,7 +508,6 @@ export default {
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
       this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
-      this.$refs.formEdit.resetValidation();
       this.dialogEditLab = true;
     },
 
@@ -539,6 +537,9 @@ export default {
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
           );
+          
+          this.$refs.form.resetValidation();
+
         } catch (error) {
           console.log(error.response);
         }
@@ -565,6 +566,8 @@ export default {
           );
 
           alert("Lab information is updated!");
+          this.$refs.formEdit.resetValidation();
+          
         } catch (error) {
           console.log(error.response);
         }

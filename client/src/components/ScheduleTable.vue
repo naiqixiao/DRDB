@@ -93,7 +93,7 @@
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-simple-checkbox
-              v-model="item.Reminded"
+              :value="!!item.Reminded"
               class="mr-0 pa-0"
               @input="updateSchedule(item, 'Reminded')"
               dense
@@ -110,7 +110,7 @@
         <template v-slot:activator="{ on }">
           <div v-on="on">
             <v-simple-checkbox
-              v-model="item.Completed"
+              :value="!!item.Completed"
               class="mr-0 pa-0"
               @input="updateSchedule(item, 'Completed')"
               dense
@@ -363,6 +363,7 @@ export default {
 
         case "Completed":
           try {
+            item.Completed = !item.Completed
             await schedule.complete(item);
           } catch (error) {
             console.log(error);
@@ -373,6 +374,7 @@ export default {
 
         case "Reminded":
           try {
+            item.Reminded = !item.Reminded
             await schedule.remind(item);
           } catch (error) {
             console.log(error);

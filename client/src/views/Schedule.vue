@@ -738,10 +738,10 @@
                     </v-col>
                     <v-col cols="12" md="2">
                       <v-btn
-                        :disabled="!scheduleNextPage & currentFamily.Email"
+                        :disabled="!scheduleNextPage && !!currentFamily.Email"
                         @click="scheduleNextStep"
                         >{{
-                          currentFamily.Email ? "Next" : "Skip email"
+                          !!currentFamily.Email ? "Next" : "Skip email"
                         }}</v-btn
                       >
                     </v-col>
@@ -1080,14 +1080,12 @@ export default {
     editFamily() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedFamily = Object.assign({}, this.currentFamily);
-      this.$refs.formFamily.resetValidation();
       this.dialogFamilyEdit = true;
     },
 
     editChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedChild = Object.assign({}, this.currentChild);
-      this.$refs.formChild.resetValidation();
       this.dialogChildEdit = true;
     },
 
@@ -1105,6 +1103,8 @@ export default {
           Object.assign(this.Children[this.editedIndex], this.currentChild);
 
           console.log("Family Info is updated!");
+
+          this.$refs.formFamily.resetValidation();
 
           this.closeFamily();
         } catch (error) {
@@ -1141,6 +1141,8 @@ export default {
           Object.assign(this.Children[this.editedIndex], this.editedChild);
 
           console.log("Child information updated!");
+
+          this.$refs.formChild.resetValidation();
 
           this.closeChild();
         }

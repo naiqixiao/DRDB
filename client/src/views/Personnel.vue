@@ -7,7 +7,9 @@
         color="#c73460"
         dense
         style="font-weight: 600"
-      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Lab email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
+      >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
       <v-alert
@@ -16,7 +18,9 @@
         color="#c7792c"
         dense
         style="font-weight: 600"
-      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Admin email is not been setup properly. Please set it up in the
+        Settings page.</v-alert
+      >
     </div>
 
     <v-row>
@@ -43,7 +47,7 @@
                 <div v-on="on">
                   <v-simple-checkbox
                     class="mr-0 pa-0"
-                    v-model="item.Active"
+                    :value="!!item.Active"
                     @input="changePersonnelStatus(item)"
                     dense
                   ></v-simple-checkbox>
@@ -63,7 +67,13 @@
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6" md="4" v-for="field in personnelFields" :key="field.label">
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+                v-for="field in personnelFields"
+                :key="field.label"
+              >
                 <v-text-field
                   background-color="textbackground"
                   :label="field.label"
@@ -95,7 +105,11 @@
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn fab @click.stop="editPersonnel" :disabled="!currentPersonnel.id">
+                          <v-btn
+                            fab
+                            @click.stop="editPersonnel"
+                            :disabled="!currentPersonnel.id"
+                          >
                             <v-icon class="fabIcon">edit</v-icon>
                           </v-btn>
                         </div>
@@ -110,7 +124,10 @@
                           <v-btn
                             fab
                             @click.stop="deletePersonnel"
-                            :disabled="currentPersonnel.id == $store.state.userID || !currentPersonnel.id"
+                            :disabled="
+                              currentPersonnel.id == $store.state.userID ||
+                              !currentPersonnel.id
+                            "
                           >
                             <v-icon class="fabIcon">delete</v-icon>
                           </v-btn>
@@ -158,7 +175,13 @@
                         <div v-if="field.options">
                           <v-select
                             justify="start"
-                            :items="$store.state.role == 'Admin' || $store.state.role == 'PI' || $store.state.role == 'Lab manager' ? options.fullRoles : options.limitedRoles"
+                            :items="
+                              $store.state.role == 'Admin' ||
+                              $store.state.role == 'PI' ||
+                              $store.state.role == 'Lab manager'
+                                ? options.fullRoles
+                                : options.limitedRoles
+                            "
                             v-model="editedPersonnel[field.field]"
                             :label="field.label"
                             :rules="$rules[field.rules]"
@@ -359,10 +382,11 @@ export default {
     },
 
     async changePersonnelStatus(item) {
-      this.currentPersonnel = item;
+      // this.currentPersonnel = item;
 
       try {
-        await personnel.update(this.currentPersonnel);
+        item.Active = !item.Active;
+        await personnel.update(item);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");

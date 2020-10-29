@@ -165,7 +165,8 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.NextContactDate) {
     queryString.NextContactDate = {
 
-      [Op.lte]: moment().startOf("day").toDate(),
+      [Op.or]: [{ [Op.lte]: moment().startOf("day").toDate() },
+      { [Op.eq]: null }]
       // [Op.between]: [
       //   moment().subtract(6, 'months').startOf("day").toDate(),
       //   moment().startOf("day").toDate()
@@ -383,10 +384,10 @@ exports.fillNextContactDate = asyncHandler(async (req, res) => {
 
   // queryString.Email = { [Op.like]: `` };
 
-  
+
   const families = await model.family.findAll();
   console.log(families.length)
-  
+
   families.forEach(async (family) => {
 
     await model.family.update({ NextContactDate: family.createdAt }, {

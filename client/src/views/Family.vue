@@ -669,7 +669,6 @@ export default {
       // this.editableFields.shift();
       // this.editableFields.pop();
       // this.editableFields.pop();
-      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 
@@ -677,7 +676,6 @@ export default {
       this.editedIndex = this.Families.indexOf(this.currentFamily);
       this.editedItem = Object.assign({}, this.currentFamily);
       // this.editableFields = Object.assign({}, this.$familyFields);
-      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 
@@ -711,6 +709,8 @@ export default {
             this.Families.push(this.editedItem);
             this.page = this.Families.length;
             console.log("Family is creted!");
+            
+            this.$refs.form.resetValidate();
             // this.$emit("searchFamily", this.editedItem);
           }
         } catch (error) {

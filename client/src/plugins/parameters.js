@@ -421,7 +421,7 @@ export default {
       ],
       birthWeight: [
         (value) => {
-          const pattern = /^[0-9]{1-4}[:.,-]?$/;
+          const pattern = /^[0-9]{1,4}[:.,-]?$/;
 
           if (value) {
             return pattern.test(value) || "Invalid Birth Weight.";

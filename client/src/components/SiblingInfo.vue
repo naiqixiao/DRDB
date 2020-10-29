@@ -173,7 +173,6 @@ export default {
     editChild(child) {
       this.editedIndex = this.Children.indexOf(child);
       this.editedItem = Object.assign({}, child);
-      this.$refs.formChild.resetValidation();
       this.dialogChild = true;
     },
 
@@ -194,6 +193,8 @@ export default {
 
           this.$emit("updateSibling", this.Children);
           console.log("Child information updated!");
+
+          this.$refs.formChild.resetValidation();
 
           this.close();
         }

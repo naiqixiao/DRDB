@@ -6,18 +6,26 @@
       </v-col>
     </v-row>-->
     <div v-if="familyId">
-      <v-row dense align="start" style="height: 345px;">
+      <v-row dense align="start" style="height: 345px">
         <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
           <v-card class="child-card d-flex flex-column" height="160px">
             <v-card-title class="title">
               <div
                 class="d-inline-block text-truncate"
-                style="max-width: 130px; padding-right: 4px;"
-              >{{ child.Name }}</div>
-              <div>{{ " (" + currentFamily.id + child.IdWithinFamily + ")" }}</div>
+                style="max-width: 130px; padding-right: 4px"
+              >
+                {{ child.Name }}
+              </div>
+              <div>
+                {{ " (" + currentFamily.id + child.IdWithinFamily + ")" }}
+              </div>
               <v-spacer></v-spacer>
-              <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large>mdi-human-male</v-icon>
-              <v-icon v-else color="pink darken-1" large>mdi-human-female</v-icon>
+              <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large
+                >mdi-human-male</v-icon
+              >
+              <v-icon v-else color="pink darken-1" large
+                >mdi-human-female</v-icon
+              >
             </v-card-title>
 
             <v-card-text align="start">
@@ -25,7 +33,13 @@
             </v-card-text>
             <v-spacer></v-spacer>
             <v-card-actions>
-              <v-btn small color="primary" dark outlined @click.stop="editChild(child, index)">
+              <v-btn
+                small
+                color="primary"
+                dark
+                outlined
+                @click.stop="editChild(child, index)"
+              >
                 <v-icon>edit</v-icon>edit
               </v-btn>
               <v-spacer></v-spacer>
@@ -45,7 +59,10 @@
         <v-col cols="6">
           <v-card
             class="child-card d-flex align-center justify-center"
-            style="border-width: medium !important; border-style: dashed !important;"
+            style="
+              border-width: medium !important;
+              border-style: dashed !important;
+            "
             height="160px"
           >
             <v-tooltip top>
@@ -58,7 +75,10 @@
                     fab
                     color="primary"
                     x-large
-                    style="border-width: medium; border-style: dashed !important;"
+                    style="
+                      border-width: medium;
+                      border-style: dashed !important;
+                    "
                     @click.stop="addChild"
                     :disabled="!familyId"
                   >
@@ -73,10 +93,12 @@
       </v-row>
     </div>
     <div v-else>
-      <v-row dense align="start" style="height: 345px;">
+      <v-row dense align="start" style="height: 345px">
         <v-col cols="6" v-for="child in 4" :key="child">
           <v-card class="placeholder-card" height="160px">
-            <v-card-title class="title">{{ "Child " + alphabet[child - 1] }}</v-card-title>
+            <v-card-title class="title">{{
+              "Child " + alphabet[child - 1]
+            }}</v-card-title>
           </v-card>
         </v-col>
       </v-row>
@@ -110,7 +132,11 @@
             <v-container>
               <v-row>
                 <v-col cols="12" sm="6" md="4">
-                  <v-text-field v-model="editedItem.Name" :rules="this.$rules.name" label="Name"></v-text-field>
+                  <v-text-field
+                    v-model="editedItem.Name"
+                    :rules="this.$rules.name"
+                    label="Name"
+                  ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -122,7 +148,15 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
-                  <v-select v-model="editedItem.Sex" :items="this.$Sex" filled label="Sex" chip></v-select>
+                  <v-select
+                    v-model="editedItem.Sex"
+                    :items="this.$Sex"
+                    outlined
+                    hide-details
+                    dense
+                    label="Sex"
+                    chip
+                  ></v-select>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <v-text-field
@@ -139,7 +173,9 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogChild = false">Cancel</v-btn>
+                <v-btn color="primary" @click="dialogChild = false"
+                  >Cancel</v-btn
+                >
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="save">Save</v-btn>
@@ -152,7 +188,11 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogSchedule" max-width="1000px" :retain-focus="false">
+      <v-dialog
+        v-model="dialogSchedule"
+        max-width="1000px"
+        :retain-focus="false"
+      >
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -160,7 +200,8 @@
               editable
               step="1"
               @click="emailDialog = false"
-            >Schedule studies for {{ currentChild.Name }}</v-stepper-step>
+              >Schedule studies for {{ currentChild.Name }}</v-stepper-step
+            >
 
             <v-divider></v-divider>
 
@@ -175,13 +216,15 @@
             <v-stepper-content step="1">
               <v-card outlined>
                 <v-row
-                  style="height: 60px;"
+                  style="height: 60px"
                   align="center"
                   justify="start"
                   v-if="response == 'Confirmed'"
                 >
                   <v-col cols="12" md="3" class="text-left">
-                    <div class="title" style="padding-left: 8px;">{{"Study date & time:"}}</div>
+                    <div class="title" style="padding-left: 8px">
+                      {{ "Study date & time:" }}
+                    </div>
                   </v-col>
                   <v-col cols="12" md="2">
                     <v-text-field
@@ -205,9 +248,16 @@
                     ></v-combobox>
                   </v-col>
                 </v-row>
-                <v-row style="height: 60px;" align="center" justify="start" v-else>
+                <v-row
+                  style="height: 60px"
+                  align="center"
+                  justify="start"
+                  v-else
+                >
                   <v-col cols="12" md="3" class="text-left">
-                    <div class="title" style="padding-left: 8px;">{{"Study date & time: NA"}}</div>
+                    <div class="title" style="padding-left: 8px">
+                      {{ "Study date & time: NA" }}
+                    </div>
                   </v-col>
                 </v-row>
                 <v-divider></v-divider>
@@ -237,7 +287,7 @@
                       v-if="index === 0 && response === 'Confirmed'"
                       align="center"
                       justify="start"
-                      style="height: 80px;"
+                      style="height: 80px"
                     >
                       <v-col cols="12" md="4" class="text-left">
                         <div class="title">Additional appointment(s) for:</div>
@@ -254,7 +304,12 @@
                               >{{ currentChild.Name }}
                             </v-btn>
                       </v-col>-->
-                      <v-col cols="12" md="2" v-for="sibling in Children" :key="sibling.id">
+                      <v-col
+                        cols="12"
+                        md="2"
+                        v-for="sibling in Children"
+                        :key="sibling.id"
+                      >
                         <v-btn
                           class="text-capitalize"
                           rounded
@@ -262,9 +317,10 @@
                           @click="newAppointment(sibling)"
                           :disabled="
                             potentialStudies(sibling).selectableStudies.length <
-                              1
+                            1
                           "
-                        >{{ sibling.Name }}</v-btn>
+                          >{{ sibling.Name }}</v-btn
+                        >
                       </v-col>
                     </v-row>
                   </v-col>
@@ -278,16 +334,21 @@
                     :disabled="!studyDate || !appointments[0].FK_Study"
                     @click="continue12()"
                   >
-                    <v-icon dark left v-show="currentSchedule.id">mdi-checkbox-marked-circle</v-icon>Schedule
+                    <v-icon dark left v-show="currentSchedule.id"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >Schedule
                   </v-btn>
 
                   <v-btn
                     v-if="response == 'Confirmed' && manualCalendar"
                     @click="createCalendarbyScheduleId"
-                  >Create Calendar</v-btn>
+                    >Create Calendar</v-btn
+                  >
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep"
+                    >Next</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -305,11 +366,15 @@
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
                   <v-btn color="primary" @click="continue23()">
-                    <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
+                    <v-icon dark left v-show="emailSent"
+                      >mdi-checkbox-marked-circle</v-icon
+                    >Send Email
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep"
+                    >Next</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -326,7 +391,9 @@
 
               <v-row dense justify="center" align="center">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
+                  <v-btn color="primary" @click="completeSchedule()"
+                    >Complete</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -463,7 +530,7 @@ export default {
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: "Confirmed",
       currentSchedule: {
-        id: null
+        id: null,
       },
       manualCalendar: false,
       nextContactDialog: false,
@@ -691,7 +758,7 @@ export default {
           timeZone: "America/Toronto",
         },
         attendees: attendees,
-        scheduleId: this.currentSchedule.id
+        scheduleId: this.currentSchedule.id,
       };
 
       try {
@@ -820,14 +887,13 @@ export default {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.FK_Family = this.familyId;
-      this.$refs.formChild.resetValidation()
       this.dialogChild = true;
     },
 
     editChild(child, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, child);
-      this.$refs.formChild.resetValidation()
+
       this.dialogChild = true;
     },
 
@@ -849,6 +915,8 @@ export default {
 
             console.log("Child information updated!");
 
+            this.$refs.formChild.resetValidation();
+
             this.close();
           }
         } else {
@@ -867,6 +935,8 @@ export default {
             this.Children.push(this.editedItem);
 
             console.log("Child is creted and siblings are updated!");
+
+            this.$refs.formChild.resetValidation();
 
             this.close();
           }
