@@ -726,7 +726,11 @@
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
-                      <v-btn color="primary" @click="continue23()">
+                      <v-btn
+                        color="primary"
+                        @click="continue23()"
+                        :disabled="!currentFamily.Email"
+                      >
                         <v-icon dark left v-show="emailSent"
                           >mdi-checkbox-marked-circle</v-icon
                         >Send Email
@@ -734,9 +738,11 @@
                     </v-col>
                     <v-col cols="12" md="2">
                       <v-btn
-                        :disabled="!scheduleNextPage"
+                        :disabled="!scheduleNextPage & currentFamily.Email"
                         @click="scheduleNextStep"
-                        >Next</v-btn
+                        >{{
+                          currentFamily.Email ? "Next" : "Skip email"
+                        }}</v-btn
                       >
                     </v-col>
                   </v-row>
@@ -1056,7 +1062,6 @@ export default {
           this.page = 0;
           this.currentChild = {};
         }
-
       } catch (error) {
         if (error.status === 401) {
           alert("Authentication failed, please login.");
@@ -1075,12 +1080,14 @@ export default {
     editFamily() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedFamily = Object.assign({}, this.currentFamily);
+      this.$refs.formFamily.resetValidation();
       this.dialogFamilyEdit = true;
     },
 
     editChild() {
       this.editedIndex = this.Children.indexOf(this.currentChild);
       this.editedChild = Object.assign({}, this.currentChild);
+      this.$refs.formChild.resetValidation();
       this.dialogChildEdit = true;
     },
 

@@ -238,12 +238,12 @@
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" @click="continue23()">
+                  <v-btn color="primary" @click="continue23()" :disabled = !editedSchedule.Family.Email>
                     <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>Send Email
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
-                  <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
+                  <v-btn :disabled="!scheduleNextPage & editedSchedule.Family.Email" @click="scheduleNextStep">{{editedSchedule.Family.Email ? 'Next' : 'Skip email'}}</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>

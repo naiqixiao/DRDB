@@ -820,12 +820,14 @@ export default {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
       this.editedItem.FK_Family = this.familyId;
+      this.$refs.formChild.resetValidation()
       this.dialogChild = true;
     },
 
     editChild(child, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, child);
+      this.$refs.formChild.resetValidation()
       this.dialogChild = true;
     },
 

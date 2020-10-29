@@ -4,10 +4,20 @@
       <v-col cols="12" md="12" style="text-align: start">
         <span class="title">Family information</span>
       </v-col>
-      <v-col cols="12" md="6" dense v-for="item in searchingFields" :key="item.label">
+      <v-col
+        cols="12"
+        md="6"
+        dense
+        v-for="item in searchingFields"
+        :key="item.label"
+      >
         <v-text-field
           :label="item.label"
-          :value="item.label === 'Phone' ? PhoneFormated(currentFamily[item.field]) : currentFamily[item.field]"
+          :value="
+            item.label === 'Phone'
+              ? PhoneFormated(currentFamily[item.field])
+              : currentFamily[item.field]
+          "
           readonly
           height="48px"
           background-color="textbackground"
@@ -24,7 +34,12 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn color="primary" fab @click.stop="editFamily" :disabled="!currentFamily.id">
+              <v-btn
+                color="primary"
+                fab
+                @click.stop="editFamily"
+                :disabled="!currentFamily.id"
+              >
                 <v-icon>edit</v-icon>
               </v-btn>
             </div>
@@ -132,7 +147,13 @@
               <h4 class="text-left">Notes:</h4>
             </v-col>
             <v-col md="8" class="subtitle">
-              <v-textarea label outlined no-resize rows="3" v-model="editedItem.Note"></v-textarea>
+              <v-textarea
+                label
+                outlined
+                no-resize
+                rows="3"
+                v-model="editedItem.Note"
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-form>
@@ -248,6 +269,7 @@ export default {
       this.editableFields.shift();
       this.editableFields.pop();
       this.editableFields.pop();
+      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 

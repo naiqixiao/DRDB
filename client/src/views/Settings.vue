@@ -7,7 +7,9 @@
         color="#c73460"
         dense
         style="font-weight: 600"
-      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Lab email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
+      >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
       <v-alert
@@ -16,15 +18,19 @@
         color="#c7792c"
         dense
         style="font-weight: 600"
-      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Admin email is not been setup properly. Please set it up in the
+        Settings page.</v-alert
+      >
     </div>
-    <v-row align="start" style="height: 200px;">
+    <v-row align="start" style="height: 200px">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
         <h4 class="text-left">User account settings:</h4>
       </v-col>
       <v-col cols="12" md="5">
-        <v-btn color="primary" @click.stop="dialog = true">Change password</v-btn>
+        <v-btn color="primary" @click.stop="dialog = true"
+          >Change password</v-btn
+        >
       </v-col>
 
       <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
@@ -35,7 +41,12 @@
               <v-col cols="12" md="6" class="subtitle">
                 <v-divider></v-divider>
                 <h4 class="text-left">Current password:</h4>
-                <v-text-field v-model="password" type="password" hide-details dense></v-text-field>
+                <v-text-field
+                  v-model="password"
+                  type="password"
+                  hide-details
+                  dense
+                ></v-text-field>
               </v-col>
             </v-row>
             <v-row justify="center">
@@ -76,12 +87,13 @@
                   color="primary"
                   :disabled="
                     passwordConfirmationRule != true ||
-                      newPassword == null ||
-                      password == null ||
-                      newPasswordRule != true
+                    newPassword == null ||
+                    password == null ||
+                    newPasswordRule != true
                   "
                   @click="changePassword"
-                >Confirm</v-btn>
+                  >Confirm</v-btn
+                >
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -90,7 +102,7 @@
       </v-dialog>
     </v-row>
 
-    <v-row justify="center" align="center" style="height: 200px;">
+    <v-row justify="center" align="center" style="height: 200px">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
         <h4 class="text-left">Lab email account settings:</h4>
@@ -116,11 +128,18 @@
               <v-btn
                 color="primary"
                 @click.stop="googleCredentialsURL('lab')"
-                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
-              >Setup Google Account</v-btn>
+                :disabled="
+                  $store.state.role != 'Admin' &&
+                  $store.state.role != 'PI' &&
+                  $store.state.role != 'Lab manager'
+                "
+                >Setup Google Account</v-btn
+              >
             </div>
           </template>
-          <span>Only PI and lab manager can change the associated lab email.</span>
+          <span
+            >Only PI and lab manager can change the associated lab email.</span
+          >
         </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
@@ -130,8 +149,13 @@
               <v-btn
                 color="primary"
                 @click.stop="editLabInfo"
-                :disabled=" $store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'"
-              >Update Lab Info</v-btn>
+                :disabled="
+                  $store.state.role != 'Admin' &&
+                  $store.state.role != 'PI' &&
+                  $store.state.role != 'Lab manager'
+                "
+                >Update Lab Info</v-btn
+              >
             </div>
           </template>
           <span>Only PI and lab manager can change lab information.</span>
@@ -140,7 +164,9 @@
 
       <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false">
         <v-card outlined>
-          <v-card-title class="headline">Paste Google sign in code</v-card-title>
+          <v-card-title class="headline"
+            >Paste Google sign in code</v-card-title
+          >
           <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
 
           <v-row justify="center">
@@ -160,14 +186,17 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="3"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogGoogle = false">Cancel</v-btn>
+                <v-btn color="primary" @click="dialogGoogle = false"
+                  >Cancel</v-btn
+                >
               </v-col>
               <v-col md="2">
                 <v-btn
                   color="primary"
                   :disabled="!signInCode"
-                  @click=" setAdmin ? setAdminToken() : setLabToken()"
-                >Confirm</v-btn>
+                  @click="setAdmin ? setAdminToken() : setLabToken()"
+                  >Confirm</v-btn
+                >
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -176,7 +205,7 @@
       </v-dialog>
     </v-row>
 
-    <v-row justify="center" align="center" style="height: 200px;">
+    <v-row justify="center" align="center" style="height: 200px">
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
         <h4 class="text-left">Administration email account settings:</h4>
@@ -202,11 +231,14 @@
               <v-btn
                 color="primary"
                 @click.stop="googleCredentialsURL('admin')"
-                :disabled=" $store.state.role != 'Admin'"
-              >Setup Admin Account</v-btn>
+                :disabled="$store.state.role != 'Admin'"
+                >Setup Admin Account</v-btn
+              >
             </div>
           </template>
-          <span>Only the Administrator can change the adminstration email.</span>
+          <span
+            >Only the Administrator can change the adminstration email.</span
+          >
         </v-tooltip>
       </v-col>
 
@@ -217,17 +249,27 @@
               <v-btn
                 color="primary"
                 @click.stop="createNewLab"
-                :disabled=" $store.state.role != 'Admin' || !$store.state.adminEmailStatus"
-              >Create a Lab</v-btn>
+                :disabled="
+                  $store.state.role != 'Admin' || !$store.state.adminEmailStatus
+                "
+                >Create a Lab</v-btn
+              >
             </div>
           </template>
           <span>Only the Administrator can create new lab.</span>
         </v-tooltip>
       </v-col>
 
-      <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false" persistent>
+      <v-dialog
+        v-model="dialogNewLab"
+        max-width="800px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
-          <v-card-title class="headline">Lab and PI/Manager information</v-card-title>
+          <v-card-title class="headline"
+            >Lab and PI/Manager information</v-card-title
+          >
 
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-row>
@@ -270,7 +312,12 @@
                 <v-divider></v-divider>
                 <h4 class="text-left">PI/Lab Manager information:</h4>
               </v-col>
-              <v-col cols="12" md="4" v-for="item in this.$labPI" :key="item.label">
+              <v-col
+                cols="12"
+                md="4"
+                v-for="item in this.$labPI"
+                :key="item.label"
+              >
                 <div v-if="item.options">
                   <v-select
                     justify="start"
@@ -318,7 +365,12 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialogEditLab" max-width="800px" :retain-focus="false" persistent>
+      <v-dialog
+        v-model="dialogEditLab"
+        max-width="800px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
           <v-card-title class="headline">Lab information</v-card-title>
 
@@ -343,7 +395,12 @@
                 <v-divider></v-divider>
                 <h4 class="text-left">Email Components:</h4>
               </v-col>
-              <v-col cols="12" md="12" v-for="item in this.$labEmailTemplate" :key="item.label">
+              <v-col
+                cols="12"
+                md="12"
+                v-for="item in this.$labEmailTemplate"
+                :key="item.label"
+              >
                 <v-textarea
                   class="conv-textarea"
                   :label="item.label"
@@ -442,6 +499,7 @@ export default {
     },
 
     createNewLab() {
+      this.$refs.form.resetValidation();
       this.dialogNewLab = true;
     },
 
@@ -451,7 +509,7 @@ export default {
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
       this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
-
+      this.$refs.formEdit.resetValidation();
       this.dialogEditLab = true;
     },
 

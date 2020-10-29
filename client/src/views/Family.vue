@@ -155,7 +155,7 @@
                 label="Notes for next contact"
                 outlined
                 no-resize
-                rows="3"
+                rows="4"
                 hide-details
                 readonly
                 v-model="currentFamily.NextContactNote"
@@ -669,6 +669,7 @@ export default {
       // this.editableFields.shift();
       // this.editableFields.pop();
       // this.editableFields.pop();
+      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 
@@ -676,6 +677,7 @@ export default {
       this.editedIndex = this.Families.indexOf(this.currentFamily);
       this.editedItem = Object.assign({}, this.currentFamily);
       // this.editableFields = Object.assign({}, this.$familyFields);
+      this.$refs.form.resetValidation();
       this.dialog = true;
     },
 
