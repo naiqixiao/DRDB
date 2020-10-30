@@ -5,7 +5,6 @@
         <v-text-field
           label="Email"
           :rules="this.$rules.email"
-          @blur="this.$refs.formLogin.resetValidation()"
           v-model="email"
           clearable
         ></v-text-field>
@@ -15,7 +14,6 @@
           type="password"
           v-model="password"
           clearable
-          @blur="this.$refs.formLogin.resetValidation()"
           @keydown.enter="login"
           :rules="this.$rules.required"
         ></v-text-field>

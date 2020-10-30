@@ -97,9 +97,9 @@ function emailBody(schedule) {
             schedule.Appointments[0].Study.Lab.LabName + "<" + schedule.Appointments[0].Study.Lab.Email + ">",
         // cc: "lab email <nx@kangleelab.com>",
         to: schedule.Appointments[0].Family.NamePrimary +
-        "<" +
-        schedule.Appointments[0].Family.Email +
-        ">",
+            "<" +
+            schedule.Appointments[0].Family.Email +
+            ">",
         // to:
         //     schedule.Appointments[0].Family.NamePrimary +
         //     "<" +
@@ -110,6 +110,36 @@ function emailBody(schedule) {
     };
 
     return emailContent;
+}
+
+function manualReminderBody(schedule) {
+
+    const emailSubject =
+        "Remind " + schedule.Appointments[0].Family.NamePrimary.split(" ")[0] + " of their participation tomorrow."
+
+
+    const emailBody =
+        "<p>" + schedule.Appointments[0].Study.Lab.LabName + ",</p>" +
+        "<p>" + schedule.Appointments[0].Family.NamePrimary.split(" ")[0] + " and their child(ren), " + childNames(schedule.Appointments) +
+        " are coming for a study tomorrow, " + moment(schedule.AppointmentTime).format(
+            " [on] dddd [(]MMM Do[)] [at] h:mma"
+        ) + "<br>"
+
+    "However, there is no email in the system to remind them over email. Please give them a call ASAP.</p>" +
+        "<p>Thank you! <br>" +
+        "Developmental Research Management System</p>"
+
+    const emailContent = {
+        to: schedule.Appointments[0].Study.Lab.LabName +
+            "<" +
+            schedule.Appointments[0].Study.Lab.Email +
+            ">",
+        subject: emailSubject,
+        body: emailBody,
+    };
+
+    return emailContent;
+
 }
 
 function makeBody(to, from, cc, subject, body) {
@@ -167,6 +197,10 @@ async function sendEmail(oAuth2Client, emailContent) {
 
 // Retrieve today's appointments from the database.
 exports.reminderEmail = asyncHandler(async () => {
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+        fs.mkdirSync(logFolder)
+    }
 
     var startDate = moment()
     switch (moment().weekday()) {
@@ -228,32 +262,87 @@ exports.reminderEmail = asyncHandler(async () => {
             ],
         });
 
+        const credentialsPath = "api/google/general/credentials.json";
+        const credentials = fs.readFileSync(credentialsPath);
+        const { client_secret, client_id, redirect_uris } = JSON.parse(
+            credentials
+        ).installed;
+
+        const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+
         schedules.forEach(async (schedule) => {
 
-            const credentialsPath = "api/google/general/credentials.json";
-            const tokenPath = "api/google/labs/lab" + schedule.Appointments[0].Study.Lab.id + "/token.json";
+            const logFile = logFolder + "/" + schedule.Appointments[0].Study.Lab.LabName + "_log.txt";
 
-            const credentials = fs.readFileSync(credentialsPath);
+            if (!!schedule.Appointments[0].Family.Email) {
 
-            const { client_secret, client_id, redirect_uris } = JSON.parse(
-                credentials
-            ).installed;
+                const tokenPath = "api/google/labs/lab" + schedule.Appointments[0].Study.Lab.id + "/token.json";
 
-            const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+                const token = fs.readFileSync(tokenPath);
 
-            const token = fs.readFileSync(tokenPath);
-            oAuth2Client.setCredentials(JSON.parse(token));
-            const emailContent = emailBody(schedule);
+                oAuth2Client.setCredentials(JSON.parse(token));
 
-            await sendEmail(oAuth2Client, emailContent);
+                const emailContent = emailBody(schedule);
 
-            // update schedule
-            await model.schedule.update({ Reminded: 1 }, {
-                where: { id: schedule.id }
-            });
+                await sendEmail(oAuth2Client, emailContent);
+
+                // update schedule
+                await model.schedule.update({ Reminded: 1 }, {
+                    where: { id: schedule.id }
+                });
+
+                // log
+                var logInfo = "[Auto reminder sent] Reminder email is sent to " + schedule.Appointments[0].Family.Email + " at " + new Date().toString() + "\r\n"
+
+                if (fs.existsSync(logFile)) {
+                    fs.appendFileSync(logFile, logInfo)
+                } else {
+                    fs.writeFileSync(logFile, logInfo)
+                }
+
+            }
+            else {
+
+                const tokenPath = "api/google/labs/general/token.json";
+
+                const token = fs.readFileSync(tokenPath);
+
+                oAuth2Client.setCredentials(JSON.parse(token));
+
+                const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
+
+                const adminSendAs = await adminGmail.users.settings.sendAs.list({
+                    userId: "me",
+                });
+
+                var sendAsEmail = {};
+
+                adminSendAs.data.sendAs.forEach((email) => {
+                    if (email.isDefault) {
+                        sendAsEmail = email;
+                    }
+                });
+
+                var adminEmail = sendAsEmail.sendAsEmail;
+
+                var emailContent = manualReminderBody(schedule);
+
+                emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
+
+                await sendEmail(oAuth2Client, emailContent);
+
+                // log
+                var logInfo = "[Manual reminder] An email about reminding participants for tomorrow's study is sent to " +
+                    schedule.Appointments[0].Study.Lab.Email + " at " + new Date().toString() + "\r\n"
+
+                if (fs.existsSync(logFile)) {
+                    fs.appendFileSync(logFile, logInfo)
+                } else {
+                    fs.writeFileSync(logFile, logInfo)
+                }
+
+            }
         })
-
-        return schedules.length + " reminder email sent!"
 
     } catch (error) {
 

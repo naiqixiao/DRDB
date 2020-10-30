@@ -12,7 +12,7 @@ var cron = require('node-cron');
 
 const ReminderController = require("./api/controllers/reminder");
 
-cron.schedule('0 16 * * *', async () => {
+cron.schedule('0 15 * * *', async () => {
 
   const resonse = await ReminderController.reminderEmail();
 

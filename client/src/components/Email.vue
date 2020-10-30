@@ -1,15 +1,33 @@
 <template>
   <v-card outlined class="d-flex flex-column">
+    <v-alert
+      v-if="!familyInfo.Email"
+      border="left"
+      type="error"
+      color="#c73460"
+      dense
+      style="font-weight: 600"
+      >Participant email is not available.</v-alert
+    >
     <v-row dense justify="start">
       <v-col cols="12" md="1"></v-col>
       <v-col cols="12" md="8">
-        <v-text-field :value="familyInfo.Email" label="Email" :rules="this.$rules.email"></v-text-field>
+        <v-text-field
+          v-model="familyInfo.Email"
+          label="Email"
+          :rules="this.$rules.email"
+          @change="checkEmail"
+        ></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
     <v-row justify="center">
-      <v-col cols="12" md="11" style="overflow-y: scroll;">
-        <vue-editor ref="emailBody" v-model="emailBody" :editor-toolbar="customToolbar"></vue-editor>
+      <v-col cols="12" md="11" style="overflow-y: scroll">
+        <vue-editor
+          ref="emailBody"
+          v-model="emailBody"
+          :editor-toolbar="customToolbar"
+        ></vue-editor>
       </v-col>
     </v-row>
   </v-card>
@@ -19,6 +37,8 @@
 import { VueEditor } from "vue2-editor";
 import email from "@/services/email";
 import moment from "moment";
+import family from "@/services/family";
+import store from "@/store";
 
 export default {
   props: {
@@ -35,6 +55,7 @@ export default {
 
   data() {
     return {
+      emailUpdate: false,
       emailBody: "",
       emailSubject: "",
       customToolbar: [
@@ -60,6 +81,10 @@ export default {
         childNames = "your " + nameList.length + " children";
       }
       return childNames;
+    },
+
+    checkEmail() {
+      this.emailUpdate = true;
     },
 
     generateEmailBody() {
@@ -236,6 +261,12 @@ export default {
 
       try {
         await email.send(emailContent);
+
+        if (this.emailUpdate) {
+          this.familyInfo.UpdatedBy = store.state.userID;
+          await family.update(this.familyInfo);
+          this.emailUpdate = false;
+        }
       } catch (error) {
         console.log(error);
       }
