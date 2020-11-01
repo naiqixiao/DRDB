@@ -159,6 +159,12 @@ export default {
   height: 36px;
 }
 
+.checkbox-child {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  margin: 0 0 0 0 !important;
+}
+
 .theme--light.v-text-field.v-text-field--solo:not(.v-text-field--solo-flat)
   > .v-input__control
   > .v-input__slot {

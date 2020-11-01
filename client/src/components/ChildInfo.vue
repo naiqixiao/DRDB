@@ -122,7 +122,7 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false">
+      <v-dialog v-model="dialogChild" max-width="800px" :retain-focus="false">
         <v-card outlined>
           <v-card-title>
             <span class="headline">Child's information</span>
@@ -131,41 +131,97 @@
           <v-form ref="formChild" v-model="validChild" lazy-validation>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.Name"
-                    :rules="this.$rules.name"
-                    label="Name"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.DoB"
-                    append-icon="event"
-                    @click:append="dobPicker = true"
-                    :rules="this.$rules.dob"
-                    label="Date of birth (YYYY-MM-DD)"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-select
-                    v-model="editedItem.Sex"
-                    :items="this.$Sex"
-                    outlined
-                    hide-details
-                    dense
-                    label="Sex"
-                    chip
-                  ></v-select>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <v-text-field
-                    v-model="editedItem.BirthWeight"
-                    :rules="this.$rules.birthWeight"
-                    label="Birth weight"
-                  ></v-text-field>
+                <v-col
+                  cols="12"
+                  :md="item.width"
+                  v-for="item in this.$childInfo"
+                  :key="item.label"
+                >
+                  <div v-if="!!item.options">
+                    <v-combobox
+                      :label="item.label"
+                      :items="$Options[item.options]"
+                      justify="start"
+                      v-model="editedItem[item.field]"
+                      outlined
+                      hide-details
+                      dense
+                    ></v-combobox>
+                  </div>
+                  <div v-else-if="item.label === 'Note'">
+                    <v-textarea
+                      class="conv-textarea"
+                      :label="item.label"
+                      outlined
+                      no-resize
+                      rows="4"
+                      hide-details
+                      v-model="editedItem[item.field]"
+                    ></v-textarea>
+                  </div>
+                  <div v-else-if="item.field === 'DoB'">
+                    <v-text-field
+                      v-model="editedItem.DoB"
+                      append-icon="event"
+                      @click:append="dobPicker = true"
+                      :rules="$rules.dob"
+                      :label="item.label"
+                      class="textfield-family"
+                      filled
+                      hide-details
+                      dense
+                      placeholder="  "
+                      outlined
+                      background-color="textbackground"
+                    ></v-text-field>
+                  </div>
+                  <div v-else-if="!!item.rules">
+                    <v-text-field
+                      class="textfield-family"
+                      filled
+                      hide-details
+                      :label="item.label"
+                      v-model="editedItem[item.field]"
+                      dense
+                      placeholder="  "
+                      outlined
+                      :rules="$rules[item.rules]"
+                      background-color="textbackground"
+                    ></v-text-field>
+                  </div>
+                  <div v-else>
+                    <v-text-field
+                      class="textfield-family"
+                      filled
+                      hide-details
+                      :label="item.label"
+                      v-model="editedItem[item.field]"
+                      dense
+                      placeholder="  "
+                      outlined
+                      background-color="textbackground"
+                    ></v-text-field>
+                  </div>
                 </v-col>
               </v-row>
+              <v-row>
+                <v-col
+                  cols="12"
+                  :md="item.width"
+                  v-for="item in this.$childSensitiveInfo"
+                  :key="item.label"
+                >
+                  <v-checkbox
+                    class="checkbox-child"
+                    hide-details
+                    :label="item.label"
+                    v-model="editedItem[item.field]"
+                    dense
+                  >
+                  </v-checkbox>
+                </v-col>
+              </v-row>
+              <v-divider></v-divider>
             </v-container>
           </v-form>
 
@@ -375,9 +431,7 @@
                   <v-btn
                     :disabled="!scheduleNextPage && !!currentFamily.Email"
                     @click="scheduleNextStep"
-                    >{{
-                      !!currentFamily.Email ? "Next" : "Skip email"
-                    }}</v-btn
+                    >{{ !!currentFamily.Email ? "Next" : "Skip email" }}</v-btn
                   >
                 </v-col>
               </v-row>
@@ -1066,7 +1120,7 @@ export default {
     },
   },
   computed: {
-    ElegibleStudies: function () {
+    ElegibleStudies() {
       if (this.Children) {
         var elegibleStudies = this.Children.map((child) => {
           let studyIds = [];
@@ -1084,7 +1138,7 @@ export default {
       }
     },
 
-    UniquePreviousStudies: function () {
+    UniquePreviousStudies() {
       return this.Children.map((child) => {
         let studyIds = [];
         child.Appointments.forEach((appointment) => {
@@ -1094,7 +1148,7 @@ export default {
         return studyIds;
       });
     },
-    PotentialStudies: function () {
+    PotentialStudies() {
       var PotentialStudies = [];
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
@@ -1116,7 +1170,7 @@ export default {
       return PotentialStudies;
     },
 
-    studyDateTime: function () {
+    studyDateTime() {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -1145,7 +1199,7 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function () {
+    earliestDate() {
       if (!this.dialogSchedule) {
         if (this.selectedStudy.length > 0) {
           var minAges = this.selectedStudy.map((study) => {

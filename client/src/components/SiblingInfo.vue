@@ -46,7 +46,7 @@
                 <v-col cols="12" sm="6" md="4">
                   <v-select
                     v-model="editedItem.Sex"
-                    :items="this.$Sex"
+                    :items="$Options.sex"
                     filled
                     label="Sex"
                     chip

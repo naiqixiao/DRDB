@@ -65,26 +65,26 @@
             </v-col>
             <v-col
               cols="12"
-              :md="field.width"
-              v-for="field in this.$familyBasicInfo"
-              :key="field.label"
+              :md="item.width"
+              v-for="item in this.$familyBasicInfo"
+              :key="item.label"
             >
-              <div v-if="field.options">
-                <v-select
+              <div v-if="!!item.options">
+                <!-- :item-value="$Options[item.options]" -->
+                <v-combobox
                   justify="start"
-                  :items="options[field.options]"
-                  v-model="editedItem[field.field]"
+                  :items="$Options[item.options]"
+                  v-model="editedItem[item.field]"
                   outlined
-                  :label="field.label"
+                  :label="item.label"
                   dense
-                  chip
-                ></v-select>
+                ></v-combobox>
               </div>
-              <div v-else-if="field.rules">
+              <div v-else-if="item.rules">
                 <v-text-field
-                  :label="field.label"
-                  :rules="$rules[field.rules]"
-                  v-model="editedItem[field.field]"
+                  :label="item.label"
+                  :rules="$rules[item.rules]"
+                  v-model="editedItem[item.field]"
                   outlined
                   hide-details
                   dense
@@ -92,8 +92,8 @@
               </div>
               <div v-else>
                 <v-text-field
-                  :label="field.label"
-                  v-model="editedItem[field.field]"
+                  :label="item.label"
+                  v-model="editedItem[item.field]"
                   outlined
                   hide-details
                   dense
@@ -107,26 +107,25 @@
             </v-col>
             <v-col
               cols="12"
-              :md="field.width"
-              v-for="field in this.$familyContactInfo"
-              :key="field.label"
+              :md="item.width"
+              v-for="item in this.$familyContactInfo"
+              :key="item.label"
             >
-              <div v-if="field.options">
-                <v-select
+              <div v-if="item.options">
+                <v-combobox
                   justify="start"
-                  :items="options[field.options]"
-                  v-model="editedItem[field.field]"
+                  :items="$Options[item.options]"
+                  v-model="editedItem[item.field]"
                   outlined
-                  :label="field.label"
+                  :label="item.label"
                   dense
-                  chip
-                ></v-select>
+                ></v-combobox>
               </div>
-              <div v-else-if="field.rules">
+              <div v-else-if="item.rules">
                 <v-text-field
-                  :label="field.label"
-                  :rules="$rules[field.rules]"
-                  v-model="editedItem[field.field]"
+                  :label="item.label"
+                  :rules="$rules[item.rules]"
+                  v-model="editedItem[item.field]"
                   outlined
                   hide-details
                   dense
@@ -134,26 +133,13 @@
               </div>
               <div v-else>
                 <v-text-field
-                  :label="field.label"
-                  v-model="editedItem[field.field]"
+                  :label="item.label"
+                  v-model="editedItem[item.field]"
                   outlined
                   hide-details
                   dense
                 ></v-text-field>
               </div>
-            </v-col>
-            <v-col md="12" class="subtitle">
-              <v-divider></v-divider>
-              <h4 class="text-left">Notes:</h4>
-            </v-col>
-            <v-col md="8" class="subtitle">
-              <v-textarea
-                label
-                outlined
-                no-resize
-                rows="3"
-                v-model="editedItem.Note"
-              ></v-textarea>
             </v-col>
           </v-row>
         </v-form>
@@ -248,16 +234,6 @@ export default {
         { label: "Last Contact Date", field: "LastContactDate" },
         { label: "Next ContactDate", field: "NextContactDate" },
       ],
-      options: {
-        language: ["English", "French", "Chinese", "Spanish", "Hindi"],
-        race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
-        recruitmentMethod: [
-          "Hospital",
-          "Events",
-          "SocialMedia",
-          "PreviousParticipation",
-        ],
-      },
       editableFields: [],
     };
   },
@@ -281,11 +257,10 @@ export default {
 
           await family.update(this.editedItem);
 
-          this.currentFamily = Object.assign({}, this.editedItem);
-          
+          this.$emit("updateFamily", this.editedItem);
+
           console.log("Family information updated!");
           this.$refs.form.resetValidation();
-
         } catch (error) {
           console.log(error.response);
         }

@@ -7,7 +7,9 @@
         color="#c73460"
         dense
         style="font-weight: 600"
-      >Lab email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Lab email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
+      >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
       <v-alert
@@ -16,7 +18,9 @@
         color="#c7792c"
         dense
         style="font-weight: 600"
-      >Admin email is not been setup properly. Please set it up in the Settings page.</v-alert>
+        >Admin email is not been setup properly. Please set it up in the
+        Settings page.</v-alert
+      >
     </div>
     <v-row justify="start">
       <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
@@ -110,7 +114,10 @@
     <v-row justify="center" style="padding-top: 28px">
       <v-col cols="12" md="3">
         <template>
-          <FamilyInfo :currentFamily="currentFamily"></FamilyInfo>
+          <FamilyInfo
+            :currentFamily="currentFamily"
+            @updateFamily="updateCurrentFamily"
+          ></FamilyInfo>
         </template>
       </v-col>
       <v-col cols="12" md="9">
@@ -118,7 +125,7 @@
           :Schedules="Schedules"
           :studyTimeSlots="this.$studyTimeSlots"
           @rowSelected="updateFamily"
-          tableHeight = "720px"
+          tableHeight="720px"
         ></ScheduleTable>
       </v-col>
     </v-row>
@@ -318,6 +325,10 @@ export default {
       // this.currentFamily = Results.data[0];
 
       this.currentFamily = family;
+    },
+
+    updateCurrentFamily(editedFamily) {
+      this.currentFamily = Object.assign({}, editedFamily);
     },
 
     beforeDatePick() {

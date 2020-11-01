@@ -102,14 +102,21 @@ export default {
         label: "Email",
         field: "Email",
         rules: "email",
-        width: "4",
+        width: "3",
         searchable: true,
       },
       {
         label: "Phone",
         field: "Phone",
         rules: "phone",
-        width: "4",
+        width: "3",
+        searchable: true,
+      },
+      {
+        label: "Cell Phone",
+        field: "CellPhone",
+        rules: "phone",
+        width: "3",
         searchable: true,
       },
       {
@@ -118,6 +125,73 @@ export default {
         width: "3",
         options: "recruitmentMethod",
       },
+    ];
+
+    Vue.prototype.$childInfo = [
+      {
+        label: "Name",
+        field: "Name",
+        rules: "name",
+        width: "4",
+      },
+      {
+        label: "Date of birth (YYYY-MM-DD)",
+        field: "DoB",
+        rules: "dob",
+        width: "4",
+      },
+      {
+        label: "Sex",
+        field: "Sex",
+        options: "sex",
+        width: "2",
+      },
+      {
+        label: "Gestational age (weeks)",
+        field: "Gestation",
+        width: "4",
+      },
+      {
+        label: "Birth weight",
+        field: "BirthWeight",
+        rules: "birthWeight",
+        width: "4",
+      },
+      {
+        label: "Language",
+        field: "Language",
+        width: "4",
+        options: "language",
+      },
+      {
+        label: "School",
+        field: "School",
+        width: "4",
+      },
+      {
+        label: "School Language",
+        field: "SchoolLanguage",
+        width: "4",
+        options: "language",
+      },
+      {
+        label: "Home Language",
+        field: "HomeLanguage",
+        width: "4",
+        options: "language",
+      },
+      {
+        label: "Note",
+        field: "Note",
+        width: "12",
+      },
+    ];
+
+    Vue.prototype.$childSensitiveInfo = [
+      { label: "Born prematurely?", field: "PrematureBirth", width: "3" },
+      { label: "Vision deficit?", field: "VisionLoss", width: "3" },
+      { label: "Hearing deficit?", field: "HearingLoss", width: "3" },
+      { label: "Other illness?", field: "Illness", width: "3" },
     ];
 
     Vue.prototype.$labInfo = [
@@ -173,17 +247,6 @@ export default {
         options: "studyType",
       },
     ];
-
-    Vue.prototype.$options = {
-      language: ["English", "French", "Chinese", "Spanish", "Hindi"],
-      race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
-      recruitmentMethod: [
-        "Hospital",
-        "Events",
-        "SocialMedia",
-        "PreviousParticipation",
-      ],
-    };
 
     Vue.prototype.$studyTimeSlots = [
       "08:30AM",
@@ -360,7 +423,19 @@ export default {
       },
     ];
 
-    Vue.prototype.$Sex = ["F", "M"];
+    Vue.prototype.$sex = ["F", "M"];
+
+    Vue.prototype.$Options = {
+      sex: ["F", "M"],
+      language: ["English", "French", "Chinese", "Spanish", "Hindi"],
+      race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],
+      recruitmentMethod: [
+        "Hospital",
+        "Events",
+        "SocialMedia",
+        "PreviousParticipation",
+      ],
+    };
 
     Vue.prototype.$rules = {
       name: [
@@ -401,7 +476,10 @@ export default {
       phone: [
         (value) => {
           const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-          return pattern.test(value) || "Invalid phone.";
+          if (value) { return pattern.test(value) || "Invalid phone."; }
+          else {
+            return true
+          }
         },
         // (value) => !!value || "Required.",
         (value) => {
@@ -416,7 +494,12 @@ export default {
         // (value) => !!value || "Required.",
         (value) => {
           const pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
-          return pattern.test(value) || "Invalid Date of Birth.";
+          if (value) {
+            return pattern.test(value) || "Invalid Date of Birth.";
+          }
+          else {
+            return true
+          }
         },
       ],
       birthWeight: [
@@ -431,6 +514,9 @@ export default {
 
         },
       ],
+      // noRule: [
+      //   true
+      // ]
       // required: [(value) => !!value || "Required."],
     };
   },

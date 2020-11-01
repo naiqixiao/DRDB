@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
 	return sequelize.define('Child', {
 		id: {
 			autoIncrement: true,
@@ -22,6 +22,10 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true
 		},
 		Age: {
+			type: DataTypes.INTEGER,
+			allowNull: true
+		},
+		Gestation: {
 			type: DataTypes.INTEGER,
 			allowNull: true
 		},
