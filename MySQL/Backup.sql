@@ -70,6 +70,7 @@ CREATE TABLE `Child` (
   `HomeLanguage` varchar(100) DEFAULT NULL,
   `SchoolLanguage` varchar(100) DEFAULT NULL,
   `School` varchar(100) DEFAULT NULL,
+  `Gestation` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `Child_ibfk_1` (`FK_Family`),
   CONSTRAINT `Child_ibfk_1` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
@@ -355,4 +356,4 @@ CREATE TABLE `Study` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-31 17:14:55
+-- Dump completed on 2020-10-31 22:45:44
