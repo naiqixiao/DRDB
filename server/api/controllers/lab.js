@@ -99,11 +99,10 @@ exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
 
-    newLabInfo.EmailOpening = "Email opening (currently not used).";
+    newLabInfo.EmailOpening = "Email opening (currently not in use).";
     newLabInfo.EmailClosing = "Please feel free to let us know if you wish to change the time for your visit. You can either send us an email or call us at XXXX.";
-    newLabInfo.Location = "Psychology Building, McMaster University";
+    newLabInfo.Location = "Psychology Building, McMaster University (used in calendar events)";
     newLabInfo.TransportationInstructions = "Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.";
-
 
     newLabInfo.Personnels.forEach((personnel) => {
       var password = Math.random()

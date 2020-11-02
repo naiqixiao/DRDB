@@ -127,7 +127,7 @@ export default {
               ",</p>" +
               "<p>We are " +
               this.$store.state.labName +
-              " at McMaster University. " +
+              // " at McMaster University. " +
               "We would love to have you and " +
               this.childNames() +
               " to participate in our study.</p>" +
