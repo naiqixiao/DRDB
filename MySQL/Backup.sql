@@ -117,7 +117,7 @@ CREATE TABLE `Experimenter` (
   KEY `FK_Study` (`FK_Study`),
   CONSTRAINT `Experimenter_ibfk_1` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Experimenter_ibfk_2` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=95 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -225,6 +225,7 @@ CREATE TABLE `Lab` (
   `EmailClosing` mediumtext,
   `Location` mediumtext,
   `TransportationInstructions` mediumtext,
+  `ZoomLink` varchar(300) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `LabName` (`LabName`),
   UNIQUE KEY `PI` (`PI`),
@@ -332,13 +333,14 @@ CREATE TABLE `Study` (
   `Completed` int NOT NULL DEFAULT '0',
   `FK_Lab` int NOT NULL,
   `FK_Personnel` int NOT NULL,
-  `StudyType` enum('Behavioural','EEG/ERP','EyeTracking','fNIRS') NOT NULL,
+  `StudyType` varchar(30) NOT NULL,
   `PrematureParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `VisionLossParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `HearingLossParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `IllParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ReminderTemplate` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_Lab` (`FK_Lab`),
   KEY `FK_Personnel_idx` (`FK_Personnel`),
@@ -356,4 +358,4 @@ CREATE TABLE `Study` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-31 22:45:44
+-- Dump completed on 2020-11-02  8:51:04
