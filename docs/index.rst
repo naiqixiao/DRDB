@@ -16,3 +16,4 @@ This is an open source system to manage participant database, study, study sched
    MySQL Database
    Backend
    Frontend
+   Email Template

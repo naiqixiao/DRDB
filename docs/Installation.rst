@@ -128,15 +128,16 @@ Backend setup and configuration
     cd ~/DRDB/server
     sudo npm install
 
--  open '~/DRDB/server/api/models/DRDB.js'
--  update *Line 4 with the MySQL username and password* that you created
+-  Set up MySQL database connection
+-  open '~/DRDB/server/config/general.js'
+-  update *Line 5 with the MySQL username and password* that you created
    in the previous step.
 -  for example, the following line indicates username of 'admin' and
    password of 'password'
 
 .. code-block:: javascript
 
-    const sequelize = new Sequelize("DRDB", "admin", "password", {
+    exports.sequelize = new Sequelize("DRDB", "admin", "password", {
     host: "localhost",
     dialect: "mysql",
     logging: false,
@@ -152,6 +153,11 @@ Backend setup and configuration
         idle: 10000,
     },
     });
+
+-  Set up the URL of the system
+-  open '~/DRDB/server/config/general.js'
+-  update *Line 1* with the URL of the system
+
 
 - Run backend server with pm2
 
