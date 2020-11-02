@@ -7,7 +7,7 @@ const morgan = require("morgan");
 app.use(morgan("dev"));
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
-app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.json({ limit: '50mb' }));
 
 // app.use(bodyParser({limit: '50mb'}));
 
@@ -46,6 +46,8 @@ const gmailRoutes = require("./api/routes/gmail");
 const extAPIRoutes = require("./api/routes/externalAPIs");
 const feedbackRoutes = require("./api/routes/feedback");
 
+const reminderRoutes = require("./api/routes/reminder");
+
 app.use("/api/user", userRoutes);
 
 app.use("/api/family", familyRoutes);
@@ -68,9 +70,8 @@ app.use("/api/extAPIs", extAPIRoutes);
 
 app.use("/api/feedback", feedbackRoutes);
 
-// app.get('/', function(req, res){
-//   res.sendFile(__dirname + '/index.html');
-// });
+app.use("/api/reminder", reminderRoutes);
+
 
 // Error handling
 app.use((req, res, next) => {

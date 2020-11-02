@@ -219,6 +219,7 @@ export default {
         "Cancelled",
         "Rejected",
       ],
+      index: -1
     };
   },
 
@@ -242,6 +243,7 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
@@ -266,6 +268,7 @@ export default {
 
         this.queryString = Object.assign({}, this.defaultQueryString);
       }
+      this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
@@ -291,6 +294,7 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
@@ -314,21 +318,18 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    updateFamily(family) {
-      // var queryStringFamily = {
-      //   id: familyId,
-      // };
-      // const Results = await family.search(queryStringFamily);
-      // this.currentFamily = Results.data[0];
-
+    updateFamily(family, index) {
+      this.index = index;
       this.currentFamily = family;
     },
 
     updateCurrentFamily(editedFamily) {
       this.currentFamily = Object.assign({}, editedFamily);
+      this.Schedules[this.index].Family = Object.assign({}, editedFamily);
     },
 
     beforeDatePick() {

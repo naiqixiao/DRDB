@@ -109,7 +109,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
-          height="48px"
+          class="textfield-family"
           background-color="textbackground"
           hide-details
           label="Associated lab email"
@@ -212,7 +212,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
-          height="48px"
+          class="textfield-family"
           background-color="textbackground"
           hide-details
           label="Administration email"
@@ -277,9 +277,9 @@
                 <v-divider></v-divider>
                 <h4 class="text-left">Lab information:</h4>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="6">
                 <v-text-field
-                  height="48px"
+                  class="textfield-family"
                   background-color="textbackground"
                   hide-details
                   label="Lab's Name"
@@ -310,6 +310,23 @@
 
               <v-col md="12" class="subtitle">
                 <v-divider></v-divider>
+                <h4 class="text-left">Zoom Link (for online studies):</h4>
+              </v-col>
+              <v-col cols="12" md="12">
+                <v-text-field
+                  class="textfield-family"
+                  background-color="textbackground"
+                  hide-details
+                  label="Zoom Link"
+                  v-model="currentLab.ZoomLink"
+                  placeholder="  "
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
                 <h4 class="text-left">PI/Lab Manager information:</h4>
               </v-col>
               <v-col
@@ -325,7 +342,7 @@
                     v-model="currentLab.Personnels[0][item.field]"
                     :label="item.label"
                     hide-details
-                    height="48px"
+                    class="textfield-family"
                     placeholder="  "
                     :rules="$rules[item.rules]"
                     outlined
@@ -335,7 +352,7 @@
                 </div>
                 <div v-else>
                   <v-text-field
-                    height="48px"
+                    class="textfield-family"
                     background-color="textbackground"
                     hide-details
                     :label="item.label"
@@ -378,13 +395,32 @@
             <v-row justify="start">
               <v-col cols="12" md="6">
                 <v-text-field
-                  height="48px"
+                  class="textfield-family"
                   background-color="textbackground"
                   hide-details
                   label="Lab's Name"
                   v-model="editedLab.LabName"
                   placeholder="  "
                   :rules="$rules.required"
+                  outlined
+                  dense
+                ></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Zoom Link (for online studies):</h4>
+              </v-col>
+              <v-col cols="12" md="12">
+                <v-text-field
+                  class="textfield-family"
+                  background-color="textbackground"
+                  hide-details
+                  label="Zoom Link"
+                  v-model="editedLab.ZoomLink"
+                  placeholder="  "
                   outlined
                   dense
                 ></v-text-field>
@@ -508,6 +544,7 @@ export default {
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
       this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
+      this.editedLab.ZoomLink = this.$store.state.ZoomLink;
       this.dialogEditLab = true;
     },
 
@@ -537,9 +574,8 @@ export default {
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
           );
-          
-          this.$refs.form.resetValidation();
 
+          this.$refs.form.resetValidation();
         } catch (error) {
           console.log(error.response);
         }
@@ -564,10 +600,10 @@ export default {
             "setTransportationInstructions",
             this.editedLab.TransportationInstructions
           );
+          this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
 
           alert("Lab information is updated!");
           this.$refs.formEdit.resetValidation();
-          
         } catch (error) {
           console.log(error.response);
         }

@@ -26,6 +26,7 @@ export default new Vuex.Store({
     emailClosing: null,
     location: null,
     transportationInstructions: null,
+    ZoomLink: null,
   },
   mutations: {
     setToken(state, token) {
@@ -80,6 +81,9 @@ export default new Vuex.Store({
     setTransportationInstructions(state, transportationInstructions) {
       state.transportationInstructions = transportationInstructions;
     },
+    setZoomLink(state, ZoomLink) {
+      state.ZoomLink = ZoomLink;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -132,6 +136,9 @@ export default new Vuex.Store({
     },
     setTransportationInstructions({ commit }, transportationInstructions) {
       commit("setTransportationInstructions", transportationInstructions);
+    },
+    setZoomLink({ commit }, ZoomLink) {
+      commit("setZoomLink", ZoomLink);
     },
   },
 });

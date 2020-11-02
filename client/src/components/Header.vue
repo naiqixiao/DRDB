@@ -198,6 +198,7 @@ export default {
       this.$store.dispatch("setEmailClosing", null);
       this.$store.dispatch("setLocation", null);
       this.$store.dispatch("setTransportationInstructions", null);
+      this.$store.dispatch("setZoomLink", null);
 
       if (this.$route.name != "Login") {
         this.$router.push({

@@ -29,52 +29,45 @@ function emailBody(schedule) {
         "Reminder for your tomorrow's study appointment with " +
         childNames(schedule.Appointments)
 
-    // " on " +
-    // moment(schedule.AppointmentTime).format(
-    //     "MMM D (ddd), [at] h:mma"
-    // );
-    const opening =
-        "<p>Dear " +
-        schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
-        ",</p>" +
-        "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
-        childNames(schedule.Appointments) +
-        moment(schedule.AppointmentTime).format(
-            " [on] dddd [(]MMM Do[)] [at] h:mma"
-        ) +
-        "</b>.</p>"
-    // var emailBodyList = [];
+    var opening = ""
 
-    // schedule.Appointments.forEach((appointment) => {
-    //     var emailBody = appointment.Study.EmailTemplate;
+    if (schedule.Appointments[0].Study.StudyType !== "Online") {
+        opening =
+            "<p>Dear " +
+            schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
+            ",</p>" +
+            "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
+            childNames(schedule.Appointments) +
+            moment(schedule.AppointmentTime).format(
+                " [tomorrow at] h:mma"
+            ) +
+            "</b>.</p>" +
+            "<p>" + schedule.Appointments[0].Study.Lab.TransportationInstructions + "</p>"
 
-    //     if (appointment.Child.Sex == "F") {
-    //         emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
-    //         emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
-    //         emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
-    //     } else {
-    //         emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
-    //         emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
-    //         emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
-    //     }
+    } else {
 
-    //     emailBody = emailBody.replace(
-    //         /\${{childName}}/g,
-    //         appointment.Child.Name || ""
-    //     );
+        opening =
+            "<p>Dear " +
+            schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
+            ",</p>" +
+            "<p>This is " + schedule.Appointments[0].Study.Lab.LabName + ". Just a reminder that you and " + childNames(schedule.Appointments) +
+            "will participate our online study " +
+            moment(schedule.AppointmentTime).format(
+                " [tomorrow at] h:mma"
+            ) +
+            "</b>.</p>"
 
-    //     emailBody = emailBody.replace(/\. he/g, ". He");
-    //     emailBody = emailBody.replace(/\. his/g, ". His");
-    //     emailBody = emailBody.replace(/\. she/g, ". She");
-    //     emailBody = emailBody.replace(/\. her/g, ". Her");
+    }
 
-    //     emailBodyList.push(emailBody);
-    // });
+    var body = schedule.Appointments[0].Study.ReminderTemplate.replace(/\${{ZoomLink}}/g,
+        "<a href='" + schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>");
 
+    body = body.replace(/\${{childName}}/g, childNames(schedule.Appointments));
 
-    // location
-    const location =
-        "<p>" + schedule.Appointments[0].Study.Lab.TransportationInstructions + "</p>"
+    if (schedule.Appointments[0].Study.StudyType === "Online") {
+
+        body = body + "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>"
+    }
 
     // closing
     const closing =
@@ -87,10 +80,9 @@ function emailBody(schedule) {
         schedule.Appointments[0].Study.Lab.LabName +
         "</p>";
 
-    const emailBody =
-        opening +
-        // emailBodyList.join("<p></p>") +
-        location + closing;
+    const emailBody = opening +
+        body +
+        closing;;
 
     const emailContent = {
         from:
@@ -126,7 +118,7 @@ function manualReminderBody(schedule) {
         ) + "<br>"
 
     "However, there is no email in the system to remind them over email. Please give them a call ASAP.</p>" +
-        "<p>Thank you! <br>" +
+        "<p>Thank you!<br>" +
         "Developmental Research Management System</p>"
 
     const emailContent = {
@@ -245,6 +237,7 @@ exports.reminderEmail = asyncHandler(async () => {
                             attributes: [
                                 "StudyName",
                                 "EmailTemplate",
+                                "ReminderTemplate",
                                 "StudyType",
                                 "FK_Lab",
                             ],
@@ -262,6 +255,8 @@ exports.reminderEmail = asyncHandler(async () => {
             ],
         });
 
+        console.log(schedules.length)
+
         const credentialsPath = "api/google/general/credentials.json";
         const credentials = fs.readFileSync(credentialsPath);
         const { client_secret, client_id, redirect_uris } = JSON.parse(
@@ -269,6 +264,7 @@ exports.reminderEmail = asyncHandler(async () => {
         ).installed;
 
         const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+
 
         schedules.forEach(async (schedule) => {
 
@@ -343,6 +339,8 @@ exports.reminderEmail = asyncHandler(async () => {
 
             }
         })
+
+        res.status(200)
 
     } catch (error) {
 

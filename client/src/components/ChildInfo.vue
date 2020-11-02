@@ -40,7 +40,7 @@
                 outlined
                 @click.stop="editChild(child, index)"
               >
-                <v-icon>edit</v-icon>edit
+                <v-icon>edit</v-icon>details
               </v-btn>
               <v-spacer></v-spacer>
               <v-btn

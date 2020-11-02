@@ -69,15 +69,15 @@
             cols="12"
             sm="6"
             md="5"
-            v-for="field in this.$studyBasicFields"
-            :key="field.label"
+            v-for="item in this.$studyBasicFields"
+            :key="item.label"
           >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
-              :label="field.label"
-              v-model="currentStudy[field.field]"
+              :label="item.label"
+              v-model="currentStudy[item.field]"
               placeholder="  "
               outlined
               dense
@@ -101,20 +101,20 @@
         <v-row justify="space-around">
           <v-col md="12">
             <v-divider></v-divider>
-            <h4 class="text-left">Point of Contact:</h4>
+            <h4 class="text-left">Point of contact:</h4>
           </v-col>
           <v-col
             cols="12"
             sm="4"
-            v-for="field in this.$studyPointofContact"
-            :key="field.label"
+            v-for="item in this.$studyPointofContact"
+            :key="item.label"
           >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
-              :label="field.label"
-              v-model="currentStudy.PointofContact[field.field]"
+              :label="item.label"
+              v-model="currentStudy.PointofContact[item.field]"
               placeholder="  "
               readonly
               outlined
@@ -132,19 +132,19 @@
           <v-col
             cols="12"
             sm="6"
-            :md="field.width"
-            v-for="field in this.$studyCriteriaFields"
-            :key="field.label"
+            :md="item.width"
+            v-for="item in this.$studyCriteriaFields"
+            :key="item.label"
           >
             <v-text-field
-              height="48px"
+              class="textfield-family"
               background-color="textbackground"
               hide-details
-              :label="field.label"
+              :label="item.label"
               :value="
-                field.label == 'MinAge' || field.label == 'MaxAge'
-                  ? AgeFormated2(currentStudy[field.field])
-                  : currentStudy[field.field]
+                item.field == 'MinAge' || item.field == 'MaxAge'
+                  ? AgeFormated2(currentStudy[item.field])
+                  : currentStudy[item.field]
               "
               placeholder="  "
               readonly
@@ -152,7 +152,8 @@
               dense
             ></v-text-field>
           </v-col>
-
+        </v-row>
+        <v-row>
           <v-col md="12">
             <v-divider></v-divider>
             <h4 class="text-left" v-show="currentStudy.id">Email template:</h4>
@@ -164,6 +165,21 @@
             v-show="currentStudy.id"
           ></body>
 
+          <v-col md="12">
+            <v-divider></v-divider>
+            <h4 class="text-left" v-show="currentStudy.id">
+              Reminder email template:
+            </h4>
+          </v-col>
+          <body
+            v-html="currentStudy.ReminderTemplate"
+            align="start"
+            class="template"
+            v-show="currentStudy.id"
+          ></body>
+        </v-row>
+
+        <v-row>
           <v-col cols="12" md="2" dense>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -229,30 +245,29 @@
                       cols="12"
                       sm="6"
                       md="4"
-                      v-for="field in this.$studyBasicFields"
-                      :key="field.label"
+                      v-for="item in this.$studyBasicFields"
+                      :key="item.label"
                     >
-                      <div v-if="field.options">
+                      <div v-if="item.options">
                         <v-select
                           justify="start"
-                          :items="options[field.options]"
-                          v-model="editedStudy[field.field]"
-                          :label="field.label"
-                          height="48px"
+                          :items="$Options[item.options]"
+                          v-model="editedStudy[item.field]"
+                          :label="item.label"
+                          class="textfield-family"
                           background-color="textbackground"
                           hide-details
                           placeholder="  "
                           outlined
                           dense
-                          chip
                         ></v-select>
                       </div>
-                      <div v-else-if="field.rules">
+                      <div v-else-if="item.rules">
                         <v-text-field
-                          :label="field.label"
-                          v-model="editedStudy[field.field]"
-                          :rules="$rules[field.rules]"
-                          height="48px"
+                          :label="item.label"
+                          v-model="editedStudy[item.field]"
+                          :rules="$rules[item.rules]"
+                          class="textfield-family"
                           background-color="textbackground"
                           hide-details
                           placeholder="  "
@@ -262,9 +277,9 @@
                       </div>
                       <div v-else>
                         <v-text-field
-                          :label="field.label"
-                          v-model="editedStudy[field.field]"
-                          height="48px"
+                          :label="item.label"
+                          v-model="editedStudy[item.field]"
+                          class="textfield-family"
                           background-color="textbackground"
                           hide-details
                           placeholder="  "
@@ -275,7 +290,7 @@
                     </v-col>
                     <v-col cols="12" sm="4">
                       <v-select
-                        height="48px"
+                        class="textfield-family"
                         :items="labMembers"
                         :item-value="'id'"
                         :item-text="'Name'"
@@ -297,17 +312,17 @@
                     <v-col
                       cols="12"
                       sm="6"
-                      :md="field.width"
-                      v-for="field in this.$studyCriteriaFields"
-                      :key="field.label"
+                      :md="item.width"
+                      v-for="item in this.$studyCriteriaFields"
+                      :key="item.label"
                     >
-                      <div v-if="field.options">
+                      <div v-if="item.options">
                         <v-select
                           justify="start"
                           :items="inclusionOptions"
-                          v-model="editedStudy[field.field]"
-                          :label="field.label"
-                          height="48px"
+                          v-model="editedStudy[item.field]"
+                          :label="item.label"
+                          class="textfield-family"
                           background-color="textbackground"
                           hide-details
                           placeholder="  "
@@ -318,11 +333,15 @@
                       </div>
                       <div v-else>
                         <v-text-field
-                          height="48px"
+                          class="textfield-family"
                           background-color="textbackground"
                           hide-details
-                          :label="field.label"
-                          v-model="editedStudy[field.field]"
+                          :label="
+                            item.field == 'MinAge' || item.field == 'MaxAge'
+                              ? item.label + ' (months)'
+                              : item.label
+                          "
+                          v-model="editedStudy[item.field]"
                           placeholder="  "
                           outlined
                           dense
@@ -358,6 +377,20 @@
                     <v-col cols="12" md="10">
                       <vue-editor
                         v-model="editedStudy.EmailTemplate"
+                        :editor-toolbar="customToolbar"
+                      ></vue-editor>
+                    </v-col>
+                  </v-row>
+
+                  <v-row justify="space-around">
+                    <v-col md="12">
+                      <v-divider></v-divider>
+                      <h4 class="text-left">Reminder email template:</h4>
+                    </v-col>
+
+                    <v-col cols="12" md="10">
+                      <vue-editor
+                        v-model="editedStudy.ReminderTemplate"
                         :editor-toolbar="customToolbar"
                       ></vue-editor>
                     </v-col>
@@ -444,11 +477,6 @@ export default {
         },
       ],
       dialog: false,
-
-      options: {
-        studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS"],
-      },
-
       Studies: [],
       currentStudy: {
         StudyName: null,
@@ -578,7 +606,6 @@ export default {
     },
 
     rowSelected(item, row) {
-      console.log(row)
       row.select(true);
       this.currentStudy = item;
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
@@ -597,12 +624,12 @@ export default {
     },
 
     async save() {
-      if (this.editedIndex < 0) {
+      if (this.editedIndex === -1) {
         try {
           const Result = await study.create(this.editedStudy);
           this.editedStudy.id = Result.data.id;
           this.Studies.push(this.editedStudy);
-          // this.editedIndex = (this.Studies.length - 1);
+          this.editedIndex = this.Studies.length - 1;
           this.$store.dispatch("setStudies", this.Studies);
         } catch (error) {
           console.log(error.response);
@@ -662,8 +689,16 @@ export default {
         var years = Math.floor(Age / 12);
         var months = Age % 12;
         // months = months.toFixed(1);
-        var Y = years > 0 ? years + " y " : "";
-        var M = months + " m";
+        var Y = years > 0 ? years + " year" : "";
+        Y = years > 1 ? Y + "s " : Y + " ";
+
+        var M = "";
+
+        if (months > 0) {
+          M = months + " month";
+          M = months !== 1 ? M + "s" : M;
+        }
+
         formated = Y + M;
       }
       return formated;
@@ -723,6 +758,7 @@ body {
   margin: 8px 8px 8px 8px;
   padding: 8px 8px 8px 8px;
   border-width: 1px;
+  width: 100%;
 }
 
 .theme--light.v-icon {

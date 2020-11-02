@@ -28,6 +28,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.TEXT,
 			allowNull: false
 		},
+		ReminderTemplate: {
+			type: DataTypes.TEXT,
+			allowNull: false
+		},
 		Completed: {
 			type: DataTypes.INTEGER,
 			allowNull: false,

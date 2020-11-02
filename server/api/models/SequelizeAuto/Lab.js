@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
 	return sequelize.define('Lab', {
 		id: {
 			autoIncrement: true,
@@ -48,7 +48,11 @@ module.exports = function(sequelize, DataTypes) {
 		TransportationInstructions: {
 			type: 'MEDIUMTEXT',
 			allowNull: true
-		}
+		},
+		ZoomLink: {
+			type: DataTypes.STRING(300),
+			allowNull: true
+		},
 	}, {
 		sequelize,
 		tableName: 'Lab'

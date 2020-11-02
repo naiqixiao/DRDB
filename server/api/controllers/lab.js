@@ -130,6 +130,7 @@ exports.create = asyncHandler(async (req, res) => {
       Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
       EmailTemplate:
         "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
+      ReminderTemplate: "<p>Please enter a template for reminder email sent to parents for their upcoming study.</p>",
       Completed: false,
       StudyType: "Behavioural",
       PrematureParticipant: "Include",
@@ -156,7 +157,7 @@ exports.create = asyncHandler(async (req, res) => {
         newLabInfo.Personnels[0].Role +
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
-        "</em></b>. Please login with your email and temporary password at <a href=" + config.URL +  ">" + config.URL +  "</a> to set your password (you need to turn on University VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+        "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password (you need to turn on University VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
 
         "<p><a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +

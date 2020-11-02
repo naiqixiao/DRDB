@@ -667,6 +667,12 @@ export default {
 
             Object.assign(this.Families[this.editedIndex], this.editedItem);
 
+            this.Families[this.editedIndex].Schedules.forEach((schedule) =>{
+
+              Object.assign(schedule.Family, this.editedItem);
+              
+            })
+
             console.log("Family information updated!");
           } else {
             this.editedItem.LastContactDate = new Date();

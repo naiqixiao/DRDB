@@ -71,13 +71,13 @@
                 cols="12"
                 sm="6"
                 md="4"
-                v-for="field in personnelFields"
-                :key="field.label"
+                v-for="item in personnelFields"
+                :key="item.label"
               >
                 <v-text-field
                   background-color="textbackground"
-                  :label="field.label"
-                  v-model="currentPersonnel[field.field]"
+                  :label="item.label"
+                  v-model="currentPersonnel[item.field]"
                   hide-details
                   height="48px"
                   placeholder="  "
@@ -169,22 +169,22 @@
                         cols="12"
                         sm="6"
                         md="4"
-                        v-for="field in personnelFields"
-                        :key="field.label"
+                        v-for="item in personnelFields"
+                        :key="item.label"
                       >
-                        <div v-if="field.options">
+                        <div v-if="item.options">
                           <v-select
                             justify="start"
                             :items="
                               $store.state.role == 'Admin' ||
                               $store.state.role == 'PI' ||
                               $store.state.role == 'Lab manager'
-                                ? options.fullRoles
-                                : options.limitedRoles
+                                ? $Options.fullRoles
+                                : $Options.limitedRoles
                             "
-                            v-model="editedPersonnel[field.field]"
-                            :label="field.label"
-                            :rules="$rules[field.rules]"
+                            v-model="editedPersonnel[item.field]"
+                            :label="item.label"
+                            :rules="$rules[item.rules]"
                             hide-details
                             height="48px"
                             placeholder="  "
@@ -193,11 +193,11 @@
                             chip
                           ></v-select>
                         </div>
-                        <div v-else-if="field.rules">
+                        <div v-else-if="item.rules">
                           <v-text-field
-                            :label="field.label"
-                            v-model="editedPersonnel[field.field]"
-                            :rules="$rules[field.rules]"
+                            :label="item.label"
+                            v-model="editedPersonnel[item.field]"
+                            :rules="$rules[item.rules]"
                             hide-details
                             height="48px"
                             placeholder="  "
@@ -207,8 +207,8 @@
                         </div>
                         <div v-else>
                           <v-text-field
-                            :label="field.label"
-                            v-model="editedPersonnel[field.field]"
+                            :label="item.label"
+                            v-model="editedPersonnel[item.field]"
                             hide-details
                             height="48px"
                             placeholder="  "
@@ -305,18 +305,6 @@ export default {
         { label: "Calendar ID", field: "Calendar", rules: "email" },
         { label: "Phone", field: "Phone", rules: "phone" },
       ],
-      options: {
-        fullRoles: [
-          "PostDoc",
-          "PI",
-          "GradStudent",
-          "Undergrad",
-          "RA",
-          "Lab manager",
-          "Staff",
-        ],
-        limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"],
-      },
 
       Personnels: [],
       currentPersonnel: {},

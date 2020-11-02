@@ -293,6 +293,7 @@ exports.login = asyncHandler(async (req, res) => {
     emailClosing: personnel.Lab.EmailClosing,
     location: personnel.Lab.Location,
     transportationInstructions: personnel.Lab.TransportationInstructions,
+    ZoomLink: personnel.Lab.ZoomLink,
   });
 });
 

@@ -88,7 +88,7 @@
         <v-row justify="space-around">
           <v-col md="12">
             <v-divider></v-divider>
-            <h4 class="text-left">Point of Contact:</h4>
+            <h4 class="text-left">Point of contact:</h4>
           </v-col>
           <v-col
             cols="12"
@@ -129,7 +129,7 @@
               hide-details
               :label="item.label"
               :value="
-                item.label == 'MinAge' || item.label == 'MaxAge'
+                item.field == 'MinAge' || item.field == 'MaxAge'
                   ? AgeFormated2(selectedStudy[item.field])
                   : selectedStudy[item.field]
               "
@@ -1698,8 +1698,16 @@ export default {
         var years = Math.floor(Age / 12);
         var months = Age % 12;
         // months = months.toFixed(1);
-        var Y = years > 0 ? years + " y " : "";
-        var M = months + " m";
+        var Y = years > 0 ? years + " year" : "";
+        Y = years > 1 ? Y + "s " : Y + " ";
+
+        var M = "";
+
+        if (months > 0) {
+          M = months + " month";
+          M = months !== 1 ? M + "s" : M;
+        }
+
         formated = Y + M;
       }
       return formated;

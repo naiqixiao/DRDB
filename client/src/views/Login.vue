@@ -262,6 +262,7 @@ export default {
           "setTransportationInstructions",
           response.data.transportationInstructions
         );
+        this.$store.dispatch("setZoomLink", response.data.ZoomLink);
 
         const profile = await externalAPIs.googleGetEmailAddress();
 

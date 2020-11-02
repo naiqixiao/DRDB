@@ -384,7 +384,7 @@ export default {
   },
   methods: {
     async updateSchedule(item, status) {
-      this.$emit("rowSelected", item.Family);
+      this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
       this.response = status;
       switch (status) {
         case "Confirmed":
@@ -602,7 +602,7 @@ export default {
     rowSelected(item, row) {
       row.select(true);
       row.expand(!row.isExpanded);
-      this.$emit("rowSelected", item.Family);
+      this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
     },
 
     datePickerRange() {
@@ -644,17 +644,17 @@ export default {
       switch (item.Status) {
         case "Confirmed":
           if (
+            moment(item.AppointmentTime).startOf("day") <=
+              moment().startOf("day").add(daysAheadofSchedule, "d") 
+              &&
             moment(item.AppointmentTime).startOf("day") >=
-              moment().startOf("day").subtract(daysAheadofSchedule, "d") &&
-            moment(item.AppointmentTime).startOf("day") <
-              moment().startOf("day").add(1, "d")
+              moment().startOf("day")
           ) {
             iconDisable = false;
           }
 
           break;
-        default:
-          break;
+       
       }
 
       return iconDisable;
@@ -670,8 +670,7 @@ export default {
           }
 
           break;
-        default:
-          break;
+
       }
 
       return iconDisable;

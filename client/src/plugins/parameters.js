@@ -435,6 +435,17 @@ export default {
         "SocialMedia",
         "PreviousParticipation",
       ],
+      studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS", "Online"],
+      fullRoles: [
+        "PostDoc",
+        "PI",
+        "GradStudent",
+        "Undergrad",
+        "RA",
+        "Lab manager",
+        "Staff",
+      ],
+      limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"],
     };
 
     Vue.prototype.$rules = {
