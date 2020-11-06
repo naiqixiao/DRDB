@@ -1,69 +1,85 @@
 <template>
   <div>
-    <!-- <v-row style="height: 48px;" dense>
-      <v-col cols="12" md="12" class="justify-start">
-        <h1 class="text-left">Child information</h1>
-      </v-col>
-    </v-row>-->
-    <div v-if="familyId">
-      <v-row dense align="start" style="height: 345px">
-        <v-col cols="6" v-for="(child, index) in Children" :key="child.id">
-          <v-card class="child-card d-flex flex-column" height="160px">
-            <v-card-title class="title">
-              <div
-                class="d-inline-block text-truncate"
-                style="max-width: 130px; padding-right: 4px"
-              >
-                {{ child.Name }}
-              </div>
-              <div>
-                {{ " (" + currentFamily.id + child.IdWithinFamily + ")" }}
+    <div style="overflow-y: scroll" v-if="familyId">
+      <v-row dense align="start" style="height: 500px">
+        <v-col cols="12" v-for="(child, index) in Children" :key="child.id">
+          <v-card class="child-card d-flex flex-column" height="200px">
+            <v-card-title
+              class="title"
+              style="padding: 4px 8px; font-size: 80%"
+            >
+              <div class="d-inline-block text-truncate" style="max-width: 60%">
+                {{
+                  child.Name +
+                  " (" +
+                  currentFamily.id +
+                  child.IdWithinFamily +
+                  ")"
+                }}
               </div>
               <v-spacer></v-spacer>
-              <v-icon v-if="child.Sex == 'M'" color="light-blue darken-4" large
-                >mdi-human-male</v-icon
+              <v-icon
+                :color="
+                  child.Sex === 'M' ? 'light-blue darken-4' : 'pink darken-1'
+                "
+                large
+                >{{
+                  child.Sex == "M" ? "mdi-human-male" : "mdi-human-female"
+                }}</v-icon
               >
-              <v-icon v-else color="pink darken-1" large
-                >mdi-human-female</v-icon
-              >
+              <v-icon v-show="birthday(child.DoB)">cake</v-icon>
             </v-card-title>
 
-            <v-card-text align="start">
-              <AgeDisplay class="subtitle-1 pl-md-2" :DoB="child.DoB" />
+            <v-card-text align="start" style="padding: 4px 8px">
+              <v-row style="height: 70px">
+                <v-col cols="12" md="7" style="padding: 0px !important" class="justify-center">
+                  <body align="start" v-html="age(child)"></body>
+                  <body style="height: 70px !important; overflow-y: scroll !important;" align="start" v-html="noteChild(child)"></body>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="12" md="5" style="padding: 0px !important;">
+                  <body align="end" v-html="languageDisplay(child)"></body>
+                </v-col>
+              </v-row>
             </v-card-text>
             <v-spacer></v-spacer>
             <v-card-actions>
-              <v-btn
-                small
-                color="primary"
-                dark
-                outlined
-                @click.stop="editChild(child, index)"
+              <v-row
+                justify="space-around"
+                style="padding-left: 8px; padding-right: 8px"
               >
-                <v-icon>edit</v-icon>details
-              </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn
-                small
-                dark
-                outlined
-                color="primary"
-                :disabled="PotentialStudies[index].length < 1"
-                @click.stop="Schedule(child, index)"
-              >
-                <v-icon dark>event</v-icon>schedule
-              </v-btn>
+                <v-btn
+                  small
+                  color="primary"
+                  dark
+                  outlined
+                  @click.stop="editChild(child, index)"
+                >
+                  <v-icon>edit</v-icon>edit
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn
+                  small
+                  dark
+                  outlined
+                  color="primary"
+                  :disabled="PotentialStudies[index].length < 1"
+                  @click.stop="Schedule(child, index)"
+                >
+                  <v-icon dark>event</v-icon>schedule
+                </v-btn>
+              </v-row>
             </v-card-actions>
           </v-card>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="12">
           <v-card
             class="child-card d-flex align-center justify-center"
             style="
               border-width: medium !important;
               border-style: dashed !important;
             "
-            height="160px"
+            height="200px"
           >
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -92,10 +108,10 @@
         </v-col>
       </v-row>
     </div>
-    <div v-else>
-      <v-row dense align="start" style="height: 345px">
-        <v-col cols="6" v-for="child in 4" :key="child">
-          <v-card class="placeholder-card" height="160px">
+    <div style="overflow-y: scroll" v-else>
+      <v-row dense align="start" style="height: 500px">
+        <v-col cols="12" v-for="child in 3" :key="child">
+          <v-card class="placeholder-card" height="200px">
             <v-card-title class="title">{{
               "Child " + alphabet[child - 1]
             }}</v-card-title>
@@ -493,7 +509,6 @@
 </template>
 
 <script>
-import AgeDisplay from "@/components/AgeDisplay";
 import ExtraStudies from "@/components/ExtraStudies";
 import Email from "@/components/Email";
 import NextContact from "@/components/NextContact";
@@ -508,7 +523,6 @@ import moment from "moment";
 
 export default {
   components: {
-    AgeDisplay,
     ExtraStudies,
     Email,
     NextContact,
@@ -955,6 +969,17 @@ export default {
       this.dialogChild = true;
     },
 
+    birthday(DoB) {
+      if (DoB) {
+        return (
+          moment(DoB).month() === moment().month() &&
+          moment(DoB).date() === moment().date()
+        );
+      } else {
+        return false;
+      }
+    },
+
     async save() {
       try {
         var validationResults = false;
@@ -1118,6 +1143,57 @@ export default {
 
       return age && hearing && vision && premature && illness;
     },
+
+    AgeFormated(DoB) {
+      var formated = "DoB is not available.";
+      if (DoB) {
+        var years = moment().diff(DoB, "years");
+        var months = moment().diff(DoB, "months", true);
+
+        months = months - years * 12;
+        months = months.toFixed(1);
+
+        var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
+        var M =
+          months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+        formated = Y + M;
+      }
+      return formated;
+    },
+
+    languageDisplay(child) {
+      var formatedLanguage =
+        "<strong>Spoken Language:</strong> " +
+        (child.Language ? child.Language : "NA") +
+        "<br>" +
+        "<strong>School Language:</strong> " +
+        (child.SchoolLanguage ? child.SchoolLanguage : "NA") +
+        "<br>" +
+        "<strong>Home Language:</strong> " +
+        (child.HomeLanguage ? child.HomeLanguage : "NA");
+
+      return formatedLanguage;
+    },
+
+    school(child) {
+      var formatedSchool =
+        "<strong>School:</strong> " + (child.School ? child.School : "NA");
+
+      return formatedSchool;
+    },
+
+    noteChild(child) {
+      var Note =
+        "<strong>Note:</strong> " + (child.Note ? child.Note : "");
+
+      return Note;
+    },
+
+    age(child) {
+      var formatedAge =
+        "<strong>Age:</strong> " + this.AgeFormated(child.DoB);
+      return formatedAge;
+    },
   },
   computed: {
     ElegibleStudies() {
@@ -1259,7 +1335,7 @@ export default {
 .child-card {
   border-radius: 10px !important;
   border-style: solid !important;
-  border-width: medium !important;
+  border-width: thin !important;
   border-color: var(--v-primary-base) !important;
   background-color: var(--v-background-lighten4) !important;
 }
@@ -1267,7 +1343,7 @@ export default {
 .placeholder-card {
   border-radius: 10px !important;
   border-style: dashed !important;
-  border-width: medium !important;
+  border-width: thin !important;
   border-color: var(--v-primary-lighten4) !important;
   background-color: var(--v-textbackground-lighten4) !important;
 }

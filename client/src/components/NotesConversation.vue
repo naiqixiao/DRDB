@@ -17,7 +17,7 @@
           <v-col cols="12" md="12" class="noPadding">
             <v-data-table
               hide-default-footer
-              height="360px"
+              height="380px"
               dense
               fixed-header
               single-select
@@ -47,7 +47,7 @@
               label="Conversation with parents"
               outlined
               no-resize
-              rows="4"
+              rows="5"
               hide-details
               v-model="conv"
               :disabled="!familyId"
@@ -63,9 +63,8 @@
             <v-textarea
               class="conv-textarea"
               label="Notes about the family."
-              outlined
               no-resize
-              rows="22"
+              rows="24"
               hide-details
               v-model="newNotes"
               :disabled="!familyId"
@@ -177,6 +176,6 @@ export default {
 }
 .tabs-items {
   background-color: rgba($color: #000000, $alpha: 0);
-  height: 455px;
+  height: 500px;
 }
 </style>

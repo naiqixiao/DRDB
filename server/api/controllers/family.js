@@ -174,12 +174,31 @@ exports.search = asyncHandler(async (req, res) => {
     }
   }
 
-
   if (req.query.AssignedLab) {
     queryString.AssignedLab = req.query.AssignedLab;
   }
 
   queryString.NoMoreContact = 0;
+
+
+  if (req.query.childName) {
+
+    const children = await model.child.findAll({
+      where: {
+        Name: {
+          [Op.like]: `${req.query.childName}%`
+        }
+      }
+    })
+
+    var familyIDs = [];
+    children.forEach((child) => {
+      familyIDs.push(child.FK_Family)
+    })
+
+    queryString.id = familyIDs
+
+  }
 
   const families = await model.family.findAll({
     where: queryString,
@@ -219,32 +238,6 @@ exports.search = asyncHandler(async (req, res) => {
           [model.schedule, 'AppointmentTime', 'DESC'],
         ]
       }
-
-      // {
-      //   model: model.appointment,
-      //   include: [
-      //     {
-      //       model: model.child,
-      //       attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
-      //     },
-      //     {
-      //       model: model.study,
-      //       attributes: [
-      //         "StudyName",
-      //         "MinAge",
-      //         "MaxAge",
-      //         "EmailTemplate",
-      //         "StudyType",
-      //         "FK_Lab",
-      //       ],
-      //     },
-      //     { model: model.schedule },
-      //   ],
-      // },
-
-      // order: [
-      //   [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
-      // ]
     ]
   });
 

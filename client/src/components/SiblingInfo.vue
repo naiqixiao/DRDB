@@ -87,7 +87,9 @@
           <h3>{{ child.Name }}</h3>
         </v-col>
         <v-col cols="12" md="3">
-          <AgeDisplay :DoB="child.DoB" />
+          <div class="subtitle-1 pl-md-2" >
+                {{ AgeFormated(child.DoB) }}
+              </div>
         </v-col>
         <v-col cols="12" md="3">
           <ElegibleStudies
@@ -118,14 +120,12 @@
 </template>
 
 <script>
-import AgeDisplay from "@/components/AgeDisplay";
 import ElegibleStudies from "@/components/ElegibleStudies";
 
 import child from "@/services/child";
 
 export default {
   components: {
-    AgeDisplay,
     ElegibleStudies,
   },
   props: {
@@ -245,6 +245,23 @@ export default {
 
       this.$emit("updateSiblingStudies", this.appointments);
     },
+
+    AgeFormated(DoB) {
+      var formated = "DoB is not available.";
+      if (DoB) {
+        var years = moment().diff(DoB, "years");
+        var months = moment().diff(DoB, "months", true);
+
+        months = months - years * 12;
+        months = months.toFixed(1);
+
+        var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
+        var M =
+          months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+        formated = Y + M;
+      }
+      return formated;
+    }
   },
   computed: {},
   watch: {

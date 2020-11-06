@@ -149,13 +149,13 @@
           </v-col>
 
           <v-row justify="space-between" align="end" dense>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="7">
               <v-textarea
                 class="conv-textarea"
                 label="Notes for next contact"
                 outlined
                 no-resize
-                rows="4"
+                rows="6"
                 hide-details
                 readonly
                 v-model="currentFamily.NextContactNote"
@@ -269,7 +269,7 @@
                 :key="item.label"
               >
                 <div v-if="!!item.options">
-                    <!-- :item-value="$Options[item.options]" -->
+                  <!-- :item-value="$Options[item.options]" -->
                   <v-combobox
                     justify="start"
                     :items="$Options[item.options]"
@@ -394,15 +394,25 @@
 
       <v-col cols="12" md="4">
         <v-col cols="12" md="12" class="justify-start">
-          <h1 class="text-left">Child information</h1>
+          <div v-if="!searchStatus">
+            <h1 class="text-left">Child information</h1>
+          </div>
+          <div v-else>
+            <v-text-field
+              class="textfield-family"
+              background-color="textbackground"
+              hide-details
+              @keydown.enter="searchFamilybyChildName($event.target.value)"
+              label="Child's Name"
+              :append-icon="searchStatus ? 'mdi-magnify' : undefined"
+              :readonly="!searchStatus"
+              placeholder="  "
+              outlined
+              dense
+            ></v-text-field>
+          </div>
         </v-col>
-        <v-col
-          style="
-            overflow-y: scroll;
-            padding: 0px !important;
-            height: 400px !important;
-          "
-        >
+        <v-col style="padding: 0px !important; height: 500px !important">
           <ChildInfo
             :Children="currentFamily.Children"
             :familyId="parseInt(currentFamily.id)"
@@ -608,6 +618,36 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
+    async searchFamilybyChildName(childName) {
+      this.$store.dispatch("setLoadingStatus", true);
+
+      this.queryString.childName = childName;
+
+      try {
+        const Results = await family.search(this.queryString);
+        if (Results.data.length > 0) {
+          this.Families = Results.data;
+          this.page = 1;
+          this.currentFamily = this.Families[this.page - 1];
+          this.searchStatus = !this.searchStatus;
+        } else {
+          alert("no family can be found");
+          this.page = 0;
+          this.currentFamily = Object.assign({}, this.familyTemplate);
+        }
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
+
+      delete this.queryString.childName;
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    },
+
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
 
@@ -667,11 +707,9 @@ export default {
 
             Object.assign(this.Families[this.editedIndex], this.editedItem);
 
-            this.Families[this.editedIndex].Schedules.forEach((schedule) =>{
-
+            this.Families[this.editedIndex].Schedules.forEach((schedule) => {
               Object.assign(schedule.Family, this.editedItem);
-              
-            })
+            });
 
             console.log("Family information updated!");
           } else {
@@ -691,7 +729,7 @@ export default {
             this.Families.push(this.editedItem);
             this.page = this.Families.length;
             console.log("Family is creted!");
-            
+
             this.$refs.form.resetValidate();
             // this.$emit("searchFamily", this.editedItem);
           }

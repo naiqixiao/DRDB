@@ -1675,18 +1675,17 @@ export default {
     },
 
     AgeFormated(DoB) {
-      var formated = "";
+      var formated = "DoB is not available.";
       if (DoB) {
-        var Age = Math.floor(
-          (new Date() - new Date(DoB)) / (1000 * 60 * 60 * 24)
-        );
+        var years = moment().diff(DoB, "years");
+        var months = moment().diff(DoB, "months", true);
 
-        var years = Math.floor(Age / 365);
-        var months = (Age % 365) / 30.5;
+        months = months - years * 12;
         months = months.toFixed(1);
-        // var days = Math.floor((Age % 365) % 30.5);
-        var Y = years > 0 ? years + " year(s) " : "";
-        var M = months + " month(s)";
+
+        var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
+        var M =
+          months > 0 ? months + (months === 1 ? " month " : " months ") : "";
         formated = Y + M;
       }
       return formated;
