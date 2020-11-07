@@ -294,7 +294,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
   }
 
-  res.status(200);
+  res.status(200).send('user created!');
 
 });
 
