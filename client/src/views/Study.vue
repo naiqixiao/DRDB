@@ -114,7 +114,11 @@
               background-color="textbackground"
               hide-details
               :label="item.label"
-              v-model="currentStudy.PointofContact[item.field]"
+              :value="
+                item.label === 'Phone'
+                  ? PhoneFormated(currentStudy.PointofContact[item.field])
+                  : currentStudy.PointofContact[item.field]
+              "
               placeholder="  "
               readonly
               outlined
@@ -184,7 +188,17 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn fab @click.stop="createStudy">
+                  <v-btn
+                    fab
+                    @click.stop="createStudy"
+                    :disabled="
+                      !(
+                        $store.state.role == 'Admin' ||
+                        $store.state.role == 'PI' ||
+                        $store.state.role == 'Lab manager'
+                      )
+                    "
+                  >
                     <v-icon class="fabIcon">add</v-icon>
                   </v-btn>
                 </div>
@@ -199,7 +213,16 @@
                   <v-btn
                     fab
                     @click.stop="editStudy"
-                    :disabled="!currentStudy.id"
+                    :disabled="
+                      !(
+                        currentStudy.id &&
+                        (currentStudy.PointofContact.id ==
+                          $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager')
+                      )
+                    "
                   >
                     <v-icon class="fabIcon">edit</v-icon>
                   </v-btn>
@@ -215,7 +238,14 @@
                   <v-btn
                     fab
                     @click.stop="deleteStudy"
-                    :disabled="!currentStudy.id"
+                    :disabled="
+                      !(
+                        currentStudy.id &&
+                        ($store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager')
+                      )
+                    "
                   >
                     <v-icon class="fabIcon">delete</v-icon>
                   </v-btn>
@@ -703,6 +733,18 @@ export default {
       }
       return formated;
     },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+        return null;
+      }
+    },
+    
   },
 
   computed: {

@@ -7,6 +7,8 @@ const UserController = require("../controllers/user");
 
 router.post("/signup", checkAuth, oAuth2, UserController.signup);
 
+router.post("/signupBatch", checkAuth, oAuth2, UserController.signupBatch);
+
 router.post("/resetPassword", UserController.resetPassword);
 
 router.post("/checklogin", checkAuth, UserController.loginChecked);

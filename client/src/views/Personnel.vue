@@ -77,7 +77,11 @@
                 <v-text-field
                   background-color="textbackground"
                   :label="item.label"
-                  v-model="currentPersonnel[item.field]"
+                  :value="
+                    item.label === 'Phone'
+                      ? PhoneFormated(currentPersonnel[item.field])
+                      : currentPersonnel[item.field]
+                  "
                   hide-details
                   height="48px"
                   placeholder="  "
@@ -93,7 +97,15 @@
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
-                          <v-btn fab @click.stop="createPersonnel">
+                          <v-btn
+                            fab
+                            @click.stop="createPersonnel"
+                            :disabled="
+                              $store.state.role != 'Admin' &&
+                              $store.state.role != 'PI' &&
+                              $store.state.role != 'Lab manager'
+                            "
+                          >
                             <v-icon class="fabIcon">add</v-icon>
                           </v-btn>
                         </div>
@@ -108,7 +120,13 @@
                           <v-btn
                             fab
                             @click.stop="editPersonnel"
-                            :disabled="!currentPersonnel.id"
+                            :disabled="
+                              !currentPersonnel.id ||
+                              (currentPersonnel.id != $store.state.userID &&
+                                $store.state.role != 'Admin' &&
+                                $store.state.role != 'PI' &&
+                                $store.state.role != 'Lab manager')
+                            "
                           >
                             <v-icon class="fabIcon">edit</v-icon>
                           </v-btn>
@@ -125,8 +143,10 @@
                             fab
                             @click.stop="deletePersonnel"
                             :disabled="
-                              currentPersonnel.id == $store.state.userID ||
-                              !currentPersonnel.id
+                              !currentPersonnel.id ||
+                              ($store.state.role != 'Admin' &&
+                                $store.state.role != 'PI' &&
+                                $store.state.role != 'Lab manager')
                             "
                           >
                             <v-icon class="fabIcon">delete</v-icon>
@@ -437,6 +457,17 @@ export default {
       }
 
       this.close();
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+        return null;
+      }
     },
 
     close() {

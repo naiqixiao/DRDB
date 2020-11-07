@@ -138,7 +138,7 @@ exports.signup = asyncHandler(async (req, res) => {
 
     if (personnel && personnel.Retired === false) {
       res.status(400).send({
-        message: "The entered information (Initial, Email, or CalendarID) already exists in the system.\nPlease double check or enter new information.",
+        message: "The entered information (Email or CalendarID) already exists in the system.\nPlease double check or enter new information.",
       });
 
     } else {
@@ -199,6 +199,103 @@ exports.signup = asyncHandler(async (req, res) => {
   } catch (error) {
     throw error;
   }
+});
+
+exports.signupBatch = asyncHandler(async (req, res) => {
+  const logFolder = "api/logs";
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const User = req.body.User;
+
+  for (var i = 0; i < req.body.newUsers.length; i++) {
+
+    newUser = req.body.newUsers[i];
+
+    try {
+
+      // check whether the user is in the system (previously being retired).
+      const personnel = await model.personnel.findOne({
+        where: {
+          Email: newUser.Email,
+        }
+      });
+
+      if (personnel && personnel.Retired === false) {
+        res.status(400).send({
+          message: "The entered information (Email or CalendarID) already exists in the system.\nPlease double check or enter new information.",
+        });
+
+      } else {
+
+        const password = Math.random()
+          .toString(36)
+          .substring(2);
+
+        const hashPassword = bcrypt.hashSync(password, 10);
+
+        newUser.Password = hashPassword;
+        newUser.temporaryPassword = true;
+
+        if (!personnel) {
+
+          newUser.FK_Lab = req.body.lab
+          await model.personnel.create(newUser);
+
+        } else {
+
+          newUser.Retired = false
+          await model.personnel.update(newUser, {
+            where: {
+              Email: newUser.Email,
+            }
+          });
+
+        }
+
+        var emailContent = {
+          to: newUser.Name + "<" + newUser.Email + ">",
+          subject:
+            "Your user account has been created!",
+          body:
+            "<p>Hello " +
+            newUser.Name.split(" ")[0] +
+            ",</p> " +
+            "<p>Welcoe to the developmental research management system!<br>" +
+            "Your role is <b>" +
+            newUser.Role +
+            "</b>, and your temporary password is <b><em>" +
+            password +
+            "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password (you need to turn on McMaster VPN).<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+            "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
+            "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
+            "<p> </p>" +
+            "<p>Thank you! <br>" +
+            "Developmental Research Management System</p>",
+        };
+
+        await sendEmail(emailContent);
+
+        // log
+        const logFile = logFolder + "/" + User.LabName + "_log.txt";
+
+        const logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + " - " + User.IP + "\r\n"
+
+        if (fs.existsSync(logFile)) {
+          fs.appendFileSync(logFile, logInfo)
+        } else {
+          fs.writeFileSync(logFile, logInfo)
+        }
+      }
+    } catch (error) {
+      throw error;
+    }
+
+  }
+
+  res.status(200);
+
 });
 
 exports.login = asyncHandler(async (req, res) => {
