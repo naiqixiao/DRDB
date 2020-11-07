@@ -49,6 +49,13 @@
                     class="mr-0 pa-0"
                     :value="!!item.Active"
                     @input="changePersonnelStatus(item)"
+                    :disabled="
+                      !(
+                        $store.state.role == 'Admin' ||
+                        $store.state.role == 'PI' ||
+                        $store.state.role == 'Lab manager'
+                      )
+                    "
                     dense
                   ></v-simple-checkbox>
                 </div>

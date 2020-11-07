@@ -49,6 +49,12 @@
                     class="checkbox"
                     :value="!!item.Completed"
                     @input="changeStudyStatus(item)"
+                    :disabled="
+                      !(
+                        $store.state.role == 'Admin' ||
+                        $store.state.role == 'PI' ||
+                        $store.state.role == 'Lab manager'
+                      )"
                     dense
                   ></v-simple-checkbox>
                 </div>
@@ -744,7 +750,7 @@ export default {
         return null;
       }
     },
-    
+
   },
 
   computed: {
