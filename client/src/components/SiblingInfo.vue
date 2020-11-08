@@ -18,7 +18,7 @@
     </template>
 
     <template v-slot:top>
-      <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false">
+      <v-dialog v-model="dialogChild" max-width="760px" :retain-focus="false" persistent>
         <v-card>
           <v-card-title>
             <span class="headline">Child's information</span>

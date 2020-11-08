@@ -54,7 +54,8 @@
                         $store.state.role == 'Admin' ||
                         $store.state.role == 'PI' ||
                         $store.state.role == 'Lab manager'
-                      )"
+                      )
+                    "
                     dense
                   ></v-simple-checkbox>
                 </div>
@@ -263,7 +264,12 @@
         </v-row>
 
         <div>
-          <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
+          <v-dialog
+            v-model="dialog"
+            max-width="1000px"
+            :retain-focus="false"
+            persistent
+          >
             <v-card>
               <v-card-title>
                 <span class="headline">Study information</span>
@@ -330,11 +336,12 @@
                         :items="labMembers"
                         :item-value="'id'"
                         :item-text="'Name'"
-                        v-model="editedStudy.FK_Personnel"
+                        v-model="pointofContact"
                         label="Point of Contact"
                         outlined
                         dense
                         hide-details
+                        return-object
                       ></v-select>
                     </v-col>
                   </v-row>
@@ -548,6 +555,11 @@ export default {
         VisionLossParticipant: "",
         HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
+        PointofContact: {
+          Name: null,
+          Email: null,
+          Phone: null,
+        },
       },
       defaultStudy: {
         StudyName: null,
@@ -563,10 +575,16 @@ export default {
         VisionLossParticipant: "",
         HearingLossParticipant: "",
         updatedAt: new Date().toISOString(),
+        PointofContact: {
+          Name: null,
+          Email: null,
+          Phone: null,
+        },
       },
       editedIndex: -1,
       labMembers: [],
       valid: true,
+      pointofContact: {},
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],
@@ -660,9 +678,13 @@ export default {
     },
 
     async save() {
+
+      this.editedStudy.FK_Personnel = this.pointofContact.id
+
       if (this.editedIndex === -1) {
         try {
           const Result = await study.create(this.editedStudy);
+          this.editedStudy.PointofContact = this.pointofContact;
           this.editedStudy.id = Result.data.id;
           this.Studies.push(this.editedStudy);
           this.editedIndex = this.Studies.length - 1;
@@ -694,6 +716,7 @@ export default {
       this.dialog = false;
 
       setTimeout(() => {
+        this.pointofContact = {};
         this.editedStudy = {};
         // this.editedIndex = -1;
       }, 300);
@@ -750,7 +773,6 @@ export default {
         return null;
       }
     },
-
   },
 
   computed: {

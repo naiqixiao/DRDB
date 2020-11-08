@@ -147,6 +147,7 @@
         v-model="nextContactDialog"
         max-width="800px"
         :retain-focus="false"
+        persistent
       >
         <v-card outlined>
           <v-card-title>
@@ -179,7 +180,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="1000px">
+      <v-dialog v-model="dialog" max-width="1000px" persistent>
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step

@@ -242,7 +242,12 @@
         </v-row>
       </v-col>
 
-      <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+      <v-dialog
+        v-model="dialog"
+        max-width="1200px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
           <v-card-title>
             <span class="headline">{{
@@ -361,6 +366,7 @@
         v-model="nextContactDialog"
         max-width="800px"
         :retain-focus="false"
+        persistent
       >
         <v-card outlined>
           <v-card-title>

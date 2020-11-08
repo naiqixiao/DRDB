@@ -69,7 +69,7 @@ exports.search = asyncHandler(async (req, res) => {
     ],
   });
 
-  return res.status(200).send(personnel);
+  res.status(200).send(personnel);
 });
 
 // Update a Tutorial by the id in the request

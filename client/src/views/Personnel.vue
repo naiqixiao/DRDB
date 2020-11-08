@@ -183,7 +183,12 @@
           </v-container>
 
           <div>
-            <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
+            <v-dialog
+              v-model="dialog"
+              max-width="1000px"
+              :retain-focus="false"
+              persistent
+            >
               <v-card>
                 <v-card-title>
                   <span class="headline">Lab member information</span>

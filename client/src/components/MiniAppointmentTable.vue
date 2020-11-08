@@ -12,30 +12,39 @@
         height="150px"
         style="border-width: medium !important"
       >
-        <v-card-title class="title" style="padding: 8px;">
+        <v-card-title class="title" style="padding: 8px">
           <span
             class="d-inline-block text-truncate"
-            style="max-width: 90px; padding-right: 2px;"
-          >{{ appointment.Child.Name }}</span>
-          <span class="body-1" style="color: var(--v-primary); ">
+            style="max-width: 90px; padding-right: 2px"
+            >{{ appointment.Child.Name }}</span
+          >
+          <span class="body-1" style="color: var(--v-primary)">
             {{
-            "(" +
-            appointment.FK_Family +
-            appointment.Child.IdWithinFamily +
-            ")"
+              "(" +
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
             }}
           </span>
           <v-spacer></v-spacer>
-          <v-icon v-if="appointment.Child.Sex == 'M'" color="light-blue darken-4">mdi-human-male</v-icon>
+          <v-icon
+            v-if="appointment.Child.Sex == 'M'"
+            color="light-blue darken-4"
+            >mdi-human-male</v-icon
+          >
           <v-icon v-else color="pink darken-1">mdi-human-female</v-icon>
         </v-card-title>
 
-        <v-card-text class="body-1" align="start" style="padding: 8px; color: var(--v-primary)">
+        <v-card-text
+          class="body-1"
+          align="start"
+          style="padding: 8px; color: var(--v-primary)"
+        >
           {{
-          appointment.Study.StudyName +
-          " (" +
-          appointment.Study.StudyType +
-          ")"
+            appointment.Study.StudyName +
+            " (" +
+            appointment.Study.StudyType +
+            ")"
           }}
         </v-card-text>
         <v-spacer></v-spacer>
@@ -46,7 +55,8 @@
                 <v-icon
                   color="primary"
                   @click="updateExperimenters(appointment, indexAppointments)"
-                >how_to_reg</v-icon>
+                  >how_to_reg</v-icon
+                >
               </div>
             </template>
             <span>Update experimenters.</span>
@@ -59,7 +69,8 @@
                   color="primary"
                   @click="removeAppointment(indexAppointments)"
                   :disabled="Schedule.Appointments.length == 1"
-                >delete</v-icon>
+                  >delete</v-icon
+                >
               </div>
             </template>
             <span>Delete this study appointment</span>
@@ -68,11 +79,11 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="2" style="padding: 12px !important;">
+    <v-col cols="12" md="2" style="padding: 12px !important">
       <v-card
         class="child-card d-flex align-center justify-center"
         height="150px"
-        style="border-width: medium !important; border-style: dashed !important;"
+        style="border-width: medium !important; border-style: dashed !important"
       >
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -83,7 +94,7 @@
                 large
                 fab
                 color="primary"
-                style="border-width: medium; border-style: dashed !important;"
+                style="border-width: medium; border-style: dashed !important"
                 @click.stop="editNewAppointments"
               >
                 <v-icon dark>add</v-icon>
@@ -100,16 +111,23 @@
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
-            <v-btn large @click.stop="emailParents" :disabled="!appointmentUpdated">Email parents</v-btn>
+            <v-btn
+              large
+              @click.stop="emailParents"
+              :disabled="!appointmentUpdated"
+              >Email parents</v-btn
+            >
           </div>
         </template>
         <span>Send an email to the parents about the update</span>
       </v-tooltip>
     </v-col>
 
-    <v-dialog v-model="dialogAddAppointments" max-width="1200px">
+    <v-dialog v-model="dialogAddAppointments" max-width="1200px" persistent>
       <v-card>
-        <v-card-title class="title">Add study appointment(s) to the visit</v-card-title>
+        <v-card-title class="title"
+          >Add study appointment(s) to the visit</v-card-title
+        >
         <v-container fluid>
           <v-row>
             <v-col cols="12" md="2" v-for="child in Children" :key="child.id">
@@ -118,10 +136,9 @@
                 rounded
                 color="primary"
                 @click="newAppointmentSlot(child)"
-                :disabled="
-                    potentialStudies(child).selectableStudies.length < 1
-                  "
-              >{{ child.Name }}</v-btn>
+                :disabled="potentialStudies(child).selectableStudies.length < 1"
+                >{{ child.Name }}</v-btn
+              >
             </v-col>
           </v-row>
           <v-row>
@@ -136,8 +153,8 @@
                 :child="appointment.Child"
                 :scheduleId="appointment.FK_Schedule"
                 :potentialStudies="
-                    potentialStudies(appointment.Child).potentialStudyList
-                  "
+                  potentialStudies(appointment.Child).potentialStudyList
+                "
                 :index="indexNewAppointment"
                 @selectStudy="selectStudy"
                 @deleteAppointment="deleteAppointment"
@@ -155,7 +172,9 @@
               <v-btn color="primary" @click="closeNewAppointment">Cancel</v-btn>
             </v-col>
             <v-col md="2">
-              <v-btn color="primary" @click="saveNewAppointments">Confirm</v-btn>
+              <v-btn color="primary" @click="saveNewAppointments"
+                >Confirm</v-btn
+              >
             </v-col>
             <v-col md="4"></v-col>
           </v-row>
@@ -163,9 +182,11 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
+    <v-dialog v-model="dialogUpdateExperimenters" max-width="800px" √>
       <v-card height="300px" class="d-flex flex-column">
-        <v-card-title class="title">Update experimenters for the current study</v-card-title>
+        <v-card-title class="title"
+          >Update experimenters for the current study</v-card-title
+        >
         <v-row justify="center">
           <v-col cols="12" md="3">
             <v-select
@@ -187,7 +208,9 @@
           <v-row justify="space-between" style="height: 50px">
             <v-col md="4"></v-col>
             <v-col md="2">
-              <v-btn color="primary" @click="dialogUpdateExperimenters = false">Cancel</v-btn>
+              <v-btn color="primary" @click="dialogUpdateExperimenters = false"
+                >Cancel</v-btn
+              >
             </v-col>
             <v-col md="2">
               <v-btn color="primay" @click="saveExperimenters">Save</v-btn>
@@ -198,7 +221,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogEmail" max-width="1000px">
+    <v-dialog v-model="dialogEmail" max-width="1000px" persistent>
       <v-card>
         <Email
           ref="Email"
@@ -217,7 +240,9 @@
             </v-col>
             <v-col cols="12" md="2">
               <v-btn color="primary" @click="sendEmail">
-                <v-icon dark left v-show="!appointmentUpdated">mdi-checkbox-marked-circle</v-icon>Send Email
+                <v-icon dark left v-show="!appointmentUpdated"
+                  >mdi-checkbox-marked-circle</v-icon
+                >Send Email
               </v-btn>
             </v-col>
             <v-col cols="12" md="4"></v-col>
@@ -534,7 +559,6 @@ export default {
         this.Schedule.Appointments[this.index] = this.editedAppointment;
 
         this.Schedule.updatedAt = updatedSchedule.data.updatedAt;
-
       } catch (error) {
         console.log(error);
       }

@@ -5,7 +5,13 @@
         <v-card-title>When to contact this family again?</v-card-title>
         <v-row align="center" justify="start">
           <v-col cols="12" md="2">
-            <v-text-field class="pa=3" label="After" suffix="days" hide-details v-model="daysAfter"></v-text-field>
+            <v-text-field
+              class="pa=3"
+              label="After"
+              suffix="days"
+              hide-details
+              v-model="daysAfter"
+            ></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field
@@ -43,7 +49,7 @@
       </v-row>
     </v-card>
 
-    <v-dialog v-model="datePicker" max-width="360px">
+    <v-dialog v-model="datePicker" max-width="360px" persistent>
       <v-card>
         <v-row align="center">
           <v-col cols="12" lg="12">

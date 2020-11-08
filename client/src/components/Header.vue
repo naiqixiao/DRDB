@@ -1,7 +1,11 @@
 <template>
   <v-app>
     <v-app-bar app color="primary" clipped-right>
-      <v-app-bar-nav-icon x-large class="title-text ma-2" @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon
+        x-large
+        class="title-text ma-2"
+        @click.stop="drawer = !drawer"
+      ></v-app-bar-nav-icon>
 
       <v-toolbar-title class="mr-12 align-center">
         <h2 class="title-text title-p-4 ma-2">{{ this.$route.name }}</h2>
@@ -9,19 +13,31 @@
 
       <v-spacer></v-spacer>
 
-      <v-toolbar-items v-if="this.$store.state.user != null" class="d-flex align-center">
-        <h2
-          class="title-text title ma-3"
-        >{{ $store.state.labName + ": " +$store.state.name + ' ('+ $store.state.role + ')' }}</h2>
+      <v-toolbar-items
+        v-if="this.$store.state.user != null"
+        class="d-flex align-center"
+      >
+        <h2 class="title-text title ma-3">
+          {{
+            $store.state.labName +
+            ": " +
+            $store.state.name +
+            " (" +
+            $store.state.role +
+            ")"
+          }}
+        </h2>
         <v-tooltip bottom>
           <template v-slot:activator="{ on }">
-            <div v-on="on" style="height:48px !important;">
+            <div v-on="on" style="height: 48px !important">
               <v-btn icon @click.stop="feedbackDialog = true">
                 <v-icon>feedback</v-icon>
               </v-btn>
             </div>
           </template>
-          <span>Send us your questions, issues, requests, and suggestions!</span>
+          <span
+            >Send us your questions, issues, requests, and suggestions!</span
+          >
         </v-tooltip>
       </v-toolbar-items>
       <v-progress-linear
@@ -53,12 +69,19 @@
 
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn block @click="logout" :disabled="!$store.state.userID">Logout</v-btn>
+          <v-btn block @click="logout" :disabled="!$store.state.userID"
+            >Logout</v-btn
+          >
         </div>
       </template>
     </v-navigation-drawer>
 
-    <v-dialog v-model="feedbackDialog" max-width="800px" :retain-focus="false">
+    <v-dialog
+      v-model="feedbackDialog"
+      max-width="800px"
+      :retain-focus="false"
+      persistent
+    >
       <v-card outlined>
         <v-card-title>
           <span class="headline">Send us your questions and suggestions!</span>
@@ -67,7 +90,10 @@
         <v-container>
           <v-row>
             <v-col cols="12" sm="10" md="10">
-              <v-text-field v-model="currentFeedback.Title" label="Title"></v-text-field>
+              <v-text-field
+                v-model="currentFeedback.Title"
+                label="Title"
+              ></v-text-field>
             </v-col>
             <v-col cols="12" sm="10" md="10">
               <vue-editor
@@ -83,14 +109,19 @@
           <v-row justify="space-between" style="height: 50px">
             <v-col md="4"></v-col>
             <v-col md="2">
-              <v-btn color="primary" @click="feedbackDialog = false">Cancel</v-btn>
+              <v-btn color="primary" @click="feedbackDialog = false"
+                >Cancel</v-btn
+              >
             </v-col>
             <v-col md="2">
               <v-btn
                 color="primary"
                 @click="createFeedback"
-                :disabled="currentFeedback.Title == '' || currentFeedback.Content == ''"
-              >Send</v-btn>
+                :disabled="
+                  currentFeedback.Title == '' || currentFeedback.Content == ''
+                "
+                >Send</v-btn
+              >
             </v-col>
             <v-col md="4"></v-col>
           </v-row>

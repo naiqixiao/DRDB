@@ -33,7 +33,7 @@
         >
       </v-col>
 
-      <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
+      <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
         <v-card outlined>
           <v-card-title class="headline">Change password</v-card-title>
           <v-form ref="form" v-model="valid" lazy-validation>
@@ -162,7 +162,7 @@
         </v-tooltip>
       </v-col>
 
-      <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false">
+      <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false" persistent>
         <v-card outlined>
           <v-card-title class="headline"
             >Paste Google sign in code</v-card-title

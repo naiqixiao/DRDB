@@ -46,7 +46,12 @@
       <h4>V1.0.20201107</h4>
     </v-col>
 
-    <v-dialog v-model="dialog" max-width="600px" :retain-focus="false">
+    <v-dialog
+      v-model="dialog"
+      max-width="600px"
+      :retain-focus="false"
+      persistent
+    >
       <v-card outlined>
         <v-card-title class="headline"
           >Welcome to the system! Please set your password.</v-card-title

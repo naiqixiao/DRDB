@@ -22,7 +22,7 @@
       </v-col>
 
       <div>
-        <v-dialog v-model="dialogStudy" max-width="600px">
+        <v-dialog v-model="dialogStudy" max-width="600px" persistent>
           <v-card>
             <v-card-title
               class="title"

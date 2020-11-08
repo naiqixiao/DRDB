@@ -131,7 +131,7 @@
     </v-row>
 
     <div>
-      <v-dialog v-model="dialogPickerBefore" max-width="360px">
+      <v-dialog v-model="dialogPickerBefore" max-width="360px" persistent>
         <v-card>
           <v-row align="center">
             <v-col cols="12" lg="12">
@@ -147,7 +147,7 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogPickerAfter" max-width="360px">
+      <v-dialog v-model="dialogPickerAfter" max-width="360px" persistent>
         <v-card>
           <v-row align="center">
             <v-col cols="12" lg="12">

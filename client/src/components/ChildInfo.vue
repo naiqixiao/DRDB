@@ -32,12 +32,24 @@
 
             <v-card-text align="start" style="padding: 4px 8px">
               <v-row style="height: 70px">
-                <v-col cols="12" md="7" style="padding: 0px !important" class="justify-center">
+                <v-col
+                  cols="12"
+                  md="7"
+                  style="padding: 0px !important"
+                  class="justify-center"
+                >
                   <body align="start" v-html="age(child)"></body>
-                  <body style="height: 70px !important; overflow-y: scroll !important;" align="start" v-html="noteChild(child)"></body>
+                  <body
+                    style="
+                      height: 70px !important;
+                      overflow-y: scroll !important;
+                    "
+                    align="start"
+                    v-html="noteChild(child)"
+                  ></body>
                 </v-col>
                 <v-spacer></v-spacer>
-                <v-col cols="12" md="5" style="padding: 0px !important;">
+                <v-col cols="12" md="5" style="padding: 0px !important">
                   <body align="end" v-html="languageDisplay(child)"></body>
                 </v-col>
               </v-row>
@@ -121,7 +133,7 @@
     </div>
 
     <div>
-      <v-dialog v-model="dobPicker" max-width="360px">
+      <v-dialog v-model="dobPicker" max-width="360px" persistent>
         <v-card>
           <v-row>
             <v-col cols="12" md="12">
@@ -138,7 +150,12 @@
     </div>
 
     <div>
-      <v-dialog v-model="dialogChild" max-width="800px" :retain-focus="false">
+      <v-dialog
+        v-model="dialogChild"
+        max-width="800px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
           <v-card-title>
             <span class="headline">Child's information</span>
@@ -264,6 +281,7 @@
         v-model="dialogSchedule"
         max-width="1000px"
         :retain-focus="false"
+        persistent
       >
         <v-stepper v-model="e1">
           <v-stepper-header>
@@ -475,7 +493,7 @@
         </v-stepper>
       </v-dialog>
 
-      <v-dialog v-model="datePicker" max-width="360px">
+      <v-dialog v-model="datePicker" max-width="360px" persistent>
         <v-card>
           <v-row align="center">
             <v-col cols="12" lg="12">
@@ -1183,15 +1201,13 @@ export default {
     },
 
     noteChild(child) {
-      var Note =
-        "<strong>Note:</strong> " + (child.Note ? child.Note : "");
+      var Note = "<strong>Note:</strong> " + (child.Note ? child.Note : "");
 
       return Note;
     },
 
     age(child) {
-      var formatedAge =
-        "<strong>Age:</strong> " + this.AgeFormated(child.DoB);
+      var formatedAge = "<strong>Age:</strong> " + this.AgeFormated(child.DoB);
       return formatedAge;
     },
   },

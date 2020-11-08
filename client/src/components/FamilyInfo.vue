@@ -49,7 +49,12 @@
       </v-col>
     </v-row>
 
-    <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
+    <v-dialog
+      v-model="dialog"
+      max-width="1200px"
+      :retain-focus="false"
+      persistent
+    >
       <v-card>
         <v-card-title>
           <span class="headline">Edit family information</span>

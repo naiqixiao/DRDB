@@ -46,7 +46,7 @@
     </v-row>
 
     <div>
-      <v-dialog v-model="dialogExperimenter" max-width="1200px">
+      <v-dialog v-model="dialogExperimenter" max-width="1200px" persistent>
         <v-card>
           <v-row align="center" justify="center">
             <v-col cols="12" lg="10">

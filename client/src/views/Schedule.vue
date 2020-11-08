@@ -222,6 +222,7 @@
           v-model="dialogFamilyEdit"
           max-width="1200px"
           :retain-focus="false"
+          persistent
         >
           <v-card outlined>
             <v-card-title>
@@ -450,7 +451,7 @@
             </v-tooltip>
           </v-col>
 
-          <v-dialog v-model="dobPicker" max-width="360px">
+          <v-dialog v-model="dobPicker" max-width="360px" persistent>
             <v-card>
               <v-row align="center">
                 <v-col cols="12" lg="12">
@@ -469,6 +470,7 @@
             v-model="dialogChildEdit"
             max-width="800px"
             :retain-focus="false"
+            persistent
           >
             <v-card>
               <v-card-title>
@@ -827,7 +829,7 @@
             </v-stepper>
           </v-dialog>
 
-          <v-dialog v-model="datePicker" max-width="360px">
+          <v-dialog v-model="datePicker" max-width="360px" persistent>
             <v-card>
               <v-row align="center">
                 <v-col cols="12" lg="12">

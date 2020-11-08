@@ -37,7 +37,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    res.status(500).send(error);
+    throw error
+    // res.status(500).send(error);
   }
 });
 
@@ -69,8 +70,7 @@ exports.search = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    res.status(500).send(error);
-    console.log(error)
+    throw error
   }
 });
 
@@ -134,7 +134,7 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    res.status(500).send(error);
+    throw error
   }
 });
 
@@ -173,6 +173,6 @@ exports.delete = asyncHandler(async (req, res) => {
 
     res.status(200).json(study);
   } catch (error) {
-    res.status(500).send(error);
+    throw error
   }
 });
