@@ -34,7 +34,7 @@ function emailBody(schedule) {
     if (schedule.Appointments[0].Study.StudyType !== "Online") {
         opening =
             "<p>Dear " +
-            schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
+            schedule..Family.NamePrimary.split(" ")[0] +
             ",</p>" +
             "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
             childNames(schedule.Appointments) +
@@ -48,7 +48,7 @@ function emailBody(schedule) {
 
         opening =
             "<p>Dear " +
-            schedule.Appointments[0].Family.NamePrimary.split(" ")[0] +
+            schedule.Family.NamePrimary.split(" ")[0] +
             ",</p>" +
             "<p>This is " + schedule.Appointments[0].Study.Lab.LabName + ". Just a reminder that you and " + childNames(schedule.Appointments) +
             "will participate our online study " +
@@ -88,12 +88,12 @@ function emailBody(schedule) {
         from:
             schedule.Appointments[0].Study.Lab.LabName + "<" + schedule.Appointments[0].Study.Lab.Email + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        to: schedule.Appointments[0].Family.NamePrimary +
+        to: schedule.Family.NamePrimary +
             "<" +
-            schedule.Appointments[0].Family.Email +
+            schedule.Family.Email +
             ">",
         // to:
-        //     schedule.Appointments[0].Family.NamePrimary +
+        //     schedule.Family.NamePrimary +
         //     "<" +
         //     schedule.Appointments[0].Study.Lab.Email +
         //     ">",
@@ -107,12 +107,12 @@ function emailBody(schedule) {
 function manualReminderBody(schedule) {
 
     const emailSubject =
-        "Remind " + schedule.Appointments[0].Family.NamePrimary.split(" ")[0] + " of their participation tomorrow."
+        "Remind " + schedule.Family.NamePrimary.split(" ")[0] + " of their participation tomorrow."
 
 
     const emailBody =
         "<p>" + schedule.Appointments[0].Study.Lab.LabName + ",</p>" +
-        "<p>" + schedule.Appointments[0].Family.NamePrimary.split(" ")[0] + " and their child(ren), " + childNames(schedule.Appointments) +
+        "<p>" + schedule.Family.NamePrimary.split(" ")[0] + " and their child(ren), " + childNames(schedule.Appointments) +
         " are coming for a study tomorrow, " + moment(schedule.AppointmentTime).format(
             " [on] dddd [(]MMM Do[)] [at] h:mma"
         ) + "<br>"
@@ -277,7 +277,7 @@ exports.reminderEmail = asyncHandler(async () => {
 
             const logFile = logFolder + "/" + schedule.Appointments[0].Study.Lab.LabName + "_log.txt";
 
-            if (!!schedule.Appointments[0].Family.Email) {
+            if (!!schedule.Family.Email) {
 
                 const tokenPath = "api/google/labs/lab" + schedule.Appointments[0].Study.Lab.id + "/token.json";
 
@@ -295,7 +295,7 @@ exports.reminderEmail = asyncHandler(async () => {
                 });
 
                 // log
-                var logInfo = "[Auto reminder sent] Reminder email is sent to " + schedule.Appointments[0].Family.Email + " at " + new Date().toString() + "\r\n"
+                var logInfo = "[Auto reminder sent] Reminder email is sent to " + schedule.Family.Email + " at " + new Date().toString() + "\r\n"
 
                 if (fs.existsSync(logFile)) {
                     fs.appendFileSync(logFile, logInfo)
