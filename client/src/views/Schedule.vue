@@ -77,7 +77,7 @@
               background-color="textbackground"
               outlined
               no-resize
-              rows="2"
+              rows="3"
               :value="selectedStudy.Description"
               readonly
               hide-details
@@ -399,7 +399,7 @@
               label="Note about this child"
               outlined
               no-resize
-              rows="3"
+              rows="4"
               hide-details
               v-model="currentChild.Note"
             ></v-textarea>

@@ -240,8 +240,8 @@ export default {
 }
 
 .v-textarea textarea {
-      line-height: 20px !important;
- }
+  line-height: 20px !important;
+}
 
 .conv-textarea {
   border-radius: 5px !important;
@@ -271,4 +271,9 @@ export default {
   font-size: 1rem;
   font-weight: 800;
 }
+
+.theme--light.v-tabs .v-tabs-bar .v-tab:not(.v-tab--active) {
+  background-color: var(--v-textbackground-base) !important;
+}
+
 </style>

@@ -1,18 +1,40 @@
 <template>
   <v-card>
-    <v-tabs v-model="tabs" fixed-tabs icons-and-text>
-      <v-tab href="#tabs-2" class="primary--text">
+    <v-tabs
+      v-model="tabs"
+      fixed-tabs
+      color="var(--v-secondary-base)"
+      background-color="var(--v-primary-base)"
+    >
+      <v-tab href="#tabs-1">
+        <v-icon style="padding-right: 8px;">format_list_bulleted</v-icon>
         Notes
-        <v-icon>format_list_bulleted</v-icon>
       </v-tab>
-      <v-tab href="#tabs-1" class="primary--text">
+      <v-tab href="#tabs-2">
+        <v-icon style="padding-right: 8px;">forum</v-icon>
         Conversations
-        <v-icon>forum</v-icon>
       </v-tab>
     </v-tabs>
 
     <v-tabs-items v-model="tabs">
       <v-tab-item value="tabs-1" class="tabs-items">
+        <v-row justify="space-between" align="end" dense>
+          <v-col class="noPadding">
+            <v-textarea
+              class="conv-textarea"
+              label="Notes about the family."
+              no-resize
+              rows="23"
+              hide-details
+              v-model="newNotes"
+              :disabled="!familyId"
+              @change="saveNotes"
+            ></v-textarea>
+          </v-col>
+        </v-row>
+      </v-tab-item>
+
+      <v-tab-item value="tabs-2" class="tabs-items">
         <v-row justify="space-between" align="end" dense>
           <v-col cols="12" md="12" class="noPadding">
             <v-data-table
@@ -47,28 +69,12 @@
               label="Conversation with parents"
               outlined
               no-resize
-              rows="5"
+              rows="4"
               hide-details
               v-model="conv"
               :disabled="!familyId"
               append-icon="mdi-send"
               @click:append="submitConversation"
-            ></v-textarea>
-          </v-col>
-        </v-row>
-      </v-tab-item>
-      <v-tab-item value="tabs-2" class="tabs-items">
-        <v-row justify="space-between" align="end" dense>
-          <v-col class="noPadding">
-            <v-textarea
-              class="conv-textarea"
-              label="Notes about the family."
-              no-resize
-              rows="24"
-              hide-details
-              v-model="newNotes"
-              :disabled="!familyId"
-              @change="saveNotes"
             ></v-textarea>
           </v-col>
         </v-row>
@@ -172,8 +178,9 @@ export default {
 
 <style lang="scss" scoped>
 .noPadding {
-  padding: 8px 0px 0px 0px !important;
+  padding: 8px 8px 4px 8px !important;
 }
+
 .tabs-items {
   background-color: rgba($color: #000000, $alpha: 0);
   height: 500px;
