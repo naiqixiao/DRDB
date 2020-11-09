@@ -8,6 +8,8 @@ const bcrypt = require("bcrypt");
 const { google } = require("googleapis");
 const { OAuth2 } = google.auth;
 
+const config = require("../../config/general");
+
 function makeBody(to, from, cc, subject, body) {
   var message = [
     'Content-Type: text/html; charset="UTF-8"\n',
@@ -123,9 +125,9 @@ exports.create = asyncHandler(async (req, res) => {
     // create a sample study
     const sampleStudy =
     {
-      StudyName: "Sample study",
+      StudyName: "Sample study for " + lab.LabName,
       MinAge: "8.00",
-      MaxAge: "18.00",
+      MaxAge: "24.00",
       Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
       EmailTemplate:
         "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
