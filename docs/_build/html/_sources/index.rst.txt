@@ -17,3 +17,4 @@ This is an open source system to manage participant database, study, study sched
    Backend
    Frontend
    Email Template
+   Role-based Rules
