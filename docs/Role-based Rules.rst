@@ -19,7 +19,7 @@ Personnel management
 **Personnel deletion** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
 
 Lab management (on Settings page)
------------------------
+-----------------------------------------
 **Lab creation** is limited to *Adminstrator*.
 
 **Lab modification** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
