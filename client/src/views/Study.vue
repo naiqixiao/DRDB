@@ -51,6 +51,7 @@
                     @input="changeStudyStatus(item)"
                     :disabled="
                       !(
+                        currentStudy.PointofContact.id == $store.state.userID ||
                         $store.state.role == 'Admin' ||
                         $store.state.role == 'PI' ||
                         $store.state.role == 'Lab manager'
@@ -202,6 +203,8 @@
                       !(
                         $store.state.role == 'Admin' ||
                         $store.state.role == 'PI' ||
+                        $store.state.role == 'PostDoc' ||
+                        $store.state.role == 'GradStudent' ||
                         $store.state.role == 'Lab manager'
                       )
                     "
@@ -248,7 +251,9 @@
                     :disabled="
                       !(
                         currentStudy.id &&
-                        ($store.state.role == 'Admin' ||
+                        (currentStudy.PointofContact.id ==
+                          $store.state.userID ||
+                          $store.state.role == 'Admin' ||
                           $store.state.role == 'PI' ||
                           $store.state.role == 'Lab manager')
                       )
@@ -678,8 +683,7 @@ export default {
     },
 
     async save() {
-
-      this.editedStudy.FK_Personnel = this.pointofContact.id
+      this.editedStudy.FK_Personnel = this.pointofContact.id;
 
       if (this.editedIndex === -1) {
         try {

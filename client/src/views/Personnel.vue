@@ -50,7 +50,7 @@
                     :value="!!item.Active"
                     @input="changePersonnelStatus(item)"
                     :disabled="
-                      !(
+                      !(currentPersonnel.id == $store.state.userID ||
                         $store.state.role == 'Admin' ||
                         $store.state.role == 'PI' ||
                         $store.state.role == 'Lab manager'
@@ -110,6 +110,8 @@
                             :disabled="
                               $store.state.role != 'Admin' &&
                               $store.state.role != 'PI' &&
+                              $store.state.role != 'PostDoc' &&
+                              $store.state.role != 'GradStudent' &&
                               $store.state.role != 'Lab manager'
                             "
                           >

@@ -33,7 +33,12 @@
         >
       </v-col>
 
-      <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
+      <v-dialog
+        v-model="dialog"
+        max-width="600px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
           <v-card-title class="headline">Change password</v-card-title>
           <v-form ref="form" v-model="valid" lazy-validation>
@@ -131,6 +136,8 @@
                 :disabled="
                   $store.state.role != 'Admin' &&
                   $store.state.role != 'PI' &&
+                  $store.state.role != 'PostDoc' &&
+                  $store.state.role != 'GradStudent' &&
                   $store.state.role != 'Lab manager'
                 "
                 >Setup Google Account</v-btn
@@ -152,6 +159,8 @@
                 :disabled="
                   $store.state.role != 'Admin' &&
                   $store.state.role != 'PI' &&
+                  $store.state.role != 'PostDoc' &&
+                  $store.state.role != 'GradStudent' &&
                   $store.state.role != 'Lab manager'
                 "
                 >Update Lab Info</v-btn
@@ -162,7 +171,12 @@
         </v-tooltip>
       </v-col>
 
-      <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false" persistent>
+      <v-dialog
+        v-model="dialogGoogle"
+        max-width="600px"
+        :retain-focus="false"
+        persistent
+      >
         <v-card outlined>
           <v-card-title class="headline"
             >Paste Google sign in code</v-card-title
