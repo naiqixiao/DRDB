@@ -34,7 +34,7 @@ function emailBody(schedule) {
     if (schedule.Appointments[0].Study.StudyType !== "Online") {
         opening =
             "<p>Dear " +
-            schedule..Family.NamePrimary.split(" ")[0] +
+            schedule.Family.NamePrimary.split(" ")[0] +
             ",</p>" +
             "<p>This is a reminder for your visit to " + schedule.Appointments[0].Study.Lab.LabName + " with <b>" +
             childNames(schedule.Appointments) +
