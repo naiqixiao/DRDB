@@ -126,6 +126,10 @@ function manualReminderBody(schedule) {
             "<" +
             schedule.Appointments[0].Study.Lab.Email +
             ">",
+        // to: schedule.Family.NamePrimary +
+        // "<" +
+        // schedule.Family.NamePrimary.Email +
+        // ">",
         subject: emailSubject,
         body: emailBody,
     };
@@ -218,6 +222,9 @@ exports.reminderEmail = asyncHandler(async () => {
             include: [
                 {
                     model: model.personnel,
+                },
+                {
+                    model: model.family,
                 },
                 {
                     model: model.appointment,
