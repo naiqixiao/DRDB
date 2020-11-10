@@ -4,7 +4,7 @@ Some functions in the system are restricted to specific personnel roles.
 
 Study management
 -------------------
-**Study creation** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
+**Study creation** is limited to *Adminstrator*, *Lab manager*, *Graduate student*, *Post-doc*, and *P.I.*.
 
 **Study modification** is limited to *Adminstrator*, *Lab manager*, *P.I.*, and *the person who is the point of contact*.
 
@@ -12,7 +12,7 @@ Study management
 
 Personnel management
 -----------------------
-**Personnel creation** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
+**Personnel creation** is limited to *Adminstrator*, *Lab manager*, *Graduate student*, *Post-doc*,and *P.I.*.
 
 **Personnel modification** is limited to *Adminstrator*, *Lab manager*, *P.I.*, and *the personnel themselves*.
 
@@ -22,12 +22,12 @@ Lab management (on Settings page)
 -----------------------------------------
 **Lab creation** is limited to *Adminstrator*.
 
-**Lab modification** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
+**Lab modification** is limited to *Adminstrator*, *Lab manager*, *Graduate student*, *Post-doc*, and *P.I.*.
 
 
 Settings
 -----------------------
-**Lab email setup** is limited to *Adminstrator*, *Lab manager*, and *P.I.*.
+**Lab email setup** is limited to *Adminstrator*, *Lab manager*, *Graduate student*, *Post-doc*, and *P.I.*.
 
 **System email setup** is limited to *Adminstrator*.
 
