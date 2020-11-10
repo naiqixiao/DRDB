@@ -53,7 +53,7 @@ Study scheduling emails
     -  during scheduling a study appointment
     -  after updating an existing study appointment
 
-Email example
+**Email example**
 
 .. image:: /img/ScheduleEmailTemplate.jpeg
     :width: 70em
@@ -74,7 +74,7 @@ Reminder emails
 - What if a participant doesn't have email in the system?
     An email will be sent to the lab email to remind researchers of calling the participant.
 
-Email example
+**Email example**
 
 .. image:: /img/ReminderEmailTemplate.jpeg
     :width: 70em
