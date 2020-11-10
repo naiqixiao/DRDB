@@ -5,7 +5,10 @@ The DRDB system can send tailored emails to participants and lab managers to inf
 
 To make the emailling system run properly, users need to setup several email templates in the system.
 
+You need to set up a Google account to enable functions like sending email and creating calendar events.
 
+For a detailed instruction, `click here
+<https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing/>`_. 
 
 Email template components
 --------------------------------
