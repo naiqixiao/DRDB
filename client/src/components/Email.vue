@@ -207,7 +207,20 @@ export default {
       switch (this.emailType) {
         case "Confirmation":
         case "ScheduleUpdate":
-          email = opening + emailBodyList.join("<p></p>") + location + closing;
+          switch (this.appointments[0].Study.StudyType) {
+            case "Online":
+              email =
+                opening +
+                emailBodyList.join("<p></p>") +
+                "<p>This study is an online study. You can participate at home. :)</p>" +
+                closing;
+              break;
+
+            default:
+              email =
+                opening + emailBodyList.join("<p></p>") + location + closing;
+              break;
+          }
           break;
 
         default:

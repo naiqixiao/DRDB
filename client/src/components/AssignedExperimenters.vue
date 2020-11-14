@@ -1,20 +1,29 @@
 <template>
-  <v-row dense>
-    <v-col cols="12" md="12" v-for="experimenter in Experimenters" :key="experimenter.id" dense>
-      <v-card class="child-card d-flex flex-column">
-        <v-card-title class="title" style="padding: 8px">
-          {{ experimenter.Name + " (" + experimenter.Initial + ")" }}
-          <v-spacer></v-spacer>
-          {{ experimenter.Role }}
-        </v-card-title>
+  <div>
+    <div style="height: 300px !important; overflow-y: scroll !important">
+      <v-row dense>
+        <v-col
+          cols="12"
+          md="6"
+          v-for="experimenter in Experimenters"
+          :key="experimenter.id"
+          dense
+        >
+          <v-card class="child-card d-flex flex-column">
+            <v-card-title class="title" style="padding: 8px">
+              {{ experimenter.Name + " (" + experimenter.Initial + ")" }}
+              <v-spacer></v-spacer>
+              {{ experimenter.Role }}
+            </v-card-title>
 
-        <v-card-text
-          class="body-1"
-          align="start"
-          style="padding: 8px; color: var(--v-primary)"
-        >{{ "Email: " + experimenter.Email }}</v-card-text>
+            <v-card-text
+              class="body-1"
+              align="start"
+              style="padding: 8px; color: var(--v-primary)"
+              >{{ "Email: " + experimenter.Email }}</v-card-text
+            >
 
-        <!-- <v-card-actions>
+            <!-- <v-card-actions>
           <v-btn
             text
             @click="removeExperimenter(index)"
@@ -22,8 +31,10 @@
             >Delete</v-btn
           >
         </v-card-actions>-->
-      </v-card>
-    </v-col>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
     <v-row align="end" justify="end">
       <v-col cols="12" md="2" dense>
         <v-tooltip top>
@@ -43,44 +54,45 @@
           <span>Assign experimenters to this study</span>
         </v-tooltip>
       </v-col>
-    </v-row>
-
-    <div>
-      <v-dialog v-model="dialogExperimenter" max-width="1200px" persistent>
-        <v-card>
-          <v-row align="center" justify="center">
-            <v-col cols="12" lg="10">
-              <v-select
-                :items="labMembers"
-                :item-value="'id'"
-                :item-text="'Name'"
-                v-model="editedExperimenter"
-                return-object
-                label="Experimenters"
-                multiple
-                chip
-                outlined
-                dense
-              ></v-select>
-            </v-col>
-          </v-row>
-
-          <v-card-actions>
-            <v-row justify="space-between" style="height: 50px">
-              <v-col md="4"></v-col>
-              <v-col md="2">
-                <v-btn color="primary" @click="dialogExperimenter = false">Cancel</v-btn>
+      <div>
+        <v-dialog v-model="dialogExperimenter" max-width="1200px" persistent>
+          <v-card>
+            <v-row align="center" justify="center">
+              <v-col cols="12" lg="10">
+                <v-select
+                  :items="labMembers"
+                  :item-value="'id'"
+                  :item-text="'Name'"
+                  v-model="editedExperimenter"
+                  return-object
+                  label="Experimenters"
+                  multiple
+                  chip
+                  outlined
+                  dense
+                ></v-select>
               </v-col>
-              <v-col md="2">
-                <v-btn color="primary" @click="save">Confirm</v-btn>
-              </v-col>
-              <v-col md="4"></v-col>
             </v-row>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
-  </v-row>
+
+            <v-card-actions>
+              <v-row justify="space-between" style="height: 50px">
+                <v-col md="4"></v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="dialogExperimenter = false"
+                    >Cancel</v-btn
+                  >
+                </v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="save">Confirm</v-btn>
+                </v-col>
+                <v-col md="4"></v-col>
+              </v-row>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
+    </v-row>
+  </div>
 </template>
 
 <script>

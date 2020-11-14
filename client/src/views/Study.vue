@@ -24,50 +24,130 @@
     </div>
 
     <v-row>
-      <v-col cols="12" md="4">
-        <v-data-table
-          hide-default-footer
-          disable-pagination
-          fixed-header
-          height="900"
-          single-select
-          no-data-text="No study to display."
-          :headers="headersStudy"
-          :items="Studies"
-          @click:row="rowSelected"
-          class="elevation-1"
-        >
-          <template #item.updatedAt="{ value }">
-            <DateDisplay :date="value" :format="'short'" />
-          </template>
+      <v-col cols="12" md="3">
+        <v-col>
+          <v-data-table
+            hide-default-footer
+            disable-pagination
+            fixed-header
+            height="750"
+            single-select
+            no-data-text="No study to display."
+            :headers="headersStudy"
+            :items="Studies"
+            @click:row="rowSelected"
+            class="elevation-1"
+          >
+            <template #item.updatedAt="{ value }">
+              <DateDisplay :date="value" :format="'short'" />
+            </template>
 
-          <template #item.Completed="{ item }">
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-simple-checkbox
-                    class="checkbox"
-                    :value="!!item.Completed"
-                    @input="changeStudyStatus(item)"
-                    :disabled="
-                      !(
-                        currentStudy.PointofContact.id == $store.state.userID ||
-                        $store.state.role == 'Admin' ||
-                        $store.state.role == 'PI' ||
-                        $store.state.role == 'Lab manager'
-                      )
-                    "
-                    dense
-                  ></v-simple-checkbox>
-                </div>
-              </template>
-              <span>Mark whether this study is still on going</span>
-            </v-tooltip>
-          </template>
-        </v-data-table>
+            <template #item.Completed="{ item }">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-simple-checkbox
+                      class="checkbox"
+                      :value="!!item.Completed"
+                      @input="changeStudyStatus(item)"
+                      :disabled="
+                        !(
+                          currentStudy.PointofContact.id ==
+                            $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager'
+                        )
+                      "
+                      dense
+                    ></v-simple-checkbox>
+                  </div>
+                </template>
+                <span>Mark whether this study is still on going</span>
+              </v-tooltip>
+            </template>
+          </v-data-table>
+
+          <v-row justify="space-around">
+            <v-col cols="12" md="3" dense>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      fab
+                      @click.stop="createStudy"
+                      :disabled="
+                        !(
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'PostDoc' ||
+                          $store.state.role == 'GradStudent' ||
+                          $store.state.role == 'Lab manager'
+                        )
+                      "
+                    >
+                      <v-icon class="fabIcon">add</v-icon>
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Add a new study</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="12" md="3" dense>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      fab
+                      @click.stop="editStudy"
+                      :disabled="
+                        !(
+                          currentStudy.id &&
+                          (currentStudy.PointofContact.id ==
+                            $store.state.userID ||
+                            $store.state.role == 'Admin' ||
+                            $store.state.role == 'PI' ||
+                            $store.state.role == 'Lab manager')
+                        )
+                      "
+                    >
+                      <v-icon class="fabIcon">edit</v-icon>
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Edit study information</span>
+              </v-tooltip>
+            </v-col>
+            <v-col cols="12" md="3" dense>
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      fab
+                      @click.stop="deleteStudy"
+                      :disabled="
+                        !(
+                          currentStudy.id &&
+                          (currentStudy.PointofContact.id ==
+                            $store.state.userID ||
+                            $store.state.role == 'Admin' ||
+                            $store.state.role == 'PI' ||
+                            $store.state.role == 'Lab manager')
+                        )
+                      "
+                    >
+                      <v-icon class="fabIcon">delete</v-icon>
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Delete this study</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
+        </v-col>
       </v-col>
 
-      <v-col cols="12" md="5">
+      <v-col cols="12" md="4">
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
@@ -166,108 +246,19 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col md="12">
+          <v-col>
             <v-divider></v-divider>
-            <h4 class="text-left" v-show="currentStudy.id">Email template:</h4>
-          </v-col>
-          <body
-            v-html="currentStudy.EmailTemplate"
-            align="start"
-            class="template"
-            v-show="currentStudy.id"
-          ></body>
 
-          <v-col md="12">
-            <v-divider></v-divider>
-            <h4 class="text-left" v-show="currentStudy.id">
-              Reminder email template:
-            </h4>
-          </v-col>
-          <body
-            v-html="currentStudy.ReminderTemplate"
-            align="start"
-            class="template"
-            v-show="currentStudy.id"
-          ></body>
-        </v-row>
+            <h3 class="text-left">Experimenters</h3>
 
-        <v-row>
-          <v-col cols="12" md="2" dense>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn
-                    fab
-                    @click.stop="createStudy"
-                    :disabled="
-                      !(
-                        $store.state.role == 'Admin' ||
-                        $store.state.role == 'PI' ||
-                        $store.state.role == 'PostDoc' ||
-                        $store.state.role == 'GradStudent' ||
-                        $store.state.role == 'Lab manager'
-                      )
-                    "
-                  >
-                    <v-icon class="fabIcon">add</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Add a new study</span>
-            </v-tooltip>
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn
-                    fab
-                    @click.stop="editStudy"
-                    :disabled="
-                      !(
-                        currentStudy.id &&
-                        (currentStudy.PointofContact.id ==
-                          $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager')
-                      )
-                    "
-                  >
-                    <v-icon class="fabIcon">edit</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Edit study information</span>
-            </v-tooltip>
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-tooltip top>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn
-                    fab
-                    @click.stop="deleteStudy"
-                    :disabled="
-                      !(
-                        currentStudy.id &&
-                        (currentStudy.PointofContact.id ==
-                          $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager')
-                      )
-                    "
-                  >
-                    <v-icon class="fabIcon">delete</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Delete this study</span>
-            </v-tooltip>
+            <AssignedExperimenters
+              :Experimenters="currentStudy.Experimenters"
+              :labMembers="labMembers"
+              :studyId="currentStudy.id"
+              @updatedExperimenters="updateExperimenters"
+            ></AssignedExperimenters>
           </v-col>
         </v-row>
-
         <div>
           <v-dialog
             v-model="dialog"
@@ -464,15 +455,34 @@
         <!-- </v-form> -->
       </v-col>
 
-      <v-col cols="12" md="3">
-        <h3>Experimenters</h3>
+      <v-col cols="12" md="5">
+        <v-col md="12">
+          <v-divider></v-divider>
+          <h3 class="text-left" v-show="currentStudy.id">
+            Schedule confirmation email preview (email template is is in dark colour):
+          </h3>
+        </v-col>
+        <body
+          v-html="confirmationPreview"
+          align="start"
+          class="template"
+          v-show="currentStudy.id"
+          style="height: 350px !important; overflow-y: scroll !important"
+        ></body>
 
-        <AssignedExperimenters
-          :Experimenters="currentStudy.Experimenters"
-          :labMembers="labMembers"
-          :studyId="currentStudy.id"
-          @updatedExperimenters="updateExperimenters"
-        ></AssignedExperimenters>
+        <v-col md="12">
+          <v-divider></v-divider>
+          <h3 class="text-left" v-show="currentStudy.id">
+            Reminder email preview (email template is in dark colour):
+          </h3>
+        </v-col>
+        <body
+          v-html="reminderPreview"
+          align="start"
+          class="template"
+          v-show="currentStudy.id"
+          style="height: 350px !important; overflow-y: scroll !important"
+        ></body>
       </v-col>
     </v-row>
   </v-container>
@@ -486,6 +496,7 @@ import study from "@/services/study";
 import personnel from "@/services/personnel";
 
 import { VueEditor } from "vue2-editor";
+import moment from "moment";
 
 export default {
   components: {
@@ -787,6 +798,142 @@ export default {
         .join("");
 
       return htmlText;
+    },
+
+    confirmationPreview() {
+      if (this.currentStudy.EmailTemplate) {
+        var opening =
+          "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
+          "Lisa,</p>" +
+          "<p style= 'color: var(--v-primary-lighten3)'>Thanks for your support to our research! This is a confirmation for your visit with " +
+          "Emma" +
+          moment().format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
+          ".</p>";
+
+        var emailBody = this.currentStudy.EmailTemplate;
+
+        emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+        emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+        emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+
+        // emailBody = emailBody.replace(/\. he/g, ". He");
+        // emailBody = emailBody.replace(/\. his/g, ". His");
+        emailBody = emailBody.replace(/\. she/g, ". She");
+        emailBody = emailBody.replace(/\. her/g, ". Her");
+
+        emailBody = emailBody.replace(/\${{childName}}/g, "Emma" || "");
+
+        // location
+        const location =
+          "<p style= 'color: var(--v-primary-lighten3)'>" +
+          this.$store.state.transportationInstructions +
+          "</p>";
+        // closing
+        const closing =
+          "<p style= 'color: var(--v-primary-lighten3)'>" +
+          this.$store.state.emailClosing +
+          "</p>" +
+          "<p style= 'color: var(--v-primary-lighten3)'>Best,<br>" +
+          this.$store.state.name +
+          "<br>" +
+          this.$store.state.role +
+          "<br>" +
+          this.$store.state.labName +
+          "</p>";
+
+        var email = "";
+
+        switch (this.currentStudy.StudyType) {
+          case "Online":
+            email =
+              opening +
+              emailBody +
+              "<p style= 'color: var(--v-primary-lighten3)'>This study is an online study. You can participate at home. :)</p>" +
+              closing;
+            break;
+
+          default:
+            email = opening + emailBody + location + closing;
+
+            break;
+        }
+
+        return email;
+      } else {
+        return "<p>Email template hasn't setup yet. No email preview is available.</p>";
+      }
+    },
+
+    reminderPreview() {
+      if (this.currentStudy.ReminderTemplate) {
+        var opening = "";
+
+        if (this.currentStudy.StudyType !== "Online") {
+          opening =
+            "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
+            "Lisa,</p>" +
+            "<p style= 'color: var(--v-primary-lighten3)'>This is a reminder for your visit to " +
+            this.$store.state.labName +
+            " with " +
+            "Emma" +
+            moment().format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
+            ".</p>" +
+            "<p style= 'color: var(--v-primary-lighten3)'>" +
+            this.$store.state.TransportationInstructions +
+            "</p>";
+        } else {
+          opening =
+            "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
+            "Lisa,</p>" +
+            "<p style= 'color: var(--v-primary-lighten3)'>This is " +
+            this.$store.state.labName +
+            ". Just a reminder that you and " +
+            "Emma will participate our online study " +
+            moment().format(" [tomorrow at] h:mma") +
+            ".</p>";
+        }
+
+        var emailBody = this.currentStudy.ReminderTemplate.replace(
+          /\${{ZoomLink}}/g,
+          "<a href='" + this.$store.state.ZoomLink + "'>Zoom Link</a>"
+        );
+
+        if (this.currentStudy.StudyType === "Online") {
+          emailBody =
+            emailBody +
+            "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>";
+        }
+
+        emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+        emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+        emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+
+        // emailBody = emailBody.replace(/\. he/g, ". He");
+        // emailBody = emailBody.replace(/\. his/g, ". His");
+        emailBody = emailBody.replace(/\. she/g, ". She");
+        emailBody = emailBody.replace(/\. her/g, ". Her");
+
+        emailBody = emailBody.replace(/\${{childName}}/g, "Emma" || "");
+
+        // closing
+        const closing =
+          "<p style= 'color: var(--v-primary-lighten3)'>" +
+          this.$store.state.emailClosing +
+          "</p>" +
+          "<p style= 'color: var(--v-primary-lighten3)'>Best,<br>" +
+          this.$store.state.name +
+          "<br>" +
+          this.$store.state.role +
+          "<br>" +
+          this.$store.state.labName +
+          "</p>";
+
+        var email = opening + emailBody + closing;
+
+        return email;
+      } else {
+        return "<p>Email template hasn't setup yet. No email preview is available.</p>";
+      }
     },
   },
 
