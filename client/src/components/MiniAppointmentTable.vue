@@ -679,8 +679,8 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        //to: this.appointments[0].Child.Family.NamePrimary + "<" + appointments[0].Child.Family.Email + ">",
-        to: this.Schedule.NamePrimary + "<" + this.$store.state.labEmail + ">",
+        to: this.Schedule.Family.NamePrimary + "<" + this.Schedule.Family.Email + ">",
+        // to: this.Schedule.NamePrimary + "<" + this.$store.state.labEmail + ">",
         subject: emailSubject,
         body: emailBody,
       };
