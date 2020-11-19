@@ -182,7 +182,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="dialogUpdateExperimenters" max-width="800px" √>
+    <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
       <v-card height="300px" class="d-flex flex-column">
         <v-card-title class="title"
           >Update experimenters for the current study</v-card-title

@@ -600,7 +600,7 @@ export default {
       }, 300);
     },
 
-    rowSelected(item, row) {
+    rowSelected(item, row) { 
       row.select(true);
       row.expand(!row.isExpanded);
       this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
