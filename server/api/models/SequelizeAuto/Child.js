@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = function(sequelize, DataTypes) {
 	return sequelize.define('Child', {
 		id: {
 			autoIncrement: true,
@@ -9,7 +9,7 @@ module.exports = function (sequelize, DataTypes) {
 			primaryKey: true
 		},
 		Name: {
-			type: DataTypes.STRING(30),
+			type: DataTypes.STRING(50),
 			allowNull: true,
 			defaultValue: "UNKNOWN"
 		},
@@ -22,10 +22,6 @@ module.exports = function (sequelize, DataTypes) {
 			allowNull: true
 		},
 		Age: {
-			type: DataTypes.INTEGER,
-			allowNull: true
-		},
-		Gestation: {
 			type: DataTypes.INTEGER,
 			allowNull: true
 		},
@@ -95,6 +91,10 @@ module.exports = function (sequelize, DataTypes) {
 		},
 		School: {
 			type: DataTypes.STRING(100),
+			allowNull: true
+		},
+		Gestation: {
+			type: DataTypes.INTEGER,
 			allowNull: true
 		}
 	}, {

@@ -3,7 +3,7 @@ const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
-const moment = require('moment');
+const moment = require("moment");
 
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -68,33 +68,42 @@ exports.create = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     const logFile = logFolder + "/log.txt";
 
-    var logInfo = "[Child Created] " + User.Name + " (" + User.Email + ") from " +
-      User.LabName + " added a child to a family (" +
-      child.FK_Family + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Child Created] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") from " +
+      User.LabName +
+      " added a child to a family (" +
+      child.FK_Family +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(child);
 
     console.log("Child is created and siblings are updated!");
   } catch (error) {
-    res.status(500).send(error);
+    throw error;
   }
 });
 
 // batch upload families
 exports.batchCreate = asyncHandler(async (req, res) => {
-
   try {
     var newChildrenInfo = req.body;
 
@@ -102,35 +111,37 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 
     const newChildren = await model.child.bulkCreate(newChildrenInfo);
 
-    // // update sibbling table & assign child id within each family
-    // for (var i = 0; i < newChildren.length; i++) {
-    //   if (newChildren.length > 1) {
-    //     var Children = await model.child.findAll({
-    //       attributes: ["id"],
-    //       where: { FK_Family: newChildren[i].FK_Family },
-    //     });
+    // update sibbling table & assign child id within each family
+    for (var i = 0; i < newChildren.length; i++) {
+        if (newChildren.length > 1) {
+          var Children = await model.child.findAll({
+            attributes: ["id"],
+            where: { FK_Family: newChildren[i].FK_Family },
+          });
 
-    //     var siblings = [];
+          var siblings = [];
 
-    //     for (var j = 0; j < Children.length; j++) {
-    //       var childId = Children[j].id;
+          for (var j = 0; j < Children.length; j++) {
+            var childId = Children[j].id;
 
-    //       Children.forEach((sibling) => {
-    //         if (sibling.id != childId) {
-    //           siblings.push({ FK_Child: childId, Sibling: sibling.id });
-    //         }
-    //       });
+            // Children.forEach((sibling) => {
+            //   if (sibling.id != childId) {
+            //     siblings.push({ FK_Child: childId, Sibling: sibling.id });
+            //   }
+            // });
 
-    //       // assign child id within each family
-    //       Children[j].IdWithinFamily = alphabet[Children.length];
-    //       await model.child.update(Children[j], {
-    //         where: { id: Children[j].id },
-    //       });
-    //     }
+            // assign child id within each family
+            // Children[j].IdWithinFamily = alphabet[j];
 
-    //     await model.sibling.bulkCreate(siblings);
-    //   }
-    // }
+            await model.child.update({IdWithinFamily: alphabet[j]}, {
+              where: { id: Children[j].id },
+            });
+          }
+
+          await model.sibling.bulkCreate(siblings);
+        
+      }
+    }
 
     res.status(200).send(newChildren);
   } catch (error) {
@@ -146,10 +157,14 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Family.Email$"] = { [Op.like]: `${req.query.Email}%` };
   }
   if (req.query.NamePrimary) {
-    queryString["$Family.NamePrimary$"] = { [Op.like]: `${req.query.NamePrimary}%` };
+    queryString["$Family.NamePrimary$"] = {
+      [Op.like]: `${req.query.NamePrimary}%`,
+    };
   }
   if (req.query.NameSecondary) {
-    queryString["$Family.NameSecondary$"] = { [Op.like]: `${req.query.NameSecondary}%` };
+    queryString["$Family.NameSecondary$"] = {
+      [Op.like]: `${req.query.NameSecondary}%`,
+    };
   }
   if (req.query.Phone) {
     queryString["$Family.Phone$"] = { [Op.like]: `${req.query.Phone}%` };
@@ -159,9 +174,15 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   queryString["$Family.NextContactDate$"] = {
-    [Op.or]: [{ [Op.lte]: moment().startOf("day").toDate() },
-    { [Op.eq]: null }]
-  }
+    [Op.or]: [
+      {
+        [Op.lte]: moment()
+          .startOf("day")
+          .toDate(),
+      },
+      { [Op.eq]: null },
+    ],
+  };
 
   queryString["$Family.NoMoreContact$"] = 0;
 
@@ -235,9 +256,7 @@ exports.search = asyncHandler(async (req, res) => {
         include: [{ model: model.appointment, include: [model.schedule] }],
       },
     ],
-    order: [
-      [model.appointment, model.schedule, 'AppointmentTime', 'DESC'],
-    ]
+    order: [[model.appointment, model.schedule, "AppointmentTime", "DESC"]],
   });
 
   shuffle(children);
@@ -263,20 +282,30 @@ exports.update = asyncHandler(async (req, res) => {
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
+    fs.mkdirSync(logFolder);
   }
 
   const logFile = logFolder + "/log.txt";
 
-  var logInfo = "[Child Updated] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " updated a child's information (" +
-    ID + ") at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+  var logInfo =
+    "[Child Updated] " +
+    User.Name +
+    " (" +
+    User.Email +
+    ") from " +
+    User.LabName +
+    " updated a child's information (" +
+    ID +
+    ") at " +
+    new Date().toString() +
+    " - " +
+    User.IP +
+    "\r\n";
 
   if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
+    fs.appendFileSync(logFile, logInfo);
   } else {
-    fs.writeFileSync(logFile, logInfo)
+    fs.writeFileSync(logFile, logInfo);
   }
 
   res.status(200).json(child);
@@ -293,20 +322,30 @@ exports.delete = asyncHandler(async (req, res) => {
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
+    fs.mkdirSync(logFolder);
   }
 
   const logFile = logFolder + "/log.txt";
 
-  var logInfo = "[Child Deleted] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " deleted a child (" +
-    req.query.id + ") from the database at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+  var logInfo =
+    "[Child Deleted] " +
+    User.Name +
+    " (" +
+    User.Email +
+    ") from " +
+    User.LabName +
+    " deleted a child (" +
+    req.query.id +
+    ") from the database at " +
+    new Date().toString() +
+    " - " +
+    User.IP +
+    "\r\n";
 
   if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
+    fs.appendFileSync(logFile, logInfo);
   } else {
-    fs.writeFileSync(logFile, logInfo)
+    fs.writeFileSync(logFile, logInfo);
   }
 
   res.status(200).json(child);

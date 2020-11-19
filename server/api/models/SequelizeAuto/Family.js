@@ -21,11 +21,11 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true
 		},
 		Phone: {
-			type: DataTypes.STRING(10),
+			type: DataTypes.STRING(11),
 			allowNull: true
 		},
 		CellPhone: {
-			type: DataTypes.STRING(10),
+			type: DataTypes.STRING(11),
 			allowNull: true
 		},
 		RacePrimary: {

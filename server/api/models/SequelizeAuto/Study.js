@@ -28,10 +28,6 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.TEXT,
 			allowNull: false
 		},
-		ReminderTemplate: {
-			type: DataTypes.TEXT,
-			allowNull: false
-		},
 		Completed: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
@@ -58,7 +54,7 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
 		StudyType: {
-			type: DataTypes.ENUM('Behavioural','EEG/ERP','EyeTracking','fNIRS'),
+			type: DataTypes.STRING(30),
 			allowNull: false
 		},
 		PrematureParticipant: {
@@ -90,6 +86,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.DATE,
 			allowNull: false,
 			defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+		},
+		ReminderTemplate: {
+			type: DataTypes.TEXT,
+			allowNull: false
 		}
 	}, {
 		sequelize,

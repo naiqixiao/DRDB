@@ -14,8 +14,7 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		Initial: {
 			type: DataTypes.STRING(45),
-			allowNull: false,
-			unique: false
+			allowNull: false
 		},
 		Role: {
 			type: DataTypes.ENUM('Admin','PostDoc','PI','GradStudent','Undergrad','RA','Lab manager','Staff'),

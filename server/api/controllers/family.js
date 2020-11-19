@@ -1,7 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const moment = require('moment');
+const moment = require("moment");
 const fs = require("fs");
 const Sequelize = require("sequelize");
 
@@ -73,20 +73,30 @@ exports.create = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     const logFile = logFolder + "/log.txt";
 
-    var logInfo = "[Family Created] " + User.Name + " (" + User.Email + ") from " +
-      User.LabName + " added a family (" +
-      newFamily.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Family Created] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") from " +
+      User.LabName +
+      " added a family (" +
+      newFamily.id +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(newFamily);
@@ -97,49 +107,55 @@ exports.create = asyncHandler(async (req, res) => {
 
 // batch upload families
 exports.batchCreate = asyncHandler(async (req, res) => {
-  var newFamilyInfo = req.body;
+  try {
+    var newFamilyInfo = req.body;
 
-  const alphabet = "abcdefghijk".split("");
+    const alphabet = "abcdefghijk".split("");
 
-  const newFamily = await model.family.bulkCreate(newFamilyInfo, {
-    include: [
-      model.conversations,
-      model.child,
-      { model: model.appointment, include: [model.schedule] },
-    ],
-  });
+    const newFamily = await model.family.bulkCreate(newFamilyInfo, {
+      include: [
+        model.conversations,
+        model.child,
+        { model: model.appointment, include: [model.schedule] },
+      ],
+    });
 
-  // update sibbling table & assign child id within each family
-  for (var i = 0; i < newFamily.length; i++) {
-    if (newFamily[i].Children.length > 1) {
-      var Children = await model.child.findAll({
-        attributes: ["id"],
-        where: { FK_Family: newFamily[i].id },
-      });
+    // update sibbling table & assign child id within each family
+    for (var i = 0; i < newFamily.length; i++) {
+      if (newFamily[i].Children) {
+        if (newFamily[i].Children.length > 1) {
+          var Children = await model.child.findAll({
+            attributes: ["id"],
+            where: { FK_Family: newFamily[i].id },
+          });
 
-      var siblings = [];
+          var siblings = [];
 
-      for (var j = 0; j < Children.length; j++) {
-        var childId = Children[j].id;
+          for (var j = 0; j < Children.length; j++) {
+            var childId = Children[j].id;
 
-        Children.forEach((sibling) => {
-          if (sibling.id != childId) {
-            siblings.push({ FK_Child: childId, Sibling: sibling.id });
+            Children.forEach((sibling) => {
+              if (sibling.id != childId) {
+                siblings.push({ FK_Child: childId, Sibling: sibling.id });
+              }
+            });
+
+            // assign child id within each family
+            Children[j].IdWithinFamily = alphabet[Children.length];
+            await model.child.update(Children[j], {
+              where: { id: Children[j].id },
+            });
           }
-        });
 
-        // assign child id within each family
-        Children[j].IdWithinFamily = alphabet[Children.length];
-        await model.child.update(Children[j], {
-          where: { id: Children[j].id },
-        });
+          await model.sibling.bulkCreate(siblings);
+        }
       }
-
-      await model.sibling.bulkCreate(siblings);
     }
-  }
 
-  res.status(200).send(newFamily);
+    res.status(200).send(newFamily);
+  } catch (error) {
+    throw error;
+  }
 });
 
 // Retrieve all families from the database.
@@ -164,14 +180,19 @@ exports.search = asyncHandler(async (req, res) => {
 
   if (req.query.NextContactDate) {
     queryString.NextContactDate = {
-
-      [Op.or]: [{ [Op.lte]: moment().startOf("day").toDate() },
-      { [Op.eq]: null }]
+      [Op.or]: [
+        {
+          [Op.lte]: moment()
+            .startOf("day")
+            .toDate(),
+        },
+        { [Op.eq]: null },
+      ],
       // [Op.between]: [
       //   moment().subtract(6, 'months').startOf("day").toDate(),
       //   moment().startOf("day").toDate()
       // ]
-    }
+    };
   }
 
   if (req.query.AssignedLab) {
@@ -180,24 +201,21 @@ exports.search = asyncHandler(async (req, res) => {
 
   queryString.NoMoreContact = 0;
 
-
   if (req.query.childName) {
-
     const children = await model.child.findAll({
       where: {
         Name: {
-          [Op.like]: `${req.query.childName}%`
-        }
-      }
-    })
+          [Op.like]: `${req.query.childName}%`,
+        },
+      },
+    });
 
     var familyIDs = [];
     children.forEach((child) => {
-      familyIDs.push(child.FK_Family)
-    })
+      familyIDs.push(child.FK_Family);
+    });
 
-    queryString.id = familyIDs
-
+    queryString.id = familyIDs;
   }
 
   const families = await model.family.findAll({
@@ -206,9 +224,12 @@ exports.search = asyncHandler(async (req, res) => {
       model.conversations,
       {
         model: model.child,
-        include: [{
-          model: model.appointment, attributes: ["FK_Study"]
-        }],
+        include: [
+          {
+            model: model.appointment,
+            attributes: ["FK_Study"],
+          },
+        ],
       },
       {
         model: model.schedule,
@@ -233,12 +254,11 @@ exports.search = asyncHandler(async (req, res) => {
                 through: { model: model.experimenterAssignment },
               },
             ],
-          }],
-        order: [
-          [model.schedule, 'AppointmentTime', 'DESC'],
-        ]
-      }
-    ]
+          },
+        ],
+        order: [[model.schedule, "AppointmentTime", "DESC"]],
+      },
+    ],
   });
 
   shuffle(families);
@@ -261,20 +281,30 @@ exports.update = asyncHandler(async (req, res) => {
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
+    fs.mkdirSync(logFolder);
   }
 
   const logFile = logFolder + "/log.txt";
 
-  var logInfo = "[Family Updated] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " updated a family's information (" +
-    ID + ") at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+  var logInfo =
+    "[Family Updated] " +
+    User.Name +
+    " (" +
+    User.Email +
+    ") from " +
+    User.LabName +
+    " updated a family's information (" +
+    ID +
+    ") at " +
+    new Date().toString() +
+    " - " +
+    User.IP +
+    "\r\n";
 
   if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
+    fs.appendFileSync(logFile, logInfo);
   } else {
-    fs.writeFileSync(logFile, logInfo)
+    fs.writeFileSync(logFile, logInfo);
   }
 
   res.status(200).send(family);
@@ -292,20 +322,30 @@ exports.delete = asyncHandler(async (req, res) => {
 
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
+    fs.mkdirSync(logFolder);
   }
 
   const logFile = logFolder + "/log.txt";
 
-  var logInfo = "[Family Deleted] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " deleted family (" +
-    ID + ") from the database at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+  var logInfo =
+    "[Family Deleted] " +
+    User.Name +
+    " (" +
+    User.Email +
+    ") from " +
+    User.LabName +
+    " deleted family (" +
+    ID +
+    ") from the database at " +
+    new Date().toString() +
+    " - " +
+    User.IP +
+    "\r\n";
 
   if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
+    fs.appendFileSync(logFile, logInfo);
   } else {
-    fs.writeFileSync(logFile, logInfo)
+    fs.writeFileSync(logFile, logInfo);
   }
 
   res.status(200).json(family);
@@ -355,7 +395,6 @@ exports.searchSpecial = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
-
 exports.fillNextContactDate = asyncHandler(async (req, res) => {
   // var queryString = {};
 
@@ -377,15 +416,16 @@ exports.fillNextContactDate = asyncHandler(async (req, res) => {
 
   // queryString.Email = { [Op.like]: `` };
 
-
   const families = await model.family.findAll();
-  console.log(families.length)
+  console.log(families.length);
 
   families.forEach(async (family) => {
-
-    await model.family.update({ NextContactDate: family.createdAt }, {
-      where: { id: family.id },
-    });
+    await model.family.update(
+      { NextContactDate: family.createdAt },
+      {
+        where: { id: family.id },
+      }
+    );
   });
 
   res.status(200);
