@@ -22,6 +22,16 @@
         Settings page.</v-alert
       >
     </div>
+    <div v-if="$store.state.trainingMode">
+      <v-alert
+        border="left"
+        type="warning"
+        color="#c7792c"
+        dense
+        style="font-weight: 600"
+        >You are running in a training mode.</v-alert
+      >
+    </div>
 
     <v-row>
       <v-col cols="12" md="3">

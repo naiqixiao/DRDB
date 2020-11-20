@@ -162,9 +162,16 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 exports.search = asyncHandler(async (req, res) => {
   var queryString = {};
 
+  if (req.query.trainingMode === "true") {
+    queryString.TrainingSet = true;
+  } else {
+    queryString.TrainingSet = false;
+  }
+
   if (req.query.id) {
     queryString.id = req.query.id;
   }
+
   if (req.query.Email) {
     queryString.Email = { [Op.like]: `${req.query.Email}%` };
   }

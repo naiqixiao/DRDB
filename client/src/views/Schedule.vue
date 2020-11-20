@@ -22,6 +22,16 @@
         Settings page.</v-alert
       >
     </div>
+    <div v-if="$store.state.trainingMode">
+      <v-alert
+        border="left"
+        type="warning"
+        color="#c7792c"
+        dense
+        style="font-weight: 600"
+        >You are running in a training mode.</v-alert
+      >
+    </div>
 
     <v-row justify="space-around">
       <v-col cols="12" md="4">
@@ -422,8 +432,8 @@
               "
               :disabled="
                 !currentChild.id ||
-                currentChild.scheduled ||
-                !$store.state.labEmailStatus
+                  currentChild.scheduled ||
+                  !$store.state.labEmailStatus
               "
               class="textfield-family"
               background-color="textbackground"
@@ -906,7 +916,9 @@ export default {
     AppointmentTableBrief,
     ParticipationHistory,
   },
-  props: {},
+  props: {
+    training: Boolean,
+  },
   data() {
     return {
       scheduleId: null,
@@ -1030,6 +1042,7 @@ export default {
       var studyQuery = {
         id: this.selectedStudy.id,
       };
+
       try {
         const studyInfo = await study.search(studyQuery);
         var pastParticipants = studyInfo.data[0].Appointments.map(
@@ -1097,6 +1110,8 @@ export default {
           queryString.HearingLossParticipant = 1;
           break;
       }
+
+      queryString.trainingMode = this.$store.state.trainingMode;
 
       try {
         const Results = await child.search(queryString);
@@ -1449,7 +1464,7 @@ export default {
         appointment.Personnels.forEach((experimenter) => {
           attendees.push({
             displayName: experimenter.Name,
-            email: experimenter.Calendar, // + ".CAL",
+            email: experimenter.Calendar,
           });
         });
       });
@@ -1767,7 +1782,7 @@ export default {
       }
     },
 
-    studyDateTime: function () {
+    studyDateTime: function() {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -1796,7 +1811,7 @@ export default {
       return studyDateTime;
     },
 
-    earliestDate: function () {
+    earliestDate: function() {
       if (
         moment(new Date())
           .add(1, "days")
@@ -1807,7 +1822,9 @@ export default {
             )
           )
       ) {
-        return moment(new Date()).add(1, "days").toISOString(true);
+        return moment(new Date())
+          .add(1, "days")
+          .toISOString(true);
       } else {
         return moment(this.editedChild.DoB)
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -1815,13 +1832,13 @@ export default {
       }
     },
 
-    latestDate: function () {
+    latestDate: function() {
       return moment(this.editedChild.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
   },
-  mounted: function () {
+  mounted: function() {
     this.searchStudies();
   },
 
@@ -1836,6 +1853,27 @@ export default {
 
     dialogSchedule(val) {
       val || this.closeSchedule();
+    },
+
+    training() {
+      // console.log(`My store value for 'training' changed to ${val}`);
+      this.currentChild = Object.assign({}, this.defaultItem);
+      this.editedIndex = -1;
+
+      // this.currentFamily = Object.assign(
+      //   {},
+      //   {
+      //     NamePrimary: null,
+      //     NameSecondary: null,
+      //     Phone: null,
+      //     Email: null,
+      //   }
+      // );
+      this.editedIndex = -1;
+
+      this.Children = [];
+      // this.currentChild = {};
+      this.page = 0;
     },
 
     response(val) {

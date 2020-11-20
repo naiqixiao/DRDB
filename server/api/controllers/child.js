@@ -113,33 +113,35 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 
     // update sibbling table & assign child id within each family
     for (var i = 0; i < newChildren.length; i++) {
-        if (newChildren.length > 1) {
-          var Children = await model.child.findAll({
-            attributes: ["id"],
-            where: { FK_Family: newChildren[i].FK_Family },
-          });
+      if (newChildren.length > 1) {
+        var Children = await model.child.findAll({
+          attributes: ["id"],
+          where: { FK_Family: newChildren[i].FK_Family },
+        });
 
-          var siblings = [];
+        var siblings = [];
 
-          for (var j = 0; j < Children.length; j++) {
-            var childId = Children[j].id;
+        for (var j = 0; j < Children.length; j++) {
+          var childId = Children[j].id;
 
-            // Children.forEach((sibling) => {
-            //   if (sibling.id != childId) {
-            //     siblings.push({ FK_Child: childId, Sibling: sibling.id });
-            //   }
-            // });
+          // Children.forEach((sibling) => {
+          //   if (sibling.id != childId) {
+          //     siblings.push({ FK_Child: childId, Sibling: sibling.id });
+          //   }
+          // });
 
-            // assign child id within each family
-            // Children[j].IdWithinFamily = alphabet[j];
+          // assign child id within each family
+          // Children[j].IdWithinFamily = alphabet[j];
 
-            await model.child.update({IdWithinFamily: alphabet[j]}, {
+          await model.child.update(
+            { IdWithinFamily: alphabet[j] },
+            {
               where: { id: Children[j].id },
-            });
-          }
+            }
+          );
+        }
 
-          await model.sibling.bulkCreate(siblings);
-        
+        await model.sibling.bulkCreate(siblings);
       }
     }
 
@@ -152,6 +154,12 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 // Retrieve all children from the database.
 exports.search = asyncHandler(async (req, res) => {
   var queryString = {};
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
 
   if (req.query.Email) {
     queryString["$Family.Email$"] = { [Op.like]: `${req.query.Email}%` };

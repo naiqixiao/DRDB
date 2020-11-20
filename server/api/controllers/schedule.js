@@ -2,7 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
-const moment = require('moment');
+const moment = require("moment");
 const fs = require("fs");
 // Create and Save an appointment
 
@@ -79,24 +79,33 @@ exports.create = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Created] " + User.Name + " (" + User.Email + ") " + "created a study appointment (" +
-      schedule.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Created] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "created a study appointment (" +
+      schedule.id +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(schedule);
@@ -136,10 +145,13 @@ exports.search = asyncHandler(async (req, res) => {
     };
   }
 
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
+
   if (req.query.Email) {
-    // queryString["$Appointments.Family.Email$"] = {
-    //   [Op.like]: `${req.query.Email}%`,
-    // };
     queryString["$Family.Email$"] = {
       [Op.like]: `${req.query.Email}%`,
     };
@@ -213,15 +225,12 @@ exports.search = asyncHandler(async (req, res) => {
           model: model.personnel,
         },
       ],
-      order: [
-
-        ['AppointmentTime', 'ASC'],
-      ],
+      order: [["AppointmentTime", "ASC"]],
     });
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
@@ -231,10 +240,21 @@ exports.today = asyncHandler(async (req, res) => {
 
   queryString.AppointmentTime = {
     [Op.between]: [
-      moment().startOf("day").toDate(),
-      moment().startOf("day").add(1, "days").toDate()
+      moment()
+        .startOf("day")
+        .toDate(),
+      moment()
+        .startOf("day")
+        .add(1, "days")
+        .toDate(),
     ],
   };
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
 
   if (req.query.lab) {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
@@ -276,14 +296,12 @@ exports.today = asyncHandler(async (req, res) => {
           model: model.personnel,
         },
       ],
-      order: [
-        ['AppointmentTime', 'ASC'],
-      ],
+      order: [["AppointmentTime", "ASC"]],
     });
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
@@ -293,11 +311,22 @@ exports.week = asyncHandler(async (req, res) => {
 
   queryString.AppointmentTime = {
     [Op.between]: [
-      moment().weekday(0).startOf("day").toDate(),
-      moment().weekday(7).startOf("day").toDate()
-
+      moment()
+        .weekday(0)
+        .startOf("day")
+        .toDate(),
+      moment()
+        .weekday(7)
+        .startOf("day")
+        .toDate(),
     ],
   };
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
 
   if (req.query.lab) {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
@@ -339,15 +368,12 @@ exports.week = asyncHandler(async (req, res) => {
           model: model.personnel,
         },
       ],
-      order: [
-
-        ['AppointmentTime', 'ASC'],
-      ],
+      order: [["AppointmentTime", "ASC"]],
     });
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
@@ -456,24 +482,33 @@ exports.update = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Update] " + User.Name + " (" + User.Email + ") " + "updated a study appointment (" +
-      ID + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Update] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "updated a study appointment (" +
+      ID +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(updatedSchedule);
@@ -503,24 +538,33 @@ exports.remind = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Remind] " + User.Name + " (" + User.Email + ") " + "sent a reminding email for a study appointment (" +
-      ID + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Remind] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "sent a reminding email for a study appointment (" +
+      ID +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(updatedSchedule);
@@ -542,37 +586,48 @@ exports.complete = asyncHandler(async (req, res) => {
 
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
-      where: { id: ID }
-    })
+      where: { id: ID },
+    });
 
     // update family by removing AssignedLab from the family
     updateFamilyInfo = { AssignedLab: null };
 
-    await model.family.update(updateFamilyInfo, { where: { id: updatedScheduleInfo.FK_Family } });
+    await model.family.update(updateFamilyInfo, {
+      where: { id: updatedScheduleInfo.FK_Family },
+    });
 
     // Log
     const User = req.body.User;
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Complete] " + User.Name + " (" + User.Email + ") " + "marked the study appointment (" +
-      ID + ") as completed at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Complete] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "marked the study appointment (" +
+      ID +
+      ") as completed at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(updatedSchedule);
@@ -586,7 +641,6 @@ exports.complete = asyncHandler(async (req, res) => {
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
-
   try {
     const schedule = await model.schedule.findOne({
       where: { id: req.query.id },
@@ -612,34 +666,43 @@ exports.delete = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "deleted a study appointment (" +
-      req.query.id + ") " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Delete] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "deleted a study appointment (" +
+      req.query.id +
+      ") " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send("schedule deleted.");
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
 exports.special = asyncHandler(async (req, res) => {
-  var queryString = {}
+  var queryString = {};
   queryString["$Appointments.Study.FK_Lab$"] = 2;
 
   try {
@@ -692,14 +755,13 @@ exports.special = asyncHandler(async (req, res) => {
       schedule.Appointments.forEach(async (appointment) => {
         var x = {};
         x.FK_Family = schedule.FK_Family;
-        await model.appointment.update(x, { where: { id: appointment.id } })
-      })
-
+        await model.appointment.update(x, { where: { id: appointment.id } });
+      });
     });
 
     res.status(200).send(schedules);
     console.log("Search successful!");
   } catch (error) {
-    throw error
+    throw error;
   }
-})
+});

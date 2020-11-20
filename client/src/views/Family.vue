@@ -22,6 +22,16 @@
         Settings page.</v-alert
       >
     </div>
+    <div v-if="$store.state.trainingMode">
+      <v-alert
+        border="left"
+        type="warning"
+        color="#c7792c"
+        dense
+        style="font-weight: 600"
+        >You are running in a training mode.</v-alert
+      >
+    </div>
     <v-row justify="space-around">
       <v-col cols="12" md="5">
         <v-row align="center" dense>
@@ -497,6 +507,9 @@ export default {
     NextContact,
     ParticipationHistory,
   },
+  props: {
+    training: Boolean,
+  },
   data() {
     return {
       contactType: "",
@@ -600,6 +613,8 @@ export default {
       }
       this.queryString = this.currentFamily;
 
+      this.queryString.trainingMode = this.$store.state.trainingMode;
+
       try {
         const Results = await family.search(this.queryString);
         if (Results.data.length > 0) {
@@ -629,6 +644,8 @@ export default {
 
       this.queryString.childName = childName;
 
+      this.queryString.trainingMode = this.$store.state.trainingMode;
+
       try {
         const Results = await family.search(this.queryString);
         if (Results.data.length > 0) {
@@ -657,8 +674,12 @@ export default {
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.NextContactDate = moment().startOf("day").toString();
+      this.queryString.NextContactDate = moment()
+        .startOf("day")
+        .toString();
       this.queryString.AssignedLab = this.$store.state.lab;
+
+      this.queryString.trainingMode = this.$store.state.trainingMode;
 
       try {
         const Results = await family.search(this.queryString);
@@ -723,6 +744,8 @@ export default {
             this.editedItem.NextContactDate = new Date();
             this.editedItem.UpdatedBy = store.state.userID;
             this.editedItem.CreatedBy = store.state.userID;
+
+            this.editedItem.TrainingSet = this.$store.state.trainingMode;
 
             const newfamilyId = await family.create(this.editedItem);
 
@@ -812,10 +835,19 @@ export default {
       }
     },
   },
-  watch: {},
+  watch: {
+    training() {
+      // console.log(`My store value for 'training' changed to ${val}`);
+      this.currentFamily = {};
+      this.Families = [];
+      this.page = 0;
+    },
+  },
   computed: {
     TodaysDate() {
-      return moment().startOf("day").format("YYYY-MM-DD");
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
     },
   },
 

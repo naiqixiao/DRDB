@@ -20,11 +20,11 @@
         <h2 class="title-text title ma-3">
           {{
             $store.state.labName +
-            ": " +
-            $store.state.name +
-            " (" +
-            $store.state.role +
-            ")"
+              ": " +
+              $store.state.name +
+              " (" +
+              $store.state.role +
+              ")"
           }}
         </h2>
         <v-tooltip bottom>
@@ -39,6 +39,16 @@
             >Send us your questions, issues, requests, and suggestions!</span
           >
         </v-tooltip>
+        <v-spacer></v-spacer>
+        <v-switch
+          :input-value="!!$store.state.trainingMode"
+          color="secondary"
+          inset
+          :label="$store.state.trainingMode ? 'Training Mode' : 'Working Mode'"
+          hide-details
+          @change="changeTrainingMode"
+          class="trainingSwitch"
+        ></v-switch>
       </v-toolbar-items>
       <v-progress-linear
         :active="$store.state.loadingStatus"
@@ -130,7 +140,7 @@
     </v-dialog>
 
     <v-main>
-      <router-view />
+      <router-view :training="$store.state.trainingMode" />
     </v-main>
   </v-app>
 </template>
@@ -148,6 +158,7 @@ export default {
   data() {
     return {
       drawer: false,
+      // trainingMode: this.$store.state.trainingMode,
       feedbackDialog: false,
       currentFeedback: {
         Title: "",
@@ -262,6 +273,11 @@ export default {
         this.currentFeedback.Email = "";
       }, 300);
     },
+
+    changeTrainingMode() {
+      this.$store.dispatch("setTrainingMode", !this.$store.state.trainingMode);
+      // this.trainingMode = this.$store.state.trainingMode;
+    },
   },
 
   watch: {
@@ -276,7 +292,7 @@ export default {
 </script>
 
 <style lang="scss">
-.v-navigation-drawer--temporary.v-navigation-drawer--clipped {
+.v-navigation-drawer--temporary .v-navigation-drawer--clipped {
   z-index: 3;
   padding-top: 56px;
 }
@@ -290,5 +306,12 @@ export default {
 .v-app-bar--fixed,
 .v-toolbar__content {
   height: 56px !important;
+}
+
+.trainingSwitch .v-label {
+  color: var(--v-secondary-base) !important;
+}
+.theme--light.v-input--switch .v-input--switch__track {
+  color: rgba($color: #ffffff, $alpha: .7) !important;
 }
 </style>

@@ -22,6 +22,17 @@
         Settings page.</v-alert
       >
     </div>
+    <div v-if="$store.state.trainingMode">
+      <v-alert
+        border="left"
+        type="warning"
+        color="#c7792c"
+        dense
+        style="font-weight: 600"
+        >You are running in a training mode.</v-alert
+      >
+    </div>
+
     <v-row justify="start">
       <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
         <v-text-field
@@ -176,6 +187,9 @@ export default {
     ScheduleTable,
     FamilyInfo,
   },
+  props: {
+    training: Boolean,
+  },
   data() {
     return {
       dialogPickerBefore: false,
@@ -219,13 +233,16 @@ export default {
         "Cancelled",
         "Rejected",
       ],
-      index: -1
+      index: -1,
     };
   },
 
   methods: {
     async searchSchedule() {
       this.$store.dispatch("setLoadingStatus", true);
+
+      this.queryString.trainingMode = this.$store.state.trainingMode;
+
       try {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
@@ -249,6 +266,8 @@ export default {
 
     async searchScheduleByStatus() {
       this.$store.dispatch("setLoadingStatus", true);
+
+      this.queryString.trainingMode = this.$store.state.trainingMode;
 
       if (this.queryString.Status) {
         try {
@@ -275,6 +294,8 @@ export default {
     async todayStudies() {
       this.$store.dispatch("setLoadingStatus", true);
 
+      this.queryString.trainingMode = this.$store.state.trainingMode;
+
       try {
         const Result = await schedule.today();
         this.Schedules = Result.data;
@@ -300,6 +321,9 @@ export default {
 
     async thisWeekStudies() {
       this.$store.dispatch("setLoadingStatus", true);
+
+      this.queryString.trainingMode = this.$store.state.trainingMode;
+
       try {
         const Result = await schedule.week();
         this.Schedules = Result.data;
@@ -348,7 +372,13 @@ export default {
   },
 
   computed: {},
-  watch: {},
+  watch: {
+    training() {
+      // console.log(`My store value for 'training' changed to ${val}`);
+      this.Schedules = [];
+      this.currentFamily = {};
+    },
+  },
 };
 </script>
 
