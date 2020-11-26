@@ -24,7 +24,7 @@ export default {
       },
       { label: "Family ID", field: "id", width: "2", searchable: true },
       {
-        label: "Parimary Caregiver",
+        label: "primary Caregiver",
         field: "NamePrimary",
         rules: "name",
         width: "4",
@@ -52,8 +52,8 @@ export default {
       },
       { label: "Race (S)", field: "RaceSecondary", width: "3", options: "race" },
       { label: "Vehicle", field: "Vehicle", width: "5" },
+      { label: "Address", field: "Address", width: "5" },
       { label: "English %", width: "2", field: "EnglishPercent" },
-      { label: "Postal Code", field: "Address", width: "2" },
       { label: "Next Contact Date", width: "4", field: "NextContactDate" },
       { label: "Last Contact Date", width: "4", field: "LastContactDate" },
       {
@@ -66,7 +66,7 @@ export default {
 
     Vue.prototype.$familyBasicInfo = [
       {
-        label: "Parimary Caregiver",
+        label: "primary Caregiver",
         field: "NamePrimary",
         rules: "name",
         width: "4",

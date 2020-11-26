@@ -21,9 +21,9 @@
           <span class="body-1" style="color: var(--v-primary)">
             {{
               "(" +
-              appointment.FK_Family +
-              appointment.Child.IdWithinFamily +
-              ")"
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
             }}
           </span>
           <v-spacer></v-spacer>
@@ -40,12 +40,14 @@
           align="start"
           style="padding: 8px; color: var(--v-primary)"
         >
+        <div class="d-inline-block text-truncate" style="max-width: 80%">
           {{
             appointment.Study.StudyName +
-            " (" +
-            appointment.Study.StudyType +
-            ")"
+              " (" +
+              appointment.Study.StudyType +
+              ")"
           }}
+        </div>
         </v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
@@ -306,9 +308,15 @@ export default {
     },
 
     async editNewAppointments() {
-      var queryString = { id: this.Schedule.FK_Family };
+      const queryString = {
+        id: this.Schedule.FK_Family,
+        trainingMode: this.$store.state.trainingMode,
+      };
+      await family.search(queryString);
       var Results = await family.search(queryString);
-      this.Children = Results.data[0].Children;
+      if (Results.data[0].Children) {
+        this.Children = Results.data[0].Children;
+      }
       this.dialogAddAppointments = true;
     },
 
@@ -463,6 +471,8 @@ export default {
       for (var i = 0; i < this.newAppointments.length; i++) {
         this.$refs.newAppointments[i].selectStudy();
       }
+
+      console.log(this.newAppointments);
 
       try {
         const updatedSchedule = await appointment.create(this.newAppointments);
@@ -679,7 +689,11 @@ export default {
         from:
           this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
         // cc: "lab email <nx@kangleelab.com>",
-        to: this.Schedule.Family.NamePrimary + "<" + this.Schedule.Family.Email + ">",
+        to:
+          this.Schedule.Family.NamePrimary +
+          "<" +
+          this.Schedule.Family.Email +
+          ">",
         // to: this.Schedule.NamePrimary + "<" + this.$store.state.labEmail + ">",
         subject: emailSubject,
         body: emailBody,

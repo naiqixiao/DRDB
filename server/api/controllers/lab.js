@@ -153,7 +153,7 @@ exports.create = asyncHandler(async (req, res) => {
         "<p>Hello " +
         newLabInfo.Personnels[0].Name.split(" ")[0] +
         ",</p> " +
-        "<p>Welcoe to the developmental research management system!</p>" +
+        "<p>Welcome to the developmental research management system!</p>" +
         "<p>Your role is <b>" +
         newLabInfo.Personnels[0].Role +
         "</b>, and your temporary password is <b><em>" +

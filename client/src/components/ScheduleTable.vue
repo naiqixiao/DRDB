@@ -48,9 +48,9 @@
             @click.stop="updateSchedule(item, 'Rescheduling')"
             :disabled="
               item.Status === 'Rescheduling' ||
-              item.Status === 'No Show' ||
-              item.Status === 'TBD' ||
-              item.Completed == true
+                item.Status === 'No Show' ||
+                item.Status === 'TBD' ||
+                item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -66,9 +66,9 @@
             @click.stop="updateSchedule(item, 'No Show')"
             :disabled="
               item.Status === 'Rescheduling' ||
-              item.Status === 'No Show' ||
-              item.Status === 'TBD' ||
-              item.Completed == true
+                item.Status === 'No Show' ||
+                item.Status === 'TBD' ||
+                item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -81,14 +81,14 @@
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-icon
-            @click.stop="updateSchedule(item, 'Cancelled')"
+            @click.stop="item.Status === 'TBD' ? updateSchedule(item, 'Rejected') : updateSchedule(item, 'Cancelled')"
             :disabled="item.Status === 'Cancelled' || item.Completed == true"
             v-bind="attrs"
             v-on="on"
             >not_interested</v-icon
           >
         </template>
-        <span>Cancel this appointment</span>
+        <span>{{item.Status === 'TBD' ? 'The parent rejected participation?' : 'Cancel this appointment'}}</span>
       </v-tooltip>
     </template>
 
@@ -143,6 +143,8 @@
     </template>
 
     <template #top>
+      <ConfirmDlg ref="confirmD" />
+
       <v-dialog
         v-model="nextContactDialog"
         max-width="800px"
@@ -320,6 +322,8 @@ import MiniAppointmentTable from "@/components/MiniAppointmentTable";
 import NextContact from "@/components/NextContact";
 import Email from "@/components/Email";
 
+import ConfirmDlg from "@/components/ConfirmDialog";
+
 import schedule from "@/services/schedule";
 
 import moment from "moment";
@@ -333,6 +337,7 @@ export default {
     MiniAppointmentTable,
     Email,
     NextContact,
+    ConfirmDlg,
   },
   props: {
     Schedules: Array,
@@ -385,83 +390,89 @@ export default {
   },
   methods: {
     async updateSchedule(item, status) {
-      this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
-      this.response = status;
-      switch (status) {
-        case "Confirmed":
-          this.editedIndex = this.Schedules.indexOf(item);
-          this.editedSchedule = Object.assign({}, item);
-          this.datePickerRange();
-          this.editedSchedule.Appointments[0].Child.Family = {};
-          this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
-          this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
-
-          this.dialog = true;
-          break;
-
-        case "Completed":
-          try {
-            item.Completed = !item.Completed;
-            await schedule.complete(item);
-          } catch (error) {
-            console.log(error);
-          }
-
-          item.updatedAt = new Date().toISOString();
-          break;
-
-        case "Reminded":
-          try {
-            item.Reminded = !item.Reminded;
-            await schedule.remind(item);
-          } catch (error) {
-            console.log(error);
-          }
-
-          item.updatedAt = new Date().toISOString();
-          break;
-
-        default:
-          item.Status = status;
-
-          if (status == "Cancelled") {
-            this.$emit("alert");
-          }
-
-          // name by combining all study names within a schedule
-          var studyNames = item.Appointments.map((appointment) => {
-            return (
-              appointment.Study.StudyName +
-              " (" +
-              item.FK_Family +
-              appointment.Child.IdWithinFamily +
-              ")"
-            );
-          });
-
-          studyNames = Array.from(new Set(studyNames));
-
-          // Calendar event title
-          item.summary =
-            item.Status.toUpperCase() + " - " + studyNames.join(" + ");
-
-          try {
-            await schedule.update(item);
-            item.AppointmentTime = null;
-            item.updatedAt = new Date().toISOString();
-
-            console.log("Study appointment updated!");
-
+      if (
+        await this.$refs.confirmD.open(
+          "Study appointment update.",
+          "Are you sure you want to mark this appointment as "+  status + "?"
+        )
+      ) {
+        this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
+        this.response = status;
+        switch (status) {
+          case "Confirmed":
+            this.editedIndex = this.Schedules.indexOf(item);
             this.editedSchedule = Object.assign({}, item);
+            this.datePickerRange();
+            this.editedSchedule.Appointments[0].Child.Family = {};
+            this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+            this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
-            // next contact
-            this.contactType = status;
-            this.nextContactDate = this.TodaysDate;
-            this.nextContactDialog = true;
-          } catch (error) {
-            console.log(error);
-          }
-          break;
+            this.dialog = true;
+            break;
+
+          case "Completed":
+            try {
+              item.Completed = !item.Completed;
+              await schedule.complete(item);
+            } catch (error) {
+              console.log(error);
+            }
+
+            item.updatedAt = new Date().toISOString();
+            break;
+
+          case "Reminded":
+            try {
+              item.Reminded = !item.Reminded;
+              await schedule.remind(item);
+            } catch (error) {
+              console.log(error);
+            }
+
+            item.updatedAt = new Date().toISOString();
+            break;
+
+          default:
+            item.Status = status;
+            // if (status == "Cancelled") {
+            //   this.$emit("alert");
+            // }
+
+            // name by combining all study names within a schedule
+            var studyNames = item.Appointments.map((appointment) => {
+              return (
+                appointment.Study.StudyName +
+                " (" +
+                item.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
+              );
+            });
+
+            studyNames = Array.from(new Set(studyNames));
+
+            // Calendar event title
+            item.summary =
+              item.Status.toUpperCase() + " - " + studyNames.join(" + ");
+
+            try {
+              await schedule.update(item);
+              item.AppointmentTime = null;
+              item.updatedAt = new Date().toISOString();
+
+              console.log("Study appointment updated!");
+
+              this.editedSchedule = Object.assign({}, item);
+
+              // next contact
+              this.contactType = status;
+              this.nextContactDate = this.TodaysDate;
+              this.nextContactDialog = true;
+            } catch (error) {
+              console.log(error);
+            }
+            break;
+        }
       }
     },
 
@@ -600,7 +611,7 @@ export default {
       }, 300);
     },
 
-    rowSelected(item, row) { 
+    rowSelected(item, row) {
       row.select(true);
       row.expand(!row.isExpanded);
       this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
@@ -646,8 +657,9 @@ export default {
         case "Confirmed":
           if (
             moment(item.AppointmentTime).startOf("day") <=
-              moment().startOf("day").add(daysAheadofSchedule, "d") 
-              &&
+              moment()
+                .startOf("day")
+                .add(daysAheadofSchedule, "d") &&
             moment(item.AppointmentTime).startOf("day") >=
               moment().startOf("day")
           ) {
@@ -655,7 +667,6 @@ export default {
           }
 
           break;
-       
       }
 
       return iconDisable;
@@ -671,7 +682,6 @@ export default {
           }
 
           break;
-
       }
 
       return iconDisable;
@@ -679,7 +689,7 @@ export default {
   },
 
   computed: {
-    studyDateTime: function () {
+    studyDateTime: function() {
       var StudyTimeString = this.studyTime.slice(0, 5);
       var AMPM = this.studyTime.slice(5, 7);
       var StudyHour = StudyTimeString.split(":")[0];
@@ -708,7 +718,9 @@ export default {
       return studyDateTime;
     },
     TodaysDate() {
-      return moment().startOf("day").format("YYYY-MM-DD");
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
     },
   },
   watch: {

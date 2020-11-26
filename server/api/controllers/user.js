@@ -170,7 +170,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "<p>Hello " +
           newUser.Name.split(" ")[0] +
           ",</p> " +
-          "<p>Welcoe to the developmental research management system!<br>" +
+          "<p>Welcome to the developmental research management system!<br>" +
           "Your role is <b>" +
           newUser.Role +
           "</b>, and your temporary password is <b><em>" +
@@ -262,7 +262,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
             "<p>Hello " +
             newUser.Name.split(" ")[0] +
             ",</p> " +
-            "<p>Welcoe to the developmental research management system!<br>" +
+            "<p>Welcome to the developmental research management system!<br>" +
             "Your role is <b>" +
             newUser.Role +
             "</b>, and your temporary password is <b><em>" +

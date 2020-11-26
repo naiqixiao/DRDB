@@ -1123,7 +1123,7 @@ export default {
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
-          this.currentChild = {};
+          this.currentChild = Object.assign({}, this.defaultItem);
         }
       } catch (error) {
         if (error.status === 401) {
@@ -1860,19 +1860,7 @@ export default {
       this.currentChild = Object.assign({}, this.defaultItem);
       this.editedIndex = -1;
 
-      // this.currentFamily = Object.assign(
-      //   {},
-      //   {
-      //     NamePrimary: null,
-      //     NameSecondary: null,
-      //     Phone: null,
-      //     Email: null,
-      //   }
-      // );
-      this.editedIndex = -1;
-
       this.Children = [];
-      // this.currentChild = {};
       this.page = 0;
     },
 

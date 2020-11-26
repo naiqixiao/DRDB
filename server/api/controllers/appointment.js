@@ -13,6 +13,7 @@ const fs = require("fs");
 // add an appointment (child, family, & study) to an existing schedule.
 exports.create = asyncHandler(async (req, res) => {
   var newAppointmentInfo = req.body.appointment;
+  // console.log(newAppointmentInfo);
 
   try {
     const appointments = await model.appointment.bulkCreate(newAppointmentInfo);
@@ -102,34 +103,45 @@ exports.create = asyncHandler(async (req, res) => {
     // Update Schedule updatedAt
     Schedule.dataValues.updatedAt = new Date();
 
-    await model.schedule.update({ Note: Schedule.Note + "" },
+    await model.schedule.update(
+      { Note: Schedule.Note + "" },
       {
-        where: { id: Schedule.id }
-      });
+        where: { id: Schedule.id },
+      }
+    );
 
     // Log
     const User = req.body.User;
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Added] " + User.Name + " (" + User.Email + ") " + "added a study appointment to a schedule (" +
-      Schedule.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Added] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "added a study appointment to a schedule (" +
+      Schedule.id +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(Schedule);
@@ -159,10 +171,14 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Family.Email$"] = { [Op.like]: `${req.query.Email}%` };
   }
   if (req.query.NamePrimary) {
-    queryString["$Family.NamePrimary$"] = { [Op.like]: `${req.query.NamePrimary}%` };
+    queryString["$Family.NamePrimary$"] = {
+      [Op.like]: `${req.query.NamePrimary}%`,
+    };
   }
   if (req.query.NameSecondary) {
-    queryString["$Family.NameSecondary$"] = { [Op.like]: `${req.query.NameSecondary}%` };
+    queryString["$Family.NameSecondary$"] = {
+      [Op.like]: `${req.query.NameSecondary}%`,
+    };
   }
   if (req.query.Phone) {
     queryString["$Family.Phone$"] = { [Op.like]: `${req.query.Phone}%` };
@@ -178,11 +194,20 @@ exports.search = asyncHandler(async (req, res) => {
     where: queryString,
     include: [
       { model: model.family, attributes: ["id", "Email", "NamePrimary"] },
-      { model: model.child, attributes: ["Name", "DoB", "Sex", "IdWithinFamily"] },
+      {
+        model: model.child,
+        attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+      },
       {
         model: model.study,
-        attributes: ["StudyName", "MinAge", "MaxAge", "StudyType", "FK_Lab", "EmailTemplate"],
-
+        attributes: [
+          "StudyName",
+          "MinAge",
+          "MaxAge",
+          "StudyType",
+          "FK_Lab",
+          "EmailTemplate",
+        ],
       },
       {
         model: model.personnel,
@@ -239,10 +264,10 @@ exports.update = asyncHandler(async (req, res) => {
           include: [
             { model: model.family },
             {
-              model: model.child
+              model: model.child,
             },
             {
-              model: model.study
+              model: model.study,
             },
             {
               model: model.personnel,
@@ -297,35 +322,45 @@ exports.update = asyncHandler(async (req, res) => {
       throw err;
     }
 
-    await model.schedule.update({ Note: Schedule.Note + "" },
-      { where: { id: Schedule.id } })
+    await model.schedule.update(
+      { Note: Schedule.Note + "" },
+      { where: { id: Schedule.id } }
+    );
 
     Schedule.dataValues.updatedAt = new Date();
-
 
     // Log
     const User = req.body.User;
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Updated] " + User.Name + " (" + User.Email + ") " + "added a study appointment (" +
-      Schedule.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Updated] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "added a study appointment (" +
+      Schedule.id +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(Schedule);
@@ -347,10 +382,10 @@ exports.delete = asyncHandler(async (req, res) => {
           include: [
             { model: model.family },
             {
-              model: model.child
+              model: model.child,
             },
             {
-              model: model.study
+              model: model.study,
             },
             {
               model: model.personnel,
@@ -414,8 +449,10 @@ exports.delete = asyncHandler(async (req, res) => {
     });
 
     // Update Schedule updatedAt
-    await model.schedule.update({ Note: Schedule.Note + "" },
-      { where: { id: req.query.FK_Schedule } })
+    await model.schedule.update(
+      { Note: Schedule.Note + "" },
+      { where: { id: req.query.FK_Schedule } }
+    );
 
     Schedule.dataValues.updatedAt = new Date();
 
@@ -424,24 +461,33 @@ exports.delete = asyncHandler(async (req, res) => {
 
     const logFolder = "api/logs";
     if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
+      fs.mkdirSync(logFolder);
     }
 
     if (User.LabName) {
       var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
     } else {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Appointment Delete] " + User.Name + " (" + User.Email + ") " + "delelete a study appointment to a schedule (" +
-      Schedule.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo =
+      "[Appointment Delete] " +
+      User.Name +
+      " (" +
+      User.Email +
+      ") " +
+      "delelete a study appointment to a schedule (" +
+      Schedule.id +
+      ") at " +
+      new Date().toString() +
+      " - " +
+      User.IP +
+      "\r\n";
 
     if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
+      fs.appendFileSync(logFile, logInfo);
     } else {
-      fs.writeFileSync(logFile, logInfo)
+      fs.writeFileSync(logFile, logInfo);
     }
 
     res.status(200).send(Schedule);

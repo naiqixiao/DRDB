@@ -213,7 +213,7 @@ export default {
         { label: "Postal Code", field: "Address" },
         { label: "Email", field: "Email", rules: "email" },
         { label: "Phone", field: "Phone", rules: "phone" },
-        { label: "Parimary Caregiver", field: "NamePrimary", rules: "name" },
+        { label: "primary Caregiver", field: "NamePrimary", rules: "name" },
         { label: "Secondary Caregiver", field: "NameSecondary", rules: "name" },
       ],
       otherInfo: [

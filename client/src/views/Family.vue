@@ -553,6 +553,7 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
+        Children: [],
       },
       currentFamily: {
         id: null,
@@ -600,7 +601,7 @@ export default {
 
     searchMode() {
       this.searchStatus = !this.searchStatus;
-      this.currentFamily = {};
+      this.currentFamily = Object.assign({}, this.familyTemplate);
       this.Families = [];
       this.page = 0;
     },
@@ -687,7 +688,6 @@ export default {
           this.Families = Results.data;
           this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
-          this.searchStatus = !this.searchStatus;
         } else {
           alert("No family needs to be followed up.");
           this.page = 0;
@@ -838,7 +838,7 @@ export default {
   watch: {
     training() {
       // console.log(`My store value for 'training' changed to ${val}`);
-      this.currentFamily = {};
+      this.currentFamily = Object.assign({}, this.familyTemplate);
       this.Families = [];
       this.page = 0;
     },

@@ -123,14 +123,6 @@
     </v-row>
 
     <v-row justify="center" style="padding-top: 28px">
-      <v-col cols="12" md="3">
-        <template>
-          <FamilyInfo
-            :currentFamily="currentFamily"
-            @updateFamily="updateCurrentFamily"
-          ></FamilyInfo>
-        </template>
-      </v-col>
       <v-col cols="12" md="9">
         <ScheduleTable
           :Schedules="Schedules"
@@ -138,6 +130,14 @@
           @rowSelected="updateFamily"
           tableHeight="720px"
         ></ScheduleTable>
+      </v-col>
+      <v-col cols="12" md="3">
+        <template>
+          <FamilyInfo
+            :currentFamily="currentFamily"
+            @updateFamily="updateCurrentFamily"
+          ></FamilyInfo>
+        </template>
       </v-col>
     </v-row>
 
@@ -220,7 +220,7 @@ export default {
         { label: "Family ID", field: "FamilyId" },
         { label: "Email", field: "Email" },
         { label: "Phone", field: "Phone" },
-        { label: "Parimary Caregiver", field: "NamePrimary" },
+        { label: "primary Caregiver", field: "NamePrimary" },
         { label: "Secondary Caregiver", field: "NameSecondary" },
         // { label: "Study Name", field: "StudyName"},
       ],
