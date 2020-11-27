@@ -437,3 +437,30 @@ exports.fillNextContactDate = asyncHandler(async (req, res) => {
 
   res.status(200);
 });
+
+exports.changeTrainingFamilyEmail = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  queryString.TrainingSet = true;
+
+  const families = await model.family.findAll({ where: queryString });
+  console.log(families.length);
+
+  families.forEach(async (family) => {
+
+    var newEmail = family.Email
+    
+    // newEmail = newEmail.replace(/dsd.cs/g, '');
+    
+    newEmail = newEmail + "dsd.cxs"
+
+    await model.family.update(
+      { Email: newEmail},
+      {
+        where: { id: family.id },
+      }
+    );
+  });
+
+  res.status(200);
+});
