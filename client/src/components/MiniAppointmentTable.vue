@@ -40,14 +40,14 @@
           align="start"
           style="padding: 8px; color: var(--v-primary)"
         >
-        <div class="d-inline-block text-truncate" style="max-width: 80%">
-          {{
-            appointment.Study.StudyName +
-              " (" +
-              appointment.Study.StudyType +
-              ")"
-          }}
-        </div>
+          <div class="d-inline-block text-truncate" style="max-width: 80%">
+            {{
+              appointment.Study.StudyName +
+                " (" +
+                appointment.Study.StudyType +
+                ")"
+            }}
+          </div>
         </v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
@@ -472,7 +472,7 @@ export default {
         this.$refs.newAppointments[i].selectStudy();
       }
 
-      console.log(this.newAppointments);
+      // console.log(this.newAppointments);
 
       try {
         const updatedSchedule = await appointment.create(this.newAppointments);
@@ -509,10 +509,10 @@ export default {
     },
 
     closeNewAppointment() {
-      this.dialogAddAppointments = false;
       setTimeout(() => {
         this.newAppointments = [];
       }, 300);
+      this.dialogAddAppointments = false;
     },
 
     save() {

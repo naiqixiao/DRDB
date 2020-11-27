@@ -220,7 +220,7 @@ export default {
         { label: "Family ID", field: "FamilyId" },
         { label: "Email", field: "Email" },
         { label: "Phone", field: "Phone" },
-        { label: "primary Caregiver", field: "NamePrimary" },
+        { label: "Primary Caregiver", field: "NamePrimary" },
         { label: "Secondary Caregiver", field: "NameSecondary" },
         // { label: "Study Name", field: "StudyName"},
       ],

@@ -24,7 +24,7 @@ export default {
       },
       { label: "Family ID", field: "id", width: "2", searchable: true },
       {
-        label: "primary Caregiver",
+        label: "Primary Caregiver",
         field: "NamePrimary",
         rules: "name",
         width: "4",
@@ -66,7 +66,7 @@ export default {
 
     Vue.prototype.$familyBasicInfo = [
       {
-        label: "primary Caregiver",
+        label: "Primary Caregiver",
         field: "NamePrimary",
         rules: "name",
         width: "4",

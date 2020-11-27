@@ -438,6 +438,7 @@ export default {
     editPersonnel() {
       this.editedPersonnel = Object.assign({}, this.currentPersonnel);
       this.editedIndex = this.Personnels.indexOf(this.currentPersonnel);
+      console.log(this.editedIndex)
       this.dialog = true;
     },
 

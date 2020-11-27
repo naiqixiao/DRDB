@@ -85,7 +85,7 @@
                 @click.stop="updateStudies"
                 :disabled="
                   !(
-                    currentPersonnel.id == $store.state.userID ||
+                    personnelId == $store.state.userID ||
                     $store.state.role == 'Admin' ||
                     $store.state.role == 'PI' ||
                     $store.state.role == 'Lab manager'

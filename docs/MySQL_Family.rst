@@ -8,7 +8,7 @@ Family table
 Table colums
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**NamePrimary**: *mother's (or primary caregiver's) name*
+**NamePrimary**: *mother's (or Primary Caregiver's) name*
     Type: varchar(30)
 **NameSecondary**: *father's (or secondary caregiver's) name*
     Type: varchar(30)
@@ -16,11 +16,11 @@ Table colums
     Type: varchar(40)
 **Phone**: *phone number*
     Type: varchar(10)
-**RacePrimary**: *mother's (or primary caregiver's) race*
+**RacePrimary**: *mother's (or Primary Caregiver's) race*
     Type: varchar(20)
 **RaceSecondary**: *father's (or secondary caregiver's) race*
     Type: varchar(20)
-**LanguagePrimary**: *mother's (or primary caregiver's) mostly used language*
+**LanguagePrimary**: *mother's (or Primary Caregiver's) mostly used language*
     Type: varchar(20)
 **LanguageSecondary**: *father's (or secondary caregiver's) mostly used language*
     Type: varchar(20)
