@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div style="height: 300px !important; overflow-y: scroll !important">
+    <div style="overflow-y: scroll !important">
       <v-row dense>
         <v-col
           cols="12"
@@ -35,7 +35,7 @@
         </v-col>
       </v-row>
     </div>
-    <v-row align="end" justify="end">
+    <v-row align="start" justify="end">
       <v-col cols="12" md="2" dense>
         <v-tooltip top>
           <template v-slot:activator="{ on }">
@@ -45,7 +45,15 @@
                 fab
                 large
                 @click.stop="updateExperimenters"
-                :disabled="!studyId"
+                :disabled="
+                        !studyId || !(
+                          PointofContactId ==
+                            $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager'
+                        )
+                      "
               >
                 <v-icon>edit</v-icon>
               </v-btn>
@@ -104,6 +112,7 @@ export default {
     Experimenters: Array,
     labMembers: Array,
     studyId: Number,
+    PointofContactId: Number
   },
 
   data() {

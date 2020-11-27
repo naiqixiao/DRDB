@@ -9,14 +9,24 @@
             {{ " (" + study.StudyType + ")" }}
           </v-card-title>
 
-          <v-card-text class="body-1" align="start" style="padding: 8px; color: var(--v-primary)">
+          <v-card-text
+            class="body-1"
+            align="start"
+            style="padding: 8px; color: var(--v-primary)"
+          >
             {{
-            "Age range: " + AgeFormated2(study.MinAge) + " to " + AgeFormated2(study.MaxAge) }}
-          </v-card-text>
-          <v-card-text class="body-1" align="end" style="padding: 8px; color: red">
-            {{
-            study.Completed ? "Completed" : "In progress"
+              "Age range: " +
+                AgeFormated2(study.MinAge) +
+                " to " +
+                AgeFormated2(study.MaxAge)
             }}
+          </v-card-text>
+          <v-card-text
+            class="body-1"
+            align="end"
+            style="padding: 8px; color: red"
+          >
+            {{ study.Completed ? "Completed" : "In progress" }}
           </v-card-text>
         </v-card>
       </v-col>
@@ -24,10 +34,9 @@
       <div>
         <v-dialog v-model="dialogStudy" max-width="600px" persistent>
           <v-card>
-            <v-card-title
-              class="title"
-              style="padding: 8px"
-            >{{"Assign studies to " + personnelName}}</v-card-title>
+            <v-card-title class="title" style="padding: 8px">{{
+              "Assign studies to " + personnelName
+            }}</v-card-title>
             <v-row justify="center" align="center" style="height: 200px;">
               <v-col cols="12" md="6">
                 <v-select
@@ -69,7 +78,20 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn color="primary" fab large @click.stop="updateStudies" :disabled="!personnelId">
+              <v-btn
+                color="primary"
+                fab
+                large
+                @click.stop="updateStudies"
+                :disabled="
+                  !(
+                    currentPersonnel.id == $store.state.userID ||
+                    $store.state.role == 'Admin' ||
+                    $store.state.role == 'PI' ||
+                    $store.state.role == 'Lab manager'
+                  )
+                "
+              >
                 <v-icon>edit</v-icon>
               </v-btn>
             </div>

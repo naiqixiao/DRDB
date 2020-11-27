@@ -11,10 +11,10 @@
               <div class="d-inline-block text-truncate" style="max-width: 60%">
                 {{
                   child.Name +
-                  " (" +
-                  currentFamily.id +
-                  child.IdWithinFamily +
-                  ")"
+                    " (" +
+                    currentFamily.id +
+                    child.IdWithinFamily +
+                    ")"
                 }}
               </div>
               <v-spacer></v-spacer>
@@ -407,7 +407,7 @@
                           @click="newAppointment(sibling)"
                           :disabled="
                             potentialStudies(sibling).selectableStudies.length <
-                            1
+                              1
                           "
                           >{{ sibling.Name }}</v-btn
                         >
@@ -794,7 +794,7 @@ export default {
 
         console.log("New Scheduled Created!");
 
-        this.$emit("newSchedule");
+        // this.$emit("newSchedule");
 
         return { calendarEvent: calendarEvent };
       } catch (error) {
@@ -955,7 +955,7 @@ export default {
     resetSchedule() {
       setTimeout(() => {
         this.e1 = 1;
-        this.currentSchedule = null;
+        this.currentSchedule = { id: null };
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         // this.response = null;
@@ -1331,7 +1331,9 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment(new Date()).add(60, "days").toISOString(true);
+        return moment(new Date())
+          .add(60, "days")
+          .toISOString(true);
       }
     },
   },

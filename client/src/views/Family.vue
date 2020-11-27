@@ -384,7 +384,7 @@
           </v-card-title>
           <NextContact
             ref="NextContact"
-            :familyId="currentFamily.id"
+            :familyId="parseInt(currentFamily.id)"
             :labId="$store.state.lab"
             :studyDate="nextContactDate"
             :contactType="contactType"
@@ -579,16 +579,15 @@ export default {
   methods: {
     async updateFamilyAppointment() {
       try {
-        const Result = await family.search(this.queryString);
-        if (Result.data.length > 0) {
-          this.Families = Result.data;
-          this.currentFamily = this.Families[this.page - 1];
-          // this.searchStatus = !this.searchStatus;
-        } else {
-          alert("no family can be found");
-          this.page = 0;
-          this.currentFamily = {};
-        }
+        var queryString = {};
+        queryString = { id: this.currentFamily.id };
+
+        queryString.trainingMode = this.$store.state.trainingMode;
+
+        const updatedFamily = await family.search(queryString);
+
+        this.Families[this.page - 1] = Object.assign({}, updatedFamily.data[0]);
+        this.currentFamily = this.Families[this.page - 1];
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
@@ -612,6 +611,11 @@ export default {
       if (item && field) {
         this.currentFamily[item] = field;
       }
+
+      if (this.currentFamily.familyId) {
+        this.currentFamily.familyId = parseInt(this.currentFamily.familyId);
+      }
+
       this.queryString = this.currentFamily;
 
       this.queryString.trainingMode = this.$store.state.trainingMode;

@@ -87,7 +87,7 @@
               background-color="textbackground"
               outlined
               no-resize
-              rows="3"
+              rows="5"
               :value="selectedStudy.Description"
               readonly
               hide-details

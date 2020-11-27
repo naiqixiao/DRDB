@@ -188,7 +188,7 @@
               background-color="textbackground"
               outlined
               no-resize
-              rows="3"
+              rows="8"
               v-model="currentStudy.Description"
               readonly
               hide-details
@@ -265,6 +265,7 @@
               :Experimenters="currentStudy.Experimenters"
               :labMembers="labMembers"
               :studyId="currentStudy.id"
+              :PointofContactId="currentStudy.PointofContact.id"
               @updatedExperimenters="updateExperimenters"
             ></AssignedExperimenters>
           </v-col>
@@ -469,7 +470,8 @@
         <v-col md="12">
           <v-divider></v-divider>
           <h3 class="text-left" v-show="currentStudy.id">
-            Schedule confirmation email preview (email template is is in dark colour):
+            Schedule confirmation email preview (email template is is in dark
+            colour):
           </h3>
         </v-col>
         <body
@@ -773,12 +775,12 @@ export default {
         var years = Math.floor(Age / 12);
         var months = Age % 12;
         // months = months.toFixed(1);
-        var Y = years > 0 ? years + " year" : "";
+        var Y = years >= 0 ? years + " year" : "";
         Y = years > 1 ? Y + "s " : Y + " ";
 
         var M = "";
 
-        if (months > 0) {
+        if (months >= 0) {
           M = months + " month";
           M = months !== 1 ? M + "s" : M;
         }
@@ -832,6 +834,9 @@ export default {
         emailBody = emailBody.replace(/\. her/g, ". Her");
 
         emailBody = emailBody.replace(/\${{childName}}/g, "Emma" || "");
+
+        emailBody = emailBody.replace(/<p>/g, "<p><strong>" || "");
+        emailBody = emailBody.replace(/<\/p>/g, "</strong></p>" || "");
 
         // location
         const location =
@@ -925,6 +930,9 @@ export default {
 
         emailBody = emailBody.replace(/\${{childName}}/g, "Emma" || "");
 
+        emailBody = emailBody.replace(/<p>/g, "<p><strong>" || "");
+        emailBody = emailBody.replace(/<\/p>/g, "</strong></p>" || "");
+
         // closing
         const closing =
           "<p style= 'color: var(--v-primary-lighten3)'>" +
@@ -947,7 +955,7 @@ export default {
     },
   },
 
-  mounted: function () {
+  mounted: function() {
     this.searchStudies();
     this.searchLabMembers();
   },

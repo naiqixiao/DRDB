@@ -50,6 +50,7 @@
               item.Status === 'Rescheduling' ||
                 item.Status === 'No Show' ||
                 item.Status === 'TBD' ||
+                item.Status === 'Rejected' ||
                 item.Completed == true
             "
             v-bind="attrs"
@@ -68,6 +69,7 @@
               item.Status === 'Rescheduling' ||
                 item.Status === 'No Show' ||
                 item.Status === 'TBD' ||
+                item.Status === 'Rejected' ||
                 item.Completed == true
             "
             v-bind="attrs"
@@ -82,7 +84,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-icon
             @click.stop="item.Status === 'TBD' ? updateSchedule(item, 'Rejected') : updateSchedule(item, 'Cancelled')"
-            :disabled="item.Status === 'Cancelled' || item.Completed == true"
+            :disabled="item.Status === 'Cancelled' || item.Status === 'Rejected' || item.Completed == true"
             v-bind="attrs"
             v-on="on"
             >not_interested</v-icon
