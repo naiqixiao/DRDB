@@ -8742,3 +8742,4 @@ server/ecosystem.config.js
 server/config/general.js
 server/api/models/DRDB.js.rej
 server/api/models/DRDB.js.orig
+.vscode/settings.json
