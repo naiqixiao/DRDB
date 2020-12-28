@@ -102,7 +102,7 @@ exports.create = asyncHandler(async (req, res) => {
   }
 });
 
-// batch upload families
+// batch upload children
 exports.batchCreate = asyncHandler(async (req, res) => {
   try {
     var newChildrenInfo = req.body;

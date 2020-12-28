@@ -26,6 +26,20 @@ function shuffle(array) {
   return array;
 }
 
+function containsObject(obj, array) {
+  var i;
+  for (i = 0; i < array.length; i++) {
+    if (
+      array[i].FK_Child === obj.FK_Child &&
+      array[i].Sibling === obj.Sibling
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Create and Save a new family
 
 //   {
@@ -141,10 +155,12 @@ exports.batchCreate = asyncHandler(async (req, res) => {
             });
 
             // assign child id within each family
-            Children[j].IdWithinFamily = alphabet[Children.length];
-            await model.child.update(Children[j], {
-              where: { id: Children[j].id },
-            });
+            if (!Children[j].IdWithinFamily) {
+              Children[j].IdWithinFamily = alphabet[j];
+              await model.child.update(Children[j], {
+                where: { id: Children[j].id },
+              });
+            }
           }
 
           await model.sibling.bulkCreate(siblings);
@@ -153,6 +169,89 @@ exports.batchCreate = asyncHandler(async (req, res) => {
     }
 
     res.status(200).send(newFamily);
+  } catch (error) {
+    throw error;
+  }
+});
+
+// batch upload families
+exports.batchCreate0 = asyncHandler(async (req, res) => {
+  try {
+    var newFamilyInfo = req.body;
+
+    const alphabet = "abcdefghijk".split("");
+
+    for (var i = 0; i < newFamilyInfo.length; i++) {
+      // check whether the family exists
+      const phone = newFamily[i].Phone;
+
+      var family = await model.family.search({ where: { Phone: phone } });
+
+      if (!!family) {
+        // when the family exists in the database, add the children to this family.
+        // in the future, outout the existing family and the current familly to
+        // remind users the potential conflict and allow users to decide whether the merge.
+
+        newFamily[i].Children.forEach((child) => {
+          child.FK_Family = family.id;
+        });
+
+        await model.child.bulkCreate(newFamily[i].Children);
+
+        family = await model.family.search({
+          where: { id: family.id },
+          include: [model.child],
+        });
+      } else {
+        family = await model.family.create(newFamily[i], {
+          include: [model.child],
+        });
+      }
+
+      // update sibbling table & assign child id within this family
+      if (family.Children.length > 1) {
+        var Children = family.Children;
+
+        var siblings = [];
+
+        var children = [];
+
+        for (var j = 0; j < Children.length; j++) {
+          var childId = Children[j].id;
+
+          Children.forEach((sibling) => {
+            if (sibling.id != childId) {
+              siblings.push({ FK_Child: childId, Sibling: sibling.id });
+            }
+          });
+
+          children.push(childId);
+
+          // assign child id within each family
+          if (!Children[j].IdWithinFamily) {
+            Children[j].IdWithinFamily = alphabet[j];
+            await model.child.update(Children[j], {
+              where: { id: Children[j].id },
+            });
+          }
+        }
+
+        existingSibling = await model.sibling.findAll({
+          where: {
+            FK_Child: { [Op.in]: children },
+            attributes: ["FK_Child", "Sibling"],
+          },
+        });
+
+        var filteredSiblings = siblings.filter(function(value) {
+          return !containsObject(value, existingSibling);
+        });
+
+        await model.sibling.bulkCreate(filteredSiblings);
+      }
+    }
+
+    res.status(200).send("new family imported!");
   } catch (error) {
     throw error;
   }
@@ -444,18 +543,17 @@ exports.changeTrainingFamilyEmail = asyncHandler(async (req, res) => {
   queryString.TrainingSet = true;
 
   const families = await model.family.findAll({ where: queryString });
-  console.log(families.length);
+  // console.log(families.length);
 
   families.forEach(async (family) => {
+    var newEmail = family.Email;
 
-    var newEmail = family.Email
-    
     // newEmail = newEmail.replace(/dsd.cs/g, '');
-    
-    newEmail = newEmail + "dsd.cxs"
+
+    newEmail = newEmail + "dsd.cxs";
 
     await model.family.update(
-      { Email: newEmail},
+      { Email: newEmail },
       {
         where: { id: family.id },
       }
