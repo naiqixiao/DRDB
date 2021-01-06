@@ -6,7 +6,7 @@ const FamilyController = require("../controllers/family");
 
 router.post("/add", checkAuth, FamilyController.create);
 
-router.post("/addBatch", checkAuth, FamilyController.batchCreate);
+router.post("/addBatch", checkAuth, FamilyController.batchCreate0);
 
 router.get("/", checkAuth, FamilyController.search);
 

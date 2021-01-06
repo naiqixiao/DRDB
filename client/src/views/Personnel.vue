@@ -87,7 +87,7 @@
               <v-col
                 cols="12"
                 sm="6"
-                md="4"
+                :md="item.width"
                 v-for="item in personnelFields"
                 :key="item.label"
               >
@@ -212,7 +212,7 @@
                       <v-col
                         cols="12"
                         sm="6"
-                        md="4"
+                        :md="item.width"
                         v-for="item in personnelFields"
                         :key="item.label"
                       >
@@ -337,17 +337,19 @@ export default {
       ],
       dialog: false,
       personnelFields: [
-        { label: "Name", field: "Name", rules: "name" },
-        { label: "Initials", field: "Initial", rules: "required" },
+        { label: "Name", field: "Name", width: "4", rules: "name" },
+        { label: "Initials", field: "Initial", width: "4", rules: "required" },
         {
           label: "Role",
           field: "Role",
           options: "role",
+          width: "4", 
           rules: "required",
         },
-        { label: "Email", field: "Email", rules: "email" },
-        { label: "Calendar ID", field: "Calendar", rules: "email" },
-        { label: "Phone", field: "Phone", rules: "phone" },
+        { label: "Email", field: "Email", width: "4", rules: "email" },
+        { label: "Calendar ID", field: "Calendar", width: "4", rules: "email" },
+        { label: "Phone", field: "Phone", width: "4", rules: "phone" },
+        { label: "Zoom Link", width: "12", field: "ZoomLink" },
       ],
 
       Personnels: [],

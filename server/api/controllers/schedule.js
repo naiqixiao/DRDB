@@ -214,7 +214,7 @@ exports.search = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },
@@ -285,7 +285,7 @@ exports.today = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },
@@ -357,7 +357,7 @@ exports.week = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },
@@ -470,7 +470,7 @@ exports.update = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },
@@ -730,7 +730,7 @@ exports.special = asyncHandler(async (req, res) => {
             {
               model: model.personnel,
               through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar"],
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },

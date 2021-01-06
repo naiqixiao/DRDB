@@ -60,7 +60,7 @@ function emailBody(schedule) {
     }
 
     var body = schedule.Appointments[0].Study.ReminderTemplate.replace(/\${{ZoomLink}}/g,
-        "<a href='" + schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>");
+        "<a href='" + schedule.Appointments[0].Personnels[0].ZoomLink ? schedule.Appointments[0].Personnels[0].ZoomLink : schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>");
 
     body = body.replace(/\${{childName}}/g, childNames(schedule.Appointments));
 
@@ -255,7 +255,7 @@ exports.reminderEmail = asyncHandler(async () => {
                         {
                             model: model.personnel,
                             through: { model: model.experimenterAssignment },
-                            attributes: ["id", "Name", "Email", "Calendar"],
+                            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
                         },
                     ],
                 },

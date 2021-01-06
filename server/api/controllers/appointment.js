@@ -212,7 +212,7 @@ exports.search = asyncHandler(async (req, res) => {
       {
         model: model.personnel,
         through: { model: model.experimenterAssignment },
-        attributes: ["id", "Name", "Email", "Calendar"],
+        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
       },
     ],
   });

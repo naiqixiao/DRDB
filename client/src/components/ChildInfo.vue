@@ -1203,7 +1203,9 @@ export default {
     noteChild(child) {
       var Note = "<strong>Note:</strong> " + (child.Note ? child.Note : "");
 
-      return Note;
+      var recruitMethod = "<strong>Recruited from:</strong> " + (child.RecruitmentMethod ? child.RecruitmentMethod : "");
+
+      return Note + "<br>" + recruitMethod;
     },
 
     age(child) {

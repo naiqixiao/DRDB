@@ -177,33 +177,54 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 // batch upload families
 exports.batchCreate0 = asyncHandler(async (req, res) => {
   try {
-    var newFamilyInfo = req.body;
+    var newFamily = req.body;
 
     const alphabet = "abcdefghijk".split("");
 
-    for (var i = 0; i < newFamilyInfo.length; i++) {
+    for (var i = 0; i < newFamily.length; i++) {
       // check whether the family exists
       const phone = newFamily[i].Phone;
 
-      var family = await model.family.search({ where: { Phone: phone } });
+      var child = {};
+      child.Name = newFamily[i].Child_Last_Name
+        ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
+        : newFamily[i].Child_First_Name;
+      child.Sex = newFamily[i].Sex;
+      child.DoB = newFamily[i].DoB;
+      child.Age = newFamily[i].Age;
+      child.Note = newFamily[i].Notes;
+      child.BirthWeight = newFamily[i].Birthweight;
+      child.Gestation = newFamily[i].Gestation;
+      child.RecruitmentMethod = newFamily[i].RecruitmentMethod;
+
+      var family = await model.family.findOne({ where: { Phone: phone } });
 
       if (!!family) {
         // when the family exists in the database, add the children to this family.
         // in the future, outout the existing family and the current familly to
         // remind users the potential conflict and allow users to decide whether the merge.
 
-        newFamily[i].Children.forEach((child) => {
-          child.FK_Family = family.id;
-        });
+        // newFamily[i].Children.forEach((child) => {
+        //   child.FK_Family = family.id;
+        // });
 
-        await model.child.bulkCreate(newFamily[i].Children);
+        child.FK_Family = family.id;
 
-        family = await model.family.search({
+        // if any of the children was already imported to the database, would the child be skipped?
+        await model.child.create(child);
+
+        family = await model.family.findOne({
           where: { id: family.id },
           include: [model.child],
         });
       } else {
-        family = await model.family.create(newFamily[i], {
+        family = await model.family.create(newFamily[i]);
+        child.FK_Family = family.id;
+        child.IdWithinFamily = IdWithinFamily = alphabet[0];
+        await model.child.create(child);
+
+        family = await model.family.findOne({
+          where: { id: family.id },
           include: [model.child],
         });
       }
@@ -228,18 +249,22 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
           children.push(childId);
 
           // assign child id within each family
-          if (!Children[j].IdWithinFamily) {
+          if (Children[j].IdWithinFamily == null) {
             Children[j].IdWithinFamily = alphabet[j];
-            await model.child.update(Children[j], {
-              where: { id: Children[j].id },
-            });
+
+            await model.child.update(
+              { IdWithinFamily: alphabet[j] },
+              {
+                where: { id: childId },
+              }
+            );
           }
         }
 
         existingSibling = await model.sibling.findAll({
+          attributes: ["FK_Child", "Sibling"],
           where: {
             FK_Child: { [Op.in]: children },
-            attributes: ["FK_Child", "Sibling"],
           },
         });
 

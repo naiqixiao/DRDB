@@ -67,6 +67,11 @@ module.exports = function(sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
+		RecruitmentMethod: {
+			type: DataTypes.STRING(100),
+			allowNull: true,
+			defaultValue: "Hospital"
+		},
 		BirthWeight: {
 			type: DataTypes.INTEGER,
 			allowNull: true

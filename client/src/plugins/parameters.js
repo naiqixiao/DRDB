@@ -54,14 +54,14 @@ export default {
       { label: "Vehicle", field: "Vehicle", width: "5" },
       { label: "Address", field: "Address", width: "5" },
       { label: "English %", width: "2", field: "EnglishPercent" },
-      { label: "Next Contact Date", width: "4", field: "NextContactDate" },
-      { label: "Last Contact Date", width: "4", field: "LastContactDate" },
-      {
-        label: "Recruited via",
-        field: "RecruitmentMethod",
-        width: "3",
-        options: "recruitmentMethod",
-      },
+      { label: "Next Contact Date", width: "5", field: "NextContactDate" },
+      { label: "Last Contact Date", width: "5", field: "LastContactDate" },
+      // {
+      //   label: "Recruited via",
+      //   field: "RecruitmentMethod",
+      //   width: "3",
+      //   options: "recruitmentMethod",
+      // },
     ];
 
     Vue.prototype.$familyBasicInfo = [
@@ -119,12 +119,12 @@ export default {
         width: "3",
         searchable: true,
       },
-      {
-        label: "Recruited via",
-        field: "RecruitmentMethod",
-        width: "3",
-        options: "recruitmentMethod",
-      },
+      // {
+      //   label: "Recruited via",
+      //   field: "RecruitmentMethod",
+      //   width: "3",
+      //   options: "recruitmentMethod",
+      // },
     ];
 
     Vue.prototype.$childInfo = [
@@ -179,6 +179,12 @@ export default {
         field: "HomeLanguage",
         width: "4",
         options: "language",
+      },
+      {
+        label: "Recruited via",
+        field: "RecruitmentMethod",
+        width: "12",
+        options: "recruitmentMethod",
       },
       {
         label: "Note",
