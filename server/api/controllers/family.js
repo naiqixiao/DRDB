@@ -183,12 +183,11 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
     for (var i = 0; i < newFamily.length; i++) {
       // check whether the family exists
-      const phone = newFamily[i].Phone;
-
+      
       var child = {};
       child.Name = newFamily[i].Child_Last_Name
-        ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
-        : newFamily[i].Child_First_Name;
+      ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
+      : newFamily[i].Child_First_Name;
       child.Sex = newFamily[i].Sex;
       child.DoB = newFamily[i].DoB;
       child.Age = newFamily[i].Age;
@@ -196,8 +195,20 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       child.BirthWeight = newFamily[i].Birthweight;
       child.Gestation = newFamily[i].Gestation;
       child.RecruitmentMethod = newFamily[i].RecruitmentMethod;
+      
+      const phone = newFamily[i].Phone;
+      const email = newFamily[i].Email;
 
-      var family = await model.family.findOne({ where: { Phone: phone } });
+      var searchString = {}
+
+      if (phone) {
+        searchString.Phone = phone;
+      }
+      if (email) {
+        searchString.Email = email;
+      }
+      
+      var family = await model.family.findOne({ where: searchString });
 
       if (!!family) {
         // when the family exists in the database, add the children to this family.
