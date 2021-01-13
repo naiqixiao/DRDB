@@ -20,7 +20,9 @@ exports.create = asyncHandler(async (req, res) => {
 
   var logInfo = "[Conversation Created] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " created a conversation at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+    new Date().toString() + 
+    
+    "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)
@@ -50,7 +52,9 @@ exports.delete = asyncHandler(async (req, res) => {
 
   var logInfo = "[Conversation Deleted] " + User.Name + " (" + User.Email + ") from " +
     User.LabName + " deleted a conversation at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+    new Date().toString() + 
+    
+    "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)

@@ -4,7 +4,7 @@ import store from "@/store";
 export default {
   // create(personnelInfo) {
   //   personnelInfo.User = {
-  //     IP: store.state.ip,
+  //     // IP: store.state.ip,
   //     Name: store.state.name,
   //     Email: store.state.user,
   //     LabName: store.state.labName
@@ -18,7 +18,7 @@ export default {
   },
   update(personnelInfo) {
     personnelInfo.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -28,7 +28,7 @@ export default {
   delete(personnelInfo) {
     
     personnelInfo.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

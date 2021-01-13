@@ -4,7 +4,7 @@ import store from "@/store";
 export default {
   create(conversation) {
     conversation.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -14,7 +14,7 @@ export default {
   delete(conversation) {
 
     conversation.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

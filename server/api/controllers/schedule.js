@@ -98,8 +98,8 @@ exports.create = asyncHandler(async (req, res) => {
       schedule.id +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -501,8 +501,8 @@ exports.update = asyncHandler(async (req, res) => {
       ID +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -557,8 +557,8 @@ exports.remind = asyncHandler(async (req, res) => {
       ID +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -620,8 +620,8 @@ exports.complete = asyncHandler(async (req, res) => {
       ID +
       ") as completed at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -685,8 +685,8 @@ exports.delete = asyncHandler(async (req, res) => {
       req.query.id +
       ") " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {

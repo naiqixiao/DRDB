@@ -21,7 +21,7 @@ export default new Vuex.Store({
     labEmailStatus: null,
     adminEmailStatus: null,
     loadingStatus: false,
-    ip: null,
+    // ip: null,
     emailOpening: null,
     emailClosing: null,
     location: null,
@@ -67,9 +67,9 @@ export default new Vuex.Store({
     setLoadingStatus(state, loadingStatus) {
       state.loadingStatus = loadingStatus;
     },
-    setIP(state, ip) {
-      state.ip = ip;
-    },
+    // setIP(state, ip) {
+    //   state.ip = ip;
+    // },
     setEmailOpening(state, emailOpening) {
       state.emailOpening = emailOpening;
     },
@@ -126,9 +126,9 @@ export default new Vuex.Store({
     setLoadingStatus({ commit }, loadingStatus) {
       commit("setLoadingStatus", loadingStatus);
     },
-    setIP({ commit }, ip) {
-      commit("setIP", ip);
-    },
+    // setIP({ commit }, ip) {
+    //   commit("setIP", ip);
+    // },
     setEmailOpening({ commit }, emailOpening) {
       commit("setEmailOpening", emailOpening);
     },

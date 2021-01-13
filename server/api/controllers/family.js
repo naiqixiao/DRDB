@@ -103,8 +103,8 @@ exports.create = asyncHandler(async (req, res) => {
       newFamily.id +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -439,8 +439,8 @@ exports.update = asyncHandler(async (req, res) => {
     ID +
     ") at " +
     new Date().toString() +
-    " - " +
-    User.IP +
+    // " - " +
+    // User.IP +
     "\r\n";
 
   if (fs.existsSync(logFile)) {
@@ -480,8 +480,8 @@ exports.delete = asyncHandler(async (req, res) => {
     ID +
     ") from the database at " +
     new Date().toString() +
-    " - " +
-    User.IP +
+    // " - " +
+    // User.IP +
     "\r\n";
 
   if (fs.existsSync(logFile)) {

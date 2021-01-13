@@ -188,7 +188,7 @@ exports.signup = asyncHandler(async (req, res) => {
       // log
       const logFile = logFolder + "/" + User.LabName + "_log.txt";
 
-      var logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + " - " + User.IP + "\r\n"
+      var logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + "\r\n"
 
       if (fs.existsSync(logFile)) {
         fs.appendFileSync(logFile, logInfo)
@@ -280,7 +280,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         // log
         const logFile = logFolder + "/" + User.LabName + "_log.txt";
 
-        const logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + " - " + User.IP + "\r\n"
+        const logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + "\r\n"
 
         if (fs.existsSync(logFile)) {
           fs.appendFileSync(logFile, logInfo)
@@ -304,7 +304,7 @@ exports.login = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const { Email, Password, IP } = req.body;
+  const { Email, Password} = req.body;
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
@@ -321,7 +321,7 @@ exports.login = asyncHandler(async (req, res) => {
   if (!personnel) {
     // log the login information.
     const logFile = logFolder + "/log.txt";
-    var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + " - " + IP + "\r\n"
+    var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -340,7 +340,7 @@ exports.login = asyncHandler(async (req, res) => {
 
     // log the login information.
     const logFile = logFolder + "/log.txt";
-    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + " - " + IP + "\r\n"
+    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -366,7 +366,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   // log the login information.
   const logFile = logFolder + "/" + personnel.Lab.LabName + "_log.txt";
-  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + " - " + IP + "\r\n"
+  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)
@@ -494,7 +494,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     // log
     const logFile = logFolder + "/" + User.LabName + "_log.txt";
 
-    var logInfo = "[Change Password] " + User.Name + " (" + User.Email + ") " + "chagned password at " + new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo = "[Change Password] " + User.Name + " (" + User.Email + ") " + "chagned password at " + new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -551,7 +551,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       var logFile = logFolder + "/log.txt";
     }
 
-    var logInfo = "[Password Reset] " + personnel.Name + " (" + personnel.Email + ") " + "reset password at " + new Date().toString() + " - " + User.IP + "\r\n"
+    var logInfo = "[Password Reset] " + personnel.Name + " (" + personnel.Email + ") " + "reset password at " + new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)

@@ -146,11 +146,11 @@ export default {
       if (validationResults) {
         this.$store.dispatch("setLoadingStatus", true);
         try {
-          const KKK = await fetch("https://api.ipify.org/?format=json");
+          // const KKK = await fetch("https://api.ipify.org/?format=json");
 
-          var ip = await KKK.json();
+          // var ip = await KKK.json();
 
-          this.$store.dispatch("setIP", ip.ip);
+          // this.$store.dispatch("setIP", ip.ip);
 
           const response = await login.login({
             Email: this.email,
@@ -212,11 +212,11 @@ export default {
 
     async resetPassword() {
       if (this.email) {
-        const KKK = await fetch("https://api.ipify.org/?format=json");
+        // const KKK = await fetch("https://api.ipify.org/?format=json");
 
-        var ip = await KKK.json();
+        // var ip = await KKK.json();
 
-        this.$store.dispatch("setIP", ip.ip);
+        // this.$store.dispatch("setIP", ip.ip);
 
         try {
           await login.resetPassword({

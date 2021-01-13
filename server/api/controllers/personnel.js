@@ -106,7 +106,9 @@ exports.update = asyncHandler(async (req, res) => {
 
   var logInfo = "[Personnel Updated] " + User.Name + " (" + User.Email + ") " + "update personnel information (" +
     personnel.Name + ") at " +
-    new Date().toString() + " - " + User.IP + "\r\n";
+    new Date().toString() + 
+    
+    "\r\n";
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)
@@ -160,7 +162,9 @@ exports.delete = asyncHandler(async (req, res) => {
 
   var logInfo = "[Personnel Deleted] " + User.Name + " (" + User.Email + ") " + "removed (" +
     req.query.id + ") from the database at " +
-    new Date().toString() + " - " + User.IP + "\r\n"
+    new Date().toString() + 
+    
+    "\r\n"
 
   if (fs.existsSync(logFile)) {
     fs.appendFileSync(logFile, logInfo)

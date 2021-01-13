@@ -5,7 +5,7 @@ export default {
   register(credentials) {
     credentials.lab = store.state.lab;
     credentials.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -23,7 +23,7 @@ export default {
   changePassword(credentials) {
     credentials.lab = store.state.lab;
     credentials.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -33,7 +33,7 @@ export default {
   },
   resetPassword(credentials) {
     credentials.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

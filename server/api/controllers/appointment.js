@@ -134,8 +134,8 @@ exports.create = asyncHandler(async (req, res) => {
       Schedule.id +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -353,8 +353,8 @@ exports.update = asyncHandler(async (req, res) => {
       Schedule.id +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {
@@ -480,8 +480,8 @@ exports.delete = asyncHandler(async (req, res) => {
       Schedule.id +
       ") at " +
       new Date().toString() +
-      " - " +
-      User.IP +
+      // " - " +
+      // User.IP +
       "\r\n";
 
     if (fs.existsSync(logFile)) {

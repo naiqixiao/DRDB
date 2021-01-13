@@ -5,7 +5,7 @@ export default {
   postStudies(appointment) {
 
     appointment.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

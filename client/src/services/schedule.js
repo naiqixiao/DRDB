@@ -4,7 +4,7 @@ import store from "@/store";
 export default {
   create(schedule) {
     schedule.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -32,7 +32,7 @@ export default {
   },
   update(schedule) {
     schedule.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -42,7 +42,7 @@ export default {
   },
   complete(schedule) {
     schedule.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -52,7 +52,7 @@ export default {
   },
   remind(schedule) {
     schedule.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -62,7 +62,7 @@ export default {
   },
   delete(schedule) {
     schedule.User = {
-      IP: store.state.ip,
+      // IP: store.state.ip,
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

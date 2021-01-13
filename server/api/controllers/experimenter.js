@@ -31,7 +31,7 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +
       "updated experimenter assignment for a study (" +
       experimenters[0].FK_Study + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+      new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -72,7 +72,7 @@ exports.updateStudies = asyncHandler(async (req, res) => {
     var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +
       "updated experimenter assignment for an experimenter (" +
       studies[0].FK_Experimenter + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+      new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)

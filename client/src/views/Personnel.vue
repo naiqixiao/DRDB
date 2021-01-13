@@ -453,11 +453,11 @@ export default {
     async save() {
       if (this.editedIndex < 0) {
         try {
-          const KKK = await fetch("https://api.ipify.org/?format=json");
+          // const KKK = await fetch("https://api.ipify.org/?format=json");
 
-          var ip = await KKK.json();
+          // var ip = await KKK.json();
 
-          this.editedPersonnel.IP = ip.ip;
+          // this.editedPersonnel.IP = ip.ip;
 
           const Result = await login.register(this.editedPersonnel);
           this.editedPersonnel.id = Result.data.id;

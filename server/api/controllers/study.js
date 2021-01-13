@@ -27,7 +27,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     var logInfo = "[Study Created] " + User.Name + " (" + User.Email + ") " + "created a study (" +
       study.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+      new Date().toString() + 
+      "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -124,7 +125,7 @@ exports.update = asyncHandler(async (req, res) => {
 
     var logInfo = "[Study Updated] " + User.Name + " (" + User.Email + ") " + "update a study's information (" +
       ID + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+      new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)
@@ -163,7 +164,7 @@ exports.delete = asyncHandler(async (req, res) => {
 
     var logInfo = "[Study Deleted] " + User.Name + " (" + User.Email + ") " + "deleted a study (" +
       req.query.id + ") at " +
-      new Date().toString() + " - " + User.IP + "\r\n"
+      new Date().toString() + "\r\n"
 
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo)

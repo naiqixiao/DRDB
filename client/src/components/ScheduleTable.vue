@@ -455,7 +455,8 @@ export default {
 
             // Calendar event title
             item.summary =
-              item.Status.toUpperCase() + " - " + studyNames.join(" + ");
+              item.Status.toUpperCase() + // " - " + 
+              studyNames.join(" + ");
 
             try {
               await schedule.update(item);
