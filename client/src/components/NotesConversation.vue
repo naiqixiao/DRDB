@@ -185,4 +185,7 @@ export default {
   background-color: rgba($color: #000000, $alpha: 0);
   height: 500px;
 }
+.v-tab {
+  max-width: 50%;
+}
 </style>

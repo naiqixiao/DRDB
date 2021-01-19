@@ -24,6 +24,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.TEXT,
 			allowNull: false
 		},
+		PhoneScript: {
+			type: DataTypes.TEXT,
+			allowNull: false
+		},
 		EmailTemplate: {
 			type: DataTypes.TEXT,
 			allowNull: false

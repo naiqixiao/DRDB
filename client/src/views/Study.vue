@@ -182,7 +182,7 @@
               readonly
             ></v-text-field>
           </v-col>
-          <v-col md="12">
+          <v-col md="6">
             <v-textarea
               label="Study summary"
               background-color="textbackground"
@@ -190,6 +190,18 @@
               no-resize
               rows="8"
               v-model="currentStudy.Description"
+              readonly
+              hide-details
+            ></v-textarea>
+          </v-col>
+          <v-col md="6">
+            <v-textarea
+              label="Phone Script"
+              background-color="textbackground"
+              outlined
+              no-resize
+              rows="8"
+              v-model="currentStudy.PhoneScript"
               readonly
               hide-details
             ></v-textarea>
@@ -403,16 +415,27 @@
                   <v-row justify="space-around">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Study summary:</h4>
+                      <h4 class="text-left">'Study summary & Phone script:'</h4>
                     </v-col>
 
-                    <v-col cols="12" md="10">
+                    <v-col cols="12" md="6">
                       <v-textarea
                         label="Study summary"
                         outlined
                         no-resize
-                        rows="3"
+                        rows="6"
                         v-model="editedStudy.Description"
+                        hide-details
+                      ></v-textarea>
+                    </v-col>
+
+                    <v-col cols="12" md="6">
+                      <v-textarea
+                        label="Phone Script"
+                        outlined
+                        no-resize
+                        rows="6"
+                        v-model="editedStudy.PhoneScript"
                         hide-details
                       ></v-textarea>
                     </v-col>

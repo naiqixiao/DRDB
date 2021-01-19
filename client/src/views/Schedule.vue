@@ -58,98 +58,11 @@
         </v-row>
 
         <v-row>
-          <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Study information:</h4>
-          </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-            md="4"
-            v-for="item in this.$studyBasicFields"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="selectedStudy[item.field]"
-              placeholder="  "
-              outlined
-              dense
-              readonly
-            ></v-text-field>
-          </v-col>
-          <v-col md="12" class="subtitle">
-            <v-textarea
-              label="Study summary"
-              background-color="textbackground"
-              outlined
-              no-resize
-              rows="5"
-              :value="selectedStudy.Description"
-              readonly
-              hide-details
-            ></v-textarea>
+          <v-col cols="12" md="12">
+            <StudySummary :selectedStudy="selectedStudy"></StudySummary>
           </v-col>
         </v-row>
 
-        <v-row justify="space-around">
-          <v-col md="12">
-            <v-divider></v-divider>
-            <h4 class="text-left">Point of contact:</h4>
-          </v-col>
-          <v-col
-            cols="12"
-            sm="4"
-            v-for="item in this.$studyPointofContact"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="selectedStudy.PointofContact[item.field]"
-              placeholder="  "
-              readonly
-              outlined
-              dense
-            ></v-text-field>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Study criteria:</h4>
-          </v-col>
-
-          <v-col
-            cols="12"
-            sm="6"
-            :md="item.width"
-            v-for="item in this.$studyCriteriaFields"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="
-                item.field == 'MinAge' || item.field == 'MaxAge'
-                  ? AgeFormated2(selectedStudy[item.field])
-                  : selectedStudy[item.field]
-              "
-              placeholder="  "
-              outlined
-              dense
-              readonly
-            ></v-text-field>
-          </v-col>
-        </v-row>
         <!-- <h4>{{ selectedStudy.StudyName }}</h4>
         <h4>{{ selectedStudy.MinAge }}</h4>
         <h4>{{ selectedStudy.MaxAge }}</h4>
@@ -895,6 +808,7 @@ import moment from "moment";
 import ExtraStudies from "@/components/ExtraStudies";
 
 import NotesConversation from "@/components/NotesConversation";
+import StudySummary from "@/components/StudySummary";
 
 import Email from "@/components/Email";
 // import EmailDialog from "@/components/EmailDialog";
@@ -908,6 +822,7 @@ import Page from "@/components/Page";
 export default {
   components: {
     NotesConversation,
+    StudySummary,
     ExtraStudies,
     Email,
     // EmailDialog,
@@ -1703,27 +1618,6 @@ export default {
         var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
         var M =
           months > 0 ? months + (months === 1 ? " month " : " months ") : "";
-        formated = Y + M;
-      }
-      return formated;
-    },
-
-    AgeFormated2(Age) {
-      var formated = "";
-      if (Age) {
-        var years = Math.floor(Age / 12);
-        var months = Age % 12;
-        // months = months.toFixed(1);
-        var Y = years > 0 ? years + " year" : "";
-        Y = years > 1 ? Y + "s " : Y + " ";
-
-        var M = "";
-
-        if (months > 0) {
-          M = months + " month";
-          M = months !== 1 ? M + "s" : M;
-        }
-
         formated = Y + M;
       }
       return formated;

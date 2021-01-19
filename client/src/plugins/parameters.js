@@ -275,6 +275,12 @@ export default {
       "05:00PM",
       "05:30PM",
       "06:00PM",
+      "06:30PM",
+      "07:00PM",
+      "07:30PM",
+      "08:00PM",
+      "08:30PM",
+      "09:00PM",
     ];
 
     Vue.prototype.$headersSchedule = [
@@ -484,7 +490,7 @@ export default {
         },
         (value) => {
           if (value) {
-            return (value && value.length <= 50) || "Max 50 characters"
+            return (value && value.length <= 90) || "Max 90 characters"
           } else {
             return true
           }
