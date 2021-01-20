@@ -121,7 +121,7 @@
               dense
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="2"></v-col>
+          <!-- <v-col cols="12" md="2"></v-col> -->
           <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -921,7 +921,7 @@ export default {
         { label: "Sex", field: "Sex", width: 1 },
         { label: "DoB", field: "DoB", width: 2 },
       ],
-      familyField: [1, 2, 0, 3, 4, 7],
+      familyField: [1, 2, 0, 3, 4, 7, 15],
       Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: null,
       studyDate: null,
