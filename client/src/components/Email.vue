@@ -99,7 +99,7 @@ export default {
               "<p>Dear " +
               this.familyInfo.NamePrimary.split(" ")[0] +
               ",</p>" +
-              "<p>Thanks for your support to our research! This is a confirmation for your visit with <b>" +
+              "<p>Thanks for your support to our research! This is a confirmation for your participation in our study with <b>" +
               this.childNames() +
               moment(this.scheduleInfo.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"

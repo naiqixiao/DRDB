@@ -837,10 +837,11 @@ export default {
 
     confirmationPreview() {
       if (this.currentStudy.EmailTemplate) {
+        
         var opening =
           "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
           "Lisa,</p>" +
-          "<p style= 'color: var(--v-primary-lighten3)'>Thanks for your support to our research! This is a confirmation for your visit with " +
+          "<p style= 'color: var(--v-primary-lighten3)'>Thanks for your support to our research! This is a confirmation for your participation in our study with " +
           "Emma" +
           moment().format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
           ".</p>";

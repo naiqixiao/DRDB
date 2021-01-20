@@ -44,7 +44,7 @@ Study scheduling emails
 --------------------------------
 - Structure
     -  email opening (no setting is available at the momemnt)
-        - for confirming an appointment: "Thanks for your support to our research! This is a confirmation for your visit with ${{childName}} on ${{AppointTime}}."
+        - for confirming an appointment: "Thanks for your support to our research! This is a confirmation for your participation in our study with ${{childName}} on ${{AppointTime}}."
         - for updating an appointment: "This is an update on your visit with ${{childName}} on ${{AppointTime}}."
         - to introduce a study to parents: We are ${{labName}}. We would love to have you and ${{childName}} to participate in our study. Here is the information about the study:"
     -  study specific email template
