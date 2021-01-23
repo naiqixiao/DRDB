@@ -1,9 +1,10 @@
 <template>
-  <v-row align="end" justify="space-around">
-    <v-col cols="12" md="2" class="d-flex align-end">
+  <v-row align="end" justify="start">
+    <v-col cols="12" md="1" ></v-col>
+      <v-col cols="12" md="2" class="d-flex align-end">
       <h3 class="name">{{ child.Name + ":"}}</h3>
     </v-col>
-    <v-col cols="12" md="2" > 
+    <v-col cols="12" md="4" > 
       <v-select
         v-if="index == 0 && currentStudy"
         :items="potentialStudies"
@@ -31,21 +32,21 @@
         chip
       ></v-select>
     </v-col>
-    <v-col cols="12" md="3" v-if="response == 'Confirmed'">
+    <v-col cols="12" md="4" v-if="response == 'Confirmed'">
       <v-select
         :items="potentialExperimenters"
         :item-value="'id'"
         :item-text="'Name'"
         v-model="selectedExperimenters"
         return-object
-        label="Experimenters"
+        label="Experimenter(s)"
         multiple
         hide-details
         dense
         chip
       ></v-select>
     </v-col>
-    <v-col cols="12" md="2" v-if="index > 0">
+    <v-col cols="12" md="1" v-if="index > 0">
       <v-btn text icon color="primary" @click="deleteAppointment">
         <v-icon>delete</v-icon>
       </v-btn>

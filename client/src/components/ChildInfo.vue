@@ -305,12 +305,7 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-card outlined>
-                <v-row
-                  style="height: 60px"
-                  align="center"
-                  justify="start"
-                  v-if="response == 'Confirmed'"
-                >
+                <v-row style="height: 80px" align="center" justify="start">
                   <v-col cols="12" md="3" class="text-left">
                     <div class="title" style="padding-left: 8px">
                       {{ "Study date & time:" }}
@@ -323,6 +318,7 @@
                       v-model="studyDate"
                       append-icon="event"
                       @click:append="datePicker = true"
+                      :disabled="this.skipStudyDateTimeStatus"
                       hide-details
                       dense
                     ></v-text-field>
@@ -335,10 +331,48 @@
                       label="Study time"
                       hide-details
                       dense
+                      :disabled="this.skipStudyDateTimeStatus"
                     ></v-combobox>
                   </v-col>
+                  <v-col cols="12" md="1"></v-col>
+                  <v-col cols="12" md="3">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-checkbox
+                            label="Skip study date/time"
+                            class="ma-0 pa-0"
+                            :value="skipStudyDateTimeStatus"
+                            @change="skipStudyDateTime()"
+                            dense
+                          ></v-checkbox>
+                        </div>
+                      </template>
+                      <span
+                        >Check this box to use current date/time for the current
+                        appointment.</span
+                      >
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-checkbox
+                            label="Skip reminder email"
+                            class="ma-0 pa-0"
+                            :value="skipReminderEmailStatus"
+                            @change="skipReminderEmail()"
+                            dense
+                          ></v-checkbox>
+                        </div>
+                      </template>
+                      <span
+                        >Check this box to prevent reminder email from being
+                        sent to the participant.</span
+                      >
+                    </v-tooltip>
+                  </v-col>
                 </v-row>
-                <v-row
+                <!-- <v-row
                   style="height: 60px"
                   align="center"
                   justify="start"
@@ -349,9 +383,9 @@
                       {{ "Study date & time: NA" }}
                     </div>
                   </v-col>
-                </v-row>
+                </v-row> -->
                 <v-divider></v-divider>
-                <v-row dense>
+                <v-row style="height: 220px" align="center" justify="start">
                   <v-col
                     cols="12"
                     md="12"
@@ -373,6 +407,7 @@
                       @emitEmailTemplate="getEmailTemplate"
                       align="start"
                     ></ExtraStudies>
+                    <v-divider></v-divider>
                     <v-row
                       v-if="index === 0 && response === 'Confirmed'"
                       align="center"
@@ -453,9 +488,33 @@
               ></Email>
 
               <v-row justify="space-between" align="center">
-                <v-col cols="12" md="2"></v-col>
+                <v-col cols="12" md="2">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        <v-checkbox
+                          label="Skip email"
+                          class="ma-0 pa-0"
+                          :value="skipConfirmationEmailStatus"
+                          @change="skipConfirmationEmail()"
+                          :disabled="response != 'Confirmed'"
+                          dense
+                        ></v-checkbox>
+                      </div>
+                    </template>
+                    <span>Check this box to skip email to parents.</span>
+                  </v-tooltip>
+                </v-col>
                 <v-col cols="12" md="6">
-                  <v-btn color="primary" @click="continue23()">
+                  <v-btn
+                    color="primary"
+                    @click="continue23()"
+                    :disabled="
+                      !currentFamily.Email ||
+                        this.skipConfirmationEmailStatus ||
+                        !this.$store.state.labEmailStatus
+                    "
+                  >
                     <v-icon dark left v-show="emailSent"
                       >mdi-checkbox-marked-circle</v-icon
                     >Send Email
@@ -463,9 +522,19 @@
                 </v-col>
                 <v-col cols="12" md="2">
                   <v-btn
-                    :disabled="!scheduleNextPage && !!currentFamily.Email"
+                    :disabled="
+                      !scheduleNextPage &&
+                        !!currentFamily.Email &&
+                        !this.skipConfirmationEmailStatus
+                    "
                     @click="scheduleNextStep"
-                    >{{ !!currentFamily.Email ? "Next" : "Skip email" }}</v-btn
+                    >{{
+                      !!currentFamily.Email ||
+                      (!this.skipConfirmationEmailStatus &&
+                        this.$store.state.labEmailStatus)
+                        ? "Next"
+                        : "Skip email"
+                    }}</v-btn
                   >
                 </v-col>
               </v-row>
@@ -627,6 +696,9 @@ export default {
       emailDialog: false,
       emailTemplate: "",
       studyDate: null,
+      skipStudyDateTimeStatus: false,
+      skipConfirmationEmailStatus: false,
+      skipReminderEmailStatus: false,
     };
   },
   methods: {
@@ -711,6 +783,22 @@ export default {
       };
     },
 
+    skipStudyDateTime() {
+      this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
+
+      this.studyDate = moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
+    },
+
+    skipConfirmationEmail() {
+      this.skipConfirmationEmailStatus = !this.skipConfirmationEmailStatus;
+    },
+
+    skipReminderEmail() {
+      this.skipReminderEmailStatus = !this.skipReminderEmailStatus;
+    },
+
     async createSchedule() {
       this.Experimenters = [];
 
@@ -754,6 +842,10 @@ export default {
             },
             attendees: this.Experimenters,
           };
+
+          if (this.skipReminderEmailStatus) {
+            newSchedule.Reminded = true;
+          }
 
           break;
 
@@ -885,7 +977,7 @@ export default {
 
         var scheduleInfo = await this.createSchedule();
 
-        if (this.response == "Confirmed") {
+        if (this.response == "Confirmed" && this.$store.state.labEmailStatus) {
           try {
             await this.createCalendarEvent(scheduleInfo.calendarEvent);
 
@@ -1203,7 +1295,9 @@ export default {
     noteChild(child) {
       var Note = "<strong>Note:</strong> " + (child.Note ? child.Note : "");
 
-      var recruitMethod = "<strong>Recruited from:</strong> " + (child.RecruitmentMethod ? child.RecruitmentMethod : "");
+      var recruitMethod =
+        "<strong>Recruited from:</strong> " +
+        (child.RecruitmentMethod ? child.RecruitmentMethod : "");
 
       return Note + "<br>" + recruitMethod;
     },

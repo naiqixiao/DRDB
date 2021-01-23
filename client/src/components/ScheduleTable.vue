@@ -83,14 +83,26 @@
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-icon
-            @click.stop="item.Status === 'TBD' ? updateSchedule(item, 'Rejected') : updateSchedule(item, 'Cancelled')"
-            :disabled="item.Status === 'Cancelled' || item.Status === 'Rejected' || item.Completed == true"
+            @click.stop="
+              item.Status === 'TBD'
+                ? updateSchedule(item, 'Rejected')
+                : updateSchedule(item, 'Cancelled')
+            "
+            :disabled="
+              item.Status === 'Cancelled' ||
+                item.Status === 'Rejected' ||
+                item.Completed == true
+            "
             v-bind="attrs"
             v-on="on"
             >not_interested</v-icon
           >
         </template>
-        <span>{{item.Status === 'TBD' ? 'The parent rejected participation?' : 'Cancel this appointment'}}</span>
+        <span>{{
+          item.Status === "TBD"
+            ? "The parent rejected participation?"
+            : "Cancel this appointment"
+        }}</span>
       </v-tooltip>
     </template>
 
@@ -227,6 +239,40 @@
                       hide-details
                       dense
                     ></v-combobox>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-checkbox
+                            label="Skip study date/time"
+                            class="margin-top-48 pa-0"
+                            :value="skipStudyDateTimeStatus"
+                            @change="skipStudyDateTime()"
+                            dense
+                          ></v-checkbox>
+                        </div>
+                      </template>
+                      <span
+                        >Check this box to use current date/time for the current
+                        appointment.</span
+                      >
+                    </v-tooltip>
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-checkbox
+                            label="Skip reminder email"
+                            class="ma-0 pa-0"
+                            :value="skipReminderEmailStatus"
+                            @change="skipReminderEmail()"
+                            dense
+                          ></v-checkbox>
+                        </div>
+                      </template>
+                      <span
+                        >Check this box to prevent reminder email from being
+                        sent to the participant.</span
+                      >
+                    </v-tooltip>
                   </v-col>
                 </v-row>
               </v-card>
@@ -262,12 +308,32 @@
               ></Email>
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
-                <v-col cols="12" md="2"></v-col>
+                  <v-col cols="12" md="2">
+                    <v-tooltip top>
+                      <template v-slot:activator="{ on }">
+                        <div v-on="on">
+                          <v-checkbox
+                            label="Skip email"
+                            class="ma-0 pa-0"
+                            :value="skipConfirmationEmailStatus"
+                            @change="skipConfirmationEmail()"
+                            :disabled="response != 'Confirmed'"
+                            dense
+                          ></v-checkbox>
+                        </div>
+                      </template>
+                      <span>Check this box to skip email to parents.</span>
+                    </v-tooltip>
+                  </v-col>
                 <v-col cols="12" md="6">
                   <v-btn
                     color="primary"
                     @click="continue23()"
-                    :disabled="!editedSchedule.Family.Email"
+                    :disabled="
+                      !editedSchedule.Family.Email ||
+                        skipConfirmationEmailStatus ||
+                        !$store.state.labEmailStatus
+                    "
                   >
                     <v-icon dark left v-show="emailSent"
                       >mdi-checkbox-marked-circle</v-icon
@@ -277,11 +343,17 @@
                 <v-col cols="12" md="2">
                   <v-btn
                     :disabled="
-                      !scheduleNextPage && !!editedSchedule.Family.Email
+                      !scheduleNextPage &&
+                        !!editedSchedule.Family.Email &&
+                        !skipConfirmationEmailStatus 
                     "
                     @click="scheduleNextStep"
                     >{{
-                      !!editedSchedule.Family.Email ? "Next" : "Skip email"
+                      !!editedSchedule.Family.Email &&
+                      !skipConfirmationEmailStatus &&
+                      $store.state.labEmailStatus
+                        ? "Next"
+                        : "Skip email"
                     }}</v-btn
                   >
                 </v-col>
@@ -348,6 +420,9 @@ export default {
   },
   data() {
     return {
+      skipStudyDateTimeStatus: false,
+      skipConfirmationEmailStatus: false,
+      skipReminderEmailStatus: false,
       e1: 1,
       contactType: "",
       dialog: false,
@@ -395,7 +470,7 @@ export default {
       if (
         await this.$refs.confirmD.open(
           "Study appointment update.",
-          "Are you sure you want to mark this appointment as "+  status + "?"
+          "Are you sure you want to mark this appointment as " + status + "?"
         )
       ) {
         this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
@@ -454,9 +529,7 @@ export default {
             studyNames = Array.from(new Set(studyNames));
 
             // Calendar event title
-            item.summary =
-              item.Status.toUpperCase() + // " - " + 
-              studyNames.join(" + ");
+            item.summary = item.Status.toUpperCase() + studyNames.join(" + "); // " - " +
 
             try {
               await schedule.update(item);
@@ -529,6 +602,10 @@ export default {
             timeZone: "America/Toronto",
           };
 
+          if (this.skipReminderEmailStatus) {
+            this.editedSchedule.Reminded = true;
+          }
+
           const calendarEvent = await schedule.update(this.editedSchedule);
 
           this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
@@ -545,6 +622,22 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+
+    skipStudyDateTime() {
+      this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
+
+      this.studyDate = moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
+    },
+
+    skipConfirmationEmail() {
+      this.skipConfirmationEmailStatus = !this.skipConfirmationEmailStatus;
+    },
+
+    skipReminderEmail() {
+      this.skipReminderEmailStatus = !this.skipReminderEmailStatus;
     },
 
     async continue12() {
