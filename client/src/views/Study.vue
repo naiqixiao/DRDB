@@ -940,7 +940,8 @@ export default {
         if (this.currentStudy.StudyType === "Online") {
           emailBody =
             emailBody +
-            "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>";
+            "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+            "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
         }
 
         emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
