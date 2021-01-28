@@ -61,6 +61,7 @@ export default {
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],
+        ["link"],
       ],
     };
   },

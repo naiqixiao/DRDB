@@ -170,6 +170,7 @@ export default {
         ["bold", "italic", "underline"],
         [{ list: "ordered" }, { list: "bullet" }],
         [{ color: [] }, { background: [] }],
+        ["link"],
         // ["image", "code-block"]
       ],
       navs: [

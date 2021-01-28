@@ -639,6 +639,7 @@ export default {
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],
+        ["link"],
       ],
       inclusionOptions: ["Include", "Exclude", "Only"],
     };
