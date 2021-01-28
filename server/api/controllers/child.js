@@ -199,7 +199,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
   if (req.query.minAge && req.query.maxAge) {
     queryString.Age = {
-      [Op.between]: [req.query.minAge * 30.5 - 5, req.query.maxAge * 30.5 - 5],
+      [Op.between]: [req.query.minAge * 30.5 - 1, req.query.maxAge * 30.5 - 1],
     };
   }
   if (req.query.pastParticipants) {

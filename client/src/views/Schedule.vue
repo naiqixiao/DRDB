@@ -1802,7 +1802,7 @@ export default {
         moment(new Date())
           .add(1, "days")
           .isSameOrAfter(
-            moment(this.editedChild.DoB).add(
+            moment(this.currentChild.DoB).add(
               Math.floor(this.selectedStudy.MinAge * 30.5),
               "days"
             )
@@ -1812,14 +1812,14 @@ export default {
           .add(1, "days")
           .toISOString(true);
       } else {
-        return moment(this.editedChild.DoB)
+        return moment(this.currentChild.DoB)
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
           .toISOString(true);
       }
     },
 
     latestDate: function() {
-      return moment(this.editedChild.DoB)
+      return moment(this.currentChild.DoB)
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
