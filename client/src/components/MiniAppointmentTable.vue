@@ -665,6 +665,11 @@ export default {
         emailBody = emailBody.replace(/\. she/g, ". She");
         emailBody = emailBody.replace(/\. her/g, ". Her");
 
+        emailBody = emailBody.replace(
+          /\${{ZoomLink}}/g,
+          "<a href='" + appointment.Personnels[0].ZoomLink + "'>Zoom Link</a>"
+        );
+
         emailBodyList.push(emailBody);
       });
 

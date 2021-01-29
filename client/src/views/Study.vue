@@ -863,6 +863,11 @@ export default {
         emailBody = emailBody.replace(/<p>/g, "<p><strong>" || "");
         emailBody = emailBody.replace(/<\/p>/g, "</strong></p>" || "");
 
+        emailBody = emailBody.replace(
+          /\${{ZoomLink}}/g,
+          "<a href='" + this.$store.state.ZoomLink + "'>Zoom Link</a>"
+        );
+
         // location
         const location =
           "<p style= 'color: var(--v-primary-lighten3)'>" +
