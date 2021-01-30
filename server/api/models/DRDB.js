@@ -120,6 +120,9 @@ const Appointment = sequelize.import("../models/SequelizeAuto/Appointment");
 const ExperimenterAssignment = sequelize.import(
   "../models/SequelizeAuto/ExperimenterAssignment"
 );
+const ExperimenterAssignment_2nd = sequelize.import(
+  "../models/SequelizeAuto/SecondExperimenterAssignment"
+);
 
 Appointment.belongsTo(Family, {
   foreignKey: "FK_Family",
@@ -160,11 +163,26 @@ Personnel.belongsToMany(Appointment, {
   through: "ExperimenterAssignment",
   foreignKey: "FK_Experimenter",
   otherKey: "FK_Appointment",
+  as: "PrimaryExperimenterof"
 });
 Appointment.belongsToMany(Personnel, {
   through: "ExperimenterAssignment",
   foreignKey: "FK_Appointment",
   otherKey: "FK_Experimenter",
+  as: "PrimaryExperimenter"
+});
+
+Personnel.belongsToMany(Appointment, {
+  through: "ExperimenterAssignment_2nd",
+  foreignKey: "FK_Experimenter",
+  otherKey: "FK_Appointment",
+  as: "SecondaryExperimenterof"
+});
+Appointment.belongsToMany(Personnel, {
+  through: "ExperimenterAssignment_2nd",
+  foreignKey: "FK_Appointment",
+  otherKey: "FK_Experimenter",
+  as: "SecondaryExperimenter"
 });
 
 Schedule.belongsTo(Personnel, {
@@ -173,7 +191,6 @@ Schedule.belongsTo(Personnel, {
 Personnel.hasMany(Schedule, {
   foreignKey: "ScheduledBy",
 });
-
 
 // Feedback
 const Feedback = sequelize.import("../models/SequelizeAuto/Feedback");
@@ -194,6 +211,7 @@ sequelize.sync({ force: false }).then(() => {
   exports.experimenter = Experimenter;
   exports.sibling = Sibling;
   exports.experimenterAssignment = ExperimenterAssignment;
+  exports.experimenterAssignment_2nd = ExperimenterAssignment_2nd;
   exports.feedback = Feedback;
   exports.sequelize = sequelize;
 });

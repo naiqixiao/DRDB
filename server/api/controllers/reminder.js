@@ -61,8 +61,8 @@ function emailBody(schedule) {
 
   var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
     /\${{ZoomLink}}/g,
-    "<a href='" + schedule.Appointments[0].Personnels[0].ZoomLink
-      ? schedule.Appointments[0].Personnels[0].ZoomLink
+    "<a href='" + schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
+      ? schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
       : schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>"
   );
 
@@ -263,15 +263,20 @@ exports.reminderEmail = asyncHandler(async () => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
         },
       ],
     });
-
-    console.log(schedules.length);
 
     const credentialsPath = "api/google/general/credentials.json";
     const credentials = fs.readFileSync(credentialsPath);

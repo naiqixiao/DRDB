@@ -1,7 +1,7 @@
 <template>
   <v-row align="end" justify="space-around">
     <v-col cols="12" md="2" class="d-flex align-end">
-      <h3 class="name">{{ child.Name + ":"}}</h3>
+      <h3 class="name">{{ child.Name + ":" }}</h3>
     </v-col>
 
     <v-col cols="12" md="2">
@@ -20,16 +20,30 @@
     </v-col>
     <v-col cols="12" md="3">
       <v-select
+        style="margin-left: 10px"
         :items="potentialExperimenters"
         :item-value="'id'"
         :item-text="'Name'"
         v-model="selectedExperimenters"
         return-object
-        label="Experimenters"
-        multiple
+        label="Experimenter (Primary)"
+        hide-details
         dense
         chip
+      ></v-select>
+    </v-col>
+    <v-col cols="12" md="3">
+      <v-select
+        :items="potentialExperimenters"
+        :item-value="'id'"
+        :item-text="'Name'"
+        v-model="selectedExperimenters_2nd"
+        return-object
+        label="Experimenters (Secondary)"
+        multiple
         hide-details
+        dense
+        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="2">
@@ -58,14 +72,20 @@ export default {
   data() {
     return {
       selectedStudy: this.currentStudy,
-      selectedExperimenters: [],
+      selectedExperimenters: {},
+      selectedExperimenters_2nd: [],
     };
   },
   methods: {
     selectStudy() {
-      const experimenterIds = this.selectedExperimenters.map((experimenter) => {
-        return experimenter.id;
-      });
+      const experimenterIds = [];
+      experimenterIds.push(this.selectedExperimenters.id);
+
+      const experimenterIds_2nd = this.selectedExperimenters_2nd.map(
+        (experimenter) => {
+          return experimenter.id;
+        }
+      );
 
       const appointment = {
         FK_Child: this.child.id,
@@ -85,13 +105,26 @@ export default {
           StudyType: this.selectedStudy.StudyType,
         },
         Experimenters: experimenterIds,
+        Experimenters_2nd: experimenterIds_2nd,
+        ZoomLink: this.selectedExperimenters.ZoomLink,
       };
 
-      const attendees = this.selectedExperimenters.map((experimenter) => {
-        return {
+      const attendees = [];
+
+      attendees.push({
+          displayName: this.selectedExperimenters.Name,
+          email: this.selectedExperimenters.Calendar,
+          // EMAIL: experimenter.Email,
+          // zoomLink: experimenter.ZoomLink,
+        });
+
+      this.selectedExperimenters_2nd.map((experimenter) => {
+        attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar + ".CAL",
-        };
+          email: experimenter.Calendar,
+          // EMAIL: experimenter.Email,
+          // zoomLink: experimenter.ZoomLink,
+        });
       });
 
       this.$emit("selectStudy", {
@@ -178,4 +211,3 @@ export default {
   align-items: flex-end;
 }
 </style>
-

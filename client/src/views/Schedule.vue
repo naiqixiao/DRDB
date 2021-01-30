@@ -1342,7 +1342,7 @@ export default {
 
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
-      }
+      } // check selectStudy function above to see how appointments and Experimenters are added.
 
       switch (this.response) {
         case "Confirmed":
@@ -1366,6 +1366,10 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
+            description:
+              this.appointments[0].Study.StudyType == "Online"
+                ? this.appointments[0].ZoomLink
+                : "",
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
@@ -1479,6 +1483,10 @@ export default {
       var calendarEvent = {
         summary: studyNames.join(" + "),
         location: this.$store.state.location,
+        description:
+          this.appointments[0].Study.StudyType == "Online"
+            ? this.appointments[0].ZoomLink
+            : "",
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
           timeZone: "America/Toronto",
@@ -1627,8 +1635,8 @@ export default {
 
     studyElegibility(study, child) {
       var age =
-        child.Age >= study.MinAge * 30.5 - 5 &&
-        child.Age <= study.MaxAge * 30.5 - 5;
+        child.Age >= study.MinAge * 30.5 - 1 &&
+        child.Age <= study.MaxAge * 30.5 - 1;
 
       var hearing = false;
 

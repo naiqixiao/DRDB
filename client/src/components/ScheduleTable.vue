@@ -196,7 +196,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="1000px" persistent>
+      <v-dialog v-model="dialog" max-width="1000px">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -231,7 +231,7 @@
                       :max="latestDate"
                     ></v-date-picker>
                   </v-col>
-                  <v-col cols="12" lg="3">
+                  <v-col cols="12" md="3">
                     <v-combobox
                       v-model="studyTime"
                       :items="studyTimeSlots"
@@ -273,6 +273,32 @@
                         sent to the participant.</span
                       >
                     </v-tooltip>
+                    <!-- <v-divider></v-divider>
+                    <v-select
+                      style="margin-top: 30px"
+                      :items="potentialExperimenters"
+                      :item-value="'id'"
+                      :item-text="'Name'"
+                      v-model="selectedExperimenters"
+                      return-object
+                      label="Experimenter (Primary)"
+                      hide-details
+                      dense
+                      chip
+                    ></v-select>
+                    <v-select
+                      style="margin-top: 30px"
+                      :items="potentialExperimenters"
+                      :item-value="'id'"
+                      :item-text="'Name'"
+                      v-model="selectedExperimenters_2nd"
+                      return-object
+                      label="Experimenters (Secondary)"
+                      multiple
+                      hide-details
+                      dense
+                      chip
+                    ></v-select> -->
                   </v-col>
                 </v-row>
               </v-card>
@@ -308,23 +334,23 @@
               ></Email>
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
-                  <v-col cols="12" md="2">
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <div v-on="on">
-                          <v-checkbox
-                            label="Skip email"
-                            class="ma-0 pa-0"
-                            :value="skipConfirmationEmailStatus"
-                            @change="skipConfirmationEmail()"
-                            :disabled="response != 'Confirmed'"
-                            dense
-                          ></v-checkbox>
-                        </div>
-                      </template>
-                      <span>Check this box to skip email to parents.</span>
-                    </v-tooltip>
-                  </v-col>
+                <v-col cols="12" md="2">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        <v-checkbox
+                          label="Skip email"
+                          class="ma-0 pa-0"
+                          :value="skipConfirmationEmailStatus"
+                          @change="skipConfirmationEmail()"
+                          :disabled="response != 'Confirmed'"
+                          dense
+                        ></v-checkbox>
+                      </div>
+                    </template>
+                    <span>Check this box to skip email to parents.</span>
+                  </v-tooltip>
+                </v-col>
                 <v-col cols="12" md="6">
                   <v-btn
                     color="primary"
@@ -345,7 +371,7 @@
                     :disabled="
                       !scheduleNextPage &&
                         !!editedSchedule.Family.Email &&
-                        !skipConfirmationEmailStatus 
+                        !skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{

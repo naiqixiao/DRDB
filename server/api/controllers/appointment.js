@@ -20,6 +20,10 @@ exports.create = asyncHandler(async (req, res) => {
 
     // update experimenter assignment
     var experimenterAssignment = [];
+
+    // update secondary experimenters
+    var experimenterAssignment_2nd = [];
+
     for (var i = 0; i < appointments.length; i++) {
       var appointmentId = appointments[i].id;
 
@@ -29,9 +33,20 @@ exports.create = asyncHandler(async (req, res) => {
           FK_Appointment: appointmentId,
         });
       });
+
+      newAppointmentInfo[i].Experimenters_2nd.forEach((experimenter_2nd) => {
+        experimenterAssignment_2nd.push({
+          FK_Experimenter: experimenter_2nd,
+          FK_Appointment: appointmentId,
+        });
+      });
     }
 
     await model.experimenterAssignment.bulkCreate(experimenterAssignment);
+
+    await model.experimenterAssignment_2nd.bulkCreate(
+      experimenterAssignment_2nd
+    );
 
     // update calendar event
     var Schedule = await model.schedule.findOne({
@@ -49,7 +64,13 @@ exports.create = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
             },
           ],
         },
@@ -71,7 +92,13 @@ exports.create = asyncHandler(async (req, res) => {
     var attendees = [];
 
     Schedule.Appointments.forEach((appointment) => {
-      appointment.Personnels.forEach((experimenter) => {
+      appointment.PrimaryExperimenter.forEach((experimenter) => {
+        attendees.push({
+          displayName: experimenter.Name,
+          email: experimenter.Calendar, // + ".CAL",
+        });
+      });
+      appointment.SecondaryExperimenter.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
           email: experimenter.Calendar, // + ".CAL",
@@ -211,7 +238,14 @@ exports.search = asyncHandler(async (req, res) => {
       },
       {
         model: model.personnel,
+        as: "PrimaryExperimenter",
         through: { model: model.experimenterAssignment },
+        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+      },
+      {
+        model: model.personnel,
+        as: "SecondaryExperimenter",
+        through: { model: model.experimenterAssignment_2nd },
         attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
       },
     ],
@@ -247,13 +281,22 @@ exports.search = asyncHandler(async (req, res) => {
 
 exports.update = asyncHandler(async (req, res) => {
   const updatedAppointmentInfo = req.body.updatedExperimenters;
+  const updatedAppointmentInfo_2nd = req.body.updatedExperimenters_2nd;
 
   try {
     await model.experimenterAssignment.destroy({
-      where: { FK_Appointment: updatedAppointmentInfo[0].FK_Appointment },
+      where: { FK_Appointment: updatedAppointmentInfo.FK_Appointment },
     });
 
-    await model.experimenterAssignment.bulkCreate(updatedAppointmentInfo);
+    await model.experimenterAssignment.create(updatedAppointmentInfo);
+
+    await model.experimenterAssignment_2nd.destroy({
+      where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
+    });
+
+    await model.experimenterAssignment_2nd.bulkCreate(
+      updatedAppointmentInfo_2nd
+    );
 
     // update calendar event
     var Schedule = await model.schedule.findOne({
@@ -271,7 +314,13 @@ exports.update = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
             },
           ],
         },
@@ -293,7 +342,14 @@ exports.update = asyncHandler(async (req, res) => {
     var attendees = [];
 
     Schedule.Appointments.forEach((appointment) => {
-      appointment.Personnels.forEach((experimenter) => {
+      appointment.PrimaryExperimenter.forEach((experimenter) => {
+        attendees.push({
+          displayName: experimenter.Name,
+          email: experimenter.Calendar,
+        });
+      });
+
+      appointment.SecondaryExperimenter.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
           email: experimenter.Calendar,
@@ -389,7 +445,13 @@ exports.delete = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
             },
           ],
         },
@@ -415,10 +477,16 @@ exports.delete = asyncHandler(async (req, res) => {
     var attendees = [];
 
     updatedAppointments.forEach((appointment) => {
-      appointment.Personnels.forEach((experimenter) => {
+      appointment.PrimaryExperimenter.forEach((experimenter) => {
         attendees.push({
           displayName: experimenter.Name,
-          email: experimenter.Calendar, // + ".CAL",
+          email: experimenter.Calendar,
+        });
+      });
+      appointment.SecondaryExperimenter.forEach((experimenter) => {
+        attendees.push({
+          displayName: experimenter.Name,
+          email: experimenter.Calendar,
         });
       });
     });

@@ -190,14 +190,28 @@
           >Update experimenters for the current study</v-card-title
         >
         <v-row justify="center">
-          <v-col cols="12" md="3">
+          <v-col cols="12" md="4">
             <v-select
               :items="potentialExperimenters"
               :item-value="'id'"
               :item-text="'Name'"
               v-model="selectedExperimenters"
               return-object
-              label="Experimenters"
+              label="Experimenter (Primary)"
+              hide-details
+              dense
+              chip
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="2"></v-col>
+          <v-col cols="12" md="4">
+            <v-select
+              :items="potentialExperimenters"
+              :item-value="'id'"
+              :item-text="'Name'"
+              v-model="selectedExperimenters_2nd"
+              return-object
+              label="Experimenters (Secondary)"
               multiple
               hide-details
               dense
@@ -286,7 +300,8 @@ export default {
       newAppointments: [],
       newAppointment: {},
       editedAppointment: {},
-      selectedExperimenters: [],
+      selectedExperimenters: {},
+      selectedExperimenters_2nd: [],
       index: -1,
       Experimenters: [],
       previousIndex: -1,
@@ -312,7 +327,9 @@ export default {
         id: this.Schedule.FK_Family,
         trainingMode: this.$store.state.trainingMode,
       };
+      
       await family.search(queryString);
+
       var Results = await family.search(queryString);
       if (Results.data[0].Children) {
         this.Children = Results.data[0].Children;
@@ -322,8 +339,8 @@ export default {
 
     studyElegibility(study, child) {
       var age =
-        child.Age >= study.MinAge * 30.5 - 5 &&
-        child.Age <= study.MaxAge * 30.5 - 5;
+        child.Age >= study.MinAge * 30.5 - 1 &&
+        child.Age <= study.MaxAge * 30.5 - 1;
 
       var hearing = false;
 
@@ -472,8 +489,6 @@ export default {
         this.$refs.newAppointments[i].selectStudy();
       }
 
-      // console.log(this.newAppointments);
-
       try {
         const updatedSchedule = await appointment.create(this.newAppointments);
 
@@ -543,15 +558,21 @@ export default {
     updateExperimenters(appointment, index) {
       // used to change experimenters of a given appointment
       this.editedAppointment = appointment;
-      this.selectedExperimenters = appointment.Personnels;
+      this.selectedExperimenters = appointment.PrimaryExperimenter[0];
       this.index = index;
       this.dialogUpdateExperimenters = true;
     },
 
     async saveExperimenters() {
-      this.editedAppointment.Personnels = this.selectedExperimenters;
+      this.editedAppointment.PrimaryExperimenter[0] = this.selectedExperimenters;
+      this.editedAppointment.SecondaryExperimenter = this.selectedExperimenters_2nd;
 
-      var updatedExperimenters = this.selectedExperimenters.map(
+      var updatedExperimenters = {
+        FK_Appointment: this.editedAppointment.id,
+        FK_Experimenter: this.selectedExperimenters.id,
+      };
+
+      const experimenterIds_2nd = this.selectedExperimenters_2nd.map(
         (experimenter) => {
           return {
             FK_Appointment: this.editedAppointment.id,
@@ -563,6 +584,7 @@ export default {
       try {
         const updatedSchedule = await appointment.update({
           updatedExperimenters: updatedExperimenters,
+          updatedExperimenters_2nd: experimenterIds_2nd,
           scheduleId: this.editedAppointment.FK_Schedule,
         });
 
@@ -667,7 +689,9 @@ export default {
 
         emailBody = emailBody.replace(
           /\${{ZoomLink}}/g,
-          "<a href='" + appointment.Personnels[0].ZoomLink + "'>Zoom Link</a>"
+          "<a href='" +
+            appointment.PrimaryExperimenter[0].ZoomLink +
+            "'>Zoom Link</a>"
         );
 
         emailBodyList.push(emailBody);

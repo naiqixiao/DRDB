@@ -38,6 +38,7 @@ const experimenterRoutes = require("./api/routes/experimenter");
 
 const appointmentRoutes = require("./api/routes/appointment");
 const experimenterAssignmentRoutes = require("./api/routes/experimenterAssignment");
+const experimenterAssignment2ndRoutes = require("./api/routes/experimenterAssignment_2nd");
 const scheduleRoutes = require("./api/routes/schedule");
 
 const calRoutes = require("./api/routes/calendar");
@@ -61,6 +62,7 @@ app.use("/api/experimenter", experimenterRoutes);
 
 app.use("/api/appointment", appointmentRoutes);
 app.use("/api/experimentAssignment", experimenterAssignmentRoutes);
+app.use("/api/experimentAssignment", experimenterAssignment2ndRoutes);
 app.use("/api/schedule", scheduleRoutes);
 
 app.use("/api/cal", calRoutes);

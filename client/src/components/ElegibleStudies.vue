@@ -33,8 +33,8 @@ export default {
 
     studyElegibility(study, child) {
       var age =
-        child.Age >= study.MinAge * 30.5 - 5 &&
-        child.Age <= study.MaxAge * 30.5 - 5;
+        child.Age >= study.MinAge * 30.5 - 1 &&
+        child.Age <= study.MaxAge * 30.5 - 1;
 
       var hearing = false;
 

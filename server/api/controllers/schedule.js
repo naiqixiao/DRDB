@@ -60,7 +60,11 @@ exports.create = asyncHandler(async (req, res) => {
       include: [model.appointment],
     });
 
+    // add primary experimenter
     var experimenterAssignment = [];
+    // add secondary experimenters
+    var experimenterAssignment_2nd = [];
+
     for (var i = 0; i < schedule.Appointments.length; i++) {
       var appointmentId = schedule.Appointments[i].id;
 
@@ -70,9 +74,19 @@ exports.create = asyncHandler(async (req, res) => {
           FK_Appointment: appointmentId,
         });
       });
+
+      newScheduleInfo.Appointments[i].Experimenters_2nd.forEach((experimenter_2nd) => {
+        experimenterAssignment_2nd.push({
+          FK_Experimenter: experimenter_2nd,
+          FK_Appointment: appointmentId,
+        });
+      });
+
     }
 
     await model.experimenterAssignment.bulkCreate(experimenterAssignment);
+    
+    await model.experimenterAssignment_2nd.bulkCreate(experimenterAssignment_2nd);
 
     // Log
     const User = req.body.User;
@@ -213,7 +227,14 @@ exports.search = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
@@ -284,7 +305,14 @@ exports.today = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
@@ -356,7 +384,14 @@ exports.week = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
@@ -729,7 +764,14 @@ exports.special = asyncHandler(async (req, res) => {
             },
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
