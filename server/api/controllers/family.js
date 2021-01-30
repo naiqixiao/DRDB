@@ -183,11 +183,11 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
     for (var i = 0; i < newFamily.length; i++) {
       // check whether the family exists
-      
+
       var child = {};
       child.Name = newFamily[i].Child_Last_Name
-      ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
-      : newFamily[i].Child_First_Name;
+        ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
+        : newFamily[i].Child_First_Name;
       child.Sex = newFamily[i].Sex;
       child.DoB = newFamily[i].DoB;
       child.Age = newFamily[i].Age;
@@ -195,11 +195,11 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       child.BirthWeight = newFamily[i].Birthweight;
       child.Gestation = newFamily[i].Gestation;
       child.RecruitmentMethod = newFamily[i].RecruitmentMethod;
-      
+
       const phone = newFamily[i].Phone;
       const email = newFamily[i].Email;
 
-      var searchString = {}
+      var searchString = {};
 
       if (phone) {
         searchString.Phone = phone;
@@ -207,7 +207,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       if (email) {
         searchString.Email = email;
       }
-      
+
       var family = await model.family.findOne({ where: searchString });
 
       if (!!family) {
@@ -459,6 +459,141 @@ exports.update = asyncHandler(async (req, res) => {
 
   res.status(200).send(family);
   console.log("Family Information Updated!");
+});
+
+exports.releaseFamily = asyncHandler(async (req, res) => {
+  // get the ids of family whoes study has completed.
+  var queryString = {};
+  var queryString2 = {};
+  var queryString3 = {};
+
+  queryString.AppointmentTime = {
+    [Op.lte]: moment()
+      .subtract(1, "days")
+      .startOf("day")
+      .toDate(),
+  };
+
+  queryString.Status = "Confirmed";
+  queryString.Completed = 0;
+
+  queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show"];
+  queryString2.Completed = 0;
+  queryString2.createdAt = {
+    [Op.between]: [
+      moment()
+        .subtract(2, "M")
+        .startOf("day")
+        .toDate(),
+      moment()
+        .add(2, "M")
+        .startOf("day")
+        .toDate(),
+    ],
+  };
+
+  queryString3.Status = ["Cancelled", "Rejected"];
+  queryString3.Completed = 0;
+
+  try {
+    const schedules = await model.schedule.findAll({
+      where: queryString,
+    });
+
+    const schedulesOnGoing = await model.schedule.findAll({
+      where: queryString2,
+    });
+
+    const schedulesRejected = await model.schedule.findAll({
+      where: queryString3,
+    });
+
+    var IDs = [];
+
+    if (schedules.length > 0 || schedulesRejected.length > 0) {
+      IDs = schedules.map((schedule) => {
+        return schedule.FK_Family;
+      });
+
+      schedulesRejected.forEach((schedule) => {
+        IDs.push(schedule.FK_Family);
+      });
+
+      IDs = Array.from(new Set(IDs)); // unique IDs
+
+      // remove the families with incoming studies from the family list
+      if (schedulesOnGoing.length > 0) {
+        var IDsOnGoing = schedulesOnGoing.map((schedule) => {
+          return schedule.FK_Family;
+        });
+
+        IDsOnGoing = Array.from(new Set(IDsOnGoing)); // unique IDs
+
+        IDsOnGoing.forEach((familyOnGoing) => {
+          const index = IDs.indexOf(familyOnGoing);
+          if (index > -1) {
+            IDs.splice(index, 1);
+          }
+        });
+      }
+    }
+
+    var scheduleIDs = schedules.map((schedule) => {
+      return schedule.id;
+    });
+
+    schedulesRejected.forEach((schedule) => {
+      scheduleIDs.push(schedule.id);
+    });
+
+    scheduleIDs = Array.from(new Set(scheduleIDs)); // unique scheduleIDs
+
+    if (scheduleIDs.length > 0) {
+      await model.schedule.update(
+        { Completed: true },
+        {
+          where: { id: scheduleIDs },
+        }
+      );
+    }
+
+    if (IDs.length > 0) {
+      // update family by removing AssignedLab from the family
+      const updateFamilyInfo = { AssignedLab: null };
+
+      await model.family.update(updateFamilyInfo, {
+        where: { id: IDs },
+      });
+
+      // Log
+      const logFolder = "api/logs";
+      if (!fs.existsSync(logFolder)) {
+        fs.mkdirSync(logFolder);
+      }
+
+      const logFile = logFolder + "/log.txt";
+
+      var logInfo =
+        "[Family Lab Assisgnment Release] " +
+        "Families (" +
+        IDs.join(", ") +
+        ") were no longer assigned to any lab due to study completion at " +
+        new Date().toString() +
+        "\r\n";
+
+      if (fs.existsSync(logFile)) {
+        fs.appendFileSync(logFile, logInfo);
+      } else {
+        fs.writeFileSync(logFile, logInfo);
+      }
+
+      res.status(200).send(IDs.length + " families released.");
+    } else {
+      res.status(200).send("no family needs to be released.");
+    }
+  } catch (error) {
+    throw error;
+  }
 });
 
 // Delete a family with the specified id in the request

@@ -327,7 +327,7 @@ export default {
         id: this.Schedule.FK_Family,
         trainingMode: this.$store.state.trainingMode,
       };
-      
+
       await family.search(queryString);
 
       var Results = await family.search(queryString);
@@ -600,7 +600,8 @@ export default {
 
     closeUpdateExperimenter() {
       this.editedAppointment = {};
-      this.selectedExperimenters = [];
+      this.selectedExperimenters = {};
+      this.selectedExperimenters_2nd = [];
       this.index = -1;
       this.dialogUpdateExperimenters = false;
     },

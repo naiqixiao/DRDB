@@ -281,8 +281,8 @@
         v-model="dialogSchedule"
         max-width="1000px"
         :retain-focus="false"
-        persistent
       >
+        <ConfirmDlg ref="confirmD" />
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -405,6 +405,7 @@
                       @deleteAppointment="deleteAppointment"
                       @emitSelectedStudy="receiveSelectedStudy"
                       @emitEmailTemplate="getEmailTemplate"
+                      @primaryExperimenterStatus="checkPrimaryExperimenter"
                       align="start"
                     ></ExtraStudies>
                     <v-divider></v-divider>
@@ -608,11 +609,14 @@ import calendar from "@/services/calendar";
 
 import moment from "moment";
 
+import ConfirmDlg from "@/components/ConfirmDialog";
+
 export default {
   components: {
     ExtraStudies,
     Email,
     NextContact,
+    ConfirmDlg,
   },
   props: {
     Children: Array,
@@ -699,6 +703,7 @@ export default {
       skipStudyDateTimeStatus: false,
       skipConfirmationEmailStatus: false,
       skipReminderEmailStatus: false,
+      primaryExperimenterList: [],
     };
   },
   methods: {
@@ -781,6 +786,10 @@ export default {
         potentialStudyList: potentialStudyList,
         selectableStudies: selectableStudies,
       };
+    },
+
+    checkPrimaryExperimenter(primaryExperimenterStatus) {
+      this.primaryExperimenterList.push(primaryExperimenterStatus);
     },
 
     skipStudyDateTime() {
@@ -978,29 +987,48 @@ export default {
     },
 
     async continue12() {
+      this.primaryExperimenterList = [];
+
+      for (var i = 0; i < this.appointments.length; i++) {
+        this.$refs.extraStudies[i].primaryExperimenterStatus();
+      }
+
+      console.log(this.primaryExperimenterList)
+
       try {
-        if (this.currentSchedule.id) {
-          await this.deleteUnfinishedSchedule();
-        }
-
-        var scheduleInfo = await this.createSchedule();
-
-        if (this.response == "Confirmed" && this.$store.state.labEmailStatus) {
-          try {
-            await this.createCalendarEvent(scheduleInfo.calendarEvent);
-
-            // this.emailDialog = true;
-            // this.e1 = 2;
-            this.scheduleNextPage = true;
-          } catch (error) {
-            alert(
-              "Calendar event wasn't created successfully, please try again."
-            );
-            console.log(error);
-            this.manualCalendar = true;
-          }
+        if (this.primaryExperimenterList.includes(0)) {
+          // if any appointment without an experimenter.
+          await this.$refs.confirmD.open(
+            "Who is going to run the study?",
+            "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+          );
         } else {
-          this.scheduleNextPage = true;
+          if (this.currentSchedule.id) {
+            await this.deleteUnfinishedSchedule();
+          }
+
+          var scheduleInfo = await this.createSchedule();
+
+          if (
+            this.response == "Confirmed" &&
+            this.$store.state.labEmailStatus
+          ) {
+            try {
+              await this.createCalendarEvent(scheduleInfo.calendarEvent);
+
+              // this.emailDialog = true;
+              // this.e1 = 2;
+              this.scheduleNextPage = true;
+            } catch (error) {
+              alert(
+                "Calendar event wasn't created successfully, please try again."
+              );
+              console.log(error);
+              this.manualCalendar = true;
+            }
+          } else {
+            this.scheduleNextPage = true;
+          }
         }
       } catch (error) {
         console.log(error);
@@ -1066,6 +1094,13 @@ export default {
         this.nextContactDialog = false;
         this.emailSent = false;
         this.scheduleNextPage = false;
+        this.skipStudyDateTimeStatus = false;
+        this.skipConfirmationEmailStatus = false;
+        this.skipReminderEmailStatus = false;
+        this.primaryExperimenterList = [];
+        for (var i = 0; i < this.appointments.length; i++) {
+          this.$refs.extraStudies[i].resetExperimenters();
+        }
       }, 300);
     },
 

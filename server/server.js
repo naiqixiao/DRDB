@@ -20,6 +20,12 @@ cron.schedule('0 15 * * *', async () => {
 
 });
 
+cron.schedule('0 1 * * *', async () => {
+
+  await FamilyController.releaseFamily();
+
+});
+
 // const io = require("socket.io")(server);
 
 // io.on("connection", function(socket) {

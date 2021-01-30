@@ -430,6 +430,7 @@
         </v-col>
         <v-col style="padding: 0px !important; height: 500px !important">
           <ChildInfo
+            ref="childInfo"
             :Children="currentFamily.Children"
             :familyId="parseInt(currentFamily.id)"
             :currentFamily="currentFamily"
@@ -821,11 +822,14 @@ export default {
     nextPage() {
       this.page += 1;
       this.currentFamily = this.Families[this.page - 1];
+
+      this.$refs.childInfo.resetSchedule();
     },
 
     previousPage() {
       this.page -= 1;
       this.currentFamily = this.Families[this.page - 1];
+      this.$refs.childInfo.resetSchedule();
     },
 
     PhoneFormated(Phone) {

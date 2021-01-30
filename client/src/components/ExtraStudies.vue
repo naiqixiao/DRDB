@@ -115,11 +115,11 @@ export default {
       const attendees = [];
 
       attendees.push({
-          displayName: this.selectedExperimenters.Name,
-          email: this.selectedExperimenters.Calendar,
-          // EMAIL: experimenter.Email,
-          // zoomLink: experimenter.ZoomLink,
-        });
+        displayName: this.selectedExperimenters.Name,
+        email: this.selectedExperimenters.Calendar,
+        // EMAIL: experimenter.Email,
+        // zoomLink: experimenter.ZoomLink,
+      });
 
       this.selectedExperimenters_2nd.map((experimenter) => {
         attendees.push({
@@ -135,6 +135,18 @@ export default {
         appointment: appointment,
         attendees: attendees,
       });
+    },
+
+    primaryExperimenterStatus() {
+      this.$emit(
+        "primaryExperimenterStatus",
+        Object.keys(this.selectedExperimenters).length
+      );
+    },
+
+    resetExperimenters() {
+      this.selectedExperimenters = {};
+      this.selectedExperimenters_2nd = [];
     },
 
     emitSelectedStudy() {
@@ -209,6 +221,16 @@ export default {
       }
     },
   },
+
+  watch:{
+    
+    selectedStudy(){
+
+      this.selectedExperimenters = {};
+      this.selectedExperimenters_2nd = [];
+
+    }
+  }
 };
 </script>
 <style scoped>

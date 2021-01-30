@@ -12,6 +12,8 @@ router.get("/", checkAuth, FamilyController.search);
 
 // router.post("/special", checkAuth, FamilyController.changeTrainingFamilyEmail);
 
+router.post("/releaseFamily", checkAuth, FamilyController.releaseFamily);
+
 router.post("/", checkAuth, FamilyController.update);
 
 router.delete("/", checkAuth, FamilyController.delete);
