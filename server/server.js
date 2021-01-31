@@ -20,7 +20,9 @@ cron.schedule('0 15 * * *', async () => {
 
 });
 
-cron.schedule('0 1 * * *', async () => {
+const FamilyController = require("./api/controllers/family");
+
+cron.schedule('0 9 * * *', async () => {
 
   await FamilyController.releaseFamily();
 
