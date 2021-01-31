@@ -28,6 +28,14 @@ cron.schedule('0 9 * * *', async () => {
 
 });
 
+const ChildController = require("./api/controllers/child");
+
+cron.schedule('0 0 * * *', async () => {
+
+  await ChildController.updateAge();
+
+});
+
 // const io = require("socket.io")(server);
 
 // io.on("connection", function(socket) {

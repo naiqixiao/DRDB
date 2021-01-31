@@ -14,6 +14,8 @@ router.get("/siblings/", checkAuth, ChildController.siblings);
 
 router.post("/", checkAuth, ChildController.update);
 
+router.post("/updateAge", checkAuth, ChildController.updateAge);
+
 router.delete("/", checkAuth, ChildController.delete);
 
 module.exports = router;

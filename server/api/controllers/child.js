@@ -5,6 +5,8 @@ const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const moment = require("moment");
 
+const config = require("../../config/general");
+
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   var currentIndex = array.length,
@@ -370,3 +372,18 @@ exports.siblings = asyncHandler(async (req, res) => {
 
   res.status(200).json(results);
 });
+
+// update Age
+exports.updateAge = asyncHandler(async (req, res) => {
+
+  var queryString = "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
+  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
+
+  try {
+
+    await model.sequelize.query(queryString);
+    res.status(200).send('Age updated!')
+  } catch (error) {
+    throw error;
+  }
+})
