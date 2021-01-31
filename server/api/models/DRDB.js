@@ -120,7 +120,7 @@ const Appointment = sequelize.import("../models/SequelizeAuto/Appointment");
 const ExperimenterAssignment = sequelize.import(
   "../models/SequelizeAuto/ExperimenterAssignment"
 );
-const ExperimenterAssignment_2nd = sequelize.import(
+const SecondExperimenterAssignment = sequelize.import(
   "../models/SequelizeAuto/SecondExperimenterAssignment"
 );
 
@@ -172,14 +172,15 @@ Appointment.belongsToMany(Personnel, {
   as: "PrimaryExperimenter"
 });
 
+
 Personnel.belongsToMany(Appointment, {
-  through: "ExperimenterAssignment_2nd",
+  through: "SecondExperimenterAssignment",
   foreignKey: "FK_Experimenter",
   otherKey: "FK_Appointment",
   as: "SecondaryExperimenterof"
 });
 Appointment.belongsToMany(Personnel, {
-  through: "ExperimenterAssignment_2nd",
+  through: "SecondExperimenterAssignment",
   foreignKey: "FK_Appointment",
   otherKey: "FK_Experimenter",
   as: "SecondaryExperimenter"
@@ -211,7 +212,7 @@ sequelize.sync({ force: false }).then(() => {
   exports.experimenter = Experimenter;
   exports.sibling = Sibling;
   exports.experimenterAssignment = ExperimenterAssignment;
-  exports.experimenterAssignment_2nd = ExperimenterAssignment_2nd;
+  exports.experimenterAssignment_2nd = SecondExperimenterAssignment;
   exports.feedback = Feedback;
   exports.sequelize = sequelize;
 });
