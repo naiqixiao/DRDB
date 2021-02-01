@@ -374,7 +374,7 @@ exports.reminderEmail = asyncHandler(async () => {
       }
     });
 
-    res.status(200);
+    res.status(200).send();
   } catch (error) {
     throw error;
   }

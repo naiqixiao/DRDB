@@ -382,6 +382,25 @@ exports.updateAge = asyncHandler(async (req, res) => {
   try {
 
     await model.sequelize.query(queryString);
+
+    const logFolder = "api/logs";
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdirSync(logFolder);
+    }
+  
+    const logFile = logFolder + "/Auto_log.txt";
+  
+    var logInfo =
+      "[Age Updated] Children's age is updated at " +
+      new Date().toString() +
+      "\r\n";
+  
+    if (fs.existsSync(logFile)) {
+      fs.appendFileSync(logFile, logInfo);
+    } else {
+      fs.writeFileSync(logFile, logInfo);
+    }
+
     res.status(200).send('Age updated!')
   } catch (error) {
     throw error;

@@ -571,7 +571,7 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
         fs.mkdirSync(logFolder);
       }
 
-      const logFile = logFolder + "/log.txt";
+      const logFile = logFolder + "/Auto_log.txt";
 
       var logInfo =
         "[Family Lab Assisgnment Release] " +
