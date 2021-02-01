@@ -374,7 +374,7 @@ exports.siblings = asyncHandler(async (req, res) => {
 });
 
 // update Age
-exports.updateAge = asyncHandler(async (req, res) => {
+exports.updateAge = asyncHandler(async () => {
 
   var queryString = "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
@@ -400,8 +400,8 @@ exports.updateAge = asyncHandler(async (req, res) => {
     } else {
       fs.writeFileSync(logFile, logInfo);
     }
-
-    res.status(200).send('Age updated!')
+    // res.status(200).send('Age updated!')
+  
   } catch (error) {
     throw error;
   }

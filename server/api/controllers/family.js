@@ -587,10 +587,11 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
         fs.writeFileSync(logFile, logInfo);
       }
 
-      res.status(200).send(IDs.length + " families released.");
-    } else {
-      res.status(200).send("no family needs to be released.");
-    }
+      // res.status(200).send(IDs.length + " families released.");
+    } 
+    // else {
+    //   res.status(200).send("no family needs to be released.");
+    // }
   } catch (error) {
     throw error;
   }

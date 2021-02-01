@@ -59,19 +59,27 @@ function emailBody(schedule) {
       "</b>.</p>";
   }
 
-  var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
-    /\${{ZoomLink}}/g,
-    "<a href='" + schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
-      ? schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
-      : schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>"
-  );
+  if (schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink || schedule.Appointments[0].Study.Lab.ZoomLink) {
+
+    var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
+      /\${{ZoomLink}}/g,
+      "<a href='" + schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
+        ? schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
+        : schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>"
+    );
+  } else {
+
+    var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
+      /\${{ZoomLink}}/g, "Zoom Link not available.");
+
+  }
 
   body = body.replace(/\${{childName}}/g, childNames(schedule.Appointments));
 
   if (schedule.Appointments[0].Study.StudyType === "Online") {
     body =
       body +
-      "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+      "<p>If this study use Zoom for online study, you can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
       "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
   }
 
@@ -374,7 +382,7 @@ exports.reminderEmail = asyncHandler(async () => {
       }
     });
 
-    res.status(200).send();
+    // res.status(200).send();
   } catch (error) {
     throw error;
   }
