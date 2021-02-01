@@ -1535,7 +1535,7 @@ export default {
       }
 
       try {
-        if (this.primaryExperimenterList.includes(0)) {
+        if ((this.response == "Confirmed" && this.primaryExperimenterList.includes(0))) {
           // if any appointment without an experimenter.
           await this.$refs.confirmD.open(
             "Who is going to run the study?",
