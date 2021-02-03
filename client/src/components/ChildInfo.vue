@@ -385,7 +385,11 @@
                   </v-col>
                 </v-row> -->
                 <v-divider></v-divider>
-                <v-row style="height: 220px" align="center" justify="start">
+                <v-row
+                  style="height: 400px; overflow-y: scroll !important; padding-top: 16px;"
+                  align="start"
+                  justify="start"
+                >
                   <v-col
                     cols="12"
                     md="12"
@@ -462,7 +466,7 @@
                   >
                     <v-icon dark left v-show="currentSchedule.id"
                       >mdi-checkbox-marked-circle</v-icon
-                    >Schedule
+                    >{{ scheduleButtonText }}
                   </v-btn>
 
                   <v-btn
@@ -479,15 +483,19 @@
               </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <Email
-                ref="Email"
-                :dialog="emailDialog"
-                :appointments="appointments"
-                :familyInfo="currentFamily"
-                :scheduleInfo="currentSchedule"
-                emailType="Confirmation"
-              ></Email>
-
+              <v-card outlined>
+                <v-row style="height: 700px;">
+                  <Email
+                    ref="Email"
+                    :dialog="emailDialog"
+                    :appointments="appointments"
+                    :familyInfo="currentFamily"
+                    :scheduleInfo="currentSchedule"
+                    emailType="Confirmation"
+                  ></Email>
+                </v-row>
+              </v-card>
+              <v-divider></v-divider>
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2">
                   <v-tooltip top>
@@ -518,7 +526,7 @@
                   >
                     <v-icon dark left v-show="emailSent"
                       >mdi-checkbox-marked-circle</v-icon
-                    >Send Email
+                    >{{ emailButtonText }}
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
@@ -550,7 +558,7 @@
                 :contactType="response"
                 :nextContactDialog="nextContactDialog"
               ></NextContact>
-
+              <v-divider></v-divider>
               <v-row dense justify="center" align="center">
                 <v-col>
                   <v-btn color="primary" @click="completeSchedule()"
@@ -704,6 +712,8 @@ export default {
       skipConfirmationEmailStatus: false,
       skipReminderEmailStatus: false,
       primaryExperimenterList: [],
+      emailButtonText: "Send email",
+      scheduleButtonText: "Schedule",
     };
   },
   methods: {
@@ -993,10 +1003,13 @@ export default {
         this.$refs.extraStudies[i].primaryExperimenterStatus();
       }
 
-      console.log(this.primaryExperimenterList)
+      console.log(this.primaryExperimenterList);
 
       try {
-        if ((this.response == "Confirmed" && this.primaryExperimenterList.includes(0))) {
+        if (
+          this.response == "Confirmed" &&
+          this.primaryExperimenterList.includes(0)
+        ) {
           // if any appointment without an experimenter.
           await this.$refs.confirmD.open(
             "Who is going to run the study?",
@@ -1019,6 +1032,7 @@ export default {
               // this.emailDialog = true;
               // this.e1 = 2;
               this.scheduleNextPage = true;
+              this.scheduleButtonText = "Study Scheduled!";
             } catch (error) {
               alert(
                 "Calendar event wasn't created successfully, please try again."
@@ -1041,6 +1055,7 @@ export default {
         // this.e1 = 3;
         // this.nextContactDialog = true;
         this.emailSent = true;
+        this.emailButtonText = "Email sent";
         this.scheduleNextPage = true;
       } catch (error) {
         console.log(error);
@@ -1086,6 +1101,8 @@ export default {
         this.currentSchedule = { id: null };
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
+        this.emailButtonText = "Send email";
+        this.scheduleButtonText = "Schedule";
         // this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";

@@ -4,6 +4,7 @@
       <div v-if="contactType != 'NoMoreContact'">
         <v-card-title>When to contact this family again?</v-card-title>
         <v-row align="center" justify="start">
+          <v-col cols="12" md="1"></v-col>
           <v-col cols="12" md="2">
             <v-text-field
               class="pa=3"
@@ -29,8 +30,12 @@
       <div v-else>
         <v-card-title>No more contact this family?</v-card-title>
         <v-row align="center" justify="start">
+          <v-col cols="12" md="1"></v-col>
           <v-col cols="12" md="4">
-            <v-switch v-model="neverContact" label="No more contact"></v-switch>
+            <v-checkbox 
+            v-model="neverContact"
+            hide-details
+            label="No more contact"></v-checkbox>
           </v-col>
         </v-row>
       </div>
@@ -324,4 +329,6 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+
+</style>

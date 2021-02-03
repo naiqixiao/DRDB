@@ -8,7 +8,7 @@
     :headers="this.$headersAppointmentsBrief"
     :items="Appointments"
     class="elevation-1"
-    height="380px"
+    height="450px"
     calculate-widths
   >
     <template #item.Schedule.AppointmentTime="{ item }">

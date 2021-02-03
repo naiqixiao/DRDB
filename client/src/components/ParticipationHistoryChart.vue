@@ -1,5 +1,5 @@
 <template>
-  <v-card name="participationStatistics" outlined height="380px">
+  <v-card name="participationStatistics" outlined height="450px">
     <v-card-text v-if="family.Appointments || family.Schedules">
       <doughnut-chart :chart-data="datacollection.chartData" :height="280"></doughnut-chart>
     </v-card-text>

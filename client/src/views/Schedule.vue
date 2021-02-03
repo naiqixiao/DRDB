@@ -299,6 +299,18 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="1"></v-col>
+
+          <v-col md="10">
+            <v-textarea
+              class="conv-textarea"
+              label="Note about this child"
+              outlined
+              no-resize
+              rows="4"
+              hide-details
+              v-model="currentChild.Note"
+            ></v-textarea>
+          </v-col>
           <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
@@ -315,17 +327,6 @@
               </template>
               <span>Edit child information</span>
             </v-tooltip>
-          </v-col>
-          <v-col md="12">
-            <v-textarea
-              class="conv-textarea"
-              label="Note about this child"
-              outlined
-              no-resize
-              rows="4"
-              hide-details
-              v-model="currentChild.Note"
-            ></v-textarea>
           </v-col>
         </v-row>
 
@@ -633,7 +634,11 @@
                       </v-col>
                     </v-row> -->
                     <v-divider></v-divider>
-                    <v-row style="height: 220px" align="center" justify="start">
+                    <v-row
+                      style="height: 400px; overflow-y: scroll !important; padding-top: 16px;"
+                      align="start"
+                      justify="start"
+                    >
                       <v-col
                         cols="12"
                         md="12"
@@ -738,14 +743,18 @@
                 </v-stepper-content>
 
                 <v-stepper-content step="2">
-                  <Email
-                    ref="Email"
-                    :dialog="emailDialog"
-                    :familyInfo="currentFamily"
-                    :scheduleInfo="currentSchedule"
-                    :appointments="appointments"
-                    :emailType="emailType"
-                  ></Email>
+                  <v-card outlined>
+                    <v-row style="height: 700px;">
+                      <Email
+                        ref="Email"
+                        :dialog="emailDialog"
+                        :familyInfo="currentFamily"
+                        :scheduleInfo="currentSchedule"
+                        :appointments="appointments"
+                        :emailType="emailType"
+                      ></Email>
+                    </v-row>
+                  </v-card>
                   <v-divider></v-divider>
                   <v-row justify="space-between" align="center">
                     <v-col cols="12" md="2">
@@ -777,7 +786,7 @@
                       >
                         <v-icon dark left v-show="emailSent"
                           >mdi-checkbox-marked-circle</v-icon
-                        >Send Email
+                        >{{ emailButtonText }}
                       </v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
@@ -850,7 +859,7 @@
       </v-col>
     </v-row>
 
-    <v-row justify="start">
+    <v-row justify="start" height="450px">
       <v-col cols="12" md="9">
         <AppointmentTableBrief
           :Appointments="currentFamily.Appointments"
@@ -1005,6 +1014,7 @@ export default {
       skipConfirmationEmailStatus: false,
       skipReminderEmailStatus: false,
       primaryExperimenterList: [],
+      emailButtonText: "Send email",
     };
   },
 
@@ -1522,6 +1532,8 @@ export default {
           // this.emailDialog = true;
           this.scheduleNextPage = true;
         }
+
+        this.scheduleButtonText = "Schedule";
       } catch (error) {
         console.log(error);
       }
@@ -1535,7 +1547,10 @@ export default {
       }
 
       try {
-        if ((this.response == "Confirmed" && this.primaryExperimenterList.includes(0))) {
+        if (
+          this.response == "Confirmed" &&
+          this.primaryExperimenterList.includes(0)
+        ) {
           // if any appointment without an experimenter.
           await this.$refs.confirmD.open(
             "Who is going to run the study?",
@@ -1558,6 +1573,7 @@ export default {
               // this.emailDialog = true;
               // this.e1 = 2;
               this.scheduleNextPage = true;
+              this.scheduleButtonText = "Study Scheduled!";
             } catch (error) {
               alert(
                 "Calendar event wasn't created successfully, please try again."
@@ -1580,6 +1596,7 @@ export default {
         // this.e1 = 3;
         // this.nextContactDialog = true;
         this.emailSent = true;
+        this.emailButtonText = "Email Sent";
         this.scheduleNextPage = true;
       } catch (error) {
         console.log(error);
@@ -1654,6 +1671,8 @@ export default {
         this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";
+        this.emailButtonText = "Send email";
+        this.scheduleButtonText = "Schedule";
         this.emailDialog = false;
         this.nextContactDialog = false;
         this.emailSent = false;

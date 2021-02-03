@@ -1,5 +1,5 @@
 <template>
-  <v-card name="participationStatistics" outlined height="380px">
+  <v-card name="participationStatistics" outlined height="450px">
     <v-card-text v-if="family.Appointments">
       <!-- {{ "Number of participated studies: " + family.Appointments.length }} -->
       <GChart

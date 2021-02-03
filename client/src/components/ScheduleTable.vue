@@ -302,6 +302,7 @@
                   </v-col>
                 </v-row>
               </v-card>
+
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2"></v-col>
@@ -324,14 +325,18 @@
               </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <Email
-                ref="Email"
-                :dialog="emailDialog"
-                :appointments="editedSchedule.Appointments"
-                :scheduleInfo="editedSchedule"
-                :familyInfo="editedSchedule.Family"
-                emailType="Confirmation"
-              ></Email>
+              <v-card outlined>
+                <v-row style="height: 700px;">
+                  <Email
+                    ref="Email"
+                    :dialog="emailDialog"
+                    :appointments="editedSchedule.Appointments"
+                    :scheduleInfo="editedSchedule"
+                    :familyInfo="editedSchedule.Family"
+                    emailType="Confirmation"
+                  ></Email>
+                </v-row>
+              </v-card>
               <v-divider></v-divider>
               <v-row justify="space-between" align="center">
                 <v-col cols="12" md="2">
@@ -363,7 +368,7 @@
                   >
                     <v-icon dark left v-show="emailSent"
                       >mdi-checkbox-marked-circle</v-icon
-                    >Send Email
+                    >{{ emailButtonText }}
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
@@ -551,7 +556,7 @@ export default {
         ],
       },
       dialogReminderEmail: false,
-      emailButtonText: "Send",
+      emailButtonText: "Send email",
       reminderEmailStatus: false,
     };
   },
@@ -890,7 +895,7 @@ export default {
     },
 
     async closeReminderEmail() {
-      if ((this.skipReminderEmailStatue)) {
+      if (this.skipReminderEmailStatue) {
         await schedule.remind(this.editedSchedule);
       }
 
@@ -898,7 +903,7 @@ export default {
       setTimeout(() => {
         this.dialogReminderEmail = false;
         this.dialogReminderEmail = false;
-        this.emailButtonText = "Send";
+        this.emailButtonText = "Send email";
         this.skipReminderEmailStatus = false;
         this.reminderEmailStatus = false;
       }, 300);

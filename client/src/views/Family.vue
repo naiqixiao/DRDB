@@ -224,7 +224,7 @@
                       "
                       :disabled="!currentFamily.id && !nextContactDialog"
                     >
-                      <v-icon color="warning">cancel</v-icon>
+                    <v-icon color="warning" style="padding-right: 5px;">pan_tool</v-icon>
                     </v-btn>
                   </div>
                 </template>
@@ -449,7 +449,7 @@
         ></NotesConversation>
       </v-col>
     </v-row>
-    <v-row justify="start" dense height="300">
+    <v-row justify="start" dense height="450px">
       <v-col cols="12" md="9">
         <!-- <AppointmentTable
           :Appointments="currentFamily.Appointments"
@@ -461,7 +461,7 @@
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
           :studyTimeSlots="this.$studyTimeSlots"
-          tableHeight="380px"
+          tableHeight="450px"
         ></ScheduleTable>
       </v-col>
 
