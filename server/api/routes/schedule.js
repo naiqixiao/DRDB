@@ -11,7 +11,7 @@ router.get("/", checkAuth, ScheduleController.search);
 
 router.get("/today", checkAuth, ScheduleController.today);
 
-router.get("/tomorrow", checkAuth, ScheduleController.today);
+router.get("/tomorrow", checkAuth, ScheduleController.tomorrow);
 
 router.get("/week", checkAuth, ScheduleController.week);
 

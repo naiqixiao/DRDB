@@ -26,7 +26,7 @@ export default {
   },
   tomorrow(schedule) {
     schedule.lab = store.state.lab;
-    return api().get("schedule/today", {
+    return api().get("schedule/tomorrow", {
       params: schedule,
     });
   },

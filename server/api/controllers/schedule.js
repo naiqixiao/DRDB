@@ -344,12 +344,12 @@ exports.tomorrow = asyncHandler(async (req, res) => {
   queryString.AppointmentTime = {
     [Op.between]: [
       moment()
-        .startOf("day")
         .add(1, "days")
+        .startOf("day")
         .toDate(),
       moment()
-        .startOf("day")
         .add(2, "days")
+        .startOf("day")
         .toDate(),
     ],
   };
@@ -417,7 +417,7 @@ exports.tomorrow = asyncHandler(async (req, res) => {
   }
 });
 
-// Retrieve today's appointments from the database.
+// Retrieve this week's appointments from the database.
 exports.week = asyncHandler(async (req, res) => {
   var queryString = {};
 

@@ -1,6 +1,6 @@
 <template>
   <!-- <v-card outlined class="d-flex flex-column"> -->
-    <div>
+  <div>
     <v-alert
       v-if="!familyInfo.Email"
       border="left"
@@ -31,7 +31,7 @@
         ></vue-editor>
       </v-col>
     </v-row>
-    </div>
+  </div>
   <!-- </v-card> -->
 </template>
 
@@ -176,7 +176,7 @@ export default {
                 this.$store.state.labName +
                 ". Just a reminder that you and " +
                 this.childNames() +
-                "will participate our online study " +
+                " will participate our online study" +
                 moment(this.scheduleInfo.AppointmentTime).format(
                   " [tomorrow at] h:mma"
                 ) +
@@ -216,7 +216,7 @@ export default {
         if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
           body =
             body +
-            "<p>If this study use Zoom for online study, you can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+            "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
             "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
         }
 
@@ -384,11 +384,13 @@ export default {
       var formattedEmailBody = "";
 
       for (var i = 0; i < k.length; i++) {
-        if (i < k.length - 3) {
-          formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
-        } else {
-          formattedEmailBody = formattedEmailBody + k[i] + "<br>";
-        }
+        formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+
+        // if (i < k.length - 3) {
+        // formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
+        // } else {
+        //   formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        // }
       }
 
       return formattedEmailBody;
@@ -424,7 +426,9 @@ export default {
             break;
 
           case "Reminder":
-            this.emailSubject = "See you tomorrow! " + this.childNames();
+            this.emailSubject =
+              "Reminder for your tomorrow's study appointment with " +
+              this.childNames();
             break;
 
           case "ThankYou":
@@ -466,7 +470,9 @@ export default {
           break;
 
         case "Reminder":
-          this.emailSubject = "See you tomorrow! " + this.childNames();
+          this.emailSubject =
+            "Reminder for your tomorrow's study appointment with " +
+            this.childNames();
           break;
 
         case "ThankYou":
