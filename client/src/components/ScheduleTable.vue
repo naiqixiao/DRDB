@@ -414,7 +414,7 @@
           <v-card-title>
             <span class="headline">Reminder email</span>
           </v-card-title>
-          <v-row style="height: 750px;">
+          <v-row style="height: 700px;">
             <Email
               ref="Email"
               :dialog="dialogReminderEmail"

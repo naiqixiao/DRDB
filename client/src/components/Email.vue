@@ -22,9 +22,10 @@
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
-    <v-row justify="center" dense>
-      <v-col cols="12" md="11" style="overflow-y: scroll">
+    <v-row justify="center" style="height: 500px">
+      <v-col cols="12" md="11" >
         <vue-editor
+          style="height: 450px"
           ref="emailBody"
           v-model="emailBody"
           :editor-toolbar="customToolbar"
@@ -384,13 +385,13 @@ export default {
       var formattedEmailBody = "";
 
       for (var i = 0; i < k.length; i++) {
-        formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        // formattedEmailBody = formattedEmailBody + k[i] + "<br>";
 
-        // if (i < k.length - 3) {
-        // formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
-        // } else {
-        //   formattedEmailBody = formattedEmailBody + k[i] + "<br>";
-        // }
+        if (i < k.length - 3) {
+        formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
+        } else {
+          formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        }
       }
 
       return formattedEmailBody;
