@@ -136,7 +136,7 @@
             ></v-simple-checkbox>
           </div>
         </template>
-        <span>Confirm reminder is sent</span>
+        <span>Mark the study is done.</span>
       </v-tooltip>
     </template>
 
@@ -165,7 +165,7 @@
         :retain-focus="false"
         persistent
       >
-        <v-card outlined>
+        <v-card outlined style="height: 800px">
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
           </v-card-title>
@@ -348,7 +348,7 @@
                         ></v-checkbox>
                       </div>
                     </template>
-                    <span>Check this box to skip email to parents.</span>
+                    <span>Check this box to skip emailing to parents.</span>
                   </v-tooltip>
                 </v-col>
                 <v-col cols="12" md="6">
@@ -407,6 +407,67 @@
             </v-stepper-content>
           </v-stepper-items>
         </v-stepper>
+      </v-dialog>
+
+      <v-dialog v-model="dialogReminderEmail" max-width="1000px" persistent>
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Reminder email</span>
+          </v-card-title>
+          <v-row style="height: 750px;">
+            <Email
+              ref="Email"
+              :dialog="dialogReminderEmail"
+              :appointments="editedSchedule.Appointments"
+              :scheduleInfo="editedSchedule"
+              :familyInfo="editedSchedule.Family"
+              emailType="Reminder"
+            ></Email>
+          </v-row>
+          <v-card-actions>
+            <v-row justify="space-between" align="center">
+              <v-col cols="12" md="2">
+                <v-tooltip top>
+                  <template v-slot:activator="{ on }">
+                    <div v-on="on">
+                      <v-checkbox
+                        label="Skip email"
+                        class="ma-0 pa-0"
+                        :value="skipReminderEmailStatus"
+                        @change="skipReminderEmail()"
+                        dense
+                      ></v-checkbox>
+                    </div>
+                  </template>
+                  <span>Check this box to skip emailing to parents.</span>
+                </v-tooltip>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-btn
+                  color="primary"
+                  :disabled="
+                    !!!editedSchedule.Family.Email ||
+                      skipReminderEmailStatus ||
+                      !$store.state.labEmailStatus
+                  "
+                  @click="sendReminderEmail()"
+                >
+                  <v-icon dark left v-show="reminderEmailStatus"
+                    >mdi-checkbox-marked-circle</v-icon
+                  >
+                  {{ emailButtonText }}
+                </v-btn>
+              </v-col>
+              <v-col cols="12" md="2">
+                <v-btn
+                  :disabled="!(reminderEmailStatus || skipReminderEmailStatus)"
+                  @click="closeReminderEmail()"
+                  >Complete</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
       </v-dialog>
     </template>
   </v-data-table>
@@ -489,6 +550,9 @@ export default {
           },
         ],
       },
+      dialogReminderEmail: false,
+      emailButtonText: "Send",
+      reminderEmailStatus: false,
     };
   },
   methods: {
@@ -525,14 +589,16 @@ export default {
             break;
 
           case "Reminded":
-            try {
-              item.Reminded = !item.Reminded;
-              await schedule.remind(item);
-            } catch (error) {
-              console.log(error);
-            }
+            this.editedIndex = this.Schedules.indexOf(item);
+            this.editedSchedule = Object.assign({}, item);
+            this.editedSchedule.Appointments[0].Child.Family = {};
+            this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+            this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
+
+            this.dialogReminderEmail = true;
 
             item.updatedAt = new Date().toISOString();
+            item.Reminded = true;
             break;
 
           default:
@@ -808,6 +874,35 @@ export default {
 
       return iconDisable;
     },
+
+    async sendReminderEmail() {
+      try {
+        await this.$refs.Email.sendEmail();
+
+        this.emailButtonText = "Email Sent";
+
+        this.reminderEmailStatus = true;
+
+        await schedule.remind(this.editedSchedule);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async closeReminderEmail() {
+      if ((this.skipReminderEmailStatue)) {
+        await schedule.remind(this.editedSchedule);
+      }
+
+      this.dialogReminderEmail = false;
+      setTimeout(() => {
+        this.dialogReminderEmail = false;
+        this.dialogReminderEmail = false;
+        this.emailButtonText = "Send";
+        this.skipReminderEmailStatus = false;
+        this.reminderEmailStatus = false;
+      }, 300);
+    },
   },
 
   computed: {
@@ -844,10 +939,16 @@ export default {
         .startOf("day")
         .format("YYYY-MM-DD");
     },
+    reminderEmailDisable() {
+      return false;
+    },
   },
   watch: {
     dialog(val) {
       val || this.close();
+    },
+    dialogReminderEmail(val) {
+      val || this.closeReminderEmail();
     },
   },
 };

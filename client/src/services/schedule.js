@@ -18,14 +18,20 @@ export default {
       params: schedule,
     });
   },
-  today() {
-    const schedule = { lab: store.state.lab };
+  today(schedule) {
+    schedule.lab = store.state.lab;
     return api().get("schedule/today", {
       params: schedule,
     });
   },
-  week() {
-    const schedule = { lab: store.state.lab };
+  tomorrow(schedule) {
+    schedule.lab = store.state.lab;
+    return api().get("schedule/today", {
+      params: schedule,
+    });
+  },
+  week(schedule) {
+    schedule.lab = store.state.lab;
     return api().get("schedule/week", {
       params: schedule,
     });

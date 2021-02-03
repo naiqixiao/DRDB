@@ -48,7 +48,7 @@
         ></v-text-field>
       </v-col>
     </v-row>
-    <v-row justify="space-between">
+    <v-row justify="start">
       <v-col cols="12" md="2">
         <v-select
           @blur="searchSchedule"
@@ -114,11 +114,18 @@
         ></v-text-field>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col cols="12" md="2">
-        <v-btn large @click="todayStudies">Today's Studies</v-btn>
+      <v-col cols="12" md="1">
+        <v-btn large @click="studiesInaPeriod('today')">Today's Studies</v-btn>
+      </v-col>
+      <v-col cols="12" md="1">
+        <v-btn large @click="studiesInaPeriod('tomorrow')"
+          >Tomorrow's Studies</v-btn
+        >
       </v-col>
       <v-col cols="12" md="2">
-        <v-btn large @click="thisWeekStudies">This week's Studies</v-btn>
+        <v-btn large @click="studiesInaPeriod('thisWeek')"
+          >This week's Studies</v-btn
+        >
       </v-col>
     </v-row>
 
@@ -291,13 +298,54 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    async todayStudies() {
+    // async todayStudies() {
+    //   this.$store.dispatch("setLoadingStatus", true);
+
+    //   this.queryString.trainingMode = this.$store.state.trainingMode;
+
+    //   try {
+    //     const Result = await schedule.today(this.queryString);
+    //     this.Schedules = Result.data;
+
+    //     if (this.Schedules.length == 0) {
+    //       alert("No study appointment can be found. Sorry~");
+    //     }
+    //   } catch (error) {
+    //     if (error.response.status === 401) {
+    //       alert("Authentication failed, please login.");
+    //       this.$router.push({
+    //         name: "Login",
+    //       });
+    //     } else {
+    //       console.log(JSON.stringify(error.response));
+    //     }
+    //   }
+
+    //   this.queryString = Object.assign({}, this.defaultQueryString);
+    //   this.index = -1;
+    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    // },
+
+    async studiesInaPeriod(serchRange) {
       this.$store.dispatch("setLoadingStatus", true);
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
-
+      var Result = [];
       try {
-        const Result = await schedule.today();
+        switch (serchRange) {
+          case "today":
+            Result = await schedule.today(this.queryString);
+
+            break;
+          case "tomorrow":
+            Result = await schedule.tomorrow(this.queryString);
+
+            break;
+          case "thisWeek":
+            Result = await schedule.week(this.queryString);
+
+            break;
+        }
         this.Schedules = Result.data;
 
         if (this.Schedules.length == 0) {
@@ -319,32 +367,32 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    async thisWeekStudies() {
-      this.$store.dispatch("setLoadingStatus", true);
+    // async thisWeekStudies() {
+    //   this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+    //   this.queryString.trainingMode = this.$store.state.trainingMode;
 
-      try {
-        const Result = await schedule.week();
-        this.Schedules = Result.data;
-        if (this.Schedules.length == 0) {
-          alert("No study appointment can be found. Sorry~");
-        }
-      } catch (error) {
-        if (error.response.status === 401) {
-          alert("Authentication failed, please login.");
-          this.$router.push({
-            name: "Login",
-          });
-        } else {
-          console.log(JSON.stringify(error.response));
-        }
-      }
+    //   try {
+    //     const Result = await schedule.week(this.queryString);
+    //     this.Schedules = Result.data;
+    //     if (this.Schedules.length == 0) {
+    //       alert("No study appointment can be found. Sorry~");
+    //     }
+    //   } catch (error) {
+    //     if (error.response.status === 401) {
+    //       alert("Authentication failed, please login.");
+    //       this.$router.push({
+    //         name: "Login",
+    //       });
+    //     } else {
+    //       console.log(JSON.stringify(error.response));
+    //     }
+    //   }
 
-      this.queryString = Object.assign({}, this.defaultQueryString);
-      this.index = -1;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    },
+    //   this.queryString = Object.assign({}, this.defaultQueryString);
+    //   this.index = -1;
+    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    // },
 
     updateFamily(family, index) {
       this.index = index;

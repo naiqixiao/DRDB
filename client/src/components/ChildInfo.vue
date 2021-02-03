@@ -503,7 +503,7 @@
                         ></v-checkbox>
                       </div>
                     </template>
-                    <span>Check this box to skip email to parents.</span>
+                    <span>Check this box to skip emailing to parents.</span>
                   </v-tooltip>
                 </v-col>
                 <v-col cols="12" md="6">

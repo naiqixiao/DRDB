@@ -224,6 +224,7 @@ exports.search = asyncHandler(async (req, res) => {
                 "MinAge",
                 "MaxAge",
                 "EmailTemplate",
+                "ReminderTemplate",
                 "StudyType",
                 "FK_Lab",
               ],
@@ -302,6 +303,86 @@ exports.today = asyncHandler(async (req, res) => {
                 "MinAge",
                 "MaxAge",
                 "EmailTemplate",
+                "ReminderTemplate",
+                "StudyType",
+                "FK_Lab",
+              ],
+            },
+            {
+              model: model.personnel,
+              as: "PrimaryExperimenter",
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+          ],
+        },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
+      ],
+      order: [["AppointmentTime", "ASC"]],
+    });
+    res.status(200).send(schedule);
+    console.log("Search successful!");
+  } catch (error) {
+    throw error;
+  }
+});
+
+exports.tomorrow = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  queryString.AppointmentTime = {
+    [Op.between]: [
+      moment()
+        .startOf("day")
+        .add(1, "days")
+        .toDate(),
+      moment()
+        .startOf("day")
+        .add(2, "days")
+        .toDate(),
+    ],
+  };
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
+
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
+
+  try {
+    const schedule = await model.schedule.findAll({
+      where: queryString,
+      include: [
+        {
+          model: model.appointment,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+            },
+            {
+              model: model.study,
+              attributes: [
+                "StudyName",
+                "MinAge",
+                "MaxAge",
+                "EmailTemplate",
+                "ReminderTemplate",
                 "StudyType",
                 "FK_Lab",
               ],
@@ -381,6 +462,7 @@ exports.week = asyncHandler(async (req, res) => {
                 "MinAge",
                 "MaxAge",
                 "EmailTemplate",
+                "ReminderTemplate",
                 "StudyType",
                 "FK_Lab",
               ],
@@ -505,13 +587,20 @@ exports.update = asyncHandler(async (req, res) => {
                 "MinAge",
                 "MaxAge",
                 "EmailTemplate",
+                "ReminderTemplate",
                 "StudyType",
               ],
             },
-
             {
               model: model.personnel,
+              as: "PrimaryExperimenter",
               through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
             },
           ],
@@ -571,7 +660,7 @@ exports.remind = asyncHandler(async (req, res) => {
   }
 
   try {
-    const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
+    const updatedSchedule = await model.schedule.update({ Reminded: 1 }, {
       where: { id: ID },
     });
 
@@ -765,6 +854,7 @@ exports.special = asyncHandler(async (req, res) => {
                 "MinAge",
                 "MaxAge",
                 "EmailTemplate",
+                "ReminderTemplate",
                 "StudyType",
                 "FK_Lab",
               ],

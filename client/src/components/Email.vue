@@ -1,5 +1,6 @@
 <template>
-  <v-card outlined class="d-flex flex-column">
+  <!-- <v-card outlined class="d-flex flex-column"> -->
+    <div>
     <v-alert
       v-if="!familyInfo.Email"
       border="left"
@@ -21,7 +22,7 @@
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
-    <v-row justify="center">
+    <v-row justify="center" dense>
       <v-col cols="12" md="11" style="overflow-y: scroll">
         <vue-editor
           ref="emailBody"
@@ -30,7 +31,8 @@
         ></vue-editor>
       </v-col>
     </v-row>
-  </v-card>
+    </div>
+  <!-- </v-card> -->
 </template>
 
 <script>
@@ -145,104 +147,189 @@ export default {
               "!</p>" +
               "<p>We are looking forward to seeing you again!</p>";
             break;
+
+          case "Reminder":
+            if (
+              this.scheduleInfo.Appointments[0].Study.StudyType !== "Online"
+            ) {
+              opening =
+                "<p>Dear " +
+                this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
+                ",</p>" +
+                "<p>This is a reminder for your visit to " +
+                this.$store.state.labName +
+                " with <b>" +
+                this.childNames() +
+                moment(this.scheduleInfo.AppointmentTime).format(
+                  " [tomorrow at] h:mma"
+                ) +
+                "</b>.</p>" +
+                "<p>" +
+                this.$store.state.transportationInstructions +
+                "</p>";
+            } else {
+              opening =
+                "<p>Dear " +
+                this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
+                ",</p>" +
+                "<p>This is " +
+                this.$store.state.labName +
+                ". Just a reminder that you and " +
+                this.childNames() +
+                "will participate our online study " +
+                moment(this.scheduleInfo.AppointmentTime).format(
+                  " [tomorrow at] h:mma"
+                ) +
+                "</b>.</p>";
+            }
+
+            break;
         }
       }
       // specific content for each schedueld study.
       // const pattern = /\$\{\{([^}]+)\}\}/g;
-      var emailBody = "";
-      this.appointments.forEach((appointment) => {
+
+      var email = "";
+      if (this.emailType == "Reminder") {
+        if (
+          this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink ||
+          this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink
+        ) {
+          body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+            /\${{ZoomLink}}/g,
+            "<a href='" +
+              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
+              ? this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
+                  .ZoomLink
+              : this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
+                  "'>Zoom Link</a>"
+          );
+        } else {
+          var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+            /\${{ZoomLink}}/g,
+            "Zoom Link not available."
+          );
+        }
+
+        body = body.replace(/\${{childName}}/g, this.childNames());
+
+        if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
+          body =
+            body +
+            "<p>If this study use Zoom for online study, you can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+            "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
+        }
+
+        // closing
+        const closing =
+          "<p>" +
+          this.$store.state.emailClosing +
+          "</p>" +
+          "<p>Best,</p><p>" +
+          this.scheduleInfo.Personnel.Name +
+          "</p><p>" +
+          this.scheduleInfo.Personnel.Role +
+          "</p><p>" +
+          this.$store.state.labName +
+          "</p>";
+
+        email = opening + body + closing;
+      } else {
+        var emailBody = "";
+
+        this.appointments.forEach((appointment) => {
+          switch (this.emailType) {
+            case "Confirmation":
+            case "ScheduleUpdate":
+              emailBody = appointment.Study.EmailTemplate;
+              break;
+            case "Introduction":
+              emailBody = appointment.Study.Description;
+              break;
+          }
+          // Search for all the variables to be replaced, for instance ${"Column name"}
+
+          // var templateVars = appointment.Study.EmailTemplate.match(pattern);
+          // templateVars = Array.from(new Set(templateVars));
+
+          if (appointment.Child.Sex == "F") {
+            emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+            emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+            emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+          } else {
+            emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+            emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+            emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+          }
+
+          emailBody = emailBody.replace(
+            /\${{childName}}/g,
+            appointment.Child.Name || ""
+          );
+
+          emailBody = emailBody.replace(/\. he/g, ". He");
+          emailBody = emailBody.replace(/\. his/g, ". His");
+          emailBody = emailBody.replace(/\. she/g, ". She");
+          emailBody = emailBody.replace(/\. her/g, ". Her");
+
+          emailBody = emailBody.replace(
+            /\${{ZoomLink}}/g,
+            "<a href='" + appointment.ZoomLink + "'>Zoom Link</a>"
+          );
+
+          emailBodyList.push(emailBody);
+        });
+
+        // location
+        const location =
+          "<p>" + this.$store.state.transportationInstructions + "</p>";
+        // closing
+        const closing =
+          "<p>" +
+          this.$store.state.emailClosing +
+          "</p>" +
+          "<p>Best,</p><p>" +
+          this.$store.state.name +
+          "</p><p>" +
+          this.$store.state.role +
+          "</p><p>" +
+          this.$store.state.labName +
+          "</p>";
+
         switch (this.emailType) {
           case "Confirmation":
           case "ScheduleUpdate":
-            emailBody = appointment.Study.EmailTemplate;
+            switch (this.appointments[0].Study.StudyType) {
+              case "Online":
+                email =
+                  opening +
+                  emailBodyList.join("<p></p>") +
+                  "<p>This study is an online study. You can participate at home. :)</p>" +
+                  closing;
+                break;
+
+              default:
+                email =
+                  opening + emailBodyList.join("<p></p>") + location + closing;
+                break;
+            }
             break;
-          case "Introduction":
-            emailBody = appointment.Study.Description;
+
+          default:
+            email =
+              opening +
+              "<p>" +
+              this.$store.state.emailClosing +
+              "</p>" +
+              "<p>Best,</p><p>" +
+              this.$store.state.name +
+              "</p><p>" +
+              this.$store.state.role +
+              "</p><p>" +
+              this.$store.state.labName +
+              "</p>";
             break;
         }
-        // Search for all the variables to be replaced, for instance ${"Column name"}
-
-        // var templateVars = appointment.Study.EmailTemplate.match(pattern);
-        // templateVars = Array.from(new Set(templateVars));
-
-        if (appointment.Child.Sex == "F") {
-          emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
-          emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
-          emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
-        } else {
-          emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
-          emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
-          emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
-        }
-
-        emailBody = emailBody.replace(
-          /\${{childName}}/g,
-          appointment.Child.Name || ""
-        );
-
-        emailBody = emailBody.replace(/\. he/g, ". He");
-        emailBody = emailBody.replace(/\. his/g, ". His");
-        emailBody = emailBody.replace(/\. she/g, ". She");
-        emailBody = emailBody.replace(/\. her/g, ". Her");
-
-        emailBody = emailBody.replace(
-          /\${{ZoomLink}}/g,
-          "<a href='" + appointment.ZoomLink + "'>Zoom Link</a>"
-        );
-
-        emailBodyList.push(emailBody);
-      });
-
-      // location
-      const location =
-        "<p>" + this.$store.state.transportationInstructions + "</p>";
-      // closing
-      const closing =
-        "<p>" +
-        this.$store.state.emailClosing +
-        "</p>" +
-        "<p>Best,</p><p>" +
-        this.$store.state.name +
-        "</p><p>" +
-        this.$store.state.role +
-        "</p><p>" +
-        this.$store.state.labName +
-        "</p>";
-
-      var email = "";
-      switch (this.emailType) {
-        case "Confirmation":
-        case "ScheduleUpdate":
-          switch (this.appointments[0].Study.StudyType) {
-            case "Online":
-              email =
-                opening +
-                emailBodyList.join("<p></p>") +
-                "<p>This study is an online study. You can participate at home. :)</p>" +
-                closing;
-              break;
-
-            default:
-              email =
-                opening + emailBodyList.join("<p></p>") + location + closing;
-              break;
-          }
-          break;
-
-        default:
-          email =
-            opening +
-            "<p>" +
-            this.$store.state.emailClosing +
-            "</p>" +
-            "<p>Best,</p><p>" +
-            this.$store.state.name +
-            "</p><p>" +
-            this.$store.state.role +
-            "</p><p>" +
-            this.$store.state.labName +
-            "</p>";
-          break;
       }
 
       // if (this.emailTemplate) {

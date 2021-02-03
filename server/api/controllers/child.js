@@ -248,6 +248,7 @@ exports.search = asyncHandler(async (req, res) => {
                   "MinAge",
                   "MaxAge",
                   "EmailTemplate",
+                  "ReminderTemplate",
                   "StudyType",
                   "FK_Lab",
                 ],

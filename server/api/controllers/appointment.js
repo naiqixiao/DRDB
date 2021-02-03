@@ -234,6 +234,7 @@ exports.search = asyncHandler(async (req, res) => {
           "StudyType",
           "FK_Lab",
           "EmailTemplate",
+          "ReminderTemplate",
         ],
       },
       {
