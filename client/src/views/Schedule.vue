@@ -1157,7 +1157,7 @@ export default {
           this.currentChild = this.Children[this.page - 1];
 
           alert(
-            "Hold on!\n\nMake sure you confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nThanks!"
+            "Hold on!\n\nMake sure to confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nYour little effort will benefit everyone in the future! Thanks! :)"
           );
         } else {
           alert("no child is elegible for the selected study. :(");
