@@ -279,7 +279,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
           },
         });
 
-        var filteredSiblings = siblings.filter(function(value) {
+        var filteredSiblings = siblings.filter(function (value) {
           return !containsObject(value, existingSibling);
         });
 
@@ -436,8 +436,16 @@ exports.update = asyncHandler(async (req, res) => {
 
   const logFile = logFolder + "/log.txt";
 
+  var logKeywords = '[Family Updated] ';
+
+  if ('NoMoreContact' in updatedFamilyInfo) {
+    if (updatedFamilyInfo.NoMoreContact) {
+      logKeywords = '[Family Removed] '
+    }
+  }
+
   var logInfo =
-    "[Family Updated] " +
+    logKeywords +
     User.Name +
     " (" +
     User.Email +
@@ -588,7 +596,7 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
       }
 
       // res.status(200).send(IDs.length + " families released.");
-    } 
+    }
     // else {
     //   res.status(200).send("no family needs to be released.");
     // }
