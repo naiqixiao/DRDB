@@ -1157,7 +1157,7 @@ export default {
           this.currentChild = this.Children[this.page - 1];
 
           alert(
-            "Hold on!\n\nMake sure to confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nYour little effort will benefit everyone in the future! Thanks! :)"
+            "Hold on!\n\nMake sure to confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nYour little effort will benefit everyone in the future!\n\nThanks! :)"
           );
         } else {
           alert("no child is elegible for the selected study. :(");
@@ -1852,32 +1852,33 @@ export default {
     },
 
     async NoMoreContact() {
-      await this.$refs.confirmD.open(
-        "Remove this family from the database",
-        "Can you confirm the removal?"
-      );
+      if (
+        await this.$refs.confirmD.open(
+          "Remove this family from the database",
+          "Can you confirm the removal?"
+        )
+      ) {
+        var updatedFamilyInfo = {
+          id: this.currentFamily.id,
+          NextContactNote: "Parents asked to be removed from the database.",
+          LastContactDate: moment()
+            .startOf("day")
+            .format("YYYY-MM-DD"),
+          NoMoreContact: true,
+        };
 
-      var updatedFamilyInfo = {
-        id: this.currentFamily.id,
-        NextContactNote: "Parents asked to be removed from the database.",
-        LastContactDate: moment()
-          .startOf("day")
-          .format("YYYY-MM-DD"),
-        NoMoreContact: true,
-      };
+        try {
+          await family.update(updatedFamilyInfo);
 
-      try {
-        await family.update(updatedFamilyInfo);
+          // mark the child/family been scheduled. So no others will schedule this family again.
+          this.currentChild.scheduled = true;
 
+          Object.assign(this.Children[this.page - 1], this.currentChild);
 
-        // mark the child/family been scheduled. So no others will schedule this family again.
-        this.currentChild.scheduled = true;
-
-        Object.assign(this.Children[this.page - 1], this.currentChild);
-
-        alert("This family is removed from the databased.");
-      } catch (error) {
-        console.log(error);
+          alert("This family is removed from the databased.");
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
   },
