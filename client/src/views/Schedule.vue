@@ -1869,14 +1869,15 @@ export default {
       try {
         await family.update(updatedFamilyInfo);
 
-        alert("This family is removed from the databased.");
 
         // mark the child/family been scheduled. So no others will schedule this family again.
         this.currentChild.scheduled = true;
 
-        Object.assign(this.Children[this.editedIndex], this.currentChild);
+        Object.assign(this.Children[this.page - 1], this.currentChild);
+
+        alert("This family is removed from the databased.");
       } catch (error) {
-        console.log(error.response);
+        console.log(error);
       }
     },
   },
