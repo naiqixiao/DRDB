@@ -33,6 +33,8 @@
       >
     </div>
 
+    <ConfirmDlg ref="confirmD" />
+
     <v-row justify="space-around">
       <v-col cols="12" md="4">
         <v-row dense>
@@ -333,7 +335,7 @@
         <v-row justify="space-around" align="center">
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
-            <h4 class="text-left">Schedule a study for this child</h4>
+            <h4 class="text-left">Schedule a study for this child:</h4>
           </v-col>
           <v-col cols="12" md="9">
             <v-select
@@ -521,7 +523,7 @@
             max-width="1000px"
             :retain-focus="false"
           >
-            <ConfirmDlg ref="confirmD" />
+            <!-- <ConfirmDlg ref="confirmD" /> -->
             <v-stepper v-model="e1">
               <v-stepper-header>
                 <v-stepper-step
@@ -848,6 +850,36 @@
             </v-card>
           </v-dialog>
         </v-row>
+        <v-row justify="space-around" align="center">
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">No More Contact</h4>
+          </v-col>
+          <v-col cols="12" md="10">
+            <h3 class="text-left">
+              If this family requests NO MORE CONTACT, you should click this
+              button ===>>>>
+            </h3>
+          </v-col>
+          <v-col cols="12" md="2">
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn
+                    fab
+                    @click="NoMoreContact()"
+                    :disabled="!currentChild.id"
+                  >
+                    <v-icon color="warning" style="padding-right: 5px;"
+                      >pan_tool</v-icon
+                    >
+                  </v-btn>
+                </div>
+              </template>
+              <span>Remove this family from the database.</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
       </v-col>
       <v-col cols="12" md="3">
         <NotesConversation
@@ -1123,6 +1155,10 @@ export default {
           this.page = 1;
           this.Children = Results.data;
           this.currentChild = this.Children[this.page - 1];
+
+          alert(
+            "Hold on!\n\nMake sure you confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nThanks!"
+          );
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
@@ -1813,6 +1849,35 @@ export default {
 
     nextContact() {
       this.e1 = 3;
+    },
+
+    async NoMoreContact() {
+      await this.$refs.confirmD.open(
+        "Remove this family from the database",
+        "Can you confirm the removal?"
+      );
+
+      var updatedFamilyInfo = {
+        id: this.currentFamily.id,
+        NextContactNote: "Parents asked to be removed from the database.",
+        LastContactDate: moment()
+          .startOf("day")
+          .format("YYYY-MM-DD"),
+        NoMoreContact: true,
+      };
+
+      try {
+        await family.update(updatedFamilyInfo);
+
+        alert("This family is removed from the databased.");
+
+        // mark the child/family been scheduled. So no others will schedule this family again.
+        this.currentChild.scheduled = true;
+
+        Object.assign(this.Children[this.editedIndex], this.currentChild);
+      } catch (error) {
+        console.log(error.response);
+      }
     },
   },
 
