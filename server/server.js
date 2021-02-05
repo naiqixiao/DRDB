@@ -10,15 +10,15 @@ const server = http.createServer(app);
 // Send reminder emails to parents the day before their appointment
 var cron = require('node-cron');
 
-const ReminderController = require("./api/controllers/reminder");
+// const ReminderController = require("./api/controllers/reminder");
 
-cron.schedule('0 15 * * *', async () => {
+// cron.schedule('0 15 * * *', async () => {
 
-  const resonse = await ReminderController.reminderEmail();
+//   const resonse = await ReminderController.reminderEmail();
 
-  console.log(resonse);
+//   console.log(resonse);
 
-});
+// });
 
 const FamilyController = require("./api/controllers/family");
 

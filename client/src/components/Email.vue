@@ -23,7 +23,7 @@
       </v-col>
     </v-row>
     <v-row justify="center" style="height: 500px">
-      <v-col cols="12" md="11" >
+      <v-col cols="12" md="11">
         <vue-editor
           style="height: 450px"
           ref="emailBody"
@@ -194,7 +194,7 @@ export default {
       if (this.emailType == "Reminder") {
         if (
           this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink ||
-          this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink
+          this.$store.state.ZoomLink
         ) {
           body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
             /\${{ZoomLink}}/g,
@@ -202,8 +202,7 @@ export default {
               this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
               ? this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
                   .ZoomLink
-              : this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
-                  "'>Zoom Link</a>"
+              : this.$store.state.ZoomLink + "'>Zoom Link</a>"
           );
         } else {
           var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
@@ -355,13 +354,30 @@ export default {
       // }
     },
 
+    experimenterEmails() {
+      var emails = [];
+
+      this.scheduleInfo.Appointments.forEach((appointment) => {
+        appointment.PrimaryExperimenter.forEach((experimenter) => {
+          emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+        });
+
+        appointment.SecondaryExperimenter.forEach((experimenter) => {
+          emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+        });
+      });
+
+      return emails.join(", ");
+    },
+
     async sendEmail() {
       // send email with the current email body
+
       var emailContent = {
         from:
-          this.$store.state.labName + "<" + this.$store.state.labEmail + ">",
-        to: this.familyInfo.NamePrimary + "<" + this.familyInfo.Email + ">",
-        // to: this.familyInfo.NamePrimary + "<" + this.$store.state.labEmail + ">",
+          this.$store.state.labName + " <" + this.$store.state.labEmail + ">",
+        to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
+        bcc: this.experimenterEmails(),
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
       };
@@ -388,7 +404,7 @@ export default {
         // formattedEmailBody = formattedEmailBody + k[i] + "<br>";
 
         if (i < k.length - 3) {
-        formattedEmailBody = formattedEmailBody + k[i] + "</p><p>";
+          formattedEmailBody = formattedEmailBody + k[i] + "<br><br>";
         } else {
           formattedEmailBody = formattedEmailBody + k[i] + "<br>";
         }

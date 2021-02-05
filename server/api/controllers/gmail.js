@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 
-function makeBody(to, from, cc, subject, body) {
+function makeBody(to, from, cc, bcc, subject, body) {
   var message = [
     'Content-Type: text/html; charset="UTF-8"\n',
     "MIME-Version: 1.0\n",
@@ -14,6 +14,9 @@ function makeBody(to, from, cc, subject, body) {
     "\n",
     "cc: ",
     cc,
+    "\n",
+    "bcc: ",
+    bcc,
     "\n",
     "subject: ",
     subject,
@@ -36,6 +39,7 @@ async function sendEmail(oAuth2Client, emailContent) {
     emailContent.to,
     emailContent.from,
     emailContent.cc,
+    emailContent.bcc,
     emailContent.subject,
     emailContent.body
   );

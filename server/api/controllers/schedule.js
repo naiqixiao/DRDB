@@ -341,18 +341,36 @@ exports.today = asyncHandler(async (req, res) => {
 exports.tomorrow = asyncHandler(async (req, res) => {
   var queryString = {};
 
-  queryString.AppointmentTime = {
-    [Op.between]: [
-      moment()
-        .add(1, "days")
-        .startOf("day")
-        .toDate(),
-      moment()
-        .add(2, "days")
-        .startOf("day")
-        .toDate(),
-    ],
-  };
+  if (moment().day() >= 5) { // if today is Friday or weekend, return the schedule from today to the coming Monday.
+    queryString.AppointmentTime = {
+      [Op.between]: [
+        moment()
+          .add(1, "days")
+          .startOf("day")
+          .toDate(),
+        moment()
+          .add(1, "weeks")
+          .weekday(2)
+          .startOf("day")
+          .toDate(),
+      ],
+    }
+
+
+  } else {
+    queryString.AppointmentTime = {
+      [Op.between]: [
+        moment()
+          .add(1, "days")
+          .startOf("day")
+          .toDate(),
+        moment()
+          .add(2, "days")
+          .startOf("day")
+          .toDate(),
+      ],
+    };
+  }
 
   if (req.query.trainingMode === "true") {
     queryString["$Family.TrainingSet$"] = true;

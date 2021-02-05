@@ -842,7 +842,7 @@ export default {
       var iconDisable = true;
       var daysAheadofSchedule = 1;
 
-      if (moment(item.AppointmentTime).day() == 1) {
+      if (moment(item.AppointmentTime).day() <= 1) {
         daysAheadofSchedule = 3;
       }
 
