@@ -204,9 +204,6 @@ exports.search = asyncHandler(async (req, res) => {
       [Op.between]: [req.query.minAge * 30.5 - 1, req.query.maxAge * 30.5 - 1],
     };
   }
-  if (req.query.pastParticipants) {
-    queryString.id = { [Op.notIn]: req.query.pastParticipants };
-  }
   if (req.query.PrematureParticipant) {
     queryString.PrematureBirth = req.query.PrematureParticipant;
   }
@@ -221,6 +218,43 @@ exports.search = asyncHandler(async (req, res) => {
 
   if (req.query.HearingLossParticipant) {
     queryString.HearingLoss = req.query.HearingLossParticipant;
+  }
+
+
+  // if (req.query.pastParticipants) {
+  //   queryString.id = { [Op.notIn]: req.query.pastParticipants };
+  // }
+
+  if (req.query.studyID) {
+
+
+    const studyInfo = await model.study.findOne({
+      where: { id: req.query.studyID }, include: [
+        model.appointment,
+        model.lab,
+        {
+          model: model.personnel,
+          as: 'PointofContact'
+        },
+        {
+          model: model.personnel,
+          as: 'Experimenters',
+          through: {
+            model: model.experimenter,
+          },
+        },
+      ],
+    });
+
+    const pastParticipants = studyInfo.Appointments.map(
+      (appointment) => {
+        return appointment.FK_Child;
+      }
+    );
+
+    console.log(pastParticipants)
+
+    queryString.id = { [Op.notIn]: pastParticipants };
   }
 
   const children = await model.child.findAll({
@@ -388,21 +422,21 @@ exports.updateAge = asyncHandler(async () => {
     if (!fs.existsSync(logFolder)) {
       fs.mkdirSync(logFolder);
     }
-  
+
     const logFile = logFolder + "/Auto_log.txt";
-  
+
     var logInfo =
       "[Age Updated] Children's age is updated at " +
       new Date().toString() +
       "\r\n";
-  
+
     if (fs.existsSync(logFile)) {
       fs.appendFileSync(logFile, logInfo);
     } else {
       fs.writeFileSync(logFile, logInfo);
     }
     // res.status(200).send('Age updated!')
-  
+
   } catch (error) {
     throw error;
   }

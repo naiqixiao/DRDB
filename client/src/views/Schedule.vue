@@ -1074,29 +1074,11 @@ export default {
     async searchChild() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      var studyQuery = {
-        id: this.selectedStudy.id,
-      };
-
-      try {
-        const studyInfo = await study.search(studyQuery);
-        var pastParticipants = studyInfo.data[0].Appointments.map(
-          (appointment) => {
-            return appointment.FK_Child;
-          }
-        );
-      } catch (error) {
-        console.log(error);
-      }
-
       var queryString = {};
-
-      if (pastParticipants) {
-        queryString.pastParticipants = pastParticipants;
-      }
 
       queryString.minAge = this.selectedStudy.MinAge;
       queryString.maxAge = this.selectedStudy.MaxAge;
+      queryString.studyID = this.selectedStudy.id;
 
       switch (this.selectedStudy.PrematureParticipant) {
         // case "Include":
