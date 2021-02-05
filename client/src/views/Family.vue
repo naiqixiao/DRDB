@@ -224,7 +224,9 @@
                       "
                       :disabled="!currentFamily.id && !nextContactDialog"
                     >
-                    <v-icon color="warning" style="padding-right: 5px;">pan_tool</v-icon>
+                      <v-icon color="warning" style="padding-right: 5px;"
+                        >pan_tool</v-icon
+                      >
                     </v-btn>
                   </div>
                 </template>
@@ -415,7 +417,7 @@
           </div>
           <div v-else>
             <v-text-field
-              class="textfield-family"
+              style="height: 48px;"
               background-color="textbackground"
               hide-details
               @keydown.enter="searchFamilybyChildName($event.target.value)"
@@ -538,7 +540,7 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
-        Note: ''
+        Note: null,
       },
       familyTemplate: {
         id: null,
@@ -556,7 +558,7 @@ export default {
         RecruitmentMethod: null,
         NextContactDate: null,
         Children: [],
-        Note: ''
+        Note: null,
       },
       currentFamily: {
         id: null,
@@ -573,7 +575,7 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
-        Note: ''
+        Note: null,
       },
       Families: [],
       // editableFields: [],

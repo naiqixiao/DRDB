@@ -171,7 +171,15 @@ export default {
       if (val) {
         this.newNotes = this.notes;
       }
+      if (!val) {
+        this.newNotes = "";
+      }
     },
+    // notes(val) {
+    //   if (val) {
+    //     this.newNotes = this.notes;
+    //   }
+    // },
   },
 };
 </script>
