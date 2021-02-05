@@ -538,6 +538,7 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
+        Note: ''
       },
       familyTemplate: {
         id: null,
@@ -555,6 +556,7 @@ export default {
         RecruitmentMethod: null,
         NextContactDate: null,
         Children: [],
+        Note: ''
       },
       currentFamily: {
         id: null,
@@ -571,6 +573,7 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
+        Note: ''
       },
       Families: [],
       // editableFields: [],
