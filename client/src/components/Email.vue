@@ -374,8 +374,8 @@ export default {
       // send email with the current email body
 
       var emailContent = {
-        from:
-          this.$store.state.labName + " <" + this.$store.state.labEmail + ">",
+        // from:
+        //   this.$store.state.labName + " <" + this.$store.state.labEmail + ">",
         to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
         bcc: this.experimenterEmails(),
         subject: this.emailSubject,

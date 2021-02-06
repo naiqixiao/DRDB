@@ -304,7 +304,7 @@ exports.login = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
-  const { Email, Password} = req.body;
+  const { Email, Password } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
       Email: Email,
@@ -564,31 +564,24 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       message: "Password reset!",
     });
 
-    try {
-      var emailContent = {
-        to: personnel.Name + "<" + personnel.Email + ">",
-        subject: "Your password is reset",
-        body:
-          "<p>Hello " +
-          personnel.Name.split(" ")[0] +
-          ",</p> " +
-          "<p>You login password is reset, and the temporary passwor is: <b>" +
-          password +
-          "</b></p> <p>Please login to change your password.<br> " +
-          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-          "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-          "<p> </p>" +
-          "<p>Thank you! <br>" +
-          "Developmental Research Management System</p>",
-      };
+    var emailContent = {
+      to: personnel.Name + "<" + personnel.Email + ">",
+      subject: "Your password is reset",
+      body:
+        "<p>Hello " +
+        personnel.Name.split(" ")[0] +
+        ",</p> " +
+        "<p>You login password is reset, and the temporary passwor is: <b>" +
+        password +
+        "</b></p> <p>Please login to change your password.<br> " +
+        "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
+        "<a href='https://docs.google.com/presentation/d/1Q09bJj1h_86FVS9zOVIZlwpnh1sPtRrlZxolPZ12PlA/edit?usp=sharing'>How to set up a Google account to activate email and calendar functions.</a></p>" +
+        "<p> </p>" +
+        "<p>Thank you! <br>" +
+        "Developmental Research Management System</p>",
+    };
 
-      await sendEmail(emailContent);
-
-
-    } catch (error) {
-      throw error;
-    }
-
+    await sendEmail(emailContent);
 
   } catch (error) {
     throw error;

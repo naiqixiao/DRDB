@@ -21,9 +21,9 @@
           <span class="body-1" style="color: var(--v-primary)">
             {{
               "(" +
-                appointment.FK_Family +
-                appointment.Child.IdWithinFamily +
-                ")"
+              appointment.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
             }}
           </span>
           <v-spacer></v-spacer>
@@ -38,16 +38,27 @@
         <v-card-text
           class="body-1"
           align="start"
-          style="padding: 8px; color: var(--v-primary)"
+          style="padding: 4px; color: var(--v-primary)"
         >
-          <div class="d-inline-block text-truncate" style="max-width: 80%">
-            {{
-              appointment.Study.StudyName +
+          <v-row style="height: 70px">
+            <div class="d-inline-block text-truncate" style="max-width: 80%">
+              {{
+                appointment.Study.StudyName +
                 " (" +
                 appointment.Study.StudyType +
                 ")"
-            }}
-          </div>
+              }}
+            </div>
+            <body
+              align="start"
+              class="d-inline-block text-truncate"
+              style="max-width: 80%"
+              v-html="ExperimentersNames(appointment)"
+            ></body>
+            <!-- <div class="d-inline-block text-truncate" style="max-width: 80%">
+            {{ExperimentersNames(appointment)}}
+          </div> -->
+          </v-row>
         </v-card-text>
         <v-spacer></v-spacer>
         <v-card-actions>
@@ -559,6 +570,7 @@ export default {
       // used to change experimenters of a given appointment
       this.editedAppointment = appointment;
       this.selectedExperimenters = appointment.PrimaryExperimenter[0];
+      this.selectedExperimenters_2nd = appointment.SecondaryExperimenter;
       this.index = index;
       this.dialogUpdateExperimenters = true;
     },
@@ -734,6 +746,20 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+
+    ExperimentersNames(appointment) {
+      var E2 = appointment.SecondaryExperimenter.map((experimenter) => {
+        return experimenter.Initial;
+      });
+
+      return (
+        "<strong>E1:</strong> " +
+        appointment.PrimaryExperimenter[0].Initial +
+        "<br>" +
+        "<strong>E2:</strong> " +
+        E2.join(", ")
+      );
     },
   },
 

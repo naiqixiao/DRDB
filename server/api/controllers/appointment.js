@@ -241,13 +241,13 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.personnel,
         as: "PrimaryExperimenter",
         through: { model: model.experimenterAssignment },
-        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
       },
       {
         model: model.personnel,
         as: "SecondaryExperimenter",
         through: { model: model.experimenterAssignment_2nd },
-        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink"],
+        attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
       },
     ],
   });
@@ -291,13 +291,17 @@ exports.update = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.create(updatedAppointmentInfo);
 
-    await model.experimenterAssignment_2nd.destroy({
-      where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
-    });
+    if (updatedAppointmentInfo_2nd.length > 0 ) {
 
-    await model.experimenterAssignment_2nd.bulkCreate(
-      updatedAppointmentInfo_2nd
-    );
+      await model.experimenterAssignment_2nd.destroy({
+        where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
+      });
+
+      await model.experimenterAssignment_2nd.bulkCreate(
+        updatedAppointmentInfo_2nd
+      );
+
+    }
 
     // update calendar event
     var Schedule = await model.schedule.findOne({
