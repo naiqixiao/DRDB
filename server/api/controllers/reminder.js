@@ -9,7 +9,7 @@ const moment = require("moment");
 
 function childNames(Appointments) {
   var nameList = Appointments.map((appointment) => {
-    return appointment.Child.Name;
+    return appointment.Child.Name.split(" ")[0];
   });
 
   nameList = Array.from(new Set(nameList));
@@ -26,7 +26,7 @@ function childNames(Appointments) {
 
 function emailBody(schedule) {
   const emailSubject =
-    "Reminder for your tomorrow's study appointment with " +
+    "Reminder for your study appointment with " +
     childNames(schedule.Appointments);
 
   var opening = "";
@@ -59,20 +59,28 @@ function emailBody(schedule) {
       "</b>.</p>";
   }
 
-  if (schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink || schedule.Appointments[0].Study.Lab.ZoomLink) {
+  var ZoomLink = "Zoom Link not available.";
+  var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
+    /\${{ZoomLink}}/g, ZoomLink);
 
-    var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
-      /\${{ZoomLink}}/g,
-      "<a href='" + schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
-        ? schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink
-        : schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>"
-    );
-  } else {
+  if (!!schedule.Appointments[0].Study.Lab.ZoomLink) {
 
-    var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
-      /\${{ZoomLink}}/g, "Zoom Link not available.");
+    ZoomLink = schedule.Appointments[0].Study.Lab.ZoomLink;
+
 
   }
+
+  if (schedule.Appointments[0].PrimaryExperimenter.length > 0) {
+
+    if (schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink) {
+
+      ZoomLink = schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink;
+    }
+
+  }
+
+  var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
+    "Zoom Link not available.", "<a href='" + ZoomLink + "'>Zoom Link</a>");
 
   body = body.replace(/\${{childName}}/g, childNames(schedule.Appointments));
 
@@ -88,11 +96,11 @@ function emailBody(schedule) {
     "<p>" +
     schedule.Appointments[0].Study.Lab.EmailClosing +
     "</p>" +
-    "<p>Best,<br>" +
+    "<p>Best,</p><p>" +
     schedule.Personnel.Name +
-    "<br>" +
+    "</p><p>" +
     schedule.Personnel.Role +
-    "<br>" +
+    "</p><p>" +
     schedule.Appointments[0].Study.Lab.LabName +
     "</p>";
 
@@ -106,16 +114,33 @@ function emailBody(schedule) {
       ">",
     // cc: "lab email <nx@kangleelab.com>",
     to: schedule.Family.NamePrimary + "<" + schedule.Family.Email + ">",
+    bcc: experimenterEmails(schedule.Appointments),
     // to:
     //     schedule.Family.NamePrimary +
     //     "<" +
     //     schedule.Appointments[0].Study.Lab.Email +
     //     ">",
     subject: emailSubject,
-    body: emailBody,
+    body: formatedBody(emailBody),
   };
 
   return emailContent;
+}
+
+function experimenterEmails(Appointments) {
+  var emails = [];
+
+  Appointments.forEach((appointment) => {
+    appointment.PrimaryExperimenter.forEach((experimenter) => {
+      emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+    });
+
+    appointment.SecondaryExperimenter.forEach((experimenter) => {
+      emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+    });
+  });
+
+  return emails.join(", ");
 }
 
 function manualReminderBody(schedule) {
@@ -136,10 +161,10 @@ function manualReminderBody(schedule) {
     moment(schedule.AppointmentTime).format(
       " [on] dddd [(]MMM Do[)] [at] h:mma"
     ) +
-    "<br>";
+    "</p><p>";
 
   "However, there is no email in the system to remind them over email. Please give them a call ASAP.</p>" +
-    "<p>Thank you!<br>" +
+    "<p>Thank you!</p><p>" +
     "Developmental Research Management System</p>";
 
   const emailContent = {
@@ -153,7 +178,7 @@ function manualReminderBody(schedule) {
     // schedule.Family.NamePrimary.Email +
     // ">",
     subject: emailSubject,
-    body: emailBody,
+    body: formatedBody(emailBody),
   };
 
   return emailContent;
@@ -214,6 +239,23 @@ async function sendEmail(oAuth2Client, emailContent) {
   } catch (error) {
     return error;
   }
+}
+
+function formatedBody(emailBody) {
+  const k = emailBody.split("</p><p>");
+  var formattedEmailBody = "";
+
+  for (var i = 0; i < k.length; i++) {
+    // formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+
+    if (i < k.length - 3) {
+      formattedEmailBody = formattedEmailBody + k[i] + "<br><br>";
+    } else {
+      formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+    }
+  }
+
+  return formattedEmailBody;
 }
 
 // Retrieve today's appointments from the database.

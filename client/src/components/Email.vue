@@ -72,7 +72,7 @@ export default {
   methods: {
     childNames() {
       var nameList = this.appointments.map((appointment) => {
-        return appointment.Child.Name;
+        return appointment.Child.Name.split(" ")[0];
       });
 
       nameList = Array.from(new Set(nameList));
@@ -150,6 +150,29 @@ export default {
             break;
 
           case "Reminder":
+            var dateLabel = "";
+
+            var differentDays = moment
+              .duration(
+                moment(this.scheduleInfo.AppointmentTime)
+                  .startOf("day")
+                  .diff(moment().startOf("day"))
+              )
+              .asDays();
+
+            switch (differentDays) {
+              case 1:
+                dateLabel = " tomorrow";
+                break;
+
+              default:
+                dateLabel = moment(this.scheduleInfo.AppointmentTime).format(
+                  " [this] dddd"
+                );
+
+                break;
+            }
+
             if (
               this.scheduleInfo.Appointments[0].Study.StudyType !== "Online"
             ) {
@@ -161,8 +184,9 @@ export default {
                 this.$store.state.labName +
                 " with <b>" +
                 this.childNames() +
+                dateLabel +
                 moment(this.scheduleInfo.AppointmentTime).format(
-                  " [tomorrow at] h:mma"
+                  " [at] h:mma"
                 ) +
                 "</b>.</p>" +
                 "<p>" +
@@ -178,8 +202,9 @@ export default {
                 ". Just a reminder that you and " +
                 this.childNames() +
                 " will participate our online study" +
+                dateLabel +
                 moment(this.scheduleInfo.AppointmentTime).format(
-                  " [tomorrow at] h:mma"
+                  " [at] h:mma"
                 ) +
                 "</b>.</p>";
             }
@@ -192,24 +217,28 @@ export default {
 
       var email = "";
       if (this.emailType == "Reminder") {
-        if (
-          this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink ||
-          this.$store.state.ZoomLink
-        ) {
-          body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-            /\${{ZoomLink}}/g,
-            "<a href='" +
-              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
-              ? this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
-                  .ZoomLink
-              : this.$store.state.ZoomLink + "'>Zoom Link</a>"
-          );
-        } else {
-          var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-            /\${{ZoomLink}}/g,
-            "Zoom Link not available."
-          );
+        var ZoomLink = "Zoom Link not available.";
+        var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+          /\${{ZoomLink}}/g,
+          "Zoom Link not available."
+        );
+        if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
+          ZoomLink = this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink;
         }
+
+        if (this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0) {
+          if (
+            this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
+          ) {
+            ZoomLink = this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
+              .ZoomLink;
+          }
+        }
+
+        body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+          "Zoom Link not available.",
+          "<a href='" + ZoomLink + "'>Zoom Link</a>"
+        );
 
         body = body.replace(/\${{childName}}/g, this.childNames());
 
@@ -444,8 +473,7 @@ export default {
 
           case "Reminder":
             this.emailSubject =
-              "Reminder for your tomorrow's study appointment with " +
-              this.childNames();
+              "Reminder for your study appointment with " + this.childNames();
             break;
 
           case "ThankYou":
@@ -488,8 +516,7 @@ export default {
 
         case "Reminder":
           this.emailSubject =
-            "Reminder for your tomorrow's study appointment with " +
-            this.childNames();
+            "Reminder for your study appointment with " + this.childNames();
           break;
 
         case "ThankYou":
