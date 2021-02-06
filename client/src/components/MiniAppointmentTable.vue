@@ -21,9 +21,9 @@
           <span class="body-1" style="color: var(--v-primary)">
             {{
               "(" +
-              appointment.FK_Family +
-              appointment.Child.IdWithinFamily +
-              ")"
+                appointment.FK_Family +
+                appointment.Child.IdWithinFamily +
+                ")"
             }}
           </span>
           <v-spacer></v-spacer>
@@ -38,26 +38,15 @@
         <v-card-text
           class="body-1"
           align="start"
-          style="padding: 4px; color: var(--v-primary)"
+          style="padding-left: 8px; padding-top: 4px; padding-bottom: 4px; color: var(--v-primary)"
         >
           <v-row style="height: 70px">
-            <div class="d-inline-block text-truncate" style="max-width: 80%">
-              {{
-                appointment.Study.StudyName +
-                " (" +
-                appointment.Study.StudyType +
-                ")"
-              }}
-            </div>
             <body
               align="start"
               class="d-inline-block text-truncate"
-              style="max-width: 80%"
+              style="max-width: 90%"
               v-html="ExperimentersNames(appointment)"
             ></body>
-            <!-- <div class="d-inline-block text-truncate" style="max-width: 80%">
-            {{ExperimentersNames(appointment)}}
-          </div> -->
           </v-row>
         </v-card-text>
         <v-spacer></v-spacer>
@@ -200,7 +189,7 @@
         <v-card-title class="title"
           >Update experimenters for the current study</v-card-title
         >
-        <v-row justify="center">
+        <v-row align="center" justify="center">
           <v-col cols="12" md="4">
             <v-select
               :items="potentialExperimenters"
@@ -230,7 +219,7 @@
             ></v-select>
           </v-col>
         </v-row>
-        <v-spacer></v-spacer>
+        <!-- <v-spacer></v-spacer> -->
         <v-card-actions>
           <v-row justify="space-between" style="height: 50px">
             <v-col md="4"></v-col>
@@ -754,6 +743,12 @@ export default {
       });
 
       return (
+        "<strong>" +
+        appointment.Study.StudyName +
+        "</strong> (" +
+        appointment.Study.StudyType +
+        ")" +
+        "<br>" +
         "<strong>E1:</strong> " +
         appointment.PrimaryExperimenter[0].Initial +
         "<br>" +
