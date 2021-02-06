@@ -60,36 +60,40 @@ exports.create = asyncHandler(async (req, res) => {
       include: [model.appointment],
     });
 
-    // add primary experimenter
-    var experimenterAssignment = [];
-    // add secondary experimenters
-    var experimenterAssignment_2nd = [];
+    if (newScheduleInfo.Status == 'Confirmed') {
 
-    for (var i = 0; i < schedule.Appointments.length; i++) {
-      var appointmentId = schedule.Appointments[i].id;
+      // add primary experimenter
+      var experimenterAssignment = [];
+      // add secondary experimenters
+      var experimenterAssignment_2nd = [];
 
-      newScheduleInfo.Appointments[i].Experimenters.forEach((experimenter) => {
-        experimenterAssignment.push({
-          FK_Experimenter: experimenter,
-          FK_Appointment: appointmentId,
-        });
-      });
+      for (var i = 0; i < schedule.Appointments.length; i++) {
+        var appointmentId = schedule.Appointments[i].id;
 
-      newScheduleInfo.Appointments[i].Experimenters_2nd.forEach(
-        (experimenter_2nd) => {
-          experimenterAssignment_2nd.push({
-            FK_Experimenter: experimenter_2nd,
+        newScheduleInfo.Appointments[i].Experimenters.forEach((experimenter) => {
+          experimenterAssignment.push({
+            FK_Experimenter: experimenter,
             FK_Appointment: appointmentId,
           });
-        }
+        });
+
+        newScheduleInfo.Appointments[i].Experimenters_2nd.forEach(
+          (experimenter_2nd) => {
+            experimenterAssignment_2nd.push({
+              FK_Experimenter: experimenter_2nd,
+              FK_Appointment: appointmentId,
+            });
+          }
+        );
+      }
+
+      await model.experimenterAssignment.bulkCreate(experimenterAssignment);
+
+      await model.experimenterAssignment_2nd.bulkCreate(
+        experimenterAssignment_2nd
       );
+
     }
-
-    await model.experimenterAssignment.bulkCreate(experimenterAssignment);
-
-    await model.experimenterAssignment_2nd.bulkCreate(
-      experimenterAssignment_2nd
-    );
 
     // Log
     const User = req.body.User;

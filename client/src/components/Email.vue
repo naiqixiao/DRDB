@@ -393,7 +393,7 @@ export default {
           emails.push(experimenter.Name + " <" + experimenter.Email + ">");
         });
 
-        appointment.SecondaryExperimenter.forEach((experimenter) => {
+        this.scheduleInfo.Appointments.SecondaryExperimenter.forEach((experimenter) => {
           emails.push(experimenter.Name + " <" + experimenter.Email + ">");
         });
       });
@@ -408,10 +408,13 @@ export default {
         // from:
         //   this.$store.state.labName + " <" + this.$store.state.labEmail + ">",
         to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
-        bcc: this.experimenterEmails(),
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
       };
+
+      if (this.emailType == "Reminder") {
+        emailContent.bcc = this.experimenterEmails();
+      }
 
       try {
         await email.send(emailContent);
