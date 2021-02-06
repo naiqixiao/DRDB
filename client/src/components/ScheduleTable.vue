@@ -895,7 +895,7 @@ export default {
     },
 
     async closeReminderEmail() {
-      if (this.skipReminderEmailStatue) {
+      if (this.skipReminderEmailStatus) {
         await schedule.remind(this.editedSchedule);
       }
 
