@@ -228,6 +228,7 @@ exports.search = asyncHandler(async (req, res) => {
                 "StudyType",
                 "FK_Lab",
               ],
+              include: [{ model: model.lab }],
             },
             {
               model: model.personnel,
@@ -307,6 +308,7 @@ exports.today = asyncHandler(async (req, res) => {
                 "StudyType",
                 "FK_Lab",
               ],
+              include: [{ model: model.lab }],
             },
             {
               model: model.personnel,
@@ -404,6 +406,7 @@ exports.tomorrow = asyncHandler(async (req, res) => {
                 "StudyType",
                 "FK_Lab",
               ],
+              include: [{ model: model.lab }],
             },
             {
               model: model.personnel,
@@ -484,6 +487,7 @@ exports.week = asyncHandler(async (req, res) => {
                 "StudyType",
                 "FK_Lab",
               ],
+              include: [{ model: model.lab }],
             },
             {
               model: model.personnel,
@@ -876,6 +880,7 @@ exports.special = asyncHandler(async (req, res) => {
                 "StudyType",
                 "FK_Lab",
               ],
+              include: [{ model: model.lab }],
             },
             {
               model: model.personnel,

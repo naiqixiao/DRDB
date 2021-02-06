@@ -222,8 +222,10 @@ export default {
           /\${{ZoomLink}}/g,
           "Zoom Link not available."
         );
-        if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
-          ZoomLink = this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink;
+        if ("ZoomLink" in this.scheduleInfo.Appointments[0].Study.Lab) {
+          if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
+            ZoomLink = this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink;
+          }
         }
 
         if (this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0) {

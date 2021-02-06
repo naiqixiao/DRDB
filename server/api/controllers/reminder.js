@@ -63,9 +63,9 @@ function emailBody(schedule) {
   var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
     /\${{ZoomLink}}/g, ZoomLink);
 
-  if (!!schedule.Appointments[0].Study.Lab.ZoomLink) {
+  if ("ZoomLink" in schedule.Appointments[0].Study.Lab) {
 
-    ZoomLink = schedule.Appointments[0].Study.Lab.ZoomLink;
+    if (schedule.Appointments[0].Study.Lab.ZoomLink) { ZoomLink = schedule.Appointments[0].Study.Lab.ZoomLink; }
 
 
   }
