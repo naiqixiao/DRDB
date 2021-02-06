@@ -738,6 +738,11 @@ export default {
     },
 
     ExperimentersNames(appointment) {
+      var E1 = "not assigned";
+      if (appointment.PrimaryExperimenter.length > 0) {
+        E1 = appointment.PrimaryExperimenter[0].Initial;
+      }
+
       var E2 = appointment.SecondaryExperimenter.map((experimenter) => {
         return experimenter.Initial;
       });
@@ -750,7 +755,7 @@ export default {
         ")" +
         "<br>" +
         "<strong>E1:</strong> " +
-        appointment.PrimaryExperimenter[0].Initial +
+        E1 +
         "<br>" +
         "<strong>E2:</strong> " +
         E2.join(", ")
