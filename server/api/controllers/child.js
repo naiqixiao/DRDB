@@ -398,8 +398,12 @@ exports.delete = asyncHandler(async (req, res) => {
 
 // Update a sibling table
 exports.siblings = asyncHandler(async (req, res) => {
+
+  var queryString = "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from ${{DBName}}.Child c inner join ${{DBName}}.Child s on c.FK_Family  = s.FK_Family where c.IdWithinFamily <> s.IdWithinFamily "
+  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
+
   const siblings = await model.sequelize.query(
-    "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from DRDB.Child c inner join DRDB.Child s on c.FK_Family  = s.FK_Family where c.IdWithinFamily <> s.IdWithinFamily ",
+    queryString,
     { type: QueryTypes.SELECT }
   );
 
