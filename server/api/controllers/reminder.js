@@ -277,7 +277,7 @@ exports.reminderEmail = asyncHandler(async () => {
   var queryString = {};
 
   queryString.AppointmentTime = {
-    [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
+    [Op.between]: [startDate.toDate(), startDate.add(2, "days").toDate()],
   };
   queryString.Reminded = 0;
 

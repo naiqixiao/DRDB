@@ -362,7 +362,6 @@ exports.tomorrow = asyncHandler(async (req, res) => {
       ],
     }
 
-
   } else {
     queryString.AppointmentTime = {
       [Op.between]: [
