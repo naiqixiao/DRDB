@@ -374,11 +374,12 @@ export default {
       var emails = [];
 
       this.scheduleInfo.Appointments.forEach((appointment) => {
+
         appointment.PrimaryExperimenter.forEach((experimenter) => {
           emails.push(experimenter.Name + " <" + experimenter.Email + ">");
         });
 
-        this.scheduleInfo.Appointments.SecondaryExperimenter.forEach(
+        appointment.SecondaryExperimenter.forEach(
           (experimenter) => {
             emails.push(experimenter.Name + " <" + experimenter.Email + ">");
           }

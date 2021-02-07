@@ -113,9 +113,69 @@
           dense
         ></v-text-field>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col cols="12" md="1">
-        <v-btn large @click="studiesInaPeriod('today')">Today's Studies</v-btn>
+      <!-- <v-spacer></v-spacer> -->
+      <v-col cols="12" md="2">
+        <v-btn-toggle dark>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn
+                  style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                  large
+                  @click="studiesInaPeriod('today')"
+                >
+                  <v-icon
+                    style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                    >today</v-icon
+                  >
+                </v-btn>
+              </div>
+            </template>
+            <span>Today's studies.</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn
+                  style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                  large
+                  @click="studiesInaPeriod('tomorrow')"
+                >
+                  <v-icon
+                    style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                    >event</v-icon
+                  >
+                </v-btn>
+              </div>
+            </template>
+            <span>Tomorrow's studies</span>
+          </v-tooltip>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-btn
+                  style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                  large
+                  @click="studiesInaPeriod('thisWeek')"
+                >
+                  <v-icon
+                    style="color: var(--v-secondary-base);
+  background-color: var(--v-primary-base) !important;"
+                    >date_range</v-icon
+                  >
+                </v-btn>
+              </div>
+            </template>
+            <span>Studies within this week</span>
+          </v-tooltip>
+        </v-btn-toggle>
+
+        <!-- <v-btn large @click="studiesInaPeriod('today')">Today's Studies</v-btn>
       </v-col>
       <v-col cols="12" md="1">
         <v-btn large @click="studiesInaPeriod('tomorrow')"
@@ -125,7 +185,7 @@
       <v-col cols="12" md="2">
         <v-btn large @click="studiesInaPeriod('thisWeek')"
           >This week's Studies</v-btn
-        >
+        > -->
       </v-col>
     </v-row>
 
@@ -151,13 +211,11 @@
     <div>
       <v-dialog v-model="dialogPickerBefore" max-width="290px">
         <v-card outlined>
-         
-              <v-date-picker
-                v-model="queryString.AppointmentTimeBefore"
-                show-current
-                @click:date="beforeDatePick"
-              ></v-date-picker>
-    
+          <v-date-picker
+            v-model="queryString.AppointmentTimeBefore"
+            show-current
+            @click:date="beforeDatePick"
+          ></v-date-picker>
         </v-card>
       </v-dialog>
     </div>

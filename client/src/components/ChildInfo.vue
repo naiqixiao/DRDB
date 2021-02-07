@@ -268,7 +268,7 @@
     <div>
       <v-dialog
         v-model="dialogSchedule"
-        max-width="1000px"
+        max-width="1200px"
         :retain-focus="false"
       >
         <ConfirmDlg ref="confirmD" />
@@ -294,13 +294,13 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-row
-                style="height: 450px;"
+                style="height: 650px;"
                 align="start"
                 justify="center"
                 dense
               >
-                <v-card outlined style="height: 450px;" width="90%">
-                  <v-row style="height: 80px" align="center" justify="start">
+                <v-card outlined style="height: 650px;" width="90%">
+                  <v-row style="height: 100px" align="center" justify="start">
                     <v-col cols="12" md="3" class="text-left">
                       <div class="title" style="padding-left: 8px">
                         {{ "Study date & time:" }}
@@ -408,15 +408,16 @@
                   <v-spacer></v-spacer>
                   <v-divider style="margin-bottom: 4px"></v-divider>
                   <v-row
+                    dense
                     v-if="response === 'Confirmed'"
                     align="center"
                     justify="start"
-                    style="height: 60px"
+                    style="height: 100px"
                   >
                     <v-col cols="12" md="4" class="text-left">
-                      <div class="title">
+                      <h4 class="text-left">
                         Additional appointment(s) for:
-                      </div>
+                      </h4>
                     </v-col>
                     <!-- <v-col cols="12" md="2">
                             <v-btn
@@ -446,6 +447,26 @@
                         "
                         >{{ sibling.Name }}</v-btn
                       >
+                    </v-col>
+                  </v-row>
+                  <v-spacer></v-spacer>
+                  <v-divider style="margin-bottom: 4px"></v-divider>
+                  <v-row
+                    dense
+                    style="height: 150px"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-col md="11">
+                      <v-textarea
+                        class="conv-textarea"
+                        label="Notes for this schedule"
+                        outlined
+                        no-resize
+                        rows="6"
+                        hide-details
+                        v-model="scheduleNotes"
+                      ></v-textarea>
                     </v-col>
                   </v-row>
                 </v-card>
@@ -729,6 +750,7 @@ export default {
         StudyName: " ",
         Experimenters: [],
       },
+      scheduleNotes: "",
     };
   },
   methods: {
@@ -856,18 +878,23 @@ export default {
 
           studyNames = Array.from(new Set(studyNames));
 
+          var calendarDescription = this.scheduleNotes + "<br>";
+          if (this.appointments[0].Study.StudyType == "Online")
+            calendarDescription =
+              calendarDescription +
+              "zoom link: " +
+              this.appointments[0].ZoomLink;
+
           newSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             FK_Family: this.familyId,
+            Note: this.scheduleNotes,
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             location: this.$store.state.location,
-            description:
-              this.appointments[0].Study.StudyType == "Online"
-                ? this.appointments[0].ZoomLink
-                : "",
+            description: calendarDescription,
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
@@ -1066,12 +1093,28 @@ export default {
 
     async continue23() {
       try {
-        await this.$refs.Email.sendEmail();
-        // this.e1 = 3;
-        // this.nextContactDialog = true;
-        this.emailSent = true;
-        this.emailButtonText = "Email sent";
-        this.scheduleNextPage = true;
+        if (this.emailButtonText == "Email Sent!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Send again?",
+              "An email was just sent to this family. Do you want to send it again?"
+            )
+          ) {
+            await this.$refs.Email.sendEmail();
+            // this.e1 = 3;
+            // this.nextContactDialog = true;
+            this.emailSent = true;
+            this.emailButtonText = "Email sent!";
+            this.scheduleNextPage = true;
+          }
+        } else {
+          await this.$refs.Email.sendEmail();
+          // this.e1 = 3;
+          // this.nextContactDialog = true;
+          this.emailSent = true;
+          this.emailButtonText = "Email sent!";
+          this.scheduleNextPage = true;
+        }
       } catch (error) {
         console.log(error);
         alert("Email wasn't sent successfully, please try again.");
@@ -1118,6 +1161,7 @@ export default {
         this.editedIndex = -1;
         this.emailButtonText = "Send email";
         this.scheduleButtonText = "Schedule";
+        this.scheduleNotes = "";
         // this.response = null;
         this.studyDate = null;
         this.studyTime = "09:00AM";

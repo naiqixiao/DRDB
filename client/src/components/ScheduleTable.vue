@@ -14,6 +14,10 @@
   >
     <template #item.Child="{ item }">
       <ChildNameSchedule :item="item" />
+      <!-- <v-spacer></v-spacer> -->
+      <v-icon @click="showScheduleNote(item)"
+        >{{ item.Note && item.Note != "null" ? "textsms" : "chat_bubble" }}
+      </v-icon>
     </template>
     <template #item.Study="{ item }">
       <StudyNameSchedule :item="item" />
@@ -30,7 +34,11 @@
 
     <template v-slot:item.Status="{ item }">
       <v-chip :color="getColor(item.Status, item.Completed)" dark>
-        {{ item.Status == 'Confirmed' && item.Completed ? 'Completed' : item.Status }}
+        {{
+          item.Status == "Confirmed" && item.Completed
+            ? "Completed"
+            : item.Status
+        }}
       </v-chip>
     </template>
 
@@ -150,7 +158,7 @@
       <td :colspan="headers.length">
         <v-row
           justify="space-between"
-          height="160px"
+          height="174px"
           style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll"
         >
           <MiniAppointmentTable
@@ -227,24 +235,26 @@
             <v-stepper-content step="1">
               <v-row
                 justify="space-around"
-                style="height: 450px;"
+                style="height: 460px;"
                 align="center"
                 dense
               >
-                <v-card outlined style="height: 450px;" width="90%">
+                <v-card outlined style="height: 460px;" width="90%">
                   <v-card-title class="headline"
                     >Select study date and time</v-card-title
                   >
-                  <v-row dense justify="space-around" align="center">
-                    <v-col cols="12" lg="4">
-                      <v-date-picker
-                        v-model="studyDate"
-                        show-current
-                        :min="earliestDate"
-                        :max="latestDate"
-                      ></v-date-picker>
+                  <v-row dense justify="space-around" align="start">
+                    <v-col cols="12" md="5">
+                      <v-card outlined width="292px">
+                        <v-date-picker
+                          v-model="studyDate"
+                          show-current
+                          :min="earliestDate"
+                          :max="latestDate"
+                        ></v-date-picker>
+                      </v-card>
                     </v-col>
-                    <v-col cols="12" md="4">
+                    <v-col cols="12" md="5">
                       <v-combobox
                         v-model="studyTime"
                         :items="studyTimeSlots"
@@ -286,7 +296,26 @@
                           sent to the participant.</span
                         >
                       </v-tooltip>
-                      <!-- <v-divider></v-divider>
+                      <v-divider style="margin-bottom: 8px"></v-divider>
+                      <v-row
+                        dense
+                        style="height: 150px"
+                        align="center"
+                        justify="center"
+                      >
+                        <v-col md="12">
+                          <v-textarea
+                            class="conv-textarea"
+                            label="Notes for this schedule"
+                            outlined
+                            no-resize
+                            rows="11"
+                            hide-details
+                            v-model="editedSchedule.Note"
+                          ></v-textarea>
+                        </v-col>
+                      </v-row>
+                      <!-- 
                     <v-select
                       style="margin-top: 30px"
                       :items="potentialExperimenters"
@@ -446,7 +475,7 @@
         </v-stepper>
       </v-dialog>
 
-      <v-dialog v-model="dialogReminderEmail" max-width="1000px" persistent>
+      <v-dialog v-model="dialogReminderEmail" max-width="1000px">
         <v-card outlined>
           <v-card-title>
             <span class="headline">Reminder email</span>
@@ -502,6 +531,43 @@
                   >Complete</v-btn
                 >
               </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="dialogNote" max-width="600px">
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Notes for this appointment</span>
+          </v-card-title>
+          <v-card-text>
+            <v-row justify="space-between" align="end" dense>
+              <v-col class="noPadding">
+                <v-textarea
+                  class="conv-textarea"
+                  outlined
+                  no-resize
+                  rows="12"
+                  hide-details
+                  v-model="editedSchedule.Note"
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-actions style="padding: 16px;">
+            <v-row justify="space-between">
+              <v-col md="2"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="closeScheduleNotes"
+                  >Cancel</v-btn
+                >
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="saveScheduleNotes">Save</v-btn>
+              </v-col>
+              <v-col md="2"></v-col>
             </v-row>
           </v-card-actions>
         </v-card>
@@ -591,16 +657,29 @@ export default {
       scheduleButtonText: "Confirm new study appointment",
       emailButtonText: "Send email",
       reminderEmailStatus: false,
+      dialogNote: false,
+      // scheduleNotes: "",
     };
   },
   methods: {
     async updateSchedule(item, status) {
-      if (
-        await this.$refs.confirmD.open(
-          "Study appointment update.",
-          "Are you sure you want to mark this appointment as " + status + "?"
-        )
-      ) {
+      var comDTitle = "";
+      var comDText = "";
+
+      switch (status) {
+        case "Reminded":
+          comDTitle = "Send a reminder email";
+          comDText = "Do you want to send the email?";
+          break;
+
+        default:
+          comDTitle = "Study appointment update";
+          comDText =
+            "Are you sure you want to mark this appointment as " + status + "?";
+          break;
+      }
+
+      if (await this.$refs.confirmD.open(comDTitle, comDText)) {
         this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
         this.response = status;
         switch (status) {
@@ -736,6 +815,15 @@ export default {
             this.editedSchedule.Reminded = true;
           }
 
+          var calendarDescription = this.editedSchedule.Note + "<br>";
+          if (this.editedSchedule.Appointments[0].Study.StudyType == "Online")
+            calendarDescription =
+              calendarDescription +
+              "zoom link: " +
+              this.editedSchedule.Appointments[0].ZoomLink;
+
+          this.editedSchedule.description = calendarDescription;
+
           const calendarEvent = await schedule.update(this.editedSchedule);
 
           this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
@@ -747,8 +835,6 @@ export default {
 
           Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
         }
-
-        // this.close();
       } catch (error) {
         console.log(error);
       }
@@ -785,11 +871,26 @@ export default {
 
     async continue23() {
       try {
-        await this.$refs.Email.sendEmail();
+        if (this.emailButtonText == "Email Sent!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Send again?",
+              "An email was just sent to this family. Do you want to send it again?"
+            )
+          ) {
+            await this.$refs.Email.sendEmail();
 
-        this.emailSent = true;
-        this.emailButtonText = "Email Sent!";
-        this.scheduleNextPage = true;
+            this.emailSent = true;
+            this.emailButtonText = "Email Sent!";
+            this.scheduleNextPage = true;
+          }
+        } else {
+          await this.$refs.Email.sendEmail();
+
+          this.emailSent = true;
+          this.emailButtonText = "Email Sent!";
+          this.scheduleNextPage = true;
+        }
       } catch (error) {
         console.log(error);
       }
@@ -838,6 +939,9 @@ export default {
         this.scheduleUpdated = false;
         this.scheduleButtonText = "Confirm new study appointment";
         this.emailButtonText = "Send email";
+        this.skipStudyDateTimeStatus = false;
+        this.skipConfirmationEmailStatus = false;
+        this.skipReminderEmailStatus = false;
       }, 300);
     },
 
@@ -919,13 +1023,30 @@ export default {
 
     async sendReminderEmail() {
       try {
-        await this.$refs.Email.sendEmail();
+        if (this.emailButtonText == "Email Sent!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Send again?",
+              "An email was just sent to this family. Do you want to send it again?"
+            )
+          ) {
+            await this.$refs.Email.sendEmail();
 
-        this.emailButtonText = "Email Sent!";
+            this.emailButtonText = "Email Sent!";
 
-        this.reminderEmailStatus = true;
+            this.reminderEmailStatus = true;
 
-        await schedule.remind(this.editedSchedule);
+            await schedule.remind(this.editedSchedule);
+          }
+        } else {
+          await this.$refs.Email.sendEmail();
+
+          this.emailButtonText = "Email Sent!";
+
+          this.reminderEmailStatus = true;
+
+          await schedule.remind(this.editedSchedule);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -978,6 +1099,38 @@ export default {
 
       return color;
     },
+
+    showScheduleNote(item) {
+      this.editedSchedule = Object.assign({}, item);
+      this.editedIndex = this.Schedules.indexOf(item);
+      this.dialogNote = true;
+    },
+
+    closeScheduleNotes() {
+      this.dialogNote = false;
+      // setTimeout(() => {
+
+      // }, 300);
+    },
+
+    async saveScheduleNotes() {
+      var updatedSchedule = {
+        id: this.editedSchedule.id,
+        Note: this.editedSchedule.Note,
+        calendarEventId: this.editedSchedule.calendarEventId,
+        description: this.editedSchedule.Note,
+      };
+
+      try {
+        await schedule.update(updatedSchedule);
+
+        Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
+
+        this.closeScheduleNotes();
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 
   computed: {
@@ -1024,6 +1177,9 @@ export default {
     },
     dialogReminderEmail(val) {
       val || this.closeReminderEmail();
+    },
+    dialogNote(val) {
+      val || this.closeScheduleNotes();
     },
   },
 };

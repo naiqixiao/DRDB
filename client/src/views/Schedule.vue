@@ -541,12 +541,12 @@
               <v-stepper-items>
                 <v-stepper-content step="1">
                   <v-row
-                    style="height: 450px;"
+                    style="height: 650px;"
                     align="start"
                     justify="center"
                     dense
                   >
-                    <v-card outlined style="height: 450px;" width="90%">
+                    <v-card outlined style="height: 650px;" width="90%">
                       <v-row
                         style="height: 100px;"
                         align="center"
@@ -658,10 +658,11 @@
                       <v-spacer></v-spacer>
                       <v-divider style="margin-bottom: 4px"></v-divider>
                       <v-row
+                        dense
                         v-if="response === 'Confirmed'"
                         align="center"
                         justify="start"
-                        style="height: 60px"
+                        style="height: 100px"
                       >
                         <v-col cols="12" md="3" class="text-left">
                           <h4 class="text-left">
@@ -698,6 +699,26 @@
                             "
                             >{{ child.Name }}</v-btn
                           >
+                        </v-col>
+                      </v-row>
+                      <v-spacer></v-spacer>
+                      <v-divider style="margin-bottom: 4px"></v-divider>
+                      <v-row
+                        dense
+                        style="height: 150px"
+                        align="center"
+                        justify="center"
+                      >
+                        <v-col md="11">
+                          <v-textarea
+                            class="conv-textarea"
+                            label="Notes for this schedule"
+                            outlined
+                            no-resize
+                            rows="6"
+                            hide-details
+                            v-model="scheduleNotes"
+                          ></v-textarea>
                         </v-col>
                       </v-row>
                     </v-card>
@@ -1055,6 +1076,7 @@ export default {
         PrimaryExperimenter: [],
         SecondaryExperimenter: [],
       },
+      // scheduleNotes: "",
     };
   },
 
@@ -1402,18 +1424,23 @@ export default {
 
           studyNames = Array.from(new Set(studyNames));
 
+          var calendarDescription = this.scheduleNotes + "<br>";
+          if (this.appointments[0].Study.StudyType == "Online")
+            calendarDescription =
+              calendarDescription +
+              "zoom link: " +
+              this.appointments[0].ZoomLink;
+
           this.currentSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
             Status: this.response,
             FK_Family: this.currentFamily.id,
+            Note: this.scheduleNotes,
             summary: studyNames.join(" + "),
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
-            description:
-              this.appointments[0].Study.StudyType == "Online"
-                ? this.appointments[0].ZoomLink
-                : "",
+            description: calendarDescription,
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
@@ -1616,12 +1643,28 @@ export default {
 
     async continue23() {
       try {
-        await this.$refs.Email.sendEmail();
-        // this.e1 = 3;
-        // this.nextContactDialog = true;
-        this.emailSent = true;
-        this.emailButtonText = "Email Sent";
-        this.scheduleNextPage = true;
+        if (this.emailButtonText == "Email Sent!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Send again?",
+              "An email was just sent to this family. Do you want to send it again?"
+            )
+          ) {
+            await this.$refs.Email.sendEmail();
+            // this.e1 = 3;
+            // this.nextContactDialog = true;
+            this.emailSent = true;
+            this.emailButtonText = "Email Sent!";
+            this.scheduleNextPage = true;
+          }
+        } else {
+          await this.$refs.Email.sendEmail();
+          // this.e1 = 3;
+          // this.nextContactDialog = true;
+          this.emailSent = true;
+          this.emailButtonText = "Email Sent!";
+          this.scheduleNextPage = true;
+        }
       } catch (error) {
         console.log(error);
         alert("Email wasn't sent successfully, please try again.");
@@ -1675,7 +1718,6 @@ export default {
           this.Children[childIndex].scheduled = true;
         });
 
-        //
         await this.$refs.NextContact.updateNextContact();
         this.resetSchedule();
         this.closeSchedule();
@@ -1697,6 +1739,7 @@ export default {
         this.studyTime = "09:00AM";
         this.emailButtonText = "Send email";
         this.scheduleButtonText = "Schedule";
+        this.scheduleNotes = "";
         this.emailDialog = false;
         this.nextContactDialog = false;
         this.emailSent = false;

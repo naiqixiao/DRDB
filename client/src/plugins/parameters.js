@@ -286,27 +286,27 @@ export default {
     Vue.prototype.$headersSchedule = [
       {
         text: "Child",
-        align: "center",
+        align: "end",
         value: "Child",
-        width: "16%",
+        width: "12%",
       },
       {
         text: "Study",
         align: "center",
         value: "Study",
-        width: "18%",
+        width: "14%",
       },
       {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "18%",
+        width: "15%",
       },
       {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "13%",
+        width: "10%",
       },
       {
         text: "Status",
@@ -326,21 +326,21 @@ export default {
         align: "center",
         value: "actions",
         sortable: false,
-        width: "15%",
+        width: "16%",
       },
       {
         text: "Reminder",
         align: "center",
         value: "Reminded",
         sortable: false,
-        width: "5%",
+        width: "8%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Completed",
         sortable: false,
-        width: "5%",
+        width: "8%",
       },
     ];
 
