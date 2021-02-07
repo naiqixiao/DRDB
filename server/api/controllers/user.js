@@ -313,7 +313,21 @@ exports.login = asyncHandler(async (req, res) => {
     include: [
       {
         model: model.lab,
-        include: [{ model: model.study }],
+        include: [{
+          model: model.study, include: [
+            {
+              model: model.personnel,
+              as: 'PointofContact'
+            },
+            {
+              model: model.personnel,
+              as: 'Experimenters',
+              through: {
+                model: model.experimenter,
+              },
+            },
+          ]
+        }],
       },
     ],
   });

@@ -252,7 +252,7 @@ exports.search = asyncHandler(async (req, res) => {
       }
     );
 
-    console.log(pastParticipants)
+    // console.log(pastParticipants)
 
     queryString.id = { [Op.notIn]: pastParticipants };
   }

@@ -307,6 +307,15 @@ export default {
       previousIndex: -1,
       appointmentUpdated: false,
       dialogEmail: false,
+      defaultAppointment: {
+        index: null,
+        FK_Family: null,
+        FK_Child: null,
+        FK_Study: null,
+        FK_Schedule: null,
+        PrimaryExperimenter: [],
+        SecondaryExperimenter:[]
+      },
     };
   },
   methods: {
@@ -746,6 +755,13 @@ export default {
       var E2 = appointment.SecondaryExperimenter.map((experimenter) => {
         return experimenter.Initial;
       });
+      
+      var E22 = "";
+      if (appointment.SecondaryExperimenter.length > 0) {
+        E22 = E2.join(", ");
+      } else {
+        E22 = "not assigned";
+      }
 
       return (
         "<strong>" +
@@ -758,7 +774,7 @@ export default {
         E1 +
         "<br>" +
         "<strong>E2:</strong> " +
-        E2.join(", ")
+        E22
       );
     },
   },

@@ -17,7 +17,7 @@ import { GChart } from "vue-google-charts";
 export default {
   components: { GChart },
   props: {
-    family: Object
+    family: Object,
   },
 
   data() {
@@ -30,34 +30,35 @@ export default {
         "Rescheduling",
         "No Show",
         "Cancelled",
-        "Rejected"
+        "Rejected",
       ],
       colors: [
-        "#FF9F1C",
-        "#FFC16E",
-        "#2EC4B6",
-        "#011627",
-        "#182B3A",
-        "#A91628",
-        "#E71D36",
-        "#ED5A6C"
-      ]
+        "#01579B",
+        "#40C4FF",
+        "#009688",
+        "#00796B",
+        "#9E9D24",
+        "#EF6C00",
+        "#F4511E",
+        "#263238",
+      ],
     };
   },
 
   methods: {
     scheduleStatistics() {
       var schedule = [];
-      this.family.Appointments.forEach(appointment => {
+      this.family.Appointments.forEach((appointment) => {
         schedule.push({
           id: appointment.FK_Schedule,
           status: appointment.Schedule.Status,
-          AppointmentTime: appointment.Schedule.AppointmentTime
+          AppointmentTime: appointment.Schedule.AppointmentTime,
+          completed: appointment.Schedule.Completed,
         });
       });
 
       const uniqueSchedule = schedule.reduce((schedule, current) => {
-        const x = schedule.find(item => item.id === current.id);
+        const x = schedule.find((item) => item.id === current.id);
         if (!x) {
           return schedule.concat([current]);
         } else {
@@ -68,7 +69,13 @@ export default {
       var scheduleStatus = {};
       var chartIndices = [];
 
-      uniqueSchedule.forEach(schedule => {
+      uniqueSchedule.forEach((schedule) => {
+        if (schedule.status == "Confirmed" && schedule.completed) {
+          schedule.status = "Completed";
+        }
+      });
+
+      uniqueSchedule.forEach((schedule) => {
         if (scheduleStatus[schedule.status]) {
           scheduleStatus[schedule.status] += 1;
         } else {
@@ -84,14 +91,14 @@ export default {
       var chartColors = [];
       var chartStatus = [];
 
-      chartIndices.forEach(index => {
+      chartIndices.forEach((index) => {
         chartColors.push(this.colors[index]);
         chartStatus.push(this.status[index]);
       });
 
       var chartData = [["Status", "Count"]];
 
-      chartStatus.forEach(status => {
+      chartStatus.forEach((status) => {
         chartData.push([status, scheduleStatus[status]]);
       });
 
@@ -100,18 +107,18 @@ export default {
         title: "Family participation history",
         width: 400,
         height: 300,
-        chartArea: { left: 20, top:40, width: "80%", height: "80%" },
+        chartArea: { left: 20, top: 40, width: "80%", height: "80%" },
         fontSize: 12,
         backgroundColor: { fill: "transparent" },
         titleTextStyle: {
           fontSize: 18,
-          bold: true
-        }
+          bold: true,
+        },
       };
 
       return { chartData: chartData, chartOptions: chartOptions };
-    }
-  }
+    },
+  },
 };
 </script>
 

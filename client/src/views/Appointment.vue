@@ -149,33 +149,27 @@
     </v-row>
 
     <div>
-      <v-dialog v-model="dialogPickerBefore" max-width="360px" persistent>
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" lg="12">
+      <v-dialog v-model="dialogPickerBefore" max-width="290px">
+        <v-card outlined>
+         
               <v-date-picker
                 v-model="queryString.AppointmentTimeBefore"
                 show-current
                 @click:date="beforeDatePick"
               ></v-date-picker>
-            </v-col>
-          </v-row>
+    
         </v-card>
       </v-dialog>
     </div>
 
     <div>
-      <v-dialog v-model="dialogPickerAfter" max-width="360px" persistent>
-        <v-card>
-          <v-row align="center">
-            <v-col cols="12" lg="12">
-              <v-date-picker
-                v-model="queryString.AppointmentTimeAfter"
-                show-current
-                @click:date="afterDatePick"
-              ></v-date-picker>
-            </v-col>
-          </v-row>
+      <v-dialog v-model="dialogPickerAfter" max-width="290px">
+        <v-card outlined>
+          <v-date-picker
+            v-model="queryString.AppointmentTimeAfter"
+            show-current
+            @click:date="afterDatePick"
+          ></v-date-picker>
         </v-card>
       </v-dialog>
     </div>

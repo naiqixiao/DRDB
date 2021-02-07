@@ -433,6 +433,13 @@ export default {
         value: "Schedule.updatedAt",
         width: "10%",
       },
+      // {
+      //   text: "Complete",
+      //   align: "center",
+      //   value: "Schedule.Completed",
+      //   sortable: false,
+      //   width: "10%",
+      // },
     ];
 
     Vue.prototype.$sex = ["F", "M"];

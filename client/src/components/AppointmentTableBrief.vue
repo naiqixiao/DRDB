@@ -28,6 +28,18 @@
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
     </template>
+    <template #item.Schedule.Status="{ item }">
+      <v-chip
+        :color="getColor(item.Schedule.Status, item.Schedule.Completed)"
+        dark
+      >
+        {{
+          item.Schedule.Status == "Confirmed" && item.Schedule.Completed
+            ? "Completed"
+            : item.Schedule.Status
+        }}
+      </v-chip>
+    </template>
   </v-data-table>
 </template>
 
@@ -51,6 +63,40 @@ export default {
         DoB: new Date(),
       },
     };
+  },
+  methods: {
+    getColor(status, completed) {
+      var color = "";
+      switch (status) {
+        case "Completed":
+          color = "#01579B";
+          break;
+        case "Confirmed":
+          if (completed) {
+            color = "#01579B";
+          } else {
+            color = "light-blue accent-2";
+          }
+          break;
+        case "TBD":
+          color = "teal darken-2";
+          break;
+        case "Rescheduling":
+          color = "lime darken-3";
+          break;
+        case "No Show":
+          color = "orange darken-3";
+          break;
+        case "Cancelled":
+          color = "deep-orange darken-1";
+          break;
+        case "Rejected":
+          color = "blue-grey darken-4";
+          break;
+      }
+
+      return color;
+    },
   },
   // computed: {
   //   sortableAppointments() {

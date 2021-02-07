@@ -46,14 +46,14 @@
                 large
                 @click.stop="updateExperimenters"
                 :disabled="
-                        !studyId || !(
-                          PointofContactId ==
-                            $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager'
-                        )
-                      "
+                  !studyId ||
+                    !(
+                      PointofContactId == $store.state.userID ||
+                      $store.state.role == 'Admin' ||
+                      $store.state.role == 'PI' ||
+                      $store.state.role == 'Lab manager'
+                    )
+                "
               >
                 <v-icon>edit</v-icon>
               </v-btn>
@@ -62,38 +62,47 @@
           <span>Assign experimenters to this study</span>
         </v-tooltip>
       </v-col>
-      <div>
-        <v-dialog v-model="dialogExperimenter" max-width="1200px" persistent>
-          <v-card>
-            <v-row align="center" justify="center">
-              <v-col cols="12" lg="10">
-                <v-select
-                  :items="labMembers"
-                  :item-value="'id'"
-                  :item-text="'Name'"
-                  v-model="editedExperimenter"
-                  return-object
-                  label="Experimenters"
-                  multiple
-                  chip
-                  outlined
-                  dense
-                ></v-select>
-              </v-col>
-            </v-row>
 
-            <v-card-actions>
-              <v-row justify="space-between" style="height: 50px">
-                <v-col md="4"></v-col>
+      <div>
+        <v-dialog v-model="dialogExperimenter" max-width="800px">
+          <v-card>
+            <v-card-title class="title" style="padding: 8px">{{
+              "Assign this study to"
+            }}</v-card-title>
+
+            <v-card-text>
+              <v-row
+                align="center"
+                justify="center"
+                style="height: 200px;" dense
+              >
+                <v-col cols="12" lg="10">
+                  <v-select
+                    :items="labMembers"
+                    :item-value="'id'"
+                    :item-text="'Name'"
+                    v-model="editedExperimenter"
+                    return-object
+                    label="Experimenters"
+                    multiple
+                    chip
+                    outlined
+                    dense
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-card-text>
+
+            <v-card-actions tyle="padding: 16px;">
+              <v-row justify="space-between">
+                <v-col md="3"></v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="dialogExperimenter = false"
-                    >Cancel</v-btn
-                  >
+                  <v-btn color="primary" @click="close">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="save">Confirm</v-btn>
                 </v-col>
-                <v-col md="4"></v-col>
+                <v-col md="3"></v-col>
               </v-row>
             </v-card-actions>
           </v-card>
@@ -112,7 +121,7 @@ export default {
     Experimenters: Array,
     labMembers: Array,
     studyId: Number,
-    PointofContactId: Number
+    PointofContactId: Number,
   },
 
   data() {
@@ -142,12 +151,16 @@ export default {
         await experimenter.postExperimenters(newExperimenters);
 
         this.$emit("updatedExperimenters", this.editedExperimenter);
-        this.dialogExperimenter = false;
+        this.close();
 
         console.log("Experimenters updated.");
       } catch (error) {
         console.error(error.response);
       }
+    },
+
+    close() {
+      this.dialogExperimenter = false;
     },
   },
   computed: {},

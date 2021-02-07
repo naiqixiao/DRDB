@@ -586,7 +586,7 @@ exports.update = asyncHandler(async (req, res) => {
           throw err;
         }
 
-        updatedScheduleInfo.AppointmentTime = null;
+        // updatedScheduleInfo.AppointmentTime = null;
       }
 
       break;

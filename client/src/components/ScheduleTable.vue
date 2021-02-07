@@ -28,6 +28,12 @@
       <AgeByParticipationSchedule :item="item" />
     </template>
 
+    <template v-slot:item.Status="{ item }">
+      <v-chip :color="getColor(item.Status, item.Completed)" dark>
+        {{ item.Status == 'Confirmed' && item.Completed ? 'Completed' : item.Status }}
+      </v-chip>
+    </template>
+
     <template #item.actions="{ item }">
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
@@ -144,6 +150,7 @@
       <td :colspan="headers.length">
         <v-row
           justify="space-between"
+          height="160px"
           style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll"
         >
           <MiniAppointmentTable
@@ -165,7 +172,7 @@
         :retain-focus="false"
         persistent
       >
-        <v-card outlined style="height: 800px">
+        <v-card outlined>
           <v-card-title>
             <span class="headline">Notes for the next contact</span>
           </v-card-title>
@@ -179,8 +186,8 @@
             @nextContactDone="updateNextContactFrontend"
           ></NextContact>
 
-          <v-card-actions>
-            <v-row justify="space-between" style="height: 50px">
+          <v-card-actions style="padding: 16px;">
+            <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="nextContactDialog = false"
@@ -218,62 +225,68 @@
 
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-card outlined>
-                <v-card-title class="headline"
-                  >Select study date and time.</v-card-title
-                >
-                <v-row justify="space-around">
-                  <v-col cols="12" lg="6">
-                    <v-date-picker
-                      v-model="studyDate"
-                      show-current
-                      :min="earliestDate"
-                      :max="latestDate"
-                    ></v-date-picker>
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <v-combobox
-                      v-model="studyTime"
-                      :items="studyTimeSlots"
-                      label="Study time"
-                      hide-details
-                      dense
-                    ></v-combobox>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <div v-on="on">
-                          <v-checkbox
-                            label="Skip study date/time"
-                            class="margin-top-48 pa-0"
-                            :value="skipStudyDateTimeStatus"
-                            @change="skipStudyDateTime()"
-                            dense
-                          ></v-checkbox>
-                        </div>
-                      </template>
-                      <span
-                        >Check this box to use current date/time for the current
-                        appointment.</span
-                      >
-                    </v-tooltip>
-                    <v-tooltip top>
-                      <template v-slot:activator="{ on }">
-                        <div v-on="on">
-                          <v-checkbox
-                            label="Skip reminder email"
-                            class="ma-0 pa-0"
-                            :value="skipReminderEmailStatus"
-                            @change="skipReminderEmail()"
-                            dense
-                          ></v-checkbox>
-                        </div>
-                      </template>
-                      <span
-                        >Check this box to prevent reminder email from being
-                        sent to the participant.</span
-                      >
-                    </v-tooltip>
-                    <!-- <v-divider></v-divider>
+              <v-row
+                justify="space-around"
+                style="height: 450px;"
+                align="center"
+                dense
+              >
+                <v-card outlined style="height: 450px;" width="90%">
+                  <v-card-title class="headline"
+                    >Select study date and time</v-card-title
+                  >
+                  <v-row dense justify="space-around" align="center">
+                    <v-col cols="12" lg="4">
+                      <v-date-picker
+                        v-model="studyDate"
+                        show-current
+                        :min="earliestDate"
+                        :max="latestDate"
+                      ></v-date-picker>
+                    </v-col>
+                    <v-col cols="12" md="4">
+                      <v-combobox
+                        v-model="studyTime"
+                        :items="studyTimeSlots"
+                        label="Study time"
+                        hide-details
+                        dense
+                      ></v-combobox>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <div v-on="on">
+                            <v-checkbox
+                              label="Skip study date/time"
+                              class="margin-top-48 pa-0"
+                              :value="skipStudyDateTimeStatus"
+                              @change="skipStudyDateTime()"
+                              dense
+                            ></v-checkbox>
+                          </div>
+                        </template>
+                        <span
+                          >Check this box to use current date/time for the
+                          current appointment.</span
+                        >
+                      </v-tooltip>
+                      <v-tooltip top>
+                        <template v-slot:activator="{ on }">
+                          <div v-on="on">
+                            <v-checkbox
+                              label="Skip reminder email"
+                              class="ma-0 pa-0"
+                              :value="skipReminderEmailStatus"
+                              @change="skipReminderEmail()"
+                              dense
+                            ></v-checkbox>
+                          </div>
+                        </template>
+                        <span
+                          >Check this box to prevent reminder email from being
+                          sent to the participant.</span
+                        >
+                      </v-tooltip>
+                      <!-- <v-divider></v-divider>
                     <v-select
                       style="margin-top: 30px"
                       :items="potentialExperimenters"
@@ -299,12 +312,16 @@
                       dense
                       chip
                     ></v-select> -->
-                  </v-col>
-                </v-row>
-              </v-card>
+                    </v-col>
+                  </v-row>
+                </v-card>
+              </v-row>
 
-              <v-divider></v-divider>
-              <v-row justify="space-between" align="center">
+              <v-row
+                justify="space-between"
+                align="center"
+                style="padding: 8px;"
+              >
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
                   <v-btn
@@ -314,7 +331,7 @@
                   >
                     <v-icon dark left v-show="scheduleUpdated"
                       >mdi-checkbox-marked-circle</v-icon
-                    >Confirm
+                    >{{ scheduleButtonText }}
                   </v-btn>
                 </v-col>
                 <v-col cols="12" md="2">
@@ -325,8 +342,13 @@
               </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-card outlined>
-                <v-row style="height: 700px;">
+              <v-row
+                style="height: 700px;"
+                align="start"
+                justify="center"
+                dense
+              >
+                <v-card outlined style="height: 700px;" width="90%">
                   <Email
                     ref="Email"
                     :dialog="emailDialog"
@@ -335,10 +357,15 @@
                     :familyInfo="editedSchedule.Family"
                     emailType="Confirmation"
                   ></Email>
-                </v-row>
-              </v-card>
-              <v-divider></v-divider>
-              <v-row justify="space-between" align="center">
+                </v-card>
+              </v-row>
+              <!-- <v-divider></v-divider> -->
+              <v-row
+                dense
+                justify="space-between"
+                align="center"
+                style="padding: 8px;"
+              >
                 <v-col cols="12" md="2">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -401,8 +428,13 @@
                 :nextContactDialog="nextContactDialogStepper"
                 @nextContactDone="updateNextContactFrontend"
               ></NextContact>
-              <v-divider></v-divider>
-              <v-row dense justify="center" align="center">
+              <!-- <v-divider></v-divider> -->
+              <v-row
+                dense
+                justify="space-between"
+                align="center"
+                style="padding: 8px;"
+              >
                 <v-col>
                   <v-btn color="primary" @click="completeSchedule"
                     >Complete</v-btn
@@ -419,7 +451,7 @@
           <v-card-title>
             <span class="headline">Reminder email</span>
           </v-card-title>
-          <v-row style="height: 700px;">
+          <v-row style="height: 700px;" align="start" justify="center" dense>
             <Email
               ref="Email"
               :dialog="dialogReminderEmail"
@@ -556,6 +588,7 @@ export default {
         ],
       },
       dialogReminderEmail: false,
+      scheduleButtonText: "Confirm new study appointment",
       emailButtonText: "Send email",
       reminderEmailStatus: false,
     };
@@ -630,7 +663,7 @@ export default {
 
             try {
               await schedule.update(item);
-              item.AppointmentTime = null;
+              // item.AppointmentTime = null;
               item.updatedAt = new Date().toISOString();
 
               console.log("Study appointment updated!");
@@ -743,6 +776,7 @@ export default {
 
         this.scheduleUpdated = true;
         this.scheduleNextPage = true;
+        this.scheduleButtonText = "Study appointment updated!";
       } catch (error) {
         console.log(error);
         alert("Failed to update the appointment, please try again.");
@@ -754,6 +788,7 @@ export default {
         await this.$refs.Email.sendEmail();
 
         this.emailSent = true;
+        this.emailButtonText = "Email Sent!";
         this.scheduleNextPage = true;
       } catch (error) {
         console.log(error);
@@ -801,6 +836,8 @@ export default {
         this.emailSent = false;
         this.scheduleNextPage = false;
         this.scheduleUpdated = false;
+        this.scheduleButtonText = "Confirm new study appointment";
+        this.emailButtonText = "Send email";
       }, 300);
     },
 
@@ -884,7 +921,7 @@ export default {
       try {
         await this.$refs.Email.sendEmail();
 
-        this.emailButtonText = "Email Sent";
+        this.emailButtonText = "Email Sent!";
 
         this.reminderEmailStatus = true;
 
@@ -907,6 +944,39 @@ export default {
         this.skipReminderEmailStatus = false;
         this.reminderEmailStatus = false;
       }, 300);
+    },
+
+    getColor(status, completed) {
+      var color = "";
+      switch (status) {
+        case "Completed":
+          color = "#01579B";
+          break;
+        case "Confirmed":
+          if (completed) {
+            color = "#01579B";
+          } else {
+            color = "light-blue accent-2";
+          }
+          break;
+        case "TBD":
+          color = "teal darken-2";
+          break;
+        case "Rescheduling":
+          color = "lime darken-3";
+          break;
+        case "No Show":
+          color = "orange darken-3";
+          break;
+        case "Cancelled":
+          color = "deep-orange darken-1";
+          break;
+        case "Rejected":
+          color = "blue-grey darken-4";
+          break;
+      }
+
+      return color;
     },
   },
 

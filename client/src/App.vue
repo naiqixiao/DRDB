@@ -237,6 +237,7 @@ export default {
 .v-data-table tbody tr.v-data-table__expanded__content {
   padding-left: 0px !important;
   background-color: var(--v-textbackground-lighten4) !important;
+  height: 180px;
 }
 
 .v-textarea textarea {

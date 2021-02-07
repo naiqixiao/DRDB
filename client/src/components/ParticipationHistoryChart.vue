@@ -1,7 +1,10 @@
 <template>
   <v-card name="participationStatistics" outlined height="450px">
     <v-card-text v-if="family.Appointments || family.Schedules">
-      <doughnut-chart :chart-data="datacollection.chartData" :height="280"></doughnut-chart>
+      <doughnut-chart
+        :chart-data="datacollection.chartData"
+        :height="280"
+      ></doughnut-chart>
     </v-card-text>
   </v-card>
 </template>
@@ -29,14 +32,14 @@ export default {
         "Rejected",
       ],
       colors: [
-        "#FF9F1C",
-        "#FFC16E",
-        "#2EC4B6",
-        "#011627",
-        "#182B3A",
-        "#A91628",
-        "#E71D36",
-        "#ED5A6C",
+        "#01579B",
+        "#40C4FF",
+        "#009688",
+        "#00796B",
+        "#9E9D24",
+        "#EF6C00",
+        "#F4511E",
+        "#263238",
       ],
     };
   },
@@ -49,6 +52,11 @@ export default {
 
       if (this.family.Schedules) {
         this.family.Schedules.forEach((schedule) => {
+
+          if (schedule.Status == "Confirmed" && schedule.Completed) {
+            schedule.Status = "Completed";
+          }
+
           if (scheduleStatus[schedule.Status]) {
             scheduleStatus[schedule.Status] += 1;
           } else {
@@ -63,6 +71,7 @@ export default {
             id: appointment.FK_Schedule,
             status: appointment.Schedule.Status,
             AppointmentTime: appointment.Schedule.AppointmentTime,
+            completed: appointment.Schedule.Completed,
           });
         });
 
@@ -74,6 +83,12 @@ export default {
             return schedule;
           }
         }, []);
+
+        uniqueSchedule.forEach((schedule) => {
+          if (schedule.status == "Confirmed" && schedule.completed) {
+            schedule.status = "Completed";
+          }
+        });
 
         uniqueSchedule.forEach((schedule) => {
           if (scheduleStatus[schedule.status]) {
@@ -126,5 +141,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

@@ -60,7 +60,8 @@
                     :value="!!item.Active"
                     @input="changePersonnelStatus(item)"
                     :disabled="
-                      !(currentPersonnel.id == $store.state.userID ||
+                      !(
+                        currentPersonnel.id == $store.state.userID ||
                         $store.state.role == 'Admin' ||
                         $store.state.role == 'PI' ||
                         $store.state.role == 'Lab manager'
@@ -119,10 +120,10 @@
                             @click.stop="createPersonnel"
                             :disabled="
                               $store.state.role != 'Admin' &&
-                              $store.state.role != 'PI' &&
-                              $store.state.role != 'PostDoc' &&
-                              $store.state.role != 'GradStudent' &&
-                              $store.state.role != 'Lab manager'
+                                $store.state.role != 'PI' &&
+                                $store.state.role != 'PostDoc' &&
+                                $store.state.role != 'GradStudent' &&
+                                $store.state.role != 'Lab manager'
                             "
                           >
                             <v-icon class="fabIcon">add</v-icon>
@@ -141,10 +142,10 @@
                             @click.stop="editPersonnel"
                             :disabled="
                               !currentPersonnel.id ||
-                              (currentPersonnel.id != $store.state.userID &&
-                                $store.state.role != 'Admin' &&
-                                $store.state.role != 'PI' &&
-                                $store.state.role != 'Lab manager')
+                                (currentPersonnel.id != $store.state.userID &&
+                                  $store.state.role != 'Admin' &&
+                                  $store.state.role != 'PI' &&
+                                  $store.state.role != 'Lab manager')
                             "
                           >
                             <v-icon class="fabIcon">edit</v-icon>
@@ -163,9 +164,9 @@
                             @click.stop="deletePersonnel"
                             :disabled="
                               !currentPersonnel.id ||
-                              ($store.state.role != 'Admin' &&
-                                $store.state.role != 'PI' &&
-                                $store.state.role != 'Lab manager')
+                                ($store.state.role != 'Admin' &&
+                                  $store.state.role != 'PI' &&
+                                  $store.state.role != 'Lab manager')
                             "
                           >
                             <v-icon class="fabIcon">delete</v-icon>
@@ -195,81 +196,77 @@
           </v-container>
 
           <div>
-            <v-dialog
-              v-model="dialog"
-              max-width="1000px"
-              :retain-focus="false"
-              persistent
-            >
+            <v-dialog v-model="dialog" max-width="1000px" :retain-focus="false">
               <v-card>
                 <v-card-title>
                   <span class="headline">Lab member information</span>
                 </v-card-title>
+                <v-card-text>
+                  <v-form ref="form" v-model="valid" lazy-validation>
+                    <v-container>
+                      <v-row dense style="padding: 8px 8px 4px">
+                        <v-col
+                          cols="12"
+                          sm="6"
+                          :md="item.width"
+                          v-for="item in personnelFields"
+                          :key="item.label"
+                        >
+                          <div v-if="item.options">
+                            <v-select
+                              justify="start"
+                              :items="
+                                $store.state.role == 'Admin' ||
+                                $store.state.role == 'PI' ||
+                                $store.state.role == 'Lab manager'
+                                  ? $Options.fullRoles
+                                  : $Options.limitedRoles
+                              "
+                              v-model="editedPersonnel[item.field]"
+                              :label="item.label"
+                              :rules="$rules[item.rules]"
+                              hide-details
+                              height="48px"
+                              placeholder="  "
+                              outlined
+                              dense
+                              chip
+                            ></v-select>
+                          </div>
+                          <div v-else-if="item.rules">
+                            <v-text-field
+                              :label="item.label"
+                              v-model="editedPersonnel[item.field]"
+                              :rules="$rules[item.rules]"
+                              hide-details
+                              height="48px"
+                              placeholder="  "
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </div>
+                          <div v-else>
+                            <v-text-field
+                              :label="item.label"
+                              v-model="editedPersonnel[item.field]"
+                              hide-details
+                              height="48px"
+                              placeholder="  "
+                              outlined
+                              dense
+                            ></v-text-field>
+                          </div>
+                        </v-col>
+                      </v-row>
 
-                <v-form ref="form" v-model="valid" lazy-validation>
-                  <v-container>
-                    <v-row>
-                      <v-col
-                        cols="12"
-                        sm="6"
-                        :md="item.width"
-                        v-for="item in personnelFields"
-                        :key="item.label"
-                      >
-                        <div v-if="item.options">
-                          <v-select
-                            justify="start"
-                            :items="
-                              $store.state.role == 'Admin' ||
-                              $store.state.role == 'PI' ||
-                              $store.state.role == 'Lab manager'
-                                ? $Options.fullRoles
-                                : $Options.limitedRoles
-                            "
-                            v-model="editedPersonnel[item.field]"
-                            :label="item.label"
-                            :rules="$rules[item.rules]"
-                            hide-details
-                            height="48px"
-                            placeholder="  "
-                            outlined
-                            dense
-                            chip
-                          ></v-select>
-                        </div>
-                        <div v-else-if="item.rules">
-                          <v-text-field
-                            :label="item.label"
-                            v-model="editedPersonnel[item.field]"
-                            :rules="$rules[item.rules]"
-                            hide-details
-                            height="48px"
-                            placeholder="  "
-                            outlined
-                            dense
-                          ></v-text-field>
-                        </div>
-                        <div v-else>
-                          <v-text-field
-                            :label="item.label"
-                            v-model="editedPersonnel[item.field]"
-                            hide-details
-                            height="48px"
-                            placeholder="  "
-                            outlined
-                            dense
-                          ></v-text-field>
-                        </div>
-                      </v-col>
-                    </v-row>
-
-                    <v-row>
-                      <v-col cols="12" md="8"></v-col>
-                    </v-row>
-                  </v-container>
-                </v-form>
-                <v-card-actions>
-                  <v-row justify="space-between" style="height: 50px">
+                      <v-row>
+                        <v-col cols="12" md="8"></v-col>
+                      </v-row>
+                    </v-container>
+                  </v-form>
+                </v-card-text>
+                <v-card-actions style="padding: 16px;">
+                  <v-row justify="space-between">
                     <v-col md="4"></v-col>
                     <v-col md="2">
                       <v-btn color="primary" @click="close">Cancel</v-btn>
@@ -343,7 +340,7 @@ export default {
           label: "Role",
           field: "Role",
           options: "role",
-          width: "4", 
+          width: "4",
           rules: "required",
         },
         { label: "Email", field: "Email", width: "4", rules: "email" },
@@ -440,7 +437,7 @@ export default {
     editPersonnel() {
       this.editedPersonnel = Object.assign({}, this.currentPersonnel);
       this.editedIndex = this.Personnels.indexOf(this.currentPersonnel);
-      console.log(this.editedIndex)
+      console.log(this.editedIndex);
       this.dialog = true;
     },
 
@@ -529,7 +526,7 @@ export default {
       this.currentPersonnel.AssignedStudies = updatedStudies;
     },
   },
-  mounted: function () {
+  mounted: function() {
     this.searchPersonnel();
     this.searchLabStudies();
   },

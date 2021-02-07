@@ -32,39 +32,42 @@
       </v-col>
 
       <div>
-        <v-dialog v-model="dialogStudy" max-width="600px" persistent>
+        <v-dialog v-model="dialogStudy" max-width="800px">
           <v-card>
             <v-card-title class="title" style="padding: 8px">{{
               "Assign studies to " + personnelName
             }}</v-card-title>
-            <v-row justify="center" align="center" style="height: 200px;">
-              <v-col cols="12" md="6">
-                <v-select
-                  :items="labStudies"
-                  :item-value="'id'"
-                  :item-text="'StudyName'"
-                  v-model="editedStudies"
-                  return-object
-                  label="Studies"
-                  multiple
-                  hide-details
-                  height="48px"
-                  placeholder="  "
-                  outlined
-                  dense
-                  chip
-                ></v-select>
-              </v-col>
-            </v-row>
 
-            <v-card-actions>
-              <v-row justify="space-between" style="height: 50px">
+            <v-card-text>
+              <v-row justify="center" align="center" style="height: 200px;" dense>
+                <v-col cols="12" md="8">
+                  <v-select
+                    :items="labStudies"
+                    :item-value="'id'"
+                    :item-text="'StudyName'"
+                    v-model="editedStudies"
+                    return-object
+                    label="Studies"
+                    multiple
+                    hide-details
+                    height="48px"
+                    placeholder="  "
+                    outlined
+                    dense
+                    chip
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            
+            <v-card-actions style="padding: 16px;">
+              <v-row justify="space-between">
                 <v-col md="3"></v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="close = false">Cancel</v-btn>
+                  <v-btn color="primary" @click="close()">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="save">Save</v-btn>
+                  <v-btn color="primary" @click="save()">Save</v-btn>
                 </v-col>
                 <v-col md="3"></v-col>
               </v-row>
@@ -141,11 +144,11 @@ export default {
         await experimenter.postStudies(newStudies);
 
         this.$emit("updatedStudies", this.editedStudies);
-        this.dialogStudy = false;
 
+        this.close();
         console.log("Studies updated.");
       } catch (error) {
-        console.error(error.response);
+        console.error(error);
       }
     },
 

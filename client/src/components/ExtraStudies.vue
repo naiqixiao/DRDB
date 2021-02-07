@@ -1,23 +1,22 @@
 <template>
-  <v-row align="end" justify="space-around">
-    <!-- <v-col cols="12" md="1" ></v-col> -->
-    <v-col cols="12" md="" class="d-flex align-end">
+  <v-row align="end" justify="start" style="height: 60px; margin: 0px;" dense>
+    <v-col cols="12" md="2" class="d-flex align-end">
       <h3 class="name">{{ child.Name + ":" }}</h3>
     </v-col>
     <v-col cols="12" md="2">
       <v-select
-        v-if="index == 0 && currentStudy"
         :items="potentialStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
-        v-model="defaultSelected"
+        v-model="selectedStudy"
         return-object
         label="Studies"
-        disabled
+        @change="emitSelectedStudy"
+        :disabled="index == 0 && !!currentStudy.id > 0"
         dense
         hide-details
       ></v-select>
-      <v-select
+      <!-- <v-select
         v-else
         :items="potentialExtraStudies"
         :item-value="'id'"
@@ -28,13 +27,12 @@
         label="Studies"
         hide-details
         dense
-        chip
-      ></v-select>
+      ></v-select> -->
     </v-col>
     <v-col cols="12" md="3" v-if="response == 'Confirmed'">
       <v-select
         style="margin-left: 10px"
-        :items="potentialExperimenters"
+        :items="selectedStudy.Experimenters"
         :item-value="'id'"
         :item-text="'Name'"
         v-model="selectedExperimenters"
@@ -42,12 +40,11 @@
         label="Experimenter (Primary)"
         hide-details
         dense
-        chip
       ></v-select>
     </v-col>
-    <v-col cols="12" md="3" v-if="response == 'Confirmed'">
+    <v-col cols="12" md="4" v-if="response == 'Confirmed'">
       <v-select
-        :items="potentialExperimenters"
+        :items="secondaryExperimenterList"
         :item-value="'id'"
         :item-text="'Name'"
         v-model="selectedExperimenters_2nd"
@@ -56,7 +53,6 @@
         multiple
         hide-details
         dense
-        chip
       ></v-select>
     </v-col>
     <v-col cols="12" md="1" v-if="index > 0">
@@ -65,13 +61,13 @@
       </v-btn>
     </v-col>
     <v-col cols="12" md="2" v-else></v-col>
-    <v-col cols="12" md="2"></v-col>
+    <!-- <v-col cols="12" md="2"></v-col> -->
   </v-row>
 </template>
 
 <script>
 // import store from "@/store";
-import personnel from "@/services/personnel";
+// import personnel from "@/services/personnel";
 
 export default {
   props: {
@@ -86,8 +82,11 @@ export default {
   data() {
     return {
       selectedStudy: this.currentStudy,
+        // ? this.currentStudy
+        // : this.studyPlaceHolder,
       selectedExperimenters: {},
       selectedExperimenters_2nd: [],
+      
     };
   },
   methods: {
@@ -170,6 +169,7 @@ export default {
       this.$emit("deleteAppointment", this.index);
     },
   },
+
   computed: {
     potentialExtraStudies() {
       if (this.currentStudy && this.targetChild.id == this.child.id) {
@@ -189,48 +189,56 @@ export default {
           }
         : {};
     },
-  },
 
-  asyncComputed: {
-    async potentialExperimenters() {
-      if (this.selectedStudy) {
-        var studyId = null;
-
-        if (this.index == 0 && this.currentStudy) {
-          studyId = this.currentStudy.id;
-        } else {
-          studyId = this.selectedStudy.id;
+    secondaryExperimenterList() {
+      var secondaryExperimenterList = [];
+      this.selectedStudy.Experimenters.forEach((experimenter) => {
+        if (experimenter.id !== this.selectedExperimenters.id) {
+          secondaryExperimenterList.push(experimenter);
         }
+      });
 
-        try {
-          var queryString = {
-            study: studyId,
-          };
-
-          const results = await personnel.search(queryString);
-
-          // filter the output based on experimenters' availability on the participation date.
-          // this.participationDate
-
-          return results.data;
-        } catch (error) {
-          console.log(error.response);
-        }
-      } else {
-        return [];
-      }
+      return secondaryExperimenterList;
     },
   },
 
-  watch:{
-    
-    selectedStudy(){
+  // asyncComputed: {
+  //   async potentialExperimenters() {
+  //     if (this.selectedStudy) {
+  //       var studyId = null;
 
+  //       if (this.index == 0 && this.currentStudy) {
+  //         studyId = this.currentStudy.id;
+  //       } else {
+  //         studyId = this.selectedStudy.id;
+  //       }
+
+  //       try {
+  //         var queryString = {
+  //           study: studyId,
+  //         };
+
+  //         const results = await personnel.search(queryString);
+
+  //         // filter the output based on experimenters' availability on the participation date.
+  //         // this.participationDate
+
+  //         return results.data;
+  //       } catch (error) {
+  //         console.log(error.response);
+  //       }
+  //     } else {
+  //       return [];
+  //     }
+  //   },
+  // },
+
+  watch: {
+    selectedStudy() {
       this.selectedExperimenters = {};
       this.selectedExperimenters_2nd = [];
-
-    }
-  }
+    },
+  },
 };
 </script>
 <style scoped>

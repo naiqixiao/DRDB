@@ -3,69 +3,82 @@
     <v-card outlined>
       <div v-if="contactType != 'NoMoreContact'">
         <v-card-title>When to contact this family again?</v-card-title>
-        <v-row align="center" justify="start">
-          <v-col cols="12" md="1"></v-col>
-          <v-col cols="12" md="2">
-            <v-text-field
-              class="pa=3"
-              label="After"
-              suffix="days"
-              hide-details
-              v-model="daysAfter"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="3">
-            <v-text-field
-              class="pa=3"
-              ref="contactDate"
-              label="Contact after"
-              v-model="nextContactDate"
-              append-icon="event"
-              hide-details
-              @click:append="datePicker = true"
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <v-card-text>
+          <v-row align="center" justify="start">
+            <v-col cols="12" md="1"></v-col>
+            <v-col cols="12" md="2">
+              <v-text-field
+                class="pa=3"
+                label="After"
+                suffix="days"
+                hide-details
+                v-model="daysAfter"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="3">
+              <v-text-field
+                class="pa=3"
+                ref="contactDate"
+                label="Contact after"
+                v-model="nextContactDate"
+                append-icon="event"
+                hide-details
+                @click:append="datePicker = true"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-row align="center">
+            <v-col cols="12" lg="9">
+              <v-textarea
+                class="conv-textarea"
+                label="Notes for next contact"
+                no-resize
+                rows="3"
+                hide-details
+                v-model="nextContactNote"
+              ></v-textarea>
+            </v-col>
+          </v-row>
+        </v-card-text>
       </div>
       <div v-else>
         <v-card-title>No more contact this family?</v-card-title>
-        <v-row align="center" justify="start">
-          <v-col cols="12" md="1"></v-col>
-          <v-col cols="12" md="4">
-            <v-checkbox 
-            v-model="neverContact"
-            hide-details
-            label="No more contact"></v-checkbox>
-          </v-col>
-        </v-row>
-      </div>
+        <v-card-text
+          ><v-row align="center" justify="start">
+            <v-col cols="12" md="1"></v-col>
+            <v-col cols="12" md="4">
+              <v-checkbox
+                v-model="neverContact"
+                hide-details
+                label="No more contact"
+              ></v-checkbox>
+            </v-col>
+          </v-row>
 
-      <v-row align="center">
-        <v-col cols="12" lg="9">
-          <v-textarea
-            class="conv-textarea"
-            label="Notes for next contact"
-            no-resize
-            rows="3"
-            hide-details
-            v-model="nextContactNote"
-          ></v-textarea>
-        </v-col>
-      </v-row>
+          <v-row align="center">
+            <v-col cols="12" lg="9">
+              <v-textarea
+                class="conv-textarea"
+                label="Notes for next contact"
+                no-resize
+                rows="3"
+                hide-details
+                v-model="nextContactNote"
+              ></v-textarea>
+            </v-col>
+          </v-row>
+        </v-card-text>
+      </div>
     </v-card>
 
-    <v-dialog v-model="datePicker" max-width="360px" persistent>
-      <v-card>
-        <v-row align="center">
-          <v-col cols="12" lg="12">
-            <v-date-picker
-              v-model="nextContactDate"
-              show-current
-              @click:date="datePick"
-              :min="new Date().toISOString()"
-            ></v-date-picker>
-          </v-col>
-        </v-row>
+    <v-dialog v-model="datePicker" max-width="290px">
+      <v-card outlined>
+        <v-date-picker
+          v-model="nextContactDate"
+          show-current
+          @click:date="datePick"
+          :min="new Date().toISOString()"
+        ></v-date-picker>
       </v-card>
     </v-dialog>
   </v-container>
@@ -127,7 +140,9 @@ export default {
         id: this.familyId,
         NextContactNote: this.nextContactNote,
         NextContactDate: this.nextContactDate,
-        LastContactDate: moment().startOf("day").format("YYYY-MM-DD"),
+        LastContactDate: moment()
+          .startOf("day")
+          .format("YYYY-MM-DD"),
         NoMoreContact: this.neverContact,
         AssignedLab: this.Lab,
       };
@@ -176,7 +191,9 @@ export default {
               "The family is about to participate in a study on " +
               moment(this.studyDate).format("YYYY-MM-DD") +
               ". Contact the family at least 7 days (" +
-              moment(this.studyDate).add(7, "days").format("YYYY-MM-DD") +
+              moment(this.studyDate)
+                .add(7, "days")
+                .format("YYYY-MM-DD") +
               ") after their participation.";
             break;
 
@@ -258,7 +275,9 @@ export default {
             "The family is about to participate in a study on " +
             moment(this.studyDate).format("YYYY-MM-DD") +
             ". Contact the family at least 7 days (" +
-            moment(this.studyDate).add(7, "days").format("YYYY-MM-DD") +
+            moment(this.studyDate)
+              .add(7, "days")
+              .format("YYYY-MM-DD") +
             ") after their participation.";
           break;
 
@@ -329,6 +348,4 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

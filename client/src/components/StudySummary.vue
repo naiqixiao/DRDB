@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card outlined>
     <v-tabs
       v-model="tabs"
       fixed-tabs
@@ -19,25 +19,28 @@
 
     <v-tabs-items v-model="tabs">
       <v-tab-item value="tabs-1" class="tabs-items">
-        <v-col md="12" class="subtitle">
-          <v-textarea
-            label=""
-            background-color="textbackground"
-            outlined
-            no-resize
-            rows="21"
-            :value="
-              selectedStudy.PhoneScript
-                ? selectedStudy.PhoneScript
-                : 'No phone script is available.'
-            "
-            readonly
-            hide-details
-          ></v-textarea>
-        </v-col>
+        <v-row dense>
+          <v-col md="12" class="subtitle">
+            <v-textarea
+              label=""
+              background-color="textbackground"
+              outlined
+              no-resize
+              :value="
+                selectedStudy.PhoneScript
+                  ? selectedStudy.PhoneScript
+                  : 'No phone script is available.'
+              "
+              rows="20"
+              readonly
+              hide-details
+            ></v-textarea>
+          </v-col>
+        </v-row>
       </v-tab-item>
 
       <v-tab-item value="tabs-2" class="tabs-items">
+        <v-row dense>
         <v-row>
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
@@ -131,6 +134,7 @@
             ></v-text-field>
           </v-col>
         </v-row>
+        </v-row>
       </v-tab-item>
     </v-tabs-items>
   </v-card>
@@ -178,7 +182,7 @@ export default {
 
 .tabs-items {
   background-color: rgba($color: #000000, $alpha: 0);
-  height: 450px;
+  height: 430px;
 }
 
 .v-tab {

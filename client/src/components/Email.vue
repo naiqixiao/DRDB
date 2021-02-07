@@ -10,7 +10,7 @@
       style="font-weight: 600"
       >Participant email is not available.</v-alert
     >
-    <v-row dense justify="start">
+    <v-row dense justify="start" >
       <v-col cols="12" md="1"></v-col>
       <v-col cols="12" md="8">
         <v-text-field
@@ -21,7 +21,7 @@
         ></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
-    </v-row>
+    </v-row >
     <v-row justify="center" style="height: 500px">
       <v-col cols="12" md="11">
         <vue-editor
