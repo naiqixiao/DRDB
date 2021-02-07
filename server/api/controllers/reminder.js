@@ -36,7 +36,7 @@ function emailBody(schedule) {
       "<p>Dear " +
       schedule.Family.NamePrimary.split(" ")[0] +
       ",</p>" +
-      "<p>This is a reminder for your visit to " +
+      "<p>Hope you are doing great! This is a reminder for your visit to " +
       schedule.Appointments[0].Study.Lab.LabName +
       " with <b>" +
       childNames(schedule.Appointments) +
@@ -50,7 +50,7 @@ function emailBody(schedule) {
       "<p>Dear " +
       schedule.Family.NamePrimary.split(" ")[0] +
       ",</p>" +
-      "<p>This is " +
+      "<p>Hope you are doing great! This is " +
       schedule.Appointments[0].Study.Lab.LabName +
       ". Just a reminder that you and " +
       childNames(schedule.Appointments) +
@@ -60,27 +60,22 @@ function emailBody(schedule) {
   }
 
   var ZoomLink = "Zoom Link not available.";
-  var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
-    /\${{ZoomLink}}/g, ZoomLink);
 
   if ("ZoomLink" in schedule.Appointments[0].Study.Lab) {
 
-    if (schedule.Appointments[0].Study.Lab.ZoomLink) { ZoomLink = schedule.Appointments[0].Study.Lab.ZoomLink; }
-
+    if (schedule.Appointments[0].Study.Lab.ZoomLink) { ZoomLink = "<a href='" + schedule.Appointments[0].Study.Lab.ZoomLink + "'>Zoom Link</a>"; }
 
   }
 
   if (schedule.Appointments[0].PrimaryExperimenter.length > 0) {
 
     if (schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink) {
-
-      ZoomLink = schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink;
+      ZoomLink = "<a href='" + schedule.Appointments[0].PrimaryExperimenter[0].ZoomLink + "'>Zoom Link</a>";
     }
-
   }
 
   var body = schedule.Appointments[0].Study.ReminderTemplate.replace(
-    "Zoom Link not available.", "<a href='" + ZoomLink + "'>Zoom Link</a>");
+    /\${{ZoomLink}}/g, ZoomLink);
 
   body = body.replace(/\${{childName}}/g, childNames(schedule.Appointments));
 
@@ -112,14 +107,8 @@ function emailBody(schedule) {
       "<" +
       schedule.Appointments[0].Study.Lab.Email +
       ">",
-    // cc: "lab email <nx@kangleelab.com>",
     to: schedule.Family.NamePrimary + "<" + schedule.Family.Email + ">",
     bcc: experimenterEmails(schedule.Appointments),
-    // to:
-    //     schedule.Family.NamePrimary +
-    //     "<" +
-    //     schedule.Appointments[0].Study.Lab.Email +
-    //     ">",
     subject: emailSubject,
     body: formatedBody(emailBody),
   };

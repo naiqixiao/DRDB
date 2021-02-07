@@ -10,7 +10,7 @@
       style="font-weight: 600"
       >Participant email is not available.</v-alert
     >
-    <v-row dense justify="start" >
+    <v-row dense justify="start">
       <v-col cols="12" md="1"></v-col>
       <v-col cols="12" md="8">
         <v-text-field
@@ -21,7 +21,7 @@
         ></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
-    </v-row >
+    </v-row>
     <v-row justify="center" style="height: 500px">
       <v-col cols="12" md="11">
         <vue-editor
@@ -180,7 +180,7 @@ export default {
                 "<p>Dear " +
                 this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
                 ",</p>" +
-                "<p>This is a reminder for your visit to " +
+                "<p>Hope you are doing great! This is a reminder for your visit to " +
                 this.$store.state.labName +
                 " with <b>" +
                 this.childNames() +
@@ -197,7 +197,7 @@ export default {
                 "<p>Dear " +
                 this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
                 ",</p>" +
-                "<p>This is " +
+                "<p>Hope you are doing great! This is " +
                 this.$store.state.labName +
                 ". Just a reminder that you and " +
                 this.childNames() +
@@ -218,13 +218,13 @@ export default {
       var email = "";
       if (this.emailType == "Reminder") {
         var ZoomLink = "Zoom Link not available.";
-        var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-          /\${{ZoomLink}}/g,
-          "Zoom Link not available."
-        );
+
         if ("ZoomLink" in this.scheduleInfo.Appointments[0].Study.Lab) {
           if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
-            ZoomLink = this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink;
+            ZoomLink =
+              "<a href='" +
+              this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
+              "'>Zoom Link</a>";
           }
         }
 
@@ -232,14 +232,17 @@ export default {
           if (
             this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
           ) {
-            ZoomLink = this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
-              .ZoomLink;
+            ZoomLink =
+              "<a href='" +
+              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
+                .ZoomLink +
+              "'>Zoom Link</a>";
           }
         }
 
-        body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-          "Zoom Link not available.",
-          "<a href='" + ZoomLink + "'>Zoom Link</a>"
+        var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+          /\${{ZoomLink}}/g,
+          ZoomLink
         );
 
         body = body.replace(/\${{childName}}/g, this.childNames());
@@ -363,26 +366,8 @@ export default {
         }
       }
 
-      // if (this.emailTemplate) {
-      //   var email = this.emailTemplate;
-      //   // Search for all the variables to be replaced, for instance ${"Column name"}
-
-      //   var pattern = /\$\{\{([^}]+)\}\}/g;
-      //   var templateVars = this.emailTemplate.match(pattern);
-      //   //  Replace variables from the template with the actual values from the data object.
-      //   // If no value is available, replace with the empty string.
-      //   for (var i = 0; i < templateVars.length; ++i) {
-      //     // normalizeHeader ignores ${"} so we can call it directly here.
-
-      //     var variableData = this.data[templateVars[i].slice(3, -2)];
-
-      //     email = email.replace(templateVars[i], variableData || "");
-      //   }
-
       return email;
-      // } else {
-      //   return "email body not available";
-      // }
+
     },
 
     experimenterEmails() {
@@ -393,9 +378,11 @@ export default {
           emails.push(experimenter.Name + " <" + experimenter.Email + ">");
         });
 
-        this.scheduleInfo.Appointments.SecondaryExperimenter.forEach((experimenter) => {
-          emails.push(experimenter.Name + " <" + experimenter.Email + ">");
-        });
+        this.scheduleInfo.Appointments.SecondaryExperimenter.forEach(
+          (experimenter) => {
+            emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+          }
+        );
       });
 
       return emails.join(", ");
