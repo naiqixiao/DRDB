@@ -923,7 +923,7 @@ export default {
           opening =
             "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
             "Lisa,</p>" +
-            "<p style= 'color: var(--v-primary-lighten3)'>This is a reminder for your visit to " +
+            "<p style= 'color: var(--v-primary-lighten3)'>Hope you are doing great! This is a reminder for your visit to " +
             this.$store.state.labName +
             " with " +
             "Emma" +
@@ -936,7 +936,7 @@ export default {
           opening =
             "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
             "Lisa,</p>" +
-            "<p style= 'color: var(--v-primary-lighten3)'>This is " +
+            "<p style= 'color: var(--v-primary-lighten3)'>Hope you are doing great! This is " +
             this.$store.state.labName +
             ". Just a reminder that you and " +
             "Emma will participate our online study " +

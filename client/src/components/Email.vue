@@ -199,7 +199,7 @@ export default {
                 ",</p>" +
                 "<p>Hope you are doing great! This is " +
                 this.$store.state.labName +
-                ". Just a reminder that you and " +
+                ". Just a reminder that you and <b>" +
                 this.childNames() +
                 " will participate our online study" +
                 dateLabel +

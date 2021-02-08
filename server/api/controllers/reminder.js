@@ -266,7 +266,7 @@ exports.reminderEmail = asyncHandler(async () => {
   var queryString = {};
 
   queryString.AppointmentTime = {
-    [Op.between]: [startDate.toDate(), startDate.add(2, "days").toDate()],
+    [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
   };
   queryString.Reminded = 0;
 
@@ -275,20 +275,8 @@ exports.reminderEmail = asyncHandler(async () => {
       where: queryString,
       include: [
         {
-          model: model.personnel,
-        },
-        {
-          model: model.family,
-        },
-        {
           model: model.appointment,
           include: [
-            {
-              model: model.personnel,
-            },
-            {
-              model: model.family,
-            },
             {
               model: model.child,
               attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
@@ -297,6 +285,8 @@ exports.reminderEmail = asyncHandler(async () => {
               model: model.study,
               attributes: [
                 "StudyName",
+                "MinAge",
+                "MaxAge",
                 "EmailTemplate",
                 "ReminderTemplate",
                 "StudyType",
@@ -318,6 +308,12 @@ exports.reminderEmail = asyncHandler(async () => {
             },
           ],
         },
+        {
+          model: model.family,
+        },
+        {
+          model: model.personnel,
+        },
       ],
     });
 
@@ -336,83 +332,86 @@ exports.reminderEmail = asyncHandler(async () => {
         schedule.Appointments[0].Study.Lab.LabName +
         "_log.txt";
 
-      if (!!schedule.Family.Email) {
-        const tokenPath =
-          "api/google/labs/lab" +
-          schedule.Appointments[0].Study.Lab.id +
-          "/token.json";
+      if (!!schedule.Appointments[0].Study.ReminderTemplate) {
 
-        const token = fs.readFileSync(tokenPath);
+        if (!!schedule.Family.Email) {
+          const tokenPath =
+            "api/google/labs/lab" +
+            schedule.Appointments[0].Study.Lab.id +
+            "/token.json";
 
-        oAuth2Client.setCredentials(JSON.parse(token));
+          const token = fs.readFileSync(tokenPath);
 
-        const emailContent = emailBody(schedule);
+          oAuth2Client.setCredentials(JSON.parse(token));
 
-        await sendEmail(oAuth2Client, emailContent);
+          const emailContent = emailBody(schedule);
 
-        // update schedule
-        await model.schedule.update(
-          { Reminded: 1 },
-          {
-            where: { id: schedule.id },
+          await sendEmail(oAuth2Client, emailContent);
+
+          // update schedule
+          await model.schedule.update(
+            { Reminded: 1 },
+            {
+              where: { id: schedule.id },
+            }
+          );
+
+          // log
+          var logInfo =
+            "[Auto reminder sent] Reminder email is sent to " +
+            schedule.Family.Email +
+            " at " +
+            new Date().toString() +
+            "\r\n";
+
+          if (fs.existsSync(logFile)) {
+            fs.appendFileSync(logFile, logInfo);
+          } else {
+            fs.writeFileSync(logFile, logInfo);
           }
-        );
-
-        // log
-        var logInfo =
-          "[Auto reminder sent] Reminder email is sent to " +
-          schedule.Family.Email +
-          " at " +
-          new Date().toString() +
-          "\r\n";
-
-        if (fs.existsSync(logFile)) {
-          fs.appendFileSync(logFile, logInfo);
         } else {
-          fs.writeFileSync(logFile, logInfo);
-        }
-      } else {
-        const tokenPath = "api/google/labs/general/token.json";
+          const tokenPath = "api/google/labs/general/token.json";
 
-        const token = fs.readFileSync(tokenPath);
+          const token = fs.readFileSync(tokenPath);
 
-        oAuth2Client.setCredentials(JSON.parse(token));
+          oAuth2Client.setCredentials(JSON.parse(token));
 
-        const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
+          const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-        const adminSendAs = await adminGmail.users.settings.sendAs.list({
-          userId: "me",
-        });
+          const adminSendAs = await adminGmail.users.settings.sendAs.list({
+            userId: "me",
+          });
 
-        var sendAsEmail = {};
+          var sendAsEmail = {};
 
-        adminSendAs.data.sendAs.forEach((email) => {
-          if (email.isDefault) {
-            sendAsEmail = email;
+          adminSendAs.data.sendAs.forEach((email) => {
+            if (email.isDefault) {
+              sendAsEmail = email;
+            }
+          });
+
+          var adminEmail = sendAsEmail.sendAsEmail;
+
+          var emailContent = manualReminderBody(schedule);
+
+          emailContent.from =
+            "Developmental Research Management System" + "<" + adminEmail + ">";
+
+          await sendEmail(oAuth2Client, emailContent);
+
+          // log
+          var logInfo =
+            "[Manual reminder] An email about reminding participants for tomorrow's study is sent to " +
+            schedule.Appointments[0].Study.Lab.Email +
+            " at " +
+            new Date().toString() +
+            "\r\n";
+
+          if (fs.existsSync(logFile)) {
+            fs.appendFileSync(logFile, logInfo);
+          } else {
+            fs.writeFileSync(logFile, logInfo);
           }
-        });
-
-        var adminEmail = sendAsEmail.sendAsEmail;
-
-        var emailContent = manualReminderBody(schedule);
-
-        emailContent.from =
-          "Developmental Research Management System" + "<" + adminEmail + ">";
-
-        await sendEmail(oAuth2Client, emailContent);
-
-        // log
-        var logInfo =
-          "[Manual reminder] An email about reminding participants for tomorrow's study is sent to " +
-          schedule.Appointments[0].Study.Lab.Email +
-          " at " +
-          new Date().toString() +
-          "\r\n";
-
-        if (fs.existsSync(logFile)) {
-          fs.appendFileSync(logFile, logInfo);
-        } else {
-          fs.writeFileSync(logFile, logInfo);
         }
       }
     });
