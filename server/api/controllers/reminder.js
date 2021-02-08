@@ -248,7 +248,7 @@ function formatedBody(emailBody) {
 }
 
 // Retrieve today's appointments from the database.
-exports.reminderEmail = asyncHandler(async () => {
+exports.reminderEmail = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
     fs.mkdirSync(logFolder);
@@ -416,7 +416,7 @@ exports.reminderEmail = asyncHandler(async () => {
       }
     });
 
-    // res.status(200).send();
+    res.status(200).send('reminder email sent!');
   } catch (error) {
     throw error;
   }
