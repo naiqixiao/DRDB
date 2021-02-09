@@ -5,6 +5,8 @@ const moment = require("moment");
 const fs = require("fs");
 const Sequelize = require("sequelize");
 
+const log = require("../controllers/log");
+
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
   var currentIndex = array.length,
