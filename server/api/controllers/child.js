@@ -440,7 +440,7 @@ exports.updateAge = asyncHandler(async (req, res) => {
       fs.writeFileSync(logFile, logInfo);
     }
     
-    res.status(200).send('Age updated!')
+    // res.status(200).send('Age updated!')
 
   } catch (error) {
     throw error;

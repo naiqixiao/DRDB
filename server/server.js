@@ -14,7 +14,7 @@ const ReminderController = require("./api/controllers/reminder");
 
 cron.schedule('0 18 * * *', async (req, res) => {
 
-  await ReminderController.reminderEmail();
+  ReminderController.reminderEmail();
 
   // console.log(resonse);
 
@@ -24,7 +24,7 @@ const FamilyController = require("./api/controllers/family");
 
 cron.schedule('0 9 * * *', async (req, res) => {
 
-  await FamilyController.releaseFamily();
+  FamilyController.releaseFamily();
 
 });
 
@@ -33,7 +33,7 @@ const ChildController = require("./api/controllers/child");
 
 cron.schedule('5 0 * * *', async (req, res) => {
 
-  await ChildController.updateAge();
+  ChildController.updateAge();
 
 });
 

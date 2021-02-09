@@ -416,7 +416,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
       }
     });
 
-    res.status(200).send('reminder email sent!');
+    // res.status(200).send('reminder email sent!');
   } catch (error) {
     throw error;
   }
