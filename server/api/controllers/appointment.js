@@ -142,7 +142,7 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Created", User, "added a study appointment to a schedule(" +
+    await log.createLog("Appointment Added", User, "added a study appointment to a schedule(" +
       Schedule.id +
       ")");
 

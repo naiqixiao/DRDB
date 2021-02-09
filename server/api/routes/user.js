@@ -13,6 +13,8 @@ router.post("/resetPassword", UserController.resetPassword);
 
 router.post("/checklogin", checkAuth, UserController.loginChecked);
 
+router.post("/logout", checkAuth, UserController.logout);
+
 router.post("/changePassword", checkAuth, UserController.changePassword);
 
 router.post("/login", UserController.login);

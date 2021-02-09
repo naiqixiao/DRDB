@@ -57,9 +57,7 @@ exports.createLog = async function (logType, user, note) {
       "[Log_]YYYY_MM_DD[.csv]"
     ),
 
-
       logCSV = await jsonexport(log)
-    console.log(logCSV);
 
     const logFile = folderName + "/" + fileName;
 

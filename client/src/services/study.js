@@ -4,7 +4,7 @@ import store from "@/store";
 export default {
   create(studyInfo) {
     studyInfo.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -18,7 +18,7 @@ export default {
   },
   update(studyInfo) {
     studyInfo.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -29,7 +29,7 @@ export default {
     studyInfo.lab = store.state.lab;
 
     studyInfo.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

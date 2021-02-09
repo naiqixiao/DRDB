@@ -287,7 +287,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 });
 
 exports.login = asyncHandler(async (req, res) => {
-  
+
   const { Email, Password } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
@@ -319,19 +319,19 @@ exports.login = asyncHandler(async (req, res) => {
   if (!personnel) {
     // log the login information.
 
-    await log.createLog("Login Not Exist", {}, Email + " does not exist (or has been retired)");
-  //   const logFolder = "api/logs";
-  // if (!fs.existsSync(logFolder)) {
-  //   fs.mkdirSync(logFolder)
-  // }
-  //   const logFile = logFolder + "/log.txt";
-  //   var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
+    await log.createLog("Not Exist", {}, Email + " does not exist (or has been retired)");
+    //   const logFolder = "api/logs";
+    // if (!fs.existsSync(logFolder)) {
+    //   fs.mkdirSync(logFolder)
+    // }
+    //   const logFile = logFolder + "/log.txt";
+    //   var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
 
-  //   if (fs.existsSync(logFile)) {
-  //     fs.appendFileSync(logFile, logInfo)
-  //   } else {
-  //     fs.writeFileSync(logFile, logInfo)
-  //   }
+    //   if (fs.existsSync(logFile)) {
+    //     fs.appendFileSync(logFile, logInfo)
+    //   } else {
+    //     fs.writeFileSync(logFile, logInfo)
+    //   }
 
     return res.status(401).send({
       error: "The login information was incorrect",
@@ -365,7 +365,7 @@ exports.login = asyncHandler(async (req, res) => {
 
   // log the login information.
   personnel.LabName = personnel.Lab.LabName;
-  await log.createLog("Login", personnel, "logged in successfully!");
+  await log.createLog("Log in", personnel, "logged in successfully!");
 
   res.status(200).send({
     message: "Auth succsessful.",
@@ -555,3 +555,10 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+exports.logout = asyncHandler(async (req, res) => {
+  const User = req.body
+  await log.createLog("Log out", User, "log out the system.");
+
+  res.status(200).send('log out sucessfully.')
+})

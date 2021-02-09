@@ -8,7 +8,7 @@ export default {
     newAppointment.lab = store.state.lab;
 
     newAppointment.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -26,7 +26,7 @@ export default {
   update(updatedAppointment) {
     updatedAppointment.lab = store.state.lab;
     updatedAppointment.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -38,7 +38,7 @@ export default {
     removedAppointment.lab = store.state.lab;
     
     removedAppointment.User = {
-      // IP: store.state.ip,
+      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

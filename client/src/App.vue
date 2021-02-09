@@ -20,6 +20,7 @@ export default {
   components: {
     Header,
   },
+
   watch: {
     group() {},
   },
@@ -27,8 +28,41 @@ export default {
   data() {
     return {};
   },
+  methods: {
+    // async deleteUpload() {
+    //   await login.check_login();
+    // },
+  },
 
   async created() {
+    window.addEventListener("beforeunload", (event) => {
+
+      login.logout();
+
+      this.$store.dispatch("setToken", null);
+      this.$store.dispatch("setUser", null);
+      this.$store.dispatch("setName", null);
+      this.$store.dispatch("setUserID", null);
+      this.$store.dispatch("setLabEmail", null);
+      this.$store.dispatch("setLabName", null);
+      this.$store.dispatch("setRole", null);
+      this.$store.dispatch("setStudies", null);
+
+      this.$store.dispatch("setLabEmailStatus", null);
+      this.$store.dispatch("setAdminEmailStatus", null);
+      this.$store.dispatch("setLoadingStatus", false);
+
+      this.$store.dispatch("setEmailOpening", null);
+      this.$store.dispatch("setEmailClosing", null);
+      this.$store.dispatch("setLocation", null);
+      this.$store.dispatch("setTransportationInstructions", null);
+      this.$store.dispatch("setZoomLink", null);
+      // Cancel the event as stated by the standard.
+      event.preventDefault();
+      // Chrome requires returnValue to be set.
+      event.returnValue = "";
+    });
+
     try {
       await login.check_login();
       // console.log("User is already logged in.");
@@ -276,5 +310,4 @@ export default {
 .theme--light.v-tabs .v-tabs-bar .v-tab:not(.v-tab--active) {
   background-color: var(--v-textbackground-base) !important;
 }
-
 </style>
