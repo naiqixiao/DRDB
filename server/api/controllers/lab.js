@@ -2,6 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
+const log = require("../controllers/log");
 
 const bcrypt = require("bcrypt");
 
@@ -183,25 +184,8 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    const logFile = logFolder + "/log.txt";
-
-    var logInfo = "[Lab Created] " + User.Name + " (" + User.Email + ") from " +
-      User.LabName + " created a lab (" +
-      newLabInfo.LabName + ") at " +
-      new Date().toString() + 
-      
-      "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Lab Created", User, "created a lab (" +
+      newLabInfo.LabName + ")");
 
     res.status(200).send('a new lab is created.');
   } catch (error) {
@@ -242,29 +226,8 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-  } else {
-    var logFile = logFolder + "/log.txt";
-  }
-
-  var logInfo = "[Lab Updated] " + User.Name + " (" + User.Email + ") updated lab information (" +
-    updatedLabInfo.LabName + ") at " +
-    new Date().toString() + 
-    
-    "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Lab Updated", User, "updated lab information (" +
+    updatedLabInfo.LabName + ")");
 
   res.status(200).send(lab);
   console.log("Lab Information Updated!");
@@ -286,27 +249,10 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  var User = JSON.parse(req.query.User);
+  const User = JSON.parse(req.query.User);
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo = "[Lab Deleted] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " deleted lab (" +
-    req.query.id + ") from the database at " +
-    new Date().toString() + 
-    
-    "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Lab Deleted", User, "deleted lab (" +
+    req.query.id + ") from the database");
 
   res.status(200).json(lab);
   console.log("Lab removal succeeds.");

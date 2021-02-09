@@ -120,6 +120,7 @@
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 <v-btn
+                  tile
                   style="color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;"
                   large
@@ -139,6 +140,7 @@
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 <v-btn
+                  tile
                   style="color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;"
                   large
@@ -158,6 +160,7 @@
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 <v-btn
+                  tile
                   style="color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;"
                   large

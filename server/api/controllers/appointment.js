@@ -3,6 +3,8 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const fs = require("fs");
+const log = require("../controllers/log");
+
 // {
 //             "FK_Schedule": 35,
 //             "FK_Study": 3,
@@ -140,36 +142,9 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo =
-      "[Appointment Added] " +
-      User.Name +
-      " (" +
-      User.Email +
-      ") " +
-      "added a study appointment to a schedule (" +
+    await log.createLog("Appointment Created", User, "added a study appointment to a schedule(" +
       Schedule.id +
-      ") at " +
-      new Date().toString() +
-      // " - " +
-      // User.IP +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
+      ")");
 
     res.status(200).send(Schedule);
   } catch (error) {
@@ -291,7 +266,7 @@ exports.update = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.create(updatedAppointmentInfo);
 
-    if (updatedAppointmentInfo_2nd.length > 0 ) {
+    if (updatedAppointmentInfo_2nd.length > 0) {
 
       await model.experimenterAssignment_2nd.destroy({
         where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
@@ -393,36 +368,7 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo =
-      "[Appointment Updated] " +
-      User.Name +
-      " (" +
-      User.Email +
-      ") " +
-      "added a study appointment (" +
-      Schedule.id +
-      ") at " +
-      new Date().toString() +
-      // " - " +
-      // User.IP +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
+    await log.createLog("Appointment Updated", User, "updated a study appointment");
 
     res.status(200).send(Schedule);
 
@@ -530,38 +476,10 @@ exports.delete = asyncHandler(async (req, res) => {
     Schedule.dataValues.updatedAt = new Date();
 
     // Log
-    var User = JSON.parse(req.query.User);
+    const User = JSON.parse(req.query.User);
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo =
-      "[Appointment Delete] " +
-      User.Name +
-      " (" +
-      User.Email +
-      ") " +
-      "delelete a study appointment to a schedule (" +
-      Schedule.id +
-      ") at " +
-      new Date().toString() +
-      // " - " +
-      // User.IP +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
+    await log.createLog("Appointment Delete", User, "delelete a study appointment from a schedule (" + Schedule.id +
+      ")");
 
     res.status(200).send(Schedule);
   } catch (error) {

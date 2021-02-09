@@ -85,33 +85,9 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    const logFile = logFolder + "/log.txt";
-
-    var logInfo =
-      "[Family Created] " +
-      User.Name +
-      " (" +
-      User.Email +
-      ") from " +
-      User.LabName +
-      " added a family (" +
+    await log.createLog("Family Created", User, "added a family (" +
       newFamily.id +
-      ") at " +
-      new Date().toString() +
-      // " - " +
-      // User.IP +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
+      ")");
 
     res.status(200).send(newFamily);
   } catch (error) {
@@ -429,13 +405,6 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
-  }
-
-  const logFile = logFolder + "/log.txt";
-
   var logKeywords = '[Family Updated] ';
 
   if ('NoMoreContact' in updatedFamilyInfo) {
@@ -444,26 +413,9 @@ exports.update = asyncHandler(async (req, res) => {
     }
   }
 
-  var logInfo =
-    logKeywords +
-    User.Name +
-    " (" +
-    User.Email +
-    ") from " +
-    User.LabName +
-    " updated a family's information (" +
+  await log.createLog(logKeywords, User, "updated a family's information (" +
     ID +
-    ") at " +
-    new Date().toString() +
-    // " - " +
-    // User.IP +
-    "\r\n";
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo);
-  } else {
-    fs.writeFileSync(logFile, logInfo);
-  }
+    ")");
 
   res.status(200).send(family);
   console.log("Family Information Updated!");
@@ -574,26 +526,10 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
       });
 
       // Log
-      const logFolder = "api/logs";
-      if (!fs.existsSync(logFolder)) {
-        fs.mkdirSync(logFolder);
-      }
-
-      const logFile = logFolder + "/Auto_log.txt";
-
-      var logInfo =
-        "[Family Lab Assisgnment Release] " +
-        "Families (" +
+      await log.createLog("Family Lab Assisgnment Release", {}, "Families (" +
         IDs.join(", ") +
-        ") were no longer assigned to any lab due to study completion at " +
-        new Date().toString() +
-        "\r\n";
+        ") were no longer assigned to any lab due to study completion");
 
-      if (fs.existsSync(logFile)) {
-        fs.appendFileSync(logFile, logInfo);
-      } else {
-        fs.writeFileSync(logFile, logInfo);
-      }
 
       // res.status(200).send(IDs.length + " families released.");
     }
@@ -612,35 +548,11 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  var User = JSON.parse(req.query.User);
+  const User = JSON.parse(req.query.User);
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo =
-    "[Family Deleted] " +
-    User.Name +
-    " (" +
-    User.Email +
-    ") from " +
-    User.LabName +
-    " deleted family (" +
+  await log.createLog("Family Deleted", User, "deleted family (" +
     ID +
-    ") from the database at " +
-    new Date().toString() +
-    // " - " +
-    // User.IP +
-    "\r\n";
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo);
-  } else {
-    fs.writeFileSync(logFile, logInfo);
-  }
+    ") from the database");
 
   res.status(200).json(family);
 });

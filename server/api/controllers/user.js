@@ -9,6 +9,8 @@ const { OAuth2 } = google.auth;
 
 const config = require("../../config/general");
 
+const log = require("../controllers/log");
+
 // function generalAuth() {
 //   const credentialsPath = "api/google/general/credentials.json";
 //   const tokenPath = "api/google/general/token.json";
@@ -186,15 +188,8 @@ exports.signup = asyncHandler(async (req, res) => {
       await sendEmail(emailContent);
 
       // log
-      const logFile = logFolder + "/" + User.LabName + "_log.txt";
+      await log.createLog("User Created", User, "created " + newUser.Email);
 
-      var logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + "\r\n"
-
-      if (fs.existsSync(logFile)) {
-        fs.appendFileSync(logFile, logInfo)
-      } else {
-        fs.writeFileSync(logFile, logInfo)
-      }
     }
   } catch (error) {
     throw error;
@@ -278,15 +273,8 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         await sendEmail(emailContent);
 
         // log
-        const logFile = logFolder + "/" + User.LabName + "_log.txt";
+        await log.createLog("User Created", User, "created " + newUser.Email);
 
-        const logInfo = "[User Created] " + User.Name + " (" + User.Email + ") " + "created " + newUser.Email + " at " + new Date().toString() + "\r\n"
-
-        if (fs.existsSync(logFile)) {
-          fs.appendFileSync(logFile, logInfo)
-        } else {
-          fs.writeFileSync(logFile, logInfo)
-        }
       }
     } catch (error) {
       throw error;
@@ -299,11 +287,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 });
 
 exports.login = asyncHandler(async (req, res) => {
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
+  
   const { Email, Password } = req.body;
   const personnel = await model.personnel.findOne({
     where: {
@@ -334,14 +318,20 @@ exports.login = asyncHandler(async (req, res) => {
 
   if (!personnel) {
     // log the login information.
-    const logFile = logFolder + "/log.txt";
-    var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
 
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Login Not Exist", {}, Email + " does not exist (or has been retired)");
+  //   const logFolder = "api/logs";
+  // if (!fs.existsSync(logFolder)) {
+  //   fs.mkdirSync(logFolder)
+  // }
+  //   const logFile = logFolder + "/log.txt";
+  //   var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
+
+  //   if (fs.existsSync(logFile)) {
+  //     fs.appendFileSync(logFile, logInfo)
+  //   } else {
+  //     fs.writeFileSync(logFile, logInfo)
+  //   }
 
     return res.status(401).send({
       error: "The login information was incorrect",
@@ -353,14 +343,9 @@ exports.login = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
 
     // log the login information.
-    const logFile = logFolder + "/log.txt";
-    var logInfo = "[Login ERROR] " + personnel.Name + " (" + personnel.Email + ") " + "login password mismatched at " + new Date().toString() + "\r\n"
+    personnel.LabName = personnel.Lab.LabName;
 
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Login Error", personnel, "login password mismatched");
 
     return res.status(401).send({
       error: "The login information was incorrect",
@@ -379,14 +364,8 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  const logFile = logFolder + "/" + personnel.Lab.LabName + "_log.txt";
-  var logInfo = "[Login] " + personnel.Name + " (" + personnel.Email + ") " + "logged in at " + new Date().toString() + "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  personnel.LabName = personnel.Lab.LabName;
+  await log.createLog("Login", personnel, "logged in successfully!");
 
   res.status(200).send({
     message: "Auth succsessful.",
@@ -506,15 +485,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
     await sendEmail(emailContent);
 
     // log
-    const logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    var logInfo = "[Change Password] " + User.Name + " (" + User.Email + ") " + "chagned password at " + new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Change Password", User, "chagned password");
 
   } catch (error) {
     throw error;
@@ -553,26 +524,9 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     );
 
     // log
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
+    personnel.LabName = User.LabName
 
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Password Reset] " + personnel.Name + " (" + personnel.Email + ") " + "reset password at " + new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
-
+    await log.createLog("Change Reset", personnel, "reset password");
 
     res.status(200).send({
       message: "Password reset!",

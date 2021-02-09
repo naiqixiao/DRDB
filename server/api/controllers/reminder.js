@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const { OAuth2 } = google.auth;
 const fs = require("fs");
+const log = require("../controllers/log");
 
 const moment = require("moment");
 
@@ -249,11 +250,6 @@ function formatedBody(emailBody) {
 
 // Retrieve today's appointments from the database.
 exports.reminderEmail = asyncHandler(async (req, res) => {
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
-  }
-
   var startDate = moment();
   switch (moment().weekday()) {
     default:
@@ -326,11 +322,6 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
     schedules.forEach(async (schedule) => {
-      const logFile =
-        logFolder +
-        "/" +
-        schedule.Appointments[0].Study.Lab.LabName +
-        "_log.txt";
 
       if (!!schedule.Appointments[0].Study.ReminderTemplate) {
 
@@ -357,18 +348,12 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           );
 
           // log
-          var logInfo =
-            "[Auto reminder sent] Reminder email is sent to " +
-            schedule.Family.Email +
-            " at " +
-            new Date().toString() +
-            "\r\n";
+          await log.createLog("Auto reminder sent", {
+            Name: '',
+            Email: '', LabName: schedule.Appointments[0].Study.Lab.LabName
+          }, "Reminder email is sent to " +
+          schedule.Family.Email);
 
-          if (fs.existsSync(logFile)) {
-            fs.appendFileSync(logFile, logInfo);
-          } else {
-            fs.writeFileSync(logFile, logInfo);
-          }
         } else {
           const tokenPath = "api/google/labs/general/token.json";
 
@@ -400,18 +385,12 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           await sendEmail(oAuth2Client, emailContent);
 
           // log
-          var logInfo =
-            "[Manual reminder] An email about reminding participants for tomorrow's study is sent to " +
-            schedule.Appointments[0].Study.Lab.Email +
-            " at " +
-            new Date().toString() +
-            "\r\n";
+          await log.createLog("Manual reminder", {
+            Name: '',
+            Email: '', LabName: schedule.Appointments[0].Study.Lab.LabName
+          }, "An email about reminding participants for tomorrow's study is sent to " +
+          schedule.Appointments[0].Study.Lab.Email);
 
-          if (fs.existsSync(logFile)) {
-            fs.appendFileSync(logFile, logInfo);
-          } else {
-            fs.writeFileSync(logFile, logInfo);
-          }
         }
       }
     });

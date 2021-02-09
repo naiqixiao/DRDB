@@ -3,6 +3,8 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 
+const log = require("../controllers/log");
+
 exports.create = asyncHandler(async (req, res) => {
   var newConersation = req.body;
 
@@ -11,24 +13,7 @@ exports.create = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo = "[Conversation Created] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " created a conversation at " +
-    new Date().toString() + 
-    
-    "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Conversation Created", User, "created a conversation");
 
   res.status(200).send(conversation);
   console.log("conversation created " + conversation.id);
@@ -41,26 +26,9 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  var User = JSON.parse(req.query.User);
+  const User = JSON.parse(req.query.User);
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo = "[Conversation Deleted] " + User.Name + " (" + User.Email + ") from " +
-    User.LabName + " deleted a conversation at " +
-    new Date().toString() + 
-    
-    "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Conversation Deleted", User, "deleted a conversation");
 
   res.status(200).send("conversation deleted.");
 });

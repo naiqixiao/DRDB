@@ -4,6 +4,7 @@ const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const moment = require("moment");
+const log = require("../controllers/log");
 
 const config = require("../../config/general");
 
@@ -67,34 +68,9 @@ exports.create = asyncHandler(async (req, res) => {
 
     // Log
     const User = req.body.User;
-
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    const logFile = logFolder + "/log.txt";
-
-    var logInfo =
-      "[Child Created] " +
-      User.Name +
-      " (" +
-      User.Email +
-      ") from " +
-      User.LabName +
-      " added a child to a family (" +
+    await log.createLog("Child Created", User, "added a child to a family (" +
       child.FK_Family +
-      ") at " +
-      new Date().toString() +
-      // " - " +
-      // User.IP +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
+      ")");
 
     res.status(200).send(child);
 
@@ -252,8 +228,6 @@ exports.search = asyncHandler(async (req, res) => {
       }
     );
 
-    // console.log(pastParticipants)
-
     queryString.id = { [Op.notIn]: pastParticipants };
   }
 
@@ -325,33 +299,7 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo =
-    "[Child Updated] " +
-    User.Name +
-    " (" +
-    User.Email +
-    ") from " +
-    User.LabName +
-    " updated a child's information (" +
-    ID +
-    ") at " +
-    new Date().toString() +
-    // " - " +
-    // User.IP +
-    "\r\n";
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo);
-  } else {
-    fs.writeFileSync(logFile, logInfo);
-  }
+  await log.createLog("Child Updated", User, "updated a child's information (" + ID + ")");
 
   res.status(200).json(child);
 });
@@ -363,35 +311,9 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  var User = JSON.parse(req.query.User);
+  const User = JSON.parse(req.query.User);
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder);
-  }
-
-  const logFile = logFolder + "/log.txt";
-
-  var logInfo =
-    "[Child Deleted] " +
-    User.Name +
-    " (" +
-    User.Email +
-    ") from " +
-    User.LabName +
-    " deleted a child (" +
-    req.query.id +
-    ") from the database at " +
-    new Date().toString() +
-    // " - " +
-    // User.IP +
-    "\r\n";
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo);
-  } else {
-    fs.writeFileSync(logFile, logInfo);
-  }
+  await log.createLog("Child Deleted", User, "deleted a child (" + req.query.id + ")");
 
   res.status(200).json(child);
 });
@@ -421,26 +343,8 @@ exports.updateAge = asyncHandler(async (req, res) => {
   try {
 
     await model.sequelize.query(queryString);
-
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder);
-    }
-
-    const logFile = logFolder + "/Auto_log.txt";
-
-    var logInfo =
-      "[Age Updated] Children's age is updated at " +
-      new Date().toString() +
-      "\r\n";
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo);
-    } else {
-      fs.writeFileSync(logFile, logInfo);
-    }
     
-    // res.status(200).send('Age updated!')
+    await log.createLog("Age Updated", {}, "Children's age is updated");
 
   } catch (error) {
     throw error;

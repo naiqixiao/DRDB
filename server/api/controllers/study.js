@@ -3,6 +3,8 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 
+const log = require("../controllers/log");
+
 // Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
   var newStudyInfo = req.body;
@@ -13,28 +15,7 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Study Created] " + User.Name + " (" + User.Email + ") " + "created a study (" +
-      study.id + ") at " +
-      new Date().toString() + 
-      "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Study Created", User, "created a study (" + study.StudyName + ")");
 
     res.status(200).send(study);
   } catch (error) {
@@ -111,27 +92,7 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Study Updated] " + User.Name + " (" + User.Email + ") " + "update a study's information (" +
-      ID + ") at " +
-      new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Study Updated", User, "update a study's information (" + updatedStudyInfo.StudyName + ")");
 
     res.status(200).send(study);
   } catch (error) {
@@ -148,29 +109,9 @@ exports.delete = asyncHandler(async (req, res) => {
     });
 
     // Log
-    var User = JSON.parse(req.query.User);
+    const User = JSON.parse(req.query.User);
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Study Deleted] " + User.Name + " (" + User.Email + ") " + "deleted a study (" +
-      req.query.id + ") at " +
-      new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Study Deleted", User, "deleted a study (" + req.query.id + ")");
 
     res.status(200).json(study);
   } catch (error) {

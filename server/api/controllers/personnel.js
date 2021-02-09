@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const bcrypt = require("bcrypt");
+const log = require("../controllers/log");
 
 // Create and Save a new personnel
 exports.create = asyncHandler(async (req, res) => {
@@ -92,29 +93,8 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-  } else {
-    var logFile = logFolder + "/log.txt";
-  }
-
-  var logInfo = "[Personnel Updated] " + User.Name + " (" + User.Email + ") " + "update personnel information (" +
-    personnel.Name + ") at " +
-    new Date().toString() + 
-    
-    "\r\n";
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Personnel Updated", User, "update personnel information (" +
+    personnel.Name + ")");
 
   res.status(200).send(personnel);
   console.log("Personnel Information Updated!");
@@ -146,31 +126,10 @@ exports.delete = asyncHandler(async (req, res) => {
   })
 
   // Log
-  var User = JSON.parse(req.query.User);
+  const User = JSON.parse(req.query.User);
 
-  const logFolder = "api/logs";
-  if (!fs.existsSync(logFolder)) {
-    fs.mkdirSync(logFolder)
-  }
-
-  if (User.LabName) {
-    var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-  } else {
-    var logFile = logFolder + "/log.txt";
-  }
-
-  var logInfo = "[Personnel Deleted] " + User.Name + " (" + User.Email + ") " + "removed (" +
-    req.query.id + ") from the database at " +
-    new Date().toString() + 
-    
-    "\r\n"
-
-  if (fs.existsSync(logFile)) {
-    fs.appendFileSync(logFile, logInfo)
-  } else {
-    fs.writeFileSync(logFile, logInfo)
-  }
+  await log.createLog("Personnel Deleted", User, "removed (" +
+  req.query.id + ") from the database");
 
   res.status(200).json(personnel);
   console.log(personnel.id + " deleted.");

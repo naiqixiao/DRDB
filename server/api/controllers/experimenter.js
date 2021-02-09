@@ -3,6 +3,8 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 
+const log = require("../controllers/log");
+
 exports.updateExperimenters = asyncHandler(async (req, res) => {
   const experimenters = req.body.experimenters;
 
@@ -16,28 +18,8 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +
-      "updated experimenter assignment for a study (" +
-      experimenters[0].FK_Study + ") at " +
-      new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Experimenter Assignment Updated", User, "updated experimenter assignment for a study (" +
+      experimenters[0].FK_Study + ")");
 
     res.status(200).send(assignedStudies);
   } catch (error) {
@@ -56,29 +38,8 @@ exports.updateStudies = asyncHandler(async (req, res) => {
 
     // Log
     const User = req.body.User;
-
-    const logFolder = "api/logs";
-    if (!fs.existsSync(logFolder)) {
-      fs.mkdirSync(logFolder)
-    }
-
-    if (User.LabName) {
-      var logFile = logFolder + "/" + User.LabName + "_log.txt";
-
-    } else {
-      var logFile = logFolder + "/log.txt";
-    }
-
-    var logInfo = "[Experimenter Assignment Updated] " + User.Name + " (" + User.Email + ") " +
-      "updated experimenter assignment for an experimenter (" +
-      studies[0].FK_Experimenter + ") at " +
-      new Date().toString() + "\r\n"
-
-    if (fs.existsSync(logFile)) {
-      fs.appendFileSync(logFile, logInfo)
-    } else {
-      fs.writeFileSync(logFile, logInfo)
-    }
+    await log.createLog("Experimenter Assignment Updated", User, "updated experimenter assignment for an experimenter (" +
+      studies[0].FK_Experimenter + ")");
 
     res.status(200).send(assignedStudies);
   } catch (error) {
