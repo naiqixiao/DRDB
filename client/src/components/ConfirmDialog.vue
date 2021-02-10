@@ -14,7 +14,7 @@
       <div style="height: 120px">
         <v-card-text justify="center"
           v-show="!!message"
-          class="pa-4 body-2"
+          class="pa-4 body-2 text-left"
           v-html="message"
         ></v-card-text>
       </div>

@@ -32,36 +32,26 @@ export default {
     // async deleteUpload() {
     //   await login.check_login();
     // },
+    beforePageDestroyed: function() {
+      this.$store.dispatch("setToken", null);
+      login.logout();
+    },
   },
 
   async created() {
-    window.addEventListener("beforeunload", (event) => {
+    // window.addEventListener("beforeunload", (event) => {
 
-      login.logout();
+    //   login.logout();
 
-      this.$store.dispatch("setToken", null);
-      this.$store.dispatch("setUser", null);
-      this.$store.dispatch("setName", null);
-      this.$store.dispatch("setUserID", null);
-      this.$store.dispatch("setLabEmail", null);
-      this.$store.dispatch("setLabName", null);
-      this.$store.dispatch("setRole", null);
-      this.$store.dispatch("setStudies", null);
+    //   this.$store.dispatch("setToken", null);
 
-      this.$store.dispatch("setLabEmailStatus", null);
-      this.$store.dispatch("setAdminEmailStatus", null);
-      this.$store.dispatch("setLoadingStatus", false);
+    //   // Cancel the event as stated by the standard.
+    //   event.preventDefault();
+    //   // Chrome requires returnValue to be set.
+    //   event.returnValue = "";
+    // });
 
-      this.$store.dispatch("setEmailOpening", null);
-      this.$store.dispatch("setEmailClosing", null);
-      this.$store.dispatch("setLocation", null);
-      this.$store.dispatch("setTransportationInstructions", null);
-      this.$store.dispatch("setZoomLink", null);
-      // Cancel the event as stated by the standard.
-      event.preventDefault();
-      // Chrome requires returnValue to be set.
-      event.returnValue = "";
-    });
+    window.addEventListener("beforeunload", this.beforePageDestroyed);
 
     try {
       await login.check_login();

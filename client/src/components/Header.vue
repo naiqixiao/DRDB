@@ -228,13 +228,13 @@ export default {
       this.$store.dispatch("setUser", null);
       this.$store.dispatch("setName", null);
       this.$store.dispatch("setUserID", null);
-      this.$store.dispatch("setLabEmail", null);
-      this.$store.dispatch("setLabName", null);
-      this.$store.dispatch("setRole", null);
+      // this.$store.dispatch("setLabEmail", null);
+      // this.$store.dispatch("setLabName", null);
+      // this.$store.dispatch("setRole", null);
       this.$store.dispatch("setStudies", null);
 
-      this.$store.dispatch("setLabEmailStatus", null);
-      this.$store.dispatch("setAdminEmailStatus", null);
+      // this.$store.dispatch("setLabEmailStatus", null);
+      // this.$store.dispatch("setAdminEmailStatus", null);
       this.$store.dispatch("setLoadingStatus", false);
 
       this.$store.dispatch("setEmailOpening", null);

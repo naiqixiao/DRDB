@@ -85,9 +85,11 @@
 
       <v-col cols="12" md="5">
         <v-row justify="space-around">
-          <v-col cols="12" md="3"></v-col>
+          <v-col cols="12" md="9">
+            <h2 v-show="currentChild.scheduled" style="color: red;">You're late. Someone is calling this family...</h2>
+          </v-col>
           <v-spacer></v-spacer>
-          <v-col cols="12" md="4" style="text-align: end">
+          <v-col cols="12" md="3" style="text-align: end">
             <Page
               :page="page"
               :NofPages="Children ? Children.length : 0"
@@ -100,7 +102,7 @@
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
-          </v-col>
+                   </v-col>
           <v-col
             cols="12"
             v-for="item in familyField.map((i) => this.$familyFields[i])"
@@ -953,6 +955,8 @@ import Page from "@/components/Page";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
 
+import io from "socket.io-client";
+
 export default {
   components: {
     NotesConversation,
@@ -1076,7 +1080,9 @@ export default {
         PrimaryExperimenter: [],
         SecondaryExperimenter: [],
       },
-      // scheduleNotes: "",
+      scheduleNotes: "",
+      socket: {},
+      currentVisitedFamilies: [],
     };
   },
 
@@ -1103,6 +1109,10 @@ export default {
 
     async searchChild() {
       this.$store.dispatch("setLoadingStatus", true);
+
+      if (!this.currentChild.scheduled) {
+        this.socket.emit("remove family", this.currentChild.FK_Family);
+      }
 
       var queryString = {};
 
@@ -1168,12 +1178,21 @@ export default {
           this.Children = Results.data;
           this.currentChild = this.Children[this.page - 1];
 
+          if (
+            this.currentVisitedFamilies.includes(this.currentChild.FK_Family)
+          ) {
+            this.currentChild.scheduled = true;
+          } else {
+            this.socket.emit("add family", this.currentChild.FK_Family);
+          }
+
           alert(
             "Hold on!\n\nMake sure to confirm with parents about their email address and child's information.\n\nUse the pencil buttons to update family and/or child informatin.\n\nYour little effort will benefit everyone in the future!\n\nThanks! :)"
           );
         } else {
           alert("no child is elegible for the selected study. :(");
           this.page = 0;
+          this.Children = Results.data;
           this.currentChild = Object.assign({}, this.defaultItem);
         }
       } catch (error) {
@@ -1860,15 +1879,37 @@ export default {
     },
 
     nextPage() {
+      if (!this.currentChild.scheduled) {
+        this.socket.emit("remove family", this.currentChild.FK_Family);
+      }
+
       this.page += 1;
       this.currentChild = this.Children[this.page - 1];
       this.resetSchedule();
+
+      if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
+        this.currentChild.scheduled = true;
+      } else {
+        this.socket.emit("add family", this.currentChild.FK_Family);
+        this.currentChild.scheduled = false;
+      }
     },
 
     previousPage() {
+      if (!this.currentChild.scheduled) {
+        this.socket.emit("remove family", this.currentChild.FK_Family);
+      }
+
       this.page -= 1;
       this.currentChild = this.Children[this.page - 1];
       this.resetSchedule();
+
+      if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
+        this.currentChild.scheduled = true;
+      } else {
+        this.socket.emit("add family", this.currentChild.FK_Family);
+        this.currentChild.scheduled = false;
+      }
     },
 
     datePick() {
@@ -1988,11 +2029,33 @@ export default {
         .toISOString(true);
     },
   },
+
   mounted: function() {
     this.searchStudies();
+    this.socket.on("familyList update", (familyList) => {
+      this.currentVisitedFamilies = familyList;
+      console.log(this.currentVisitedFamilies);
+    });
+  },
+
+  created: function() {
+    console.log(this.socket);
+    this.socket = io("http://192.168.0.10:3000");
+  },
+
+  beforeDestroy: function() {
+    this.socket.emit("disconnect");
   },
 
   watch: {
+    // $route(to, from) {
+    //   console.log(to)
+    //   console.log(from)
+    //   if (to !== from) {
+    //     this.socket.emit("disconnect");
+    //   }
+    // },
+
     dialogChildEdit(val) {
       val || this.closeChild();
     },
