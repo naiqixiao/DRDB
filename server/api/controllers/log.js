@@ -55,15 +55,17 @@ exports.createLog = async function (logType, user, note) {
 
     var fileName = moment().startOf('week').format(
       "[Log_]YYYY_MM_DD[.csv]"
-    ),
-
-      logCSV = await jsonexport(log)
+    )
 
     const logFile = folderName + "/" + fileName;
 
     if (fs.existsSync(logFile)) {
+      logCSV = await jsonexport(log, includeHeaders = false)
+
       fs.appendFileSync(logFile, logCSV)
     } else {
+      logCSV = await jsonexport(log)
+
       fs.writeFileSync(logFile, logCSV)
     }
   }
