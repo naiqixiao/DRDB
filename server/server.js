@@ -71,8 +71,6 @@ cron.schedule('5 0 * * *', async (req, res) => {
 
 });
 
-var familyList = [];
-var clientList = [];
 const io = require("socket.io")(server);
 
 io.on("connection", (socket) => {

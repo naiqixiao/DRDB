@@ -8746,3 +8746,4 @@ server/api/models/DRDB.js.orig
 server/config/general.js-20201102
 server/config/general.js-20210124
 .gitignore
+client/src/plugins/variables.js
