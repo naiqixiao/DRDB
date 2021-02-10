@@ -43,7 +43,7 @@
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.0.20210207</h4>
+      <h4>V1.0.20210209</h4>
     </v-col>
 
     <v-dialog

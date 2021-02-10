@@ -2034,7 +2034,7 @@ export default {
     this.searchStudies();
     this.socket.on("familyList update", (familyList) => {
       this.currentVisitedFamilies = familyList;
-      console.log(this.currentVisitedFamilies);
+      // console.log(this.currentVisitedFamilies);
     });
   },
 
