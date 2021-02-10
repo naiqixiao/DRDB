@@ -21,7 +21,6 @@ const Conversations = sequelize.import(
   "../models/SequelizeAuto/Conversations.js"
 );
 
-
 Family.hasMany(Child, {
   foreignKey: "FK_Family",
 });

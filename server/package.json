@@ -30,7 +30,7 @@
     "pm2": "^4.5.1",
     "sequelize": "^5.22.3",
     "sequelize-auto": "^0.5.4",
-    "socket.io": "^2.2.0"
+    "socket.io": "^3.1.1"
   },
   "devDependencies": {
     "prettier": "^1.19.1"

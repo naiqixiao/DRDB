@@ -16,3 +16,6 @@ exports.sequelize = new Sequelize("Database_Name", "User", "Password", {
     idle: 10000,
   },
 });
+
+exports.DBName = "DRDB";
+exports.frontendURL = ["example URL"]

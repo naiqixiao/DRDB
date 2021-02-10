@@ -61,7 +61,6 @@ cron.schedule('0 9 * * *', async (req, res) => {
 
 });
 
-
 const ChildController = require("./api/controllers/child");
 
 cron.schedule('5 0 * * *', async (req, res) => {
@@ -71,12 +70,24 @@ cron.schedule('5 0 * * *', async (req, res) => {
 
 });
 
-const io = require("socket.io")(server);
+const config = require("../config/general");
+
+const options = {
+  cors: {
+    origin: config.frontendURL,
+    methods: ["GET", "POST"]
+  }
+};
+
+const io = require("socket.io")(server, options);
 
 io.on("connection", (socket) => {
 
   console.log(socket.id + '  connected!')
-  clientList.push(socket.id)
+
+  if (!clientList.includes(socket.id)) {
+    clientList.push(socket.id)
+  }
 
   socket.emit('familyList update', familyList)
 
@@ -85,8 +96,9 @@ io.on("connection", (socket) => {
     if (!familyList.includes(familyId)) {
       familyList.push(familyId)
       io.emit('familyList update', familyList)
+      // console.log(familyList)
     }
-
+    // console.log('family added!')
   })
 
   socket.on('remove family', familyId => {
@@ -96,7 +108,6 @@ io.on("connection", (socket) => {
       familyList.splice(index, 1)
       io.emit('familyList update', familyList)
     }
-
   })
 
   socket.on("disconnect", () => {
