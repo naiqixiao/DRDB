@@ -407,11 +407,11 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  var logKeywords = '[Family Updated] ';
+  var logKeywords = 'Family Updated';
 
   if ('NoMoreContact' in updatedFamilyInfo) {
     if (updatedFamilyInfo.NoMoreContact) {
-      logKeywords = '[Family Removed] '
+      logKeywords = 'Family Removed'
     }
   }
 

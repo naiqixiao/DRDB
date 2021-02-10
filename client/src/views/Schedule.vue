@@ -956,6 +956,7 @@ import Page from "@/components/Page";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import io from "socket.io-client";
+import { backendURL } from '../plugins/variables'
 
 export default {
   components: {
@@ -2040,7 +2041,7 @@ export default {
 
   created: function() {
     console.log(this.socket);
-    this.socket = io("http://192.168.0.10:3000");
+    this.socket = io(backendURL);
   },
 
   beforeDestroy: function() {

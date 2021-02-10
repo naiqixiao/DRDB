@@ -71,12 +71,6 @@ cron.schedule('5 0 * * *', async (req, res) => {
 
 });
 
-// socket.io
-// const options = {
-//   cors: true,
-//   origins: ["http://192.168.0.10:8080"],
-// };
-
 var familyList = [];
 var clientList = [];
 const io = require("socket.io")(server);
