@@ -70,7 +70,7 @@ cron.schedule('5 0 * * *', async (req, res) => {
 
 });
 
-const config = require("../config/general");
+const config = require("./config/general");
 
 const options = {
   cors: {
