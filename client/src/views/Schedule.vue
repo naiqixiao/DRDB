@@ -86,7 +86,9 @@
       <v-col cols="12" md="5">
         <v-row justify="space-around">
           <v-col cols="12" md="9">
-            <h2 v-show="currentChild.scheduled" style="color: red;">You're late. Someone is calling this family...</h2>
+            <h2 v-show="contacted" style="color: red;">
+              You're late. Someone just called this family...
+            </h2>
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="12" md="3" style="text-align: end">
@@ -102,7 +104,7 @@
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
-                   </v-col>
+          </v-col>
           <v-col
             cols="12"
             v-for="item in familyField.map((i) => this.$familyFields[i])"
@@ -956,7 +958,7 @@ import Page from "@/components/Page";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import io from "socket.io-client";
-import { backendURL } from '../plugins/variables'
+import { backendURL } from "../plugins/variables";
 
 export default {
   components: {
@@ -1084,6 +1086,7 @@ export default {
       scheduleNotes: "",
       socket: {},
       currentVisitedFamilies: [],
+      contactedByOthers: false,
     };
   },
 
@@ -1771,6 +1774,7 @@ export default {
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
         }
+        this.contactedByOthers = false;
       }, 300);
     },
 
@@ -1889,10 +1893,9 @@ export default {
       this.resetSchedule();
 
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
-        this.currentChild.scheduled = true;
+        this.contactedByOthers = true;
       } else {
         this.socket.emit("add family", this.currentChild.FK_Family);
-        this.currentChild.scheduled = false;
       }
     },
 
@@ -1906,10 +1909,9 @@ export default {
       this.resetSchedule();
 
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
-        this.currentChild.scheduled = true;
+        this.contactedByOthers = true;
       } else {
         this.socket.emit("add family", this.currentChild.FK_Family);
-        this.currentChild.scheduled = false;
       }
     },
 
