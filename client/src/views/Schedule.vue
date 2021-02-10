@@ -86,7 +86,7 @@
       <v-col cols="12" md="5">
         <v-row justify="space-around">
           <v-col cols="12" md="9">
-            <h2 v-show="contacted" style="color: red;">
+            <h2 v-show="contactedByOthers" style="color: red;">
               You're late. Someone just called this family...
             </h2>
           </v-col>
@@ -958,7 +958,7 @@ import Page from "@/components/Page";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import io from "socket.io-client";
-import { backendURL } from "../plugins/variables";
+// import { backendURL } from "../plugins/variables";
 
 export default {
   components: {
@@ -2042,8 +2042,7 @@ export default {
   },
 
   created: function() {
-    console.log(this.socket);
-    this.socket = io(backendURL);
+    this.socket = io();
   },
 
   beforeDestroy: function() {
