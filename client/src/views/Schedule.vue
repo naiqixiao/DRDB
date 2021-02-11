@@ -2045,7 +2045,6 @@ export default {
   created: function() {
     this.socket = io(backendURL);
 
-    // this.socket = io(backendURL);
     console.log(backendURL);
   },
 

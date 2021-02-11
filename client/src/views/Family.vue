@@ -73,14 +73,15 @@
                 class="textfield-family"
                 background-color="textbackground"
                 hide-details
-                @keydown.enter="searchFamily(item.field, $event.target.value)"
+                @keydown.enter="searchFamily()"
+                @input="getSearchKeys(item.field, $event)"
                 :label="item.label"
                 :value="
                   item.label === 'Phone'
                     ? PhoneFormated(currentFamily[item.field])
                     : currentFamily[item.field]
                 "
-                :append-icon="searchStatus ? 'mdi-magnify' : undefined"
+                :append-icon="searchStatus ? 'mdi-magnify' : ''"
                 :readonly="!searchStatus"
                 placeholder="  "
                 outlined
@@ -106,6 +107,7 @@
                 background-color="textbackground"
                 hide-details
                 @keydown.enter="searchFamily"
+                @input="getSearchKeys(item.field, $event)"
                 :label="item.label"
                 v-model="currentFamily[item.field]"
                 :append-icon="searchStatus ? 'mdi-magnify' : undefined"
@@ -224,7 +226,7 @@
                       "
                       :disabled="!currentFamily.id && !nextContactDialog"
                     >
-                      <v-icon color="warning" style="padding-right: 5px;"
+                      <v-icon color="warning" style="padding-right: 5px"
                         >pan_tool</v-icon
                       >
                     </v-btn>
@@ -283,7 +285,7 @@
                   <div v-if="!!item.options">
                     <!-- :item-value="$Options[item.options]" -->
                     <v-combobox
-                    class="textfield-family"
+                      class="textfield-family"
                       justify="start"
                       :items="$Options[item.options]"
                       v-model="editedItem[item.field]"
@@ -294,7 +296,7 @@
                   </div>
                   <div v-else-if="item.rules">
                     <v-text-field
-                    class="textfield-family"
+                      class="textfield-family"
                       :label="item.label"
                       :rules="$rules[item.rules]"
                       v-model="editedItem[item.field]"
@@ -305,7 +307,7 @@
                   </div>
                   <div v-else>
                     <v-text-field
-                    class="textfield-family"
+                      class="textfield-family"
                       :label="item.label"
                       v-model="editedItem[item.field]"
                       outlined
@@ -361,7 +363,7 @@
               </v-row>
             </v-form>
           </v-card-text>
-          <v-card-actions style="padding: 16px;">
+          <v-card-actions style="padding: 16px">
             <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
@@ -395,8 +397,8 @@
             :nextContactDialog="nextContactDialog"
             @nextContactDone="updateNextContactFrontend"
           ></NextContact>
-          <v-card-actions style="padding: 16px;">
-            <v-row justify="space-between" >
+          <v-card-actions style="padding: 16px">
+            <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="nextContactDialog = false"
@@ -419,10 +421,11 @@
           </div>
           <div v-else>
             <v-text-field
-              style="height: 48px;"
+              style="height: 48px"
               background-color="textbackground"
               hide-details
-              @keydown.enter="searchFamilybyChildName($event.target.value)"
+              @keydown.enter="searchFamily"
+              @input="getSearchKeys('childName', $event)"
               label="Child's Name"
               :append-icon="searchStatus ? 'mdi-magnify' : undefined"
               :readonly="!searchStatus"
@@ -531,6 +534,7 @@ export default {
         id: null,
         Email: null,
         Phone: null,
+        CellPhone: null,
         NamePrimary: null,
         NameSecondary: null,
         Address: null,
@@ -548,6 +552,7 @@ export default {
         id: null,
         Email: null,
         Phone: null,
+        CellPhone: null,
         NamePrimary: null,
         NameSecondary: null,
         Address: null,
@@ -559,13 +564,13 @@ export default {
         Vehicle: null,
         RecruitmentMethod: null,
         NextContactDate: null,
-        Children: [],
         Note: null,
       },
       currentFamily: {
         id: null,
         Email: null,
         Phone: null,
+        CellPhone: null,
         NamePrimary: null,
         NameSecondary: null,
         Address: null,
@@ -611,20 +616,18 @@ export default {
       this.currentFamily = Object.assign({}, this.familyTemplate);
       this.Families = [];
       this.page = 0;
+      this.queryString = {};
     },
 
-    async searchFamily(item, field) {
+    getSearchKeys(field, value) {
+      if (value && field) {
+        this.queryString[field] = value;
+      }
+    },
+
+    async searchFamily() {
       this.$store.dispatch("setLoadingStatus", true);
-
-      if (item && field) {
-        this.currentFamily[item] = field;
-      }
-
-      if (this.currentFamily.familyId) {
-        this.currentFamily.familyId = parseInt(this.currentFamily.familyId);
-      }
-
-      this.queryString = this.currentFamily;
+      // console.log(this.currentFamily)
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
 
@@ -634,12 +637,18 @@ export default {
           this.Families = Results.data;
           this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
-          this.searchStatus = !this.searchStatus;
         } else {
-          alert("no family can be found");
           this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
+
+          this.currentFamily.Email = "";
+          this.currentFamily.Phone = "";
+          this.currentFamily.CellPhone = "";
+          this.currentFamily.id = "";
+          alert("no family can be found");
         }
+
+        this.searchStatus = !this.searchStatus;
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
@@ -652,44 +661,44 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    async searchFamilybyChildName(childName) {
-      this.$store.dispatch("setLoadingStatus", true);
+    // async searchFamilybyChildName(childName) {
+    //   this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.childName = childName;
+    //   this.queryString = this.currentFamily;
+    //   this.queryString.childName = childName;
 
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+    //   this.queryString.trainingMode = this.$store.state.trainingMode;
 
-      try {
-        const Results = await family.search(this.queryString);
-        if (Results.data.length > 0) {
-          this.Families = Results.data;
-          this.page = 1;
-          this.currentFamily = this.Families[this.page - 1];
-          this.searchStatus = !this.searchStatus;
-        } else {
-          alert("no family can be found");
-          this.page = 0;
-          this.currentFamily = Object.assign({}, this.familyTemplate);
-        }
-      } catch (error) {
-        if (error.response.status === 401) {
-          alert("Authentication failed, please login.");
-          this.$router.push({
-            name: "Login",
-          });
-        }
-      }
+    //   try {
+    //     const Results = await family.search(this.queryString);
+    //     if (Results.data.length > 0) {
+    //       this.Families = Results.data;
+    //       this.page = 1;
+    //       this.currentFamily = this.Families[this.page - 1];
+    //     } else {
+    //       alert("no family can be found");
+    //       this.page = 0;
+    //       this.currentFamily = Object.assign({}, this.familyTemplate);
+    //     }
 
-      delete this.queryString.childName;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    },
+    //     this.searchStatus = !this.searchStatus;
+    //   } catch (error) {
+    //     if (error.response.status === 401) {
+    //       alert("Authentication failed, please login.");
+    //       this.$router.push({
+    //         name: "Login",
+    //       });
+    //     }
+    //   }
+
+    //   delete this.queryString.childName;
+    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    // },
 
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.NextContactDate = moment()
-        .startOf("day")
-        .toString();
+      this.queryString.NextContactDate = moment().startOf("day").toString();
       this.queryString.AssignedLab = this.$store.state.lab;
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
@@ -860,9 +869,7 @@ export default {
   },
   computed: {
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      return moment().startOf("day").format("YYYY-MM-DD");
     },
   },
 
