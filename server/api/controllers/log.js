@@ -60,7 +60,7 @@ exports.createLog = async function (logType, user, note) {
     const logFile = folderName + "/" + fileName;
 
     if (fs.existsSync(logFile)) {
-      logCSV = await jsonexport(log, includeHeaders = false)
+      logCSV = await jsonexport(log, {includeHeaders: false})
 
       fs.appendFileSync(logFile, logCSV)
     } else {
