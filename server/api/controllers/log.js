@@ -62,11 +62,11 @@ exports.createLog = async function (logType, user, note) {
     if (fs.existsSync(logFile)) {
       logCSV = await jsonexport(log, {includeHeaders: false})
 
-      fs.appendFileSync(logFile, logCSV)
+      fs.appendFileSync(logFile, logCSV + '\r\n')
     } else {
       logCSV = await jsonexport(log)
 
-      fs.writeFileSync(logFile, logCSV)
+      fs.writeFileSync(logFile, logCSV + '\r\n')
     }
   }
   catch (err) {
