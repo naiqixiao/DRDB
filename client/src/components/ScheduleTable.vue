@@ -738,7 +738,7 @@ export default {
             studyNames = Array.from(new Set(studyNames));
 
             // Calendar event title
-            item.summary = item.Status.toUpperCase() + studyNames.join(" + "); // " - " +
+            item.summary = item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
 
             try {
               await schedule.update(item);
