@@ -37,6 +37,7 @@
       <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
         <v-text-field
           @keydown.enter="searchSchedule"
+          @input="getSearchKeys(item.field, $event)"
           :label="item.label"
           v-model="queryString[item.field]"
           append-icon="mdi-magnify"
@@ -50,9 +51,11 @@
     </v-row>
     <v-row justify="start">
       <v-col cols="12" md="2">
+          <!-- @blur="searchSchedule" -->
         <v-select
-          @blur="searchSchedule"
+          @input="getSearchKeys('StudyName', $event)"
           v-model="queryString.StudyName"
+          @keydown.enter="searchSchedule"
           :items="$store.state.studies"
           :item-value="'id'"
           :item-text="'StudyName'"
@@ -68,9 +71,11 @@
         ></v-select>
       </v-col>
       <v-col cols="12" md="2">
+          <!-- @blur="searchScheduleByStatus" -->
         <v-select
-          @blur="searchScheduleByStatus"
+        @input="getSearchKeys('Status', $event)"
           v-model="queryString.Status"
+          @keydown.enter="searchSchedule"
           :items="Status"
           label="Status"
           multiple
@@ -85,6 +90,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
+        @input="getSearchKeys(item.field, $event)"
           @keydown.enter="searchSchedule"
           ref="textfieldAfter"
           label="After"
@@ -101,6 +107,7 @@
       <v-col cols="12" md="2">
         <v-text-field
           @keydown.enter="searchSchedule"
+          @input="getSearchKeys(item.field, $event)"
           ref="textfieldBefore"
           label="Before"
           v-model="queryString.AppointmentTimeBefore"
@@ -300,6 +307,12 @@ export default {
   },
 
   methods: {
+    getSearchKeys(field, value) {
+      if (value && field) {
+        this.queryString[field] = value;
+        console.log(this.queryString)
+      }
+    },
     async searchSchedule() {
       this.$store.dispatch("setLoadingStatus", true);
 
