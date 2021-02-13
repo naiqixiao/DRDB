@@ -689,9 +689,9 @@ export default {
         this.labMembers = Result.data;
 
         //  exclude PIs
-        this.labMembers = this.labMembers.filter((member) => {
-          return member.Role !== "PI";
-        });
+        // this.labMembers = this.labMembers.filter((member) => {
+        //   return member.Role !== "PI";
+        // });
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");

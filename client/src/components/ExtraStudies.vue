@@ -82,11 +82,10 @@ export default {
   data() {
     return {
       selectedStudy: this.currentStudy,
-        // ? this.currentStudy
-        // : this.studyPlaceHolder,
+      // ? this.currentStudy
+      // : this.studyPlaceHolder,
       selectedExperimenters: {},
       selectedExperimenters_2nd: [],
-      
     };
   },
   methods: {
@@ -108,7 +107,12 @@ export default {
         Study: this.selectedStudy,
         Experimenters: experimenterIds,
         Experimenters_2nd: experimenterIds_2nd,
-        ZoomLink: this.selectedExperimenters.ZoomLink,
+        PrimaryExperimenter: [
+          {
+            ZoomLink: this.selectedExperimenters.ZoomLink,
+          },
+        ],
+        // ZoomLink: this.selectedExperimenters.ZoomLink,
       };
 
       const attendees = [];
