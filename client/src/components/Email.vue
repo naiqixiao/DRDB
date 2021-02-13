@@ -308,7 +308,7 @@ export default {
 
           emailBody = emailBody.replace(
             /\${{ZoomLink}}/g,
-            "<a href='" + appointment.PrimaryExperimenter.ZoomLink + "'>Zoom Link</a>"
+            "<a href='" + appointment.PrimaryExperimenter[0].ZoomLink + "'>Zoom Link</a>"
           );
 
           emailBodyList.push(emailBody);

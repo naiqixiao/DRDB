@@ -257,7 +257,7 @@
                     <v-col cols="12" md="5">
                       <v-combobox
                         v-model="studyTime"
-                        :items="studyTimeSlots"
+                        :items="$studyTimeSlots"
                         label="Study time"
                         hide-details
                         dense
@@ -355,7 +355,7 @@
                 <v-col cols="12" md="6">
                   <v-btn
                     color="primary"
-                    :disabled="!studyDateTime"
+                    :disabled="!studyTime"
                     @click="continue12()"
                   >
                     <v-icon dark left v-show="scheduleUpdated"
@@ -605,7 +605,6 @@ export default {
   },
   props: {
     Schedules: Array,
-    studyTimeSlots: Array,
     tableHeight: String,
   },
   data() {
@@ -632,7 +631,7 @@ export default {
       earliestDate: new Date(),
       latestDate: new Date(),
       studyDate: null,
-      studyTime: "09:00AM",
+      studyTime: null,
       emailDialog: false,
       scheduleNextPage: false,
       emailSent: false,
@@ -738,7 +737,8 @@ export default {
             studyNames = Array.from(new Set(studyNames));
 
             // Calendar event title
-            item.summary = item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
+            item.summary =
+              item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
 
             try {
               await schedule.update(item);
@@ -815,12 +815,12 @@ export default {
             this.editedSchedule.Reminded = true;
           }
 
-          var calendarDescription = this.editedSchedule.Note + "<br>";
+          var calendarDescription = "<b>Note: </b>" + this.editedSchedule.Note + "<br>";
           if (this.editedSchedule.Appointments[0].Study.StudyType == "Online")
             calendarDescription =
               calendarDescription +
-              "zoom link: " +
-              this.editedSchedule.Appointments[0].ZoomLink;
+              "<b>zoom link: </b>" +
+              this.editedSchedule.Appointments[0].PrimaryExperimenter.ZoomLink;
 
           this.editedSchedule.description = calendarDescription;
 
@@ -930,7 +930,7 @@ export default {
       this.dialog = false;
       setTimeout(() => {
         this.studyDate = null;
-        this.studyTime = "09:00AM";
+        this.studyTime = null;
         this.e1 = 1;
         this.emailDialog = false;
         this.nextContactDialogStepper = false;
@@ -1135,32 +1135,36 @@ export default {
 
   computed: {
     studyDateTime: function() {
-      var StudyTimeString = this.studyTime.slice(0, 5);
-      var AMPM = this.studyTime.slice(5, 7);
-      var StudyHour = StudyTimeString.split(":")[0];
-      var StudyMin = StudyTimeString.split(":")[1];
+      if (this.studyTime) {
+        var StudyTimeString = this.studyTime.slice(0, 5);
+        var AMPM = this.studyTime.slice(5, 7);
+        var StudyHour = StudyTimeString.split(":")[0];
+        var StudyMin = StudyTimeString.split(":")[1];
 
-      switch (AMPM) {
-        case "PM":
-          if (parseInt(StudyHour) < 12) {
-            StudyHour = parseInt(StudyHour) + 12;
-          }
-          break;
+        switch (AMPM) {
+          case "PM":
+            if (parseInt(StudyHour) < 12) {
+              StudyHour = parseInt(StudyHour) + 12;
+            }
+            break;
 
-        case "AM":
-          StudyHour = parseInt(StudyHour);
-          break;
+          case "AM":
+            StudyHour = parseInt(StudyHour);
+            break;
+        }
+
+        StudyMin = parseInt(StudyMin);
+        var studyDateTime =
+          new Date(this.studyDate).getTime() +
+          StudyHour * 3600 * 1000 +
+          StudyMin * 60000 +
+          new Date(this.studyDate).getTimezoneOffset() * 60000;
+
+        studyDateTime = new Date(studyDateTime);
+        return studyDateTime;
+      } else {
+        return new Date();
       }
-
-      StudyMin = parseInt(StudyMin);
-      var studyDateTime =
-        new Date(this.studyDate).getTime() +
-        StudyHour * 3600 * 1000 +
-        StudyMin * 60000 +
-        new Date(this.studyDate).getTimezoneOffset() * 60000;
-
-      studyDateTime = new Date(studyDateTime);
-      return studyDateTime;
     },
     TodaysDate() {
       return moment()
