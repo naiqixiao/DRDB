@@ -123,7 +123,7 @@ exports.create = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendUpdates: "all",
+        sendNotifications: true,
       });
     } catch (error) {
       throw error;
@@ -352,7 +352,7 @@ exports.update = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendUpdates: "all",
+        sendNotifications: true,
       });
     } catch (err) {
       throw err;
@@ -457,7 +457,7 @@ exports.delete = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        // sendUpdates: "all"
+        // sendNotifications: true
       });
     } catch (err) {
       throw err;

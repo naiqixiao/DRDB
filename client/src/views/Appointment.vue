@@ -51,7 +51,7 @@
     </v-row>
     <v-row justify="start">
       <v-col cols="12" md="2">
-          <!-- @blur="searchSchedule" -->
+        <!-- @blur="searchSchedule" -->
         <v-select
           @input="getSearchKeys('StudyName', $event)"
           v-model="queryString.StudyName"
@@ -71,9 +71,9 @@
         ></v-select>
       </v-col>
       <v-col cols="12" md="2">
-          <!-- @blur="searchScheduleByStatus" -->
+        <!-- @blur="searchScheduleByStatus" -->
         <v-select
-        @input="getSearchKeys('Status', $event)"
+          @input="getSearchKeys('Status', $event)"
           v-model="queryString.Status"
           @keydown.enter="searchSchedule"
           :items="Status"
@@ -90,7 +90,7 @@
       </v-col>
       <v-col cols="12" md="2">
         <v-text-field
-        @input="getSearchKeys(item.field, $event)"
+          @input="getSearchKeys(item.field, $event)"
           @keydown.enter="searchSchedule"
           ref="textfieldAfter"
           label="After"
@@ -119,6 +119,11 @@
           outlined
           dense
         ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="1" style="text-align: center">
+        <v-btn large @click="searchSchedule">
+          <v-icon left dark>mdi-magnify</v-icon>Search
+        </v-btn>
       </v-col>
       <!-- <v-spacer></v-spacer> -->
       <v-col cols="12" md="2">
@@ -203,7 +208,6 @@
       <v-col cols="12" md="9">
         <ScheduleTable
           :Schedules="Schedules"
-          :studyTimeSlots="this.$studyTimeSlots"
           @rowSelected="updateFamily"
           tableHeight="720px"
         ></ScheduleTable>
@@ -245,7 +249,7 @@
 </template>
 
 <script>
-import ScheduleTable from "@/components/ScheduleTable";
+import ScheduleTable from "@/components/ScheduleTable_new";
 import FamilyInfo from "@/components/FamilyInfo";
 
 // import family from "@/services/family";
@@ -310,7 +314,7 @@ export default {
     getSearchKeys(field, value) {
       if (value && field) {
         this.queryString[field] = value;
-        console.log(this.queryString)
+        console.log(this.queryString);
       }
     },
     async searchSchedule() {
@@ -339,32 +343,32 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    async searchScheduleByStatus() {
-      this.$store.dispatch("setLoadingStatus", true);
+    // async searchScheduleByStatus() {
+    //   this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+    //   this.queryString.trainingMode = this.$store.state.trainingMode;
 
-      if (this.queryString.Status) {
-        try {
-          const Result = await schedule.search(this.queryString);
-          this.Schedules = Result.data;
-          if (this.Schedules.length == 0) {
-            alert("No study appointment can be found. Sorry~");
-          }
-        } catch (error) {
-          if (error.response.status === 401) {
-            alert("Authentication failed, please login.");
-            this.$router.push({
-              name: "Login",
-            });
-          }
-        }
+    //   if (this.queryString.Status) {
+    //     try {
+    //       const Result = await schedule.search(this.queryString);
+    //       this.Schedules = Result.data;
+    //       if (this.Schedules.length == 0) {
+    //         alert("No study appointment can be found. Sorry~");
+    //       }
+    //     } catch (error) {
+    //       if (error.response.status === 401) {
+    //         alert("Authentication failed, please login.");
+    //         this.$router.push({
+    //           name: "Login",
+    //         });
+    //       }
+    //     }
 
-        this.queryString = Object.assign({}, this.defaultQueryString);
-      }
-      this.index = -1;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    },
+    //     this.queryString = Object.assign({}, this.defaultQueryString);
+    //   }
+    //   this.index = -1;
+    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    // },
 
     // async todayStudies() {
     //   this.$store.dispatch("setLoadingStatus", true);

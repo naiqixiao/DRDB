@@ -50,7 +50,7 @@ exports.create = asyncHandler(async (req, res) => {
   //   const calEvent = await google.calendar.events.insert({
   //     calendarId: "primary",
   //     resource: newScheduleInfo,
-  //     sendUpdates: "all",
+  //     sendNotifications: true,
   //   });
 
   //   newScheduleInfo.calendarEventId = calEvent.data.id;
@@ -168,7 +168,7 @@ exports.search = asyncHandler(async (req, res) => {
     };
   }
   if (req.query.FamilyId) {
-    queryString["$FK_Family$"] = req.query.FamilyId;
+    queryString.FK_Family = req.query.FamilyId;
   }
   if (req.query.StudyName) {
     queryString["$Appointments.FK_Study$"] = req.query.StudyName;
@@ -194,20 +194,22 @@ exports.search = asyncHandler(async (req, res) => {
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-                "FK_Lab",
-              ],
-              include: [{ model: model.lab }],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -225,6 +227,15 @@ exports.search = asyncHandler(async (req, res) => {
         },
         {
           model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
         },
         {
           model: model.personnel,
@@ -274,20 +285,22 @@ exports.today = asyncHandler(async (req, res) => {
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-                "FK_Lab",
-              ],
-              include: [{ model: model.lab }],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -305,6 +318,15 @@ exports.today = asyncHandler(async (req, res) => {
         },
         {
           model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
         },
         {
           model: model.personnel,
@@ -371,20 +393,22 @@ exports.tomorrow = asyncHandler(async (req, res) => {
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-                "FK_Lab",
-              ],
-              include: [{ model: model.lab }],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -402,6 +426,15 @@ exports.tomorrow = asyncHandler(async (req, res) => {
         },
         {
           model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
         },
         {
           model: model.personnel,
@@ -452,20 +485,22 @@ exports.week = asyncHandler(async (req, res) => {
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-                "FK_Lab",
-              ],
-              include: [{ model: model.lab }],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -483,6 +518,15 @@ exports.week = asyncHandler(async (req, res) => {
         },
         {
           model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
         },
         {
           model: model.personnel,
@@ -518,14 +562,14 @@ exports.update = asyncHandler(async (req, res) => {
           calendarId: "primary",
           eventId: updatedScheduleInfo.calendarEventId,
           resource: updatedScheduleInfo,
-          sendUpdates: "all",
+          sendNotifications: true,
         });
       } else {
         // Create a calendar event
         const calEvent = await calendar.events.insert({
           calendarId: "primary",
           resource: updatedScheduleInfo,
-          sendUpdates: "all",
+          sendNotifications: true,
         });
 
         updatedScheduleInfo.calendarEventId = calEvent.data.id;
@@ -554,7 +598,7 @@ exports.update = asyncHandler(async (req, res) => {
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
             resource: updatedScheduleInfo,
-            sendUpdates: "all",
+            sendNotifications: true,
           });
         } catch (err) {
           throw err;
@@ -571,25 +615,26 @@ exports.update = asyncHandler(async (req, res) => {
       where: { id: ID },
       include: [
         {
-          model: model.family,
-        },
-        {
           model: model.appointment,
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-              ],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -605,7 +650,23 @@ exports.update = asyncHandler(async (req, res) => {
             },
           ],
         },
+        {
+          model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
+        },
+        {
+          model: model.personnel,
+        },
       ],
+      order: [["AppointmentTime", "ASC"]],
     });
 
     // Log
@@ -703,7 +764,7 @@ exports.delete = asyncHandler(async (req, res) => {
       await calendar.events.delete({
         calendarId: "primary",
         eventId: schedule.calendarEventId,
-        sendUpdates: "all",
+        sendNotifications: true,
       });
     }
 
@@ -737,20 +798,22 @@ exports.special = asyncHandler(async (req, res) => {
           include: [
             {
               model: model.child,
-              attributes: ["Name", "DoB", "Sex", "IdWithinFamily"],
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
             },
             {
               model: model.study,
-              attributes: [
-                "StudyName",
-                "MinAge",
-                "MaxAge",
-                "EmailTemplate",
-                "ReminderTemplate",
-                "StudyType",
-                "FK_Lab",
-              ],
-              include: [{ model: model.lab }],
+              include: [{ model: model.lab },
+              {
+                model: model.personnel,
+                as: 'Experimenters',
+                through: {
+                  model: model.experimenter,
+                },
+              },],
             },
             {
               model: model.personnel,
@@ -768,11 +831,21 @@ exports.special = asyncHandler(async (req, res) => {
         },
         {
           model: model.family,
+          include: [
+            {
+              model: model.child,
+              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
+              include: [{
+                model: model.appointment,
+                attributes: ['FK_Study']
+              }]
+            },]
         },
         {
           model: model.personnel,
         },
       ],
+      order: [["AppointmentTime", "ASC"]],
     });
 
     schedules.forEach((schedule) => {

@@ -39,20 +39,18 @@ exports.create = asyncHandler(async (req, res) => {
     const calEvent = await calendar.events.insert({
       calendarId: "primary",
       resource: event,
-      sendUpdates: "all",
+      sendNotifications: true,
     });
 
     var updatedScheduleInfo = {};
     updatedScheduleInfo.calendarEventId = calEvent.data.id;
     updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
 
-    try {
-      await model.schedule.update(updatedScheduleInfo, {
-        where: { id: event.scheduleId },
-      });
-    } catch (error) {
-      throw error;
-    }
+
+    await model.schedule.update(updatedScheduleInfo, {
+      where: { id: event.scheduleId },
+    });
+
 
     res.status(200).send(calEvent.data);
     console.log("Calendar event successfully created: " + calEvent.data.id);
@@ -71,7 +69,7 @@ exports.update = asyncHandler(async (req, res) => {
       calendarId: "primary",
       eventId: req.query.eventId,
       resource: event,
-      sendUpdates: "all",
+      sendNotifications: true,
     });
     res.status(200).send(calEvent.data);
     console.log("Calendar event successfully updated: " + calEvent.data.id);
@@ -87,7 +85,7 @@ exports.delete = asyncHandler(async (req, res) => {
     const calEvent = await calendar.events.delete({
       calendarId: "primary",
       eventId: req.query.eventId,
-      sendUpdates: "all",
+      sendNotifications: true,
     });
     res.status(200).send(calEvent.data);
     console.log("Calendar event successfully deleted: " + calEvent.data.id);
