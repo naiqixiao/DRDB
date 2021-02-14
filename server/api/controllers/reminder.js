@@ -109,7 +109,7 @@ function emailBody(schedule) {
       schedule.Appointments[0].Study.Lab.Email +
       ">",
     to: schedule.Family.NamePrimary + "<" + schedule.Family.Email + ">",
-    bcc: experimenterEmails(schedule.Appointments),
+    // bcc: experimenterEmails(schedule.Appointments),
     subject: emailSubject,
     body: formatedBody(emailBody),
   };
@@ -400,3 +400,235 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+
+// Retrieve today's appointments from the database.
+exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
+  var startDate = moment();
+  switch (moment().weekday()) {
+    default:
+      startDate = moment()
+        .startOf("day")
+        .add(1, "days");
+      break;
+  }
+
+  try {
+
+    const experimenters = await model.personnel.findAll({
+      where: {
+        [Op.and]: {
+          '$PrimaryExperimenterof.Schedule.AppointmentTime$': {
+            [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
+          },
+          '$SecondaryExperimenterof.Schedule.AppointmentTime$': {
+            [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
+          },
+        },
+        '$PrimaryExperimenterof.Schedule.Status$': 'Confirmed'
+      },
+      include: [
+        model.lab,
+        {
+          model: model.appointment,
+          as: "PrimaryExperimenterof",
+          through: { model: model.experimenterAssignment },
+          include: [
+            {
+              model: model.schedule
+            },
+            {
+              model: model.study
+            },
+            {
+              model: model.child,
+              include: [
+                { model: model.family }
+              ]
+            },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+            },
+          ]
+        },
+        {
+          model: model.appointment,
+          as: "SecondaryExperimenterof",
+          through: { model: model.experimenterAssignment_2nd },
+          include: [
+            {
+              model: model.schedule
+            },
+            {
+              model: model.study
+            },
+            {
+              model: model.child,
+              include: [
+                { model: model.family }
+              ]
+            },
+            {
+              model: model.personnel,
+              as: "PrimaryExperimenter",
+              through: { model: model.experimenterAssignment },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+            },
+          ]
+        }
+      ],
+
+    });
+
+    var experimenterReminderContent = [];
+
+    const credentialsPath = "api/google/general/credentials.json";
+    const credentials = fs.readFileSync(credentialsPath);
+    const { client_secret, client_id, redirect_uris } = JSON.parse(
+      credentials
+    ).installed;
+
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+
+    experimenters.forEach(async experimenter => {
+
+      var body = "Hi " +
+        experimenter.Name.split(" ")[0] + "<br><br>The following is(are) your study(ies) tomorrow! Good luck! :)<br><br>";
+
+      body = body + "<style> border: 1px solid #000000; table tr th {text-align: center; color: black; font-size: 24; font-weight: bold; padding: 5px;} table td {text-align: center; color: black; padding: 5px;} tbody tr:nth-child(even) { background: #e8e7e1;} </style>"
+      // table th, table td{
+      //   text-align: center;
+      //   }
+      if (experimenter.PrimaryExperimenterof.length > 0) {
+        body = body + "<h2>Studies that you are the primary experimenter</h2>"
+
+        // as Primary experimenter 
+        body = body + '<table style="width:90%;">'
+        body = body + "<tr><th width='15%'>Study time</th><th width='10%'>Study name</th>"
+        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner (E2)</th><th width='25%'>Zoom link</th></tr>"
+
+        experimenter.PrimaryExperimenterof.forEach(appointmentPri => {
+
+          var E2 = appointmentPri.SecondaryExperimenter.map((experimenter) => {
+            return experimenter.Name + "<br>" + experimenter.Email;
+          });
+
+          var E22 = "";
+          if (appointmentPri.SecondaryExperimenter.length > 0) {
+            E22 = E2.join(", ");
+          } else {
+            E22 = "not assigned";
+          }
+
+          const parent = appointmentPri.Child.Family.NamePrimary.split(" ")[0] + ", " +
+            PhoneFormated(appointmentPri.Child.Family.Phone) +
+            "<br>" + appointmentPri.Child.Family.Email
+
+          const ZoomLink = experimenter.ZoomLink ? experimenter.ZoomLink : "not available";
+
+          body = body + "<tr>"
+          body = body + "<td style='padding = 8px;'>" + moment(appointmentPri.Schedule.AppointmentTime).format(
+            "MMM Do [at] h:mma"
+          ) + "</td>"
+          body = body + "<td style='padding = 8px;'>" + appointmentPri.Study.StudyName + "</td>"
+          body = body + "<td style='padding = 8px;'>" + parent + "</td>"
+          body = body + "<td style='padding = 8px;'>" + appointmentPri.Child.Name.split(" ")[0] + "</td>"
+          body = body + "<td style='padding = 8px;'>" + E22 + "</td>"
+          body = body + "<td style='padding = 8px;'>" + ZoomLink + "</td>"
+          body = body + "</tr>"
+        })
+
+        body = body + '</table>'
+
+      }
+
+      if (experimenter.SecondaryExperimenterof.length > 0) {
+
+        body = body + "<h2>Studies that you are the secondary experimenter:</h2>"
+        // as Secondary experimenter 
+        body = body + '<table style="width:90%">'
+        body = body + "<tr><th width='15%'>Study time</th><th width='10%'>Study name</th>"
+        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner (E2)</th><th width='25%'>Zoom link</th></tr>"
+
+        experimenter.SecondaryExperimenterof.forEach(appointmentSec => {
+
+          var E1 = appointmentSec.PrimaryExperimenter.map((experimenter) => {
+            return experimenter.Name + "<br>" + experimenter.Email;
+          });
+
+          const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + ", " +
+            PhoneFormated(appointmentSec.Child.Family.Phone) +
+            "<br>" + appointmentSec.Child.Family.Email
+
+          const ZoomLink = appointmentSec.PrimaryExperimenter[0].ZoomLink ? appointmentSec.PrimaryExperimenter[0].ZoomLink : "not available";
+
+          body = body + "<tr>"
+          body = body + "<td style='padding = 8px;'>" + moment(appointmentSec.Schedule.AppointmentTime).format(
+            "MMM Do [at] h:mma"
+          ) + "</td>"
+          body = body + "<td style='padding = 8px;'>" + appointmentSec.Study.StudyName + "</td>"
+          body = body + "<td style='padding = 8px;'>" + parent + "</td>"
+          body = body + "<td style='padding = 8px;'>" + appointmentSec.Child.Name.split(" ")[0] + "</td>"
+          body = body + "<td style='padding = 8px;'>" + E1[0] + "</td>"
+          body = body + "<td style='padding = 8px;'>" + ZoomLink + "</td>"
+          body = body + "</tr>"
+        })
+      }
+
+      body = body + '</table><br><br>'
+      body = body + "Best,<br><br>" +
+        experimenter.Lab.LabName
+
+      const emailContent = {
+        from:
+          experimenter.Lab.LabName +
+          "<" +
+          experimenter.Lab.Email +
+          ">",
+        to: experimenter.Name + "<" + experimenter.Email + ">",
+        subject: "Baby Lab Study Reminder",
+        body: body,
+      };
+
+      experimenterReminderContent.push(emailContent);
+
+      // send email
+      const tokenPath =
+        "api/google/labs/lab" +
+        experimenter.Lab.id +
+        "/token.json";
+
+      const token = fs.readFileSync(tokenPath);
+
+      oAuth2Client.setCredentials(JSON.parse(token));
+
+      await sendEmail(oAuth2Client, emailContent);
+
+      // log
+      await log.createLog("Auto reminder sent", {
+        Name: '',
+        Email: '', LabName: experimenter.Lab.LabName
+      }, "Reminder email (experimenter) is sent to " +
+      experimenter.Name);
+    })
+
+    // res.status(200).send(experimenterReminderContent);
+    // console.log("Reminder emails sent!");
+  } catch (error) {
+    throw error;
+  }
+});
+
+function PhoneFormated(Phone) {
+  if (Phone) {
+    var cleaned = ("" + Phone).replace(/\D/g, "");
+    var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+    if (match) {
+      return "(" + match[1] + ") " + match[2] + "-" + match[3];
+    }
+    return null;
+  }
+}

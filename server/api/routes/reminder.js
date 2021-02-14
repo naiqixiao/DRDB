@@ -6,4 +6,6 @@ const ReminderController = require("../controllers/reminder");
 
 router.post("/", ReminderController.reminderEmail);
 
+router.post("/experimenterReminder", ReminderController.reminderEmailforExperimenters);
+
 module.exports = router;

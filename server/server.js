@@ -49,7 +49,11 @@ cron.schedule('0 18 * * *', async (req, res) => {
 
   ReminderController.reminderEmail();
 
-  // console.log(resonse);
+});
+
+cron.schedule('0 16 * * *', async (req, res) => {
+
+  ReminderController.reminderEmailforExperimenters();
 
 });
 

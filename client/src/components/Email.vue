@@ -400,9 +400,9 @@ export default {
         body: this.formatedBody(this.$refs.emailBody.value),
       };
 
-      if (this.emailType == "Reminder") {
-        emailContent.bcc = this.experimenterEmails();
-      }
+      // if (this.emailType == "Reminder") {
+      //   emailContent.bcc = this.experimenterEmails();
+      // }
 
       try {
         await email.send(emailContent);
