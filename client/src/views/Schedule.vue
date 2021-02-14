@@ -610,7 +610,8 @@
                             </template>
                             <span
                               >Check this box to use current date/time for the
-                              current appointment.</span
+                              current appointment.<br />NO Google Calendar event
+                              will be created.</span
                             >
                           </v-tooltip>
                           <v-tooltip right>
@@ -652,6 +653,8 @@
                             potentialStudies(appointment.Child)
                               .potentialStudyList
                           "
+                          type="newSchedule"
+                          :nOfAppointments="appointments.length"
                           @selectStudy="selectStudy"
                           @deleteAppointment="deleteAppointment"
                           @emitSelectedStudy="receiveSelectedStudy"
@@ -660,7 +663,10 @@
                         ></ExtraStudies>
                       </div>
                       <v-spacer></v-spacer>
-                      <v-divider style="margin-bottom: 4px"></v-divider>
+                      <v-divider
+                        style="margin-bottom: 4px"
+                        v-show="response === 'Confirmed'"
+                      ></v-divider>
                       <v-row
                         dense
                         v-if="response === 'Confirmed'"
@@ -683,7 +689,7 @@
                               potentialStudies(currentChild).selectableStudies
                                 .length < 1
                             "
-                            >{{ currentChild.Name }}</v-btn
+                            >{{ currentChild.Name.split(" ")[0] }}</v-btn
                           >
                         </v-col>
                         <v-col
@@ -701,7 +707,7 @@
                               potentialStudies(child).selectableStudies.length <
                                 1
                             "
-                            >{{ child.Name }}</v-btn
+                            >{{ child.Name.split(" ")[0] }}</v-btn
                           >
                         </v-col>
                       </v-row>
@@ -736,9 +742,12 @@
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
                       <v-btn
+                        :loading="loadingStatus"
                         color="primary"
                         :disabled="
-                          response === 'Confirmed' ? !studyDate : false
+                          response === 'Confirmed'
+                            ? !(studyDateTime || skipStudyDateTimeStatus)
+                            : false
                         "
                         @click="continue12()"
                       >
@@ -807,6 +816,7 @@
                     </v-col>
                     <v-col cols="12" md="6">
                       <v-btn
+                        :loading="loadingStatus"
                         color="primary"
                         @click="continue23()"
                         :disabled="
@@ -1022,7 +1032,7 @@ export default {
       currentSchedule: {},
       appointments: [],
       Experimenters: [],
-      studyTime: "09:00AM",
+      studyTime: null,
       currentChild: {
         Name: null,
         Sex: null,
@@ -1087,6 +1097,7 @@ export default {
       socket: {},
       currentVisitedFamilies: [],
       contactedByOthers: false,
+      loadingStatus: false,
     };
   },
 
@@ -1416,6 +1427,7 @@ export default {
       this.studyDate = moment()
         .startOf("day")
         .format("YYYY-MM-DD");
+      this.studyTime = "06:00AM";
     },
 
     skipConfirmationEmail() {
@@ -1447,12 +1459,13 @@ export default {
 
           studyNames = Array.from(new Set(studyNames));
 
-          var calendarDescription = this.scheduleNotes + "<br>";
-          if (this.appointments[0].Study.StudyType == "Online")
-            calendarDescription =
-              calendarDescription +
-              "zoom link: " +
-              this.appointments[0].ZoomLink;
+          // var calendarDescription =
+          //   "<b>Note: </b>" + this.scheduleNotes + "<br>";
+          // if (this.appointments[0].Study.StudyType == "Online")
+          //   calendarDescription =
+          //     calendarDescription +
+          //     "<b>zoom link: </b>" +
+          //     this.appointments[0].ZoomLink;
 
           this.currentSchedule = {
             AppointmentTime: moment(this.studyDateTime).toISOString(true),
@@ -1463,7 +1476,10 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
-            description: calendarDescription,
+            description: this.calendarDescription(
+              this.scheduleNotes,
+              this.appointments
+            ),
             start: {
               dateTime: moment(this.studyDateTime).toISOString(true),
               timeZone: "America/Toronto",
@@ -1489,6 +1505,7 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: store.state.userID,
             FK_Family: this.currentFamily.id,
+            Note: this.scheduleNotes,
           };
 
           if (
@@ -1578,10 +1595,10 @@ export default {
       var calendarEvent = {
         summary: studyNames.join(" + "),
         location: this.$store.state.location,
-        description:
-          this.appointments[0].Study.StudyType == "Online"
-            ? this.appointments[0].ZoomLink
-            : "",
+        description: this.calendarDescription(
+          this.scheduleNotes,
+          this.appointments
+        ),
         start: {
           dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
           timeZone: "America/Toronto",
@@ -1614,57 +1631,114 @@ export default {
     },
 
     async continue12() {
+      this.loadingStatus = true;
       this.primaryExperimenterList = [];
 
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].primaryExperimenterStatus();
       }
 
-      try {
+      var scheduleInfo = {};
+
+      if (this.scheduleButtonText == "Study Scheduled!") {
         if (
-          this.response == "Confirmed" &&
-          this.primaryExperimenterList.includes(0)
-        ) {
-          // if any appointment without an experimenter.
           await this.$refs.confirmD.open(
-            "Who is going to run the study?",
-            "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
-          );
-        } else {
-          if (this.scheduleId) {
-            await this.deleteUnfinishedSchedule();
-          }
-
-          var scheduleInfo = await this.createSchedule();
-
-          if (
-            this.response == "Confirmed" &&
-            this.$store.state.labEmailStatus
-          ) {
-            try {
-              await this.createCalendarEvent(scheduleInfo.calendarEvent);
-
-              // this.emailDialog = true;
-              // this.e1 = 2;
-              this.scheduleNextPage = true;
-              this.scheduleButtonText = "Study Scheduled!";
-            } catch (error) {
-              alert(
-                "Calendar event wasn't created successfully, please try again."
+            "Beep!",
+            "You just created an appointment for this family. Do you want to do it again?"
+          )
+        ) {
+          try {
+            if (
+              this.response == "Confirmed" &&
+              this.primaryExperimenterList.includes(0)
+            ) {
+              // if any appointment without an experimenter.
+              await this.$refs.confirmD.open(
+                "Who is going to run the study?",
+                "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
               );
-              console.log(error);
-              this.manualCalendar = true;
+            } else {
+              if (this.scheduleId) {
+                await this.deleteUnfinishedSchedule();
+              }
+
+              scheduleInfo = await this.createSchedule();
+
+              if (
+                this.response == "Confirmed" &&
+                this.$store.state.labEmailStatus &&
+                !this.skipStudyDateTimeStatus
+              ) {
+                try {
+                  await this.createCalendarEvent(scheduleInfo.calendarEvent);
+
+                  this.scheduleNextPage = true;
+                  this.scheduleButtonText = "Study Scheduled!";
+                } catch (error) {
+                  alert(
+                    "Calendar event wasn't created successfully, please try again."
+                  );
+                  console.log(error);
+                  this.manualCalendar = true;
+                }
+              } else {
+                this.scheduleButtonText = "Study Scheduled!";
+                this.scheduleNextPage = true;
+              }
             }
-          } else {
-            this.scheduleNextPage = true;
+          } catch (error) {
+            console.log(error);
           }
         }
-      } catch (error) {
-        console.log(error);
+      } else {
+        try {
+          if (
+            this.response == "Confirmed" &&
+            this.primaryExperimenterList.includes(0)
+          ) {
+            // if any appointment without an experimenter.
+            await this.$refs.confirmD.open(
+              "Who is going to run the study?",
+              "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+            );
+          } else {
+            if (this.scheduleId) {
+              await this.deleteUnfinishedSchedule();
+            }
+
+            scheduleInfo = await this.createSchedule();
+
+            if (
+              this.response == "Confirmed" &&
+              this.$store.state.labEmailStatus &&
+              !this.skipStudyDateTimeStatus
+            ) {
+              try {
+                await this.createCalendarEvent(scheduleInfo.calendarEvent);
+
+                this.scheduleNextPage = true;
+                this.scheduleButtonText = "Study Scheduled!";
+              } catch (error) {
+                alert(
+                  "Calendar event wasn't created successfully, please try again."
+                );
+                console.log(error);
+                this.manualCalendar = true;
+              }
+            } else {
+              this.scheduleButtonText = "Study Scheduled!";
+              this.scheduleNextPage = true;
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
       }
+      this.loadingStatus = false;
     },
 
     async continue23() {
+      this.loadingStatus = true;
       try {
         if (this.emailButtonText == "Email Sent!") {
           if (
@@ -1692,6 +1766,7 @@ export default {
         console.log(error);
         alert("Email wasn't sent successfully, please try again.");
       }
+      this.loadingStatus = false;
     },
 
     scheduleNextStep() {
@@ -1759,7 +1834,7 @@ export default {
         this.scheduleId = null;
         this.response = null;
         this.studyDate = null;
-        this.studyTime = "09:00AM";
+        this.studyTime = null;
         this.emailButtonText = "Send email";
         this.scheduleButtonText = "Schedule";
         this.scheduleNotes = "";
@@ -1770,6 +1845,7 @@ export default {
         this.skipStudyDateTimeStatus = false;
         this.skipConfirmationEmailStatus = false;
         this.skipReminderEmailStatus = false;
+        this.Experimenters = [];
         this.primaryExperimenterList = [];
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
@@ -1961,6 +2037,37 @@ export default {
         }
       }
     },
+
+    calendarDescription(notes, appointments) {
+      const schedule = {
+        Note: notes,
+        Appointments: appointments,
+      };
+      var description = "<b>Note: </b>" + schedule.Note + "<br>";
+
+      schedule.Appointments.forEach((appointment) => {
+        description =
+          description +
+          "<br>==================" +
+          "<br><b>" +
+          appointment.Study.StudyName +
+          "</b><br>" +
+          "<b>E1: </b>" +
+          appointment.E1 +
+          "<br>" +
+          "<b>E2: </b>" +
+          appointment.E2 +
+          "<br>";
+
+        if (appointment.Study.StudyType == "Online")
+          description =
+            description +
+            "<b>zoom link: </b>" +
+            appointment.PrimaryExperimenter[0].ZoomLink;
+      });
+
+      return description;
+    },
   },
 
   computed: {
@@ -1977,33 +2084,37 @@ export default {
       }
     },
 
-    studyDateTime: function() {
-      var StudyTimeString = this.studyTime.slice(0, 5);
-      var AMPM = this.studyTime.slice(5, 7);
-      var StudyHour = StudyTimeString.split(":")[0];
-      var StudyMin = StudyTimeString.split(":")[1];
+    studyDateTime() {
+      if (this.studyTime && this.studyDate) {
+        var StudyTimeString = this.studyTime.slice(0, 5);
+        var AMPM = this.studyTime.slice(5, 7);
+        var StudyHour = StudyTimeString.split(":")[0];
+        var StudyMin = StudyTimeString.split(":")[1];
 
-      switch (AMPM) {
-        case "PM":
-          if (parseInt(StudyHour) < 12) {
-            StudyHour = parseInt(StudyHour) + 12;
-          }
-          break;
+        switch (AMPM) {
+          case "PM":
+            if (parseInt(StudyHour) < 12) {
+              StudyHour = parseInt(StudyHour) + 12;
+            }
+            break;
 
-        case "AM":
-          StudyHour = parseInt(StudyHour);
-          break;
+          case "AM":
+            StudyHour = parseInt(StudyHour);
+            break;
+        }
+
+        StudyMin = parseInt(StudyMin);
+        var studyDateTime =
+          new Date(this.studyDate).getTime() +
+          StudyHour * 3600 * 1000 +
+          StudyMin * 60000 +
+          new Date(this.studyDate).getTimezoneOffset() * 60000;
+
+        studyDateTime = new Date(studyDateTime);
+        return studyDateTime;
+      } else {
+        return null;
       }
-
-      StudyMin = parseInt(StudyMin);
-      var studyDateTime =
-        new Date(this.studyDate).getTime() +
-        StudyHour * 3600 * 1000 +
-        StudyMin * 60000 +
-        new Date(this.studyDate).getTimezoneOffset() * 60000;
-
-      studyDateTime = new Date(studyDateTime);
-      return studyDateTime;
     },
 
     earliestDate: function() {
@@ -2088,7 +2199,7 @@ export default {
           this.scheduleButtonIcon = "event";
           this.scheduleButtonTooltip = "Pick study date and time";
           this.scheduleButtonText = "Schedule";
-          this.studyTime = "09:00AM";
+          this.studyTime = null;
           this.emailType = "Confirmation";
           break;
         }

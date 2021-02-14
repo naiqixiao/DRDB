@@ -158,11 +158,10 @@
       <td :colspan="headers.length">
         <v-row
           justify="space-between"
-          height="174px"
-          style="background-color: rgba(0, 0, 0, 0); overflow-x: scroll"
+          height="190px"
+          style="background-color: rgba(0, 0, 0, 0);"
         >
           <MiniAppointmentTable
-            :Appointments="item.Appointments"
             :Schedule="item"
             :Index="Schedules.indexOf(item)"
             @updateSchedule="updateSchedule"
@@ -211,7 +210,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="1000px">
+      <v-dialog v-model="dialog" max-width="1200px">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -234,59 +233,82 @@
           <v-stepper-items>
             <v-stepper-content step="1">
               <v-row
-                justify="space-around"
-                style="height: 460px;"
-                align="center"
+                style="height: 650px;"
+                align="start"
+                justify="center"
                 dense
               >
-                <v-card outlined style="height: 460px;" width="90%">
-                  <v-card-title class="headline"
-                    >Select study date and time</v-card-title
+                <v-card outlined style="height: 650px;" width="90%">
+                  <v-row
+                    style="height: 100px;"
+                    align="center"
+                    justify="start"
+                    dense
                   >
-                  <v-row dense justify="space-around" align="start">
-                    <v-col cols="12" md="5">
-                      <v-card outlined width="292px">
-                        <v-date-picker
-                          v-model="studyDate"
-                          show-current
-                          :min="earliestDate"
-                          :max="latestDate"
-                        ></v-date-picker>
-                      </v-card>
+                    <v-col cols="12" md="3" class="text-left">
+                      <div class="title" style="padding-left: 8px">
+                        {{ "Study date & time:" }}
+                      </div>
                     </v-col>
-                    <v-col cols="12" md="5">
+                    <v-col cols="12" md="2">
+                      <v-text-field
+                        ref="studyDate"
+                        label="Study date"
+                        v-model="studyDate"
+                        append-icon="event"
+                        @click:append="datePicker = true"
+                        :disabled="
+                          response != 'Confirmed' || skipStudyDateTimeStatus
+                        "
+                        hide-details
+                        dense
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="1"></v-col>
+                    <v-col cols="12" md="2">
                       <v-combobox
                         v-model="studyTime"
                         :items="$studyTimeSlots"
                         label="Study time"
+                        :disabled="
+                          response != 'Confirmed' || skipStudyDateTimeStatus
+                        "
                         hide-details
                         dense
                       ></v-combobox>
-                      <v-tooltip top>
+                    </v-col>
+                    <v-col cols="12" md="1"></v-col>
+                    <v-col cols="12" md="3">
+                      <v-tooltip right>
                         <template v-slot:activator="{ on }">
                           <div v-on="on">
                             <v-checkbox
+                              style="padding: 4px !important"
                               label="Skip study date/time"
-                              class="margin-top-48 pa-0"
+                              class="ma-0 pa-0"
                               :value="skipStudyDateTimeStatus"
                               @change="skipStudyDateTime()"
+                              hide-details
                               dense
                             ></v-checkbox>
                           </div>
                         </template>
                         <span
                           >Check this box to use current date/time for the
-                          current appointment.</span
+                          current appointment.<br />NO Google Calendar event
+                          will be created.</span
                         >
                       </v-tooltip>
-                      <v-tooltip top>
+                      <v-tooltip right>
                         <template v-slot:activator="{ on }">
                           <div v-on="on">
                             <v-checkbox
+                              style="padding: 4px !important"
                               label="Skip reminder email"
                               class="ma-0 pa-0"
                               :value="skipReminderEmailStatus"
                               @change="skipReminderEmail()"
+                              hide-details
                               dense
                             ></v-checkbox>
                           </div>
@@ -296,51 +318,88 @@
                           sent to the participant.</span
                         >
                       </v-tooltip>
-                      <v-divider style="margin-bottom: 8px"></v-divider>
-                      <v-row
-                        dense
-                        style="height: 150px"
-                        align="center"
-                        justify="center"
+                    </v-col>
+                  </v-row>
+                  <v-divider style="margin-bottom: 16px"></v-divider>
+                  <div style="height: 290px; overflow-y: scroll !important;">
+                    <ExtraStudies
+                      ref="extraStudies"
+                      v-for="(appointment,
+                      index) in editedSchedule.Appointments"
+                      :key="appointment.id"
+                      :child="appointment.Child"
+                      :targetChild="appointment.Child"
+                      :currentStudy="appointment.Study"
+                      :index="index"
+                      :response="response"
+                      :potentialStudies="
+                        potentialStudies(
+                          appointment.Child,
+                          appointment.FK_Study
+                        ).potentialStudyList
+                      "
+                      type="reSchedule"
+                      :nOfAppointments="editedSchedule.Appointments.length"
+                      @selectStudy="selectStudy"
+                      @deleteAppointment="deleteAppointment"
+                      @emitSelectedStudy="receiveSelectedStudy"
+                      @primaryExperimenterStatus="checkPrimaryExperimenter"
+                      align="start"
+                    ></ExtraStudies>
+                  </div>
+                  <v-spacer></v-spacer>
+                  <v-divider
+                    style="margin-bottom: 4px"
+                    v-show="response === 'Confirmed'"
+                  ></v-divider>
+                  <v-row
+                    dense
+                    v-if="response === 'Confirmed'"
+                    align="center"
+                    justify="start"
+                    style="height: 100px"
+                  >
+                    <v-col cols="12" md="3" class="text-left">
+                      <h4 class="text-left">
+                        Additional appointment(s) for:
+                      </h4>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="2"
+                      v-for="child in editedSchedule.Family.Children"
+                      :key="child.id"
+                    >
+                      <v-btn
+                        class="text-capitalize"
+                        rounded
+                        color="primary"
+                        @click="newAppointment(child)"
+                        :disabled="
+                          potentialStudies(child).selectableStudies.length < 1
+                        "
+                        >{{ child.Name.split(" ")[0] }}</v-btn
                       >
-                        <v-col md="12">
-                          <v-textarea
-                            class="conv-textarea"
-                            label="Notes for this schedule"
-                            outlined
-                            no-resize
-                            rows="11"
-                            hide-details
-                            v-model="editedSchedule.Note"
-                          ></v-textarea>
-                        </v-col>
-                      </v-row>
-                      <!-- 
-                    <v-select
-                      style="margin-top: 30px"
-                      :items="potentialExperimenters"
-                      :item-value="'id'"
-                      :item-text="'Name'"
-                      v-model="selectedExperimenters"
-                      return-object
-                      label="Experimenter (Primary)"
-                      hide-details
-                      dense
-                      chip
-                    ></v-select>
-                    <v-select
-                      style="margin-top: 30px"
-                      :items="potentialExperimenters"
-                      :item-value="'id'"
-                      :item-text="'Name'"
-                      v-model="selectedExperimenters_2nd"
-                      return-object
-                      label="Experimenters (Secondary)"
-                      multiple
-                      hide-details
-                      dense
-                      chip
-                    ></v-select> -->
+                    </v-col>
+                  </v-row>
+                  <v-spacer></v-spacer>
+                  <v-divider style="margin-bottom: 4px"></v-divider>
+                  <v-row
+                    dense
+                    style="height: 150px"
+                    align="center"
+                    justify="center"
+                  >
+                    <v-col md="11">
+                      <v-textarea
+                        class="conv-textarea"
+                        label="Notes for this schedule"
+                        outlined
+                        no-resize
+                        rows="6"
+                        hide-details
+                        v-model="editedSchedule.Note"
+                      ></v-textarea>
                     </v-col>
                   </v-row>
                 </v-card>
@@ -355,8 +414,9 @@
                 <v-col cols="12" md="6">
                   <v-btn
                     color="primary"
-                    :disabled="!studyTime"
+                    :disabled="!(studyDateTime || skipStudyDateTimeStatus)"
                     @click="continue12()"
+                    :loading="loadingStatus"
                   >
                     <v-icon dark left v-show="scheduleUpdated"
                       >mdi-checkbox-marked-circle</v-icon
@@ -414,6 +474,7 @@
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-btn
+                    :loading="loadingStatus"
                     color="primary"
                     @click="continue23()"
                     :disabled="
@@ -572,6 +633,18 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <v-dialog v-model="datePicker" max-width="290px">
+        <v-card outlined>
+          <v-date-picker
+            v-model="studyDate"
+            show-current
+            @click:date="datePick"
+            :min="earliestDate"
+            :max="latestDate"
+          ></v-date-picker>
+        </v-card>
+      </v-dialog>
     </template>
   </v-data-table>
 </template>
@@ -590,6 +663,8 @@ import ConfirmDlg from "@/components/ConfirmDialog";
 
 import schedule from "@/services/schedule";
 
+import ExtraStudies from "@/components/ExtraStudies";
+
 import moment from "moment";
 
 export default {
@@ -602,6 +677,7 @@ export default {
     Email,
     NextContact,
     ConfirmDlg,
+    ExtraStudies,
   },
   props: {
     Schedules: Array,
@@ -657,7 +733,20 @@ export default {
       emailButtonText: "Send email",
       reminderEmailStatus: false,
       dialogNote: false,
-      // scheduleNotes: "",
+      Experimenters: [],
+      primaryExperimenterList: [],
+      datePicker: false,
+      defaultAppointment: {
+        index: null,
+        FK_Family: null,
+        FK_Child: null,
+        FK_Study: null,
+        Study: { StudyName: null },
+        FK_Schedule: null,
+        PrimaryExperimenter: [],
+        SecondaryExperimenter: [],
+      },
+      loadingStatus: false,
     };
   },
   methods: {
@@ -678,6 +767,8 @@ export default {
           break;
       }
 
+      this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
+
       if (await this.$refs.confirmD.open(comDTitle, comDText)) {
         this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
         this.response = status;
@@ -690,6 +781,13 @@ export default {
             this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
             this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
+            // console.log(this.editedSchedule);
+            // console.log(
+            //   this.potentialStudies(
+            //     this.editedSchedule.Appointments[0].Child,
+            //     this.editedSchedule.Appointments[0].FK_Study
+            //   )
+            // );
             this.dialog = true;
             break;
 
@@ -719,9 +817,6 @@ export default {
 
           default:
             item.Status = status;
-            // if (status == "Cancelled") {
-            //   this.$emit("alert");
-            // }
 
             // name by combining all study names within a schedule
             var studyNames = item.Appointments.map((appointment) => {
@@ -776,6 +871,12 @@ export default {
     },
 
     async reschedule() {
+      this.Experimenters = [];
+
+      for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
+        this.$refs.extraStudies[i].selectStudy();
+      } // check selectStudy function above to see how appointments and Experimenters are added.
+
       try {
         if (this.editedIndex > -1) {
           this.editedSchedule.Status = "Confirmed";
@@ -815,14 +916,13 @@ export default {
             this.editedSchedule.Reminded = true;
           }
 
-          var calendarDescription = "<b>Note: </b>" + this.editedSchedule.Note + "<br>";
-          if (this.editedSchedule.Appointments[0].Study.StudyType == "Online")
-            calendarDescription =
-              calendarDescription +
-              "<b>zoom link: </b>" +
-              this.editedSchedule.Appointments[0].PrimaryExperimenter.ZoomLink;
+          this.editedSchedule.description = this.calendarDescription(
+            this.editedSchedule
+          );
 
-          this.editedSchedule.description = calendarDescription;
+          this.editedSchedule.attendees = this.Experimenters;
+
+          this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
           const calendarEvent = await schedule.update(this.editedSchedule);
 
@@ -846,6 +946,7 @@ export default {
       this.studyDate = moment()
         .startOf("day")
         .format("YYYY-MM-DD");
+      this.studyTime = "06:00AM";
     },
 
     skipConfirmationEmail() {
@@ -857,15 +958,68 @@ export default {
     },
 
     async continue12() {
-      try {
-        await this.reschedule();
+      this.primaryExperimenterList = [];
 
-        this.scheduleUpdated = true;
-        this.scheduleNextPage = true;
-        this.scheduleButtonText = "Study appointment updated!";
-      } catch (error) {
-        console.log(error);
-        alert("Failed to update the appointment, please try again.");
+      for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
+        this.$refs.extraStudies[i].primaryExperimenterStatus();
+      }
+
+      if (this.scheduleButtonText == "Study appointment updated!") {
+        if (
+          await this.$refs.confirmD.open(
+            "Beep!",
+            "You just created an appointment for this family. Do you want to do it again?"
+          )
+        ) {
+          try {
+            if (
+              this.response == "Confirmed" &&
+              this.primaryExperimenterList.includes(0)
+            ) {
+              // if any appointment without an experimenter.
+              await this.$refs.confirmD.open(
+                "Who is going to run the study?",
+                "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+              );
+            } else {
+              this.loadingStatus = true;
+              await this.reschedule();
+
+              this.scheduleUpdated = true;
+              this.scheduleNextPage = true;
+              this.scheduleButtonText = "Study appointment updated!";
+            }
+          } catch (error) {
+            console.log(error);
+            alert("Failed to update the appointment, please try again.");
+          }
+          this.loadingStatus = false;
+        }
+      } else {
+        try {
+          if (
+            this.response == "Confirmed" &&
+            this.primaryExperimenterList.includes(0)
+          ) {
+            // if any appointment without an experimenter.
+            await this.$refs.confirmD.open(
+              "Who is going to run the study?",
+              "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+            );
+          } else {
+            this.loadingStatus = true;
+            await this.reschedule();
+
+            this.scheduleUpdated = true;
+            this.scheduleNextPage = true;
+            this.scheduleButtonText = "Study appointment updated!";
+          }
+        } catch (error) {
+          console.log(error);
+          alert("Failed to update the appointment, please try again.");
+        }
+
+        this.loadingStatus = false;
       }
     },
 
@@ -878,6 +1032,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
+            this.loadingStatus = true;
             await this.$refs.Email.sendEmail();
 
             this.emailSent = true;
@@ -885,6 +1040,7 @@ export default {
             this.scheduleNextPage = true;
           }
         } else {
+          this.loadingStatus = true;
           await this.$refs.Email.sendEmail();
 
           this.emailSent = true;
@@ -894,6 +1050,8 @@ export default {
       } catch (error) {
         console.log(error);
       }
+
+      this.loadingStatus = false;
     },
 
     async completeSchedule() {
@@ -942,6 +1100,8 @@ export default {
         this.skipStudyDateTimeStatus = false;
         this.skipConfirmationEmailStatus = false;
         this.skipReminderEmailStatus = false;
+        this.Experimenters = [];
+        this.primaryExperimenterList = [];
       }, 300);
     },
 
@@ -949,6 +1109,180 @@ export default {
       row.select(true);
       row.expand(!row.isExpanded);
       this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
+    },
+
+    selectStudy(extraAppointments) {
+      Object.assign(
+        this.editedSchedule.Appointments[extraAppointments.index],
+        extraAppointments.appointment
+      );
+
+      if (this.Experimenters.lenth < 1) {
+        this.Experimenters = extraAppointments.attendees;
+      } else {
+        extraAppointments.attendees.forEach((experimenter) => {
+          this.Experimenters.push(experimenter);
+        });
+      }
+    },
+
+    deleteAppointment(index) {
+      this.editedSchedule.Appointments.splice(index, 1);
+    },
+
+    receiveSelectedStudy(selectedStudy) {
+      this.editedSchedule.Appointments[selectedStudy.index].FK_Study =
+        selectedStudy.studyId;
+      this.editedSchedule.Appointments[selectedStudy.index].FK_Child =
+        selectedStudy.childId;
+    },
+
+    newAppointment(child) {
+      var newAppointment = Object.assign({}, this.defaultAppointment);
+
+      newAppointment.FK_Child = child.id;
+      newAppointment.Child = child;
+      newAppointment.FK_Family = child.FK_Family;
+      newAppointment.Study = {
+        id: 0,
+        StudyName: " ",
+        Experimenters: [],
+      };
+
+      newAppointment.index = this.editedSchedule.Appointments.length;
+
+      this.editedSchedule.Appointments.push(newAppointment);
+    },
+
+    checkPrimaryExperimenter(primaryExperimenterStatus) {
+      this.primaryExperimenterList.push(primaryExperimenterStatus);
+    },
+
+    potentialStudies(child, currentStudy) {
+      var ElegibleStudies = [];
+
+      this.$store.state.studies.forEach((study) => {
+        if (this.studyElegibility(study, child)) {
+          ElegibleStudies.push(study.id);
+        }
+      });
+
+      var uniquePreviousStudies = [];
+
+      if (child.Appointments) {
+        child.Appointments.forEach((appointment) => {
+          uniquePreviousStudies.push(appointment.FK_Study);
+        });
+        uniquePreviousStudies = Array.from(new Set(uniquePreviousStudies));
+
+        if (currentStudy) {
+          const index = uniquePreviousStudies.indexOf(currentStudy);
+
+          uniquePreviousStudies.splice(index, 1);
+        }
+      }
+
+      var potentialStudies = ElegibleStudies.filter(
+        (study) => !uniquePreviousStudies.includes(study)
+      );
+
+      // check the selected studies.
+      var currentSelectedStudies = [];
+      if (this.editedSchedule.Appointments.length > 0) {
+        for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
+          if (this.editedSchedule.Appointments[i].FK_Child == child.id) {
+            currentSelectedStudies.push(
+              this.editedSchedule.Appointments[i].FK_Study
+            );
+          }
+        }
+      }
+
+      var selectableStudies = potentialStudies.filter(
+        (study) => !currentSelectedStudies.includes(study)
+      );
+
+      var potentialStudyList = this.$store.state.studies.filter((study) =>
+        potentialStudies.includes(study.id)
+      );
+
+      return {
+        potentialStudyList: potentialStudyList,
+        selectableStudies: selectableStudies,
+      };
+    },
+
+    studyElegibility(study, child) {
+      var age =
+        child.Age >= study.MinAge * 30.5 - 1 &&
+        child.Age <= study.MaxAge * 30.5 - 1;
+
+      var hearing = false;
+
+      switch (study.HearingLossParticipant) {
+        case "Only":
+          child.HearingLoss ? (hearing = true) : (hearing = false);
+          break;
+
+        case "Exclude":
+          child.HearingLoss ? (hearing = false) : (hearing = true);
+
+          break;
+
+        case "Include":
+          hearing = true;
+          break;
+      }
+
+      var vision = false;
+      switch (study.VisionLossParticipant) {
+        case "Only":
+          child.VisionLoss ? (vision = true) : (vision = false);
+          break;
+
+        case "Exclude":
+          child.VisionLoss ? (vision = false) : (vision = true);
+
+          break;
+
+        case "Include":
+          vision = true;
+          break;
+      }
+
+      var premature = false;
+      switch (study.PrematureParticipant) {
+        case "Only":
+          child.PrematureBirth ? (premature = true) : (premature = false);
+          break;
+
+        case "Exclude":
+          child.PrematureBirth ? (premature = false) : (premature = true);
+
+          break;
+
+        case "Include":
+          premature = true;
+          break;
+      }
+
+      var illness = false;
+      switch (study.IllParticipant) {
+        case "Only":
+          child.Illness ? (illness = true) : (illness = false);
+          break;
+
+        case "Exclude":
+          child.Illness ? (illness = false) : (illness = true);
+
+          break;
+
+        case "Include":
+          illness = true;
+          break;
+      }
+
+      return age && hearing && vision && premature && illness;
     },
 
     datePickerRange() {
@@ -1113,12 +1447,19 @@ export default {
       // }, 300);
     },
 
+    datePick() {
+      this.datePicker = false;
+      setTimeout(() => {
+        this.$refs.studyDate.focus();
+      }, 100);
+    },
+
     async saveScheduleNotes() {
       var updatedSchedule = {
         id: this.editedSchedule.id,
         Note: this.editedSchedule.Note,
         calendarEventId: this.editedSchedule.calendarEventId,
-        description: this.editedSchedule.Note,
+        description: this.calendarDescription(this.editedSchedule),
       };
 
       try {
@@ -1131,11 +1472,93 @@ export default {
         console.log(error);
       }
     },
+
+    calendarDescription(schedule) {
+      var description = "<b>Note: </b>" + schedule.Note + "<br>";
+
+      schedule.Appointments.forEach((appointment) => {
+        description =
+          description +
+          "<br>==================" +
+          "<br><b>" +
+          appointment.Study.StudyName +
+          "</b><br>" +
+          "<b>E1: </b>" +
+          appointment.E1 +
+          "<br>" +
+          "<b>E2: </b>" +
+          appointment.E2 +
+          "<br>";
+
+        if (appointment.Study.StudyType == "Online")
+          description =
+            description +
+            "<b>zoom link: </b>" +
+            appointment.PrimaryExperimenter[0].ZoomLink;
+      });
+
+      return description;
+    },
   },
 
   computed: {
-    studyDateTime: function() {
-      if (this.studyTime) {
+    ElegibleStudies() {
+      if (this.editedSchedule.Family.Children) {
+        var elegibleStudies = this.editedSchedule.Family.Children.map(
+          (child) => {
+            let studyIds = [];
+            this.$store.state.studies.forEach((study) => {
+              if (this.studyElegibility(study, child)) {
+                studyIds.push(study.id);
+              }
+            });
+            return studyIds;
+          }
+        );
+
+        return elegibleStudies;
+      } else {
+        return [];
+      }
+    },
+
+    UniquePreviousStudies() {
+      return this.editedSchedule.Family.Children.map((child) => {
+        let studyIds = [];
+        child.Appointments.forEach((appointment) => {
+          studyIds.push(appointment.FK_Study);
+        });
+
+        return studyIds;
+      });
+    },
+
+    PotentialStudies() {
+      // this is different from the functions in Schedule or ChildInfo
+
+      var PotentialStudies = [];
+      for (var i = 0; i < this.ElegibleStudies.length; i++) {
+        var elegibleStudy = this.ElegibleStudies[i];
+        var previousStudies = this.UniquePreviousStudies[i];
+
+        previousStudies = Array.from(new Set(previousStudies));
+
+        let potentialStudyIds = elegibleStudy.filter(
+          (study) => !previousStudies.includes(study)
+        );
+
+        var PotentialStudyList = this.$store.state.studies.filter((study) =>
+          potentialStudyIds.includes(study.id)
+        );
+
+        PotentialStudies.push(PotentialStudyList);
+      }
+
+      return PotentialStudies;
+    },
+
+    studyDateTime() {
+      if (this.studyTime && this.studyDate) {
         var StudyTimeString = this.studyTime.slice(0, 5);
         var AMPM = this.studyTime.slice(5, 7);
         var StudyHour = StudyTimeString.split(":")[0];
@@ -1163,7 +1586,7 @@ export default {
         studyDateTime = new Date(studyDateTime);
         return studyDateTime;
       } else {
-        return new Date();
+        return null;
       }
     },
     TodaysDate() {

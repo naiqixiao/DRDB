@@ -65,15 +65,15 @@ exports.create = asyncHandler(async (req, res) => {
     if (newScheduleInfo.Status == 'Confirmed') {
 
       // add primary experimenter
-      var experimenterAssignment = [];
+      var experimenterList = [];
       // add secondary experimenters
-      var experimenterAssignment_2nd = [];
+      var experimenter_2ndList = [];
 
       for (var i = 0; i < schedule.Appointments.length; i++) {
         var appointmentId = schedule.Appointments[i].id;
 
         newScheduleInfo.Appointments[i].Experimenters.forEach((experimenter) => {
-          experimenterAssignment.push({
+          experimenterList.push({
             FK_Experimenter: experimenter,
             FK_Appointment: appointmentId,
           });
@@ -81,7 +81,7 @@ exports.create = asyncHandler(async (req, res) => {
 
         newScheduleInfo.Appointments[i].Experimenters_2nd.forEach(
           (experimenter_2nd) => {
-            experimenterAssignment_2nd.push({
+            experimenter_2ndList.push({
               FK_Experimenter: experimenter_2nd,
               FK_Appointment: appointmentId,
             });
@@ -89,10 +89,10 @@ exports.create = asyncHandler(async (req, res) => {
         );
       }
 
-      await model.experimenterAssignment.bulkCreate(experimenterAssignment);
+      await model.experimenterAssignment.bulkCreate(experimenterList);
 
       await model.experimenterAssignment_2nd.bulkCreate(
-        experimenterAssignment_2nd
+        experimenter_2ndList
       );
 
     }
@@ -186,63 +186,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await model.schedule.findAll({
-      where: queryString,
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
-    });
+    const schedule = await searchScheudles(queryString)
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
@@ -277,63 +221,8 @@ exports.today = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await model.schedule.findAll({
-      where: queryString,
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
-    });
+    const schedule = await searchScheudles(queryString);
+
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
@@ -385,63 +274,9 @@ exports.tomorrow = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await model.schedule.findAll({
-      where: queryString,
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
-    });
+
+    const schedule = await searchScheudles(queryString)
+
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
@@ -477,63 +312,8 @@ exports.week = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await model.schedule.findAll({
-      where: queryString,
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
-    });
+    const schedule = await searchScheudles(queryString)
+
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
@@ -557,40 +337,101 @@ exports.update = asyncHandler(async (req, res) => {
 
   switch (updatedScheduleInfo.Status) {
     case "Confirmed":
-      if (updatedScheduleInfo.calendarEventId) {
-        await calendar.events.patch({
-          calendarId: "primary",
-          eventId: updatedScheduleInfo.calendarEventId,
-          resource: updatedScheduleInfo,
-          sendNotifications: true,
-        });
-      } else {
-        // Create a calendar event
-        const calEvent = await calendar.events.insert({
-          calendarId: "primary",
-          resource: updatedScheduleInfo,
-          sendNotifications: true,
-        });
+      // add primary experimenter
+      var experimenterList = [];
+      // add secondary experimenters
+      var experimenter_2ndList = [];
 
-        updatedScheduleInfo.calendarEventId = calEvent.data.id;
-        updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+      updatedScheduleInfo.Appointments.forEach(async (appointment) => {
 
-        // res.status(200).send({
-        //   calendarEventId: calEvent.data.id,
-        //   eventURL: calEvent.data.htmlLink
-        // });
+        if (!appointment.id) { // new appointment added to the schedule
+          appointment.FK_Schedule = ID
+
+          const newAppointment = await model.appointment.create(appointment)
+
+          appointment.Experimenters.forEach((experimenter) => {
+            experimenterList.push({
+              FK_Experimenter: experimenter,
+              FK_Appointment: newAppointment.id,
+            });
+          });
+
+          appointment.Experimenters_2nd.forEach((experimenter) => {
+            experimenter_2ndList.push({
+              FK_Experimenter: experimenter,
+              FK_Appointment: newAppointment.id,
+            });
+          });
+
+        } else {
+
+          await model.appointment.update(appointment, { where: { id: appointment.id } })
+
+          // remove exist experimenter assignment
+          await model.experimenterAssignment.destroy({
+            where: { FK_Appointment: appointment.id },
+          });
+
+          await model.experimenterAssignment_2nd.destroy({
+            where: { FK_Appointment: appointment.id },
+          });
+
+          // new experimenter assigment
+          appointment.Experimenters.forEach((experimenter) => {
+            experimenterList.push({
+              FK_Experimenter: experimenter,
+              FK_Appointment: appointment.id,
+            });
+          });
+
+          appointment.Experimenters_2nd.forEach((experimenter) => {
+            experimenter_2ndList.push({
+              'FK_Experimenter': experimenter,
+              'FK_Appointment': appointment.id,
+
+            })
+
+          })
+        };
+
+        await model.experimenterAssignment.bulkCreate(experimenterList);
+
+        if (experimenter_2ndList.length > 0) {
+          await model.experimenterAssignment_2nd.bulkCreate(
+            experimenter_2ndList
+          );
+        }
+
+      });
+
+      //
+      if (!updatedScheduleInfo.skipStudyDateTimeStatus) {
+        if (updatedScheduleInfo.calendarEventId) {
+          await calendar.events.patch({
+            calendarId: "primary",
+            eventId: updatedScheduleInfo.calendarEventId,
+            resource: updatedScheduleInfo,
+            sendNotifications: true,
+          });
+        } else {
+          // Create a calendar event
+          const calEvent = await calendar.events.insert({
+            calendarId: "primary",
+            resource: updatedScheduleInfo,
+            sendNotifications: true,
+          });
+
+          updatedScheduleInfo.calendarEventId = calEvent.data.id;
+          updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+        }
       }
 
-      break;
-
-    case "Cancelled":
-      updatedScheduleInfo.Completed = true;
       break;
 
     default:
       // update the calendar event, if an appointment is rescheduled.
 
-      if (updatedScheduleInfo.calendarEventId) {
+      if (updatedScheduleInfo.calendarEventId && !updatedScheduleInfo.skipStudyDateTimeStatus) {
         // check if there was an calendar event created before.
 
         try {
@@ -603,70 +444,19 @@ exports.update = asyncHandler(async (req, res) => {
         } catch (err) {
           throw err;
         }
-
-        // updatedScheduleInfo.AppointmentTime = null;
       }
 
       break;
   }
 
+  if (updatedScheduleInfo.Status == "Cancelled") {
+
+    updatedScheduleInfo.Completed = true;
+  }
+
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
       where: { id: ID },
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
     });
 
     // Log
@@ -790,63 +580,7 @@ exports.special = asyncHandler(async (req, res) => {
   queryString["$Appointments.Study.FK_Lab$"] = 2;
 
   try {
-    var schedules = await model.schedule.findAll({
-      where: queryString,
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },
-            {
-              model: model.study,
-              include: [{ model: model.lab },
-              {
-                model: model.personnel,
-                as: 'Experimenters',
-                through: {
-                  model: model.experimenter,
-                },
-              },],
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-            },
-          ],
-        },
-        {
-          model: model.family,
-          include: [
-            {
-              model: model.child,
-              attributes: ["Name", "DoB", "Age", "Sex", "IdWithinFamily"],
-              include: [{
-                model: model.appointment,
-                attributes: ['FK_Study']
-              }]
-            },]
-        },
-        {
-          model: model.personnel,
-        },
-      ],
-      order: [["AppointmentTime", "ASC"]],
-    });
+    var schedules = await searchScheudles(queryString)
 
     schedules.forEach((schedule) => {
       // if (schedule.Appointments[0].FK_Family) {
@@ -870,3 +604,66 @@ exports.special = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+
+async function searchScheudles(queryString) {
+
+  const schedule = await model.schedule.findAll({
+    where: queryString,
+    include: [
+      {
+        model: model.appointment,
+        include: [
+          {
+            model: model.child,
+            attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"],
+            include: [{
+              model: model.appointment,
+              attributes: ['FK_Study']
+            }]
+          },
+          {
+            model: model.study,
+            include: [{ model: model.lab },
+            {
+              model: model.personnel,
+              as: 'Experimenters',
+              through: {
+                model: model.experimenter,
+              },
+            },],
+          },
+          {
+            model: model.personnel,
+            as: "PrimaryExperimenter",
+            through: { model: model.experimenterAssignment },
+            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+          },
+          {
+            model: model.personnel,
+            as: "SecondaryExperimenter",
+            through: { model: model.experimenterAssignment_2nd },
+            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+          },
+        ],
+      },
+      {
+        model: model.family,
+        include: [
+          {
+            model: model.child,
+            include: [{
+              model: model.appointment,
+              attributes: ['FK_Study']
+            }]
+          },]
+      },
+      {
+        model: model.personnel,
+      },
+    ],
+    order: [["AppointmentTime", "ASC"]],
+  });
+
+  return schedule
+}

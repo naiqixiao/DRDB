@@ -2,20 +2,20 @@
   <v-row dense>
     <v-col
       cols="12"
-      md="2"
+      md="3"
       style="padding: 12px !important"
       v-for="(appointment, indexAppointments) in Schedule.Appointments"
       :key="appointment.id"
     >
       <v-card
         class="child-card d-flex flex-column"
-        height="150px"
+        height="180px"
         style="border-width: medium !important"
       >
         <v-card-title class="title" style="padding: 8px">
           <span
             class="d-inline-block text-truncate"
-            style="max-width: 90px; padding-right: 2px"
+            style="max-width: 100px; padding-right: 2px"
             >{{ appointment.Child.Name }}</span
           >
           <span class="body-1" style="color: var(--v-primary)">
@@ -42,9 +42,9 @@
         >
           <v-row style="height: 70px">
             <body
-              align="start"
               class="d-inline-block text-truncate"
-              style="max-width: 90%"
+              align="start"
+              style="max-width: 90%; z-index:2"
               v-html="ExperimentersNames(appointment)"
             ></body>
           </v-row>
@@ -84,7 +84,7 @@
     <v-col cols="12" md="2" style="padding: 12px !important">
       <v-card
         class="child-card d-flex align-center justify-center"
-        height="150px"
+        height="180px"
         style="border-width: medium !important; border-style: dashed !important"
       >
         <v-tooltip top>
@@ -187,12 +187,12 @@
     <v-dialog v-model="dialogUpdateExperimenters" max-width="800px">
       <v-card height="300px" class="d-flex flex-column">
         <v-card-title class="title"
-          >Update experimenters for the current study</v-card-title
+          >Update experimenters for the current appointment</v-card-title
         >
         <v-row align="center" justify="center">
           <v-col cols="12" md="4">
             <v-select
-              :items="potentialExperimenters"
+              :items="primaryaryExperimenterList"
               :item-value="'id'"
               :item-text="'Name'"
               v-model="selectedExperimenters"
@@ -206,7 +206,7 @@
           <v-col cols="12" md="2"></v-col>
           <v-col cols="12" md="4">
             <v-select
-              :items="potentialExperimenters"
+              :items="secondaryExperimenterList"
               :item-value="'id'"
               :item-text="'Name'"
               v-model="selectedExperimenters_2nd"
@@ -229,7 +229,12 @@
               >
             </v-col>
             <v-col md="2">
-              <v-btn color="primay" @click="saveExperimenters">Save</v-btn>
+              <v-btn
+                color="primay"
+                @click="saveExperimenters"
+                :loading="loadingStatus"
+                >Save</v-btn
+              >
             </v-col>
             <v-col md="4"></v-col>
           </v-row>
@@ -271,7 +276,7 @@
 
 <script>
 import NewAppointments from "@/components/NewAppointments";
-import personnel from "@/services/personnel";
+// import personnel from "@/services/personnel";
 
 import family from "@/services/family";
 import appointment from "@/services/appointment";
@@ -289,6 +294,7 @@ export default {
   props: {
     Schedule: Object,
     Index: Number,
+    potentialExperimenters: Array,
   },
 
   data() {
@@ -300,7 +306,7 @@ export default {
       newAppointments: [],
       newAppointment: {},
       editedAppointment: {},
-      selectedExperimenters: {},
+      selectedExperimenters: {id: 0},
       selectedExperimenters_2nd: [],
       index: -1,
       Experimenters: [],
@@ -314,8 +320,9 @@ export default {
         FK_Study: null,
         FK_Schedule: null,
         PrimaryExperimenter: [],
-        SecondaryExperimenter:[]
+        SecondaryExperimenter: [],
       },
+      loadingStatus: false,
     };
   },
   methods: {
@@ -570,47 +577,56 @@ export default {
       this.selectedExperimenters = appointment.PrimaryExperimenter[0];
       this.selectedExperimenters_2nd = appointment.SecondaryExperimenter;
       this.index = index;
+
       this.dialogUpdateExperimenters = true;
     },
 
     async saveExperimenters() {
+      this.loadingStatus = true;
+
       this.editedAppointment.PrimaryExperimenter[0] = this.selectedExperimenters;
       this.editedAppointment.SecondaryExperimenter = this.selectedExperimenters_2nd;
 
-      var updatedExperimenters = {
-        FK_Appointment: this.editedAppointment.id,
-        FK_Experimenter: this.selectedExperimenters.id,
-      };
+      // var attendees = [];
 
-      const experimenterIds_2nd = this.selectedExperimenters_2nd.map(
-        (experimenter) => {
-          return {
-            FK_Appointment: this.editedAppointment.id,
-            FK_Experimenter: experimenter.id,
-          };
-        }
-      );
+      // attendees.push({
+      //   displayName: this.selectedExperimenters.Name,
+      //   email: this.selectedExperimenters.Calendar,
+      // });
+
+      // if (this.selectedExperimenters_2nd.length > 0) {
+      //   this.selectedExperimenters_2nd.forEach((experimenter) => {
+      //     attendees.push({
+      //       displayName: experimenter.Name,
+      //       email: experimenter.Calendar,
+      //     });
+      //   });
+      // }
 
       try {
-        const updatedSchedule = await appointment.update({
-          updatedExperimenters: updatedExperimenters,
-          updatedExperimenters_2nd: experimenterIds_2nd,
-          scheduleId: this.editedAppointment.FK_Schedule,
+        await appointment.updateExperimenters({
+          updatedExperimenters: this.selectedExperimenters,
+          updatedExperimenters_2nd: this.selectedExperimenters_2nd,
+          calendarId: this.Schedule.calendarEventId,
+          scheduleId: this.Schedule.id,
+          appointmentId: this.editedAppointment.id,
         });
 
         this.Schedule.Appointments[this.index] = this.editedAppointment;
 
-        this.Schedule.updatedAt = updatedSchedule.data.updatedAt;
+        this.Schedule.updatedAt = new Date().toString();
       } catch (error) {
         console.log(error);
       }
+
+      this.loadingStatus = false;
 
       this.closeUpdateExperimenter();
     },
 
     closeUpdateExperimenter() {
       this.editedAppointment = {};
-      this.selectedExperimenters = {};
+      this.selectedExperimenters = {id: 0};
       this.selectedExperimenters_2nd = [];
       this.index = -1;
       this.dialogUpdateExperimenters = false;
@@ -755,7 +771,7 @@ export default {
       var E2 = appointment.SecondaryExperimenter.map((experimenter) => {
         return experimenter.Initial;
       });
-      
+
       var E22 = "";
       if (appointment.SecondaryExperimenter.length > 0) {
         E22 = E2.join(", ");
@@ -763,7 +779,7 @@ export default {
         E22 = "not assigned";
       }
 
-      return (
+      var body =
         "<strong>" +
         appointment.Study.StudyName +
         "</strong> (" +
@@ -774,35 +790,74 @@ export default {
         E1 +
         "<br>" +
         "<strong>E2:</strong> " +
-        E22
-      );
-    },
-  },
+        E22;
 
-  computed: {},
-
-  asyncComputed: {
-    async potentialExperimenters() {
-      if (this.editedAppointment.FK_Study) {
-        try {
-          var queryString = {
-            study: this.editedAppointment.FK_Study,
-          };
-
-          const results = await personnel.search(queryString);
-
-          // filter the output based on experimenters' availability on the participation date.
-          // this.participationDate
-
-          return results.data;
-        } catch (error) {
-          console.log(error);
-        }
+      if (
+        appointment.PrimaryExperimenter.length > 0 &&
+        appointment.Study.StudyType == "Online"
+      ) {
+        body =
+          body +
+          "<br>" +
+          "<strong><a href='" +
+          appointment.PrimaryExperimenter[0].ZoomLink +
+          "' target='_blank' >" +
+          appointment.PrimaryExperimenter[0].ZoomLink +
+          "</a></strong>";
       } else {
-        return [];
+        body = body + "<br>" + "<strong>Zoom link not available</strong>";
       }
+
+      return body;
     },
   },
+
+  computed: {
+    primaryaryExperimenterList() {
+      var primaryaryExperimenterList = [];
+      var appointment = this.editedAppointment;
+      if ("Study" in appointment) {
+        primaryaryExperimenterList = appointment.Study.Experimenters;
+      }
+
+      return primaryaryExperimenterList;
+    },
+
+    secondaryExperimenterList() {
+      var secondaryExperimenterList = [];
+
+      var appointment = this.editedAppointment;
+      if ("Study" in appointment) {
+        secondaryExperimenterList = appointment.Study.Experimenters.filter(
+          (experimenter) => experimenter.id !== this.selectedExperimenters.id
+        );
+      }
+      return secondaryExperimenterList;
+    },
+  },
+
+  // asyncComputed: {
+  //   async potentialExperimenters() {
+  //     if (this.editedAppointment.FK_Study) {
+  //       try {
+  //         var queryString = {
+  //           study: this.editedAppointment.FK_Study,
+  //         };
+
+  //         const results = await personnel.search(queryString);
+
+  //         // filter the output based on experimenters' availability on the participation date.
+  //         // this.participationDate
+
+  //         return results.data;
+  //       } catch (error) {
+  //         console.log(error);
+  //       }
+  //     } else {
+  //       return [];
+  //     }
+  //   },
+  // },
 
   watch: {
     dialog(val) {

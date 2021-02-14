@@ -320,6 +320,7 @@ exports.update = asyncHandler(async (req, res) => {
     studyNames = Array.from(new Set(studyNames));
 
     var attendees = [];
+    var description = "<b>Note: </b>" + Schedule.Note + "<br>";
 
     Schedule.Appointments.forEach((appointment) => {
       appointment.PrimaryExperimenter.forEach((experimenter) => {
@@ -335,10 +336,45 @@ exports.update = asyncHandler(async (req, res) => {
           email: experimenter.Calendar,
         });
       });
+
+      appointment.E1 = appointment.PrimaryExperimenter[0].Name +
+        " (" +
+        appointment.PrimaryExperimenter[0].Email +
+        ")"
+
+      const experimenterNames_2nd = appointment.SecondaryExperimenter.map(
+        (experimenter) => {
+          return experimenter.Name + " (" + experimenter.Email + ")";
+        }
+      );
+
+      appointment.E2 = experimenterNames_2nd.join(", "),
+
+        description =
+        description +
+        "<br>==================" +
+        "<br><b>" +
+        appointment.Study.StudyName +
+        "</b><br>" +
+        "<b>E1: </b>" +
+        appointment.E1 +
+        "<br>" +
+        "<b>E2: </b>" +
+        appointment.E2 +
+        "<br>";
+
+      if (appointment.Study.StudyType == "Online")
+        description =
+          description +
+          "<b>zoom link: </b>" +
+          appointment.PrimaryExperimenter[0].ZoomLink;
+
     });
+
 
     const updatedScheduleInfo = {
       summary: studyNames.join(" + "),
+      description: description,
       attendees: attendees,
     };
 
@@ -358,17 +394,12 @@ exports.update = asyncHandler(async (req, res) => {
       throw err;
     }
 
-    await model.schedule.update(
-      { Note: Schedule.Note + "" },
-      { where: { id: Schedule.id } }
-    );
-
     Schedule.dataValues.updatedAt = new Date();
 
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Updated", User, "updated a study appointment");
+    await log.createLog("Appointment Updated", User, "updated experimenters in study appointment");
 
     res.status(200).send(Schedule);
 
@@ -377,6 +408,172 @@ exports.update = asyncHandler(async (req, res) => {
     console.log("Appointment update error:" + error);
   }
 });
+
+exports.updateExperimenters = asyncHandler(async (req, res) => {
+  const updatedAppointmentInfo = req.body.updatedExperimenters;
+  const updatedAppointmentInfo_2nd = req.body.updatedExperimenters_2nd;
+  const calendarId = req.body.calendarId;
+  const appointmentId = req.body.appointmentId;
+
+  const experimenterId = {
+    FK_Appointment: appointmentId,
+    FK_Experimenter: updatedAppointmentInfo.id,
+  };
+
+  const experimenterIds_2nd = updatedAppointmentInfo_2nd.map(
+    (experimenter) => {
+      return {
+        FK_Appointment: appointmentId,
+        FK_Experimenter: experimenter.id,
+      };
+    }
+  );
+
+  try {
+    await model.experimenterAssignment.destroy({
+      where: { FK_Appointment: appointmentId },
+    });
+
+    await model.experimenterAssignment.create(experimenterId);
+
+
+    await model.experimenterAssignment_2nd.destroy({
+      where: { FK_Appointment: appointmentId },
+    });
+
+    if (experimenterIds_2nd.length > 0) {
+
+      await model.experimenterAssignment_2nd.bulkCreate(
+        experimenterIds_2nd
+      );
+
+    }
+
+
+    if (calendarId) {
+
+      // update calendar event
+      const schedule = await model.schedule.findOne({
+        where: { id: req.body.scheduleId },
+        include: [
+          {
+            model: model.appointment,
+            include: [
+              { model: model.family },
+              {
+                model: model.child,
+              },
+              {
+                model: model.study,
+              },
+              {
+                model: model.personnel,
+                as: "PrimaryExperimenter",
+                through: { model: model.experimenterAssignment },
+              },
+              {
+                model: model.personnel,
+                as: "SecondaryExperimenter",
+                through: { model: model.experimenterAssignment_2nd },
+              },
+            ],
+          },
+        ],
+      });
+
+
+      var attendees = [];
+      var description = "<b>Note: </b>" + schedule.Note + "<br>";
+
+      schedule.Appointments.forEach((appointment) => {
+        appointment.PrimaryExperimenter.forEach((experimenter) => {
+          attendees.push({
+            displayName: experimenter.Name,
+            email: experimenter.Calendar,
+          });
+        });
+
+        appointment.SecondaryExperimenter.forEach((experimenter) => {
+          attendees.push({
+            displayName: experimenter.Name,
+            email: experimenter.Calendar,
+          });
+        });
+
+        appointment.E1 = appointment.PrimaryExperimenter[0].Name +
+          " (" +
+          appointment.PrimaryExperimenter[0].Email +
+          ")"
+
+        const experimenterNames_2nd = appointment.SecondaryExperimenter.map(
+          (experimenter) => {
+            return experimenter.Name + " (" + experimenter.Email + ")";
+          }
+        );
+
+        appointment.E2 = experimenterNames_2nd.join(", "),
+
+          description =
+          description +
+          "<br>==================" +
+          "<br><b>" +
+          appointment.Study.StudyName +
+          "</b><br>" +
+          "<b>E1: </b>" +
+          appointment.E1 +
+          "<br>" +
+          "<b>E2: </b>" +
+          appointment.E2 +
+          "<br>";
+
+        if (appointment.Study.StudyType == "Online") {
+          description =
+            description +
+            "<b>zoom link: </b>" +
+            appointment.PrimaryExperimenter[0].ZoomLink;
+        }
+      });
+
+      const updatedScheduleInfo = {
+        description: description,
+        attendees: attendees,
+      };
+
+
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
+
+      await calendar.events.patch({
+        calendarId: "primary",
+        eventId: calendarId,
+        resource: updatedScheduleInfo,
+      });
+
+    }
+
+    // // await model.schedule.update(
+    // //   { Note: Schedule.Note + "" },
+    // //   { where: { id: Schedule.id } }
+    // // );
+
+    // Schedule.dataValues.updatedAt = new Date();
+
+    // Log
+    const User = req.body.User;
+
+    await log.createLog("Appointment Updated", User, "updated experimenters in study appointment");
+
+    res.status(200).send('Experimenters updated!');
+
+    console.log("Experimenters updated!");
+  } catch (error) {
+    console.log("Experimenters update error:" + error);
+  }
+
+});
+
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {

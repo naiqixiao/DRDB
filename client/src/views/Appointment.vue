@@ -121,7 +121,23 @@
         ></v-text-field>
       </v-col>
       <v-col cols="12" md="1" style="text-align: center">
-        <v-btn large @click="searchSchedule">
+        <v-btn
+          large
+          @click="searchSchedule"
+          :disabled="
+            !(
+              queryString.Email ||
+              queryString.AppointmentTimeAfter ||
+              queryString.AppointmentTimeBefore ||
+              queryString.Status.length > 0 ||
+              queryString.StudyName.length > 0 ||
+              queryString.Phone ||
+              queryString.NamePrimary ||
+              queryString.NameSecondary ||
+              queryString.FamilyId
+            )
+          "
+        >
           <v-icon left dark>mdi-magnify</v-icon>Search
         </v-btn>
       </v-col>
@@ -249,7 +265,7 @@
 </template>
 
 <script>
-import ScheduleTable from "@/components/ScheduleTable_new";
+import ScheduleTable from "@/components/ScheduleTable";
 import FamilyInfo from "@/components/FamilyInfo";
 
 // import family from "@/services/family";
@@ -274,7 +290,8 @@ export default {
         Phone: null,
         NamePrimary: null,
         NameSecondary: null,
-        Status: null,
+        Status: [],
+        StudyName: [],
         AppointmentTimeBefore: null,
         AppointmentTimeAfter: null,
       },
@@ -284,7 +301,8 @@ export default {
         Phone: null,
         NamePrimary: null,
         NameSecondary: null,
-        Status: null,
+        Status: [],
+        StudyName: [],
         AppointmentTimeBefore: null,
         AppointmentTimeAfter: null,
       },
@@ -314,7 +332,7 @@ export default {
     getSearchKeys(field, value) {
       if (value && field) {
         this.queryString[field] = value;
-        console.log(this.queryString);
+        // console.log(this.queryString);
       }
     },
     async searchSchedule() {

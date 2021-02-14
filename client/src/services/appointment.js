@@ -33,6 +33,17 @@ export default {
     }
     return api().post("appointment/", updatedAppointment);
   },
+  
+  updateExperimenters(updatedAppointment) {
+    updatedAppointment.lab = store.state.lab;
+    updatedAppointment.User = {
+      
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+    return api().post("appointment/exp", updatedAppointment);
+  },
 
   delete(removedAppointment) {
     removedAppointment.lab = store.state.lab;

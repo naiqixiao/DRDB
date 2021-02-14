@@ -12,7 +12,7 @@
         return-object
         label="Studies"
         @change="emitSelectedStudy"
-        :disabled="index == 0 && !!currentStudy.id > 0"
+        :disabled="index == 0 && !!currentStudy.id > 0 && type == 'newSchedule'"
         dense
         hide-details
       ></v-select>
@@ -55,12 +55,18 @@
         dense
       ></v-select>
     </v-col>
-    <v-col cols="12" md="1" v-if="index > 0">
-      <v-btn text icon color="primary" @click="deleteAppointment">
+    <v-col cols="12" md="1">
+      <v-btn
+        text
+        icon
+        color="primary"
+        @click="deleteAppointment"
+        :disabled="nOfAppointments < 2"
+      >
         <v-icon>delete</v-icon>
       </v-btn>
     </v-col>
-    <v-col cols="12" md="2" v-else></v-col>
+    <!-- <v-col cols="12" md="2" v-else></v-col> -->
     <!-- <v-col cols="12" md="2"></v-col> -->
   </v-row>
 </template>
@@ -78,6 +84,8 @@ export default {
     participationDate: Date,
     index: Number,
     response: String,
+    type: String,
+    nOfAppointments: Number,
   },
   data() {
     return {
@@ -99,6 +107,21 @@ export default {
         }
       );
 
+      const experimenterNames_2nd = this.selectedExperimenters_2nd.map(
+        (experimenter) => {
+          return experimenter.Name + " (" + experimenter.Email + ")";
+        }
+      );
+
+      const secondaryExperimenters = this.selectedExperimenters_2nd.map(
+        (experimenter) => {
+          return {
+            Initial: experimenter.Initial,
+            ZoomLink: experimenter.ZoomLink,
+          };
+        }
+      );
+
       const appointment = {
         FK_Child: this.child.id,
         FK_Family: this.child.FK_Family,
@@ -110,8 +133,16 @@ export default {
         PrimaryExperimenter: [
           {
             ZoomLink: this.selectedExperimenters.ZoomLink,
+            Initial: this.selectedExperimenters.Initial,
           },
         ],
+        SecondaryExperimenter: secondaryExperimenters,
+        E1:
+          this.selectedExperimenters.Name +
+          " (" +
+          this.selectedExperimenters.Email +
+          ")",
+        E2: experimenterNames_2nd.join(", "),
         // ZoomLink: this.selectedExperimenters.ZoomLink,
       };
 

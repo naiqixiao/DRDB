@@ -8748,3 +8748,6 @@ server/config/general.js-20210124
 .gitignore
 client/src/plugins/variables.js
 client/src/plugins/variables.js
+server/server.cert
+server/server.key
+client/src/components/ScheduleTable_old.vue

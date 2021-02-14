@@ -441,7 +441,6 @@
             :Children="currentFamily.Children"
             :familyId="parseInt(currentFamily.id)"
             :currentFamily="currentFamily"
-            :studyTimeSlots="this.$studyTimeSlots"
             @newSchedule="updateFamilyAppointment"
           ></ChildInfo>
         </v-col>
@@ -458,16 +457,8 @@
     </v-row>
     <v-row justify="start" dense height="450px">
       <v-col cols="12" md="9">
-        <!-- <AppointmentTable
-          :Appointments="currentFamily.Appointments"
-          :studyTimeSlots="this.$studyTimeSlots"
-          :family="currentFamily"
-          @alert="alert = true"
-          @nextContactDone="updateNextContactFrontend"
-        ></AppointmentTable>-->
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
-          :studyTimeSlots="this.$studyTimeSlots"
           tableHeight="450px"
         ></ScheduleTable>
       </v-col>
