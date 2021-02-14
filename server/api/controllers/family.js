@@ -400,6 +400,8 @@ exports.update = asyncHandler(async (req, res) => {
   var ID = req.body.id;
   var updatedFamilyInfo = req.body;
 
+  console.log(updatedFamilyInfo)
+
   const family = await model.family.update(updatedFamilyInfo, {
     where: { id: ID },
   });

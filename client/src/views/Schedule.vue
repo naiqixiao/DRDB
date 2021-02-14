@@ -2119,27 +2119,27 @@ export default {
 
     earliestDate: function() {
       if (
-        moment(new Date())
+        moment()
           .add(1, "days")
           .isSameOrAfter(
-            moment(this.currentChild.DoB).add(
+            moment(this.currentChild.DoB, "YYYY-M-D").add(
               Math.floor(this.selectedStudy.MinAge * 30.5),
               "days"
             )
           )
       ) {
-        return moment(new Date())
+        return moment()
           .add(1, "days")
           .toISOString(true);
       } else {
-        return moment(this.currentChild.DoB)
+        return moment(this.currentChild.DoB, "YYYY-M-D")
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
           .toISOString(true);
       }
     },
 
     latestDate: function() {
-      return moment(this.currentChild.DoB)
+      return moment(this.currentChild.DoB, "YYYY-M-D")
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },

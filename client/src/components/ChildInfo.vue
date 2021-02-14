@@ -1651,7 +1651,7 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment(new Date())
+        return moment()
           .add(60, "days")
           .toISOString(true);
       }
