@@ -265,6 +265,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
     [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
   };
   queryString.Reminded = 0;
+  queryString.Status = 'Confirmed';
 
   try {
     const schedules = await model.schedule.findAll({
