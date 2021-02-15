@@ -487,6 +487,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
               through: { model: model.experimenterAssignment },
               attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
             },
+            {
+              model: model.personnel,
+              as: "SecondaryExperimenter",
+              through: { model: model.experimenterAssignment_2nd },
+              attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+            },
           ]
         }
       ],
@@ -529,13 +535,13 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
         experimenter.PrimaryExperimenterof.forEach(appointmentPri => {
 
-          var E2 = appointmentPri.SecondaryExperimenter.map((experimenter) => {
-            return experimenter.Name + "<br>" + experimenter.Email;
+          var E2 = appointmentPri.SecondaryExperimenter.map((e2) => {
+            return e2.Name + " (" + e2.Email + ")";;
           });
 
           var E22 = "";
           if (appointmentPri.SecondaryExperimenter.length > 0) {
-            E22 = E2.join(", ");
+            E22 = E2.join("<br>");
           } else {
             E22 = "not assigned";
           }
@@ -568,13 +574,24 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
         // as Secondary experimenter 
         body = body + '<table style="width:90%">'
         body = body + "<tr><th width='15%'>Study time</th><th width='10%'>Study name</th>"
-        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner (E2)</th><th width='25%'>Zoom link</th></tr>"
+        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner</th><th width='25%'>Zoom link</th></tr>"
 
         experimenter.SecondaryExperimenterof.forEach(appointmentSec => {
 
-          var E1 = appointmentSec.PrimaryExperimenter.map((experimenter) => {
-            return experimenter.Name + "<br>" + experimenter.Email;
+          var E1 = appointmentSec.PrimaryExperimenter.map((e1) => {
+            return e1.Name + " (" + e1.Email + ")";
           });
+
+          var E2 = appointmentSec.SecondaryExperimenter.map((e2) => {
+            if (e2.Email !== experimenter.Email) { return e2.Name + " (" + e2.Email + ")"; }
+          });
+
+          var E22 = "";
+          if (appointmentPri.SecondaryExperimenter.length > 0) {
+            E22 = E2.join("<br>");
+            E22 = "E2: " + E22
+            E1[0] = "E1: " + E1[0] + "<br>" + E22
+          }
 
           const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + ", " +
             PhoneFormated(appointmentSec.Child.Family.Phone) +
