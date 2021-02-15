@@ -490,7 +490,14 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
           ]
         }
       ],
-
+      order: [[{
+        model: model.appointment,
+        as: "PrimaryExperimenterof"
+      }, { model: model.schedule }, "AppointmentTime", "ASC"],
+      [{
+        model: model.appointment,
+        as: "SecondaryExperimenterof"
+      }, { model: model.schedule }, "AppointmentTime", "ASC"]],
     });
 
     var experimenterReminderContent = [];
