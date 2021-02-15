@@ -262,7 +262,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
   var queryString = {};
 
   queryString.AppointmentTime = {
-    [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
+    [Op.between]: [moment().startOf("day").add(1, "days").toDate(), moment().startOf("day").add(2, "days").toDate()],
   };
   queryString.Reminded = 0;
   queryString.Status = 'Confirmed';
@@ -405,28 +405,27 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 
 // Retrieve today's appointments from the database.
 exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
-  var startDate = moment();
-  switch (moment().weekday()) {
-    default:
-      startDate = moment()
-        .startOf("day")
-        .add(1, "days");
-      break;
-  }
 
   try {
 
     const experimenters = await model.personnel.findAll({
       where: {
-        [Op.and]: {
+
+        [Op.or]: [{
           '$PrimaryExperimenterof.Schedule.AppointmentTime$': {
-            [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
-          },
-          '$SecondaryExperimenterof.Schedule.AppointmentTime$': {
-            [Op.between]: [startDate.toDate(), startDate.add(1, "days").toDate()],
-          },
+            [Op.between]: [moment().startOf("day").add(1, "days").toDate(), moment().startOf("day").add(2, "days").toDate()]
+          }
         },
-        '$PrimaryExperimenterof.Schedule.Status$': 'Confirmed'
+        {
+          '$SecondaryExperimenterof.Schedule.AppointmentTime$': {
+            [Op.between]: [moment().startOf("day").add(1, "days").toDate(), moment().startOf("day").add(2, "days").toDate()]
+          }
+        }],
+        [Op.or]: [
+          { '$PrimaryExperimenterof.Schedule.Status$': 'Confirmed' },
+          { '$SecondaryExperimenterof.Schedule.Status$': 'Confirmed' }
+        ]
+
       },
       include: [
         model.lab,
@@ -436,7 +435,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
           through: { model: model.experimenterAssignment },
           include: [
             {
-              model: model.schedule
+              model: model.schedule,
+              where: {
+                AppointmentTime: {
+                  [Op.between]: [moment().startOf("day").add(1, "days").toDate(), moment().startOf("day").add(2, "days").toDate()],
+                },
+              }
             },
             {
               model: model.study
@@ -461,7 +465,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
           through: { model: model.experimenterAssignment_2nd },
           include: [
             {
-              model: model.schedule
+              model: model.schedule,
+              where: {
+                AppointmentTime: {
+                  [Op.between]: [moment().startOf("day").add(1, "days").toDate(), moment().startOf("day").add(2, "days").toDate()],
+                },
+              }
             },
             {
               model: model.study
