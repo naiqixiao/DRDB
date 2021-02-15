@@ -55,7 +55,7 @@ function emailBody(schedule) {
       schedule.Appointments[0].Study.Lab.LabName +
       ". Just a reminder that you and " +
       childNames(schedule.Appointments) +
-      "will participate our online study " +
+      " will participate our online study " +
       moment(schedule.AppointmentTime).format(" [tomorrow at] h:mma") +
       "</b>.</p>";
   }

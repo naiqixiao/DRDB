@@ -74,6 +74,14 @@ cron.schedule('5 0 * * *', async (req, res) => {
 
 });
 
+const autoCancelController = require("./api/controllers/autoCancellation");
+
+cron.schedule('15 0 * * *', async (req, res) => {
+
+  autoCancelController.autoCancellation();
+
+});
+
 const config = require("./config/general");
 
 const options = {
