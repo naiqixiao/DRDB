@@ -266,11 +266,11 @@ exports.update = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.create(updatedAppointmentInfo);
 
-    if (updatedAppointmentInfo_2nd.length > 0) {
+    await model.experimenterAssignment_2nd.destroy({
+      where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
+    });
 
-      await model.experimenterAssignment_2nd.destroy({
-        where: { FK_Appointment: updatedAppointmentInfo_2nd[0].FK_Appointment },
-      });
+    if (updatedAppointmentInfo_2nd.length > 0) {
 
       await model.experimenterAssignment_2nd.bulkCreate(
         updatedAppointmentInfo_2nd
