@@ -452,6 +452,22 @@ exports.update = asyncHandler(async (req, res) => {
   if (updatedScheduleInfo.Status == "Cancelled") {
 
     updatedScheduleInfo.Completed = true;
+
+    // update family by removing AssignedLab from the family
+    updateFamilyInfo = { AssignedLab: null };
+
+    await model.family.update(updateFamilyInfo, {
+      where: { id: updatedScheduleInfo.FK_Family },
+    });
+  } else {
+
+    // update family's AssignedLab with the current lab
+    updateFamilyInfo = { AssignedLab: req.body.lab };
+
+    await model.family.update(updateFamilyInfo, {
+      where: { id: updatedScheduleInfo.FK_Family },
+    });
+
   }
 
   try {

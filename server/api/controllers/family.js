@@ -356,6 +356,14 @@ exports.search = asyncHandler(async (req, res) => {
         include: [
           {
             model: model.family,
+            include: [
+              {
+                model: model.child,
+                include: [{
+                  model: model.appointment,
+                  attributes: ['FK_Study']
+                }]
+              },]
           },
           {
             model: model.personnel,
@@ -365,9 +373,150 @@ exports.search = asyncHandler(async (req, res) => {
             include: [
               {
                 model: model.child,
+                include: [{
+                  model: model.appointment,
+                  attributes: ['FK_Study']
+                }]
               },
               {
                 model: model.study,
+                include: [{ model: model.lab },
+                {
+                  model: model.personnel,
+                  as: 'Experimenters',
+                  through: {
+                    model: model.experimenter,
+                  },
+                },],
+              },
+              {
+                model: model.personnel,
+                as: "PrimaryExperimenter",
+                through: { model: model.experimenterAssignment },
+                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+              },
+              {
+                model: model.personnel,
+                as: "SecondaryExperimenter",
+                through: { model: model.experimenterAssignment_2nd },
+                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+              },
+            ],
+          },
+        ],
+        order: [[model.schedule, "AppointmentTime", "DESC"]],
+      },
+    ],
+  });
+
+  shuffle(families);
+
+  res.status(200).send(families);
+  console.log("Search successful!");
+});
+
+// Retrieve all families from the database.
+exports.followupSearch = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  if (req.query.trainingMode === "true") {
+    queryString.TrainingSet = true;
+  } else {
+    queryString.TrainingSet = false;
+  }
+
+  queryString.NextContactDate = {
+    [Op.or]: [
+      {
+        [Op.lte]: moment()
+          .startOf("day")
+          .toDate(),
+      },
+      { [Op.eq]: null },
+    ],
+  };
+
+  if (req.query.AssignedLab) {
+    queryString.AssignedLab = req.query.AssignedLab;
+  }
+
+  queryString.NoMoreContact = 0;
+
+  queryString['$Schedules.Status$'] = ['TBD', 'Rescheduling', 'No Show']
+
+  const families = await model.family.findAll({
+    where: queryString,
+    // {
+    //   [Op.or]: [{
+    //     '$Schedules.Status$': 'TBD'
+    //   }, {
+    //     '$Schedules.Status$': 'Rescheduling'
+
+    //   }, {
+    //     '$Schedules.Status$': 'No Show'
+    //   }],
+    //   [Op.or]: [
+    //     {
+    //       NextContactDate: {
+    //         [Op.lte]: moment()
+    //           .startOf("day")
+    //           .toDate()
+    //       },
+    //     },
+    //     { NextContactDate: { [Op.eq]: null } },
+    //   ],
+    //   TrainingSet: queryString.TrainingSet
+    //   // AssignedLab: req.query.AssignedLab
+
+    // },
+    include: [
+      model.conversations,
+      {
+        model: model.child,
+        include: [
+          {
+            model: model.appointment,
+            attributes: ["FK_Study"],
+          },
+        ],
+      },
+      {
+        model: model.schedule,
+        include: [
+          {
+            model: model.family,
+            include: [
+              {
+                model: model.child,
+                include: [{
+                  model: model.appointment,
+                  attributes: ['FK_Study']
+                }]
+              },]
+          },
+          {
+            model: model.personnel,
+          },
+          {
+            model: model.appointment,
+            include: [
+              {
+                model: model.child,
+                include: [{
+                  model: model.appointment,
+                  attributes: ['FK_Study']
+                }]
+              },
+              {
+                model: model.study,
+                include: [{ model: model.lab },
+                {
+                  model: model.personnel,
+                  as: 'Experimenters',
+                  through: {
+                    model: model.experimenter,
+                  },
+                },],
               },
               {
                 model: model.personnel,

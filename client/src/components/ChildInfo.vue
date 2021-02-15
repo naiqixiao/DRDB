@@ -270,6 +270,7 @@
         v-model="dialogSchedule"
         max-width="1200px"
         :retain-focus="false"
+        persistent
       >
         <ConfirmDlg ref="confirmD" />
         <v-stepper v-model="e1">

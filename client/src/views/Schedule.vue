@@ -520,6 +520,7 @@
             v-model="dialogSchedule"
             max-width="1200px"
             :retain-focus="false"
+            persistent
           >
             <v-stepper v-model="e1">
               <v-stepper-header>

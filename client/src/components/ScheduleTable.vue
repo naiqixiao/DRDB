@@ -62,10 +62,10 @@
             @click.stop="updateSchedule(item, 'Rescheduling')"
             :disabled="
               item.Status === 'Rescheduling' ||
-                item.Status === 'No Show' ||
-                item.Status === 'TBD' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -81,10 +81,10 @@
             @click.stop="updateSchedule(item, 'No Show')"
             :disabled="
               item.Status === 'Rescheduling' ||
-                item.Status === 'No Show' ||
-                item.Status === 'TBD' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -104,8 +104,8 @@
             "
             :disabled="
               item.Status === 'Cancelled' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -159,7 +159,7 @@
         <v-row
           justify="space-between"
           height="190px"
-          style="background-color: rgba(0, 0, 0, 0);"
+          style="background-color: rgba(0, 0, 0, 0)"
         >
           <MiniAppointmentTable
             :Schedule="item"
@@ -193,7 +193,7 @@
             @nextContactDone="updateNextContactFrontend"
           ></NextContact>
 
-          <v-card-actions style="padding: 16px;">
+          <v-card-actions style="padding: 16px">
             <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
@@ -210,7 +210,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="1200px">
+      <v-dialog v-model="dialog" max-width="1200px" persistent>
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -232,15 +232,10 @@
 
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-row
-                style="height: 650px;"
-                align="start"
-                justify="center"
-                dense
-              >
-                <v-card outlined style="height: 650px;" width="90%">
+              <v-row style="height: 650px" align="start" justify="center" dense>
+                <v-card outlined style="height: 650px" width="90%">
                   <v-row
-                    style="height: 100px;"
+                    style="height: 100px"
                     align="center"
                     justify="start"
                     dense
@@ -321,11 +316,12 @@
                     </v-col>
                   </v-row>
                   <v-divider style="margin-bottom: 16px"></v-divider>
-                  <div style="height: 290px; overflow-y: scroll !important;">
+                  <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies
                       ref="extraStudies"
-                      v-for="(appointment,
-                      index) in editedSchedule.Appointments"
+                      v-for="(
+                        appointment, index
+                      ) in editedSchedule.Appointments"
                       :key="appointment.id"
                       :child="appointment.Child"
                       :targetChild="appointment.Child"
@@ -360,9 +356,7 @@
                     style="height: 100px"
                   >
                     <v-col cols="12" md="3" class="text-left">
-                      <h4 class="text-left">
-                        Additional appointment(s) for:
-                      </h4>
+                      <h4 class="text-left">Additional appointment(s) for:</h4>
                     </v-col>
                     <v-col
                       cols="12"
@@ -408,7 +402,7 @@
               <v-row
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
               >
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
@@ -431,13 +425,8 @@
               </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-row
-                style="height: 700px;"
-                align="start"
-                justify="center"
-                dense
-              >
-                <v-card outlined style="height: 700px;" width="90%">
+              <v-row style="height: 700px" align="start" justify="center" dense>
+                <v-card outlined style="height: 700px" width="90%">
                   <Email
                     ref="Email"
                     :dialog="emailDialog"
@@ -453,7 +442,7 @@
                 dense
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
               >
                 <v-col cols="12" md="2">
                   <v-tooltip top>
@@ -479,8 +468,8 @@
                     @click="continue23()"
                     :disabled="
                       !editedSchedule.Family.Email ||
-                        skipConfirmationEmailStatus ||
-                        !$store.state.labEmailStatus
+                      skipConfirmationEmailStatus ||
+                      !$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -492,8 +481,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                        !!editedSchedule.Family.Email &&
-                        !skipConfirmationEmailStatus
+                      !!editedSchedule.Family.Email &&
+                      !skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -523,7 +512,7 @@
                 dense
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
               >
                 <v-col>
                   <v-btn color="primary" @click="completeSchedule"
@@ -541,7 +530,7 @@
           <v-card-title>
             <span class="headline">Reminder email</span>
           </v-card-title>
-          <v-row style="height: 700px;" align="start" justify="center" dense>
+          <v-row style="height: 700px" align="start" justify="center" dense>
             <Email
               ref="Email"
               :dialog="dialogReminderEmail"
@@ -574,8 +563,8 @@
                   color="primary"
                   :disabled="
                     !!!editedSchedule.Family.Email ||
-                      skipReminderEmailStatus ||
-                      !$store.state.labEmailStatus
+                    skipReminderEmailStatus ||
+                    !$store.state.labEmailStatus
                   "
                   @click="sendReminderEmail()"
                 >
@@ -617,7 +606,7 @@
             </v-row>
           </v-card-text>
 
-          <v-card-actions style="padding: 16px;">
+          <v-card-actions style="padding: 16px">
             <v-row justify="space-between">
               <v-col md="2"></v-col>
               <v-col md="2">
@@ -943,9 +932,7 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1325,9 +1312,7 @@ export default {
         case "Confirmed":
           if (
             moment(item.AppointmentTime).startOf("day") <=
-              moment()
-                .startOf("day")
-                .add(daysAheadofSchedule, "d") &&
+              moment().startOf("day").add(daysAheadofSchedule, "d") &&
             moment(item.AppointmentTime).startOf("day") >=
               moment().startOf("day")
           ) {
@@ -1590,9 +1575,7 @@ export default {
       }
     },
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      return moment().startOf("day").format("YYYY-MM-DD");
     },
     reminderEmailDisable() {
       return false;

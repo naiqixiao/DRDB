@@ -149,14 +149,18 @@
               <div v-on="on">
                 <v-btn
                   tile
-                  style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                  style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
                   large
                   @click="studiesInaPeriod('today')"
                 >
                   <v-icon
-                    style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                    style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
                     >today</v-icon
                   >
                 </v-btn>
@@ -169,14 +173,18 @@
               <div v-on="on">
                 <v-btn
                   tile
-                  style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                  style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
                   large
                   @click="studiesInaPeriod('tomorrow')"
                 >
                   <v-icon
-                    style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                    style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
                     >event</v-icon
                   >
                 </v-btn>
@@ -189,14 +197,18 @@
               <div v-on="on">
                 <v-btn
                   tile
-                  style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                  style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
                   large
                   @click="studiesInaPeriod('thisWeek')"
                 >
                   <v-icon
-                    style="color: var(--v-secondary-base);
-  background-color: var(--v-primary-base) !important;"
+                    style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
                     >date_range</v-icon
                   >
                 </v-btn>
@@ -335,6 +347,7 @@ export default {
         // console.log(this.queryString);
       }
     },
+
     async searchSchedule() {
       this.$store.dispatch("setLoadingStatus", true);
 
@@ -343,6 +356,8 @@ export default {
       try {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
+
+        this.currentFamily = this.Schedules[0].Family;
 
         if (this.Schedules.length == 0) {
           alert("No study appointment can be found. Sorry~");

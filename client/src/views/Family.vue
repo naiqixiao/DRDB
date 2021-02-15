@@ -652,50 +652,15 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    // async searchFamilybyChildName(childName) {
-    //   this.$store.dispatch("setLoadingStatus", true);
-
-    //   this.queryString = this.currentFamily;
-    //   this.queryString.childName = childName;
-
-    //   this.queryString.trainingMode = this.$store.state.trainingMode;
-
-    //   try {
-    //     const Results = await family.search(this.queryString);
-    //     if (Results.data.length > 0) {
-    //       this.Families = Results.data;
-    //       this.page = 1;
-    //       this.currentFamily = this.Families[this.page - 1];
-    //     } else {
-    //       alert("no family can be found");
-    //       this.page = 0;
-    //       this.currentFamily = Object.assign({}, this.familyTemplate);
-    //     }
-
-    //     this.searchStatus = !this.searchStatus;
-    //   } catch (error) {
-    //     if (error.response.status === 401) {
-    //       alert("Authentication failed, please login.");
-    //       this.$router.push({
-    //         name: "Login",
-    //       });
-    //     }
-    //   }
-
-    //   delete this.queryString.childName;
-    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    // },
-
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      this.queryString.NextContactDate = moment().startOf("day").toString();
       this.queryString.AssignedLab = this.$store.state.lab;
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
 
       try {
-        const Results = await family.search(this.queryString);
+        const Results = await family.followupSearch(this.queryString);
         if (Results.data.length > 0) {
           this.Families = Results.data;
           this.page = 1;

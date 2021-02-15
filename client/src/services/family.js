@@ -17,6 +17,11 @@ export default {
       params: familyInfo
     });
   },
+  followupSearch(familyInfo) {
+    return api().get("family/followup", {
+      params: familyInfo
+    });
+  },
   update(familyInfo) {
     familyInfo.User = {
       
