@@ -587,7 +587,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
           });
 
           var E22 = "";
-          if (appointmentPri.SecondaryExperimenter.length > 0) {
+          if (appointmentSec.SecondaryExperimenter.length > 0) {
             E22 = E2.join("<br>");
             E22 = "E2: " + E22
             E1[0] = "E1: " + E1[0] + "<br>" + E22
