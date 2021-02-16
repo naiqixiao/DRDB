@@ -549,7 +549,7 @@ exports.update = asyncHandler(async (req, res) => {
   var ID = req.body.id;
   var updatedFamilyInfo = req.body;
 
-  console.log(updatedFamilyInfo)
+  // console.log(updatedFamilyInfo)
 
   const family = await model.family.update(updatedFamilyInfo, {
     where: { id: ID },
@@ -776,7 +776,7 @@ exports.fillNextContactDate = asyncHandler(async (req, res) => {
   // queryString.Email = { [Op.like]: `` };
 
   const families = await model.family.findAll();
-  console.log(families.length);
+  // console.log(families.length);
 
   families.forEach(async (family) => {
     await model.family.update(
