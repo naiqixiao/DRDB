@@ -194,6 +194,45 @@ exports.search = asyncHandler(async (req, res) => {
   }
 });
 
+exports.searchFollowUps = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  queryString['$Family.NextContactDate$'] = {
+    [Op.or]: [
+      {
+        [Op.lte]: moment()
+          .startOf("day")
+          .toDate(),
+      },
+      { [Op.eq]: null },
+    ],
+  };
+  queryString['$Family.NoMoreContact$'] = 0;
+
+  queryString.Status = { [Op.in]: ['TBD', 'Rescheduling', 'No Show'] }
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
+
+  queryString['$Family.AssignedLab$'] = req.query.lab;
+
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
+
+  try {
+    const schedule = await searchScheudles(queryString);
+
+    res.status(200).send(schedule);
+    console.log("Follow up search successful!");
+  } catch (error) {
+    throw error;
+  }
+});
+
 // Retrieve today's appointments from the database.
 exports.today = asyncHandler(async (req, res) => {
   var queryString = {};

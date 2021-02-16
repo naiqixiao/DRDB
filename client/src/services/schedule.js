@@ -18,6 +18,12 @@ export default {
       params: schedule,
     });
   },
+  searchFollowUps(schedule) {
+    schedule.lab = store.state.lab;
+    return api().get("schedule/followups", {
+      params: schedule,
+    });
+  },
   today(schedule) {
     schedule.lab = store.state.lab;
     return api().get("schedule/today", {

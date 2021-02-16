@@ -33,7 +33,7 @@ exports.autoCancellation = asyncHandler(async (req, res) => {
             await model.schedule.update(
                 {
                     Status: 'Rejected',
-                    Completed: 1
+                    Completed: true
                 },
                 { where: { id: schedule.id } }
             )

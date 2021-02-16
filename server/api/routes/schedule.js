@@ -9,6 +9,8 @@ router.post("/add", checkAuth, ScheduleController.create);
 
 router.get("/", checkAuth, ScheduleController.search);
 
+router.get("/followups", checkAuth, ScheduleController.searchFollowUps);
+
 router.get("/today", checkAuth, ScheduleController.today);
 
 router.get("/tomorrow", checkAuth, ScheduleController.tomorrow);

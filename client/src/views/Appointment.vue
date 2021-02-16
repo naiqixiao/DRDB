@@ -120,28 +120,8 @@
           dense
         ></v-text-field>
       </v-col>
-      <v-col cols="12" md="1" style="text-align: center">
-        <v-btn
-          large
-          @click="searchSchedule"
-          :disabled="
-            !(
-              queryString.Email ||
-              queryString.AppointmentTimeAfter ||
-              queryString.AppointmentTimeBefore ||
-              queryString.Status.length > 0 ||
-              queryString.StudyName.length > 0 ||
-              queryString.Phone ||
-              queryString.NamePrimary ||
-              queryString.NameSecondary ||
-              queryString.FamilyId
-            )
-          "
-        >
-          <v-icon left dark>mdi-magnify</v-icon>Search
-        </v-btn>
-      </v-col>
-      <!-- <v-spacer></v-spacer> -->
+    </v-row>
+    <v-row justify="center">
       <v-col cols="12" md="2">
         <v-btn-toggle dark>
           <v-tooltip bottom>
@@ -217,18 +197,34 @@
             <span>Studies within this week</span>
           </v-tooltip>
         </v-btn-toggle>
+      </v-col>
 
-        <!-- <v-btn large @click="studiesInaPeriod('today')">Today's Studies</v-btn>
+      <v-col cols="12" md="2" style="text-align: center">
+        <v-btn large @click="followupSearch">
+          <v-icon dark left>mdi-phone</v-icon>Follow-ups
+        </v-btn>
       </v-col>
-      <v-col cols="12" md="1">
-        <v-btn large @click="studiesInaPeriod('tomorrow')"
-          >Tomorrow's Studies</v-btn
+
+      <v-col cols="12" md="1" style="text-align: center">
+        <v-btn
+          large
+          @click="searchSchedule"
+          :disabled="
+            !(
+              queryString.Email ||
+              queryString.AppointmentTimeAfter ||
+              queryString.AppointmentTimeBefore ||
+              queryString.Status.length > 0 ||
+              queryString.StudyName.length > 0 ||
+              queryString.Phone ||
+              queryString.NamePrimary ||
+              queryString.NameSecondary ||
+              queryString.FamilyId
+            )
+          "
         >
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-btn large @click="studiesInaPeriod('thisWeek')"
-          >This week's Studies</v-btn
-        > -->
+          <v-icon left dark>mdi-magnify</v-icon>Search
+        </v-btn>
       </v-col>
     </v-row>
 
@@ -357,9 +353,10 @@ export default {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
 
-        this.currentFamily = this.Schedules[0].Family;
-
-        if (this.Schedules.length == 0) {
+        if (this.Schedules.length > 0) {
+          this.currentFamily = this.Schedules[0].Family;
+        } else {
+          this.currentFamily = {};
           alert("No study appointment can be found. Sorry~");
         }
       } catch (error) {
@@ -376,60 +373,34 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    // async searchScheduleByStatus() {
-    //   this.$store.dispatch("setLoadingStatus", true);
+    async followupSearch() {
+      this.$store.dispatch("setLoadingStatus", true);
 
-    //   this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.queryString.trainingMode = this.$store.state.trainingMode;
 
-    //   if (this.queryString.Status) {
-    //     try {
-    //       const Result = await schedule.search(this.queryString);
-    //       this.Schedules = Result.data;
-    //       if (this.Schedules.length == 0) {
-    //         alert("No study appointment can be found. Sorry~");
-    //       }
-    //     } catch (error) {
-    //       if (error.response.status === 401) {
-    //         alert("Authentication failed, please login.");
-    //         this.$router.push({
-    //           name: "Login",
-    //         });
-    //       }
-    //     }
+      try {
+        const Result = await schedule.searchFollowUps(this.queryString);
+        this.Schedules = Result.data;
 
-    //     this.queryString = Object.assign({}, this.defaultQueryString);
-    //   }
-    //   this.index = -1;
-    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    // },
+        if (this.Schedules.length > 0) {
+          this.currentFamily = this.Schedules[0].Family;
+        } else {
+          this.currentFamily = {};
+          alert("No study appointment can be found. Sorry~");
+        }
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
 
-    // async todayStudies() {
-    //   this.$store.dispatch("setLoadingStatus", true);
-
-    //   this.queryString.trainingMode = this.$store.state.trainingMode;
-
-    //   try {
-    //     const Result = await schedule.today(this.queryString);
-    //     this.Schedules = Result.data;
-
-    //     if (this.Schedules.length == 0) {
-    //       alert("No study appointment can be found. Sorry~");
-    //     }
-    //   } catch (error) {
-    //     if (error.response.status === 401) {
-    //       alert("Authentication failed, please login.");
-    //       this.$router.push({
-    //         name: "Login",
-    //       });
-    //     } else {
-    //       console.log(JSON.stringify(error.response));
-    //     }
-    //   }
-
-    //   this.queryString = Object.assign({}, this.defaultQueryString);
-    //   this.index = -1;
-    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    // },
+      this.queryString = Object.assign({}, this.defaultQueryString);
+      this.index = -1;
+      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+    },
 
     async studiesInaPeriod(serchRange) {
       this.$store.dispatch("setLoadingStatus", true);
@@ -453,7 +424,10 @@ export default {
         }
         this.Schedules = Result.data;
 
-        if (this.Schedules.length == 0) {
+        if (this.Schedules.length > 0) {
+          this.currentFamily = this.Schedules[0].Family;
+        } else {
+          this.currentFamily = {};
           alert("No study appointment can be found. Sorry~");
         }
       } catch (error) {

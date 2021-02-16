@@ -28,6 +28,20 @@
         ></v-text-field>
       </v-col>
     </v-row>
+    <v-row justify="space-between" align="end" dense>
+      <v-col cols="12" md="12">
+        <v-textarea
+          class="conv-textarea"
+          label="Notes for next contact"
+          outlined
+          no-resize
+          rows="16"
+          hide-details
+          readonly
+          v-model="currentFamily.NextContactNote"
+        ></v-textarea>
+      </v-col>
+    </v-row>
 
     <v-row justify="end">
       <v-col cols="12" md="3" dense>
@@ -49,11 +63,7 @@
       </v-col>
     </v-row>
 
-    <v-dialog
-      v-model="dialog"
-      max-width="1200px"
-      :retain-focus="false"
-    >
+    <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
       <v-card outlined>
         <v-card-title>
           <span class="headline">Edit family information</span>
@@ -149,7 +159,7 @@
           </v-form>
         </v-card-text>
         <v-card-actions style="padding: 16px;">
-          <v-row justify="space-between" >
+          <v-row justify="space-between">
             <v-col md="4"></v-col>
             <v-col md="2">
               <v-btn color="primary" @click="dialog = false">Cancel</v-btn>

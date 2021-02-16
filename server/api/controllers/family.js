@@ -442,7 +442,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
   queryString.NoMoreContact = 0;
 
-  queryString['$Schedules.Status$'] = ['TBD', 'Rescheduling', 'No Show']
+  queryString['$Schedules.Status$'] = { [Op.in]: ['TBD', 'Rescheduling', 'No Show'] }
 
   const families = await model.family.findAll({
     where: queryString,
