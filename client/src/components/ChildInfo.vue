@@ -1107,53 +1107,54 @@ export default {
           } catch (error) {
             console.log(error);
           }
-        } else {
-          try {
+        }
+      } else {
+        try {
+          if (
+            this.response == "Confirmed" &&
+            this.primaryExperimenterList.includes(0)
+          ) {
+            // if any appointment without an experimenter.
+            await this.$refs.confirmD.open(
+              "Who is going to run the study?",
+              "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+            );
+          } else {
+            if (this.currentSchedule.id) {
+              await this.deleteUnfinishedSchedule();
+            }
+
+            scheduleInfo = await this.createSchedule();
+
             if (
               this.response == "Confirmed" &&
-              this.primaryExperimenterList.includes(0)
+              this.$store.state.labEmailStatus &&
+              !this.skipStudyDateTimeStatus
             ) {
-              // if any appointment without an experimenter.
-              await this.$refs.confirmD.open(
-                "Who is going to run the study?",
-                "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
-              );
-            } else {
-              if (this.currentSchedule.id) {
-                await this.deleteUnfinishedSchedule();
-              }
+              try {
+                await this.createCalendarEvent(scheduleInfo.calendarEvent);
 
-              scheduleInfo = await this.createSchedule();
-
-              if (
-                this.response == "Confirmed" &&
-                this.$store.state.labEmailStatus &&
-                !this.skipStudyDateTimeStatus
-              ) {
-                try {
-                  await this.createCalendarEvent(scheduleInfo.calendarEvent);
-
-                  // this.emailDialog = true;
-                  // this.e1 = 2;
-                  this.scheduleNextPage = true;
-                  this.scheduleButtonText = "Study Scheduled!";
-                } catch (error) {
-                  alert(
-                    "Calendar event wasn't created successfully, please try again."
-                  );
-                  console.log(error);
-                  this.manualCalendar = true;
-                }
-              } else {
-                this.scheduleButtonText = "Study Scheduled!";
+                // this.emailDialog = true;
+                // this.e1 = 2;
                 this.scheduleNextPage = true;
+                this.scheduleButtonText = "Study Scheduled!";
+              } catch (error) {
+                alert(
+                  "Calendar event wasn't created successfully, please try again."
+                );
+                console.log(error);
+                this.manualCalendar = true;
               }
+            } else {
+              this.scheduleButtonText = "Study Scheduled!";
+              this.scheduleNextPage = true;
             }
-          } catch (error) {
-            console.log(error);
           }
+        } catch (error) {
+          console.log(error);
         }
       }
+
       this.loadingStatus = false;
     },
 

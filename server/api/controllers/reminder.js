@@ -30,6 +30,10 @@ function emailBody(schedule) {
     "Reminder for your study appointment with " +
     childNames(schedule.Appointments);
 
+  if (!schedule.Family.NamePrimary) {
+    schedule.Family.NamePrimary = ""
+  }
+
   var opening = "";
 
   if (schedule.Appointments[0].Study.StudyType !== "Online") {
@@ -134,6 +138,11 @@ function experimenterEmails(Appointments) {
 }
 
 function manualReminderBody(schedule) {
+
+  if (!schedule.Family.NamePrimary) {
+    schedule.Family.NamePrimary = ''
+  }
+
   const emailSubject =
     "Remind " +
     schedule.Family.NamePrimary.split(" ")[0] +
@@ -515,7 +524,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
     ).installed;
 
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-    
+
 
     const TH = "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
     const TH2nd = "style = 'background: lightgreen; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
@@ -559,6 +568,10 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             E22 = E2.join("<br>");
           } else {
             E22 = "not assigned";
+          }
+
+          if (!appointmentPri.Child.Family.NamePrimary) {
+            appointmentPri.Child.Family.NamePrimary = ""
           }
 
           const parent = appointmentPri.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
@@ -615,6 +628,10 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             E22 = E2.join("<br>");
             E22 = "E2: " + E22
             E1[0] = "E1: " + E1[0] + "<br>" + E22
+          }
+
+          if (!appointmentSec.Child.Family.NamePrimary) {
+            appointmentSec.Child.Family.NamePrimary = ""
           }
 
           const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
