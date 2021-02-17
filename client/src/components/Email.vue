@@ -201,7 +201,7 @@ export default {
                 this.$store.state.labName +
                 ". Just a reminder that you and <b>" +
                 this.childNames() +
-                " will participate our online study" +
+                " will participate in our in our online study" +
                 dateLabel +
                 moment(this.scheduleInfo.AppointmentTime).format(
                   " [at] h:mma"

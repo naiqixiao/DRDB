@@ -66,7 +66,7 @@ Reminder emails
 - Structure
     -  reminder opening (no setting is available at the momemnt)
         - in-person lab studies: "This is a reminder for your visit to ${{LabName}} with ${{childName}} on ${{AppointTime}}."
-        - online studies: "This is ${{LabName}}. Just a reminder that you and ${{childName}} will participate our online study."
+        - online studies: "This is ${{LabName}}. Just a reminder that you and ${{childName}} will participate in our online study."
     -  reminder template
         - ${{ZoomLink}} will be replaced with the ZoomLink of the first experimenter. If no the experimenter's ZoomLink is not set up, the lab's ZoomLink will be filled instead.
     -  transportation instructions (for in-person studies)

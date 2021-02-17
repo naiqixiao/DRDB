@@ -939,7 +939,7 @@ export default {
             "<p style= 'color: var(--v-primary-lighten3)'>Hope you are doing great! This is " +
             this.$store.state.labName +
             ". Just a reminder that you and " +
-            "Emma will participate our online study " +
+            "Emma will participate in our online study " +
             moment().format(" [tomorrow at] h:mma") +
             ".</p>";
         }
