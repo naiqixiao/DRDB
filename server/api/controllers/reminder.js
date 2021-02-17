@@ -515,25 +515,40 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
     ).installed;
 
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    
+
+    const TH = "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
+    const TH2nd = "style = 'background: lightgreen; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
+    const TRO = "<td style = 'background: white !important; border: 1px solid #999; padding: 0.5rem; text-align: center; '>"
+    const TRE = "<td style = 'background: #e8e7e1 !important; border: 1px solid #999; padding: 0.5rem; text-align: center;'>"
 
     experimenters.forEach(async experimenter => {
 
-      var body = "Hi " +
-        experimenter.Name.split(" ")[0] + "<br><br>The following is(are) your study(ies) tomorrow! Good luck! :)<br><br>";
+      var body = "<!DOCTYPE html><html><head>"
+      body = body + "</head><body>Hi "
 
-      body = body + "<style> border: 1px solid #000000; table tr th {text-align: center; color: black; font-size: 24; font-weight: bold; padding: 5px;} table td {text-align: center; color: black; padding: 5px;} tbody tr:nth-child(even) { background: #e8e7e1;} </style>"
+      if (experimenter.PrimaryExperimenterof.length + experimenter.SecondaryExperimenterof.length > 1) {
+
+        body = body + experimenter.Name.split(" ")[0] + ",<br><br>The following are your studies tomorrow! Good luck! :)<br><br>";
+      } else {
+        body = body + experimenter.Name.split(" ")[0] + ",<br><br>The following is your study tomorrow! Good luck! :)<br><br>";
+      }
       // table th, table td{
       //   text-align: center;
       //   }
       if (experimenter.PrimaryExperimenterof.length > 0) {
-        body = body + "<h2>Studies that you are the primary experimenter</h2>"
+        body = body + "<h2>Studies that you are the primary experimenter: </h2>"
 
         // as Primary experimenter 
-        body = body + '<table style="width:90%;">'
-        body = body + "<tr><th width='15%'>Study time</th><th width='10%'>Study name</th>"
-        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner (E2)</th><th width='25%'>Zoom link</th></tr>"
+        body = body + '<table style="width:90%; border-collapse: collapse !important;">'
+        body = body + "<tr><th width='15%'" + TH + ">Study time</th>" +
+          "<th width='15%' " + TH + ">Study name</th>" +
+          "<th width='18%' " + TH + ">Parent</th>" +
+          "<th width='7%' " + TH + ">Child</th>" +
+          "<th width='20%' " + TH + ">Partner (E2)</th>" +
+          "<th width='25%' " + TH + ">Zoom link</th></tr>"
 
-        experimenter.PrimaryExperimenterof.forEach(appointmentPri => {
+        experimenter.PrimaryExperimenterof.forEach((appointmentPri, index) => {
 
           var E2 = appointmentPri.SecondaryExperimenter.map((e2) => {
             return e2.Name + " (" + e2.Email + ")";;
@@ -546,21 +561,26 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             E22 = "not assigned";
           }
 
-          const parent = appointmentPri.Child.Family.NamePrimary.split(" ")[0] + ", " +
+          const parent = appointmentPri.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
             PhoneFormated(appointmentPri.Child.Family.Phone) +
-            "<br>" + appointmentPri.Child.Family.Email
+            "<br>" + appointmentPri.Child.Family.Email;
 
           const ZoomLink = experimenter.ZoomLink ? experimenter.ZoomLink : "not available";
 
+          var style = TRO
+          if (index % 2 == 1) {
+            style = TRE
+          }
+
           body = body + "<tr>"
-          body = body + "<td style='padding = 8px;'>" + moment(appointmentPri.Schedule.AppointmentTime).format(
+          body = body + style + moment(appointmentPri.Schedule.AppointmentTime).format(
             "MMM Do [at] h:mma"
           ) + "</td>"
-          body = body + "<td style='padding = 8px;'>" + appointmentPri.Study.StudyName + "</td>"
-          body = body + "<td style='padding = 8px;'>" + parent + "</td>"
-          body = body + "<td style='padding = 8px;'>" + appointmentPri.Child.Name.split(" ")[0] + "</td>"
-          body = body + "<td style='padding = 8px;'>" + E22 + "</td>"
-          body = body + "<td style='padding = 8px;'>" + ZoomLink + "</td>"
+          body = body + style + appointmentPri.Study.StudyName + "</td>"
+          body = body + style + parent + "</td>"
+          body = body + style + appointmentPri.Child.Name.split(" ")[0] + "</td>"
+          body = body + style + E22 + "</td>"
+          body = body + style + ZoomLink + "</td>"
           body = body + "</tr>"
         })
 
@@ -572,11 +592,15 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
         body = body + "<h2>Studies that you are the secondary experimenter:</h2>"
         // as Secondary experimenter 
-        body = body + '<table style="width:90%">'
-        body = body + "<tr><th width='15%'>Study time</th><th width='10%'>Study name</th>"
-        body = body + "<th width='23%'>Parent</th><th width='7%'>Child</th><th width='20%'>Partner</th><th width='25%'>Zoom link</th></tr>"
+        body = body + '<table style="width:90%; border-collapse: collapse !important;">'
+        body = body + "<tr><th width='15%'" + TH2nd + ">Study time</th>" +
+          "<th width='15%' " + TH2nd + ">Study name</th>" +
+          "<th width='18%' " + TH2nd + ">Parent</th>" +
+          "<th width='7%' " + TH2nd + ">Child</th>" +
+          "<th width='20%' " + TH2nd + ">Partner(s)</th>" +
+          "<th width='25%' " + TH2nd + ">Zoom link</th></tr>"
 
-        experimenter.SecondaryExperimenterof.forEach(appointmentSec => {
+        experimenter.SecondaryExperimenterof.forEach((appointmentSec, index) => {
 
           var E1 = appointmentSec.PrimaryExperimenter.map((e1) => {
             return e1.Name + " (" + e1.Email + ")";
@@ -587,27 +611,32 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
           });
 
           var E22 = "";
-          if (appointmentSec.SecondaryExperimenter.length > 0) {
+          if (E2.length > 1) {
             E22 = E2.join("<br>");
             E22 = "E2: " + E22
             E1[0] = "E1: " + E1[0] + "<br>" + E22
           }
 
-          const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + ", " +
+          const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
             PhoneFormated(appointmentSec.Child.Family.Phone) +
-            "<br>" + appointmentSec.Child.Family.Email
+            "<br>" + appointmentSec.Child.Family.Email;
 
           const ZoomLink = appointmentSec.PrimaryExperimenter[0].ZoomLink ? appointmentSec.PrimaryExperimenter[0].ZoomLink : "not available";
 
+          var style = TRO
+          if (index % 2 == 1) {
+            style = TRE
+          }
+
           body = body + "<tr>"
-          body = body + "<td style='padding = 8px;'>" + moment(appointmentSec.Schedule.AppointmentTime).format(
+          body = body + style + moment(appointmentSec.Schedule.AppointmentTime).format(
             "MMM Do [at] h:mma"
           ) + "</td>"
-          body = body + "<td style='padding = 8px;'>" + appointmentSec.Study.StudyName + "</td>"
-          body = body + "<td style='padding = 8px;'>" + parent + "</td>"
-          body = body + "<td style='padding = 8px;'>" + appointmentSec.Child.Name.split(" ")[0] + "</td>"
-          body = body + "<td style='padding = 8px;'>" + E1[0] + "</td>"
-          body = body + "<td style='padding = 8px;'>" + ZoomLink + "</td>"
+          body = body + style + appointmentSec.Study.StudyName + "</td>"
+          body = body + style + parent + "</td>"
+          body = body + style + appointmentSec.Child.Name.split(" ")[0] + "</td>"
+          body = body + style + E1[0] + "</td>"
+          body = body + style + ZoomLink + "</td>"
           body = body + "</tr>"
         })
       }
