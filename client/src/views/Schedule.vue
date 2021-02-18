@@ -968,8 +968,8 @@ import Page from "@/components/Page";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
 
-import { io } from "socket.io-client";
-import { backendURL } from "../plugins/variables";
+// import { io } from "socket.io-client";
+// import { backendURL } from "../plugins/variables";
 
 export default {
   components: {
@@ -1095,7 +1095,7 @@ export default {
         SecondaryExperimenter: [],
       },
       scheduleNotes: "",
-      socket: {},
+      // socket: {},
       currentVisitedFamilies: [],
       contactedByOthers: false,
       loadingStatus: false,
@@ -1126,9 +1126,9 @@ export default {
     async searchChild() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      if (!this.currentChild.scheduled) {
-        this.socket.emit("remove family", this.currentChild.FK_Family);
-      }
+      // if (!this.currentChild.scheduled) {
+      //   this.socket.emit("remove family", this.currentChild.FK_Family);
+      // }
 
       var queryString = {};
 
@@ -1198,8 +1198,8 @@ export default {
             this.currentVisitedFamilies.includes(this.currentChild.FK_Family)
           ) {
             this.currentChild.scheduled = true;
-          } else {
-            this.socket.emit("add family", this.currentChild.FK_Family);
+          // } else {
+          //   this.socket.emit("add family", this.currentChild.FK_Family);
           }
 
           alert(
@@ -1960,9 +1960,9 @@ export default {
     },
 
     nextPage() {
-      if (!this.currentChild.scheduled && !this.contactedByOthers) {
-        this.socket.emit("remove family", this.currentChild.FK_Family);
-      }
+      // if (!this.currentChild.scheduled && !this.contactedByOthers) {
+      //   this.socket.emit("remove family", this.currentChild.FK_Family);
+      // }
 
       this.page += 1;
       this.currentChild = this.Children[this.page - 1];
@@ -1971,15 +1971,15 @@ export default {
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
       } else {
-        this.socket.emit("add family", this.currentChild.FK_Family);
+        // this.socket.emit("add family", this.currentChild.FK_Family);
         this.contactedByOthers = false;
       }
     },
 
     previousPage() {
-      if (!this.currentChild.scheduled && !this.contactedByOthers) {
-        this.socket.emit("remove family", this.currentChild.FK_Family);
-      }
+      // if (!this.currentChild.scheduled && !this.contactedByOthers) {
+      //   this.socket.emit("remove family", this.currentChild.FK_Family);
+      // }
 
       this.page -= 1;
       this.currentChild = this.Children[this.page - 1];
@@ -1988,7 +1988,7 @@ export default {
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
       } else {
-        this.socket.emit("add family", this.currentChild.FK_Family);
+        // this.socket.emit("add family", this.currentChild.FK_Family);
         this.contactedByOthers = false;
       }
     },
@@ -2148,16 +2148,16 @@ export default {
 
   mounted: function() {
     this.searchStudies();
-    this.socket.on("familyList update", (familyList) => {
-      this.currentVisitedFamilies = familyList;
-      console.log(this.currentVisitedFamilies);
-    });
+    // this.socket.on("familyList update", (familyList) => {
+    //   this.currentVisitedFamilies = familyList;
+    //   console.log(this.currentVisitedFamilies);
+    // });
   },
 
   created: function() {
-    this.socket = io(backendURL);
+    // this.socket = io(backendURL);
 
-    console.log(backendURL);
+    // console.log(backendURL);
   },
 
   beforeDestroy: function() {
