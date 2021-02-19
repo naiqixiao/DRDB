@@ -11,10 +11,10 @@
               <div class="d-inline-block text-truncate" style="max-width: 60%">
                 {{
                   child.Name +
-                    " (" +
-                    currentFamily.id +
-                    child.IdWithinFamily +
-                    ")"
+                  " (" +
+                  currentFamily.id +
+                  child.IdWithinFamily +
+                  ")"
                 }}
               </div>
               <v-spacer></v-spacer>
@@ -55,7 +55,7 @@
               </v-row>
             </v-card-text>
             <v-spacer></v-spacer>
-            <v-card-actions style="padding: 16px;">
+            <v-card-actions style="padding: 16px">
               <v-row dense justify="space-around">
                 <v-btn
                   small
@@ -69,17 +69,19 @@
                 <v-spacer></v-spacer>
                 <v-btn
                   small
-                  color="primary"
+                  color="warning"
                   dark
                   outlined
-                  :disabled="
-                    $store.state.role != 'Admin' &&
+                  :v-show="
+                    !(
+                      $store.state.role != 'Admin' &&
                       $store.state.role != 'PI' &&
                       $store.state.role != 'PostDoc' &&
                       $store.state.role != 'GradStudent' &&
                       $store.state.role != 'Lab manager'
+                    )
                   "
-                  @click.stop="deleteChild(child)"
+                  @click.stop="deleteChild(child, index)"
                   ><v-icon>delete</v-icon>Delete</v-btn
                 >
                 <v-spacer></v-spacer>
@@ -264,7 +266,7 @@
             </v-form>
           </v-card-text>
 
-          <v-card-actions style="padding: 16px;">
+          <v-card-actions style="padding: 16px">
             <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
@@ -311,13 +313,8 @@
 
           <v-stepper-items>
             <v-stepper-content step="1">
-              <v-row
-                style="height: 650px;"
-                align="start"
-                justify="center"
-                dense
-              >
-                <v-card outlined style="height: 650px;" width="90%">
+              <v-row style="height: 650px" align="start" justify="center" dense>
+                <v-card outlined style="height: 650px" width="90%">
                   <v-row style="height: 100px" align="center" justify="start">
                     <v-col cols="12" md="3" class="text-left">
                       <div class="title" style="padding-left: 8px">
@@ -403,7 +400,7 @@
                   </v-col>
                 </v-row> -->
                   <v-divider style="margin-bottom: 16px"></v-divider>
-                  <div style="height: 290px; overflow-y: scroll !important;">
+                  <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies
                       ref="extraStudies"
                       v-for="(appointment, index) in appointments"
@@ -439,9 +436,7 @@
                     style="height: 100px"
                   >
                     <v-col cols="12" md="4" class="text-left">
-                      <h4 class="text-left">
-                        Additional appointment(s) for:
-                      </h4>
+                      <h4 class="text-left">Additional appointment(s) for:</h4>
                     </v-col>
                     <!-- <v-col cols="12" md="2">
                             <v-btn
@@ -498,7 +493,7 @@
               <v-row
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
               >
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
@@ -507,7 +502,7 @@
                     color="primary"
                     :disabled="
                       !(studyDateTime || skipStudyDateTimeStatus) ||
-                        !appointments[0].FK_Study
+                      !appointments[0].FK_Study
                     "
                     @click="continue12()"
                   >
@@ -530,13 +525,8 @@
               </v-row>
             </v-stepper-content>
             <v-stepper-content step="2">
-              <v-row
-                style="height: 700px;"
-                align="start"
-                justify="center"
-                dense
-              >
-                <v-card outlined style="height: 700px;" width="90%">
+              <v-row style="height: 700px" align="start" justify="center" dense>
+                <v-card outlined style="height: 700px" width="90%">
                   <Email
                     ref="Email"
                     :dialog="emailDialog"
@@ -551,7 +541,7 @@
               <v-row
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
               >
                 <v-col cols="12" md="2">
                   <v-tooltip top>
@@ -577,8 +567,8 @@
                     @click="continue23()"
                     :disabled="
                       !currentFamily.Email ||
-                        this.skipConfirmationEmailStatus ||
-                        !this.$store.state.labEmailStatus
+                      this.skipConfirmationEmailStatus ||
+                      !this.$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -590,8 +580,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                        !!currentFamily.Email &&
-                        !this.skipConfirmationEmailStatus
+                      !!currentFamily.Email &&
+                      !this.skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -619,7 +609,7 @@
               <v-row
                 justify="space-between"
                 align="center"
-                style="padding: 8px;"
+                style="padding: 8px"
                 dense
               >
                 <v-col>
@@ -870,9 +860,7 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1286,7 +1274,7 @@ export default {
       this.dialogChild = true;
     },
 
-    async deleteChild(currentChild) {
+    async deleteChild(currentChild, index) {
       if (
         await this.$refs.confirmD.open(
           "Beep!",
@@ -1297,6 +1285,8 @@ export default {
           await child.delete(currentChild);
 
           alert("The child is removed from the database.");
+
+          this.Children.splice(index, 1);
         } catch (error) {
           console.log(error);
         }
@@ -1329,8 +1319,6 @@ export default {
             await child.update(this.editedItem);
 
             Object.assign(this.Children[this.editedIndex], this.editedItem);
-
-            console.log("Child information updated!");
 
             this.$refs.formChild.resetValidation();
 
@@ -1687,9 +1675,7 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment()
-          .add(60, "days")
-          .toISOString(true);
+        return moment().add(60, "days").toISOString(true);
       }
     },
   },
