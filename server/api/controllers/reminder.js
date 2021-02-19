@@ -526,8 +526,8 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
 
-    const TH = "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
-    const TH2nd = "style = 'background: lightgreen; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 24;'"
+    const TH = "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'"
+    const TH2nd = "style = 'background: lightgreen; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'"
     const TRO = "<td style = 'background: white !important; border: 1px solid #999; padding: 0.5rem; text-align: center; '>"
     const TRE = "<td style = 'background: #e8e7e1 !important; border: 1px solid #999; padding: 0.5rem; text-align: center;'>"
 
