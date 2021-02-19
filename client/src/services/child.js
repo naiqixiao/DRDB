@@ -4,7 +4,7 @@ import store from "@/store";
 export default {
   create(childInfo) {
     childInfo.User = {
-      
+
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -19,7 +19,7 @@ export default {
   },
   update(childInfo) {
     childInfo.User = {
-      
+
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName
@@ -28,7 +28,6 @@ export default {
   },
   delete(childInfo) {
     childInfo.User = {
-      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

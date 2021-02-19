@@ -69,6 +69,23 @@
                 <v-spacer></v-spacer>
                 <v-btn
                   small
+                  color="primary"
+                  dark
+                  outlined
+                  :disabled="
+                    $store.state.role != 'Admin' &&
+                      $store.state.role != 'PI' &&
+                      $store.state.role != 'PostDoc' &&
+                      $store.state.role != 'GradStudent' &&
+                      $store.state.role != 'Lab manager'
+                  "
+                  @click.stop="deleteChild(child)"
+                  ><v-icon>delete</v-icon>Delete</v-btn
+                >
+                <v-spacer></v-spacer>
+
+                <v-btn
+                  small
                   dark
                   outlined
                   color="primary"
@@ -265,6 +282,7 @@
       </v-dialog>
     </div>
 
+    <ConfirmDlg ref="confirmD" />
     <div>
       <v-dialog
         v-model="dialogSchedule"
@@ -272,7 +290,6 @@
         :retain-focus="false"
         persistent
       >
-        <ConfirmDlg ref="confirmD" />
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -1267,6 +1284,23 @@ export default {
       this.editedItem = Object.assign({}, child);
 
       this.dialogChild = true;
+    },
+
+    async deleteChild(currentChild) {
+      if (
+        await this.$refs.confirmD.open(
+          "Beep!",
+          "All the participation record of this child will be removed.<br><br>Are you sure about removing this child?"
+        )
+      ) {
+        try {
+          await child.delete(currentChild);
+
+          alert("The child is removed from the database.");
+        } catch (error) {
+          console.log(error);
+        }
+      }
     },
 
     birthday(DoB) {
