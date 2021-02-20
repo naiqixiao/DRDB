@@ -202,9 +202,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
             }
           ]
         },
-        include: [
-          model.child
-        ]
+        include: [model.child],
       });
 
       if (!!family) {
