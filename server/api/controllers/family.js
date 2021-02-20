@@ -155,7 +155,7 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 // batch upload families
 exports.batchCreate0 = asyncHandler(async (req, res) => {
   try {
-    var newFamily = req.body;
+    var newFamilies = req.body;
 
     const alphabet = "abcdefghijk".split("");
 
@@ -164,23 +164,23 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
     var nOfSkip = 0;
     var nOfAdded = 0;
 
-    for (var i = 0; i < newFamily.length; i++) {
+    for (var i = 0; i < newFamilies.length; i++) {
       // check whether the family exists
 
       var child = {};
-      child.Name = newFamily[i].Child_Last_Name
-        ? newFamily[i].Child_First_Name + " " + newFamily[i].Child_Last_Name
-        : newFamily[i].Child_First_Name;
-      child.Sex = newFamily[i].Sex;
-      child.DoB = newFamily[i].DoB;
-      child.Age = newFamily[i].Age;
-      child.Note = newFamily[i].Notes;
-      child.BirthWeight = newFamily[i].Birthweight;
-      child.Gestation = newFamily[i].Gestation;
-      child.RecruitmentMethod = newFamily[i].RecruitmentMethod;
+      child.Name = newFamilies[i].Child_Last_Name
+        ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
+        : newFamilies[i].Child_First_Name;
+      child.Sex = newFamilies[i].Sex;
+      child.DoB = newFamilies[i].DoB;
+      child.Age = newFamilies[i].Age;
+      child.Note = newFamilies[i].Notes;
+      child.BirthWeight = newFamilies[i].Birthweight;
+      child.Gestation = newFamilies[i].Gestation;
+      child.RecruitmentMethod = newFamilies[i].RecruitmentMethod;
 
-      const phone = newFamily[i].Phone;
-      const email = newFamily[i].Email;
+      const phone = newFamilies[i].Phone;
+      const email = newFamilies[i].Email;
 
       // var searchString = {};
 
@@ -244,7 +244,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
           });
         }
       } else {
-        family = await model.family.create(newFamily[i]);
+        family = await model.family.create(newFamilies[i]);
         child.FK_Family = family.id;
         child.IdWithinFamily = IdWithinFamily = alphabet[0];
 
@@ -315,10 +315,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       nOfAdded
     });
   } catch (error) {
-    throw {
-      error,
-      nOfAdded
-    };
+    throw error
   }
 });
 
