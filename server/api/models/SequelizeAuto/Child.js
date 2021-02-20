@@ -99,7 +99,7 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true
 		},
 		Gestation: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.DECIMAL,
 			allowNull: true
 		}
 	}, {

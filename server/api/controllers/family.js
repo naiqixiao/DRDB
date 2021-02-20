@@ -159,6 +159,10 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
     const alphabet = "abcdefghijk".split("");
 
+    var doubleCheckList = [];
+    var skipImport = false;
+    var nOfSkip = 0;
+
     for (var i = 0; i < newFamily.length; i++) {
       // check whether the family exists
 
@@ -177,16 +181,30 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       const phone = newFamily[i].Phone;
       const email = newFamily[i].Email;
 
-      var searchString = {};
+      // var searchString = {};
 
-      if (phone) {
-        searchString.Phone = phone;
-      }
-      if (email) {
-        searchString.Email = email;
-      }
+      // if (phone) {
+      //   searchString.Phone = phone;
+      // }
+      // if (email) {
+      //   searchString.Email = email;
+      // }
 
-      var family = await model.family.findOne({ where: searchString });
+      var family = await model.family.findOne({
+        where: {
+          [Op.or]: [
+            {
+              'Phone': phone
+            },
+            {
+              "Email": email
+            }
+          ]
+        },
+        include: [
+          model.child
+        ]
+      });
 
       if (!!family) {
         // when the family exists in the database, add the children to this family.
@@ -197,15 +215,33 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         //   child.FK_Family = family.id;
         // });
 
-        child.FK_Family = family.id;
+        family.Children.forEach(existingChild => {
+          if (existingChild.DoB == child.DoB) {
 
-        // if any of the children was already imported to the database, would the child be skipped?
-        await model.child.create(child);
+            if (existingChild.Name == child.Name) {
+              skipImport = true
+              nOfSkip += 1
+            } else {
+              doubleCheckList.push({
+                "FK_Family": family.id,
+                "childID": existingChild.id
+              })
+            }
+          }
+        })
 
-        family = await model.family.findOne({
-          where: { id: family.id },
-          include: [model.child],
-        });
+        if (!skipImport) {
+
+          child.FK_Family = family.id;
+
+          // if any of the children was already imported to the database, would the child be skipped?
+          await model.child.create(child);
+
+          family = await model.family.findOne({
+            where: { id: family.id },
+            include: [model.child],
+          });
+        }
       } else {
         family = await model.family.create(newFamily[i]);
         child.FK_Family = family.id;
@@ -219,7 +255,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       }
 
       // update sibbling table & assign child id within this family
-      if (family.Children.length > 1) {
+      if (family.Children.length > 1 && !skipImport) {
         var Children = family.Children;
 
         var siblings = [];
@@ -263,9 +299,14 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
         await model.sibling.bulkCreate(filteredSiblings);
       }
+
+      skipImport = false;
     }
 
-    res.status(200).send("new family imported!");
+    res.status(200).send({
+      doubleCheckList,
+      nOfSkip
+    });
   } catch (error) {
     throw error;
   }
