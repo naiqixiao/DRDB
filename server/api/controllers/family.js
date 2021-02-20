@@ -162,6 +162,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
     var doubleCheckList = [];
     var skipImport = false;
     var nOfSkip = 0;
+    var nOfAdded = 0;
 
     for (var i = 0; i < newFamily.length; i++) {
       // check whether the family exists
@@ -301,15 +302,23 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         await model.sibling.bulkCreate(filteredSiblings);
       }
 
-      skipImport = false;
+      if (skipImport) {
+        skipImport = false;
+      } else {
+        nOfAdded += 1
+      }
     }
 
     res.status(200).send({
       doubleCheckList,
-      nOfSkip
+      nOfSkip,
+      nOfAdded
     });
   } catch (error) {
-    throw error;
+    throw {
+      error,
+      nOfAdded
+    };
   }
 });
 
