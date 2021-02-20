@@ -168,10 +168,12 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       // check whether the family exists
 
       var child = {};
-      child.Name = newFamilies[i].Child_Last_Name
-        ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
-        : newFamilies[i].Child_First_Name;
+      child.Name = newFamilies[i].Name;
+      // child.Name = newFamilies[i].Child_Last_Name
+      //   ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
+      //   : newFamilies[i].Child_First_Name;
       child.Sex = newFamilies[i].Sex;
+      child.Gender = newFamilies[i].Gender;
       child.DoB = newFamilies[i].DoB;
       child.Age = newFamilies[i].Age;
       child.Note = newFamilies[i].Notes;
