@@ -67,11 +67,6 @@ module.exports = function(sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
-		RecruitmentMethod: {
-			type: DataTypes.STRING(100),
-			allowNull: true,
-			defaultValue: "Hospital"
-		},
 		BirthWeight: {
 			type: DataTypes.INTEGER,
 			allowNull: true
@@ -98,8 +93,17 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING(100),
 			allowNull: true
 		},
+		RecruitmentMethod: {
+			type: DataTypes.STRING(100),
+			allowNull: true,
+			defaultValue: "Hospital"
+		},
 		Gestation: {
 			type: DataTypes.DECIMAL,
+			allowNull: true
+		},
+		Gender: {
+			type: DataTypes.STRING(1),
 			allowNull: true
 		}
 	}, {

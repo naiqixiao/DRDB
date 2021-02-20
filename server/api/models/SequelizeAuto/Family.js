@@ -52,6 +52,11 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.TEXT,
 			allowNull: true
 		},
+		AutismHistory: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			defaultValue: 0
+		},
 		Vehicle: {
 			type: DataTypes.TEXT,
 			allowNull: true
