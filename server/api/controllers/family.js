@@ -236,7 +236,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
           // if any of the children was already imported to the database, would the child be skipped?
           await model.child.create(child);
 
-          family = await model.family.findOne({
+          newFamily = await model.family.findOne({
             where: { id: family.id },
             include: [model.child],
           });
@@ -254,50 +254,56 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         });
       }
 
+      // console.log('checkpoint')
+      // console.log({ skipImport })
+
       // update sibbling table & assign child id within this family
-      if (newFamily.Children.length > 1 && !skipImport) {
-        var Children = family.Children;
+      if (!skipImport) {
 
-        var siblings = [];
+        if (newFamily.Children.length > 1) {
+          var Children = newFamily.Children;
 
-        var children = [];
+          var siblings = [];
 
-        for (var j = 0; j < Children.length; j++) {
-          var childId = Children[j].id;
+          var children = [];
 
-          Children.forEach((sibling) => {
-            if (sibling.id != childId) {
-              siblings.push({ FK_Child: childId, Sibling: sibling.id });
+          for (var j = 0; j < Children.length; j++) {
+            var childId = Children[j].id;
+
+            Children.forEach((sibling) => {
+              if (sibling.id != childId) {
+                siblings.push({ FK_Child: childId, Sibling: sibling.id });
+              }
+            });
+
+            children.push(childId);
+
+            // assign child id within each family
+            if (Children[j].IdWithinFamily == null) {
+              Children[j].IdWithinFamily = alphabet[j];
+
+              await model.child.update(
+                { IdWithinFamily: alphabet[j] },
+                {
+                  where: { id: childId },
+                }
+              );
             }
+          }
+
+          existingSibling = await model.sibling.findAll({
+            attributes: ["FK_Child", "Sibling"],
+            where: {
+              FK_Child: { [Op.in]: children },
+            },
           });
 
-          children.push(childId);
+          var filteredSiblings = siblings.filter(function (value) {
+            return !containsObject(value, existingSibling);
+          });
 
-          // assign child id within each family
-          if (Children[j].IdWithinFamily == null) {
-            Children[j].IdWithinFamily = alphabet[j];
-
-            await model.child.update(
-              { IdWithinFamily: alphabet[j] },
-              {
-                where: { id: childId },
-              }
-            );
-          }
+          await model.sibling.bulkCreate(filteredSiblings);
         }
-
-        existingSibling = await model.sibling.findAll({
-          attributes: ["FK_Child", "Sibling"],
-          where: {
-            FK_Child: { [Op.in]: children },
-          },
-        });
-
-        var filteredSiblings = siblings.filter(function (value) {
-          return !containsObject(value, existingSibling);
-        });
-
-        await model.sibling.bulkCreate(filteredSiblings);
       }
 
       if (skipImport) {
