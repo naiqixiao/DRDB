@@ -216,7 +216,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         //   child.FK_Family = family.id;
         // });
 
-        if ('DoB' in child) {
+        if ('DoB' in newFamilies[i]) {
 
           family.Children.forEach(existingChild => {
             if (existingChild.DoB == child.DoB) {
@@ -249,9 +249,10 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
           skipImport = true
         }
       } else {
+
         family = await model.family.create(newFamilies[i]);
 
-        if ('DoB' in child) {
+        if ('DoB' in newFamilies[i]) {
 
           child.FK_Family = family.id;
           child.IdWithinFamily = IdWithinFamily = alphabet[0];
