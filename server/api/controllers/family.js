@@ -246,16 +246,17 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         family = await model.family.create(newFamily[i]);
         child.FK_Family = family.id;
         child.IdWithinFamily = IdWithinFamily = alphabet[0];
+
         await model.child.create(child);
 
-        family = await model.family.findOne({
+        newFamily = await model.family.findOne({
           where: { id: family.id },
           include: [model.child],
         });
       }
 
       // update sibbling table & assign child id within this family
-      if (family.Children.length > 1 && !skipImport) {
+      if (newFamily.Children.length > 1 && !skipImport) {
         var Children = family.Children;
 
         var siblings = [];
