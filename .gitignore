@@ -8753,3 +8753,4 @@ server/server.key
 client/src/components/ScheduleTable_old.vue
 server/api/controllers/reminder copy.js
 server/api/controllers/reminder_test.js
+.vscode/settings.json
