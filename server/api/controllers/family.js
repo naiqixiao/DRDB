@@ -250,7 +250,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
         await model.child.create(child);
 
-        newFamily = await model.family.findOne({
+        var newFamily = await model.family.findOne({
           where: { id: family.id },
           include: [model.child],
         });
