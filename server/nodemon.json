@@ -1,6 +1,8 @@
 {
-"env": {
-    "JWT_KEY": "secret"
-}
-
+    "env": {
+        "JWT_KEY": "secret"
+    },
+    "ignore": [
+        "api/realtimeUpdate/*.json"
+    ]
 }

@@ -35,7 +35,7 @@
 
     <ConfirmDlg ref="confirmD" />
 
-    <v-row justify="space-around" style="height: 620px;">
+    <v-row justify="space-around" style="height: 620px">
       <v-col cols="12" md="4">
         <v-row dense>
           <v-col cols="12" md="12">
@@ -86,7 +86,7 @@
       <v-col cols="12" md="5">
         <v-row justify="space-around">
           <v-col cols="12" md="9">
-            <h2 v-show="contactedByOthers" style="color: red;">
+            <h2 v-show="contactedByOthers" style="color: red">
               You're late. Someone just called this family...
             </h2>
           </v-col>
@@ -248,7 +248,7 @@
                 </v-row>
               </v-form>
             </v-card-text>
-            <v-card-actions style="padding: 16px;">
+            <v-card-actions style="padding: 16px">
               <v-row justify="space-between">
                 <v-col md="4"></v-col>
                 <v-col md="2">
@@ -345,14 +345,15 @@
               :items="Responses"
               v-model="response"
               :label="
-                currentChild.scheduled
+                currentChild.scheduled || contactedByOthers
                   ? 'This family is already scheduled.'
                   : 'Parents\'\ response'
               "
               :disabled="
                 !currentChild.id ||
                   currentChild.scheduled ||
-                  !$store.state.labEmailStatus
+                  !$store.state.labEmailStatus ||
+                  contactedByOthers
               "
               class="textfield-family"
               background-color="textbackground"
@@ -499,7 +500,7 @@
                 </v-form>
               </v-card-text>
 
-              <v-card-actions style="padding: 16px;">
+              <v-card-actions style="padding: 16px">
                 <v-row justify="space-between">
                   <v-col md="4"></v-col>
                   <v-col md="2">
@@ -546,14 +547,14 @@
               <v-stepper-items>
                 <v-stepper-content step="1">
                   <v-row
-                    style="height: 650px;"
+                    style="height: 650px"
                     align="start"
                     justify="center"
                     dense
                   >
-                    <v-card outlined style="height: 650px;" width="90%">
+                    <v-card outlined style="height: 650px" width="90%">
                       <v-row
-                        style="height: 100px;"
+                        style="height: 100px"
                         align="center"
                         justify="start"
                         dense
@@ -638,9 +639,7 @@
                         </v-col>
                       </v-row>
                       <v-divider style="margin-bottom: 16px"></v-divider>
-                      <div
-                        style="height: 290px; overflow-y: scroll !important;"
-                      >
+                      <div style="height: 290px; overflow-y: scroll !important">
                         <ExtraStudies
                           v-for="(appointment, index) in appointments"
                           :key="appointment.index"
@@ -738,7 +737,7 @@
                   <v-row
                     justify="space-between"
                     align="center"
-                    style="padding: 8px;"
+                    style="padding: 8px"
                   >
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
@@ -776,12 +775,12 @@
 
                 <v-stepper-content step="2">
                   <v-row
-                    style="height: 700px;"
+                    style="height: 700px"
                     align="start"
                     justify="center"
                     dense
                   >
-                    <v-card outlined style="height: 700px;" width="90%">
+                    <v-card outlined style="height: 700px" width="90%">
                       <Email
                         ref="Email"
                         :dialog="emailDialog"
@@ -796,7 +795,7 @@
                   <v-row
                     justify="space-between"
                     align="center"
-                    style="padding: 8px;"
+                    style="padding: 8px"
                   >
                     <v-col cols="12" md="2">
                       <v-tooltip top>
@@ -905,7 +904,7 @@
                     @click="NoMoreContact()"
                     :disabled="!currentChild.id"
                   >
-                    <v-icon color="warning" style="padding-right: 5px;"
+                    <v-icon color="warning" style="padding-right: 5px"
                       >pan_tool</v-icon
                     >
                   </v-btn>
@@ -949,6 +948,8 @@ import family from "@/services/family";
 
 import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
+
+import RTU from "@/services/realtimeUpdate";
 
 import moment from "moment";
 
@@ -1126,9 +1127,11 @@ export default {
     async searchChild() {
       this.$store.dispatch("setLoadingStatus", true);
 
-      // if (!this.currentChild.scheduled) {
-      //   this.socket.emit("remove family", this.currentChild.FK_Family);
-      // }
+      if (!this.currentChild.scheduled && this.currentChild.FK_Family) {
+        // this.socket.emit("remove family", this.currentChild.FK_Family);
+        const results = await RTU.remove(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
+      }
 
       var queryString = {};
 
@@ -1198,8 +1201,10 @@ export default {
             this.currentVisitedFamilies.includes(this.currentChild.FK_Family)
           ) {
             this.currentChild.scheduled = true;
-          // } else {
-          //   this.socket.emit("add family", this.currentChild.FK_Family);
+          } else {
+            // this.socket.emit("add family", this.currentChild.FK_Family);
+            const results = await RTU.add(this.currentChild.FK_Family);
+            this.currentVisitedFamilies = results.data;
           }
 
           alert(
@@ -1959,10 +1964,12 @@ export default {
       }
     },
 
-    nextPage() {
-      // if (!this.currentChild.scheduled && !this.contactedByOthers) {
-      //   this.socket.emit("remove family", this.currentChild.FK_Family);
-      // }
+    async nextPage() {
+      if (!this.currentChild.scheduled && !this.contactedByOthers) {
+        //   this.socket.emit("remove family", this.currentChild.FK_Family);
+        const results = await RTU.remove(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
+      }
 
       this.page += 1;
       this.currentChild = this.Children[this.page - 1];
@@ -1972,14 +1979,18 @@ export default {
         this.contactedByOthers = true;
       } else {
         // this.socket.emit("add family", this.currentChild.FK_Family);
+        const results = await RTU.add(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
         this.contactedByOthers = false;
       }
     },
 
-    previousPage() {
-      // if (!this.currentChild.scheduled && !this.contactedByOthers) {
-      //   this.socket.emit("remove family", this.currentChild.FK_Family);
-      // }
+    async previousPage() {
+      if (!this.currentChild.scheduled && !this.contactedByOthers) {
+        //   this.socket.emit("remove family", this.currentChild.FK_Family);
+        const results = await RTU.remove(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
+      }
 
       this.page -= 1;
       this.currentChild = this.Children[this.page - 1];
@@ -1989,6 +2000,8 @@ export default {
         this.contactedByOthers = true;
       } else {
         // this.socket.emit("add family", this.currentChild.FK_Family);
+        const results = await RTU.add(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
         this.contactedByOthers = false;
       }
     },
@@ -2146,33 +2159,38 @@ export default {
     },
   },
 
-  mounted: function() {
+  mounted: async function() {
     this.searchStudies();
     // this.socket.on("familyList update", (familyList) => {
     //   this.currentVisitedFamilies = familyList;
     //   console.log(this.currentVisitedFamilies);
     // });
+    const results = await RTU.get();
+    this.currentVisitedFamilies = results.data;
+    // console.log(this.currentVisitedFamilies);
   },
 
   created: function() {
     // this.socket = io(backendURL);
-
     // console.log(backendURL);
   },
 
   beforeDestroy: function() {
     // this.socket.emit("disconnect");
+    if (
+      !this.currentChild.scheduled &&
+      !this.contactedByOthers &&
+      this.currentChild.FK_Family
+    ) {
+      // console.log("it is about to close!");
+      // console.log(this.currentChild.FK_Family);
+      //   this.socket.emit("remove family", this.currentChild.FK_Family);
+      RTU.remove(this.currentChild.FK_Family);
+      // this.currentVisitedFamilies = results.data;
+    }
   },
 
   watch: {
-    // $route(to, from) {
-    //   console.log(to)
-    //   console.log(from)
-    //   if (to !== from) {
-    //     this.socket.emit("disconnect");
-    //   }
-    // },
-
     dialogChildEdit(val) {
       val || this.closeChild();
     },

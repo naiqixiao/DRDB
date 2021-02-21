@@ -48,6 +48,7 @@ const extAPIRoutes = require("./api/routes/externalAPIs");
 const feedbackRoutes = require("./api/routes/feedback");
 
 const reminderRoutes = require("./api/routes/reminder");
+const rtuRoutes = require("./api/routes/RTU");
 
 app.use("/api/user", userRoutes);
 
@@ -73,6 +74,7 @@ app.use("/api/extAPIs", extAPIRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
 app.use("/api/reminder", reminderRoutes);
+app.use("/api/RTU", rtuRoutes);
 
 
 // Error handling

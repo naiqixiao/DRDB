@@ -82,6 +82,14 @@ cron.schedule('15 0 * * *', async (req, res) => {
 
 });
 
+const rtuController = require("./api/controllers/RTU");
+
+cron.schedule('35 0 * * *', () => {
+
+  rtuController.reset();
+
+});
+
 const config = require("./config/general");
 
 const options = {

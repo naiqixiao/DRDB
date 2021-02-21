@@ -2,7 +2,7 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const fs = require("fs");
+// const fs = require("fs");
 const moment = require("moment");
 const log = require("../controllers/log");
 
