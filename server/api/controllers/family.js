@@ -179,6 +179,8 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       child.Note = newFamilies[i].Notes;
       child.BirthWeight = newFamilies[i].Birthweight;
       child.Gestation = newFamilies[i].Gestation;
+      child.HearingLoss = newFamilies[i].HearingLoss;
+      child.VisionLoss = newFamilies[i].VisionLoss;
       child.RecruitmentMethod = newFamilies[i].RecruitmentMethod;
 
       const phone = newFamilies[i].Phone;
