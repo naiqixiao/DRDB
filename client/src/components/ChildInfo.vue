@@ -1469,16 +1469,20 @@ export default {
     AgeFormated(DoB) {
       var formated = "DoB is not available.";
       if (DoB) {
-        var years = moment().diff(DoB, "years");
-        var months = moment().diff(DoB, "months", true);
+        if (moment().diff(DoB, "days") > 0) {
+          var years = moment().diff(DoB, "years");
+          var months = moment().diff(DoB, "months", true);
 
-        months = months - years * 12;
-        months = months.toFixed(1);
+          months = months - years * 12;
+          months = months.toFixed(1);
 
-        var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
-        var M =
-          months > 0 ? months + (months === 1 ? " month " : " months ") : "";
-        formated = Y + M;
+          var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
+          var M =
+            months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+          formated = Y + M;
+        } else {
+          formated = "Not born yet.";
+        }
       }
       return formated;
     },

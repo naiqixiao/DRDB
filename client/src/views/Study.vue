@@ -801,8 +801,8 @@ export default {
     },
 
     AgeFormated2(Age) {
-      var formated = "";
-      if (Age) {
+      var formated = "Not born yet.";
+      if (Age > 0) {
         var years = Math.floor(Age / 12);
         var months = Age % 12;
         // months = months.toFixed(1);

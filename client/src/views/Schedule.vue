@@ -351,9 +351,9 @@
               "
               :disabled="
                 !currentChild.id ||
-                  currentChild.scheduled ||
-                  !$store.state.labEmailStatus ||
-                  contactedByOthers
+                currentChild.scheduled ||
+                !$store.state.labEmailStatus ||
+                contactedByOthers
               "
               class="textfield-family"
               background-color="textbackground"
@@ -573,7 +573,7 @@
                             @click:append="datePicker = true"
                             :disabled="
                               this.response != 'Confirmed' ||
-                                this.skipStudyDateTimeStatus
+                              this.skipStudyDateTimeStatus
                             "
                             hide-details
                             dense
@@ -587,7 +587,7 @@
                             label="Study time"
                             :disabled="
                               this.response != 'Confirmed' ||
-                                this.skipStudyDateTimeStatus
+                              this.skipStudyDateTimeStatus
                             "
                             hide-details
                             dense
@@ -705,7 +705,7 @@
                             @click="newAppointment(child)"
                             :disabled="
                               potentialStudies(child).selectableStudies.length <
-                                1
+                              1
                             "
                             >{{ child.Name.split(" ")[0] }}</v-btn
                           >
@@ -821,8 +821,8 @@
                         @click="continue23()"
                         :disabled="
                           !currentFamily.Email ||
-                            this.skipConfirmationEmailStatus ||
-                            !this.$store.state.labEmailStatus
+                          this.skipConfirmationEmailStatus ||
+                          !this.$store.state.labEmailStatus
                         "
                       >
                         <v-icon dark left v-show="emailSent"
@@ -834,8 +834,8 @@
                       <v-btn
                         :disabled="
                           !scheduleNextPage &&
-                            !!currentFamily.Email &&
-                            !this.skipConfirmationEmailStatus
+                          !!currentFamily.Email &&
+                          !this.skipConfirmationEmailStatus
                         "
                         @click="scheduleNextStep"
                         >{{
@@ -1430,9 +1430,7 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1939,16 +1937,20 @@ export default {
         formated = "DoB is not available.";
       }
       if (DoB) {
-        var years = moment().diff(DoB, "years");
-        var months = moment().diff(DoB, "months", true);
+        if (moment().diff(DoB, "days") > 0) {
+          var years = moment().diff(DoB, "years");
+          var months = moment().diff(DoB, "months", true);
 
-        months = months - years * 12;
-        months = months.toFixed(1);
+          months = months - years * 12;
+          months = months.toFixed(1);
 
-        var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
-        var M =
-          months > 0 ? months + (months === 1 ? " month " : " months ") : "";
-        formated = Y + M;
+          var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
+          var M =
+            months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+          formated = Y + M;
+        } else {
+          formated = "Not born yet.";
+        }
       }
       return formated;
     },
@@ -2031,9 +2033,7 @@ export default {
         var updatedFamilyInfo = {
           id: this.currentFamily.id,
           NextContactNote: "Parents asked to be removed from the database.",
-          LastContactDate: moment()
-            .startOf("day")
-            .format("YYYY-MM-DD"),
+          LastContactDate: moment().startOf("day").format("YYYY-MM-DD"),
           NoMoreContact: true,
         };
 
@@ -2131,7 +2131,7 @@ export default {
       }
     },
 
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment()
           .add(1, "days")
@@ -2142,9 +2142,7 @@ export default {
             )
           )
       ) {
-        return moment()
-          .add(1, "days")
-          .toISOString(true);
+        return moment().add(1, "days").toISOString(true);
       } else {
         return moment(this.currentChild.DoB, "YYYY-M-D")
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -2152,14 +2150,14 @@ export default {
       }
     },
 
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.currentChild.DoB, "YYYY-M-D")
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
   },
 
-  mounted: async function() {
+  mounted: async function () {
     this.searchStudies();
     // this.socket.on("familyList update", (familyList) => {
     //   this.currentVisitedFamilies = familyList;
@@ -2170,12 +2168,12 @@ export default {
     // console.log(this.currentVisitedFamilies);
   },
 
-  created: function() {
+  created: function () {
     // this.socket = io(backendURL);
     // console.log(backendURL);
   },
 
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     // this.socket.emit("disconnect");
     if (
       !this.currentChild.scheduled &&

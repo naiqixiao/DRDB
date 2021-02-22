@@ -19,13 +19,18 @@ export default {
           (1000 * 60 * 60 * 24)
       );
 
-      var years = Math.floor(Age / 365);
-      var months = (Age % 365) / 30.5;
-      months = months.toFixed(1);
-      // var days = Math.floor((Age % 365) % 30.5);
-      var Y = years > 0 ? years + " Y " : "";
-      var M = months + " M";
-      var formated = Y + M;
+      var formated = "Not born yet.";
+
+      if (Age > 0) {
+        var years = Math.floor(Age / 365);
+        var months = (Age % 365) / 30.5;
+        months = months.toFixed(1);
+        // var days = Math.floor((Age % 365) % 30.5);
+        var Y = years > 0 ? years + " y " : "";
+        var M = months + " m";
+        formated = Y + M;
+      }
+
       return formated;
     },
   },
