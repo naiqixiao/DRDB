@@ -99,44 +99,44 @@ const options = {
   }
 };
 
-// const io = require("socket.io")(server, options);
+const io = require("socket.io")(server, options);
 
-// io.on("connection", (socket) => {
+io.on("connection", (socket) => {
 
-//   console.log(socket.id + '  connected!')
+  console.log(socket.id + '  connected!')
 
-//   if (!clientList.includes(socket.id)) {
-//     clientList.push(socket.id)
-//   }
+  if (!clientList.includes(socket.id)) {
+    clientList.push(socket.id)
+  }
 
-//   socket.emit('familyList update', familyList)
+  socket.emit('familyList update', familyList)
 
-//   socket.on('add family', familyId => {
+  socket.on('add family', familyId => {
 
-//     if (!familyList.includes(familyId)) {
-//       familyList.push(familyId)
-//       io.emit('familyList update', familyList)
-//       // console.log(familyList)
-//     }
-//     // console.log('family added!')
-//   })
+    if (!familyList.includes(familyId)) {
+      familyList.push(familyId)
+      io.emit('familyList update', familyList)
+      // console.log(familyList)
+    }
+    // console.log('family added!')
+  })
 
-//   socket.on('remove family', familyId => {
+  socket.on('remove family', familyId => {
 
-//     if (familyList.includes(familyId)) {
-//       const index = familyList.indexOf(familyId)
-//       familyList.splice(index, 1)
-//       io.emit('familyList update', familyList)
-//     }
-//   })
+    if (familyList.includes(familyId)) {
+      const index = familyList.indexOf(familyId)
+      familyList.splice(index, 1)
+      io.emit('familyList update', familyList)
+    }
+  })
 
-//   socket.on("disconnect", () => {
-//     console.log(socket.id + "user disconnected");
-//     const index = clientList.indexOf(socket.id)
-//     clientList.splice(index, 1)
-//     if (clientList.length == 0) {
-//       console.log('no body left.')
-//       familyList = [];
-//     }
-//   });
-// });
+  socket.on("disconnect", () => {
+    console.log(socket.id + "user disconnected");
+    const index = clientList.indexOf(socket.id)
+    clientList.splice(index, 1)
+    if (clientList.length == 0) {
+      console.log('no body left.')
+      familyList = [];
+    }
+  });
+});

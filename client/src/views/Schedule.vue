@@ -969,8 +969,8 @@ import Page from "@/components/Page";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
 
-// import { io } from "socket.io-client";
-// import { backendURL } from "../plugins/variables";
+import { io } from "socket.io-client";
+import { backendURL } from "../plugins/variables";
 
 export default {
   components: {
@@ -1096,7 +1096,7 @@ export default {
         SecondaryExperimenter: [],
       },
       scheduleNotes: "",
-      // socket: {},
+      socket: {},
       currentVisitedFamilies: [],
       contactedByOthers: false,
       loadingStatus: false,
@@ -1128,7 +1128,7 @@ export default {
       this.$store.dispatch("setLoadingStatus", true);
 
       if (!this.currentChild.scheduled && this.currentChild.FK_Family) {
-        // this.socket.emit("remove family", this.currentChild.FK_Family);
+        this.socket.emit("remove family", this.currentChild.FK_Family);
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
@@ -1202,7 +1202,7 @@ export default {
           ) {
             this.currentChild.scheduled = true;
           } else {
-            // this.socket.emit("add family", this.currentChild.FK_Family);
+            this.socket.emit("add family", this.currentChild.FK_Family);
             const results = await RTU.add(this.currentChild.FK_Family);
             this.currentVisitedFamilies = results.data;
           }
@@ -1968,7 +1968,7 @@ export default {
 
     async nextPage() {
       if (!this.currentChild.scheduled && !this.contactedByOthers) {
-        //   this.socket.emit("remove family", this.currentChild.FK_Family);
+          this.socket.emit("remove family", this.currentChild.FK_Family);
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
@@ -1980,7 +1980,7 @@ export default {
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
       } else {
-        // this.socket.emit("add family", this.currentChild.FK_Family);
+        this.socket.emit("add family", this.currentChild.FK_Family);
         const results = await RTU.add(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
         this.contactedByOthers = false;
@@ -1989,7 +1989,7 @@ export default {
 
     async previousPage() {
       if (!this.currentChild.scheduled && !this.contactedByOthers) {
-        //   this.socket.emit("remove family", this.currentChild.FK_Family);
+          this.socket.emit("remove family", this.currentChild.FK_Family);
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
@@ -2001,7 +2001,7 @@ export default {
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
       } else {
-        // this.socket.emit("add family", this.currentChild.FK_Family);
+        this.socket.emit("add family", this.currentChild.FK_Family);
         const results = await RTU.add(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
         this.contactedByOthers = false;
@@ -2159,22 +2159,22 @@ export default {
 
   mounted: async function () {
     this.searchStudies();
-    // this.socket.on("familyList update", (familyList) => {
-    //   this.currentVisitedFamilies = familyList;
-    //   console.log(this.currentVisitedFamilies);
-    // });
+    this.socket.on("familyList update", (familyList) => {
+      this.currentVisitedFamilies = familyList;
+      console.log(this.currentVisitedFamilies);
+    });
     const results = await RTU.get();
     this.currentVisitedFamilies = results.data;
     // console.log(this.currentVisitedFamilies);
   },
 
   created: function () {
-    // this.socket = io(backendURL);
+    this.socket = io(backendURL);
     // console.log(backendURL);
   },
 
   beforeDestroy: function () {
-    // this.socket.emit("disconnect");
+    this.socket.emit("disconnect");
     if (
       !this.currentChild.scheduled &&
       !this.contactedByOthers &&
@@ -2182,7 +2182,7 @@ export default {
     ) {
       // console.log("it is about to close!");
       // console.log(this.currentChild.FK_Family);
-      //   this.socket.emit("remove family", this.currentChild.FK_Family);
+        this.socket.emit("remove family", this.currentChild.FK_Family);
       RTU.remove(this.currentChild.FK_Family);
       // this.currentVisitedFamilies = results.data;
     }
