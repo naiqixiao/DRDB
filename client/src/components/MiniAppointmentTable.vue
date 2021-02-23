@@ -81,7 +81,7 @@
       </v-card>
     </v-col>
 
-    <v-col cols="12" md="2" style="padding: 12px !important">
+    <!-- <v-col cols="12" md="2" style="padding: 12px !important">
       <v-card
         class="child-card d-flex align-center justify-center"
         height="180px"
@@ -106,10 +106,10 @@
           <span>Add new studies to this appointment.</span>
         </v-tooltip>
       </v-card>
-    </v-col>
+    </v-col> -->
     <v-spacer></v-spacer>
 
-    <v-col cols="12" md="2" class="d-flex align-center justify-center">
+    <!-- <v-col cols="12" md="2" class="d-flex align-center justify-center">
       <v-tooltip top>
         <template v-slot:activator="{ on }">
           <div v-on="on">
@@ -123,7 +123,7 @@
         </template>
         <span>Send an email to the parents about the update</span>
       </v-tooltip>
-    </v-col>
+    </v-col> -->
 
     <v-dialog v-model="dialogAddAppointments" max-width="1200px" persistent>
       <v-card>
@@ -247,9 +247,9 @@
         <Email
           ref="Email"
           :dialog="dialogEmail"
-          :appointments="Schedule.Appointments"
           :familyInfo="Schedule.Family"
           :scheduleInfo="Schedule"
+          :appointments="Schedule.Appointments"
           emailType="ScheduleUpdate"
         ></Email>
         <v-divider></v-divider>
