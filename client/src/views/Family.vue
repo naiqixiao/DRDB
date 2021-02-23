@@ -417,7 +417,12 @@
       <v-col cols="12" md="4">
         <v-col cols="12" md="12" class="justify-start">
           <div v-if="!searchStatus">
-            <h1 class="text-left">Child information</h1>
+            <h2 class="text-left" v-if="!contactedByOthers">
+              Child information
+            </h2>
+            <h2 style="color: red" v-else>
+              Some one is calling (or just called) this family.
+            </h2>
           </div>
           <div v-else>
             <v-text-field
@@ -495,6 +500,8 @@ import family from "@/services/family";
 import store from "@/store";
 
 import moment from "moment";
+
+import RTU from "@/services/realtimeUpdate";
 
 export default {
   components: {
@@ -574,8 +581,11 @@ export default {
         RecruitmentMethod: null,
         NextContactDate: null,
         Note: null,
+        scheduled: false,
       },
       Families: [],
+      currentVisitedFamilies: [],
+      contactedByOthers: false,
       // editableFields: [],
     };
   },
@@ -588,7 +598,8 @@ export default {
 
         queryString.trainingMode = this.$store.state.trainingMode;
 
-        const updatedFamily = await family.search(queryString);
+        var updatedFamily = await family.search(queryString);
+        updatedFamily.scheduled = true;
 
         this.Families[this.page - 1] = Object.assign({}, updatedFamily.data[0]);
         this.currentFamily = this.Families[this.page - 1];
@@ -602,7 +613,13 @@ export default {
       }
     },
 
-    searchMode() {
+    async searchMode() {
+      if (!this.currentFamily.scheduled && !!this.currentFamily.id) {
+        // this.socket.emit("remove family", this.currentFamily.id);
+        const results = await RTU.remove(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+      }
+
       this.searchStatus = !this.searchStatus;
       this.currentFamily = Object.assign({}, this.familyTemplate);
       this.Families = [];
@@ -618,7 +635,6 @@ export default {
 
     async searchFamily() {
       this.$store.dispatch("setLoadingStatus", true);
-      // console.log(this.currentFamily)
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
 
@@ -628,6 +644,14 @@ export default {
           this.Families = Results.data;
           this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
+
+          if (this.currentVisitedFamilies.includes(this.currentFamily.id)) {
+            this.contactedByOthers = true;
+          } else {
+            const results = await RTU.add(this.currentFamily.id);
+            this.currentVisitedFamilies = results.data;
+            this.contactedByOthers = false;
+          }
         } else {
           this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
@@ -791,17 +815,43 @@ export default {
       console.log(validationresults);
     },
 
-    nextPage() {
+    async nextPage() {
+      if (!this.currentFamily.scheduled && !this.contactedByOthers) {
+        const results = await RTU.remove(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+      }
+
       this.page += 1;
       this.currentFamily = this.Families[this.page - 1];
 
       this.$refs.childInfo.resetSchedule();
+
+      if (this.currentVisitedFamilies.includes(this.currentFamily.id)) {
+        this.contactedByOthers = true;
+      } else {
+        const results = await RTU.add(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+        this.contactedByOthers = false;
+      }
     },
 
-    previousPage() {
+    async previousPage() {
+      if (!this.currentFamily.scheduled && !this.contactedByOthers) {
+        const results = await RTU.remove(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+      }
+
       this.page -= 1;
       this.currentFamily = this.Families[this.page - 1];
       this.$refs.childInfo.resetSchedule();
+
+      if (this.currentVisitedFamilies.includes(this.currentFamily.id)) {
+        this.contactedByOthers = true;
+      } else {
+        const results = await RTU.add(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+        this.contactedByOthers = false;
+      }
     },
 
     PhoneFormated(Phone) {
@@ -815,6 +865,37 @@ export default {
       }
     },
   },
+
+  mounted: async function() {
+    // this.socket.on("familyList update", (familyList) => {
+    //   this.currentVisitedFamilies = familyList;
+    //   console.log(this.currentVisitedFamilies);
+    // });
+    const results = await RTU.get();
+    this.currentVisitedFamilies = results.data;
+    // console.log(this.currentVisitedFamilies);
+  },
+
+  created: function() {
+    // this.socket = io(backendURL);
+    // console.log(backendURL);
+  },
+
+  beforeDestroy: function() {
+    // this.socket.emit("disconnect");
+    if (
+      !this.currentFamily.scheduled &&
+      !this.contactedByOthers &&
+      this.currentFamily.id
+    ) {
+      // console.log("it is about to close!");
+      // console.log(this.currentChild.FK_Family);
+      // this.socket.emit("remove family", this.currentChild.FK_Family);
+      RTU.remove(this.currentFamily.id);
+      // this.currentVisitedFamilies = results.data;
+    }
+  },
+
   watch: {
     training() {
       // console.log(`My store value for 'training' changed to ${val}`);
@@ -825,7 +906,9 @@ export default {
   },
   computed: {
     TodaysDate() {
-      return moment().startOf("day").format("YYYY-MM-DD");
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
     },
   },
 
