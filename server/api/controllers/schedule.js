@@ -500,12 +500,13 @@ exports.update = asyncHandler(async (req, res) => {
     });
   } else {
 
-    // update family's AssignedLab with the current lab
-    updateFamilyInfo = { AssignedLab: req.body.lab };
+    if (updatedScheduleInfo.FK_Family) {// update family's AssignedLab with the current lab
+      updateFamilyInfo = { AssignedLab: req.body.lab };
 
-    await model.family.update(updateFamilyInfo, {
-      where: { id: updatedScheduleInfo.FK_Family },
-    });
+      await model.family.update(updateFamilyInfo, {
+        where: { id: updatedScheduleInfo.FK_Family },
+      });
+    }
 
   }
 
