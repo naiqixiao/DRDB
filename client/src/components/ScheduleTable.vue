@@ -372,7 +372,7 @@
                         :disabled="
                           potentialStudies(child).selectableStudies.length < 1
                         "
-                        >{{ child.Name.split(" ")[0] }}</v-btn
+                        >{{ !!child.Name ? child.Name.split(" ")[0] : "Name is missing"}}</v-btn
                       >
                     </v-col>
                   </v-row>

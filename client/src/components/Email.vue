@@ -72,7 +72,9 @@ export default {
   methods: {
     childNames() {
       var nameList = this.appointments.map((appointment) => {
-        return appointment.Child.Name.split(" ")[0];
+        if (!!appointment.Child.Name) {
+          return appointment.Child.Name.split(" ")[0];
+        }
       });
 
       nameList = Array.from(new Set(nameList));
@@ -97,11 +99,17 @@ export default {
       // opening line, confirming the schedule date and time
       if (this.appointments) {
         var opening = "";
+
+        var parentName = "Caregiver";
+        if (!!this.familyInfo.NamePrimary) {
+          parentName = this.familyInfo.NamePrimary.split(" ")[0];
+        }
+
         switch (this.emailType) {
           case "Confirmation":
             opening =
               "<p>Dear " +
-              this.familyInfo.NamePrimary.split(" ")[0] +
+              parentName +
               ",</p>" +
               "<p>Thanks for your support to our research! This is a confirmation for your participation in our study with <b>" +
               this.childNames() +
@@ -114,7 +122,7 @@ export default {
           case "ScheduleUpdate":
             opening =
               "<p>Dear " +
-              this.familyInfo.NamePrimary.split(" ")[0] +
+              parentName +
               ",</p>" +
               "<p>This is an update on your visit with <b>" +
               this.childNames() +
@@ -127,7 +135,7 @@ export default {
           case "Introduction":
             opening =
               "<p>Dear " +
-              this.familyInfo.NamePrimary.split(" ")[0] +
+              parentName +
               ",</p>" +
               "<p>We are " +
               this.$store.state.labName +
@@ -141,7 +149,7 @@ export default {
           case "ThankYou":
             opening =
               "<p>Dear " +
-              this.familyInfo.NamePrimary.split(" ")[0] +
+              parentName +
               ",</p>" +
               "<p>Thank you so much for visiting us with " +
               this.childNames() +
@@ -178,7 +186,7 @@ export default {
             ) {
               opening =
                 "<p>Dear " +
-                this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
+                parentName +
                 ",</p>" +
                 "<p>Hope you are doing great! This is a reminder for your visit to " +
                 this.$store.state.labName +
@@ -195,7 +203,7 @@ export default {
             } else {
               opening =
                 "<p>Dear " +
-                this.scheduleInfo.Family.NamePrimary.split(" ")[0] +
+                parentName +
                 ",</p>" +
                 "<p>Hope you are doing great! This is " +
                 this.$store.state.labName +
@@ -308,7 +316,9 @@ export default {
 
           emailBody = emailBody.replace(
             /\${{ZoomLink}}/g,
-            "<a href='" + appointment.PrimaryExperimenter[0].ZoomLink + "'>Zoom Link</a>"
+            "<a href='" +
+              appointment.PrimaryExperimenter[0].ZoomLink +
+              "'>Zoom Link</a>"
           );
 
           emailBodyList.push(emailBody);
@@ -367,23 +377,19 @@ export default {
       }
 
       return email;
-
     },
 
     experimenterEmails() {
       var emails = [];
 
       this.scheduleInfo.Appointments.forEach((appointment) => {
-
         appointment.PrimaryExperimenter.forEach((experimenter) => {
           emails.push(experimenter.Name + " <" + experimenter.Email + ">");
         });
 
-        appointment.SecondaryExperimenter.forEach(
-          (experimenter) => {
-            emails.push(experimenter.Name + " <" + experimenter.Email + ">");
-          }
-        );
+        appointment.SecondaryExperimenter.forEach((experimenter) => {
+          emails.push(experimenter.Name + " <" + experimenter.Email + ">");
+        });
       });
 
       return emails.join(", ");

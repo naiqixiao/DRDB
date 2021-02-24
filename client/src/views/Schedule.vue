@@ -689,7 +689,7 @@
                               potentialStudies(currentChild).selectableStudies
                                 .length < 1
                             "
-                            >{{ currentChild.Name.split(" ")[0] }}</v-btn
+                            >{{ !!currentChild.Name ? currentChild.Name.split(" ")[0] : "Name is missing" }}</v-btn
                           >
                         </v-col>
                         <v-col
@@ -707,7 +707,7 @@
                               potentialStudies(child).selectableStudies.length <
                               1
                             "
-                            >{{ child.Name.split(" ")[0] }}</v-btn
+                            >{{ !!child.Name ? child.Name.split(" ")[0] : "Name is missing" }}</v-btn
                           >
                         </v-col>
                       </v-row>
@@ -2169,6 +2169,7 @@ export default {
   },
 
   created: function () {
+    // this.socket = io('http://192.168.0.10', {path: "/app1socket"});
     this.socket = io(backendURL);
     // console.log(backendURL);
   },

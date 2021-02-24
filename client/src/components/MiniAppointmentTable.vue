@@ -306,7 +306,7 @@ export default {
       newAppointments: [],
       newAppointment: {},
       editedAppointment: {},
-      selectedExperimenters: {id: 0},
+      selectedExperimenters: { id: 0 },
       selectedExperimenters_2nd: [],
       index: -1,
       Experimenters: [],
@@ -626,7 +626,7 @@ export default {
 
     closeUpdateExperimenter() {
       this.editedAppointment = {};
-      this.selectedExperimenters = {id: 0};
+      this.selectedExperimenters = { id: 0 };
       this.selectedExperimenters_2nd = [];
       this.index = -1;
       this.dialogUpdateExperimenters = false;
@@ -673,6 +673,12 @@ export default {
     async autoEmail() {
       // send an email to parents about appointment updates.
       // this email will be sent automatically, if researchers forgot to send.
+
+      var parentName = "Caregiver";
+      if (!!this.Schedule.Family.NamePrimary) {
+        parentName = this.Schedule.Family.NamePrimary.split(" ")[0];
+      }
+
       const emailSubject =
         "An update on your visit " +
         // this.childNames() +
@@ -680,7 +686,7 @@ export default {
         moment(this.Schedule.AppointmentTime).format("MMM D (ddd), [at] h:mma");
       const opening =
         "<p>Dear " +
-        this.Schedule.Family.NamePrimary.split(" ")[0] +
+        parentName +
         ",</p>" +
         "<p>This is an update on your visit with " +
         this.childNames() +

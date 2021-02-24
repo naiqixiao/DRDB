@@ -10,7 +10,7 @@ const moment = require("moment");
 
 function childNames(Appointments) {
   var nameList = Appointments.map((appointment) => {
-    return appointment.Child.Name.split(" ")[0];
+    if (!!appointment.Child.Name) { return appointment.Child.Name.split(" ")[0]; }
   });
 
   nameList = Array.from(new Set(nameList));
@@ -36,10 +36,15 @@ function emailBody(schedule) {
 
   var opening = "";
 
+  var parentName = "Caregiver";
+  if (!!schedule.Family.NamePrimary) {
+    parentName = schedule.Family.NamePrimary.split(" ")[0];
+  }
+
   if (schedule.Appointments[0].Study.StudyType !== "Online") {
     opening =
       "<p>Dear " +
-      schedule.Family.NamePrimary.split(" ")[0] +
+      parentName +
       ",</p>" +
       "<p>Hope you are doing great! This is a reminder for your visit to " +
       schedule.Appointments[0].Study.Lab.LabName +
@@ -53,7 +58,7 @@ function emailBody(schedule) {
   } else {
     opening =
       "<p>Dear " +
-      schedule.Family.NamePrimary.split(" ")[0] +
+      parentName +
       ",</p>" +
       "<p>Hope you are doing great! This is " +
       schedule.Appointments[0].Study.Lab.LabName +
@@ -143,9 +148,14 @@ function manualReminderBody(schedule) {
     schedule.Family.NamePrimary = ''
   }
 
+  var parentName = "Caregiver";
+  if (!!schedule.Family.NamePrimary) {
+    parentName = schedule.Family.NamePrimary.split(" ")[0];
+  }
+
   const emailSubject =
     "Remind " +
-    schedule.Family.NamePrimary.split(" ")[0] +
+    parentName +
     " of their participation tomorrow.";
 
   const emailBody =
@@ -153,7 +163,7 @@ function manualReminderBody(schedule) {
     schedule.Appointments[0].Study.Lab.LabName +
     ",</p>" +
     "<p>" +
-    schedule.Family.NamePrimary.split(" ")[0] +
+    parentName +
     " and their child(ren), " +
     childNames(schedule.Appointments) +
     " are coming for a study tomorrow, " +
@@ -574,7 +584,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             appointmentPri.Child.Family.NamePrimary = ""
           }
 
-          const parent = appointmentPri.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
+          var parentName = "Parent Name N/A";
+          if (!!appointmentPri.Child.Family.NamePrimary) {
+            parentName = appointmentPri.Child.Family.NamePrimary.split(" ")[0];
+          }
+
+          const parent = parentName + "<br>" +
             PhoneFormated(appointmentPri.Child.Family.Phone) +
             "<br>" + appointmentPri.Child.Family.Email;
 
@@ -585,13 +600,18 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             style = TRE
           }
 
+          var childName = "Child name N/A"
+          if (appointmentPri.Child.Name) {
+            childName.split(" ")[0]
+          }
+
           body = body + "<tr>"
           body = body + style + moment(appointmentPri.Schedule.AppointmentTime).format(
             "MMM Do [at] h:mma"
           ) + "</td>"
           body = body + style + appointmentPri.Study.StudyName + "</td>"
           body = body + style + parent + "</td>"
-          body = body + style + appointmentPri.Child.Name.split(" ")[0] + "</td>"
+          body = body + style + childName + "</td>"
           body = body + style + E22 + "</td>"
           body = body + style + ZoomLink + "</td>"
           body = body + "</tr>"
@@ -634,7 +654,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             appointmentSec.Child.Family.NamePrimary = ""
           }
 
-          const parent = appointmentSec.Child.Family.NamePrimary.split(" ")[0] + "<br>" +
+          var parentName = "Parent Name N/A";
+          if (!!appointmentSec.Child.Family.NamePrimary) {
+            parentName = appointmentSec.Child.Family.NamePrimary.split(" ")[0];
+          }
+
+          const parent = parentName + "<br>" +
             PhoneFormated(appointmentSec.Child.Family.Phone) +
             "<br>" + appointmentSec.Child.Family.Email;
 
@@ -645,13 +670,18 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             style = TRE
           }
 
+          var childName = "Child name N/A"
+          if (appointmentSec.Child.Name) {
+            childName.split(" ")[0]
+          }
+
           body = body + "<tr>"
           body = body + style + moment(appointmentSec.Schedule.AppointmentTime).format(
             "MMM Do [at] h:mma"
           ) + "</td>"
           body = body + style + appointmentSec.Study.StudyName + "</td>"
           body = body + style + parent + "</td>"
-          body = body + style + appointmentSec.Child.Name.split(" ")[0] + "</td>"
+          body = body + style + childName + "</td>"
           body = body + style + E1[0] + "</td>"
           body = body + style + ZoomLink + "</td>"
           body = body + "</tr>"

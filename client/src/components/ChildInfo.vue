@@ -464,7 +464,7 @@
                         :disabled="
                           potentialStudies(sibling).selectableStudies.length < 1
                         "
-                        >{{ sibling.Name.split(" ")[0] }}</v-btn
+                        >{{ !!sibling.Name ? sibling.Name.split(" ")[0] : "Name is missing" }}</v-btn
                       >
                     </v-col>
                   </v-row>
