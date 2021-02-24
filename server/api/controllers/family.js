@@ -270,9 +270,6 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         }
       }
 
-      // console.log('checkpoint')
-      // console.log({ skipImport })
-
       // update sibbling table & assign child id within this family
       if (!skipImport) {
 
