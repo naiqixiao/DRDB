@@ -675,7 +675,7 @@ export default {
       // this email will be sent automatically, if researchers forgot to send.
 
       var parentName = "Caregiver";
-      if (!!this.Schedule.Family.NamePrimary) {
+      if (this.Schedule.Family.NamePrimary) {
         parentName = this.Schedule.Family.NamePrimary.split(" ")[0];
       }
 
