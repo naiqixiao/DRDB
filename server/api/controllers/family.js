@@ -186,25 +186,18 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       const phone = newFamilies[i].Phone;
       const email = newFamilies[i].Email;
 
-      // var searchString = {};
+      var searchString = [];
 
-      // if (phone) {
-      //   searchString.Phone = phone;
-      // }
-      // if (email) {
-      //   searchString.Email = email;
-      // }
+      if (phone && phone != '') {
+        searchString.push({ 'Phone': phone });
+      }
+      if (email && email != '') {
+        searchString.push({ "Email": email });
+      }
 
       var family = await model.family.findOne({
         where: {
-          [Op.or]: [
-            {
-              'Phone': phone
-            },
-            {
-              "Email": email
-            }
-          ]
+          [Op.or]: searchString
         },
         include: [model.child],
       });
