@@ -35,11 +35,19 @@
           label="Notes for next contact"
           outlined
           no-resize
-          rows="16"
+          rows="6"
           hide-details
           readonly
           v-model="currentFamily.NextContactNote"
         ></v-textarea>
+      </v-col>
+      <v-col cols="12" md="12">
+        <NotesConversation
+          :Conversation="currentFamily.Conversations"
+          :familyId="parseInt(currentFamily.id)"
+          :notes="currentFamily.Note"
+          @updateNotes="saveNotes"
+        ></NotesConversation>
       </v-col>
     </v-row>
 
@@ -158,7 +166,7 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <v-card-actions style="padding: 16px;">
+        <v-card-actions style="padding: 16px">
           <v-row justify="space-between">
             <v-col md="4"></v-col>
             <v-col md="2">
@@ -178,8 +186,12 @@
 <script>
 import family from "@/services/family";
 import store from "@/store";
+import NotesConversation from "@/components/NotesConversation";
 
 export default {
+  components: {
+    NotesConversation,
+  },
   props: {
     currentFamily: Object,
   },

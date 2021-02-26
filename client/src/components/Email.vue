@@ -72,7 +72,7 @@ export default {
   methods: {
     childNames() {
       var nameList = this.appointments.map((appointment) => {
-        if (!!appointment.Child.Name) {
+        if (appointment.Child.Name) {
           return appointment.Child.Name.split(" ")[0];
         }
       });
@@ -101,7 +101,7 @@ export default {
         var opening = "";
 
         var parentName = "Caregiver";
-        if (!!this.familyInfo.NamePrimary) {
+        if (this.familyInfo.NamePrimary) {
           parentName = this.familyInfo.NamePrimary.split(" ")[0];
         }
 
