@@ -679,6 +679,12 @@ export default {
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
 
+      if (!this.currentFamily.scheduled && !!this.currentFamily.id) {
+        // this.socket.emit("remove family", this.currentFamily.id);
+        const results = await RTU.remove(this.currentFamily.id);
+        this.currentVisitedFamilies = results.data;
+      }
+
       this.queryString.AssignedLab = this.$store.state.lab;
 
       this.queryString.trainingMode = this.$store.state.trainingMode;
@@ -689,6 +695,14 @@ export default {
           this.Families = Results.data;
           this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
+
+          if (this.currentVisitedFamilies.includes(this.currentFamily.id)) {
+            this.contactedByOthers = true;
+          } else {
+            const results = await RTU.add(this.currentFamily.id);
+            this.currentVisitedFamilies = results.data;
+            this.contactedByOthers = false;
+          }
         } else {
           alert("No family needs to be followed up.");
           this.page = 0;
