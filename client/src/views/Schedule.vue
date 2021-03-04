@@ -351,9 +351,9 @@
               "
               :disabled="
                 !currentChild.id ||
-                currentChild.scheduled ||
-                !$store.state.labEmailStatus ||
-                contactedByOthers
+                  currentChild.scheduled ||
+                  !$store.state.labEmailStatus ||
+                  contactedByOthers
               "
               class="textfield-family"
               background-color="textbackground"
@@ -573,7 +573,7 @@
                             @click:append="datePicker = true"
                             :disabled="
                               this.response != 'Confirmed' ||
-                              this.skipStudyDateTimeStatus
+                                this.skipStudyDateTimeStatus
                             "
                             hide-details
                             dense
@@ -587,7 +587,7 @@
                             label="Study time"
                             :disabled="
                               this.response != 'Confirmed' ||
-                              this.skipStudyDateTimeStatus
+                                this.skipStudyDateTimeStatus
                             "
                             hide-details
                             dense
@@ -689,7 +689,11 @@
                               potentialStudies(currentChild).selectableStudies
                                 .length < 1
                             "
-                            >{{ !!currentChild.Name ? currentChild.Name.split(" ")[0] : "Name is missing" }}</v-btn
+                            >{{
+                              !!currentChild.Name
+                                ? currentChild.Name.split(" ")[0]
+                                : "Name is missing"
+                            }}</v-btn
                           >
                         </v-col>
                         <v-col
@@ -705,9 +709,13 @@
                             @click="newAppointment(child)"
                             :disabled="
                               potentialStudies(child).selectableStudies.length <
-                              1
+                                1
                             "
-                            >{{ !!child.Name ? child.Name.split(" ")[0] : "Name is missing" }}</v-btn
+                            >{{
+                              !!child.Name
+                                ? child.Name.split(" ")[0]
+                                : "Name is missing"
+                            }}</v-btn
                           >
                         </v-col>
                       </v-row>
@@ -821,8 +829,8 @@
                         @click="continue23()"
                         :disabled="
                           !currentFamily.Email ||
-                          this.skipConfirmationEmailStatus ||
-                          !this.$store.state.labEmailStatus
+                            this.skipConfirmationEmailStatus ||
+                            !this.$store.state.labEmailStatus
                         "
                       >
                         <v-icon dark left v-show="emailSent"
@@ -834,8 +842,8 @@
                       <v-btn
                         :disabled="
                           !scheduleNextPage &&
-                          !!currentFamily.Email &&
-                          !this.skipConfirmationEmailStatus
+                            !!currentFamily.Email &&
+                            !this.skipConfirmationEmailStatus
                         "
                         @click="scheduleNextStep"
                         >{{
@@ -1227,6 +1235,10 @@ export default {
         }
       }
 
+      if (this.selectedStudy.ReminderTemplate == "") {
+        this.skipReminderEmailStatus = true;
+      }
+
       this.response = null;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 500);
     },
@@ -1430,7 +1442,9 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
+      this.studyDate = moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1848,7 +1862,11 @@ export default {
         this.scheduleNextPage = false;
         this.skipStudyDateTimeStatus = false;
         this.skipConfirmationEmailStatus = false;
-        this.skipReminderEmailStatus = false;
+        if (this.selectedStudy.ReminderTemplate == "") {
+          this.skipReminderEmailStatus = true;
+        } else {
+          this.skipReminderEmailStatus = false;
+        }
         this.Experimenters = [];
         this.primaryExperimenterList = [];
         for (var i = 0; i < this.appointments.length; i++) {
@@ -1968,7 +1986,7 @@ export default {
 
     async nextPage() {
       if (!this.currentChild.scheduled && !this.contactedByOthers) {
-          this.socket.emit("remove family", this.currentChild.FK_Family);
+        this.socket.emit("remove family", this.currentChild.FK_Family);
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
@@ -1989,7 +2007,7 @@ export default {
 
     async previousPage() {
       if (!this.currentChild.scheduled && !this.contactedByOthers) {
-          this.socket.emit("remove family", this.currentChild.FK_Family);
+        this.socket.emit("remove family", this.currentChild.FK_Family);
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
@@ -2033,7 +2051,9 @@ export default {
         var updatedFamilyInfo = {
           id: this.currentFamily.id,
           NextContactNote: "Parents asked to be removed from the database.",
-          LastContactDate: moment().startOf("day").format("YYYY-MM-DD"),
+          LastContactDate: moment()
+            .startOf("day")
+            .format("YYYY-MM-DD"),
           NoMoreContact: true,
         };
 
@@ -2131,7 +2151,7 @@ export default {
       }
     },
 
-    earliestDate: function () {
+    earliestDate: function() {
       if (
         moment()
           .add(1, "days")
@@ -2142,7 +2162,9 @@ export default {
             )
           )
       ) {
-        return moment().add(1, "days").toISOString(true);
+        return moment()
+          .add(1, "days")
+          .toISOString(true);
       } else {
         return moment(this.currentChild.DoB, "YYYY-M-D")
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -2150,14 +2172,14 @@ export default {
       }
     },
 
-    latestDate: function () {
+    latestDate: function() {
       return moment(this.currentChild.DoB, "YYYY-M-D")
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
   },
 
-  mounted: async function () {
+  mounted: async function() {
     this.searchStudies();
     this.socket.on("familyList update", (familyList) => {
       this.currentVisitedFamilies = familyList;
@@ -2168,13 +2190,13 @@ export default {
     // console.log(this.currentVisitedFamilies);
   },
 
-  created: function () {
+  created: function() {
     // this.socket = io('http://192.168.0.10', {path: "/app1socket"});
     this.socket = io(backendURL);
     // console.log(backendURL);
   },
 
-  beforeDestroy: function () {
+  beforeDestroy: function() {
     this.socket.emit("disconnect");
     if (
       !this.currentChild.scheduled &&
@@ -2183,7 +2205,7 @@ export default {
     ) {
       // console.log("it is about to close!");
       // console.log(this.currentChild.FK_Family);
-        this.socket.emit("remove family", this.currentChild.FK_Family);
+      this.socket.emit("remove family", this.currentChild.FK_Family);
       RTU.remove(this.currentChild.FK_Family);
       // this.currentVisitedFamilies = results.data;
     }
