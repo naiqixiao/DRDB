@@ -602,7 +602,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
           var childName = "Child name N/A"
           if (appointmentPri.Child.Name) {
-            childName = childName.split(" ")[0]
+            childName = appointmentPri.Child.Name.split(" ")[0]
           }
 
           body = body + "<tr>"
@@ -672,7 +672,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
           var childName = "Child name N/A"
           if (appointmentSec.Child.Name) {
-            childName = childName.split(" ")[0]
+            childName = appointmentSec.Child.Name.split(" ")[0]
           }
 
           body = body + "<tr>"
