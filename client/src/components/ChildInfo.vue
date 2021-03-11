@@ -11,10 +11,10 @@
               <div class="d-inline-block text-truncate" style="max-width: 60%">
                 {{
                   child.Name +
-                  " (" +
-                  currentFamily.id +
-                  child.IdWithinFamily +
-                  ")"
+                    " (" +
+                    currentFamily.id +
+                    child.IdWithinFamily +
+                    ")"
                 }}
               </div>
               <v-spacer></v-spacer>
@@ -315,78 +315,86 @@
             <v-stepper-content step="1">
               <v-row style="height: 650px" align="start" justify="center" dense>
                 <v-card outlined style="height: 650px" width="90%">
-                  <v-row style="height: 100px" align="center" justify="start">
-                    <v-col cols="12" md="3" class="text-left">
-                      <div class="title" style="padding-left: 8px">
-                        {{ "Study date & time:" }}
-                      </div>
-                    </v-col>
-                    <v-col cols="12" md="2">
-                      <v-text-field
-                        ref="studyDate"
-                        label="Study date"
-                        v-model="studyDate"
-                        append-icon="event"
-                        @click:append="datePicker = true"
-                        :disabled="this.skipStudyDateTimeStatus"
-                        hide-details
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="1"></v-col>
-                    <v-col cols="12" md="2">
-                      <v-combobox
-                        v-model="studyTime"
-                        :items="this.$studyTimeSlots"
-                        label="Study time"
-                        hide-details
-                        dense
-                        :disabled="this.skipStudyDateTimeStatus"
-                      ></v-combobox>
-                    </v-col>
-                    <v-col cols="12" md="1"></v-col>
-                    <v-col cols="12" md="3">
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <div v-on="on">
-                            <v-checkbox
-                              style="padding: 4px !important"
-                              label="Skip study date/time"
-                              class="ma-0 pa-0"
-                              :value="skipStudyDateTimeStatus"
-                              @change="skipStudyDateTime()"
-                              hide-details
-                              dense
-                            ></v-checkbox>
-                          </div>
-                        </template>
-                        <span
-                          >Check this box to use current date/time for the
-                          current appointment.<br />NO Google Calendar event
-                          will be created.</span
-                        >
-                      </v-tooltip>
-                      <v-tooltip top>
-                        <template v-slot:activator="{ on }">
-                          <div v-on="on">
-                            <v-checkbox
-                              style="padding: 4px !important"
-                              label="Skip reminder email"
-                              class="ma-0 pa-0"
-                              :value="skipReminderEmailStatus"
-                              @change="skipReminderEmail()"
-                              hide-details
-                              dense
-                            ></v-checkbox>
-                          </div>
-                        </template>
-                        <span
-                          >Check this box to prevent reminder email from being
-                          sent to the participant.</span
-                        >
-                      </v-tooltip>
-                    </v-col>
-                  </v-row>
+                  <v-form
+                    ref="scheduleDateTime"
+                    v-model="validScheduleDateTime"
+                    lazy-validation
+                  >
+                    <v-row style="height: 100px" align="center" justify="start">
+                      <v-col cols="12" md="3" class="text-left">
+                        <div class="title" style="padding-left: 8px">
+                          {{ "Study date & time:" }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-text-field
+                          ref="studyDate"
+                          label="Study date"
+                          v-model="studyDate"
+                          append-icon="event"
+                          :rules="$rules.dob"
+                          @click:append="datePicker = true"
+                          :disabled="this.skipStudyDateTimeStatus"
+                          hide-details
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" md="1"></v-col>
+                      <v-col cols="12" md="2">
+                        <v-combobox
+                          v-model="studyTime"
+                          :items="this.$studyTimeSlots"
+                          :rules="$rules.time"
+                          label="Study time"
+                          hide-details
+                          dense
+                          :disabled="this.skipStudyDateTimeStatus"
+                        ></v-combobox>
+                      </v-col>
+                      <v-col cols="12" md="1"></v-col>
+                      <v-col cols="12" md="3">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <div v-on="on">
+                              <v-checkbox
+                                style="padding: 4px !important"
+                                label="Skip study date/time"
+                                class="ma-0 pa-0"
+                                :value="skipStudyDateTimeStatus"
+                                @change="skipStudyDateTime()"
+                                hide-details
+                                dense
+                              ></v-checkbox>
+                            </div>
+                          </template>
+                          <span
+                            >Check this box to use current date/time for the
+                            current appointment.<br />NO Google Calendar event
+                            will be created.</span
+                          >
+                        </v-tooltip>
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on }">
+                            <div v-on="on">
+                              <v-checkbox
+                                style="padding: 4px !important"
+                                label="Skip reminder email"
+                                class="ma-0 pa-0"
+                                :value="skipReminderEmailStatus"
+                                @change="skipReminderEmail()"
+                                hide-details
+                                dense
+                              ></v-checkbox>
+                            </div>
+                          </template>
+                          <span
+                            >Check this box to prevent reminder email from being
+                            sent to the participant.</span
+                          >
+                        </v-tooltip>
+                      </v-col>
+                    </v-row>
+                  </v-form>
                   <!-- <v-row
                   style="height: 60px"
                   align="center"
@@ -464,7 +472,11 @@
                         :disabled="
                           potentialStudies(sibling).selectableStudies.length < 1
                         "
-                        >{{ !!sibling.Name ? sibling.Name.split(" ")[0] : "Name is missing" }}</v-btn
+                        >{{
+                          !!sibling.Name
+                            ? sibling.Name.split(" ")[0]
+                            : "Name is missing"
+                        }}</v-btn
                       >
                     </v-col>
                   </v-row>
@@ -502,7 +514,7 @@
                     color="primary"
                     :disabled="
                       !(studyDateTime || skipStudyDateTimeStatus) ||
-                      !appointments[0].FK_Study
+                        !appointments[0].FK_Study
                     "
                     @click="continue12()"
                   >
@@ -567,8 +579,8 @@
                     @click="continue23()"
                     :disabled="
                       !currentFamily.Email ||
-                      this.skipConfirmationEmailStatus ||
-                      !this.$store.state.labEmailStatus
+                        this.skipConfirmationEmailStatus ||
+                        !this.$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -580,8 +592,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                      !!currentFamily.Email &&
-                      !this.skipConfirmationEmailStatus
+                        !!currentFamily.Email &&
+                        !this.skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -694,6 +706,7 @@ export default {
       appointments: [],
       scheduleNextPage: false,
       emailSent: false,
+      validScheduleDateTime: true,
       defaultAppointment: {
         index: null,
         FK_Family: null,
@@ -860,7 +873,9 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
+      this.studyDate = moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1052,22 +1067,71 @@ export default {
     },
 
     async continue12() {
-      this.loadingStatus = true;
-      this.primaryExperimenterList = [];
+      var validationResults = this.$refs.scheduleDateTime.validate();
 
-      for (var i = 0; i < this.appointments.length; i++) {
-        this.$refs.extraStudies[i].primaryExperimenterStatus();
-      }
+      if (validationResults) {
+        this.loadingStatus = true;
+        this.primaryExperimenterList = [];
 
-      var scheduleInfo = {};
+        for (var i = 0; i < this.appointments.length; i++) {
+          this.$refs.extraStudies[i].primaryExperimenterStatus();
+        }
 
-      if (this.scheduleButtonText == "Study Scheduled!") {
-        if (
-          await this.$refs.confirmD.open(
-            "Beep!",
-            "You just created an appointment for this family. Do you want to do it again?"
-          )
-        ) {
+        var scheduleInfo = {};
+
+        if (this.scheduleButtonText == "Study Scheduled!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Beep!",
+              "You just created an appointment for this family. Do you want to do it again?"
+            )
+          ) {
+            try {
+              if (
+                this.response == "Confirmed" &&
+                this.primaryExperimenterList.includes(0)
+              ) {
+                // if any appointment without an experimenter.
+                await this.$refs.confirmD.open(
+                  "Who is going to run the study?",
+                  "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+                );
+              } else {
+                if (this.currentSchedule.id) {
+                  await this.deleteUnfinishedSchedule();
+                }
+
+                scheduleInfo = await this.createSchedule();
+
+                if (
+                  this.response == "Confirmed" &&
+                  this.$store.state.labEmailStatus &&
+                  !this.skipStudyDateTimeStatus
+                ) {
+                  try {
+                    await this.createCalendarEvent(scheduleInfo.calendarEvent);
+
+                    // this.emailDialog = true;
+                    // this.e1 = 2;
+                    this.scheduleNextPage = true;
+                    this.scheduleButtonText = "Study Scheduled!";
+                  } catch (error) {
+                    alert(
+                      "Calendar event wasn't created successfully, please try again."
+                    );
+                    console.log(error);
+                    this.manualCalendar = true;
+                  }
+                } else {
+                  this.scheduleButtonText = "Study Scheduled!";
+                  this.scheduleNextPage = true;
+                }
+              }
+            } catch (error) {
+              console.log(error);
+            }
+          }
+        } else {
           try {
             if (
               this.response == "Confirmed" &&
@@ -1113,54 +1177,11 @@ export default {
             console.log(error);
           }
         }
+
+        this.loadingStatus = false;
       } else {
-        try {
-          if (
-            this.response == "Confirmed" &&
-            this.primaryExperimenterList.includes(0)
-          ) {
-            // if any appointment without an experimenter.
-            await this.$refs.confirmD.open(
-              "Who is going to run the study?",
-              "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
-            );
-          } else {
-            if (this.currentSchedule.id) {
-              await this.deleteUnfinishedSchedule();
-            }
-
-            scheduleInfo = await this.createSchedule();
-
-            if (
-              this.response == "Confirmed" &&
-              this.$store.state.labEmailStatus &&
-              !this.skipStudyDateTimeStatus
-            ) {
-              try {
-                await this.createCalendarEvent(scheduleInfo.calendarEvent);
-
-                // this.emailDialog = true;
-                // this.e1 = 2;
-                this.scheduleNextPage = true;
-                this.scheduleButtonText = "Study Scheduled!";
-              } catch (error) {
-                alert(
-                  "Calendar event wasn't created successfully, please try again."
-                );
-                console.log(error);
-                this.manualCalendar = true;
-              }
-            } else {
-              this.scheduleButtonText = "Study Scheduled!";
-              this.scheduleNextPage = true;
-            }
-          }
-        } catch (error) {
-          console.log(error);
-        }
+        alert("Schedule date or time is not correct.");
       }
-
-      this.loadingStatus = false;
     },
 
     async continue23() {
@@ -1253,6 +1274,7 @@ export default {
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
         }
+        this.$refs.scheduleDateTime.resetValidation();
       }, 300);
     },
 
@@ -1626,9 +1648,10 @@ export default {
         }
 
         StudyMin = parseInt(StudyMin);
-        var studyDateTime =
-          new Date(this.studyDate + ' ' + StudyHour + ":" + StudyMin)
-          
+        var studyDateTime = new Date(
+          this.studyDate + " " + StudyHour + ":" + StudyMin
+        );
+
         return studyDateTime;
       } else {
         return null;
@@ -1675,7 +1698,9 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment().add(60, "days").toISOString(true);
+        return moment()
+          .add(60, "days")
+          .toISOString(true);
       }
     },
   },

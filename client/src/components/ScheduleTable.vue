@@ -62,10 +62,10 @@
             @click.stop="updateSchedule(item, 'Rescheduling')"
             :disabled="
               item.Status === 'Rescheduling' ||
-              item.Status === 'No Show' ||
-              item.Status === 'TBD' ||
-              item.Status === 'Rejected' ||
-              item.Completed == true
+                item.Status === 'No Show' ||
+                item.Status === 'TBD' ||
+                item.Status === 'Rejected' ||
+                item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -81,10 +81,10 @@
             @click.stop="updateSchedule(item, 'No Show')"
             :disabled="
               item.Status === 'Rescheduling' ||
-              item.Status === 'No Show' ||
-              item.Status === 'TBD' ||
-              item.Status === 'Rejected' ||
-              item.Completed == true
+                item.Status === 'No Show' ||
+                item.Status === 'TBD' ||
+                item.Status === 'Rejected' ||
+                item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -104,8 +104,8 @@
             "
             :disabled="
               item.Status === 'Cancelled' ||
-              item.Status === 'Rejected' ||
-              item.Completed == true
+                item.Status === 'Rejected' ||
+                item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -234,7 +234,12 @@
             <v-stepper-content step="1">
               <v-row style="height: 650px" align="start" justify="center" dense>
                 <v-card outlined style="height: 650px" width="90%">
-                  <v-row
+                  <v-form
+                        ref="scheduleDateTime"
+                        v-model="validScheduleDateTime"
+                        lazy-validation
+                      >
+                      <v-row
                     style="height: 100px"
                     align="center"
                     justify="start"
@@ -251,6 +256,7 @@
                         label="Study date"
                         v-model="studyDate"
                         append-icon="event"
+                        :rules="$rules.dob"
                         @click:append="datePicker = true"
                         :disabled="
                           response != 'Confirmed' || skipStudyDateTimeStatus
@@ -264,6 +270,7 @@
                       <v-combobox
                         v-model="studyTime"
                         :items="$studyTimeSlots"
+                        :rules="$rules.time"
                         label="Study time"
                         :disabled="
                           response != 'Confirmed' || skipStudyDateTimeStatus
@@ -315,13 +322,13 @@
                       </v-tooltip>
                     </v-col>
                   </v-row>
+                  </v-form>
                   <v-divider style="margin-bottom: 16px"></v-divider>
                   <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies
                       ref="extraStudies"
-                      v-for="(
-                        appointment, index
-                      ) in editedSchedule.Appointments"
+                      v-for="(appointment,
+                      index) in editedSchedule.Appointments"
                       :key="appointment.id"
                       :child="appointment.Child"
                       :targetChild="appointment.Child"
@@ -372,7 +379,11 @@
                         :disabled="
                           potentialStudies(child).selectableStudies.length < 1
                         "
-                        >{{ !!child.Name ? child.Name.split(" ")[0] : "Name is missing"}}</v-btn
+                        >{{
+                          !!child.Name
+                            ? child.Name.split(" ")[0]
+                            : "Name is missing"
+                        }}</v-btn
                       >
                     </v-col>
                   </v-row>
@@ -468,8 +479,8 @@
                     @click="continue23()"
                     :disabled="
                       !editedSchedule.Family.Email ||
-                      skipConfirmationEmailStatus ||
-                      !$store.state.labEmailStatus
+                        skipConfirmationEmailStatus ||
+                        !$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -481,8 +492,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                      !!editedSchedule.Family.Email &&
-                      !skipConfirmationEmailStatus
+                        !!editedSchedule.Family.Email &&
+                        !skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -563,8 +574,8 @@
                   color="primary"
                   :disabled="
                     !!!editedSchedule.Family.Email ||
-                    skipReminderEmailStatus ||
-                    !$store.state.labEmailStatus
+                      skipReminderEmailStatus ||
+                      !$store.state.labEmailStatus
                   "
                   @click="sendReminderEmail()"
                 >
@@ -725,6 +736,7 @@ export default {
       Experimenters: [],
       primaryExperimenterList: [],
       datePicker: false,
+      validScheduleDateTime: true,
       defaultAppointment: {
         index: null,
         FK_Family: null,
@@ -932,7 +944,9 @@ export default {
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
 
-      this.studyDate = moment().startOf("day").format("YYYY-MM-DD");
+      this.studyDate = moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -945,19 +959,47 @@ export default {
     },
 
     async continue12() {
-      this.primaryExperimenterList = [];
+      var validationResults = this.$refs.scheduleDateTime.validate();
 
-      for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
-        this.$refs.extraStudies[i].primaryExperimenterStatus();
-      }
+      if (validationResults) {
+        this.primaryExperimenterList = [];
 
-      if (this.scheduleButtonText == "Study appointment updated!") {
-        if (
-          await this.$refs.confirmD.open(
-            "Beep!",
-            "You just created an appointment for this family. Do you want to do it again?"
-          )
-        ) {
+        for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
+          this.$refs.extraStudies[i].primaryExperimenterStatus();
+        }
+
+        if (this.scheduleButtonText == "Study appointment updated!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Beep!",
+              "You just created an appointment for this family. Do you want to do it again?"
+            )
+          ) {
+            try {
+              if (
+                this.response == "Confirmed" &&
+                this.primaryExperimenterList.includes(0)
+              ) {
+                // if any appointment without an experimenter.
+                await this.$refs.confirmD.open(
+                  "Who is going to run the study?",
+                  "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
+                );
+              } else {
+                this.loadingStatus = true;
+                await this.reschedule();
+
+                this.scheduleUpdated = true;
+                this.scheduleNextPage = true;
+                this.scheduleButtonText = "Study appointment updated!";
+              }
+            } catch (error) {
+              console.log(error);
+              alert("Failed to update the appointment, please try again.");
+            }
+            this.loadingStatus = false;
+          }
+        } else {
           try {
             if (
               this.response == "Confirmed" &&
@@ -980,33 +1022,11 @@ export default {
             console.log(error);
             alert("Failed to update the appointment, please try again.");
           }
+
           this.loadingStatus = false;
         }
       } else {
-        try {
-          if (
-            this.response == "Confirmed" &&
-            this.primaryExperimenterList.includes(0)
-          ) {
-            // if any appointment without an experimenter.
-            await this.$refs.confirmD.open(
-              "Who is going to run the study?",
-              "Make sure to select an experimenter for this study appointment.\n If you don't see any experimenter listed, go to Study Management page to assign experimenter(s) to this study."
-            );
-          } else {
-            this.loadingStatus = true;
-            await this.reschedule();
-
-            this.scheduleUpdated = true;
-            this.scheduleNextPage = true;
-            this.scheduleButtonText = "Study appointment updated!";
-          }
-        } catch (error) {
-          console.log(error);
-          alert("Failed to update the appointment, please try again.");
-        }
-
-        this.loadingStatus = false;
+        alert("Schedule date or time is not correct.");
       }
     },
 
@@ -1089,6 +1109,7 @@ export default {
         this.skipReminderEmailStatus = false;
         this.Experimenters = [];
         this.primaryExperimenterList = [];
+        this.$refs.scheduleDateTime.resetValidation();
       }, 300);
     },
 
@@ -1312,7 +1333,9 @@ export default {
         case "Confirmed":
           if (
             moment(item.AppointmentTime).startOf("day") <=
-              moment().startOf("day").add(daysAheadofSchedule, "d") &&
+              moment()
+                .startOf("day")
+                .add(daysAheadofSchedule, "d") &&
             moment(item.AppointmentTime).startOf("day") >=
               moment().startOf("day")
           ) {
@@ -1562,16 +1585,19 @@ export default {
         }
 
         StudyMin = parseInt(StudyMin);
-        var studyDateTime =
-          new Date(this.studyDate + ' ' + StudyHour + ":" + StudyMin)
-          
+        var studyDateTime = new Date(
+          this.studyDate + " " + StudyHour + ":" + StudyMin
+        );
+
         return studyDateTime;
       } else {
         return null;
       }
     },
     TodaysDate() {
-      return moment().startOf("day").format("YYYY-MM-DD");
+      return moment()
+        .startOf("day")
+        .format("YYYY-MM-DD");
     },
     reminderEmailDisable() {
       return false;
