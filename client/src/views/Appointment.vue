@@ -33,216 +33,223 @@
       >
     </div>
 
-    <v-row justify="start">
-      <v-col cols="12" md="2" v-for="item in searchingFields" :key="item.label">
-        <v-text-field
-          @keydown.enter="searchSchedule"
-          @input="getSearchKeys(item.field, $event)"
-          :label="item.label"
-          v-model="queryString[item.field]"
-          append-icon="mdi-magnify"
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row justify="start">
-      <v-col cols="12" md="2">
-        <!-- @blur="searchSchedule" -->
-        <v-select
-          @input="getSearchKeys('StudyName', $event)"
-          v-model="queryString.StudyName"
-          @keydown.enter="searchSchedule"
-          :items="$store.state.studies"
-          :item-value="'id'"
-          :item-text="'StudyName'"
-          label="Study Name"
-          append-icon="mdi-magnify"
-          height="48px"
-          multiple
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-          chip
-        ></v-select>
-      </v-col>
-      <v-col cols="12" md="2">
-        <!-- @blur="searchScheduleByStatus" -->
-        <v-select
-          @input="getSearchKeys('Status', $event)"
-          v-model="queryString.Status"
-          @keydown.enter="searchSchedule"
-          :items="Status"
-          label="Status"
-          multiple
-          append-icon="mdi-magnify"
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-          chip
-        ></v-select>
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-text-field
-          @input="getSearchKeys(item.field, $event)"
-          @keydown.enter="searchSchedule"
-          ref="textfieldAfter"
-          label="After"
-          v-model="queryString.AppointmentTimeAfter"
-          append-icon="event"
-          @click:append="dialogPickerAfter = true"
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" md="2">
-        <v-text-field
-          @keydown.enter="searchSchedule"
-          @input="getSearchKeys(item.field, $event)"
-          ref="textfieldBefore"
-          label="Before"
-          v-model="queryString.AppointmentTimeBefore"
-          append-icon="event"
-          @click:append="dialogPickerBefore = true"
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          outlined
-          dense
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row justify="center">
-      <v-col cols="12" md="2">
-        <v-btn-toggle dark>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-btn
-                  tile
-                  style="
-                    color: var(--v-secondary-base);
-                    background-color: var(--v-primary-base) !important;
-                  "
-                  large
-                  @click="studiesInaPeriod('today')"
-                >
-                  <v-icon
-                    style="
-                      color: var(--v-secondary-base);
-                      background-color: var(--v-primary-base) !important;
-                    "
-                    >today</v-icon
-                  >
-                </v-btn>
-              </div>
-            </template>
-            <span>Today's studies.</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-btn
-                  tile
-                  style="
-                    color: var(--v-secondary-base);
-                    background-color: var(--v-primary-base) !important;
-                  "
-                  large
-                  @click="studiesInaPeriod('tomorrow')"
-                >
-                  <v-icon
-                    style="
-                      color: var(--v-secondary-base);
-                      background-color: var(--v-primary-base) !important;
-                    "
-                    >event</v-icon
-                  >
-                </v-btn>
-              </div>
-            </template>
-            <span>Tomorrow's studies</span>
-          </v-tooltip>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-btn
-                  tile
-                  style="
-                    color: var(--v-secondary-base);
-                    background-color: var(--v-primary-base) !important;
-                  "
-                  large
-                  @click="studiesInaPeriod('thisWeek')"
-                >
-                  <v-icon
-                    style="
-                      color: var(--v-secondary-base);
-                      background-color: var(--v-primary-base) !important;
-                    "
-                    >date_range</v-icon
-                  >
-                </v-btn>
-              </div>
-            </template>
-            <span>Studies within this week</span>
-          </v-tooltip>
-        </v-btn-toggle>
-      </v-col>
-
-      <v-col cols="12" md="2" style="text-align: center">
-        <v-btn large @click="followupSearch">
-          <v-icon dark left>mdi-phone</v-icon>Follow-ups
-        </v-btn>
-      </v-col>
-
-      <v-col cols="12" md="1" style="text-align: center">
-        <v-btn
-          large
-          @click="searchSchedule"
-          :disabled="
-            !(
-              queryString.Email ||
-              queryString.AppointmentTimeAfter ||
-              queryString.AppointmentTimeBefore ||
-              queryString.Status.length > 0 ||
-              queryString.StudyName.length > 0 ||
-              queryString.Phone ||
-              queryString.NamePrimary ||
-              queryString.NameSecondary ||
-              queryString.FamilyId
-            )
-          "
-        >
-          <v-icon left dark>mdi-magnify</v-icon>Search
-        </v-btn>
-      </v-col>
-    </v-row>
-
-    <v-row justify="center" style="padding-top: 28px">
+    <v-row dense>
       <v-col cols="12" md="9">
-        <ScheduleTable
-          :Schedules="Schedules"
-          @rowSelected="updateFamily"
-          tableHeight="720px"
-        ></ScheduleTable>
+        <v-row justify="start">
+          <v-col
+            cols="12"
+            v-for="item in searchingFields"
+            :md="item.width"
+            :key="item.label"
+          >
+            <v-text-field
+              @keydown.enter="searchSchedule"
+              @input="getSearchKeys(item.field, $event)"
+              :label="item.label"
+              v-model="queryString[item.field]"
+              append-icon="mdi-magnify"
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row justify="start">
+          <v-col cols="12" md="3">
+            <!-- @blur="searchSchedule" -->
+            <v-select
+              @input="getSearchKeys('StudyName', $event)"
+              v-model="queryString.StudyName"
+              @keydown.enter="searchSchedule"
+              :items="$store.state.studies"
+              :item-value="'id'"
+              :item-text="'StudyName'"
+              label="Study Name"
+              append-icon="mdi-magnify"
+              height="48px"
+              multiple
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+              chip
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="3">
+            <!-- @blur="searchScheduleByStatus" -->
+            <v-select
+              @input="getSearchKeys('Status', $event)"
+              v-model="queryString.Status"
+              @keydown.enter="searchSchedule"
+              :items="Status"
+              label="Status"
+              multiple
+              append-icon="mdi-magnify"
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+              chip
+            ></v-select>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              @input="getSearchKeys(item.field, $event)"
+              @keydown.enter="searchSchedule"
+              ref="textfieldAfter"
+              label="After"
+              v-model="queryString.AppointmentTimeAfter"
+              append-icon="event"
+              @click:append="dialogPickerAfter = true"
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              @keydown.enter="searchSchedule"
+              @input="getSearchKeys(item.field, $event)"
+              ref="textfieldBefore"
+              label="Before"
+              v-model="queryString.AppointmentTimeBefore"
+              append-icon="event"
+              @click:append="dialogPickerBefore = true"
+              height="48px"
+              background-color="textbackground"
+              hide-details
+              outlined
+              dense
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row justify="center">
+          <v-col cols="12" md="2">
+            <v-btn-toggle dark>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      tile
+                      style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
+                      large
+                      @click="studiesInaPeriod('today')"
+                    >
+                      <v-icon
+                        style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
+                        >today</v-icon
+                      >
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Today's studies.</span>
+              </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      tile
+                      style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
+                      large
+                      @click="studiesInaPeriod('tomorrow')"
+                    >
+                      <v-icon
+                        style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
+                        >event</v-icon
+                      >
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Tomorrow's studies</span>
+              </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-btn
+                      tile
+                      style="
+                    color: var(--v-secondary-base);
+                    background-color: var(--v-primary-base) !important;
+                  "
+                      large
+                      @click="studiesInaPeriod('thisWeek')"
+                    >
+                      <v-icon
+                        style="
+                      color: var(--v-secondary-base);
+                      background-color: var(--v-primary-base) !important;
+                    "
+                        >date_range</v-icon
+                      >
+                    </v-btn>
+                  </div>
+                </template>
+                <span>Studies within this week</span>
+              </v-tooltip>
+            </v-btn-toggle>
+          </v-col>
+
+          <v-col cols="12" md="2" style="text-align: center">
+            <v-btn large @click="followupSearch">
+              <v-icon dark left>mdi-phone</v-icon>Follow-ups
+            </v-btn>
+          </v-col>
+
+          <v-col cols="12" md="1" style="text-align: center">
+            <v-btn
+              large
+              @click="searchSchedule"
+              :disabled="
+                !(
+                  queryString.Email ||
+                  queryString.AppointmentTimeAfter ||
+                  queryString.AppointmentTimeBefore ||
+                  queryString.Status.length > 0 ||
+                  queryString.StudyName.length > 0 ||
+                  queryString.Phone ||
+                  queryString.NamePrimary ||
+                  queryString.NameSecondary ||
+                  queryString.FamilyId
+                )
+              "
+            >
+              <v-icon left dark>mdi-magnify</v-icon>Search
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row justify="center" style="padding-top: 28px">
+          <v-col>
+            <ScheduleTable
+              :Schedules="Schedules"
+              @rowSelected="updateFamily"
+              tableHeight="800px"
+            ></ScheduleTable>
+          </v-col>
+        </v-row>
       </v-col>
       <v-col cols="12" md="3">
-        <template>
-          <FamilyInfo
-            :currentFamily="currentFamily"
-            @updateFamily="updateCurrentFamily"
-          ></FamilyInfo>
-        </template>
+        <FamilyInfo
+          :currentFamily="currentFamily"
+          @updateFamily="updateCurrentFamily"
+        ></FamilyInfo>
       </v-col>
     </v-row>
 
@@ -316,11 +323,11 @@ export default {
       },
       Schedules: [],
       searchingFields: [
-        { label: "Family ID", field: "FamilyId" },
-        { label: "Email", field: "Email" },
-        { label: "Phone", field: "Phone" },
-        { label: "Primary Caregiver", field: "NamePrimary" },
-        { label: "Secondary Caregiver", field: "NameSecondary" },
+        { label: "Family ID", field: "FamilyId", width: 2 },
+        { label: "Email", field: "Email", width: 3  },
+        { label: "Phone", field: "Phone", width: 3  },
+        { label: "Primary Caregiver", field: "NamePrimary", width: 2  },
+        { label: "Secondary Caregiver", field: "NameSecondary", width: 2  },
         // { label: "Study Name", field: "StudyName"},
       ],
       Status: [

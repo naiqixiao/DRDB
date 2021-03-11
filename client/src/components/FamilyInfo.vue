@@ -41,14 +41,6 @@
           v-model="currentFamily.NextContactNote"
         ></v-textarea>
       </v-col>
-      <v-col cols="12" md="12">
-        <NotesConversation
-          :Conversation="currentFamily.Conversations"
-          :familyId="parseInt(currentFamily.id)"
-          :notes="currentFamily.Note"
-          @updateNotes="saveNotes"
-        ></NotesConversation>
-      </v-col>
     </v-row>
 
     <v-row justify="end">
@@ -68,6 +60,14 @@
           </template>
           <span>Edit family information</span>
         </v-tooltip>
+      </v-col>
+      <v-col cols="12" md="12">
+        <NotesConversation
+          :Conversation="currentFamily.Conversations"
+          :familyId="parseInt(currentFamily.id)"
+          :notes="currentFamily.Note"
+          @updateNotes="saveNotes"
+        ></NotesConversation>
       </v-col>
     </v-row>
 
@@ -301,6 +301,18 @@ export default {
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.familyTemplate);
       }, 300);
+    },
+
+    async saveNotes(newNotes) {
+      this.currentFamily.Note = newNotes;
+
+      this.currentFamily.UpdatedBy = store.state.userID;
+
+      await family.update(this.currentFamily);
+
+      // this.currentChild.Family = this.currentFamily;
+
+      // Object.assign(this.Children[this.page - 1], this.currentChild);
     },
 
     PhoneFormated(Phone) {

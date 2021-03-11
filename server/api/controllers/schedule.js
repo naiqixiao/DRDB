@@ -712,7 +712,8 @@ async function searchScheudles(queryString) {
               model: model.appointment,
               attributes: ['FK_Study']
             }]
-          },]
+          },
+          { model: model.conversations, }]
       },
       {
         model: model.personnel,
