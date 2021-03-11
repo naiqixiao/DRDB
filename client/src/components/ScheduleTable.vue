@@ -1563,12 +1563,8 @@ export default {
 
         StudyMin = parseInt(StudyMin);
         var studyDateTime =
-          new Date(this.studyDate).getTime() +
-          StudyHour * 3600 * 1000 +
-          StudyMin * 60000 +
-          new Date(this.studyDate).getTimezoneOffset() * 60000;
-
-        studyDateTime = new Date(studyDateTime);
+          new Date(this.studyDate + ' ' + StudyHour + ":" + StudyMin)
+          
         return studyDateTime;
       } else {
         return null;
