@@ -290,7 +290,6 @@
         v-model="dialogSchedule"
         max-width="1200px"
         :retain-focus="false"
-        persistent
       >
         <v-stepper v-model="e1">
           <v-stepper-header>
@@ -674,7 +673,7 @@ import child from "@/services/child";
 import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
 
-import moment from "moment";
+import moment from "moment-timezone";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
 
@@ -875,7 +874,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
-        .format("YYYY-MM-DD");
+        .tz('America/Toronto').format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -911,7 +910,7 @@ export default {
           studyNames = Array.from(new Set(studyNames));
 
           newSchedule = {
-            AppointmentTime: moment(this.studyDateTime).toISOString(true),
+            AppointmentTime: this.studyDateTime,
             Status: this.response,
             FK_Family: this.familyId,
             Note: this.scheduleNotes,
@@ -923,16 +922,16 @@ export default {
               this.scheduleNotes,
               this.appointments
             ),
-            start: {
-              dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto",
-            },
-            end: {
-              dateTime: moment(this.studyDateTime)
-                .add(1, "h")
-                .toISOString(true),
-              timeZone: "America/Toronto",
-            },
+            // start: {
+            //   dateTime: moment(this.studyDateTime).toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
+            // end: {
+            //   dateTime: moment(this.studyDateTime)
+            //     .add(1, "h")
+            //     .toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
             attendees: this.Experimenters,
           };
 
@@ -965,10 +964,11 @@ export default {
       try {
         const newStudySchedule = await schedule.create(newSchedule);
 
-        var calendarEvent = newSchedule;
+        var calendarEvent = Object.assign({}, newSchedule);
+        calendarEvent.scheduleId = this.currentSchedule.id;
 
         this.currentSchedule = newStudySchedule.data;
-        calendarEvent.scheduleId = this.currentSchedule.id;
+        this.currentSchedule.AppointmentTime = newSchedule.AppointmentTime;
 
         // attach schedule info to the current appointments.
         newStudySchedule.data.updatedAt = moment().toString();
@@ -1020,22 +1020,23 @@ export default {
       });
 
       var calendarEvent = {
+        AppointmentTime: currentSchedule.AppointmentTime,
         summary: studyNames.join(" + "),
         location: this.$store.state.location,
         description: this.calendarDescription(
           this.scheduleNotes,
           this.appointments
         ),
-        start: {
-          dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-          timeZone: "America/Toronto",
-        },
-        end: {
-          dateTime: moment(currentSchedule.AppointmentTime)
-            .add(1, "h")
-            .toISOString(true),
-          timeZone: "America/Toronto",
-        },
+        // start: {
+        //   dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
+        //   timeZone: "America/Toronto",
+        // },
+        // end: {
+        //   dateTime: moment(currentSchedule.AppointmentTime)
+        //     .add(1, "h")
+        //     .toISOString(true),
+        //   timeZone: "America/Toronto",
+        // },
         attendees: attendees,
         scheduleId: this.currentSchedule.id,
       };
@@ -1274,7 +1275,9 @@ export default {
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
         }
-        this.$refs.scheduleDateTime.resetValidation();
+        if (this.$refs.scheduleDateTime) {
+          this.$refs.scheduleDateTime.resetValidation();
+        }
       }, 300);
     },
 
@@ -1640,17 +1643,19 @@ export default {
             if (parseInt(StudyHour) < 12) {
               StudyHour = parseInt(StudyHour) + 12;
             }
-            break;
-
-          case "AM":
-            StudyHour = parseInt(StudyHour);
+            StudyHour = StudyHour.toString();
             break;
         }
 
-        StudyMin = parseInt(StudyMin);
-        var studyDateTime = new Date(
-          this.studyDate + " " + StudyHour + ":" + StudyMin
-        );
+        if (StudyHour.length == 1) {
+          StudyHour = "0" + StudyHour;
+        }
+
+        if (StudyMin.length == 1) {
+          StudyMin = "0" + StudyMin;
+        }
+
+        var studyDateTime = this.studyDate + "T" + StudyHour + ":" + StudyMin;
 
         return studyDateTime;
       } else {

@@ -32,10 +32,10 @@ export default {
     // async deleteUpload() {
     //   await login.check_login();
     // },
-    beforePageDestroyed: function() {
-      this.$store.dispatch("setToken", null);
-      login.logout();
-    },
+    // beforePageDestroyed: function() {
+    //   this.$store.dispatch("setToken", null);
+    //   login.logout();
+    // },
   },
 
   async created() {
@@ -51,7 +51,7 @@ export default {
     //   event.returnValue = "";
     // });
 
-    window.addEventListener("beforeunload", this.beforePageDestroyed);
+    // window.addEventListener("beforeunload", this.beforePageDestroyed);
 
     try {
       await login.check_login();

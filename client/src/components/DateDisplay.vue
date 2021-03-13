@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import moment from "moment";
+import moment from "moment-timezone";
 
 export default {
   props: {
@@ -18,9 +18,9 @@ export default {
       switch (format) {
         case "long":
           if (moment(date).diff(moment(), "days") >= -60) {
-            formatedDate = moment(date).format("h:mmA, MMM D (ddd)");
+            formatedDate = moment(date).tz('America/Toronto').format("h:mmA, MMM D (ddd)");
           } else {
-            formatedDate = moment(date).format("h:mm, MM/DD/YYYY");
+            formatedDate = moment(date).tz('America/Toronto').format("h:mm, MM/DD/YYYY");
           }
 
           if (status != "Confirmed") {
@@ -30,7 +30,7 @@ export default {
           break;
 
         default:
-          formatedDate = moment(date).format("L");
+          formatedDate = moment(date).tz('America/Toronto').format("L");
           break;
       }
 

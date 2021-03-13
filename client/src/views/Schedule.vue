@@ -521,7 +521,6 @@
             v-model="dialogSchedule"
             max-width="1200px"
             :retain-focus="false"
-            persistent
           >
             <v-stepper v-model="e1">
               <v-stepper-header>
@@ -967,7 +966,7 @@ import calendar from "@/services/calendar";
 
 import RTU from "@/services/realtimeUpdate";
 
-import moment from "moment";
+import moment from "moment-timezone";
 
 import ExtraStudies from "@/components/ExtraStudies";
 
@@ -1453,6 +1452,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
+        .tz("America/Toronto")
         .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
@@ -1495,7 +1495,7 @@ export default {
           //     this.appointments[0].ZoomLink;
 
           this.currentSchedule = {
-            AppointmentTime: moment(this.studyDateTime).toISOString(true),
+            AppointmentTime: this.studyDateTime,
             Status: this.response,
             FK_Family: this.currentFamily.id,
             Note: this.scheduleNotes,
@@ -1507,16 +1507,16 @@ export default {
               this.scheduleNotes,
               this.appointments
             ),
-            start: {
-              dateTime: moment(this.studyDateTime).toISOString(true),
-              timeZone: "America/Toronto",
-            },
-            end: {
-              dateTime: moment(this.studyDateTime)
-                .add(1, "h")
-                .toISOString(true),
-              timeZone: "America/Toronto",
-            },
+            // start: {
+            //   dateTime: moment(this.studyDateTime).toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
+            // end: {
+            //   dateTime: moment(this.studyDateTime)
+            //     .add(1, "h")
+            //     .toISOString(true),
+            //   timeZone: "America/Toronto",
+            // },
             attendees: this.Experimenters,
           };
 
@@ -1620,22 +1620,23 @@ export default {
       });
 
       var calendarEvent = {
+        AppointmentTime: currentSchedule.AppointmentTime,
         summary: studyNames.join(" + "),
         location: this.$store.state.location,
         description: this.calendarDescription(
           this.scheduleNotes,
           this.appointments
         ),
-        start: {
-          dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-          timeZone: "America/Toronto",
-        },
-        end: {
-          dateTime: moment(currentSchedule.AppointmentTime)
-            .add(1, "h")
-            .toISOString(true),
-          timeZone: "America/Toronto",
-        },
+        // start: {
+        //   dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
+        //   timeZone: "America/Toronto",
+        // },
+        // end: {
+        //   dateTime: moment(currentSchedule.AppointmentTime)
+        //     .add(1, "h")
+        //     .toISOString(true),
+        //   timeZone: "America/Toronto",
+        // },
         attendees: attendees,
         scheduleId: this.scheduleId,
       };
@@ -1771,7 +1772,7 @@ export default {
         }
         this.loadingStatus = false;
       } else {
-        alert('Schedule date or time is not correct.')
+        alert("Schedule date or time is not correct.");
       }
     },
 
@@ -1892,7 +1893,9 @@ export default {
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
         }
-        this.$refs.scheduleDateTime.resetValidation();
+        if (this.$refs.scheduleDateTime) {
+          this.$refs.scheduleDateTime.resetValidation();
+        }
       }, 300);
     },
 
@@ -2074,6 +2077,7 @@ export default {
           NextContactNote: "Parents asked to be removed from the database.",
           LastContactDate: moment()
             .startOf("day")
+            .tz("America/Toronto")
             .format("YYYY-MM-DD"),
           NoMoreContact: true,
         };
@@ -2142,7 +2146,7 @@ export default {
     studyDateTime() {
       if (this.studyTime && this.studyDate) {
         var StudyTimeString = this.studyTime.slice(0, 5);
-        var AMPM = this.studyTime.slice(5, 7);
+        var AMPM = this.studyTime.slice(5, 7).toUpperCase();
         var StudyHour = StudyTimeString.split(":")[0];
         var StudyMin = StudyTimeString.split(":")[1];
 
@@ -2151,39 +2155,21 @@ export default {
             if (parseInt(StudyHour) < 12) {
               StudyHour = parseInt(StudyHour) + 12;
             }
-            break;
-
-          case "AM":
-            StudyHour = parseInt(StudyHour);
+            StudyHour = StudyHour.toString();
             break;
         }
 
-        StudyMin = parseInt(StudyMin);
+        if (StudyHour.length == 1) {
+          StudyHour = "0" + StudyHour;
+        }
 
-        var studyDateTime =
-          // moment(this.studyDate).add(StudyHour, 'hours').add(StudyMin, 'minutes').toDate()
-          new Date(this.studyDate + " " + StudyHour + ":" + StudyMin);
+        if (StudyMin.length == 1) {
+          StudyMin = "0" + StudyMin;
+        }
 
-        // .getTime() +
-        // StudyHour * 3600 * 1000 +
-        // StudyMin * 60000 +
-        // new Date(this.studyDate).getTimezoneOffset() * 60000;
+        var studyDateTime = this.studyDate + "T" + StudyHour + ":" + StudyMin;
 
-        // studyDateTime = new Date(studyDateTime);
-        // var studyDateTime =
-        //   new Date(this.studyDate).getTime() +
-        //   StudyHour * 3600 * 1000 +
-        //   StudyMin * 60000 +
-        //   new Date(this.studyDate).getTimezoneOffset() * 60000;
-
-        // studyDateTime = new Date(studyDateTime);
-
-        // console.log(moment(this.studyDate).isDST())
-
-        // console.log(this.studyDate + 'T' + StudyHour + ":" + StudyMin)
-        // console.log(moment(this.studyDate).toDate())
-
-        // console.log(studyDateTime)
+        console.log(studyDateTime);
         return studyDateTime;
       } else {
         return null;

@@ -45,17 +45,7 @@ const log = require("../controllers/log");
 
 exports.create = asyncHandler(async (req, res) => {
   var newScheduleInfo = req.body;
-  // if (newScheduleInfo.Status == "Confirmed") {
-  //   // Create a calendar event
-  //   const calEvent = await google.calendar.events.insert({
-  //     calendarId: "primary",
-  //     resource: newScheduleInfo,
-  //     sendNotifications: true,
-  //   });
-
-  //   newScheduleInfo.calendarEventId = calEvent.data.id;
-  //   newScheduleInfo.eventURL = calEvent.data.htmlLink;
-  // }
+  newScheduleInfo.AppointmentTime = moment(newScheduleInfo.AppointmentTime).toISOString(true)
 
   try {
     const schedule = await model.schedule.create(newScheduleInfo, {
@@ -363,6 +353,23 @@ exports.week = asyncHandler(async (req, res) => {
 // Update an appointment by the id in the request
 exports.update = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
+
+  if (updatedScheduleInfo.AppointmentTime) {
+    
+    updatedScheduleInfo.start = {
+      dateTime: moment(updatedScheduleInfo.AppointmentTime).toISOString(true),
+      timeZone: "America/Toronto",
+    };
+    
+    updatedScheduleInfo.end = {
+      dateTime: moment(updatedScheduleInfo.AppointmentTime)
+      .add(1, "h") // might change if multiple studies are scheduled for one visit
+      .toISOString(true),
+      timeZone: "America/Toronto",
+    };
+
+    updatedScheduleInfo.AppointmentTime = moment(updatedScheduleInfo.AppointmentTime).toISOString(true)
+  }
 
   if (updatedScheduleInfo.id) {
     var ID = updatedScheduleInfo.id;

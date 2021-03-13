@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const model = require("../models/DRDB");
+const moment = require("moment");
 
 // Require google from googleapis package.
 const { google } = require("googleapis");
@@ -31,8 +32,20 @@ const { google } = require("googleapis");
 // }
 
 exports.create = asyncHandler(async (req, res) => {
-  const event = req.body;
+  var event = req.body;
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
+  event.start = {
+    dateTime: moment(event.AppointmentTime).toISOString(true),
+    timeZone: "America/Toronto",
+  }
+
+  event.end = {
+    dateTime: moment(event.AppointmentTime)
+      .add(1, "h")
+      .toISOString(true),
+    timeZone: "America/Toronto",
+  }
 
   try {
 

@@ -210,7 +210,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="dialog" max-width="1200px" persistent>
+      <v-dialog v-model="dialog" max-width="1200px">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -235,93 +235,93 @@
               <v-row style="height: 650px" align="start" justify="center" dense>
                 <v-card outlined style="height: 650px" width="90%">
                   <v-form
-                        ref="scheduleDateTime"
-                        v-model="validScheduleDateTime"
-                        lazy-validation
-                      >
-                      <v-row
-                    style="height: 100px"
-                    align="center"
-                    justify="start"
-                    dense
+                    ref="scheduleDateTime"
+                    v-model="validScheduleDateTime"
+                    lazy-validation
                   >
-                    <v-col cols="12" md="3" class="text-left">
-                      <div class="title" style="padding-left: 8px">
-                        {{ "Study date & time:" }}
-                      </div>
-                    </v-col>
-                    <v-col cols="12" md="2">
-                      <v-text-field
-                        ref="studyDate"
-                        label="Study date"
-                        v-model="studyDate"
-                        append-icon="event"
-                        :rules="$rules.dob"
-                        @click:append="datePicker = true"
-                        :disabled="
-                          response != 'Confirmed' || skipStudyDateTimeStatus
-                        "
-                        hide-details
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" md="1"></v-col>
-                    <v-col cols="12" md="2">
-                      <v-combobox
-                        v-model="studyTime"
-                        :items="$studyTimeSlots"
-                        :rules="$rules.time"
-                        label="Study time"
-                        :disabled="
-                          response != 'Confirmed' || skipStudyDateTimeStatus
-                        "
-                        hide-details
-                        dense
-                      ></v-combobox>
-                    </v-col>
-                    <v-col cols="12" md="1"></v-col>
-                    <v-col cols="12" md="3">
-                      <v-tooltip right>
-                        <template v-slot:activator="{ on }">
-                          <div v-on="on">
-                            <v-checkbox
-                              style="padding: 4px !important"
-                              label="Skip study date/time"
-                              class="ma-0 pa-0"
-                              :value="skipStudyDateTimeStatus"
-                              @change="skipStudyDateTime()"
-                              hide-details
-                              dense
-                            ></v-checkbox>
-                          </div>
-                        </template>
-                        <span
-                          >Check this box to use current date/time for the
-                          current appointment.<br />NO Google Calendar event
-                          will be created.</span
-                        >
-                      </v-tooltip>
-                      <v-tooltip right>
-                        <template v-slot:activator="{ on }">
-                          <div v-on="on">
-                            <v-checkbox
-                              style="padding: 4px !important"
-                              label="Skip reminder email"
-                              class="ma-0 pa-0"
-                              :value="skipReminderEmailStatus"
-                              @change="skipReminderEmail()"
-                              hide-details
-                              dense
-                            ></v-checkbox>
-                          </div>
-                        </template>
-                        <span
-                          >Check this box to prevent reminder email from being
-                          sent to the participant.</span
-                        >
-                      </v-tooltip>
-                    </v-col>
-                  </v-row>
+                    <v-row
+                      style="height: 100px"
+                      align="center"
+                      justify="start"
+                      dense
+                    >
+                      <v-col cols="12" md="3" class="text-left">
+                        <div class="title" style="padding-left: 8px">
+                          {{ "Study date & time:" }}
+                        </div>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-text-field
+                          ref="studyDate"
+                          label="Study date"
+                          v-model="studyDate"
+                          append-icon="event"
+                          :rules="$rules.dob"
+                          @click:append="datePicker = true"
+                          :disabled="
+                            response != 'Confirmed' || skipStudyDateTimeStatus
+                          "
+                          hide-details
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="12" md="1"></v-col>
+                      <v-col cols="12" md="2">
+                        <v-combobox
+                          v-model="studyTime"
+                          :items="$studyTimeSlots"
+                          :rules="$rules.time"
+                          label="Study time"
+                          :disabled="
+                            response != 'Confirmed' || skipStudyDateTimeStatus
+                          "
+                          hide-details
+                          dense
+                        ></v-combobox>
+                      </v-col>
+                      <v-col cols="12" md="1"></v-col>
+                      <v-col cols="12" md="3">
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on }">
+                            <div v-on="on">
+                              <v-checkbox
+                                style="padding: 4px !important"
+                                label="Skip study date/time"
+                                class="ma-0 pa-0"
+                                :value="skipStudyDateTimeStatus"
+                                @change="skipStudyDateTime()"
+                                hide-details
+                                dense
+                              ></v-checkbox>
+                            </div>
+                          </template>
+                          <span
+                            >Check this box to use current date/time for the
+                            current appointment.<br />NO Google Calendar event
+                            will be created.</span
+                          >
+                        </v-tooltip>
+                        <v-tooltip right>
+                          <template v-slot:activator="{ on }">
+                            <div v-on="on">
+                              <v-checkbox
+                                style="padding: 4px !important"
+                                label="Skip reminder email"
+                                class="ma-0 pa-0"
+                                :value="skipReminderEmailStatus"
+                                @change="skipReminderEmail()"
+                                hide-details
+                                dense
+                              ></v-checkbox>
+                            </div>
+                          </template>
+                          <span
+                            >Check this box to prevent reminder email from being
+                            sent to the participant.</span
+                          >
+                        </v-tooltip>
+                      </v-col>
+                    </v-row>
                   </v-form>
                   <v-divider style="margin-bottom: 16px"></v-divider>
                   <div style="height: 290px; overflow-y: scroll !important">
@@ -665,7 +665,7 @@ import schedule from "@/services/schedule";
 
 import ExtraStudies from "@/components/ExtraStudies";
 
-import moment from "moment";
+import moment from "moment-timezone";
 
 export default {
   components: {
@@ -882,9 +882,7 @@ export default {
         if (this.editedIndex > -1) {
           this.editedSchedule.Status = "Confirmed";
 
-          this.editedSchedule.AppointmentTime = moment(
-            this.studyDateTime
-          ).toISOString(true);
+          this.editedSchedule.AppointmentTime = this.studyDateTime;
 
           var studyNames = this.editedSchedule.Appointments.map(
             (appointment) => {
@@ -902,16 +900,16 @@ export default {
 
           this.editedSchedule.summary = studyNames.join(" + ");
 
-          this.editedSchedule.start = {
-            dateTime: moment(this.studyDateTime).toISOString(true),
-            timeZone: "America/Toronto",
-          };
-          this.editedSchedule.end = {
-            dateTime: moment(this.studyDateTime)
-              .add(1, "h") // might change if multiple studies are scheduled for one visit
-              .toISOString(true),
-            timeZone: "America/Toronto",
-          };
+          // this.editedSchedule.start = {
+          //   dateTime: moment(this.studyDateTime).toISOString(true),
+          //   timeZone: "America/Toronto",
+          // };
+          // this.editedSchedule.end = {
+          //   dateTime: moment(this.studyDateTime)
+          //     .add(1, "h") // might change if multiple studies are scheduled for one visit
+          //     .toISOString(true),
+          //   timeZone: "America/Toronto",
+          // };
 
           if (this.skipReminderEmailStatus) {
             this.editedSchedule.Reminded = true;
@@ -946,6 +944,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
+        .tz("America/Toronto")
         .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
@@ -1109,7 +1108,9 @@ export default {
         this.skipReminderEmailStatus = false;
         this.Experimenters = [];
         this.primaryExperimenterList = [];
-        this.$refs.scheduleDateTime.resetValidation();
+        if (this.$refs.scheduleDateTime) {
+          this.$refs.scheduleDateTime.resetValidation();
+        }
       }, 300);
     },
 
@@ -1577,17 +1578,19 @@ export default {
             if (parseInt(StudyHour) < 12) {
               StudyHour = parseInt(StudyHour) + 12;
             }
-            break;
-
-          case "AM":
-            StudyHour = parseInt(StudyHour);
+            StudyHour = StudyHour.toString();
             break;
         }
 
-        StudyMin = parseInt(StudyMin);
-        var studyDateTime = new Date(
-          this.studyDate + " " + StudyHour + ":" + StudyMin
-        );
+        if (StudyHour.length == 1) {
+          StudyHour = "0" + StudyHour;
+        }
+
+        if (StudyMin.length == 1) {
+          StudyMin = "0" + StudyMin;
+        }
+
+        var studyDateTime = this.studyDate + "T" + StudyHour + ":" + StudyMin;
 
         return studyDateTime;
       } else {
@@ -1597,6 +1600,7 @@ export default {
     TodaysDate() {
       return moment()
         .startOf("day")
+        .tz("America/Toronto")
         .format("YYYY-MM-DD");
     },
     reminderEmailDisable() {

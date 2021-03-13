@@ -552,6 +552,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
       } else {
         body = body + experimenter.Name.split(" ")[0] + ",<br><br>The following is your study tomorrow! Good luck! :)<br><br>";
       }
+
       // table th, table td{
       //   text-align: center;
       //   }
@@ -560,7 +561,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
         // as Primary experimenter 
         body = body + '<table style="width:90%; border-collapse: collapse !important;">'
-        body = body + "<tr><th width='15%'" + TH + ">Study time</th>" +
+        body = body + "<tr><th width='15%'" + TH + ">Study time(Eastern Time)</th>" +
           "<th width='15%' " + TH + ">Study name</th>" +
           "<th width='18%' " + TH + ">Parent</th>" +
           "<th width='7%' " + TH + ">Child</th>" +
@@ -626,7 +627,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
         body = body + "<h2>Studies that you are the secondary experimenter:</h2>"
         // as Secondary experimenter 
         body = body + '<table style="width:90%; border-collapse: collapse !important;">'
-        body = body + "<tr><th width='15%'" + TH2nd + ">Study time</th>" +
+        body = body + "<tr><th width='15%'" + TH2nd + ">Study time (Eastern Time)</th>" +
           "<th width='15%' " + TH2nd + ">Study name</th>" +
           "<th width='18%' " + TH2nd + ">Parent</th>" +
           "<th width='7%' " + TH2nd + ">Child</th>" +

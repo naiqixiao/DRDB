@@ -535,7 +535,7 @@ export default {
       time: [
         // (value) => !!value || "Required.",
         (value) => {
-          const pattern = /^((1[0-2]|0?[1-9]):([0-5][0-9])([AaPp][Mm]))$/;
+          const pattern = /^((1[0-2]|0?[1-9]):([0-9]|[0-5]\d|59)([AaPp][Mm]))$/;
           if (value) {
             return pattern.test(value) || "Invalid time format.";
           }
