@@ -43,7 +43,7 @@
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.1.20210313</h4>
+      <h4>V1.1.20210402</h4>
     </v-col>
 
     <v-dialog
@@ -203,7 +203,12 @@ export default {
         } catch (error) {
           this.error = error.response.data.error;
 
-          alert(error.response.data.error);
+          switch (error.response.status) {
+            case 500:
+            case 502:
+            alert("Calm down....\n\nThe backend server is not running properly.\n\nAsk the administor to fix this issue.");
+            break;
+          }
         }
 
         this.$store.dispatch("setLoadingStatus", false);
