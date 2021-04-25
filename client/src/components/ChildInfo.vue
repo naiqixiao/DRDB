@@ -965,7 +965,7 @@ export default {
         const newStudySchedule = await schedule.create(newSchedule);
 
         var calendarEvent = Object.assign({}, newSchedule);
-        calendarEvent.scheduleId = this.currentSchedule.id;
+        calendarEvent.scheduleId = newStudySchedule.data.id;
 
         this.currentSchedule = newStudySchedule.data;
         this.currentSchedule.AppointmentTime = newSchedule.AppointmentTime;

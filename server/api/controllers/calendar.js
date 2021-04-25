@@ -59,11 +59,9 @@ exports.create = asyncHandler(async (req, res) => {
     updatedScheduleInfo.calendarEventId = calEvent.data.id;
     updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
 
-
     await model.schedule.update(updatedScheduleInfo, {
       where: { id: event.scheduleId },
     });
-
 
     res.status(200).send(calEvent.data);
     console.log("Calendar event successfully created: " + calEvent.data.id);

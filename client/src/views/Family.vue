@@ -603,6 +603,7 @@ export default {
 
         this.Families[this.page - 1] = Object.assign({}, updatedFamily.data[0]);
         this.currentFamily = this.Families[this.page - 1];
+        // console.log(this.currentFamily)
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
