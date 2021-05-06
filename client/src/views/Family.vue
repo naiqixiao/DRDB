@@ -77,7 +77,7 @@
                 @input="getSearchKeys(item.field, $event)"
                 :label="item.label"
                 :value="
-                  item.label === 'Phone'
+                  item.label === 'Phone' || item.label === 'Cell Phone'
                     ? PhoneFormated(currentFamily[item.field])
                     : currentFamily[item.field]
                 "
