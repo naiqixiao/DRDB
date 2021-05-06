@@ -355,6 +355,9 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.Phone) {
     queryString.Phone = { [Op.like]: `${req.query.Phone}%` };
   }
+  if (req.query.CellPhone) {
+    queryString.CellPhone = { [Op.like]: `${req.query.CellPhone}%` };
+  }
 
   if (req.query.NextContactDate) {
     queryString.NextContactDate = {
