@@ -503,6 +503,23 @@ export default {
           }
         }
       ],
+      emailRequired: [
+        (value) => !!value || "Required.",
+        (value) => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if (value) { return pattern.test(value) || "Invalid e-mail."; }
+          else {
+            return true
+          }
+        },
+        (value) => {
+          if (value) {
+            return (value && value.length <= 90) || "Max 90 characters"
+          } else {
+            return true
+          }
+        }
+      ],
       phone: [
         (value) => {
           const pattern = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
