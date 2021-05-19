@@ -756,10 +756,10 @@ export default {
         }
       } else {
         try {
-          const Result = await study.update(this.editedStudy);
+          await study.update(this.editedStudy);
 
-          this.currentStudy = Result.data;
-          Object.assign(this.Studies[this.editedIndex], Result.data);
+          this.currentStudy = this.editedStudy;
+          Object.assign(this.Studies[this.editedIndex], this.editedStudy);
           this.$store.dispatch("setStudies", this.Studies);
         } catch (error) {
           if (error.response.status === 401) {

@@ -437,7 +437,7 @@ export default {
     editPersonnel() {
       this.editedPersonnel = Object.assign({}, this.currentPersonnel);
       this.editedIndex = this.Personnels.indexOf(this.currentPersonnel);
-      console.log(this.editedIndex);
+      // console.log(this.editedIndex);
       this.dialog = true;
     },
 
@@ -466,10 +466,10 @@ export default {
         }
       } else {
         try {
-          const Result = await personnel.update(this.editedPersonnel);
+          await personnel.update(this.editedPersonnel);
 
-          this.currentPersonnel = Result.data;
-          Object.assign(this.Personnels[this.editedIndex], Result.data);
+          this.currentPersonnel = this.editedPersonnel;
+          Object.assign(this.Personnels[this.editedIndex], this.editedPersonnel);
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
