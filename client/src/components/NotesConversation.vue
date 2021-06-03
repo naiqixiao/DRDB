@@ -137,7 +137,9 @@ export default {
       };
 
       try {
-        await conversation.create(newConversation);
+        const result = await conversation.create(newConversation);
+        newConversation.id = result.data.id;
+
         this.conv = "";
         this.Conversation.push(newConversation);
         console.log("Conversation added!");
