@@ -344,11 +344,9 @@ export default {
         trainingMode: this.$store.state.trainingMode,
       };
 
-      await family.search(queryString);
-
       var Results = await family.search(queryString);
-      if (Results.data[0].Children) {
-        this.Children = Results.data[0].Children;
+      if (Results.data.families[0].Children) {
+        this.Children = Results.data.families[0].Children;
       }
       this.dialogAddAppointments = true;
     },

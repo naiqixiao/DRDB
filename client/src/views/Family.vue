@@ -232,7 +232,7 @@
                     </v-btn>
                   </div>
                 </template>
-                <span>Delete family information</span>
+                <span>No more contact</span>
               </v-tooltip>
             </v-col>
 
@@ -465,6 +465,7 @@
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
           tableHeight="450px"
+          @nextContactDone="updateNextContactFrontend"
         ></ScheduleTable>
       </v-col>
 
@@ -599,9 +600,12 @@ export default {
         queryString.trainingMode = this.$store.state.trainingMode;
 
         var updatedFamily = await family.search(queryString);
-        updatedFamily.scheduled = true;
+        updatedFamily.data.families[0].scheduled = true;
 
-        this.Families[this.page - 1] = Object.assign({}, updatedFamily.data[0]);
+        this.Families[this.page - 1] = Object.assign(
+          {},
+          updatedFamily.data.families[0]
+        );
         this.currentFamily = this.Families[this.page - 1];
         // console.log(this.currentFamily)
       } catch (error) {
@@ -641,8 +645,8 @@ export default {
 
       try {
         const Results = await family.search(this.queryString);
-        if (Results.data.length > 0) {
-          this.Families = Results.data;
+        if (Results.data.families.length > 0) {
+          this.Families = Results.data.families;
           this.page = 1;
           this.currentFamily = this.Families[this.page - 1];
 
@@ -661,7 +665,8 @@ export default {
           this.currentFamily.Phone = "";
           this.currentFamily.CellPhone = "";
           this.currentFamily.id = "";
-          alert("no family can be found");
+
+          alert(Results.data.message);
         }
 
         this.searchStatus = !this.searchStatus;
@@ -803,13 +808,24 @@ export default {
     },
 
     updateNextContactFrontend(nextContact) {
+      // remove the family from current screen.
+      // if (nextContact.NoMoreContact) {
+      //   this.currentFamily = Object.assign({}, this.familyTemplate);
+
+      //   this.Families
+
+      // } else {
       this.currentFamily.NextContactNote = nextContact.NextContactNote;
       this.currentFamily.NextContactDate = nextContact.NextContactDate;
       this.currentFamily.NoMoreContact = nextContact.NoMoreContact;
       this.currentFamily.LastContactDate = nextContact.LastContactDate;
       this.currentFamily.AssignedLab = nextContact.AssignedLab;
-
+      
       Object.assign(this.Families[this.page - 1], this.currentFamily);
+      // }
+
+      // if (nextContact.NoMoreContact) {
+      // }
 
       this.nextContactDialog = false;
       console.log("Next Contact updated!");

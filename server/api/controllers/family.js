@@ -168,10 +168,10 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       // check whether the family exists
 
       var child = {};
-      // child.Name = newFamilies[i].Name;
-      child.Name = newFamilies[i].Child_Last_Name
-        ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
-        : newFamilies[i].Child_First_Name;
+      child.Name = newFamilies[i].Name;
+      // child.Name = newFamilies[i].Child_Last_Name
+      //   ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
+      //   : newFamilies[i].Child_First_Name;
       child.Sex = newFamilies[i].Sex;
       child.Gender = newFamilies[i].Gender;
       child.DoB = newFamilies[i].DoB;
@@ -380,7 +380,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.AssignedLab = req.query.AssignedLab;
   }
 
-  queryString.NoMoreContact = 0;
+  // queryString.NoMoreContact = 0;
 
   if (req.query.childName) {
     const children = await model.child.findAll({
@@ -399,7 +399,7 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.id = familyIDs;
   }
 
-  const families = await model.family.findAll({
+  var families = await model.family.findAll({
     where: queryString,
     include: [
       model.conversations,
@@ -470,10 +470,42 @@ exports.search = asyncHandler(async (req, res) => {
     ],
   });
 
-  shuffle(families);
+  // remove families who requested "No more contact."
+  var nOfRemoval = 0
+  families.forEach((family) => {
 
-  res.status(200).send(families);
-  console.log("Search successful!");
+    if (family.NoMoreContact === 1) {
+
+      var i = families.indexOf(family)
+      families.splice(i, 1);
+
+      nOfRemoval += 1
+
+    }
+
+  })
+
+  var message = '';
+
+  if (families.length < 1) {
+
+    if (nOfRemoval > 0) {
+
+      message = "The family was removed from database upon parents' request."
+
+    } else {
+
+      message = "Oops, we can't find the family you're looking for."
+    }
+
+  } else {
+
+    shuffle(families);
+
+  }
+
+  res.status(200).send({ families: families, message: message });
+  // console.log("Search successful!");
 });
 
 // Retrieve all families from the database.
