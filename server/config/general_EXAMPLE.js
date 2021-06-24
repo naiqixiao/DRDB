@@ -1,6 +1,6 @@
 exports.URL = 'URL of the system';
 
-exports.otherRequirement = ' (you need to turn on McMaster VPN)'
+exports.otherRequirement = ''
 
 exports.sequelize = new Sequelize("Database_Name", "User", "Password", {
   host: "mysql",
