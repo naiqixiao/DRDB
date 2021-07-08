@@ -761,6 +761,11 @@ export default {
           comDText = "Do you want to send the email?";
           break;
 
+        case "Completed":
+          comDTitle = "Study appointment update";
+          comDText = "You're going to update Study Completion status, continue?";
+          break;
+
         default:
           comDTitle = "Study appointment update";
           comDText =
