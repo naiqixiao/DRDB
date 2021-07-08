@@ -146,8 +146,8 @@
               class="mr-0 pa-0"
               @input="updateSchedule(item, 'Completed')"
               dense
-              :disabled="completeIconEnable(item)"
             ></v-simple-checkbox>
+              <!-- :disabled="completeIconEnable(item)" -->
           </div>
         </template>
         <span>Mark the study is done.</span>
