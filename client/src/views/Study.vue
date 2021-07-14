@@ -570,7 +570,7 @@ export default {
         },
 
         {
-          text: "Compled?",
+          text: "Completed?",
           align: "center",
           value: "Completed",
           sortable: false,
