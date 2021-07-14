@@ -175,14 +175,28 @@
                   >
                     <div v-if="!!item.options">
                       <!-- :item-value="$Options[item.options]" -->
-                      <v-combobox
-                        justify="start"
-                        :items="$Options[item.options]"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        :label="item.label"
-                        dense
-                      ></v-combobox>
+                      <div v-if="item.field != 'AutismHistory'">
+                        <v-combobox
+                          justify="start"
+                          v-model="editedFamily[item.field]"
+                          :items="$Options[item.options]"
+                          outlined
+                          :label="item.label"
+                          dense
+                        ></v-combobox>
+                      </div>
+                      <div v-else>
+                        <!-- :item-value="editedFamily[item.field]"
+                        :item-text="AutismText(editedFamily[item.field])" -->
+                        <v-select
+                          :items="$Options[item.options]"
+                          v-model="editedFamily[item.field]"
+                          :return-object="false"
+                          :label="item.label"
+                          outlined
+                          dense
+                        ></v-select>
+                      </div>
                     </div>
                     <div v-else-if="item.rules">
                       <v-text-field

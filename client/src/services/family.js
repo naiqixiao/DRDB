@@ -24,7 +24,6 @@ export default {
   },
   update(familyInfo) {
     familyInfo.User = {
-      
       Name: store.state.name,
       Email: store.state.user,
       LabName: store.state.labName

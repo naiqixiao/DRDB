@@ -75,6 +75,26 @@ exports.create = asyncHandler(async (req, res) => {
     delete newFamilyInfo["id"];
   }
 
+  // if (newFamilyInfo.AutismHistory.value) {
+
+  //   // newFamilyInfo.AutismHistory = newFamilyInfo.AutismHistory.value;
+  //   // switch (newFamilyInfo.AutismHistory) {
+  //   //   case 'Yes':
+  //   //     newFamilyInfo.AutismHistory = 1;
+  //   //     break;
+
+  //   //   case 'No':
+  //   //     newFamilyInfo.AutismHistory = 0;
+  //   //     break;
+
+  //   //   case 'Unknown':
+  //   //     newFamilyInfo.AutismHistory = null;
+  //   //     break;
+
+  //   // }
+
+  // }
+
   try {
     const newFamily = await model.family.create(newFamilyInfo, {
       include: [
@@ -661,30 +681,52 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 exports.update = asyncHandler(async (req, res) => {
   var ID = req.body.id;
   var updatedFamilyInfo = req.body;
-
-  // console.log(updatedFamilyInfo)
-
-  const family = await model.family.update(updatedFamilyInfo, {
-    where: { id: ID },
-  });
-
-  // Log
-  const User = req.body.User;
-
-  var logKeywords = 'Family Updated';
-
-  if ('NoMoreContact' in updatedFamilyInfo) {
-    if (updatedFamilyInfo.NoMoreContact) {
-      logKeywords = 'Family Removed'
-    }
-  }
-
-  await log.createLog(logKeywords, User, "updated a family's information (" +
-    ID +
-    ")");
-
-  res.status(200).send(family);
   console.log("Family Information Updated!");
+
+  // if (updatedFamilyInfo.AutismHistory.value) {
+
+  //   updatedFamilyInfo.AutismHistory = updatedFamilyInfo.AutismHistory.value;
+
+  //   // switch (updatedFamilyInfo.AutismHistory.value) {
+  //   //   case 'Yes':
+  //   //     updatedFamilyInfo.AutismHistory = 1;
+  //   //     break;
+
+  //   //   case 'No':
+  //   //     updatedFamilyInfo.AutismHistory = 0;
+  //   //     break;
+
+  //   //   case 'Unknown':
+  //   //     updatedFamilyInfo.AutismHistory = null;
+  //   //     break;
+
+  //   // }
+
+  // }
+  try {
+    const family = await model.family.update(updatedFamilyInfo, {
+      where: { id: ID },
+    });
+
+    // Log
+    const User = req.body.User;
+
+    var logKeywords = 'Family Updated';
+
+    if ('NoMoreContact' in updatedFamilyInfo) {
+      if (updatedFamilyInfo.NoMoreContact) {
+        logKeywords = 'Family Removed'
+      }
+    }
+
+    await log.createLog(logKeywords, User, "updated a family's information (" +
+      ID +
+      ")");
+
+    res.status(200).send(family);
+  } catch (error) {
+    throw error;
+  }
 });
 
 exports.releaseFamily = asyncHandler(async (req, res) => {

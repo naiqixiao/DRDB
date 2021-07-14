@@ -95,6 +95,7 @@ export default {
       { label: "Race (S)", field: "RaceSecondary", width: "3", options: "race" },
       { label: "English %", width: "3", field: "EnglishPercent" },
       { label: "Postal Code", field: "Address", width: "3" },
+      { label: "Autism History", field: "AutismHistory", width: "3", options: "autism" },
     ];
 
     Vue.prototype.$familyContactInfo = [
@@ -446,6 +447,19 @@ export default {
     Vue.prototype.$sex = ["F", "M"];
 
     Vue.prototype.$Options = {
+      autism: [{
+        text: 'Yes',
+        value: 1
+      },
+      {
+        text: 'No',
+        value: 0
+      },
+      {
+        text: 'Unknown',
+        value: null
+      }
+      ],
       sex: ["F", "M"],
       language: ["English", "French", "Chinese", "Spanish", "Hindi"],
       race: ["Indian", "Asian", "African", "Hispanic", "Caucasian", "Arabic"],

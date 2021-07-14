@@ -284,15 +284,32 @@
                 >
                   <div v-if="!!item.options">
                     <!-- :item-value="$Options[item.options]" -->
-                    <v-combobox
-                      class="textfield-family"
-                      justify="start"
-                      :items="$Options[item.options]"
-                      v-model="editedItem[item.field]"
-                      outlined
-                      :label="item.label"
-                      dense
-                    ></v-combobox>
+                    <!-- :item-value="['1', 2, null]"
+                      :item-text="['Yes', 'No', 'Unknown']" -->
+                    <div v-if="item.field != 'AutismHistory'">
+                      <v-combobox
+                        class="textfield-family"
+                        justify="start"
+                        v-model="editedItem[item.field]"
+                        :items="$Options[item.options]"
+                        outlined
+                        :label="item.label"
+                        dense
+                      ></v-combobox>
+                    </div>
+                    <div v-else>
+                      <!-- :item-value="editedItem[item.field]"
+                        :item-text="AutismText(editedItem[item.field])" -->
+                      <v-select
+                        class="textfield-family"
+                        :items="$Options[item.options]"
+                        v-model="editedItem[item.field]"
+                        :return-object="false"
+                        :label="item.label"
+                        outlined
+                        dense
+                      ></v-select>
+                    </div>
                   </div>
                   <div v-else-if="item.rules">
                     <v-text-field
@@ -751,6 +768,10 @@ export default {
           if (this.editedIndex > -1) {
             this.editedItem.UpdatedBy = store.state.userID;
 
+            delete this.editedItem.Schedules;
+            delete this.editedItem.Children;
+            delete this.editedItem.Conversations;
+
             await family.update(this.editedItem);
 
             Object.assign(this.Families[this.editedIndex], this.editedItem);
@@ -778,13 +799,13 @@ export default {
 
             this.Families.push(this.editedItem);
             this.page = this.Families.length;
-            console.log("Family is creted!");
+            // console.log("Family is creted!");
 
             this.$refs.form.resetValidate();
             // this.$emit("searchFamily", this.editedItem);
           }
         } catch (error) {
-          console.log(error.response);
+          console.log(error);
         }
 
         this.close();
@@ -820,7 +841,7 @@ export default {
       this.currentFamily.NoMoreContact = nextContact.NoMoreContact;
       this.currentFamily.LastContactDate = nextContact.LastContactDate;
       this.currentFamily.AssignedLab = nextContact.AssignedLab;
-      
+
       Object.assign(this.Families[this.page - 1], this.currentFamily);
       // }
 
