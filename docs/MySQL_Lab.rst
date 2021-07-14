@@ -50,6 +50,8 @@ Table colums
     Type: decimal(5,2)
 **MaxAge**: *study criterion, the oldest age in months of eligible participants*
     Type: decimal(5,2)
+**ASDParticipant**: *study criterion, should participants with family Autism histories be included into the study? Include, Exclude, or Only recruit participants with premature birth*
+    Type: enum('Include','Exclude','Only')
 **PrematureParticipant**: *study criterion, should prematurely borned participants be included into the study? Include, Exclude, or Only recruit participants with premature birth*
     Type: enum('Include','Exclude','Only')
 **VisionLossParticipant**: *study criterion, should vision impaired participants be included into the study? Include, Exclude, or Only recruit participants with vision deficit*

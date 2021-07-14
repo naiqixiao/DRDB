@@ -683,6 +683,9 @@ async function searchScheudles(queryString) {
             include: [{
               model: model.appointment,
               attributes: ['FK_Study']
+            }, {
+              model: model.family,
+              attributes: ['AutismHistory']
             }]
           },
           {
@@ -718,6 +721,9 @@ async function searchScheudles(queryString) {
             include: [{
               model: model.appointment,
               attributes: ['FK_Study']
+            }, {
+              model: model.family,
+              attributes: ['AutismHistory']
             }]
           },
           { model: model.conversations, }]

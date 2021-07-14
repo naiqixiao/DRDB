@@ -232,6 +232,7 @@ export default {
     Vue.prototype.$studyCriteriaFields = [
       { label: "Min Age", field: "MinAge", width: "5" },
       { label: "Max Age", field: "MaxAge", width: "5" },
+      { label: "ASD Participants", field: "ASDParticipant", options: "inclusion", width: "3" },
       { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3" },
       { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
       { label: "Vision Loss Participants", field: "VisionLossParticipant", options: "inclusion", width: "3" },

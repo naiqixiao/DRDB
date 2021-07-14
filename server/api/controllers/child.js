@@ -180,29 +180,28 @@ exports.search = asyncHandler(async (req, res) => {
       [Op.between]: [req.query.minAge * 30.5 - 1, req.query.maxAge * 30.5 - 1],
     };
   }
-  if (req.query.PrematureParticipant) {
+
+  if (req.query.PrematureParticipant != null) {
     queryString.PrematureBirth = req.query.PrematureParticipant;
   }
 
-  if (req.query.IllParticipant) {
+  if (req.query.IllParticipant != null) {
     queryString.Illness = req.query.IllParticipant;
   }
 
-  if (req.query.VisionLossParticipant) {
+  if (req.query.VisionLossParticipant != null) {
     queryString.VisionLoss = req.query.VisionLossParticipant;
   }
 
-  if (req.query.HearingLossParticipant) {
+  if (req.query.HearingLossParticipant != null) {
     queryString.HearingLoss = req.query.HearingLossParticipant;
   }
 
-
-  // if (req.query.pastParticipants) {
-  //   queryString.id = { [Op.notIn]: req.query.pastParticipants };
-  // }
+  if (req.query.ASDParticipant != null) {
+    queryString["$Family.AutismHistory$"] = req.query.ASDParticipant;
+  }
 
   if (req.query.studyID) {
-
 
     const studyInfo = await model.study.findOne({
       where: { id: req.query.studyID }, include: [
@@ -243,7 +242,10 @@ exports.search = asyncHandler(async (req, res) => {
           },
           {
             model: model.child,
-            include: [{ model: model.appointment, attributes: ["FK_Study"] }],
+            include: [{ model: model.appointment, attributes: ["FK_Study"] }, {
+              model: model.family,
+              attributes: ['AutismHistory']
+            }],
           },
           {
             model: model.appointment,
@@ -272,7 +274,7 @@ exports.search = asyncHandler(async (req, res) => {
         through: {
           model: model.sibling,
         },
-        include: [{ model: model.appointment, include: [model.schedule] }],
+        include: [{ model: model.appointment, include: [model.schedule] }, { model: model.family }],
       },
     ],
     order: [[model.appointment, model.schedule, "AppointmentTime", "DESC"]],
@@ -343,7 +345,7 @@ exports.updateAge = asyncHandler(async (req, res) => {
   try {
 
     await model.sequelize.query(queryString);
-    
+
     await log.createLog("Age Updated", {}, "Children's age is updated");
 
   } catch (error) {

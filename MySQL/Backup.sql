@@ -334,6 +334,7 @@ CREATE TABLE `Study` (
   `FK_Lab` int NOT NULL,
   `FK_Personnel` int NOT NULL,
   `StudyType` varchar(30) NOT NULL,
+  `ASDParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `PrematureParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `VisionLossParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `HearingLossParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',

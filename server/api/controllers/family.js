@@ -410,6 +410,10 @@ exports.search = asyncHandler(async (req, res) => {
             model: model.appointment,
             attributes: ["FK_Study"],
           },
+          {
+            model: model.family,
+            attributes: ["AutismHistory"],
+          },
         ],
       },
       {
@@ -423,6 +427,10 @@ exports.search = asyncHandler(async (req, res) => {
                 include: [{
                   model: model.appointment,
                   attributes: ['FK_Study']
+                },
+                {
+                  model: model.family,
+                  attributes: ["AutismHistory"],
                 }]
               },]
           },
@@ -437,6 +445,9 @@ exports.search = asyncHandler(async (req, res) => {
                 include: [{
                   model: model.appointment,
                   attributes: ['FK_Study']
+                }, {
+                  model: model.family,
+                  attributes: ['AutismHistory']
                 }]
               },
               {
@@ -570,7 +581,10 @@ exports.followupSearch = asyncHandler(async (req, res) => {
           {
             model: model.appointment,
             attributes: ["FK_Study"],
-          },
+          }, {
+            model: model.family,
+            attributes: ['AutismHistory']
+          }
         ],
       },
       {
@@ -584,6 +598,9 @@ exports.followupSearch = asyncHandler(async (req, res) => {
                 include: [{
                   model: model.appointment,
                   attributes: ['FK_Study']
+                }, {
+                  model: model.family,
+                  attributes: ['AutismHistory']
                 }]
               },]
           },
@@ -598,6 +615,9 @@ exports.followupSearch = asyncHandler(async (req, res) => {
                 include: [{
                   model: model.appointment,
                   attributes: ['FK_Study']
+                }, {
+                  model: model.family,
+                  attributes: ['AutismHistory']
                 }]
               },
               {

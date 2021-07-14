@@ -61,6 +61,11 @@ module.exports = function(sequelize, DataTypes) {
 			type: DataTypes.STRING(30),
 			allowNull: false
 		},
+		ASDParticipant: {
+			type: DataTypes.ENUM('Include','Exclude','Only'),
+			allowNull: false,
+			defaultValue: "Include"
+		},
 		PrematureParticipant: {
 			type: DataTypes.ENUM('Include','Exclude','Only'),
 			allowNull: false,

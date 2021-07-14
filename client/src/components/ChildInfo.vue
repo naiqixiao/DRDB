@@ -823,8 +823,10 @@ export default {
       var ElegibleStudies = [];
 
       this.$store.state.studies.forEach((study) => {
-        if (this.studyElegibility(study, child)) {
-          ElegibleStudies.push(study.id);
+        if (!study.Completed) {
+          if (this.studyElegibility(study, child)) {
+            ElegibleStudies.push(study.id);
+          }
         }
       });
 
@@ -874,7 +876,8 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
-        .tz('America/Toronto').format("YYYY-MM-DD");
+        .tz("America/Toronto")
+        .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
 
@@ -1419,76 +1422,96 @@ export default {
     },
 
     studyElegibility(study, child) {
-      var age =
-        child.Age >= study.MinAge * 30.5 - 1 &&
-        child.Age <= study.MaxAge * 30.5 - 1;
+      if (child.DoB != null) {
+        var age =
+          child.Age >= study.MinAge * 30.5 - 1 &&
+          child.Age <= study.MaxAge * 30.5 - 1;
+        var asd = false;
 
-      var hearing = false;
+        switch (study.ASDParticipant) {
+          case "Only":
+            child.Family.AutismHistory ? (asd = true) : (asd = false);
+            break;
 
-      switch (study.HearingLossParticipant) {
-        case "Only":
-          child.HearingLoss ? (hearing = true) : (hearing = false);
-          break;
+          case "Exclude":
+            child.Family.AutismHistory ? (asd = false) : (asd = true);
 
-        case "Exclude":
-          child.HearingLoss ? (hearing = false) : (hearing = true);
+            break;
 
-          break;
+          case "Include":
+            hearing = true;
+            break;
+        }
 
-        case "Include":
-          hearing = true;
-          break;
+        var hearing = false;
+
+        switch (study.HearingLossParticipant) {
+          case "Only":
+            child.HearingLoss ? (hearing = true) : (hearing = false);
+            break;
+
+          case "Exclude":
+            child.HearingLoss ? (hearing = false) : (hearing = true);
+
+            break;
+
+          case "Include":
+            hearing = true;
+            break;
+        }
+
+        var vision = false;
+        switch (study.VisionLossParticipant) {
+          case "Only":
+            child.VisionLoss ? (vision = true) : (vision = false);
+            break;
+
+          case "Exclude":
+            child.VisionLoss ? (vision = false) : (vision = true);
+
+            break;
+
+          case "Include":
+            vision = true;
+            break;
+        }
+
+        var premature = false;
+        switch (study.PrematureParticipant) {
+          case "Only":
+            child.PrematureBirth ? (premature = true) : (premature = false);
+            break;
+
+          case "Exclude":
+            child.PrematureBirth ? (premature = false) : (premature = true);
+
+            break;
+
+          case "Include":
+            premature = true;
+            break;
+        }
+
+        var illness = false;
+        switch (study.IllParticipant) {
+          case "Only":
+            child.Illness ? (illness = true) : (illness = false);
+            break;
+
+          case "Exclude":
+            child.Illness ? (illness = false) : (illness = true);
+
+            break;
+
+          case "Include":
+            illness = true;
+            break;
+        }
+
+        return age && asd && hearing && vision && premature && illness;
+      } else {
+        return false;
       }
-
-      var vision = false;
-      switch (study.VisionLossParticipant) {
-        case "Only":
-          child.VisionLoss ? (vision = true) : (vision = false);
-          break;
-
-        case "Exclude":
-          child.VisionLoss ? (vision = false) : (vision = true);
-
-          break;
-
-        case "Include":
-          vision = true;
-          break;
-      }
-
-      var premature = false;
-      switch (study.PrematureParticipant) {
-        case "Only":
-          child.PrematureBirth ? (premature = true) : (premature = false);
-          break;
-
-        case "Exclude":
-          child.PrematureBirth ? (premature = false) : (premature = true);
-
-          break;
-
-        case "Include":
-          premature = true;
-          break;
-      }
-
-      var illness = false;
-      switch (study.IllParticipant) {
-        case "Only":
-          child.Illness ? (illness = true) : (illness = false);
-          break;
-
-        case "Exclude":
-          child.Illness ? (illness = false) : (illness = true);
-
-          break;
-
-        case "Include":
-          illness = true;
-          break;
-      }
-
-      return age && hearing && vision && premature && illness;
     },
 
     AgeFormated(DoB) {

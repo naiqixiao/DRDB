@@ -135,6 +135,7 @@ exports.create = asyncHandler(async (req, res) => {
       ReminderTemplate: "<p>Please enter a template for reminder email sent to parents for their upcoming study.</p>",
       Completed: false,
       StudyType: "Behavioural",
+      ASDParticipant: "Include",
       PrematureParticipant: "Include",
       HearingLossParticipant: "Include",
       VisionLossParticipant: "Include",
