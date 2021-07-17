@@ -1260,13 +1260,13 @@ export default {
     },
 
     resetSchedule() {
+      this.emailButtonText = "Send email";
+      this.scheduleButtonText = "Schedule";
       setTimeout(() => {
         this.e1 = 1;
         this.currentSchedule = { id: null };
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
-        this.emailButtonText = "Send email";
-        this.scheduleButtonText = "Schedule";
         this.scheduleNotes = "";
         // this.response = null;
         this.studyDate = null;
@@ -1287,7 +1287,7 @@ export default {
         if (this.$refs.scheduleDateTime) {
           this.$refs.scheduleDateTime.resetValidation();
         }
-      }, 300);
+      }, 1000);
     },
 
     closeSchedule() {
@@ -1432,7 +1432,7 @@ export default {
         var age =
           child.Age >= study.MinAge * 30.5 - 1 &&
           child.Age <= study.MaxAge * 30.5 - 1;
-        
+
         var asd = false;
 
         switch (study.ASDParticipant) {
@@ -1641,7 +1641,7 @@ export default {
 
     PotentialStudies() {
       var PotentialStudies = [];
-      
+
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
         var previousStudies = this.UniquePreviousStudies[i];

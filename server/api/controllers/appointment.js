@@ -210,6 +210,7 @@ exports.search = asyncHandler(async (req, res) => {
           "FK_Lab",
           "EmailTemplate",
           "ReminderTemplate",
+          "FollowUPEmailSnippet",
         ],
       },
       {

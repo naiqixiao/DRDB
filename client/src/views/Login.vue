@@ -171,6 +171,7 @@ export default {
 
           this.$store.dispatch("setEmailOpening", response.data.emailOpening);
           this.$store.dispatch("setEmailClosing", response.data.emailClosing);
+          this.$store.dispatch("setTYEmailClosing", response.data.TYEmail);
           this.$store.dispatch("setLocation", response.data.location);
           this.$store.dispatch(
             "setTransportationInstructions",
@@ -267,6 +268,7 @@ export default {
 
         this.$store.dispatch("setEmailOpening", response.data.emailOpening);
         this.$store.dispatch("setEmailClosing", response.data.emailClosing);
+        this.$store.dispatch("setTYEmailClosing", response.data.TYEmail);
         this.$store.dispatch("setLocation", response.data.location);
         this.$store.dispatch(
           "setTransportationInstructions",

@@ -1897,14 +1897,15 @@ export default {
     },
 
     resetSchedule() {
+      this.emailButtonText = "Send email";
+      this.scheduleButtonText = "Schedule";
+
       setTimeout(() => {
         this.e1 = 1;
         this.scheduleId = null;
         this.response = null;
         this.studyDate = null;
         this.studyTime = null;
-        this.emailButtonText = "Send email";
-        this.scheduleButtonText = "Schedule";
         this.scheduleNotes = "";
         this.emailDialog = false;
         this.nextContactDialog = false;
@@ -1925,7 +1926,7 @@ export default {
         if (this.$refs.scheduleDateTime) {
           this.$refs.scheduleDateTime.resetValidation();
         }
-      }, 300);
+      }, 1000);
     },
 
     studyElegibility(study, child) {

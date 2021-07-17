@@ -381,6 +381,7 @@ exports.login = asyncHandler(async (req, res) => {
     studies: personnel.Lab.Studies,
     emailOpening: personnel.Lab.EmailOpening,
     emailClosing: personnel.Lab.EmailClosing,
+    TYEmail: personnel.Lab.TYEmail,
     location: personnel.Lab.Location,
     transportationInstructions: personnel.Lab.TransportationInstructions,
     ZoomLink: personnel.Lab.ZoomLink,
@@ -461,6 +462,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
       studies: personnel.Lab.Studies,
       emailOpening: personnel.Lab.EmailOpening,
       emailClosing: personnel.Lab.EmailClosing,
+      TYEmail: personnel.Lab.TYEmail,
       location: personnel.Lab.Location,
       transportationInstructions: personnel.Lab.TransportationInstructions,
     });

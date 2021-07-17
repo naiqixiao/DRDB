@@ -72,6 +72,15 @@ export default {
     schedule.lab = store.state.lab;
     return api().post("schedule/remind", schedule);
   },
+  tyEmail(schedule) {
+    schedule.User = {
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+    schedule.lab = store.state.lab;
+    return api().post("schedule/tyEmail", schedule);
+  },
   delete(schedule) {
     schedule.User = {
       

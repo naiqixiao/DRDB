@@ -226,13 +226,14 @@ export default {
     Vue.prototype.$labEmailTemplate = [
       { label: "Email Opening", field: "EmailOpening", placeholder: "The opening sentence to parents" },
       { label: "Email Closing", field: "EmailClosing", placeholder: "The closing sentence to parents. It usually mentions how the parents can reach the lab." },
+      { label: "Thank You Email Snipplet", field: "TYEmail", placeholder: "A paragraph shown at the bottom of thank you emails." },
       { label: "Transportation Instructions", field: "TransportationInstructions", placeholder: "Instructions for how to come to the lab." },
-      { label: "Lab Location", field: "Location", placeholder: "Lab location, showing in calendar events." },
+      // { label: "Lab Location", field: "Location", placeholder: "Lab location, showing in calendar events." },
     ];
 
     Vue.prototype.$studyCriteriaFields = [
-      { label: "Min Age", field: "MinAge", width: "5" },
-      { label: "Max Age", field: "MaxAge", width: "5" },
+      { label: "Min Age", field: "MinAge", width: "4" },
+      { label: "Max Age", field: "MaxAge", width: "4" },
       { label: "ASD Participants", field: "ASDParticipant", options: "inclusion", width: "3" },
       { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3" },
       { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
@@ -296,7 +297,7 @@ export default {
         text: "Study",
         align: "center",
         value: "Study",
-        width: "14%",
+        width: "12%",
       },
       {
         text: "Study Time",
@@ -328,19 +329,26 @@ export default {
         align: "center",
         value: "actions",
         sortable: false,
-        width: "16%",
+        width: "12%",
       },
       {
         text: "Reminder",
         align: "center",
         value: "Reminded",
         sortable: false,
-        width: "8%",
+        width: "6%",
       },
       {
         text: "Complete",
         align: "center",
         value: "Completed",
+        sortable: false,
+        width: "8%",
+      },
+      {
+        text: "TY Email",
+        align: "center",
+        value: "ThankYouEmail",
         sortable: false,
         width: "8%",
       },

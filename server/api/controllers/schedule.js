@@ -567,6 +567,35 @@ exports.remind = asyncHandler(async (req, res) => {
   }
 });
 
+exports.tyEmail = asyncHandler(async (req, res) => {
+  var updatedScheduleInfo = req.body;
+
+  if (updatedScheduleInfo.id) {
+    var ID = updatedScheduleInfo.id;
+    delete updatedScheduleInfo["id"];
+  }
+
+  try {
+    const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
+      where: { id: ID },
+    });
+
+    // Log
+    const User = req.body.User;
+
+    await log.createLog("Appointment update", User, "sent a thank you email for study schedule (" +
+      ID +
+      ")");
+
+    res.status(200).send(updatedSchedule);
+
+    console.log("Thank you email sent.");
+  } catch (error) {
+    console.log("Thank you email error: " + error);
+    throw error;
+  }
+});
+
 exports.complete = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
 

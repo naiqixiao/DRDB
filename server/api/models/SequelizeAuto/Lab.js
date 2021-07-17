@@ -41,6 +41,10 @@ module.exports = function(sequelize, DataTypes) {
 			type: 'MEDIUMTEXT',
 			allowNull: true
 		},
+		TYEmail: {
+			type: 'MEDIUMTEXT',
+			allowNull: true
+		},
 		Location: {
 			type: 'MEDIUMTEXT',
 			allowNull: true

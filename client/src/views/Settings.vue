@@ -103,9 +103,9 @@
                   color="primary"
                   :disabled="
                     passwordConfirmationRule != true ||
-                    newPassword == null ||
-                    password == null ||
-                    newPasswordRule != true
+                      newPassword == null ||
+                      password == null ||
+                      newPasswordRule != true
                   "
                   @click="changePassword"
                   >Confirm</v-btn
@@ -146,10 +146,10 @@
                 @click.stop="googleCredentialsURL('lab')"
                 :disabled="
                   $store.state.role != 'Admin' &&
-                  $store.state.role != 'PI' &&
-                  $store.state.role != 'PostDoc' &&
-                  $store.state.role != 'GradStudent' &&
-                  $store.state.role != 'Lab manager'
+                    $store.state.role != 'PI' &&
+                    $store.state.role != 'PostDoc' &&
+                    $store.state.role != 'GradStudent' &&
+                    $store.state.role != 'Lab manager'
                 "
                 >Setup Google Account</v-btn
               >
@@ -169,10 +169,10 @@
                 @click.stop="editLabInfo"
                 :disabled="
                   $store.state.role != 'Admin' &&
-                  $store.state.role != 'PI' &&
-                  $store.state.role != 'PostDoc' &&
-                  $store.state.role != 'GradStudent' &&
-                  $store.state.role != 'Lab manager'
+                    $store.state.role != 'PI' &&
+                    $store.state.role != 'PostDoc' &&
+                    $store.state.role != 'GradStudent' &&
+                    $store.state.role != 'Lab manager'
                 "
                 >Update Lab Info</v-btn
               >
@@ -408,74 +408,86 @@
       </v-dialog>
 
       <v-dialog
+        fullscreen
+        hide-overlay
+        transition="dialog-top-transition"
         v-model="dialogEditLab"
-        max-width="800px"
         :retain-focus="false"
-        persistent
       >
         <v-card outlined>
           <v-card-title class="headline">Lab information</v-card-title>
+          <v-card-text>
+            <v-form ref="formEdit" v-model="valid" lazy-validation>
+              <v-row justify="start">
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    class="textfield-family"
+                    background-color="textbackground"
+                    hide-details
+                    label="Lab's Name"
+                    v-model="editedLab.LabName"
+                    placeholder="  "
+                    :rules="$rules.required"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    class="textfield-family"
+                    background-color="textbackground"
+                    hide-details
+                    label="Location"
+                    v-model="editedLab.Location"
+                    placeholder="  "
+                    :rules="$rules.required"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+              </v-row>
 
-          <v-form ref="formEdit" v-model="valid" lazy-validation>
-            <v-row justify="start">
-              <v-col cols="12" md="6">
-                <v-text-field
-                  class="textfield-family"
-                  background-color="textbackground"
-                  hide-details
-                  label="Lab's Name"
-                  v-model="editedLab.LabName"
-                  placeholder="  "
-                  :rules="$rules.required"
-                  outlined
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
+              <v-row>
+                <v-col md="12" class="subtitle">
+                  <v-divider></v-divider>
+                  <h4 class="text-left">Zoom Link (for online studies):</h4>
+                </v-col>
+                <v-col cols="12" md="12">
+                  <v-text-field
+                    class="textfield-family"
+                    background-color="textbackground"
+                    hide-details
+                    label="Zoom Link"
+                    v-model="editedLab.ZoomLink"
+                    placeholder="  "
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col md="12" class="subtitle">
+                  <v-divider></v-divider>
+                  <h4 class="text-left">Email snipplets:</h4>
+                </v-col>
+                <v-col
+                  cols="12"
+                  md="6"
+                  v-for="item in this.$labEmailTemplate"
+                  :key="item.label"
+                >
+                  <h3 class="text-left">{{ item.label }}</h3>
 
-            <v-row>
-              <v-col md="12" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Zoom Link (for online studies):</h4>
-              </v-col>
-              <v-col cols="12" md="12">
-                <v-text-field
-                  class="textfield-family"
-                  background-color="textbackground"
-                  hide-details
-                  label="Zoom Link"
-                  v-model="editedLab.ZoomLink"
-                  placeholder="  "
-                  outlined
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col md="12" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Email Components:</h4>
-              </v-col>
-              <v-col
-                cols="12"
-                md="12"
-                v-for="item in this.$labEmailTemplate"
-                :key="item.label"
-              >
-                <v-textarea
-                  class="conv-textarea"
-                  :label="item.label"
-                  :placeholder="item.placeholder"
-                  outlined
-                  no-resize
-                  rows="3"
-                  hide-details
-                  v-model="editedLab[item.field]"
-                  :rules="$rules.required"
-                ></v-textarea>
-              </v-col>
-            </v-row>
-          </v-form>
+                  <vue-editor
+                    v-model="editedLab[item.field]"
+                    :editor-toolbar="customToolbar"
+                  ></vue-editor>
+
+                  
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-card-text>
 
           <v-card-actions>
             <v-row justify="space-between" style="height: 50px">
@@ -499,8 +511,12 @@
 import login from "@/services/login";
 import lab from "@/services/lab";
 import externalAPIs from "@/services/externalAPIs";
+import { VueEditor } from "vue2-editor";
 
 export default {
+  components: {
+    VueEditor,
+  },
   data() {
     return {
       password: null,
@@ -533,6 +549,11 @@ export default {
         LabName: null,
       },
       roleOptions: ["PI", "Lab manager"],
+      customToolbar: [
+        ["bold", "italic", "underline"],
+        [{ color: [] }, { background: [] }],
+        ["link"],
+      ],
     };
   },
 
@@ -567,6 +588,7 @@ export default {
       this.editedLab.LabName = this.$store.state.labName;
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
+      this.editedLab.TYEmail = this.$store.state.tyEmailClosing;
       this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
       this.editedLab.ZoomLink = this.$store.state.ZoomLink;
@@ -620,6 +642,7 @@ export default {
 
           this.$store.dispatch("setEmailOpening", this.editedLab.EmailOpening);
           this.$store.dispatch("setEmailClosing", this.editedLab.EmailClosing);
+          this.$store.dispatch("setTYEmailClosing", this.editedLab.TYEmail);
           this.$store.dispatch("setLocation", this.editedLab.Location);
           this.$store.dispatch(
             "setTransportationInstructions",

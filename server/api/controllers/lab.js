@@ -102,10 +102,11 @@ exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
 
-    newLabInfo.EmailOpening = "Email opening (currently not in use).";
-    newLabInfo.EmailClosing = "Please feel free to let us know if you wish to change the time for your study. You can either send us an email.";
+    newLabInfo.EmailOpening = "<p>PEmail opening (currently not in use).<\p>";
+    newLabInfo.EmailClosing = "<p>Please feel free to let us know if you wish to change the time for your study. You can either send us an email.<\p>";
+    newLabInfo.TYEmail = "<p>Please, if you have a chance, consider spreading the word to other families you may know who might like to participate.<\p>";
     newLabInfo.Location = "Psychology Building, McMaster University (used in calendar events)";
-    newLabInfo.TransportationInstructions = "Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.";
+    newLabInfo.TransportationInstructions = "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.<\p>";
 
     newLabInfo.Personnels.forEach((personnel) => {
       var password = Math.random()
@@ -133,6 +134,7 @@ exports.create = asyncHandler(async (req, res) => {
       EmailTemplate:
         "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
       ReminderTemplate: "<p>Please enter a template for reminder email sent to parents for their upcoming study.</p>",
+      FollowUPEmailSnippet: "<p>As we ment.</p>",
       Completed: false,
       StudyType: "Behavioural",
       ASDParticipant: "Include",

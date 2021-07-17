@@ -95,6 +95,8 @@ export default {
 
     generateEmailBody() {
       var emailBodyList = [];
+      var email = "";
+      var emailBody = "";
 
       // opening line, confirming the schedule date and time
       if (this.appointments) {
@@ -151,10 +153,9 @@ export default {
               "<p>Dear " +
               parentName +
               ",</p>" +
-              "<p>Thank you so much for visiting us with " +
+              "<p>Thank you so much for participating in our study with " +
               this.childNames() +
-              "!</p>" +
-              "<p>We are looking forward to seeing you again!</p>";
+              "! We had a wonderful time with you both! :-) </p>";
             break;
 
           case "Reminder":
@@ -197,9 +198,7 @@ export default {
                   " [at] h:mma"
                 ) +
                 "</b>.</p>" +
-                "<p>" +
-                this.$store.state.transportationInstructions +
-                "</p>";
+                this.$store.state.transportationInstructions;
             } else {
               opening =
                 "<p>Dear " +
@@ -220,161 +219,362 @@ export default {
             break;
         }
       }
-      // specific content for each schedueld study.
-      // const pattern = /\$\{\{([^}]+)\}\}/g;
 
-      var email = "";
-      if (this.emailType == "Reminder") {
-        var ZoomLink = "Zoom Link not available.";
+      // location
+      const location = this.$store.state.transportationInstructions;
 
-        if ("ZoomLink" in this.scheduleInfo.Appointments[0].Study.Lab) {
-          if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
-            ZoomLink =
-              "<a href='" +
-              this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
-              "'>Zoom Link</a>";
-          }
-        }
+      // closing
+      // const closing =
+      //   "<p>" +
+      //   this.$store.state.emailClosing +
+      //   "</p>" +
+      //   "<p>Best,</p><p>" +
+      //   this.$store.state.name +
+      //   "</p><p>" +
+      //   this.$store.state.role +
+      //   "</p><p>" +
+      //   this.$store.state.labName +
+      //   "</p>";
 
-        if (this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0) {
-          if (
-            this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
-          ) {
-            ZoomLink =
-              "<a href='" +
-              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
-                .ZoomLink +
-              "'>Zoom Link</a>";
-          }
-        }
+      // closing
+      var name = this.$store.state.name;
+      var role = this.$store.state.role;
 
-        var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-          /\${{ZoomLink}}/g,
-          ZoomLink
-        );
-
-        body = body.replace(/\${{childName}}/g, this.childNames());
-
-        if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
-          body =
-            body +
-            "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
-            "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
-        }
-
-        // closing
-        const closing =
-          "<p>" +
-          this.$store.state.emailClosing +
-          "</p>" +
-          "<p>Best,</p><p>" +
-          this.scheduleInfo.Personnel.Name +
-          "</p><p>" +
-          this.scheduleInfo.Personnel.Role +
-          "</p><p>" +
-          this.$store.state.labName +
-          "</p>";
-
-        email = opening + body + closing;
-      } else {
-        var emailBody = "";
-
-        this.appointments.forEach((appointment) => {
-          switch (this.emailType) {
-            case "Confirmation":
-            case "ScheduleUpdate":
-              emailBody = appointment.Study.EmailTemplate;
-              break;
-            case "Introduction":
-              emailBody = appointment.Study.Description;
-              break;
-          }
-          // Search for all the variables to be replaced, for instance ${"Column name"}
-
-          // var templateVars = appointment.Study.EmailTemplate.match(pattern);
-          // templateVars = Array.from(new Set(templateVars));
-
-          if (appointment.Child.Sex == "F") {
-            emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
-            emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
-            emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
-          } else {
-            emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
-            emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
-            emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
-          }
-
-          emailBody = emailBody.replace(
-            /\${{childName}}/g,
-            appointment.Child.Name || ""
-          );
-
-          emailBody = emailBody.replace(/\. he/g, ". He");
-          emailBody = emailBody.replace(/\. his/g, ". His");
-          emailBody = emailBody.replace(/\. she/g, ". She");
-          emailBody = emailBody.replace(/\. her/g, ". Her");
-
-          emailBody = emailBody.replace(
-            /\${{ZoomLink}}/g,
-            "<a href='" +
-              appointment.PrimaryExperimenter[0].ZoomLink +
-              "'>Zoom Link</a>"
-          );
-
-          emailBodyList.push(emailBody);
-        });
-
-        // location
-        const location =
-          "<p>" + this.$store.state.transportationInstructions + "</p>";
-        // closing
-        const closing =
-          "<p>" +
-          this.$store.state.emailClosing +
-          "</p>" +
-          "<p>Best,</p><p>" +
-          this.$store.state.name +
-          "</p><p>" +
-          this.$store.state.role +
-          "</p><p>" +
-          this.$store.state.labName +
-          "</p>";
-
-        switch (this.emailType) {
-          case "Confirmation":
-          case "ScheduleUpdate":
-            switch (this.appointments[0].Study.StudyType) {
-              case "Online":
-                email =
-                  opening +
-                  emailBodyList.join("<p></p>") +
-                  "<p>This study is an online study. You can participate at home. :)</p>" +
-                  closing;
-                break;
-
-              default:
-                email =
-                  opening + emailBodyList.join("<p></p>") + location + closing;
-                break;
-            }
-            break;
-
-          default:
-            email =
-              opening +
-              "<p>" +
-              this.$store.state.emailClosing +
-              "</p>" +
-              "<p>Best,</p><p>" +
-              this.$store.state.name +
-              "</p><p>" +
-              this.$store.state.role +
-              "</p><p>" +
-              this.$store.state.labName +
-              "</p>";
-            break;
-        }
+      if (this.scheduleInfo.Personnel) {
+        name = this.scheduleInfo.Personnel.Name;
+        role = this.scheduleInfo.Personnel.Role;
       }
+
+      const closing =
+        this.$store.state.emailClosing +
+        "<p>Best,</p><p>" +
+        name +
+        "</p><p>" +
+        role +
+        "</p><p>" +
+        this.$store.state.labName +
+        "</p>";
+
+      const TYclosing =
+        this.$store.state.tyEmailClosing +
+        "<p>Best,</p><p>" +
+        name +
+        "</p><p>" +
+        role +
+        "</p><p>" +
+        this.$store.state.labName +
+        "</p>";
+      // specific content for each schedueld study.
+
+      switch (this.emailType) {
+        case "Reminder":
+          var ZoomLink = "Zoom Link not available.";
+
+          if ("ZoomLink" in this.scheduleInfo.Appointments[0].Study.Lab) {
+            if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
+              ZoomLink =
+                "<a href='" +
+                this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
+                "'>Zoom Link</a>";
+            }
+          }
+
+          if (
+            this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0
+          ) {
+            if (
+              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
+            ) {
+              ZoomLink =
+                "<a href='" +
+                this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
+                  .ZoomLink +
+                "'>Zoom Link</a>";
+            }
+          }
+
+          var body =
+            this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+              /\${{ZoomLink}}/g,
+              ZoomLink
+            );
+
+          body = body.replace(/\${{childName}}/g, this.childNames());
+
+          if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
+            body =
+              body +
+              "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+              "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
+          }
+
+          email = opening + "<p></p>" + body + closing;
+          break;
+
+        case "Confirmation":
+        case "ScheduleUpdate":
+          this.appointments.forEach((appointment) => {
+            emailBody = appointment.Study.EmailTemplate;
+            if (appointment.Child.Sex == "F") {
+              emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+              emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+              emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+            } else {
+              emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+              emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+              emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+            }
+
+            emailBody = emailBody.replace(
+              /\${{childName}}/g,
+              appointment.Child.Name || ""
+            );
+
+            emailBody = emailBody.replace(/\. he/g, ". He");
+            emailBody = emailBody.replace(/\. his/g, ". His");
+            emailBody = emailBody.replace(/\. she/g, ". She");
+            emailBody = emailBody.replace(/\. her/g, ". Her");
+
+            emailBody = emailBody.replace(
+              /\${{ZoomLink}}/g,
+              "<a href='" +
+                appointment.PrimaryExperimenter[0].ZoomLink +
+                "'>Zoom Link</a>"
+            );
+
+            emailBodyList.push(emailBody);
+          });
+
+          switch (this.appointments[0].Study.StudyType) {
+            case "Online":
+              email =
+                opening +
+                "<p></p>" +
+                emailBodyList.join("<p></p>") +
+                "<p>This study is an online study. You can participate at home! :)</p>" +
+                closing;
+              break;
+
+            default:
+              email =
+                opening +
+                "<p></p>" +
+                emailBodyList.join("<p></p>") +
+                location +
+                closing;
+              break;
+          }
+
+          break;
+
+        case "Introduction":
+          this.appointments.forEach((appointment) => {
+            emailBody = appointment.Study.Description;
+            emailBodyList.push(emailBody);
+          });
+
+          switch (this.appointments[0].Study.StudyType) {
+            case "Online":
+              email =
+                opening +
+                "<p></p>" +
+                emailBodyList.join("<p></p>") +
+                "<p>This study is an online study. You can participate at home. :)</p>" +
+                closing;
+              break;
+
+            default:
+              email =
+                opening +
+                "<p></p>" +
+                emailBodyList.join("<p></p>") +
+                location +
+                closing;
+              break;
+          }
+
+          break;
+
+        case "ThankYou":
+          this.appointments.forEach((appointment) => {
+            if (appointment.Study.FollowUPEmailSnippet != "") {
+              emailBody = appointment.Study.FollowUPEmailSnippet;
+
+              if (appointment.Child.Sex == "F") {
+                emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+                emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+                emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+              } else {
+                emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+                emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+                emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+              }
+
+              emailBody = emailBody.replace(
+                /\${{childName}}/g,
+                appointment.Child.Name || ""
+              );
+
+              emailBody = emailBody.replace(/\. he/g, ". He");
+              emailBody = emailBody.replace(/\. his/g, ". His");
+              emailBody = emailBody.replace(/\. she/g, ". She");
+              emailBody = emailBody.replace(/\. her/g, ". Her");
+
+              emailBodyList.push(emailBody);
+            }
+          });
+
+          email = opening + emailBodyList.join("") + TYclosing;
+
+          break;
+      }
+
+      // if (this.emailType == "Reminder") {
+      // var ZoomLink = "Zoom Link not available.";
+      // if ("ZoomLink" in this.scheduleInfo.Appointments[0].Study.Lab) {
+      //   if (this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink) {
+      //     ZoomLink =
+      //       "<a href='" +
+      //       this.scheduleInfo.Appointments[0].Study.Lab.ZoomLink +
+      //       "'>Zoom Link</a>";
+      //   }
+      // }
+      // if (this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0) {
+      //   if (
+      //     this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
+      //   ) {
+      //     ZoomLink =
+      //       "<a href='" +
+      //       this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
+      //         .ZoomLink +
+      //       "'>Zoom Link</a>";
+      //   }
+      // }
+      // var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+      //   /\${{ZoomLink}}/g,
+      //   ZoomLink
+      // );
+      // body = body.replace(/\${{childName}}/g, this.childNames());
+      // if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
+      //   body =
+      //     body +
+      //     "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
+      //     "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
+      // }
+      // // closing
+      // const closing =
+      //   "<p>" +
+      //   this.$store.state.emailClosing +
+      //   "</p>" +
+      //   "<p>Best,</p><p>" +
+      //   this.scheduleInfo.Personnel.Name +
+      //   "</p><p>" +
+      //   this.scheduleInfo.Personnel.Role +
+      //   "</p><p>" +
+      //   this.$store.state.labName +
+      //   "</p>";
+      // email = opening + body + closing;
+      // } else {
+      //   var emailBody = "";
+
+      //   this.appointments.forEach((appointment) => {
+      //     switch (this.emailType) {
+      //       case "Confirmation":
+      //       case "ScheduleUpdate":
+      //         emailBody = appointment.Study.EmailTemplate;
+      //         break;
+      //       case "Introduction":
+      //         emailBody = appointment.Study.Description;
+      //         break;
+      //       case "ThankYou":
+      //         break;
+      //     }
+      //     // Search for all the variables to be replaced, for instance ${"Column name"}
+
+      //     // var templateVars = appointment.Study.EmailTemplate.match(pattern);
+      //     // templateVars = Array.from(new Set(templateVars));
+
+      //     if (appointment.Child.Sex == "F") {
+      //       emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+      //       emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+      //       emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+      //     } else {
+      //       emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+      //       emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+      //       emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+      //     }
+
+      //     emailBody = emailBody.replace(
+      //       /\${{childName}}/g,
+      //       appointment.Child.Name || ""
+      //     );
+
+      //     emailBody = emailBody.replace(/\. he/g, ". He");
+      //     emailBody = emailBody.replace(/\. his/g, ". His");
+      //     emailBody = emailBody.replace(/\. she/g, ". She");
+      //     emailBody = emailBody.replace(/\. her/g, ". Her");
+
+      //     emailBody = emailBody.replace(
+      //       /\${{ZoomLink}}/g,
+      //       "<a href='" +
+      //         appointment.PrimaryExperimenter[0].ZoomLink +
+      //         "'>Zoom Link</a>"
+      //     );
+
+      //     emailBodyList.push(emailBody);
+      //   });
+
+      //   // location
+      //   const location =
+      //     "<p>" + this.$store.state.transportationInstructions + "</p>";
+      //   // closing
+      //   const closing =
+      //     "<p>" +
+      //     this.$store.state.emailClosing +
+      //     "</p>" +
+      //     "<p>Best,</p><p>" +
+      //     this.$store.state.name +
+      //     "</p><p>" +
+      //     this.$store.state.role +
+      //     "</p><p>" +
+      //     this.$store.state.labName +
+      //     "</p>";
+
+      //   switch (this.emailType) {
+      //     case "Confirmation":
+      //     case "ScheduleUpdate":
+      //       switch (this.appointments[0].Study.StudyType) {
+      //         case "Online":
+      //           email =
+      //             opening +
+      //             emailBodyList.join("<p></p>") +
+      //             "<p>This study is an online study. You can participate at home. :)</p>" +
+      //             closing;
+      //           break;
+
+      //         default:
+      //           email =
+      //             opening + emailBodyList.join("<p></p>") + location + closing;
+      //           break;
+      //       }
+      //       break;
+
+      //     default:
+      //       email =
+      //         opening +
+      //         "<p>" +
+      //         this.$store.state.emailClosing +
+      //         "</p>" +
+      //         "<p>Best,</p><p>" +
+      //         this.$store.state.name +
+      //         "</p><p>" +
+      //         this.$store.state.role +
+      //         "</p><p>" +
+      //         this.$store.state.labName +
+      //         "</p>";
+      //       break;
+      //   }
+      // }
 
       return email;
     },

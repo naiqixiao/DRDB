@@ -24,6 +24,7 @@ export default new Vuex.Store({
     // ip: null,
     emailOpening: null,
     emailClosing: null,
+    tyEmailClosing: null,
     location: null,
     transportationInstructions: null,
     ZoomLink: null,
@@ -75,6 +76,9 @@ export default new Vuex.Store({
     },
     setEmailClosing(state, emailClosing) {
       state.emailClosing = emailClosing;
+    },
+    setTYEmailClosing(state, tyEmailClosing) {
+      state.tyEmailClosing = tyEmailClosing;
     },
     setLocation(state, location) {
       state.location = location;
@@ -134,6 +138,9 @@ export default new Vuex.Store({
     },
     setEmailClosing({ commit }, emailClosing) {
       commit("setEmailClosing", emailClosing);
+    },
+    setTYEmailClosing({ commit }, tyEmailClosing) {
+      commit("setTYEmailClosing", tyEmailClosing);
     },
     setLocation({ commit }, location) {
       commit("setLocation", location);

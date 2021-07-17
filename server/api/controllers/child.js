@@ -259,6 +259,7 @@ exports.search = asyncHandler(async (req, res) => {
                   "MaxAge",
                   "EmailTemplate",
                   "ReminderTemplate",
+                  "FollowUPEmailSnippet",
                   "StudyType",
                   "FK_Lab",
                 ],

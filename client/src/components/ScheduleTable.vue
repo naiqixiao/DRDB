@@ -154,6 +154,24 @@
       </v-tooltip>
     </template>
 
+    <template #item.ThankYouEmail="{ item }">
+      <v-tooltip top>
+        <template v-slot:activator="{ on }">
+          <div v-on="on">
+            <v-icon
+              :color="item.ThankYouEmail ? 'pink darken-1' : 'primary'"
+              :disabled="tyEmailEnable(item)"
+              @click="tyEmail(item)"
+              >{{ item.ThankYouEmail ? "favorite" : "favorite_border" }}</v-icon
+            >
+            <!-- :disabled="completeIconEnable(item)" -->
+          </div>
+        </template>
+        <span>Thank you email.</span>
+      </v-tooltip>
+      <!-- <v-icon ></v-icon> -->
+    </template>
+
     <template #expanded-item="{ headers, item }">
       <td :colspan="headers.length">
         <v-row
@@ -597,6 +615,44 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="dialogTYEmail" max-width="1100px">
+        <v-card outlined>
+          <v-card-title>
+            <span class="headline">Thank you email</span>
+          </v-card-title>
+          <v-row style="height: 700px" align="start" justify="center" dense>
+            <Email
+              ref="Email"
+              :dialog="dialogTYEmail"
+              :appointments="editedSchedule.Appointments"
+              :scheduleInfo="editedSchedule"
+              :familyInfo="editedSchedule.Family"
+              emailType="ThankYou"
+            ></Email>
+          </v-row>
+          <v-card-actions>
+            <v-row justify="center" align="center">
+              <v-col cols="12" md="2">
+                <v-btn
+                  color="primary"
+                  :disabled="
+                    !!!editedSchedule.Family.Email ||
+                      skipReminderEmailStatus ||
+                      !$store.state.labEmailStatus
+                  "
+                  @click="sendTYEmail()"
+                >
+                  <v-icon dark left v-show="reminderEmailStatus"
+                    >mdi-checkbox-marked-circle</v-icon
+                  >
+                  {{ emailButtonText }}
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
       <v-dialog v-model="dialogNote" max-width="600px">
         <v-card outlined>
           <v-card-title>
@@ -729,9 +785,11 @@ export default {
         ],
       },
       dialogReminderEmail: false,
+      dialogTYEmail: false,
       scheduleButtonText: "Confirm new study appointment",
       emailButtonText: "Send email",
       reminderEmailStatus: false,
+      tyEmailStatus: false,
       dialogNote: false,
       Experimenters: [],
       primaryExperimenterList: [],
@@ -750,6 +808,7 @@ export default {
       loadingStatus: false,
     };
   },
+
   methods: {
     async updateSchedule(item, status) {
       var comDTitle = "";
@@ -861,6 +920,19 @@ export default {
             break;
         }
       }
+    },
+
+    async tyEmail(item) {
+      this.editedIndex = this.Schedules.indexOf(item);
+      this.editedSchedule = Object.assign({}, item);
+      this.editedSchedule.Appointments[0].Child.Family = {};
+      this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+      this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
+
+      item.updatedAt = new Date().toISOString();
+      item.ThankYouEmail = true;
+
+      this.dialogTYEmail = true;
     },
 
     async updateNextContact() {
@@ -1097,7 +1169,9 @@ export default {
     },
 
     close() {
-      this.dialog = false;
+      this.scheduleButtonText = "Confirm new study appointment";
+      this.emailButtonText = "Send email";
+
       setTimeout(() => {
         this.studyDate = null;
         this.studyTime = null;
@@ -1107,8 +1181,7 @@ export default {
         this.emailSent = false;
         this.scheduleNextPage = false;
         this.scheduleUpdated = false;
-        this.scheduleButtonText = "Confirm new study appointment";
-        this.emailButtonText = "Send email";
+        this.dialog = false;
         this.skipStudyDateTimeStatus = false;
         this.skipConfirmationEmailStatus = false;
         this.skipReminderEmailStatus = false;
@@ -1117,7 +1190,7 @@ export default {
         if (this.$refs.scheduleDateTime) {
           this.$refs.scheduleDateTime.resetValidation();
         }
-      }, 300);
+      }, 1000);
     },
 
     rowSelected(item, row) {
@@ -1317,7 +1390,7 @@ export default {
 
         return age && asd && hearing && vision && premature && illness;
       } else {
-        return false
+        return false;
       }
     },
 
@@ -1391,6 +1464,21 @@ export default {
       return iconDisable;
     },
 
+    tyEmailEnable(item) {
+      var iconDisable = true;
+
+      switch (item.Status) {
+        case "Confirmed":
+          if (new Date(item.AppointmentTime) <= new Date()) {
+            iconDisable = false;
+          }
+
+          break;
+      }
+
+      return iconDisable;
+    },
+
     async sendReminderEmail() {
       try {
         if (this.emailButtonText == "Email Sent!") {
@@ -1422,19 +1510,68 @@ export default {
       }
     },
 
+    async sendTYEmail() {
+      try {
+        if (this.emailButtonText == "Email Sent!") {
+          if (
+            await this.$refs.confirmD.open(
+              "Send again?",
+              "A 'thank you' email was just sent to this family. Do you want to send it again?"
+            )
+          ) {
+            await this.$refs.Email.sendEmail();
+
+            this.emailButtonText = "Email Sent!";
+
+            this.tyEmailStatus = true;
+
+            const updatedSchedule = {
+              id: this.editedSchedule.id,
+              ThankYouEmail: true,
+            };
+
+            await schedule.tyEmail(updatedSchedule);
+          }
+        } else {
+          await this.$refs.Email.sendEmail();
+
+          this.emailButtonText = "Email Sent!";
+
+          this.tyEmailStatus = true;
+
+          const updatedSchedule = {
+            id: this.editedSchedule.id,
+            ThankYouEmail: true,
+          };
+
+          await schedule.tyEmail(updatedSchedule);
+        }
+
+        this.closeTYEmail();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
     async closeReminderEmail() {
       if (this.skipReminderEmailStatus) {
         await schedule.remind(this.editedSchedule);
       }
 
-      this.dialogReminderEmail = false;
+        this.emailButtonText = "Send email";
       setTimeout(() => {
         this.dialogReminderEmail = false;
-        this.dialogReminderEmail = false;
-        this.emailButtonText = "Send email";
         this.skipReminderEmailStatus = false;
         this.reminderEmailStatus = false;
-      }, 300);
+      }, 1000);
+    },
+
+    closeTYEmail() {
+      this.emailButtonText = "Send email";
+      setTimeout(() => {
+        this.dialogTYEmail = false;
+        this.tyEmailStatus = false;
+      }, 1000);
     },
 
     getColor(status, completed) {
@@ -1642,6 +1779,9 @@ export default {
     },
     dialogReminderEmail(val) {
       val || this.closeReminderEmail();
+    },
+    dialogTYEmail(val) {
+      val || this.closeTYEmail();
     },
     dialogNote(val) {
       val || this.closeScheduleNotes();

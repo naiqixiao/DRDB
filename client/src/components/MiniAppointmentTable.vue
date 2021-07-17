@@ -753,10 +753,10 @@ export default {
 
       // location
       const location =
-        "<p>" + this.$store.state.transportationInstructions + "</p>";
+        this.$store.state.transportationInstructions;
 
       // closing
-      const closing = "<p>" + this.$store.state.emailClosing + "</p>";
+      const closing = this.$store.state.emailClosing;
       "<p>Best,<br>" +
         this.$store.state.name +
         "<br>" +

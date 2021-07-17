@@ -239,6 +239,7 @@ export default {
 
       this.$store.dispatch("setEmailOpening", null);
       this.$store.dispatch("setEmailClosing", null);
+      this.$store.dispatch("setTYEmailClosing", null);
       this.$store.dispatch("setLocation", null);
       this.$store.dispatch("setTransportationInstructions", null);
       this.$store.dispatch("setZoomLink", null);

@@ -1,6 +1,6 @@
 /* jshint indent: 1 */
 
-module.exports = function(sequelize, DataTypes) {
+module.exports = function (sequelize, DataTypes) {
 	return sequelize.define('Study', {
 		id: {
 			autoIncrement: true,
@@ -62,27 +62,27 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false
 		},
 		ASDParticipant: {
-			type: DataTypes.ENUM('Include','Exclude','Only'),
+			type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
 			allowNull: false,
 			defaultValue: "Include"
 		},
 		PrematureParticipant: {
-			type: DataTypes.ENUM('Include','Exclude','Only'),
+			type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
 			allowNull: false,
 			defaultValue: "Include"
 		},
 		VisionLossParticipant: {
-			type: DataTypes.ENUM('Include','Exclude','Only'),
+			type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
 			allowNull: false,
 			defaultValue: "Include"
 		},
 		HearingLossParticipant: {
-			type: DataTypes.ENUM('Include','Exclude','Only'),
+			type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
 			allowNull: false,
 			defaultValue: "Include"
 		},
 		IllParticipant: {
-			type: DataTypes.ENUM('Include','Exclude','Only'),
+			type: DataTypes.ENUM('Include', 'Exclude', 'Only'),
 			allowNull: false,
 			defaultValue: "Include"
 		},
@@ -99,6 +99,10 @@ module.exports = function(sequelize, DataTypes) {
 		ReminderTemplate: {
 			type: DataTypes.TEXT,
 			allowNull: false
+		},
+		FollowUPEmailSnippet: {
+			type: DataTypes.TEXT,
+			allowNull: true
 		}
 	}, {
 		sequelize,

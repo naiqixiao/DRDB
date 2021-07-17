@@ -52,9 +52,8 @@ function emailBody(schedule) {
       childNames(schedule.Appointments) +
       moment(schedule.AppointmentTime).format(" [tomorrow at] h:mma") +
       "</b>.</p>" +
-      "<p>" +
-      schedule.Appointments[0].Study.Lab.TransportationInstructions +
-      "</p>";
+      schedule.Appointments[0].Study.Lab.TransportationInstructions;
+
   } else {
     opening =
       "<p>Dear " +
@@ -98,9 +97,7 @@ function emailBody(schedule) {
 
   // closing
   const closing =
-    "<p>" +
     schedule.Appointments[0].Study.Lab.EmailClosing +
-    "</p>" +
     "<p>Best,</p><p>" +
     schedule.Personnel.Name +
     "</p><p>" +
@@ -305,6 +302,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
                 "MaxAge",
                 "EmailTemplate",
                 "ReminderTemplate",
+                "FollowUPEmailSnippet",
                 "StudyType",
                 "FK_Lab",
               ],
