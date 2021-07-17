@@ -50,7 +50,13 @@
                 </v-col>
                 <v-spacer></v-spacer>
                 <v-col cols="12" md="5" style="padding: 0px !important">
-                  <body align="end" v-html="languageDisplay(child)"></body>
+                  <body
+                    align="end"
+                    style="
+                      overflow-y: scroll !important;
+                    "
+                    v-html="languageDisplay(child)"
+                  ></body>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -1426,6 +1432,7 @@ export default {
         var age =
           child.Age >= study.MinAge * 30.5 - 1 &&
           child.Age <= study.MaxAge * 30.5 - 1;
+        
         var asd = false;
 
         switch (study.ASDParticipant) {
@@ -1439,7 +1446,7 @@ export default {
             break;
 
           case "Include":
-            hearing = true;
+            asd = true;
             break;
         }
 
@@ -1634,6 +1641,7 @@ export default {
 
     PotentialStudies() {
       var PotentialStudies = [];
+      
       for (var i = 0; i < this.ElegibleStudies.length; i++) {
         var elegibleStudy = this.ElegibleStudies[i];
         var previousStudies = this.UniquePreviousStudies[i];
