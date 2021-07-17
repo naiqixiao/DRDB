@@ -342,6 +342,7 @@ CREATE TABLE `Study` (
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `ReminderTemplate` text NOT NULL,
+  `FollowUPEmailSnippet` text,
   PRIMARY KEY (`id`),
   KEY `FK_Lab` (`FK_Lab`),
   KEY `FK_Personnel_idx` (`FK_Personnel`),
