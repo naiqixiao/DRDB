@@ -398,29 +398,31 @@ export default {
         case "ThankYou":
           this.appointments.forEach((appointment) => {
             if (appointment.Study.FollowUPEmailSnippet != "") {
-              emailBody = appointment.Study.FollowUPEmailSnippet;
+              if (appointment.Study.FollowUPEmailSnippet) {
+                emailBody = appointment.Study.FollowUPEmailSnippet;
 
-              if (appointment.Child.Sex == "F") {
-                emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
-                emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
-                emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
-              } else {
-                emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
-                emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
-                emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+                if (appointment.Child.Sex == "F") {
+                  emailBody = emailBody.replace(/\${{he\/she}}/g, "she" || "");
+                  emailBody = emailBody.replace(/\${{his\/her}}/g, "her" || "");
+                  emailBody = emailBody.replace(/\${{him\/her}}/g, "her" || "");
+                } else {
+                  emailBody = emailBody.replace(/\${{he\/she}}/g, "he" || "");
+                  emailBody = emailBody.replace(/\${{his\/her}}/g, "his" || "");
+                  emailBody = emailBody.replace(/\${{him\/her}}/g, "him" || "");
+                }
+
+                emailBody = emailBody.replace(
+                  /\${{childName}}/g,
+                  appointment.Child.Name || ""
+                );
+
+                emailBody = emailBody.replace(/\. he/g, ". He");
+                emailBody = emailBody.replace(/\. his/g, ". His");
+                emailBody = emailBody.replace(/\. she/g, ". She");
+                emailBody = emailBody.replace(/\. her/g, ". Her");
+
+                emailBodyList.push(emailBody);
               }
-
-              emailBody = emailBody.replace(
-                /\${{childName}}/g,
-                appointment.Child.Name || ""
-              );
-
-              emailBody = emailBody.replace(/\. he/g, ". He");
-              emailBody = emailBody.replace(/\. his/g, ". His");
-              emailBody = emailBody.replace(/\. she/g, ". She");
-              emailBody = emailBody.replace(/\. her/g, ". Her");
-
-              emailBodyList.push(emailBody);
             }
           });
 
