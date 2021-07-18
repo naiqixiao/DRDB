@@ -1014,7 +1014,7 @@ export default {
     },
 
     followupPreview() {
-      if (this.currentStudy.ReminderTemplate) {
+      if (this.currentStudy.FollowUPEmailSnippet) {
         var opening =
           "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
           "Lisa,</p>" +
