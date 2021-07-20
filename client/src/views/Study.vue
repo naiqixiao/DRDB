@@ -33,6 +33,8 @@
       >
     </div>
 
+    <ConfirmDlg ref="confirmD" />
+
     <v-row>
       <v-col cols="12" md="3">
         <v-row>
@@ -549,6 +551,8 @@
 import DateDisplay from "@/components/DateDisplay";
 import AssignedExperimenters from "@/components/AssignedExperimenters";
 
+import ConfirmDlg from "@/components/ConfirmDialog";
+
 import study from "@/services/study";
 import personnel from "@/services/personnel";
 
@@ -560,6 +564,7 @@ export default {
     DateDisplay,
     AssignedExperimenters,
     VueEditor,
+    ConfirmDlg,
   },
   data() {
     return {
@@ -803,18 +808,25 @@ export default {
     },
 
     async deleteStudy() {
-      var studyInfo = {
-        id: this.currentStudy.id,
-      };
+      if (
+        await this.$refs.confirmD.open(
+          "Beep!",
+          "You are about to delete this study. <br>The deletion will also remove all related study appointments.<br><br>If you don't want to delete the study, please click CANCEL."
+        )
+      ) {
+        var studyInfo = {
+          id: this.currentStudy.id,
+        };
 
-      try {
-        await study.delete(studyInfo);
-        var index = this.Studies.indexOf(this.currentStudy);
-        this.Studies.splice(index, 1);
-        this.$store.dispatch("setStudies", this.Studies);
-        this.currentStudy = Object.assign({}, this.defaultStudy);
-      } catch (error) {
-        console.log(error.response);
+        try {
+          await study.delete(studyInfo);
+          var index = this.Studies.indexOf(this.currentStudy);
+          this.Studies.splice(index, 1);
+          this.$store.dispatch("setStudies", this.Studies);
+          this.currentStudy = Object.assign({}, this.defaultStudy);
+        } catch (error) {
+          console.log(error.response);
+        }
       }
     },
 
@@ -1056,7 +1068,7 @@ export default {
     },
   },
 
-  mounted: function () {
+  mounted: function() {
     this.searchStudies();
     this.searchLabMembers();
   },
