@@ -10,7 +10,7 @@
       <v-card
         class="child-card d-flex flex-column"
         height="180px"
-        style="border-width: medium !important"
+        style="border-width: medium !important; margin: 12px"
       >
         <v-card-title class="title" style="padding: 8px">
           <span
@@ -752,8 +752,7 @@ export default {
       });
 
       // location
-      const location =
-        this.$store.state.transportationInstructions;
+      const location = this.$store.state.transportationInstructions;
 
       // closing
       const closing = this.$store.state.emailClosing;
@@ -855,9 +854,11 @@ export default {
 
       var appointment = this.editedAppointment;
       if ("Study" in appointment) {
-        secondaryExperimenterList = appointment.Study.Experimenters.filter(
-          (experimenter) => experimenter.id !== this.selectedExperimenters.id
-        );
+        if (this.selectedExperimenters) {
+          secondaryExperimenterList = appointment.Study.Experimenters.filter(
+            (experimenter) => experimenter.id !== this.selectedExperimenters.id
+          );
+        }
       }
       return secondaryExperimenterList;
     },
