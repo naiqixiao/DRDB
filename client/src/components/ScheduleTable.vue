@@ -42,7 +42,7 @@
       </v-chip>
     </template>
 
-    <template #item.actions="{ item }">
+    <template #item.actions="{ item }" >
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-icon
@@ -50,6 +50,7 @@
             :disabled="item.Status === 'Confirmed' || item.Completed == true"
             v-bind="attrs"
             v-on="on"
+            class="tableIcon"
             >event</v-icon
           >
         </template>
@@ -69,6 +70,7 @@
             "
             v-bind="attrs"
             v-on="on"
+            class="tableIcon"
             >update</v-icon
           >
         </template>
@@ -88,6 +90,7 @@
             "
             v-bind="attrs"
             v-on="on"
+            class="tableIcon"
             >sentiment_dissatisfied</v-icon
           >
         </template>
@@ -109,6 +112,7 @@
             "
             v-bind="attrs"
             v-on="on"
+            class="tableIcon"
             >not_interested</v-icon
           >
         </template>
@@ -1800,9 +1804,9 @@ export default {
 
 /* .theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
   color: var(--v-secondary-base) !important;
-}
+} */
 
-.v-data-table
+/* .v-data-table
   /deep/
   tbody
   /deep/

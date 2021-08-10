@@ -236,6 +236,20 @@ export default {
   background-color: var(--v-background-base);
 }
 
+.theme--light.v-data-table tbody tr:hover {
+  background-color: var(--v-secondary-lighten1) !important;
+  border-bottom-right-radius: 5% !important;
+  border: solid;
+}
+.theme--light.v-data-table tbody tr:hover > td > button {
+  // color:brown;
+  display: inline !important;
+}
+
+.tableIcon {
+  display: none !important;
+}
+
 .theme--light.v-data-table
   .v-data-table-header
   th.sortable
