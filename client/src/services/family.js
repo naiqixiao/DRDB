@@ -12,6 +12,16 @@ export default {
 
     return api().post("family/add", familyInfo);
   },
+  batchImport(familyInfo) {
+    familyInfo.User = {
+      
+      Name: store.state.name,
+      Email: store.state.user,
+      LabName: store.state.labName
+    }
+
+    return api().post("family/addBatch", familyInfo);
+  },
   search(familyInfo) {
     return api().get("family/", {
       params: familyInfo

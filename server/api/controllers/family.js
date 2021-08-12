@@ -180,6 +180,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
     const alphabet = "abcdefghijk".split("");
 
     var doubleCheckList = [];
+    var skipList = [];
     var skipImport = false;
     var nOfSkip = 0;
     var nOfAdded = 0;
@@ -239,9 +240,15 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
               if (existingChild.Name == child.Name) {
                 skipImport = true
                 nOfSkip += 1
+                skipList.push({
+                  "Email": family.Email,
+                  "Name": child.Name,
+                  "DoB": child.DoB
+                })
               } else {
                 doubleCheckList.push({
                   "FK_Family": family.id,
+                  "Email": family.Email,
                   "childID": existingChild.id
                 })
               }
@@ -339,10 +346,17 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       }
     }
 
+    doubleCheckList = doubleCheckList.filter((item, index, self) =>
+      index === self.findIndex((t) => (
+        t.FK_Family === item.FK_Family
+      ))
+    )
+
     res.status(200).send({
       doubleCheckList,
       nOfSkip,
-      nOfAdded
+      nOfAdded,
+      skipList
     });
   } catch (error) {
     throw error

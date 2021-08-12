@@ -116,6 +116,54 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <v-col cols="12" md="3">
+        <template>
+          <v-file-input
+            ref="fileSelect"
+            accept=".xlsx, .csv"
+            class="textfield-family"
+            background-color="textbackground"
+            label="Select import file"
+            @change="selectFile"
+            v-model="inputFile"
+            outlined
+            dense
+            :disabled="
+              $store.state.role != 'Admin' &&
+                $store.state.role != 'PI' &&
+                $store.state.role != 'Lab manager'
+            "
+          ></v-file-input>
+        </template>
+      </v-col>
+      <v-col cols="12" md="1">
+        <v-btn
+          color="primary"
+          @click.stop="batchImport()"
+          :disabled="!inputFile"
+          :loading="loadingStatus"
+          >Upload</v-btn
+        >
+      </v-col>
+
+      <v-dialog v-model="dialogImport" max-width="800px" persistent>
+        <v-card outlined>
+          <v-card-title class="headline">Batch import results</v-card-title>
+          <v-card-text>
+            <body align="start" v-html="importReport"></body>
+          </v-card-text>
+          <v-card-actions>
+            <v-row justify="center" style="height: 50px">
+              <v-col md="2">
+                <v-btn color="primary" @click="dialogImport = false"
+                  >Confirm</v-btn
+                >
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-row>
 
     <v-row justify="center" align="center" style="height: 200px">
@@ -482,8 +530,6 @@
                     v-model="editedLab[item.field]"
                     :editor-toolbar="customToolbar"
                   ></vue-editor>
-
-                  
                 </v-col>
               </v-row>
             </v-form>
@@ -510,8 +556,11 @@
 <script>
 import login from "@/services/login";
 import lab from "@/services/lab";
+import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import { VueEditor } from "vue2-editor";
+import XLSX from "xlsx";
+import moment from "moment";
 
 export default {
   components: {
@@ -526,6 +575,7 @@ export default {
       changeTemporaryPassword: false,
       valid: true,
       dialogGoogle: false,
+      dialogImport: false,
       setAdmin: false,
       signInCode: null,
       labEmail: "Lab email is not set up yet.",
@@ -548,6 +598,10 @@ export default {
       editedLab: {
         LabName: null,
       },
+      inputFile: undefined,
+      uploadFile: null,
+      importReport: "",
+      loadingStatus: false,
       roleOptions: ["PI", "Lab manager"],
       customToolbar: [
         ["bold", "italic", "underline"],
@@ -755,6 +809,137 @@ export default {
     closeExtAPIs() {
       this.dialogGoogle = false;
       this.signInCode = null;
+    },
+
+    selectFile(file) {
+      if (file) {
+        var reader = new FileReader();
+
+        // Use the javascript reader object to load the contents
+        // of the file in the v-model prop
+        reader.onload = (e) => {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: "array" });
+          let sheetName = workbook.SheetNames[0];
+          /* DO SOMETHING WITH workbook HERE */
+          let worksheet = workbook.Sheets[sheetName];
+
+          var newParticipants = XLSX.utils.sheet_to_json(worksheet);
+
+          newParticipants.forEach((participant) => {
+            participant.DoB = moment(participant.DoB, "DD/MM/YYYY").toDate();
+
+            if (!participant.Name) {
+              participant.Name = participant.Child_Last_Name
+                ? participant.Child_First_Name +
+                  " " +
+                  participant.Child_Last_Name
+                : participant.Child_First_Name;
+            }
+
+            participant.Name = participant.Name.replace(/undefined /g, "");
+            participant.Name = participant.Name.replace(/ undefined/g, "");
+
+            if (participant.Phone) {
+              participant.Phone = participant.Phone.replace(/-/g, "");
+            }
+
+            if (participant.CellPhone) {
+              participant.CellPhone = participant.CellPhone.replace(/-/g, "");
+            }
+
+            if (participant.Birth_Weight) {
+              var BW = participant.Birth_Weight.split("-");
+
+              if (BW.length > 1) {
+                participant.Birthweight =
+                  parseInt(BW[0]) * 453.592 + (parseInt(BW[1]) * 453.592) / 16;
+              } else if (parseInt(BW[0]) < 100) {
+                participant.Birthweight = parseInt(BW[0]) * 453.592;
+              } else {
+                participant.Birthweight = parseInt(BW[0]);
+              }
+            }
+
+            participant.Age = moment().diff(participant.DoB, "days");
+
+            participant.DoB = moment(participant.DoB).format("YYYY-MM-DD");
+          });
+
+          this.uploadFile = newParticipants;
+        };
+
+        // console.log(newParticipants);
+        reader.readAsArrayBuffer(file);
+      }
+    },
+
+    async batchImport() {
+      if (this.uploadFile) {
+        this.loadingStatus = true;
+        try {
+          const importResults = await family.batchImport(this.uploadFile);
+
+          const output = this.importOutput(importResults.data);
+
+          this.importReport = output;
+          this.dialogImport = true;
+        } catch (error) {
+          console.log(error);
+        }
+
+        // this.$refs.fileSelect.value = "";
+        this.uploadFile = null;
+      }
+      this.loadingStatus = false;
+    },
+
+    importOutput(importResults) {
+      var alertText =
+        "<strong>Please copy the following information for your record.</strong><br>";
+
+      alertText =
+        alertText +
+        "<strong>" +
+        importResults.nOfAdded +
+        "</strong> families were imported.<br>";
+
+      if (importResults.doubleCheckList.length > 1) {
+        alertText =
+          alertText +
+          "<br><strong>Check if these families have duplicated child records. They probably just have twins.</strong><br>";
+
+        importResults.doubleCheckList.forEach((family) => {
+          alertText =
+            alertText +
+            " - <strong>Family ID</strong>: " +
+            family.FK_Family +
+            ", <strong>Email</strong>: " +
+            family.Email +
+            "<br>";
+        });
+      }
+
+      if (importResults.nOfSkip > 0) {
+        alertText =
+          alertText +
+          "<br><strong>There are " +
+          importResults.nOfSkip +
+          " children not being imported because they are already in the databse:</strong><br>";
+        importResults.skipList.forEach((child) => {
+          alertText =
+            alertText +
+            " -  <strong>Child name</strong>: " +
+            child.Name +
+            ", <strong>DoB</strong>: " +
+            child.DoB +
+            ", <strong>Family email</strong>: " +
+            child.Email +
+            "<br>";
+        });
+      }
+
+      return alertText;
     },
   },
   computed: {
