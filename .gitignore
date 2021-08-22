@@ -8725,11 +8725,9 @@ client/._.DS_Store
 ._.DS_Store
 server/api/logs
 client/src/components/AppointmentTable.vue
-
 docs/_build
 docs/_static/
 docs/_templates/
-
 client/src/components/AppointmentTable.vue
 client/src/components/EmailDialog.vue
 docs/_build/html/genindex.html
@@ -8747,14 +8745,10 @@ server/config/general.js-20201102
 server/config/general.js-20210124
 .gitignore
 client/src/plugins/variables.js
-client/src/plugins/variables.js
 server/server.cert
 server/server.key
 client/src/components/ScheduleTable_old.vue
 server/api/controllers/reminder copy.js
 server/api/controllers/reminder_test.js
-.vscode/settings.json
-server/api/realtimeUpdate/currentFamilies.json
-.vscode/settings.json
 client/vue.config.js
 server/api/realtimeUpdate/currentFamilies.json
