@@ -1,18 +1,18 @@
 <template>
   <v-card>
     <v-tabs
-      v-model="tabs"
       fixed-tabs
+      v-model="tabs"
       color="var(--v-secondary-base)"
       background-color="var(--v-primary-base)"
     >
       <v-tab href="#tabs-1">
-        <v-icon style="padding-right: 8px;">format_list_bulleted</v-icon>
+        <v-icon style="padding-right: 4px">format_list_bulleted</v-icon>
         Notes
       </v-tab>
       <v-tab href="#tabs-2">
-        <v-icon style="padding-right: 8px;">forum</v-icon>
-        Conversations
+        <v-icon style="padding-right: 4px">forum</v-icon>
+        Conv.
       </v-tab>
     </v-tabs>
 

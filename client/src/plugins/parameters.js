@@ -303,13 +303,13 @@ export default {
         text: "Study Time",
         align: "center",
         value: "AppointmentTime",
-        width: "15%",
+        width: "14%",
       },
       {
         text: "Age",
         align: "center",
         value: "AgeByParticipation",
-        width: "10%",
+        width: "9%",
       },
       {
         text: "Status",
@@ -321,7 +321,7 @@ export default {
         text: "Updated",
         align: "center",
         value: "updatedAt",
-        width: "8%",
+        width: "10%",
       },
 
       {

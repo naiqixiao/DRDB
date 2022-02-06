@@ -175,8 +175,24 @@ export default {
 }
 
 .theme--light.v-text-field {
-  font-size: 14px;
+  font-size: 1vw;
   font-weight: 700;
+}
+.theme--light.v-label {
+  font-size: 1vw;
+  // font-weight: 700;
+}
+h2 {
+  font-size: 1.4vw;
+  // font-weight: 700;
+}
+h4 {
+  font-size: 1.2vw;
+  // font-weight: 700;
+}
+
+.v-btn__content {
+  font-size: 1vw;
 }
 
 .textfield-family {
@@ -184,7 +200,7 @@ export default {
 }
 
 .checkbox-child {
-  font-size: 14px !important;
+  font-size: 1vw !important;
   font-weight: 700 !important;
   margin: 0 0 0 0 !important;
 }
@@ -203,7 +219,7 @@ export default {
 // }
 
 .theme--light.v-data-table th {
-  font-size: 14px;
+  font-size: 1vw;
   font-weight: 800;
   height: 50px;
 }
@@ -226,7 +242,7 @@ export default {
   border-bottom-width: 2px;
   color: var(--v-secondary-base);
   background-color: var(--v-primary-base) !important;
-  font-size: 14px !important;
+  font-size: 1vw !important;
 }
 
 .theme--light.v-data-table tbody tr:nth-of-type(odd) {
@@ -263,7 +279,7 @@ export default {
 }
 
 .theme--light.v-data-table--dense th {
-  font-size: 14px;
+  font-size: 1vw;
   font-weight: 700;
   height: 40px;
 }
@@ -307,11 +323,14 @@ export default {
 }
 
 #app .v-list-item__title {
-  font-size: 1rem;
+  font-size: 1vw;
   font-weight: 800;
 }
 
 .theme--light.v-tabs .v-tabs-bar .v-tab:not(.v-tab--active) {
   background-color: var(--v-textbackground-base) !important;
+}
+.theme--light.v-tabs .v-tabs-bar a {
+  font-size: 1vw !important;
 }
 </style>

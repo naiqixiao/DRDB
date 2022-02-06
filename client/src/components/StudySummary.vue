@@ -13,7 +13,7 @@
 
       <v-tab href="#tabs-2">
         <v-icon style="padding-right: 8px">view_list</v-icon>
-        Study Information
+        Study Info
       </v-tab>
     </v-tabs>
 

@@ -36,13 +36,17 @@
       <v-col cols="12" md="5">
         <v-row align="center" dense>
           <v-col cols="12" md="3" style="text-align: start">
-            <v-btn large @click.stop="searchMode" :disabled="searchStatus">
-              <v-icon left>mdi-magnify</v-icon>Search
+            <v-btn
+              v-bind="btnSize"
+              @click.stop="searchMode"
+              :disabled="searchStatus"
+            >
+              <v-icon left v-bind="iconSize">mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
           <v-col cols="12" md="3" style="text-align: start">
-            <v-btn large @click="followupSearch">
-              <v-icon left>mdi-phone</v-icon>Follow-ups
+            <v-btn v-bind="btnSize" @click="followupSearch">
+              <v-icon left v-bind="iconSize">mdi-phone</v-icon>Follow-ups
             </v-btn>
           </v-col>
 
@@ -175,82 +179,86 @@
             </v-col>
             <v-spacer></v-spacer>
 
-            <v-col cols="12" md="1">
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <div v-on="on">
-                    <v-btn
-                      fab
-                      @click.stop="
-                        contactType = 'NextContact';
-                        nextContactDate = TodaysDate;
-                        nextContactDialog = !nextContactDialog;
-                      "
-                      :disabled="!currentFamily.id && !nextContactDialog"
-                    >
-                      <v-icon>notes</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-                <span>Note down info for next contact</span>
-              </v-tooltip>
-            </v-col>
+            <v-col cols="12" md="5">
+              <v-row dense>
+                <v-col cols="12" md="6">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        <v-btn
+                          fab
+                          @click.stop="
+                            contactType = 'NextContact';
+                            nextContactDate = TodaysDate;
+                            nextContactDialog = !nextContactDialog;
+                          "
+                          :disabled="!currentFamily.id && !nextContactDialog"
+                        >
+                          <v-icon>notes</v-icon>
+                        </v-btn>
+                      </div>
+                    </template>
+                    <span>Note down info for next contact</span>
+                  </v-tooltip>
+                </v-col>
 
-            <v-col cols="12" md="1">
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <div v-on="on">
-                    <v-btn
-                      fab
-                      @click.stop="editFamily"
-                      :disabled="!currentFamily.id"
-                    >
-                      <v-icon>edit</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-                <span>Edit family information</span>
-              </v-tooltip>
-            </v-col>
+                <v-col cols="12" md="6">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        <v-btn
+                          fab
+                          @click.stop="editFamily"
+                          :disabled="!currentFamily.id"
+                        >
+                          <v-icon>edit</v-icon>
+                        </v-btn>
+                      </div>
+                    </template>
+                    <span>Edit family information</span>
+                  </v-tooltip>
+                </v-col>
 
-            <v-col cols="12" md="1">
-              <v-tooltip top>
-                <template v-slot:activator="{ on }">
-                  <div v-on="on">
-                    <v-btn
-                      fab
-                      @click.stop="
-                        contactType = 'NoMoreContact';
-                        nextContactDate = TodaysDate;
-                        nextContactDialog = !nextContactDialog;
-                      "
-                      :disabled="!currentFamily.id && !nextContactDialog"
-                    >
-                      <v-icon color="warning" style="padding-right: 5px"
-                        >pan_tool</v-icon
+                <v-col cols="12" md="6">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on }">
+                      <div v-on="on">
+                        <v-btn
+                          fab
+                          @click.stop="
+                            contactType = 'NoMoreContact';
+                            nextContactDate = TodaysDate;
+                            nextContactDialog = !nextContactDialog;
+                          "
+                          :disabled="!currentFamily.id && !nextContactDialog"
+                        >
+                          <v-icon color="warning" style="padding-right: 5px"
+                            >pan_tool</v-icon
+                          >
+                        </v-btn>
+                      </div>
+                    </template>
+                    <span>No more contact</span>
+                  </v-tooltip>
+                </v-col>
+
+                <v-col cols="12" md="6">
+                  <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        fab
+                        @click.stop="addFamily"
+                        v-bind="attrs"
+                        v-on="on"
                       >
-                    </v-btn>
-                  </div>
-                </template>
-                <span>No more contact</span>
-              </v-tooltip>
-            </v-col>
-
-            <v-col cols="12" md="2" class="text-right">
-              <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    color="primary"
-                    fab
-                    @click.stop="addFamily"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>add</v-icon>
-                  </v-btn>
-                </template>
-                <span>Add a new family</span>
-              </v-tooltip>
+                        <v-icon>add</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Add a new family</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
         </v-row>
@@ -918,7 +926,7 @@ export default {
     },
   },
 
-  mounted: async function() {
+  mounted: async function () {
     // this.socket.on("familyList update", (familyList) => {
     //   this.currentVisitedFamilies = familyList;
     //   console.log(this.currentVisitedFamilies);
@@ -928,12 +936,12 @@ export default {
     // console.log(this.currentVisitedFamilies);
   },
 
-  created: function() {
+  created: function () {
     // this.socket = io(backendURL);
     // console.log(backendURL);
   },
 
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     // this.socket.emit("disconnect");
     if (
       !this.currentFamily.scheduled &&
@@ -958,9 +966,19 @@ export default {
   },
   computed: {
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .format("YYYY-MM-DD");
+      return moment().startOf("day").format("YYYY-MM-DD");
+    },
+    btnSize() {
+      const size = { xs: "x-small", sm: "small", md: "small", lg: "large", xl: "large" }[
+        this.$vuetify.breakpoint.name
+      ];
+      return size ? { [size]: true } : {};
+    },
+    iconSize() {
+      const size = { xs: "x-small", sm: "small", md: "small", lg: "small", xl: "large" }[
+        this.$vuetify.breakpoint.name
+      ];
+      return size ? { [size]: true } : {};
     },
   },
 

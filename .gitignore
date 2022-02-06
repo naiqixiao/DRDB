@@ -8752,3 +8752,4 @@ server/api/controllers/reminder copy.js
 server/api/controllers/reminder_test.js
 client/vue.config.js
 server/api/realtimeUpdate/currentFamilies.json
+client/vue.config.js
