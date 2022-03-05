@@ -365,9 +365,9 @@
               "
               :disabled="
                 !currentChild.id ||
-                  currentChild.scheduled ||
-                  !$store.state.labEmailStatus ||
-                  contactedByOthers
+                currentChild.scheduled ||
+                !$store.state.labEmailStatus ||
+                contactedByOthers
               "
               class="textfield-family"
               background-color="textbackground"
@@ -592,7 +592,7 @@
                               @click:append="datePicker = true"
                               :disabled="
                                 this.response != 'Confirmed' ||
-                                  this.skipStudyDateTimeStatus
+                                this.skipStudyDateTimeStatus
                               "
                               hide-details
                               dense
@@ -607,7 +607,7 @@
                               label="Study time"
                               :disabled="
                                 this.response != 'Confirmed' ||
-                                  this.skipStudyDateTimeStatus
+                                this.skipStudyDateTimeStatus
                               "
                               hide-details
                               dense
@@ -730,7 +730,7 @@
                             @click="newAppointment(child)"
                             :disabled="
                               potentialStudies(child).selectableStudies.length <
-                                1
+                              1
                             "
                             >{{
                               !!child.Name
@@ -850,8 +850,8 @@
                         @click="continue23()"
                         :disabled="
                           !currentFamily.Email ||
-                            this.skipConfirmationEmailStatus ||
-                            !this.$store.state.labEmailStatus
+                          this.skipConfirmationEmailStatus ||
+                          !this.$store.state.labEmailStatus
                         "
                       >
                         <v-icon dark left v-show="emailSent"
@@ -863,8 +863,8 @@
                       <v-btn
                         :disabled="
                           !scheduleNextPage &&
-                            !!currentFamily.Email &&
-                            !this.skipConfirmationEmailStatus
+                          !!currentFamily.Email &&
+                          !this.skipConfirmationEmailStatus
                         "
                         @click="scheduleNextStep"
                         >{{
@@ -997,6 +997,8 @@ import ParticipationHistory from "@/components/ParticipationHistoryChart";
 import Page from "@/components/Page";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
+
+import login from "@/services/login";
 
 // import { io } from "socket.io-client";
 // import { backendURL } from "../plugins/variables";
@@ -1369,22 +1371,40 @@ export default {
     },
 
     scheduleChild() {
-      this.editedIndex = this.Children.indexOf(this.currentChild);
-      this.editedChild = Object.assign({}, this.currentChild);
+      try {
+        await login.check_login();
 
-      if (!this.scheduleId) {
-        this.appointments = [];
-        var newAppointment = Object.assign({}, this.defaultAppointment);
-        newAppointment.FK_Child = this.currentChild.id;
-        newAppointment.FK_Family = this.currentChild.FK_Family;
-        newAppointment.FK_Study = this.selectedStudy.id;
-        newAppointment.Child = this.currentChild;
-        newAppointment.Study = this.selectedStudy;
-        newAppointment.index = this.appointments.length;
-        this.appointments.push(newAppointment);
+        this.editedIndex = this.Children.indexOf(this.currentChild);
+        this.editedChild = Object.assign({}, this.currentChild);
+
+        if (!this.scheduleId) {
+          this.appointments = [];
+          var newAppointment = Object.assign({}, this.defaultAppointment);
+          newAppointment.FK_Child = this.currentChild.id;
+          newAppointment.FK_Family = this.currentChild.FK_Family;
+          newAppointment.FK_Study = this.selectedStudy.id;
+          newAppointment.Child = this.currentChild;
+          newAppointment.Study = this.selectedStudy;
+          newAppointment.index = this.appointments.length;
+          this.appointments.push(newAppointment);
+        }
+
+        this.dialogSchedule = true;
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.dispatch("setToken", null);
+          this.$store.dispatch("setUser", null);
+          this.$store.dispatch("setUserID", null);
+
+          alert("Authentication failed, please login.");
+
+          if (this.$route.name != "Login") {
+            this.$router.push({
+              name: "Login",
+            });
+          }
+        }
       }
-
-      this.dialogSchedule = true;
     },
 
     receiveSelectedStudy(selectedStudy) {
@@ -2227,7 +2247,7 @@ export default {
       }
     },
 
-    earliestDate: function() {
+    earliestDate: function () {
       if (
         moment()
           .add(1, "days")
@@ -2238,9 +2258,7 @@ export default {
             )
           )
       ) {
-        return moment()
-          .add(1, "days")
-          .toISOString(true);
+        return moment().add(1, "days").toISOString(true);
       } else {
         return moment(this.currentChild.DoB, "YYYY-M-D")
           .add(Math.floor(this.selectedStudy.MinAge * 30.5), "days")
@@ -2248,14 +2266,14 @@ export default {
       }
     },
 
-    latestDate: function() {
+    latestDate: function () {
       return moment(this.currentChild.DoB, "YYYY-M-D")
         .add(Math.floor(this.selectedStudy.MaxAge * 30.5), "days")
         .toISOString(true);
     },
   },
 
-  mounted: async function() {
+  mounted: async function () {
     this.searchStudies();
     // this.socket.on("familyList update", (familyList) => {
     //   this.currentVisitedFamilies = familyList;
@@ -2266,13 +2284,13 @@ export default {
     // console.log(this.currentVisitedFamilies);
   },
 
-  created: function() {
+  created: function () {
     // this.socket = io('http://192.168.0.10', {path: "/app1socket"});
     // this.socket = io(backendURL);
     // console.log(backendURL);
   },
 
-  beforeDestroy: function() {
+  beforeDestroy: function () {
     // this.socket.emit("disconnect");
     if (
       !this.currentChild.scheduled &&
