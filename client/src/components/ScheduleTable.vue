@@ -42,7 +42,7 @@
       </v-chip>
     </template>
 
-    <template #item.actions="{ item }" >
+    <template #item.actions="{ item }">
       <v-tooltip top>
         <template v-slot:activator="{ on, attrs }">
           <v-icon
@@ -63,10 +63,10 @@
             @click.stop="updateSchedule(item, 'Rescheduling')"
             :disabled="
               item.Status === 'Rescheduling' ||
-                item.Status === 'No Show' ||
-                item.Status === 'TBD' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -83,10 +83,10 @@
             @click.stop="updateSchedule(item, 'No Show')"
             :disabled="
               item.Status === 'Rescheduling' ||
-                item.Status === 'No Show' ||
-                item.Status === 'TBD' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'No Show' ||
+              item.Status === 'TBD' ||
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -107,8 +107,8 @@
             "
             :disabled="
               item.Status === 'Cancelled' ||
-                item.Status === 'Rejected' ||
-                item.Completed == true
+              item.Status === 'Rejected' ||
+              item.Completed == true
             "
             v-bind="attrs"
             v-on="on"
@@ -349,8 +349,9 @@
                   <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies
                       ref="extraStudies"
-                      v-for="(appointment,
-                      index) in editedSchedule.Appointments"
+                      v-for="(
+                        appointment, index
+                      ) in editedSchedule.Appointments"
                       :key="appointment.id"
                       :child="appointment.Child"
                       :targetChild="appointment.Child"
@@ -501,8 +502,8 @@
                     @click="continue23()"
                     :disabled="
                       !editedSchedule.Family.Email ||
-                        skipConfirmationEmailStatus ||
-                        !$store.state.labEmailStatus
+                      skipConfirmationEmailStatus ||
+                      !$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -514,8 +515,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                        !!editedSchedule.Family.Email &&
-                        !skipConfirmationEmailStatus
+                      !!editedSchedule.Family.Email &&
+                      !skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -596,8 +597,8 @@
                   color="primary"
                   :disabled="
                     !!!editedSchedule.Family.Email ||
-                      skipReminderEmailStatus ||
-                      !$store.state.labEmailStatus
+                    skipReminderEmailStatus ||
+                    !$store.state.labEmailStatus
                   "
                   @click="sendReminderEmail()"
                 >
@@ -641,8 +642,8 @@
                   color="primary"
                   :disabled="
                     !!!editedSchedule.Family.Email ||
-                      skipReminderEmailStatus ||
-                      !$store.state.labEmailStatus
+                    skipReminderEmailStatus ||
+                    !$store.state.labEmailStatus
                   "
                   @click="sendTYEmail()"
                 >
@@ -726,6 +727,8 @@ import schedule from "@/services/schedule";
 import ExtraStudies from "@/components/ExtraStudies";
 
 import moment from "moment-timezone";
+
+import login from "@/services/login";
 
 export default {
   components: {
@@ -815,113 +818,139 @@ export default {
 
   methods: {
     async updateSchedule(item, status) {
-      var comDTitle = "";
-      var comDText = "";
+      try {
+        await login.check_login();
+        // console.log("User is already logged in.");
 
-      switch (status) {
-        case "Reminded":
-          comDTitle = "Send a reminder email";
-          comDText = "Do you want to send the email?";
-          break;
+        var comDTitle = "";
+        var comDText = "";
 
-        case "Completed":
-          comDTitle = "Study appointment update";
-          comDText =
-            "You're going to update Study Completion status, continue?";
-          break;
-
-        default:
-          comDTitle = "Study appointment update";
-          comDText =
-            "Are you sure you want to mark this appointment as " + status + "?";
-          break;
-      }
-
-      this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
-
-      if (await this.$refs.confirmD.open(comDTitle, comDText)) {
-        this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
-        this.response = status;
         switch (status) {
-          case "Confirmed":
-            this.editedIndex = this.Schedules.indexOf(item);
-            this.editedSchedule = Object.assign({}, item);
-            this.datePickerRange();
-            this.editedSchedule.Appointments[0].Child.Family = {};
-            this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
-            this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
-
-            // console.log(this.editedSchedule);
-            // console.log(
-            //   this.potentialStudies(
-            //     this.editedSchedule.Appointments[0].Child,
-            //     this.editedSchedule.Appointments[0].FK_Study
-            //   )
-            // );
-            this.dialog = true;
+          case "Reminded":
+            comDTitle = "Send a reminder email";
+            comDText = "Do you want to send the email?";
             break;
 
           case "Completed":
-            try {
-              item.Completed = !item.Completed;
-              await schedule.complete(item);
-            } catch (error) {
-              console.log(error);
-            }
-
-            item.updatedAt = new Date().toISOString();
-            break;
-
-          case "Reminded":
-            this.editedIndex = this.Schedules.indexOf(item);
-            this.editedSchedule = Object.assign({}, item);
-            this.editedSchedule.Appointments[0].Child.Family = {};
-            this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
-            this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
-
-            this.dialogReminderEmail = true;
-
-            item.updatedAt = new Date().toISOString();
-            item.Reminded = true;
+            comDTitle = "Study appointment update";
+            comDText =
+              "You're going to update Study Completion status, continue?";
             break;
 
           default:
-            item.Status = status;
-
-            // name by combining all study names within a schedule
-            var studyNames = item.Appointments.map((appointment) => {
-              return (
-                appointment.Study.StudyName +
-                " (" +
-                item.FK_Family +
-                appointment.Child.IdWithinFamily +
-                ")"
-              );
-            });
-
-            studyNames = Array.from(new Set(studyNames));
-
-            // Calendar event title
-            item.summary =
-              item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
-
-            try {
-              await schedule.update(item);
-              // item.AppointmentTime = null;
-              item.updatedAt = new Date().toISOString();
-
-              console.log("Study appointment updated!");
-
-              this.editedSchedule = Object.assign({}, item);
-
-              // next contact
-              this.contactType = status;
-              this.nextContactDate = this.TodaysDate;
-              this.nextContactDialog = true;
-            } catch (error) {
-              console.log(error);
-            }
+            comDTitle = "Study appointment update";
+            comDText =
+              "Are you sure you want to mark this appointment as " +
+              status +
+              "?";
             break;
+        }
+
+        this.editedSchedule.skipStudyDateTimeStatus =
+          this.skipStudyDateTimeStatus;
+
+        if (await this.$refs.confirmD.open(comDTitle, comDText)) {
+          this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
+          this.response = status;
+          switch (status) {
+            case "Confirmed":
+              this.editedIndex = this.Schedules.indexOf(item);
+              this.editedSchedule = Object.assign({}, item);
+              this.datePickerRange();
+              this.editedSchedule.Appointments[0].Child.Family = {};
+              this.editedSchedule.Appointments[0].Child.Family.Email =
+                this.editedSchedule.Family.Email;
+              this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
+                this.editedSchedule.Family.NamePrimary;
+
+              // console.log(this.editedSchedule);
+              // console.log(
+              //   this.potentialStudies(
+              //     this.editedSchedule.Appointments[0].Child,
+              //     this.editedSchedule.Appointments[0].FK_Study
+              //   )
+              // );
+              this.dialog = true;
+              break;
+
+            case "Completed":
+              try {
+                item.Completed = !item.Completed;
+                await schedule.complete(item);
+              } catch (error) {
+                console.log(error);
+              }
+
+              item.updatedAt = new Date().toISOString();
+              break;
+
+            case "Reminded":
+              this.editedIndex = this.Schedules.indexOf(item);
+              this.editedSchedule = Object.assign({}, item);
+              this.editedSchedule.Appointments[0].Child.Family = {};
+              this.editedSchedule.Appointments[0].Child.Family.Email =
+                this.editedSchedule.Family.Email;
+              this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
+                this.editedSchedule.Family.NamePrimary;
+
+              this.dialogReminderEmail = true;
+
+              item.updatedAt = new Date().toISOString();
+              item.Reminded = true;
+              break;
+
+            default:
+              item.Status = status;
+
+              // name by combining all study names within a schedule
+              var studyNames = item.Appointments.map((appointment) => {
+                return (
+                  appointment.Study.StudyName +
+                  " (" +
+                  item.FK_Family +
+                  appointment.Child.IdWithinFamily +
+                  ")"
+                );
+              });
+
+              studyNames = Array.from(new Set(studyNames));
+
+              // Calendar event title
+              item.summary =
+                item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
+
+              try {
+                await schedule.update(item);
+                // item.AppointmentTime = null;
+                item.updatedAt = new Date().toISOString();
+
+                console.log("Study appointment updated!");
+
+                this.editedSchedule = Object.assign({}, item);
+
+                // next contact
+                this.contactType = status;
+                this.nextContactDate = this.TodaysDate;
+                this.nextContactDialog = true;
+              } catch (error) {
+                console.log(error);
+              }
+              break;
+          }
+        }
+      } catch (error) {
+        if (error.response.status === 401) {
+          this.$store.dispatch("setToken", null);
+          this.$store.dispatch("setUser", null);
+          this.$store.dispatch("setUserID", null);
+
+          alert("Authentication failed, please login.");
+
+          if (this.$route.name != "Login") {
+            this.$router.push({
+              name: "Login",
+            });
+          }
         }
       }
     },
@@ -930,8 +959,10 @@ export default {
       this.editedIndex = this.Schedules.indexOf(item);
       this.editedSchedule = Object.assign({}, item);
       this.editedSchedule.Appointments[0].Child.Family = {};
-      this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
-      this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
+      this.editedSchedule.Appointments[0].Child.Family.Email =
+        this.editedSchedule.Family.Email;
+      this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
+        this.editedSchedule.Family.NamePrimary;
 
       item.updatedAt = new Date().toISOString();
       item.ThankYouEmail = true;
@@ -1003,7 +1034,8 @@ export default {
 
           this.editedSchedule.attendees = this.Experimenters;
 
-          this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
+          this.editedSchedule.skipStudyDateTimeStatus =
+            this.skipStudyDateTimeStatus;
 
           const calendarEvent = await schedule.update(this.editedSchedule);
 
@@ -1012,7 +1044,8 @@ export default {
           this.editedSchedule.updatedAt = new Date().toISOString();
 
           this.editedSchedule.Appointments[0].Schedule = {};
-          this.editedSchedule.Appointments[0].Schedule.AppointmentTime = this.editedSchedule.AppointmentTime;
+          this.editedSchedule.Appointments[0].Schedule.AppointmentTime =
+            this.editedSchedule.AppointmentTime;
 
           Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
         }
@@ -1438,9 +1471,7 @@ export default {
         case "Confirmed":
           if (
             moment(item.AppointmentTime).startOf("day") <=
-              moment()
-                .startOf("day")
-                .add(daysAheadofSchedule, "d") &&
+              moment().startOf("day").add(daysAheadofSchedule, "d") &&
             moment(item.AppointmentTime).startOf("day") >=
               moment().startOf("day")
           ) {
@@ -1562,7 +1593,7 @@ export default {
         await schedule.remind(this.editedSchedule);
       }
 
-        this.emailButtonText = "Send email";
+      this.emailButtonText = "Send email";
       setTimeout(() => {
         this.dialogReminderEmail = false;
         this.skipReminderEmailStatus = false;
@@ -1768,10 +1799,7 @@ export default {
       }
     },
     TodaysDate() {
-      return moment()
-        .startOf("day")
-        .tz("America/Toronto")
-        .format("YYYY-MM-DD");
+      return moment().startOf("day").tz("America/Toronto").format("YYYY-MM-DD");
     },
     reminderEmailDisable() {
       return false;

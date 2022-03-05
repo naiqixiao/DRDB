@@ -11,10 +11,10 @@
               <div class="d-inline-block text-truncate" style="max-width: 60%">
                 {{
                   child.Name +
-                    " (" +
-                    currentFamily.id +
-                    child.IdWithinFamily +
-                    ")"
+                  " (" +
+                  currentFamily.id +
+                  child.IdWithinFamily +
+                  ")"
                 }}
               </div>
               <v-spacer></v-spacer>
@@ -52,9 +52,7 @@
                 <v-col cols="12" md="5" style="padding: 0px !important">
                   <body
                     align="end"
-                    style="
-                      overflow-y: scroll !important;
-                    "
+                    style="overflow-y: scroll !important"
                     v-html="languageDisplay(child)"
                   ></body>
                 </v-col>
@@ -519,7 +517,7 @@
                     color="primary"
                     :disabled="
                       !(studyDateTime || skipStudyDateTimeStatus) ||
-                        !appointments[0].FK_Study
+                      !appointments[0].FK_Study
                     "
                     @click="continue12()"
                   >
@@ -584,8 +582,8 @@
                     @click="continue23()"
                     :disabled="
                       !currentFamily.Email ||
-                        this.skipConfirmationEmailStatus ||
-                        !this.$store.state.labEmailStatus
+                      this.skipConfirmationEmailStatus ||
+                      !this.$store.state.labEmailStatus
                     "
                   >
                     <v-icon dark left v-show="emailSent"
@@ -597,8 +595,8 @@
                   <v-btn
                     :disabled="
                       !scheduleNextPage &&
-                        !!currentFamily.Email &&
-                        !this.skipConfirmationEmailStatus
+                      !!currentFamily.Email &&
+                      !this.skipConfirmationEmailStatus
                     "
                     @click="scheduleNextStep"
                     >{{
@@ -682,6 +680,8 @@ import calendar from "@/services/calendar";
 import moment from "moment-timezone";
 
 import ConfirmDlg from "@/components/ConfirmDialog";
+
+import login from "@/services/login";
 
 export default {
   components: {
@@ -896,103 +896,123 @@ export default {
     },
 
     async createSchedule() {
-      this.Experimenters = [];
+      try {
+        await login.check_login();
 
-      for (var i = 0; i < this.appointments.length; i++) {
-        this.$refs.extraStudies[i].selectStudy();
-      }
+        this.Experimenters = [];
 
-      var newSchedule = {};
+        for (var i = 0; i < this.appointments.length; i++) {
+          this.$refs.extraStudies[i].selectStudy();
+        }
 
-      switch (this.response) {
-        case "Confirmed":
-          var studyNames = this.appointments.map((appointment) => {
-            return (
-              appointment.Study.StudyName +
-              " (" +
-              this.familyId +
-              appointment.Child.IdWithinFamily +
-              ")"
-            );
+        var newSchedule = {};
+
+        switch (this.response) {
+          case "Confirmed":
+            var studyNames = this.appointments.map((appointment) => {
+              return (
+                appointment.Study.StudyName +
+                " (" +
+                this.familyId +
+                appointment.Child.IdWithinFamily +
+                ")"
+              );
+            });
+
+            studyNames = Array.from(new Set(studyNames));
+
+            newSchedule = {
+              AppointmentTime: this.studyDateTime,
+              Status: this.response,
+              FK_Family: this.familyId,
+              Note: this.scheduleNotes,
+              summary: studyNames.join(" + "),
+              Appointments: this.appointments,
+              ScheduledBy: this.$store.state.userID,
+              location: this.$store.state.location,
+              description: this.calendarDescription(
+                this.scheduleNotes,
+                this.appointments
+              ),
+              // start: {
+              //   dateTime: moment(this.studyDateTime).toISOString(true),
+              //   timeZone: "America/Toronto",
+              // },
+              // end: {
+              //   dateTime: moment(this.studyDateTime)
+              //     .add(1, "h")
+              //     .toISOString(true),
+              //   timeZone: "America/Toronto",
+              // },
+              attendees: this.Experimenters,
+            };
+
+            if (this.skipReminderEmailStatus) {
+              newSchedule.Reminded = true;
+            }
+
+            break;
+
+          default:
+            newSchedule = {
+              AppointmentTime: null,
+              Status: this.response,
+              FK_Family: this.familyId,
+              Appointments: this.appointments,
+              ScheduledBy: this.$store.state.userID,
+            };
+
+            if (
+              this.response === "Left a message" ||
+              this.response === "Interested"
+            ) {
+              newSchedule.Status = "TBD";
+            } else {
+              newSchedule.Status = "Rejected";
+            }
+            break;
+        }
+
+        try {
+          await login.check_login();
+
+          const newStudySchedule = await schedule.create(newSchedule);
+
+          var calendarEvent = Object.assign({}, newSchedule);
+          calendarEvent.scheduleId = newStudySchedule.data.id;
+
+          this.currentSchedule = newStudySchedule.data;
+          this.currentSchedule.AppointmentTime = newSchedule.AppointmentTime;
+
+          // attach schedule info to the current appointments.
+          newStudySchedule.data.updatedAt = moment().toString();
+
+          this.appointments.forEach((appointment) => {
+            appointment.FK_Schedule = newStudySchedule.data.id;
           });
 
-          studyNames = Array.from(new Set(studyNames));
+          console.log("New Scheduled Created!");
 
-          newSchedule = {
-            AppointmentTime: this.studyDateTime,
-            Status: this.response,
-            FK_Family: this.familyId,
-            Note: this.scheduleNotes,
-            summary: studyNames.join(" + "),
-            Appointments: this.appointments,
-            ScheduledBy: this.$store.state.userID,
-            location: this.$store.state.location,
-            description: this.calendarDescription(
-              this.scheduleNotes,
-              this.appointments
-            ),
-            // start: {
-            //   dateTime: moment(this.studyDateTime).toISOString(true),
-            //   timeZone: "America/Toronto",
-            // },
-            // end: {
-            //   dateTime: moment(this.studyDateTime)
-            //     .add(1, "h")
-            //     .toISOString(true),
-            //   timeZone: "America/Toronto",
-            // },
-            attendees: this.Experimenters,
-          };
+          // this.$emit("newSchedule");
 
-          if (this.skipReminderEmailStatus) {
-            newSchedule.Reminded = true;
-          }
-
-          break;
-
-        default:
-          newSchedule = {
-            AppointmentTime: null,
-            Status: this.response,
-            FK_Family: this.familyId,
-            Appointments: this.appointments,
-            ScheduledBy: this.$store.state.userID,
-          };
-
-          if (
-            this.response === "Left a message" ||
-            this.response === "Interested"
-          ) {
-            newSchedule.Status = "TBD";
-          } else {
-            newSchedule.Status = "Rejected";
-          }
-          break;
-      }
-
-      try {
-        const newStudySchedule = await schedule.create(newSchedule);
-
-        var calendarEvent = Object.assign({}, newSchedule);
-        calendarEvent.scheduleId = newStudySchedule.data.id;
-
-        this.currentSchedule = newStudySchedule.data;
-        this.currentSchedule.AppointmentTime = newSchedule.AppointmentTime;
-
-        // attach schedule info to the current appointments.
-        newStudySchedule.data.updatedAt = moment().toString();
-
-        this.appointments.forEach((appointment) => {
-          appointment.FK_Schedule = newStudySchedule.data.id;
-        });
-
-        console.log("New Scheduled Created!");
-
-        // this.$emit("newSchedule");
-
-        return { calendarEvent: calendarEvent };
+          return { calendarEvent: calendarEvent };
+        } catch (error) {
+          console.log(error);
+        }
       } catch (error) {
-        console.log(error);
+        if (error.response.status === 401) {
+          this.$store.dispatch("setToken", null);
+          this.$store.dispatch("setUser", null);
+          this.$store.dispatch("setUserID", null);
+
+          alert("Authentication failed, please login.");
+
+          if (this.$route.name != "Login") {
+            this.$router.push({
+              name: "Login",
+            });
+          }
+        }
       }
     },
 
@@ -1412,7 +1432,8 @@ export default {
         newAppointment.index = this.appointments.length;
         newAppointment.Child.Family = {};
         newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
-        newAppointment.Child.Family.NamePrimary = this.currentFamily.NamePrimary; // family email information used for sending email
+        newAppointment.Child.Family.NamePrimary =
+          this.currentFamily.NamePrimary; // family email information used for sending email
 
         this.appointments.push(newAppointment);
 
@@ -1734,9 +1755,7 @@ export default {
           return new Date().toISOString();
         }
       } else {
-        return moment()
-          .add(60, "days")
-          .toISOString(true);
+        return moment().add(60, "days").toISOString(true);
       }
     },
   },
