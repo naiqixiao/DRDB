@@ -1370,7 +1370,7 @@ export default {
       }, 300);
     },
 
-    scheduleChild() {
+    async scheduleChild() {
       try {
         await login.check_login();
 
