@@ -438,6 +438,9 @@ exports.update = asyncHandler(async (req, res) => {
             })
 
           })
+
+          // reset reminder setting
+          updatedScheduleInfo.Reminded = 0;
         };
 
         await model.experimenterAssignment.bulkCreate(experimenterList);

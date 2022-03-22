@@ -1037,6 +1037,8 @@ export default {
           this.editedSchedule.skipStudyDateTimeStatus =
             this.skipStudyDateTimeStatus;
 
+          this.editedSchedule.Reminded = 0;
+
           const calendarEvent = await schedule.update(this.editedSchedule);
 
           this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
