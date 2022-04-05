@@ -1,3 +1,5 @@
+const Sequelize = require("sequelize");
+
 exports.URL = 'URL of the system';
 
 exports.otherRequirement = ''
