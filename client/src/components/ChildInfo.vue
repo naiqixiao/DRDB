@@ -1386,6 +1386,13 @@ export default {
               (new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000)
             );
 
+            // add Family.AutismHistory field to allow algorithm to chech if the child is eligible for studies relates to ASD.
+            
+            this.editedItem.Family = {};
+
+            this.editedItem.Family.AutismHistory =
+              this.currentFamily.AutismHistory;
+
             const newChild = await child.create(this.editedItem);
 
             this.editedItem.id = newChild.data.id;
