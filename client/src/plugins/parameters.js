@@ -195,10 +195,11 @@ export default {
     ];
 
     Vue.prototype.$childSensitiveInfo = [
-      { label: "Born prematurely?", field: "PrematureBirth", width: "3" },
-      { label: "Vision deficit?", field: "VisionLoss", width: "3" },
-      { label: "Hearing deficit?", field: "HearingLoss", width: "3" },
-      { label: "Other illness?", field: "Illness", width: "3" },
+      { label: "Born prematurely?", field: "PrematureBirth", width: "2" },
+      { label: "ASD diagnosis?", field: "ASD", width: "2" },
+      { label: "Vision deficit?", field: "VisionLoss", width: "2" },
+      { label: "Hearing deficit?", field: "HearingLoss", width: "2" },
+      { label: "Other illness?", field: "Illness", width: "2" },
     ];
 
     Vue.prototype.$labInfo = [

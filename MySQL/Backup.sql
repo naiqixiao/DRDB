@@ -40,7 +40,7 @@ CREATE TABLE `Appointment` (
   CONSTRAINT `FK_Child` FOREIGN KEY (`FK_Child`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Schedule` FOREIGN KEY (`FK_Schedule`) REFERENCES `Schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Study` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=572 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -61,11 +61,11 @@ CREATE TABLE `Child` (
   `HearingLoss` int DEFAULT '0',
   `VisionLoss` int DEFAULT '0',
   `PrematureBirth` int DEFAULT '0',
+  `ASD` int DEFAULT '0',
   `Illness` int DEFAULT '0',
   `Note` text,
   `FK_Family` int DEFAULT NULL,
   `BirthWeight` int DEFAULT NULL,
-  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `HomeLanguage` varchar(100) DEFAULT NULL,
   `SchoolLanguage` varchar(100) DEFAULT NULL,
@@ -73,10 +73,11 @@ CREATE TABLE `Child` (
   `RecruitmentMethod` varchar(100) DEFAULT 'Hospital',
   `Gestation` decimal(2,0) DEFAULT NULL,
   `Gender` varchar(1) DEFAULT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `Child_ibfk_1` (`FK_Family`),
   CONSTRAINT `Child_ibfk_1` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6745 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -97,7 +98,7 @@ CREATE TABLE `Conversations` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `FK_Family` (`FK_Family`),
   CONSTRAINT `Conversations_ibfk_1` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,7 +120,7 @@ CREATE TABLE `Experimenter` (
   KEY `FK_Study` (`FK_Study`),
   CONSTRAINT `Experimenter_ibfk_1` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Experimenter_ibfk_2` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -141,7 +142,7 @@ CREATE TABLE `ExperimenterAssignment` (
   KEY `FK_Appointment_idx` (`FK_Appointment`),
   CONSTRAINT `FK_Appointment` FOREIGN KEY (`FK_Appointment`) REFERENCES `Appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Experimenter` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=239 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -185,7 +186,7 @@ CREATE TABLE `Family` (
   CONSTRAINT `AssignedLab` FOREIGN KEY (`AssignedLab`) REFERENCES `Lab` (`id`),
   CONSTRAINT `Family_ibfk_1` FOREIGN KEY (`CreatedBy`) REFERENCES `Personnel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `Family_ibfk_2` FOREIGN KEY (`UpdatedBy`) REFERENCES `Personnel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6412 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +209,7 @@ CREATE TABLE `Feedback` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `FK_Personnel_idx` (`CreatedBy`),
   CONSTRAINT `FK_Personnel` FOREIGN KEY (`CreatedBy`) REFERENCES `Personnel` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -236,7 +237,7 @@ CREATE TABLE `Lab` (
   UNIQUE KEY `LabName` (`LabName`),
   UNIQUE KEY `PI` (`PI`),
   UNIQUE KEY `Email_UNIQUE` (`Email`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,7 +268,7 @@ CREATE TABLE `Personnel` (
   UNIQUE KEY `Calendar` (`Calendar`),
   KEY `Personnel_ibfk_1` (`FK_Lab`),
   CONSTRAINT `Personnel_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -320,7 +321,7 @@ CREATE TABLE `Schedule` (
   KEY `ScheduledBy_idx` (`ScheduledBy`),
   CONSTRAINT `FK_Family` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`),
   CONSTRAINT `ScheduledBy` FOREIGN KEY (`ScheduledBy`) REFERENCES `Personnel` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=388 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -342,7 +343,7 @@ CREATE TABLE `SecondExperimenterAssignment` (
   KEY `FK_Experimenter_idx` (`FK_Experimenter`),
   CONSTRAINT `FK_Appointment_2nd` FOREIGN KEY (`FK_Appointment`) REFERENCES `Appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Experimenter_2nd` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -364,7 +365,7 @@ CREATE TABLE `Sibling` (
   KEY `Sibling` (`Sibling`),
   CONSTRAINT `Sibling_ibfk_1` FOREIGN KEY (`FK_Child`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Sibling_ibfk_2` FOREIGN KEY (`Sibling`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1107 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -400,7 +401,7 @@ CREATE TABLE `Study` (
   KEY `FK_Personnel_idx` (`FK_Personnel`),
   CONSTRAINT `Personnel_ibfk_3` FOREIGN KEY (`FK_Personnel`) REFERENCES `Personnel` (`id`),
   CONSTRAINT `Study_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -412,4 +413,4 @@ CREATE TABLE `Study` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-04  8:58:22
+-- Dump completed on 2022-04-10  5:33:17

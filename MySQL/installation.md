@@ -1,7 +1,7 @@
 sudo apt install mysql-server
 
-sudo mysqldump -u [user] -p [database_name] > [filename].sql
-mysqldump -u admin -p --no-data DRDB > Backup.sql
+sudo mysqldump -u [user] -p [database_name] | sed 's/ AUTO_INCREMENT=[0-9]*//g' > [filename].sql
+mysqldump -u admin -p --no-data DRDB | sed 's/ AUTO_INCREMENT=[0-9]*//g' > Backup.sql
 
 
 
