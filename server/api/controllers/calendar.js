@@ -5,6 +5,8 @@ const moment = require("moment");
 // Require google from googleapis package.
 const { google } = require("googleapis");
 
+const config = require("../../config/general");
+
 // Create a new calender instance.
 
 // {
@@ -12,11 +14,11 @@ const { google } = require("googleapis");
 //     "location": "McMaster University",
 //     "start": {
 //         "dateTime": "2020-03-19T12:00:00.000",
-//         "timeZone": "America/Toronto"
+//         "timeZone": config.timeZone
 //     },
 //     "end": {
 //         "dateTime": "2020-03-19T15:30:00.000",
-//         "timeZone": "America/Toronto"
+//         "timeZone": config.timeZone
 //     },
 //     "status": "confirmed",
 //     "attendees": [
@@ -37,14 +39,14 @@ exports.create = asyncHandler(async (req, res) => {
 
   event.start = {
     dateTime: moment(event.AppointmentTime).toISOString(true),
-    timeZone: "America/Toronto",
+    timeZone: config.timeZone,
   }
 
   event.end = {
     dateTime: moment(event.AppointmentTime)
       .add(1, "h")
       .toISOString(true),
-    timeZone: "America/Toronto",
+    timeZone: config.timeZone,
   }
 
   try {

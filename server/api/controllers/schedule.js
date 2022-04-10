@@ -3,8 +3,10 @@ const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const moment = require("moment");
-const fs = require("fs");
+// const fs = require("fs");
 const log = require("../controllers/log");
+const config = require("../../config/general");
+
 
 // Create and Save an appointment
 
@@ -30,11 +32,11 @@ const log = require("../controllers/log");
 //   "location": "Psychology Building, McMaster University",
 //   "start": {
 //       "dateTime": "2020-04-24T14:00:00.000",
-//       "timeZone": "America/Toronto"
+//       "timeZone": config.timeZone
 //   },
 //   "end": {
 //       "dateTime": "2020-04-24T15:30:00.000",
-//       "timeZone": "America/Toronto"
+//       "timeZone": config.timeZone
 //   },
 //   "attendees": [
 //       {
@@ -358,14 +360,14 @@ exports.update = asyncHandler(async (req, res) => {
     
     updatedScheduleInfo.start = {
       dateTime: moment(updatedScheduleInfo.AppointmentTime).toISOString(true),
-      timeZone: "America/Toronto",
+      timeZone: config.timeZone,
     };
     
     updatedScheduleInfo.end = {
       dateTime: moment(updatedScheduleInfo.AppointmentTime)
       .add(1, "h") // might change if multiple studies are scheduled for one visit
       .toISOString(true),
-      timeZone: "America/Toronto",
+      timeZone: config.timeZone,
     };
 
     updatedScheduleInfo.AppointmentTime = moment(updatedScheduleInfo.AppointmentTime).toISOString(true)
