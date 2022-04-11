@@ -832,6 +832,10 @@ export default {
 
     updateExperimenters(updatedExperimenters) {
       this.currentStudy.Experimenters = updatedExperimenters;
+
+      Object.assign(this.Studies[this.editedIndex], this.currentStudy);
+      this.$store.dispatch("setStudies", this.Studies);
+
     },
 
     AgeFormated2(Age) {
@@ -1068,7 +1072,7 @@ export default {
     },
   },
 
-  mounted: function() {
+  mounted: function () {
     this.searchStudies();
     this.searchLabMembers();
   },

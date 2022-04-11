@@ -29,6 +29,7 @@ export default new Vuex.Store({
     transportationInstructions: null,
     ZoomLink: null,
     trainingMode: null,
+    timeZone: null,
   },
   mutations: {
     setToken(state, token) {
@@ -92,6 +93,9 @@ export default new Vuex.Store({
     setTrainingMode(state, trainingMode) {
       state.trainingMode = trainingMode;
     },
+    setTimeZone(state, timeZone) {
+      state.timeZone = timeZone;
+    },
   },
   actions: {
     setToken({ commit }, token) {
@@ -153,6 +157,9 @@ export default new Vuex.Store({
     },
     setTrainingMode({ commit }, trainingMode) {
       commit("setTrainingMode", trainingMode);
+    },
+    setTimeZone({ commit }, timeZone) {
+      commit("setTimeZone", timeZone);
     },
   },
 });

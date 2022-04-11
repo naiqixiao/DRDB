@@ -103,9 +103,9 @@
                   color="primary"
                   :disabled="
                     passwordConfirmationRule != true ||
-                      newPassword == null ||
-                      password == null ||
-                      newPasswordRule != true
+                    newPassword == null ||
+                    password == null ||
+                    newPasswordRule != true
                   "
                   @click="changePassword"
                   >Confirm</v-btn
@@ -131,8 +131,8 @@
             dense
             :disabled="
               $store.state.role != 'Admin' &&
-                $store.state.role != 'PI' &&
-                $store.state.role != 'Lab manager'
+              $store.state.role != 'PI' &&
+              $store.state.role != 'Lab manager'
             "
           ></v-file-input>
         </template>
@@ -194,10 +194,10 @@
                 @click.stop="googleCredentialsURL('lab')"
                 :disabled="
                   $store.state.role != 'Admin' &&
-                    $store.state.role != 'PI' &&
-                    $store.state.role != 'PostDoc' &&
-                    $store.state.role != 'GradStudent' &&
-                    $store.state.role != 'Lab manager'
+                  $store.state.role != 'PI' &&
+                  $store.state.role != 'PostDoc' &&
+                  $store.state.role != 'GradStudent' &&
+                  $store.state.role != 'Lab manager'
                 "
                 >Setup Google Account</v-btn
               >
@@ -217,10 +217,10 @@
                 @click.stop="editLabInfo"
                 :disabled="
                   $store.state.role != 'Admin' &&
-                    $store.state.role != 'PI' &&
-                    $store.state.role != 'PostDoc' &&
-                    $store.state.role != 'GradStudent' &&
-                    $store.state.role != 'Lab manager'
+                  $store.state.role != 'PI' &&
+                  $store.state.role != 'PostDoc' &&
+                  $store.state.role != 'GradStudent' &&
+                  $store.state.role != 'Lab manager'
                 "
                 >Update Lab Info</v-btn
               >
@@ -467,7 +467,25 @@
           <v-card-text>
             <v-form ref="formEdit" v-model="valid" lazy-validation>
               <v-row justify="start">
-                <v-col cols="12" md="3">
+                <v-col
+                  cols="12"
+                  :md="item.width"
+                  v-for="item in this.$labInfo"
+                  :key="item.label"
+                  ><v-text-field
+                    class="textfield-family"
+                    background-color="textbackground"
+                    hide-details
+                    :label="item.label"
+                    v-model="editedLab[item.field]"
+                    placeholder="  "
+                    :rules="$rules[item.rules]"
+                    outlined
+                    dense
+                  ></v-text-field>
+                </v-col>
+
+                <!-- <v-col cols="12" md="3">
                   <v-text-field
                     class="textfield-family"
                     background-color="textbackground"
@@ -480,7 +498,7 @@
                     dense
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="4">
                   <v-text-field
                     class="textfield-family"
                     background-color="textbackground"
@@ -492,7 +510,7 @@
                     outlined
                     dense
                   ></v-text-field>
-                </v-col>
+                </v-col> -->
               </v-row>
 
               <v-row>
@@ -643,7 +661,8 @@ export default {
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
       this.editedLab.TYEmail = this.$store.state.tyEmailClosing;
-      this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
+      this.editedLab.TransportationInstructions =
+        this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
       this.editedLab.ZoomLink = this.$store.state.ZoomLink;
       this.dialogEditLab = true;

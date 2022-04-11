@@ -882,7 +882,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
-        .tz("America/Toronto")
+        .tz(this.$store.state.timeZone)
         .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },

@@ -1061,7 +1061,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
-        .tz("America/Toronto")
+        .tz(this.$store.state.timeZone)
         .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
@@ -1801,7 +1801,7 @@ export default {
       }
     },
     TodaysDate() {
-      return moment().startOf("day").tz("America/Toronto").format("YYYY-MM-DD");
+      return moment().startOf("day").tz(this.$store.state.timeZone).format("YYYY-MM-DD");
     },
     reminderEmailDisable() {
       return false;

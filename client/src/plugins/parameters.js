@@ -207,7 +207,14 @@ export default {
         label: "Lab's Name",
         field: "LabName",
         rules: "required",
+        width: "4"
       },
+      {
+        label: "Location",
+        field: "Location",
+        rules: "required",
+        width: "6"
+      }
     ];
 
     Vue.prototype.$labPI = [

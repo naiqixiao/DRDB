@@ -43,7 +43,7 @@
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.1.20220306</h4>
+      <h4>V1.1.20220410</h4>
     </v-col>
 
     <v-dialog
@@ -168,6 +168,7 @@ export default {
           this.$store.dispatch("setRole", response.data.role);
           this.$store.dispatch("setLabEmail", response.data.labEmail);
           this.$store.dispatch("setLabName", response.data.labName);
+          this.$store.dispatch("setTimeZone", response.data.timeZone);
 
           this.$store.dispatch("setEmailOpening", response.data.emailOpening);
           this.$store.dispatch("setEmailClosing", response.data.emailClosing);
@@ -207,8 +208,10 @@ export default {
           switch (error.response.status) {
             case 500:
             case 502:
-            alert("Calm down....\n\nThe backend server is not running properly.\n\nAsk the administor to fix this issue.");
-            break;
+              alert(
+                "Calm down....\n\nThe backend server is not running properly.\n\nAsk the administor to fix this issue."
+              );
+              break;
           }
         }
 
@@ -265,6 +268,7 @@ export default {
         this.$store.dispatch("setRole", response.data.role);
         this.$store.dispatch("setLabEmail", response.data.labEmail);
         this.$store.dispatch("setLabName", response.data.labName);
+        this.$store.dispatch("setTimeZone", response.data.timeZone);
 
         this.$store.dispatch("setEmailOpening", response.data.emailOpening);
         this.$store.dispatch("setEmailClosing", response.data.emailClosing);

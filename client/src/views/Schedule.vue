@@ -1501,7 +1501,7 @@ export default {
 
       this.studyDate = moment()
         .startOf("day")
-        .tz("America/Toronto")
+        .tz(this.$store.state.timeZone)
         .format("YYYY-MM-DD");
       this.studyTime = "06:00AM";
     },
@@ -1558,13 +1558,13 @@ export default {
             ),
             // start: {
             //   dateTime: moment(this.studyDateTime).toISOString(true),
-            //   timeZone: "America/Toronto",
+            //   timeZone: this.$store.state.timeZone,
             // },
             // end: {
             //   dateTime: moment(this.studyDateTime)
             //     .add(1, "h")
             //     .toISOString(true),
-            //   timeZone: "America/Toronto",
+            //   timeZone: this.$store.state.timeZone,
             // },
             attendees: this.Experimenters,
           };
@@ -1678,13 +1678,13 @@ export default {
         ),
         // start: {
         //   dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-        //   timeZone: "America/Toronto",
+        //   timeZone: this.$store.state.timeZone,
         // },
         // end: {
         //   dateTime: moment(currentSchedule.AppointmentTime)
         //     .add(1, "h")
         //     .toISOString(true),
-        //   timeZone: "America/Toronto",
+        //   timeZone: this.$store.state.timeZone,
         // },
         attendees: attendees,
         scheduleId: this.scheduleId,
@@ -2148,7 +2148,7 @@ export default {
           NextContactNote: "Parents asked to be removed from the database.",
           LastContactDate: moment()
             .startOf("day")
-            .tz("America/Toronto")
+            .tz(this.$store.state.timeZone)
             .format("YYYY-MM-DD"),
           NoMoreContact: true,
         };

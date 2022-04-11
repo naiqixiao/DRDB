@@ -385,6 +385,7 @@ exports.login = asyncHandler(async (req, res) => {
     location: personnel.Lab.Location,
     transportationInstructions: personnel.Lab.TransportationInstructions,
     ZoomLink: personnel.Lab.ZoomLink,
+    timeZone: config.timeZone
   });
 });
 
