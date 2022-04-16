@@ -815,7 +815,7 @@ export default {
             this.page = this.Families.length;
             // console.log("Family is creted!");
 
-            this.$refs.form.resetValidate();
+            this.$refs.form.resetValidation();
             // this.$emit("searchFamily", this.editedItem);
           }
         } catch (error) {
