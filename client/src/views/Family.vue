@@ -752,6 +752,12 @@ export default {
     },
 
     addFamily() {
+      if (this.$store.state.trainingMode) {
+        alert(
+          "You are currently in Training mode.\n\nAny family created under Training mode will only be accessible for training purpose.\n\nIf you want to create a record for a real family, please turn off the Training mode first."
+        );
+      }
+
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.familyTemplate);
       // this.editableFields = Object.assign({}, this.$familyFields);
@@ -969,15 +975,23 @@ export default {
       return moment().startOf("day").format("YYYY-MM-DD");
     },
     btnSize() {
-      const size = { xs: "x-small", sm: "small", md: "small", lg: "large", xl: "large" }[
-        this.$vuetify.breakpoint.name
-      ];
+      const size = {
+        xs: "x-small",
+        sm: "small",
+        md: "small",
+        lg: "large",
+        xl: "large",
+      }[this.$vuetify.breakpoint.name];
       return size ? { [size]: true } : {};
     },
     iconSize() {
-      const size = { xs: "x-small", sm: "small", md: "small", lg: "small", xl: "large" }[
-        this.$vuetify.breakpoint.name
-      ];
+      const size = {
+        xs: "x-small",
+        sm: "small",
+        md: "small",
+        lg: "small",
+        xl: "large",
+      }[this.$vuetify.breakpoint.name];
       return size ? { [size]: true } : {};
     },
   },
