@@ -95,7 +95,7 @@
                   dark
                   outlined
                   color="primary"
-                  :disabled="PotentialStudies[index].length < 1"
+                  :disabled="potentialStudies(child).potentialStudyList.length < 1"
                   @click.stop="Schedule(child, index)"
                 >
                   <v-icon dark>event</v-icon>schedule
@@ -1387,7 +1387,7 @@ export default {
             );
 
             // add Family.AutismHistory field to allow algorithm to chech if the child is eligible for studies relates to ASD.
-            
+
             this.editedItem.Family = {};
 
             this.editedItem.Family.AutismHistory =
@@ -1657,14 +1657,18 @@ export default {
     },
 
     UniquePreviousStudies() {
-      return this.Children.map((child) => {
-        let studyIds = [];
-        child.Appointments.forEach((appointment) => {
-          studyIds.push(appointment.FK_Study);
-        });
+      if (this.Children) {
+        return this.Children.map((child) => {
+          let studyIds = [];
+          child.Appointments.forEach((appointment) => {
+            studyIds.push(appointment.FK_Study);
+          });
 
-        return studyIds;
-      });
+          return studyIds;
+        });
+      } else {
+        return [];
+      }
     },
 
     PotentialStudies() {
