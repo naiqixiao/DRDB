@@ -120,10 +120,10 @@
                             @click.stop="createPersonnel"
                             :disabled="
                               $store.state.role != 'Admin' &&
-                                $store.state.role != 'PI' &&
-                                $store.state.role != 'PostDoc' &&
-                                $store.state.role != 'GradStudent' &&
-                                $store.state.role != 'Lab manager'
+                              $store.state.role != 'PI' &&
+                              $store.state.role != 'PostDoc' &&
+                              $store.state.role != 'GradStudent' &&
+                              $store.state.role != 'Lab manager'
                             "
                           >
                             <v-icon class="fabIcon">add</v-icon>
@@ -142,10 +142,10 @@
                             @click.stop="editPersonnel"
                             :disabled="
                               !currentPersonnel.id ||
-                                (currentPersonnel.id != $store.state.userID &&
-                                  $store.state.role != 'Admin' &&
-                                  $store.state.role != 'PI' &&
-                                  $store.state.role != 'Lab manager')
+                              (currentPersonnel.id != $store.state.userID &&
+                                $store.state.role != 'Admin' &&
+                                $store.state.role != 'PI' &&
+                                $store.state.role != 'Lab manager')
                             "
                           >
                             <v-icon class="fabIcon">edit</v-icon>
@@ -164,9 +164,9 @@
                             @click.stop="deletePersonnel"
                             :disabled="
                               !currentPersonnel.id ||
-                                ($store.state.role != 'Admin' &&
-                                  $store.state.role != 'PI' &&
-                                  $store.state.role != 'Lab manager')
+                              ($store.state.role != 'Admin' &&
+                                $store.state.role != 'PI' &&
+                                $store.state.role != 'Lab manager')
                             "
                           >
                             <v-icon class="fabIcon">delete</v-icon>
@@ -265,7 +265,7 @@
                     </v-container>
                   </v-form>
                 </v-card-text>
-                <v-card-actions style="padding: 16px;">
+                <v-card-actions style="padding: 16px">
                   <v-row justify="space-between">
                     <v-col md="4"></v-col>
                     <v-col md="2">
@@ -344,7 +344,12 @@ export default {
           rules: "required",
         },
         { label: "Email", field: "Email", width: "4", rules: "emailRequired" },
-        { label: "Calendar ID", field: "Calendar", width: "4", rules: "emailRequired" },
+        {
+          label: "Calendar ID",
+          field: "Calendar",
+          width: "4",
+          rules: "emailRequired",
+        },
         { label: "Phone", field: "Phone", width: "4", rules: "phone" },
         { label: "Zoom Link", width: "12", field: "ZoomLink" },
       ],
@@ -469,7 +474,15 @@ export default {
           await personnel.update(this.editedPersonnel);
 
           this.currentPersonnel = this.editedPersonnel;
-          Object.assign(this.Personnels[this.editedIndex], this.editedPersonnel);
+          Object.assign(
+            this.Personnels[this.editedIndex],
+            this.editedPersonnel
+          );
+
+          if (this.currentPersonnel.id == this.$store.state.userID) {
+            this.$store.dispatch("setZoomLink", this.currentPersonnel.ZoomLink);
+          }
+          
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
@@ -526,7 +539,7 @@ export default {
       this.currentPersonnel.AssignedStudies = updatedStudies;
     },
   },
-  mounted: function() {
+  mounted: function () {
     this.searchPersonnel();
     this.searchLabStudies();
   },
