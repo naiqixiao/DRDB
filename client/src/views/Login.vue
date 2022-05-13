@@ -169,6 +169,7 @@ export default {
           this.$store.dispatch("setLabEmail", response.data.labEmail);
           this.$store.dispatch("setLabName", response.data.labName);
           this.$store.dispatch("setTimeZone", response.data.timeZone);
+          this.$store.dispatch("setZoomLink", response.data.ZoomLink);
 
           this.$store.dispatch("setEmailOpening", response.data.emailOpening);
           this.$store.dispatch("setEmailClosing", response.data.emailClosing);
