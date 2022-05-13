@@ -384,7 +384,7 @@ exports.login = asyncHandler(async (req, res) => {
     TYEmail: personnel.Lab.TYEmail,
     location: personnel.Lab.Location,
     transportationInstructions: personnel.Lab.TransportationInstructions,
-    ZoomLink: personnel.Lab.ZoomLink,
+    ZoomLink: personnel.ZoomLink,
     timeZone: config.timeZone
   });
 });
