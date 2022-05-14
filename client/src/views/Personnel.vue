@@ -32,49 +32,77 @@
         >You are running in a training mode.</v-alert
       >
     </div>
-
+    <!--           hide-default-footer
+          disable-pagination -->
     <v-row>
       <v-col cols="12" md="4">
-        <v-data-table
-          hide-default-footer
-          disable-pagination
-          fixed-header
-          height="900"
-          single-select
-          no-data-text="No personnel to display."
-          :headers="headerPersonnel"
-          :items="Personnels"
-          class="elevation-1"
-          @click:row="rowSelected"
-        >
-          <template #item.updatedAt="{ value }">
-            <DateDisplay :date="value" :format="'short'" />
-          </template>
-
-          <template #item.Active="{ item }">
+        <v-card>
+          <v-card-title>
+            <v-text-field
+              v-model="search"
+              label="Search by Name or Email"
+              class="mx-4"
+              single-line
+              hide-details
+            ></v-text-field>
+            <v-spacer></v-spacer>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-simple-checkbox
-                    class="mr-0 pa-0"
-                    :value="!!item.Active"
-                    @input="changePersonnelStatus(item)"
-                    :disabled="
-                      !(
-                        currentPersonnel.id == $store.state.userID ||
-                        $store.state.role == 'Admin' ||
-                        $store.state.role == 'PI' ||
-                        $store.state.role == 'Lab manager'
-                      )
-                    "
-                    dense
-                  ></v-simple-checkbox>
-                </div>
-              </template>
-              <span>Mark whether this person is available to run studies</span>
-            </v-tooltip>
-          </template>
-        </v-data-table>
+                  <v-checkbox
+                    v-model="activeMemberFilter"
+                    label="Active only"
+                    hide-details
+                  ></v-checkbox></div
+              ></template>
+              <span
+                >Show active members</span
+              ></v-tooltip
+            >
+          </v-card-title>
+          <v-data-table
+            fixed-header
+            height="600"
+            single-select
+            no-data-text="No personnel to display."
+            :headers="headerPersonnel"
+            :items="Personnels"
+            :search="search"
+            :custom-filter="filterByText"
+            class="elevation-1"
+            @click:row="rowSelected"
+          >
+            <!-- <template #item.updatedAt="{ value }">
+            <DateDisplay :date="value" :format="'short'" />
+          </template> -->
+
+            <template #item.Active="{ item }">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-simple-checkbox
+                      class="mr-0 pa-0"
+                      :value="!!item.Active"
+                      @input="changePersonnelStatus(item)"
+                      :disabled="
+                        !(
+                          currentPersonnel.id == $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager'
+                        )
+                      "
+                      dense
+                    ></v-simple-checkbox>
+                  </div>
+                </template>
+                <span
+                  >Mark whether this person is available to run studies</span
+                >
+              </v-tooltip>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
 
       <v-col cols="12" md="8">
@@ -287,7 +315,7 @@
 </template>
 
 <script>
-import DateDisplay from "@/components/DateDisplay";
+// import DateDisplay from "@/components/DateDisplay";
 import AssignedStudies from "@/components/AssignedStudies";
 
 import study from "@/services/study";
@@ -297,17 +325,18 @@ import store from "@/store";
 
 export default {
   components: {
-    DateDisplay,
+    // DateDisplay,
     AssignedStudies,
   },
   data() {
     return {
+      search: "",
       headerPersonnel: [
         {
           text: "Name",
           align: "center",
           value: "Name",
-          width: "27%",
+          width: "35%",
         },
         {
           text: "Email",
@@ -316,13 +345,13 @@ export default {
           value: "Email",
           width: "35%",
         },
-        {
-          text: "Role",
-          align: "center",
-          sortable: false,
-          value: "Role",
-          width: "20%",
-        },
+        // {
+        //   text: "Role",
+        //   align: "center",
+        //   sortable: false,
+        //   value: "Role",
+        //   width: "20%",
+        // },
 
         {
           text: "Active?",
@@ -330,6 +359,11 @@ export default {
           align: "center",
           value: "Active",
           width: "18%",
+          filter: (value) => {
+            if (!this.activeMemberFilter) return true;
+
+            return value == this.activeMemberFilter;
+          },
         },
       ],
       dialog: false,
@@ -369,6 +403,7 @@ export default {
       editedIndex: -1,
       labStudies: [],
       valid: true,
+      activeMemberFilter: true,
     };
   },
 
@@ -482,7 +517,6 @@ export default {
           if (this.currentPersonnel.id == this.$store.state.userID) {
             this.$store.dispatch("setZoomLink", this.currentPersonnel.ZoomLink);
           }
-          
         } catch (error) {
           if (error.response.status === 401) {
             alert("Authentication failed, please login.");
@@ -537,6 +571,18 @@ export default {
 
     updatedStudies(updatedStudies) {
       this.currentPersonnel.AssignedStudies = updatedStudies;
+    },
+
+    filterByText(value, search) {
+      return (
+        value != null &&
+        search != null &&
+        typeof value === "string" &&
+        value
+          .toString()
+          .toLocaleLowerCase()
+          .indexOf(search.toLocaleLowerCase()) !== -1
+      );
     },
   },
   mounted: function () {

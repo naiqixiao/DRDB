@@ -37,51 +37,70 @@
 
     <v-row>
       <v-col cols="12" md="3">
-        <v-row>
-          <v-col>
-            <v-data-table
-              hide-default-footer
-              disable-pagination
-              fixed-header
-              height="750"
-              single-select
-              no-data-text="No study to display."
-              :headers="headersStudy"
-              :items="Studies"
-              @click:row="rowSelected"
-              class="elevation-1"
+        <v-card>
+          <v-card-title>
+            <v-text-field
+              v-model="search"
+              label="Search by Study Name"
+              class="mx-4"
+              single-line
+              hide-details
+            ></v-text-field>
+            <v-spacer></v-spacer>
+            <v-tooltip top>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-checkbox
+                    v-model="inProgressStudyFilter"
+                    label="In progress"
+                    hide-details
+                  ></v-checkbox></div
+              ></template>
+              <span>Show on-going studies</span></v-tooltip
             >
-              <template #item.updatedAt="{ value }">
-                <DateDisplay :date="value" :format="'short'" />
-              </template>
+          </v-card-title>
+          <v-data-table
+            fixed-header
+            height="650"
+            single-select
+            no-data-text="No study to display."
+            :headers="headersStudy"
+            :items="Studies"
+            :search="search"
+            :custom-filter="filterByText"
+            @click:row="rowSelected"
+            class="elevation-1"
+          >
+            <template #item.updatedAt="{ value }">
+              <DateDisplay :date="value" :format="'short'" />
+            </template>
 
-              <template #item.Completed="{ item }">
-                <v-tooltip top>
-                  <template v-slot:activator="{ on }">
-                    <div v-on="on">
-                      <v-simple-checkbox
-                        class="checkbox"
-                        :value="!!item.Completed"
-                        @input="changeStudyStatus(item)"
-                        :disabled="
-                          !(
-                            currentStudy.PointofContact.id ==
-                              $store.state.userID ||
-                            $store.state.role == 'Admin' ||
-                            $store.state.role == 'PI' ||
-                            $store.state.role == 'Lab manager'
-                          )
-                        "
-                        dense
-                      ></v-simple-checkbox>
-                    </div>
-                  </template>
-                  <span>Mark whether this study is still on going</span>
-                </v-tooltip>
-              </template>
-            </v-data-table>
-          </v-col>
-        </v-row>
+            <template #item.Completed="{ item }">
+              <v-tooltip top>
+                <template v-slot:activator="{ on }">
+                  <div v-on="on">
+                    <v-simple-checkbox
+                      class="checkbox"
+                      :value="!!item.Completed"
+                      @input="changeStudyStatus(item)"
+                      :disabled="
+                        !(
+                          currentStudy.PointofContact.id ==
+                            $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager'
+                        )
+                      "
+                      dense
+                    ></v-simple-checkbox>
+                  </div>
+                </template>
+                <span>Mark whether this study is still on going</span>
+              </v-tooltip>
+            </template>
+          </v-data-table>
+        </v-card>
         <v-row dense justify="end">
           <v-col cols="12" md="3" dense>
             <v-tooltip top>
@@ -574,27 +593,34 @@ export default {
           sortable: false,
           align: "center",
           value: "StudyName",
-          width: "35%",
+          width: "60%",
         },
-        {
-          text: "Type",
-          align: "center",
-          value: "StudyType",
-          width: "23%",
-        },
-        {
-          text: "Updated at",
-          align: "center",
-          value: "updatedAt",
-          width: "25%",
-        },
+        // {
+        //   text: "Type",
+        //   align: "center",
+        //   value: "StudyType",
+        //   width: "23%",
+        // },
+        // {
+        //   text: "Updated at",
+        //   align: "center",
+        //   value: "updatedAt",
+        //   width: "25%",
+        // },
 
         {
           text: "Completed?",
           align: "center",
           value: "Completed",
           sortable: false,
-          width: "17%",
+          width: "20%",
+          filter: (value) => {
+            if (this.inProgressStudyFilter) {
+              return value != this.inProgressStudyFilter;
+            } else {
+              return true;
+            }
+          },
         },
       ],
       dialog: false,
@@ -676,6 +702,8 @@ export default {
         ["link"],
       ],
       inclusionOptions: ["Include", "Exclude", "Only"],
+      inProgressStudyFilter: true,
+      search: "",
     };
   },
 
@@ -835,7 +863,6 @@ export default {
 
       Object.assign(this.Studies[this.editedIndex], this.currentStudy);
       this.$store.dispatch("setStudies", this.Studies);
-
     },
 
     AgeFormated2(Age) {
@@ -868,6 +895,18 @@ export default {
         }
         return null;
       }
+    },
+
+    filterByText(value, search) {
+      return (
+        value != null &&
+        search != null &&
+        typeof value === "string" &&
+        value
+          .toString()
+          .toLocaleLowerCase()
+          .indexOf(search.toLocaleLowerCase()) !== -1
+      );
     },
   },
 
