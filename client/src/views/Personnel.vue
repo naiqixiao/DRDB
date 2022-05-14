@@ -488,7 +488,7 @@ export default {
     },
 
     async save() {
-      if (this.editedIndex < 0) {
+      if (this.editedPersonnel.id === undefined) {
         try {
           // const KKK = await fetch("https://api.ipify.org/?format=json");
 

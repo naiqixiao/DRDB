@@ -839,7 +839,7 @@ export default {
     async save() {
       this.editedStudy.FK_Personnel = this.pointofContact.id;
 
-      if (this.editedIndex === -1) {
+      if (this.editedStudy.id === undefined) {
         try {
           const Result = await study.create(this.editedStudy);
           this.editedStudy.PointofContact = this.pointofContact;
