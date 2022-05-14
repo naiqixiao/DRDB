@@ -36,7 +36,7 @@
     <ConfirmDlg ref="confirmD" />
 
     <v-row>
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="4">
         <v-card>
           <v-card-title>
             <v-text-field
@@ -129,7 +129,7 @@
         </v-row>
       </v-col>
 
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="8">
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
@@ -244,6 +244,18 @@
             <v-tooltip right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
+                  <v-btn fab @click.stop="dialogShowEmailPreviews = true">
+                    <v-icon class="fabIcon">drafts</v-icon>
+                  </v-btn>
+                </div>
+              </template>
+              <span>Preview emails</span>
+            </v-tooltip>
+          </v-col>
+          <v-col cols="12" md="2" dense>
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
                   <v-btn
                     fab
                     @click.stop="deleteStudy"
@@ -311,7 +323,7 @@
           <v-dialog
             fullscreen
             hide-overlay
-            transition="dialog-top-transition"
+            transition="dialog-bottom-transition"
             v-model="dialog"
             :retain-focus="false"
           >
@@ -516,51 +528,83 @@
           </v-dialog>
         </div>
         <!-- </v-form> -->
-      </v-col>
 
-      <v-col cols="12" md="5" style="overflow-y: scroll !important">
-        <v-col md="12">
-          <v-divider></v-divider>
-          <h3 class="text-left" v-show="currentStudy.id">
-            Schedule confirmation email preview (email template is is in dark
-            colour):
-          </h3>
-        </v-col>
-        <body
-          v-html="confirmationPreview"
-          align="start"
-          class="template"
-          v-show="currentStudy.id"
-          style="height: 350px !important; overflow-y: scroll !important"
-        ></body>
+        <div>
+          <v-dialog
+            fullscreen
+            hide-overlay
+            transition="dialog-bottom-transition"
+            v-model="dialogShowEmailPreviews"
+            :retain-focus="false"
+          >
+            <v-card outlined>
+              <v-toolbar dark color="primary">
+                <v-btn icon dark @click="dialogShowEmailPreviews = false">
+                  <v-icon class="fabIcon">mdi-close</v-icon>
+                </v-btn>
+                <h2 class="title-text title-p-4 ma-2"
+                  >Study email previews</h2
+                >
+                <v-spacer></v-spacer>
+              </v-toolbar>
 
-        <v-col md="12">
-          <v-divider></v-divider>
-          <h3 class="text-left" v-show="currentStudy.id">
-            Reminder email preview (email template is in dark colour):
-          </h3>
-        </v-col>
-        <body
-          v-html="reminderPreview"
-          align="start"
-          class="template"
-          v-show="currentStudy.id"
-          style="height: 350px !important; overflow-y: scroll !important"
-        ></body>
+              <v-card-text>
+                <!-- <v-col cols="12" md="5" style="overflow-y: scroll !important"> -->
+                <v-col md="12">
+                  <v-divider></v-divider>
+                  <h3 class="text-left" v-show="currentStudy.id">
+                    Schedule confirmation email preview (email template is is in
+                    dark colour):
+                  </h3>
+                </v-col>
+                <body
+                  v-html="confirmationPreview"
+                  align="start"
+                  class="template"
+                  v-show="currentStudy.id"
+                  style="
+                    height: 350px !important;
+                    overflow-y: scroll !important;
+                  "
+                ></body>
 
-        <v-col md="12">
-          <v-divider></v-divider>
-          <h3 class="text-left" v-show="currentStudy.id">
-            Follow-up email preview (email template is in dark colour):
-          </h3>
-        </v-col>
-        <body
-          v-html="followupPreview"
-          align="start"
-          class="template"
-          v-show="currentStudy.id"
-          style="height: 350px !important; overflow-y: scroll !important"
-        ></body>
+                <v-col md="12">
+                  <v-divider></v-divider>
+                  <h3 class="text-left" v-show="currentStudy.id">
+                    Reminder email preview (email template is in dark colour):
+                  </h3>
+                </v-col>
+                <body
+                  v-html="reminderPreview"
+                  align="start"
+                  class="template"
+                  v-show="currentStudy.id"
+                  style="
+                    height: 350px !important;
+                    overflow-y: scroll !important;
+                  "
+                ></body>
+
+                <v-col md="12">
+                  <v-divider></v-divider>
+                  <h3 class="text-left" v-show="currentStudy.id">
+                    Follow-up email preview (email template is in dark colour):
+                  </h3>
+                </v-col>
+                <body
+                  v-html="followupPreview"
+                  align="start"
+                  class="template"
+                  v-show="currentStudy.id"
+                  style="
+                    height: 350px !important;
+                    overflow-y: scroll !important;
+                  "
+                ></body>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+        </div>
       </v-col>
     </v-row>
   </v-container>
@@ -624,6 +668,7 @@ export default {
         },
       ],
       dialog: false,
+      dialogShowEmailPreviews: false,
       Studies: [],
       currentStudy: {
         StudyName: null,

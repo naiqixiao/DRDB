@@ -458,7 +458,7 @@
       <v-dialog
         fullscreen
         hide-overlay
-        transition="dialog-top-transition"
+        transition="dialog-bottom-transition"
         v-model="dialogEditLab"
         :retain-focus="false"
       >
