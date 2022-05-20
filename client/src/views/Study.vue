@@ -61,7 +61,7 @@
           </v-card-title>
           <v-data-table
             fixed-header
-            height="650"
+            height="600"
             single-select
             no-data-text="No study to display."
             :headers="headersStudy"
@@ -244,45 +244,7 @@
             <v-tooltip right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn fab @click.stop="dialogShowEmailPreviews = true">
-                    <v-icon class="fabIcon">drafts</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Preview emails</span>
-            </v-tooltip>
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-tooltip right>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
                   <v-btn
-                    fab
-                    @click.stop="deleteStudy"
-                    :disabled="
-                      !(
-                        currentStudy.id &&
-                        (currentStudy.PointofContact.id ==
-                          $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager')
-                      )
-                    "
-                  >
-                    <v-icon class="fabIcon">delete</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>Delete this study</span>
-            </v-tooltip>
-          </v-col>
-          <v-col cols="12" md="2" dense>
-            <v-tooltip right>
-              <template v-slot:activator="{ on }">
-                <div v-on="on">
-                  <v-btn
-                    fab
                     @click.stop="editStudy"
                     :disabled="
                       !(
@@ -295,11 +257,55 @@
                       )
                     "
                   >
-                    <v-icon class="fabIcon">edit</v-icon>
+                    <v-icon left v-bind="iconSize" class="fabIcon">edit</v-icon>
+                    Edit study info
                   </v-btn>
                 </div>
               </template>
               <span>Edit study information</span>
+            </v-tooltip>
+          </v-col>
+          <v-col cols="12" md="2" dense>
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn
+                    @click.stop="dialogShowEmailPreviews = true"
+                    :disabled="!currentStudy.id"
+                  >
+                    <v-icon left v-bind="iconSize" class="fabIcon"
+                      >drafts</v-icon
+                    >Preview email templates
+                  </v-btn>
+                </div>
+              </template>
+              <span>Preview emails</span>
+            </v-tooltip>
+          </v-col>
+          <v-col cols="12" md="2" dense>
+            <v-tooltip right>
+              <template v-slot:activator="{ on }">
+                <div v-on="on">
+                  <v-btn
+                    @click.stop="deleteStudy"
+                    :disabled="
+                      !(
+                        currentStudy.id &&
+                        (currentStudy.PointofContact.id ==
+                          $store.state.userID ||
+                          $store.state.role == 'Admin' ||
+                          $store.state.role == 'PI' ||
+                          $store.state.role == 'Lab manager')
+                      )
+                    "
+                  >
+                    <v-icon left v-bind="iconSize" class="fabIcon"
+                      >delete</v-icon
+                    >Delete
+                  </v-btn>
+                </div>
+              </template>
+              <span>Delete this study</span>
             </v-tooltip>
           </v-col>
         </v-row>
@@ -542,9 +548,7 @@
                 <v-btn icon dark @click="dialogShowEmailPreviews = false">
                   <v-icon class="fabIcon">mdi-close</v-icon>
                 </v-btn>
-                <h2 class="title-text title-p-4 ma-2"
-                  >Study email previews</h2
-                >
+                <h2 class="title-text title-p-4 ma-2">Study email previews</h2>
                 <v-spacer></v-spacer>
               </v-toolbar>
 
@@ -1153,6 +1157,17 @@ export default {
       } else {
         return "<p>Email template hasn't setup yet. No email preview is available.</p>";
       }
+    },
+
+    iconSize() {
+      const size = {
+        xs: "x-small",
+        sm: "small",
+        md: "small",
+        lg: "small",
+        xl: "large",
+      }[this.$vuetify.breakpoint.name];
+      return size ? { [size]: true } : {};
     },
   },
 

@@ -128,7 +128,8 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row justify="center">
+        <v-row justify="space-around">
+          <h2>Short-cuts:</h2>
           <v-col cols="12" md="2">
             <v-btn-toggle dark>
               <v-tooltip bottom>

@@ -1,40 +1,5 @@
 <template>
   <div>
-    <div style="overflow-y: scroll !important">
-      <v-row dense>
-        <v-col
-          cols="12"
-          md="6"
-          v-for="experimenter in Experimenters"
-          :key="experimenter.id"
-          dense
-        >
-          <v-card class="child-card d-flex flex-column">
-            <v-card-title class="title" style="padding: 8px">
-              {{ experimenter.Name + " (" + experimenter.Initial + ")" }}
-              <v-spacer></v-spacer>
-              {{ experimenter.Role }}
-            </v-card-title>
-
-            <v-card-text
-              class="body-1"
-              align="start"
-              style="padding: 8px; color: var(--v-primary)"
-              >{{ "Email: " + experimenter.Email }}</v-card-text
-            >
-
-            <!-- <v-card-actions>
-          <v-btn
-            text
-            @click="removeExperimenter(index)"
-            :disabled="Experimenters.length == 1"
-            >Delete</v-btn
-          >
-        </v-card-actions>-->
-          </v-card>
-        </v-col>
-      </v-row>
-    </div>
     <v-row align="start" justify="end">
       <v-col cols="12" md="2" dense>
         <v-tooltip top>
@@ -55,7 +20,7 @@
                     )
                 "
               >
-                <v-icon>edit</v-icon>
+                <v-icon>group_add</v-icon>
               </v-btn>
             </div>
           </template>
@@ -109,6 +74,41 @@
         </v-dialog>
       </div>
     </v-row>
+    <div style="overflow-y: scroll !important">
+      <v-row dense>
+        <v-col
+          cols="12"
+          md="6"
+          v-for="experimenter in Experimenters"
+          :key="experimenter.id"
+          dense
+        >
+          <v-card class="child-card d-flex flex-column">
+            <v-card-title class="title" style="padding: 8px">
+              {{ experimenter.Name + " (" + experimenter.Initial + ")" }}
+              <v-spacer></v-spacer>
+              {{ experimenter.Role }}
+            </v-card-title>
+
+            <v-card-text
+              class="body-1"
+              align="start"
+              style="padding: 8px; color: var(--v-primary)"
+              >{{ "Email: " + experimenter.Email }}</v-card-text
+            >
+
+            <!-- <v-card-actions>
+          <v-btn
+            text
+            @click="removeExperimenter(index)"
+            :disabled="Experimenters.length == 1"
+            >Delete</v-btn
+          >
+        </v-card-actions>-->
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
   </div>
 </template>
 

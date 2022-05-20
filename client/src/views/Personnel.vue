@@ -55,9 +55,7 @@
                     hide-details
                   ></v-checkbox></div
               ></template>
-              <span
-                >Show active members</span
-              ></v-tooltip
+              <span>Show active members</span></v-tooltip
             >
           </v-card-title>
           <v-data-table
@@ -138,13 +136,12 @@
             </v-row>
             <v-row justify="space-around">
               <v-col cols="12" md="12">
-                <v-row justify="space-around">
+                <v-row justify="space-between">
                   <v-col cols="12" md="2" dense>
                     <v-tooltip top>
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
                           <v-btn
-                            fab
                             @click.stop="createPersonnel"
                             :disabled="
                               $store.state.role != 'Admin' &&
@@ -154,7 +151,9 @@
                               $store.state.role != 'Lab manager'
                             "
                           >
-                            <v-icon class="fabIcon">add</v-icon>
+                            <v-icon left v-bind="iconSize" class="fabIcon"
+                              >add</v-icon
+                            >Add a person
                           </v-btn>
                         </div>
                       </template>
@@ -166,7 +165,6 @@
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
                           <v-btn
-                            fab
                             @click.stop="editPersonnel"
                             :disabled="
                               !currentPersonnel.id ||
@@ -176,7 +174,9 @@
                                 $store.state.role != 'Lab manager')
                             "
                           >
-                            <v-icon class="fabIcon">edit</v-icon>
+                            <v-icon left v-bind="iconSize" class="fabIcon"
+                              >edit</v-icon
+                            >Update info
                           </v-btn>
                         </div>
                       </template>
@@ -188,7 +188,6 @@
                       <template v-slot:activator="{ on }">
                         <div v-on="on">
                           <v-btn
-                            fab
                             @click.stop="deletePersonnel"
                             :disabled="
                               !currentPersonnel.id ||
@@ -197,7 +196,9 @@
                                 $store.state.role != 'Lab manager')
                             "
                           >
-                            <v-icon class="fabIcon">delete</v-icon>
+                            <v-icon left v-bind="iconSize" class="fabIcon"
+                              >delete</v-icon
+                            >delete
                           </v-btn>
                         </div>
                       </template>
@@ -583,6 +584,18 @@ export default {
           .toLocaleLowerCase()
           .indexOf(search.toLocaleLowerCase()) !== -1
       );
+    },
+  },
+  computed: {
+    iconSize() {
+      const size = {
+        xs: "x-small",
+        sm: "small",
+        md: "small",
+        lg: "small",
+        xl: "large",
+      }[this.$vuetify.breakpoint.name];
+      return size ? { [size]: true } : {};
     },
   },
   mounted: function () {

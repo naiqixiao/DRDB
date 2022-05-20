@@ -95,7 +95,7 @@
                   )
                 "
               >
-                <v-icon>edit</v-icon>
+                <v-icon>badge</v-icon>
               </v-btn>
             </div>
           </template>

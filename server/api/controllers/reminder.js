@@ -282,6 +282,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
   };
   queryString.Reminded = 0;
   queryString.Status = 'Confirmed';
+  queryString["$Family.TrainingSet$"] = false;
 
   try {
     const schedules = await model.schedule.findAll({
@@ -441,6 +442,10 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
         [Op.or]: [
           { '$PrimaryExperimenterof.Schedule.Status$': 'Confirmed' },
           { '$SecondaryExperimenterof.Schedule.Status$': 'Confirmed' }
+        ],
+        [Op.or]: [
+          { '$PrimaryExperimenterof.Child.Family.TrainingSet$': false },
+          { '$SecondaryExperimenterof.Child.Family.TrainingSet$': false }
         ]
 
       },
@@ -465,7 +470,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             {
               model: model.child,
               include: [
-                { model: model.family }
+                {
+                  model: model.family,
+                  where: {
+                    TrainingSet: false
+                  }
+                }
               ]
             },
             {
@@ -495,7 +505,12 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
             {
               model: model.child,
               include: [
-                { model: model.family }
+                {
+                  model: model.family,
+                  where: {
+                    TrainingSet: false
+                  }
+                }
               ]
             },
             {
