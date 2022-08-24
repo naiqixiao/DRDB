@@ -750,32 +750,50 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
   var queryString3 = {};
 
   queryString.AppointmentTime = {
-    [Op.lte]: moment()
+    [Op.between]: [
+      moment()
+      .subtract(1, "w")
+      .startOf("day")
+      .toDate(),
+      moment()
       .subtract(1, "days")
       .startOf("day")
       .toDate(),
+    ]
   };
 
   queryString.Status = "Confirmed";
-  queryString.Completed = 0;
+  // queryString.Completed = 0;
 
   queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show"];
-  queryString2.Completed = 0;
-  queryString2.createdAt = {
+  // queryString2.Completed = 0;
+  queryString2.updatedAt = {
     [Op.between]: [
       moment()
-        .subtract(2, "M")
+        .subtract(1, "M")
         .startOf("day")
         .toDate(),
       moment()
-        .add(2, "M")
+        .add(2, "d")
         .startOf("day")
         .toDate(),
     ],
   };
 
   queryString3.Status = ["Cancelled", "Rejected"];
-  queryString3.Completed = 0;
+  queryString3.updatedAt = {
+    [Op.between]: [
+      moment()
+        .subtract(1, "M")
+        .startOf("day")
+        .toDate(),
+      moment()
+        .subtract(1, "days")
+        .startOf("day")
+        .toDate(),
+    ],
+  }
+  // queryString3.Completed = 0;
 
   try {
     const schedules = await model.schedule.findAll({

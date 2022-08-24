@@ -500,7 +500,7 @@ exports.update = asyncHandler(async (req, res) => {
       break;
   }
 
-  if (updatedScheduleInfo.Status == "Cancelled") {
+  if (updatedScheduleInfo.Status == "Cancelled" || updatedScheduleInfo.Status == "Rejected") {
 
     updatedScheduleInfo.Completed = true;
 
