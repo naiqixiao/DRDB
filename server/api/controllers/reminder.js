@@ -374,7 +374,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           schedule.Family.Email);
 
         } else {
-          const tokenPath = "api/google/labs/general/token.json";
+          const tokenPath = "api/google/general/token.json";
 
           const token = fs.readFileSync(tokenPath);
 
