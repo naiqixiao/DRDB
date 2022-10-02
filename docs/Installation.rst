@@ -244,10 +244,18 @@ How to upgrade the system
     cd ~/DRDB
     git pull
 
-    # update npm packages for client and server folders
+    # update npm packages for client folders (i.e., frontend)
     cd ~/DRDB/client
     npm install
 
+    # rebuild the system (frontend)
+    npm run build
+    #assuming your system is stored at /var/www/html/DRDB
+    sudo cp -r -T dist /var/www/html/DRDB  
+
+    # update npm packages for server folders (i.e., backend)
     cd ~/DRDB/server
     npm install
+
+    pm2 restart server.js
 
