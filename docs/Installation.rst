@@ -246,8 +246,8 @@ How to upgrade the system
 
     # update npm packages for client and server folders
     cd ~/DRDB/client
-    npm update
+    npm install
 
     cd ~/DRDB/server
-    npm update
+    npm install
 
