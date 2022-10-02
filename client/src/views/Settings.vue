@@ -33,98 +33,99 @@
       >
     </div>
 
-    <v-row align="start" style="height: 200px">
-      <v-col md="12" class="subtitle">
+    <v-row style="height: 200px">
+      <v-col md="4">
         <v-divider></v-divider>
         <h4 class="text-left">User account settings:</h4>
-      </v-col>
-      <v-col cols="12" md="5">
-        <v-btn color="primary" @click.stop="dialog = true"
+        <v-btn style="margin-top: 120px;" color="primary" @click.stop="dialog = true"
           >Change password</v-btn
         >
+        <v-dialog
+          v-model="dialog"
+          max-width="600px"
+          :retain-focus="false"
+          persistent
+        >
+          <v-card outlined>
+            <v-card-title class="headline">Change password</v-card-title>
+            <v-form ref="form" v-model="valid" lazy-validation>
+              <v-row v-if="!changeTemporaryPassword" justify="center">
+                <v-col cols="12" md="6" class="subtitle">
+                  <v-divider></v-divider>
+                  <h4 class="text-left">Current password:</h4>
+                  <v-text-field
+                    v-model="password"
+                    type="password"
+                    hide-details
+                    dense
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row justify="center">
+                <v-col cols="12" md="12">
+                  <v-divider></v-divider>
+                </v-col>
+                <v-col cols="12" md="6" class="subtitle">
+                  <h4 class="text-left">New password:</h4>
+                  <v-text-field
+                    v-model="newPassword"
+                    type="password"
+                    :rules="[newPasswordRule]"
+                    clearable
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <br />
+              <v-row justify="center">
+                <v-col cols="12" md="6" class="subtitle">
+                  <h4 class="text-left">Confirm new password:</h4>
+                  <v-text-field
+                    v-model="newPasswordVerify"
+                    clearable
+                    type="password"
+                    :rules="[passwordConfirmationRule]"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+            <v-card-actions>
+              <v-row justify="space-between" style="height: 50px">
+                <v-col md="3"></v-col>
+                <v-col md="2">
+                  <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+                </v-col>
+                <v-col md="2">
+                  <v-btn
+                    color="primary"
+                    :disabled="
+                      passwordConfirmationRule != true ||
+                      newPassword == null ||
+                      password == null ||
+                      newPasswordRule != true
+                    "
+                    @click="changePassword"
+                    >Confirm</v-btn
+                  >
+                </v-col>
+                <v-col md="3"></v-col>
+              </v-row>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-col>
-
-      <v-dialog
-        v-model="dialog"
-        max-width="600px"
-        :retain-focus="false"
-        persistent
-      >
-        <v-card outlined>
-          <v-card-title class="headline">Change password</v-card-title>
-          <v-form ref="form" v-model="valid" lazy-validation>
-            <v-row v-if="!changeTemporaryPassword" justify="center">
-              <v-col cols="12" md="6" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Current password:</h4>
-                <v-text-field
-                  v-model="password"
-                  type="password"
-                  hide-details
-                  dense
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <v-row justify="center">
-              <v-col cols="12" md="12">
-                <v-divider></v-divider>
-              </v-col>
-              <v-col cols="12" md="6" class="subtitle">
-                <h4 class="text-left">New password:</h4>
-                <v-text-field
-                  v-model="newPassword"
-                  type="password"
-                  :rules="[newPasswordRule]"
-                  clearable
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            <br />
-            <v-row justify="center">
-              <v-col cols="12" md="6" class="subtitle">
-                <h4 class="text-left">Confirm new password:</h4>
-                <v-text-field
-                  v-model="newPasswordVerify"
-                  clearable
-                  type="password"
-                  :rules="[passwordConfirmationRule]"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </v-form>
-          <v-card-actions>
-            <v-row justify="space-between" style="height: 50px">
-              <v-col md="3"></v-col>
-              <v-col md="2">
-                <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
-              </v-col>
-              <v-col md="2">
-                <v-btn
-                  color="primary"
-                  :disabled="
-                    passwordConfirmationRule != true ||
-                    newPassword == null ||
-                    password == null ||
-                    newPasswordRule != true
-                  "
-                  @click="changePassword"
-                  >Confirm</v-btn
-                >
-              </v-col>
-              <v-col md="3"></v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <v-col cols="12" md="3">
+      <v-col cols="12" md="8">
+        <v-divider></v-divider>
+        <h4 class="text-left">Batch upload participant info:</h4>
+        <p class="text-left">
+          You can use this <a href="https://mcmasteru365-my.sharepoint.com/:x:/g/personal/xiaon8_mcmaster_ca/EeFyaQJH4H9Imh_JzXojHeIBMCzy0mAj9DaezEQK0Ri5iQ?e=8jJIrM" target="_blank"><b>spreadsheet</b></a> as template to upload multiple participant information at once.<br>*Any information should be formatted as <b>TEXT</b> in the spreadsheet (including phone numbers, DoB, etc.).
+          <br>*Date of birth (DoB) has to be entered in <b>DD/MM/YYYY</b> format.
+        </p>
         <template>
           <v-file-input
             ref="fileSelect"
             accept=".xlsx, .csv"
-            class="textfield-family"
             background-color="textbackground"
-            label="Select import file"
+            label="Click here to select import file"
             @change="selectFile"
             v-model="inputFile"
             outlined
@@ -135,16 +136,15 @@
               $store.state.role != 'Lab manager'
             "
           ></v-file-input>
+
+          <v-btn
+            color="primary"
+            @click.stop="batchImport()"
+            :disabled="!inputFile"
+            :loading="loadingStatus"
+            >Upload</v-btn
+          >
         </template>
-      </v-col>
-      <v-col cols="12" md="1">
-        <v-btn
-          color="primary"
-          @click.stop="batchImport()"
-          :disabled="!inputFile"
-          :loading="loadingStatus"
-          >Upload</v-btn
-        >
       </v-col>
 
       <v-dialog v-model="dialogImport" max-width="800px" persistent>
@@ -170,7 +170,11 @@
       <v-col md="12" class="subtitle">
         <v-divider></v-divider>
         <h4 class="text-left">Lab email account settings:</h4>
+        <p class="text-left">
+          You can follow this <a href="https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK" target="_blank"><b>instruction</b></a> to set up Google Account for your lab.
+        </p>
       </v-col>
+      
       <v-col cols="12" md="2">
         <v-text-field
           class="textfield-family"
@@ -242,7 +246,7 @@
           >
           <v-card-text>
             <v-row justify="center">
-              <v-col cols="12" md="8" class="subtitle">
+              <v-col cols="12" md="10" class="subtitle">
                 <v-textarea
                   label="Paste the sign-in code here."
                   outlined

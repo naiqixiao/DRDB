@@ -348,7 +348,7 @@
                     <v-col
                       cols="12"
                       sm="3"
-                      md="1"
+                      md="2"
                       v-for="item in this.$studyBasicFields"
                       :key="item.label"
                     >
@@ -392,7 +392,7 @@
                         ></v-text-field>
                       </div>
                     </v-col>
-                    <v-col cols="12" sm="1">
+                    <v-col cols="12" sm="3">
                       <v-select
                         class="textfield-family"
                         :items="labMembers"
@@ -417,7 +417,7 @@
                     <v-col
                       cols="12"
                       sm="2"
-                      md="1"
+                      md="2"
                       v-for="item in this.$studyCriteriaFields"
                       :key="item.label"
                     >
@@ -459,6 +459,16 @@
                     <v-col md="12">
                       <v-divider></v-divider>
                       <h4 class="text-left">Study summary & Phone script:</h4>
+
+                      <p class="text-left">
+                        You can follow this 
+                        <a
+                          href="https://drdb.readthedocs.io/en/latest/Email%20Template.html"
+                          target="_blank"
+                          ><b>instruction</b></a
+                        >
+                        to set up email templates for your study.
+                      </p>
                     </v-col>
 
                     <v-col cols="12" md="6">
