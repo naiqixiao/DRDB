@@ -240,21 +240,20 @@
           <v-card-title class="headline"
             >Paste Google sign in code</v-card-title
           >
-          <!-- <v-form ref="form" v-model="valid" lazy-validation> -->
-
-          <v-row justify="center">
-            <v-col cols="12" md="8" class="subtitle">
-              <v-textarea
-                label="Paste the sign-in code here."
-                outlined
-                no-resize
-                rows="1"
-                v-model="signInCode"
-                hide-details
-              ></v-textarea>
-            </v-col>
-          </v-row>
-          <!-- </v-form> -->
+          <v-card-text>
+            <v-row justify="center">
+              <v-col cols="12" md="8" class="subtitle">
+                <v-textarea
+                  label="Paste the sign-in code here."
+                  outlined
+                  no-resize
+                  rows="1"
+                  v-model="signInCode"
+                  hide-details
+                ></v-textarea>
+              </v-col>
+            </v-row>
+          </v-card-text>
           <v-card-actions>
             <v-row justify="space-between" style="height: 50px">
               <v-col md="3"></v-col>

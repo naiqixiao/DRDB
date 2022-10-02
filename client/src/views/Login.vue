@@ -43,7 +43,7 @@
       </div>
     </v-col>
     <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.1.20220824</h4>
+      <h4>V1.1.20221001</h4>
     </v-col>
 
     <v-dialog
@@ -270,7 +270,7 @@ export default {
         this.$store.dispatch("setLabEmail", response.data.labEmail);
         this.$store.dispatch("setLabName", response.data.labName);
         this.$store.dispatch("setTimeZone", response.data.timeZone);
-        this.$store.dispatch("setTrainingMode", 0);
+        this.$store.dispatch("setTrainingMode", false);
 
         this.$store.dispatch("setEmailOpening", response.data.emailOpening);
         this.$store.dispatch("setEmailClosing", response.data.emailClosing);

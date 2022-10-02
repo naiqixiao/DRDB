@@ -28,7 +28,7 @@ export default new Vuex.Store({
     location: null,
     transportationInstructions: null,
     ZoomLink: null,
-    trainingMode: null,
+    trainingMode: false,
     timeZone: null,
   },
   mutations: {

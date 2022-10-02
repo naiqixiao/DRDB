@@ -1,5 +1,5 @@
 <template>
-  <span v-if="date">{{ DateFormat(new Date(date), format, status) }}</span>
+  <span v-if="date">{{ DateFormat(date, format, status) }}</span>
   <span v-else>{{ "Not available" }}</span>
 </template>
 
