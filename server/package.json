@@ -19,7 +19,7 @@
     "http": "0.0.0",
     "jsonexport": "^3.2.0",
     "jsonwebtoken": "^8.5.1",
-    "knex": "^0.20.15",
+    "knex": "^2.4.0",
     "mariadb": "^2.5.5",
     "moment": "^2.29.2",
     "morgan": "^1.10.0",
