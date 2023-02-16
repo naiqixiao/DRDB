@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.27, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.28, for macos11 (x86_64)
 --
--- Host: localhost    Database: DRDB
+-- Host: localhost    Database: newschema
 -- ------------------------------------------------------
 -- Server version	8.0.27
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -40,8 +40,17 @@ CREATE TABLE `Appointment` (
   CONSTRAINT `FK_Child` FOREIGN KEY (`FK_Child`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Schedule` FOREIGN KEY (`FK_Schedule`) REFERENCES `Schedule` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Study` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=578 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Appointment`
+--
+
+LOCK TABLES `Appointment` WRITE;
+/*!40000 ALTER TABLE `Appointment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Appointment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Child`
@@ -77,8 +86,17 @@ CREATE TABLE `Child` (
   PRIMARY KEY (`id`),
   KEY `Child_ibfk_1` (`FK_Family`),
   CONSTRAINT `Child_ibfk_1` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6764 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Child`
+--
+
+LOCK TABLES `Child` WRITE;
+/*!40000 ALTER TABLE `Child` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Child` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Conversations`
@@ -98,8 +116,17 @@ CREATE TABLE `Conversations` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `FK_Family` (`FK_Family`),
   CONSTRAINT `Conversations_ibfk_1` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Conversations`
+--
+
+LOCK TABLES `Conversations` WRITE;
+/*!40000 ALTER TABLE `Conversations` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Conversations` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Experimenter`
@@ -120,8 +147,17 @@ CREATE TABLE `Experimenter` (
   KEY `FK_Study` (`FK_Study`),
   CONSTRAINT `Experimenter_ibfk_1` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Experimenter_ibfk_2` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=118 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Experimenter`
+--
+
+LOCK TABLES `Experimenter` WRITE;
+/*!40000 ALTER TABLE `Experimenter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Experimenter` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `ExperimenterAssignment`
@@ -142,8 +178,17 @@ CREATE TABLE `ExperimenterAssignment` (
   KEY `FK_Appointment_idx` (`FK_Appointment`),
   CONSTRAINT `FK_Appointment` FOREIGN KEY (`FK_Appointment`) REFERENCES `Appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Experimenter` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=244 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ExperimenterAssignment`
+--
+
+LOCK TABLES `ExperimenterAssignment` WRITE;
+/*!40000 ALTER TABLE `ExperimenterAssignment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ExperimenterAssignment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Family`
@@ -186,8 +231,17 @@ CREATE TABLE `Family` (
   CONSTRAINT `AssignedLab` FOREIGN KEY (`AssignedLab`) REFERENCES `Lab` (`id`),
   CONSTRAINT `Family_ibfk_1` FOREIGN KEY (`CreatedBy`) REFERENCES `Personnel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `Family_ibfk_2` FOREIGN KEY (`UpdatedBy`) REFERENCES `Personnel` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6424 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Family`
+--
+
+LOCK TABLES `Family` WRITE;
+/*!40000 ALTER TABLE `Family` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Family` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Feedback`
@@ -209,8 +263,17 @@ CREATE TABLE `Feedback` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `FK_Personnel_idx` (`CreatedBy`),
   CONSTRAINT `FK_Personnel` FOREIGN KEY (`CreatedBy`) REFERENCES `Personnel` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Feedback`
+--
+
+LOCK TABLES `Feedback` WRITE;
+/*!40000 ALTER TABLE `Feedback` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Feedback` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Lab`
@@ -233,12 +296,23 @@ CREATE TABLE `Lab` (
   `TransportationInstructions` mediumtext,
   `ZoomLink` varchar(300) DEFAULT NULL,
   `Labcol` varchar(45) DEFAULT NULL,
+  `timeZone` varchar(45) NOT NULL DEFAULT 'America/Toronto',
   PRIMARY KEY (`id`),
   UNIQUE KEY `LabName` (`LabName`),
   UNIQUE KEY `PI` (`PI`),
   UNIQUE KEY `Email_UNIQUE` (`Email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Lab`
+--
+
+LOCK TABLES `Lab` WRITE;
+/*!40000 ALTER TABLE `Lab` DISABLE KEYS */;
+INSERT INTO `Lab` VALUES (1,'sample_Lab','PI',NULL,'2023-02-16 16:01:47','2023-02-16 16:01:47',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'America/Toronto');
+/*!40000 ALTER TABLE `Lab` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Personnel`
@@ -268,8 +342,18 @@ CREATE TABLE `Personnel` (
   UNIQUE KEY `Calendar` (`Calendar`),
   KEY `Personnel_ibfk_1` (`FK_Lab`),
   CONSTRAINT `Personnel_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Personnel`
+--
+
+LOCK TABLES `Personnel` WRITE;
+/*!40000 ALTER TABLE `Personnel` DISABLE KEYS */;
+INSERT INTO `Personnel` VALUES (1,'admin','admin','Admin',1,1,'$2b$10$Dv3R1P6auaDrSV4kylYsH.Pb3qe5utqMDSKkUK5XBHYW/sV5o232C','admin@drdb.com','admin@drdb.com',NULL,'2023-02-16 16:03:20','2023-02-16 16:03:20',0,NULL,0);
+/*!40000 ALTER TABLE `Personnel` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `RelatedStudies`
@@ -294,6 +378,15 @@ CREATE TABLE `RelatedStudies` (
   CONSTRAINT `relatedStudyId` FOREIGN KEY (`relatedStudy`) REFERENCES `Study` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `RelatedStudies`
+--
+
+LOCK TABLES `RelatedStudies` WRITE;
+/*!40000 ALTER TABLE `RelatedStudies` DISABLE KEYS */;
+/*!40000 ALTER TABLE `RelatedStudies` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Schedule`
@@ -321,8 +414,17 @@ CREATE TABLE `Schedule` (
   KEY `ScheduledBy_idx` (`ScheduledBy`),
   CONSTRAINT `FK_Family` FOREIGN KEY (`FK_Family`) REFERENCES `Family` (`id`),
   CONSTRAINT `ScheduledBy` FOREIGN KEY (`ScheduledBy`) REFERENCES `Personnel` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=394 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Schedule`
+--
+
+LOCK TABLES `Schedule` WRITE;
+/*!40000 ALTER TABLE `Schedule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Schedule` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `SecondExperimenterAssignment`
@@ -343,8 +445,17 @@ CREATE TABLE `SecondExperimenterAssignment` (
   KEY `FK_Experimenter_idx` (`FK_Experimenter`),
   CONSTRAINT `FK_Appointment_2nd` FOREIGN KEY (`FK_Appointment`) REFERENCES `Appointment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_Experimenter_2nd` FOREIGN KEY (`FK_Experimenter`) REFERENCES `Personnel` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `SecondExperimenterAssignment`
+--
+
+LOCK TABLES `SecondExperimenterAssignment` WRITE;
+/*!40000 ALTER TABLE `SecondExperimenterAssignment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `SecondExperimenterAssignment` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Sibling`
@@ -365,8 +476,17 @@ CREATE TABLE `Sibling` (
   KEY `Sibling` (`Sibling`),
   CONSTRAINT `Sibling_ibfk_1` FOREIGN KEY (`FK_Child`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `Sibling_ibfk_2` FOREIGN KEY (`Sibling`) REFERENCES `Child` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1147 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Sibling`
+--
+
+LOCK TABLES `Sibling` WRITE;
+/*!40000 ALTER TABLE `Sibling` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Sibling` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `Study`
@@ -401,8 +521,17 @@ CREATE TABLE `Study` (
   KEY `FK_Personnel_idx` (`FK_Personnel`),
   CONSTRAINT `Personnel_ibfk_3` FOREIGN KEY (`FK_Personnel`) REFERENCES `Personnel` (`id`),
   CONSTRAINT `Study_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Study`
+--
+
+LOCK TABLES `Study` WRITE;
+/*!40000 ALTER TABLE `Study` DISABLE KEYS */;
+/*!40000 ALTER TABLE `Study` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -413,4 +542,4 @@ CREATE TABLE `Study` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-10  5:33:17
+-- Dump completed on 2023-02-16 16:09:09

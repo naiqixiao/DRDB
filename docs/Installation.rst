@@ -169,6 +169,9 @@ Backend setup and configuration
 
     pm2 start server.js
 
+- Set up credentials to use Google APIs
+Please see this instruction for specific steps: https://mcmasteru365-my.sharepoint.com/:w:/g/personal/xiaon8_mcmaster_ca/EdIxUUOHUeNIgN3pAprvVMoBJZHOp-2dErCY81bENFri-g?e=zKFOIh
+
 Frontend setup
 ~~~~~~~~~~~~~~
 
@@ -235,6 +238,18 @@ Run frontend server with nginx
 
 You should be able to access the system with the ip address of your
 server by now.
+
+Inital setup the system
+-------------------------
+
+You should be able to log on to the system with the default admin account:
+
+-  Email: admin@drdb.com
+-  Password: password
+
+After logging in to the system, you can start setting up lab information (in Settings page) and personnels (in Personnel management page).
+
+To setup Google account, please see this instruction for details: https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=TLVoV3
 
 How to upgrade the system
 -------------------------
