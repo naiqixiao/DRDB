@@ -90,16 +90,16 @@ MySQL database setup
 
     EXIT
 
--  Import sample database
+-  Import template database
 
 .. code-block:: shell
 
-    # in Terminal, import the sample database with the user just created.
-    # the sample sql database is in /DRDB/MySQL/Backup.sql
-    # the following codes assume you import the sample database under the user named username. Replacing the following newuser with the username that you just created.
+    # in Terminal, import the template database with the user just created.
+    # the template sql database is in /DRDB/MySQL/Template.sql
+    # the following codes assume you import the template database under the user named username. Replacing the following newuser with the username that you just created.
 
     cd ~/DRDB
-    mysql -u newuser -p DRDB < MySQL/Backup.sql
+    mysql -u newuser -p DRDB < MySQL/Template.sql
 
     # in Terminal, log in MySQL with the username
     mysql -u newuser -p
