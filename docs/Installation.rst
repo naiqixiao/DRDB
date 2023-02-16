@@ -249,7 +249,7 @@ You should be able to log on to the system with the default admin account:
 
 After logging in to the system, you can start setting up lab information (in Settings page) and personnels (in Personnel management page).
 
-To setup Google account, please see this instruction for details: https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=TLVoV3
+To setup Google account, please see this instruction for details: https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=xeMbpV
 
 How to upgrade the system
 -------------------------
