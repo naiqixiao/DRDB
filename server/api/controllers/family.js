@@ -198,7 +198,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       child.DoB = newFamilies[i].DoB;
       child.Age = newFamilies[i].Age;
       child.Note = newFamilies[i].Notes;
-      child.BirthWeight = newFamilies[i].Birthweight;
+      child.BirthWeight = newFamilies[i].BirthWeight;
       child.Gestation = newFamilies[i].Gestation;
       child.HearingLoss = newFamilies[i].HearingLoss;
       child.VisionLoss = newFamilies[i].VisionLoss;
