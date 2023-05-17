@@ -26,7 +26,7 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
     const credentialsPath = "api/google/general/credentials.json";
     // const tokenPath = "api/google/lab" + lab + "/token.json";
 
-    const credentials = fs.readFileSync(credentialsPath);
+    const credentials = fs.readFileSync(credentialsPath, {recursive: true});
     const { client_secret, client_id, redirect_uris } = JSON.parse(
       credentials
     ).installed;
