@@ -45,7 +45,7 @@ async function sendEmail(oAuth2Client, emailContent) {
   );
 
   try {
-    const labelName = 'emailContent.studyName';
+    const labelName = emailContent.studyName;
     const listLabelsResponse = await gmail.users.labels.list({
       userId: 'me'
     });

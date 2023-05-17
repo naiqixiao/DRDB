@@ -1835,7 +1835,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail();
+            await this.$refs.Email.sendEmail(this.selectedStudy.StudyName);
             // this.e1 = 3;
             // this.nextContactDialog = true;
             this.emailSent = true;
@@ -1843,7 +1843,7 @@ export default {
             this.scheduleNextPage = true;
           }
         } else {
-          await this.$refs.Email.sendEmail();
+          await this.$refs.Email.sendEmail(this.selectedStudy.StudyName);
           // this.e1 = 3;
           // this.nextContactDialog = true;
           this.emailSent = true;
