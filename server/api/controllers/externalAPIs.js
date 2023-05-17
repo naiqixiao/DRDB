@@ -21,6 +21,8 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
       "https://www.googleapis.com/auth/gmail.settings.basic",
       "https://www.googleapis.com/auth/calendar",
       "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/gmail.modify",
+      "https://www.googleapis.com/auth/gmail.labels"
     ];
 
     const credentialsPath = "api/google/general/credentials.json";
