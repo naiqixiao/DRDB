@@ -1458,7 +1458,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail();
+            await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1467,7 +1467,7 @@ export default {
             await schedule.remind(this.editedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail();
+          await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
           this.emailButtonText = "Email Sent!";
 
@@ -1489,7 +1489,7 @@ export default {
               "A 'thank you' email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail();
+            await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1503,7 +1503,7 @@ export default {
             await schedule.tyEmail(updatedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail();
+          await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
           this.emailButtonText = "Email Sent!";
 

@@ -97,7 +97,6 @@ export default {
     };
   },
   mounted() {
-    // const defaultValue = this.$refs.defaultValue.selectedValue;
     this.$store.commit('setStudyName', this.selectedStudy.StudyName);
   },
   methods: {
