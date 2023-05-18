@@ -34,11 +34,7 @@
 
     <template v-slot:item.Status="{ item }">
       <v-chip :color="getColor(item.Status, item.Completed)" dark>
-        {{
-          item.Status == "Confirmed" && item.Completed
-            ? "Completed"
-            : item.Status
-        }}
+        {{ item.Status == "Confirmed" && item.Completed ? "Completed" : item.Status }}
       </v-chip>
     </template>
 
@@ -219,9 +215,7 @@
             <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="nextContactDialog = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="nextContactDialog = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="updateNextContact">Save</v-btn>
@@ -261,12 +255,7 @@
                     v-model="validScheduleDateTime"
                     lazy-validation
                   >
-                    <v-row
-                      style="height: 100px"
-                      align="center"
-                      justify="start"
-                      dense
-                    >
+                    <v-row style="height: 100px" align="center" justify="start" dense>
                       <v-col cols="12" md="3" class="text-left">
                         <div class="title" style="padding-left: 8px">
                           {{ "Study date & time:" }}
@@ -280,9 +269,7 @@
                           append-icon="event"
                           :rules="$rules.dob"
                           @click:append="datePicker = true"
-                          :disabled="
-                            response != 'Confirmed' || skipStudyDateTimeStatus
-                          "
+                          :disabled="response != 'Confirmed' || skipStudyDateTimeStatus"
                           hide-details
                           dense
                         ></v-text-field>
@@ -294,9 +281,7 @@
                           :items="$studyTimeSlots"
                           :rules="$rules.time"
                           label="Study time"
-                          :disabled="
-                            response != 'Confirmed' || skipStudyDateTimeStatus
-                          "
+                          :disabled="response != 'Confirmed' || skipStudyDateTimeStatus"
                           hide-details
                           dense
                         ></v-combobox>
@@ -318,9 +303,9 @@
                             </div>
                           </template>
                           <span
-                            >Check this box to use current date/time for the
-                            current appointment.<br />NO Google Calendar event
-                            will be created.</span
+                            >Check this box to use current date/time for the current
+                            appointment.<br />NO Google Calendar event will be
+                            created.</span
                           >
                         </v-tooltip>
                         <v-tooltip right>
@@ -338,8 +323,8 @@
                             </div>
                           </template>
                           <span
-                            >Check this box to prevent reminder email from being
-                            sent to the participant.</span
+                            >Check this box to prevent reminder email from being sent to
+                            the participant.</span
                           >
                         </v-tooltip>
                       </v-col>
@@ -349,9 +334,7 @@
                   <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies
                       ref="extraStudies"
-                      v-for="(
-                        appointment, index
-                      ) in editedSchedule.Appointments"
+                      v-for="(appointment, index) in editedSchedule.Appointments"
                       :key="appointment.id"
                       :child="appointment.Child"
                       :targetChild="appointment.Child"
@@ -359,10 +342,8 @@
                       :index="index"
                       :response="response"
                       :potentialStudies="
-                        potentialStudies(
-                          appointment.Child,
-                          appointment.FK_Study
-                        ).potentialStudyList
+                        potentialStudies(appointment.Child, appointment.FK_Study)
+                          .potentialStudyList
                       "
                       type="reSchedule"
                       :nOfAppointments="editedSchedule.Appointments.length"
@@ -399,25 +380,16 @@
                         rounded
                         color="primary"
                         @click="newAppointment(child)"
-                        :disabled="
-                          potentialStudies(child).selectableStudies.length < 1
-                        "
+                        :disabled="potentialStudies(child).selectableStudies.length < 1"
                         >{{
-                          !!child.Name
-                            ? child.Name.split(" ")[0]
-                            : "Name is missing"
+                          !!child.Name ? child.Name.split(" ")[0] : "Name is missing"
                         }}</v-btn
                       >
                     </v-col>
                   </v-row>
                   <v-spacer></v-spacer>
                   <v-divider style="margin-bottom: 4px"></v-divider>
-                  <v-row
-                    dense
-                    style="height: 150px"
-                    align="center"
-                    justify="center"
-                  >
+                  <v-row dense style="height: 150px" align="center" justify="center">
                     <v-col md="11">
                       <v-textarea
                         class="conv-textarea"
@@ -433,11 +405,7 @@
                 </v-card>
               </v-row>
 
-              <v-row
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-              >
+              <v-row justify="space-between" align="center" style="padding: 8px">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
                   <v-btn
@@ -472,12 +440,7 @@
                 </v-card>
               </v-row>
               <!-- <v-divider></v-divider> -->
-              <v-row
-                dense
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-              >
+              <v-row dense justify="space-between" align="center" style="padding: 8px">
                 <v-col cols="12" md="2">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -542,16 +505,9 @@
                 @nextContactDone="updateNextContactFrontend"
               ></NextContact>
               <!-- <v-divider></v-divider> -->
-              <v-row
-                dense
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-              >
+              <v-row dense justify="space-between" align="center" style="padding: 8px">
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule"
-                    >Complete</v-btn
-                  >
+                  <v-btn color="primary" @click="completeSchedule">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -682,9 +638,7 @@
             <v-row justify="space-between">
               <v-col md="2"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="closeScheduleNotes"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="closeScheduleNotes">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="saveScheduleNotes">Save</v-btn>
@@ -833,21 +787,17 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText =
-              "You're going to update Study Completion status, continue?";
+            comDText = "You're going to update Study Completion status, continue?";
             break;
 
           default:
             comDTitle = "Study appointment update";
             comDText =
-              "Are you sure you want to mark this appointment as " +
-              status +
-              "?";
+              "Are you sure you want to mark this appointment as " + status + "?";
             break;
         }
 
-        this.editedSchedule.skipStudyDateTimeStatus =
-          this.skipStudyDateTimeStatus;
+        this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
         if (await this.$refs.confirmD.open(comDTitle, comDText)) {
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
@@ -858,10 +808,8 @@ export default {
               this.editedSchedule = Object.assign({}, item);
               this.datePickerRange();
               this.editedSchedule.Appointments[0].Child.Family = {};
-              this.editedSchedule.Appointments[0].Child.Family.Email =
-                this.editedSchedule.Family.Email;
-              this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
-                this.editedSchedule.Family.NamePrimary;
+              this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+              this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
               // console.log(this.editedSchedule);
               // console.log(
@@ -888,10 +836,8 @@ export default {
               this.editedIndex = this.Schedules.indexOf(item);
               this.editedSchedule = Object.assign({}, item);
               this.editedSchedule.Appointments[0].Child.Family = {};
-              this.editedSchedule.Appointments[0].Child.Family.Email =
-                this.editedSchedule.Family.Email;
-              this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
-                this.editedSchedule.Family.NamePrimary;
+              this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+              this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
               this.dialogReminderEmail = true;
 
@@ -916,8 +862,7 @@ export default {
               studyNames = Array.from(new Set(studyNames));
 
               // Calendar event title
-              item.summary =
-                item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
+              item.summary = item.Status.toUpperCase() + " - " + studyNames.join(" + "); // " - " +
 
               try {
                 await schedule.update(item);
@@ -959,10 +904,8 @@ export default {
       this.editedIndex = this.Schedules.indexOf(item);
       this.editedSchedule = Object.assign({}, item);
       this.editedSchedule.Appointments[0].Child.Family = {};
-      this.editedSchedule.Appointments[0].Child.Family.Email =
-        this.editedSchedule.Family.Email;
-      this.editedSchedule.Appointments[0].Child.Family.NamePrimary =
-        this.editedSchedule.Family.NamePrimary;
+      this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
+      this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
       item.updatedAt = new Date().toISOString();
       item.ThankYouEmail = true;
@@ -997,17 +940,15 @@ export default {
 
           this.editedSchedule.AppointmentTime = this.studyDateTime;
 
-          var studyNames = this.editedSchedule.Appointments.map(
-            (appointment) => {
-              return (
-                appointment.Study.StudyName +
-                " (" +
-                this.editedSchedule.FK_Family +
-                appointment.Child.IdWithinFamily +
-                ")"
-              );
-            }
-          );
+          var studyNames = this.editedSchedule.Appointments.map((appointment) => {
+            return (
+              appointment.Study.StudyName +
+              " (" +
+              this.editedSchedule.FK_Family +
+              appointment.Child.IdWithinFamily +
+              ")"
+            );
+          });
 
           studyNames = Array.from(new Set(studyNames));
 
@@ -1028,14 +969,11 @@ export default {
             this.editedSchedule.Reminded = true;
           }
 
-          this.editedSchedule.description = this.calendarDescription(
-            this.editedSchedule
-          );
+          this.editedSchedule.description = this.calendarDescription(this.editedSchedule);
 
           this.editedSchedule.attendees = this.Experimenters;
 
-          this.editedSchedule.skipStudyDateTimeStatus =
-            this.skipStudyDateTimeStatus;
+          this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
           this.editedSchedule.Reminded = 0;
 
@@ -1046,8 +984,7 @@ export default {
           this.editedSchedule.updatedAt = new Date().toISOString();
 
           this.editedSchedule.Appointments[0].Schedule = {};
-          this.editedSchedule.Appointments[0].Schedule.AppointmentTime =
-            this.editedSchedule.AppointmentTime;
+          this.editedSchedule.Appointments[0].Schedule.AppointmentTime = this.editedSchedule.AppointmentTime;
 
           Object.assign(this.Schedules[this.editedIndex], this.editedSchedule);
         }
@@ -1156,7 +1093,7 @@ export default {
             )
           ) {
             this.loadingStatus = true;
-            await this.$refs.Email.sendEmail();
+            await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
             this.emailSent = true;
             this.emailButtonText = "Email Sent!";
@@ -1164,7 +1101,7 @@ export default {
           }
         } else {
           this.loadingStatus = true;
-          await this.$refs.Email.sendEmail();
+          await this.$refs.Email.sendEmail(this.$store.state.studyName);
 
           this.emailSent = true;
           this.emailButtonText = "Email Sent!";
@@ -1318,9 +1255,7 @@ export default {
       if (this.editedSchedule.Appointments.length > 0) {
         for (var i = 0; i < this.editedSchedule.Appointments.length; i++) {
           if (this.editedSchedule.Appointments[i].FK_Child == child.id) {
-            currentSelectedStudies.push(
-              this.editedSchedule.Appointments[i].FK_Study
-            );
+            currentSelectedStudies.push(this.editedSchedule.Appointments[i].FK_Study);
           }
         }
       }
@@ -1342,8 +1277,7 @@ export default {
     studyElegibility(study, child) {
       if (child.DoB != null) {
         var age =
-          child.Age >= study.MinAge * 30.5 - 1 &&
-          child.Age <= study.MaxAge * 30.5 - 1;
+          child.Age >= study.MinAge * 30.5 - 1 && child.Age <= study.MaxAge * 30.5 - 1;
 
         var asd = false;
 
@@ -1474,8 +1408,7 @@ export default {
           if (
             moment(item.AppointmentTime).startOf("day") <=
               moment().startOf("day").add(daysAheadofSchedule, "d") &&
-            moment(item.AppointmentTime).startOf("day") >=
-              moment().startOf("day")
+            moment(item.AppointmentTime).startOf("day") >= moment().startOf("day")
           ) {
             iconDisable = false;
           }
@@ -1714,19 +1647,17 @@ export default {
   computed: {
     ElegibleStudies() {
       if (this.editedSchedule.Family.Children) {
-        var elegibleStudies = this.editedSchedule.Family.Children.map(
-          (child) => {
-            let studyIds = [];
-            this.$store.state.studies.forEach((study) => {
-              if (!study.Completed) {
-                if (this.studyElegibility(study, child)) {
-                  studyIds.push(study.id);
-                }
+        var elegibleStudies = this.editedSchedule.Family.Children.map((child) => {
+          let studyIds = [];
+          this.$store.state.studies.forEach((study) => {
+            if (!study.Completed) {
+              if (this.studyElegibility(study, child)) {
+                studyIds.push(study.id);
               }
-            });
-            return studyIds;
-          }
-        );
+            }
+          });
+          return studyIds;
+        });
 
         return elegibleStudies;
       } else {

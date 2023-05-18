@@ -11,7 +11,7 @@
         v-model="selectedStudy"
         return-object
         label="Studies"
-        @change="emitSelectedStudy"
+        @change="emitSelectedStudy, handleSelect"
         :disabled="index == 0 && !!currentStudy.id > 0 && type == 'newSchedule'"
         dense
         hide-details
@@ -95,6 +95,10 @@ export default {
       selectedExperimenters: {},
       selectedExperimenters_2nd: [],
     };
+  },
+  mounted() {
+    // const defaultValue = this.$refs.defaultValue.selectedValue;
+    this.$store.commit('setStudyName', this.selectedStudy.StudyName);
   },
   methods: {
     selectStudy() {
@@ -194,6 +198,10 @@ export default {
       if (this.index == 0) {
         this.$emit("emitEmailTemplate", this.selectedStudy.EmailTemplate);
       }
+    },
+
+    handleSelect() {
+      this.$store.commit('setStudyName', 'value');
     },
 
     clear() {
