@@ -4,28 +4,15 @@
       <v-row dense align="start" style="height: 500px">
         <v-col cols="12" v-for="(child, index) in Children" :key="child.id">
           <v-card class="child-card d-flex flex-column" height="200px">
-            <v-card-title
-              class="title"
-              style="padding: 4px 8px; font-size: 80%"
-            >
+            <v-card-title class="title" style="padding: 4px 8px; font-size: 80%">
               <div class="d-inline-block text-truncate" style="max-width: 60%">
-                {{
-                  child.Name +
-                  " (" +
-                  currentFamily.id +
-                  child.IdWithinFamily +
-                  ")"
-                }}
+                {{ child.Name + " (" + currentFamily.id + child.IdWithinFamily + ")" }}
               </div>
               <v-spacer></v-spacer>
               <v-icon
-                :color="
-                  child.Sex === 'M' ? 'light-blue darken-4' : 'pink darken-1'
-                "
+                :color="child.Sex === 'M' ? 'light-blue darken-4' : 'pink darken-1'"
                 large
-                >{{
-                  child.Sex == "M" ? "mdi-human-male" : "mdi-human-female"
-                }}</v-icon
+                >{{ child.Sex == "M" ? "mdi-human-male" : "mdi-human-female" }}</v-icon
               >
               <v-icon v-show="birthday(child.DoB)">cake</v-icon>
             </v-card-title>
@@ -40,10 +27,7 @@
                 >
                   <body align="start" v-html="age(child)"></body>
                   <body
-                    style="
-                      height: 70px !important;
-                      overflow-y: scroll !important;
-                    "
+                    style="height: 70px !important; overflow-y: scroll !important"
                     align="start"
                     v-html="noteChild(child)"
                   ></body>
@@ -107,10 +91,7 @@
         <v-col cols="12">
           <v-card
             class="child-card d-flex align-center justify-center"
-            style="
-              border-width: medium !important;
-              border-style: dashed !important;
-            "
+            style="border-width: medium !important; border-style: dashed !important"
             height="200px"
           >
             <v-tooltip top>
@@ -123,10 +104,7 @@
                     fab
                     color="primary"
                     x-large
-                    style="
-                      border-width: medium;
-                      border-style: dashed !important;
-                    "
+                    style="border-width: medium; border-style: dashed !important"
                     @click.stop="addChild"
                     :disabled="!familyId"
                   >
@@ -274,9 +252,7 @@
             <v-row justify="space-between">
               <v-col md="4"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogChild = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="dialogChild = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="save">Save</v-btn>
@@ -290,11 +266,7 @@
 
     <ConfirmDlg ref="confirmD" />
     <div>
-      <v-dialog
-        v-model="dialogSchedule"
-        max-width="1200px"
-        :retain-focus="false"
-      >
+      <v-dialog v-model="dialogSchedule" max-width="1200px" :retain-focus="false">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step
@@ -371,9 +343,9 @@
                             </div>
                           </template>
                           <span
-                            >Check this box to use current date/time for the
-                            current appointment.<br />NO Google Calendar event
-                            will be created.</span
+                            >Check this box to use current date/time for the current
+                            appointment.<br />NO Google Calendar event will be
+                            created.</span
                           >
                         </v-tooltip>
                         <v-tooltip top>
@@ -391,8 +363,8 @@
                             </div>
                           </template>
                           <span
-                            >Check this box to prevent reminder email from being
-                            sent to the participant.</span
+                            >Check this box to prevent reminder email from being sent to
+                            the participant.</span
                           >
                         </v-tooltip>
                       </v-col>
@@ -461,36 +433,22 @@
                               >{{ currentChild.Name }}
                             </v-btn>
                       </v-col>-->
-                    <v-col
-                      cols="12"
-                      md="2"
-                      v-for="sibling in Children"
-                      :key="sibling.id"
-                    >
+                    <v-col cols="12" md="2" v-for="sibling in Children" :key="sibling.id">
                       <v-btn
                         class="text-capitalize"
                         rounded
                         color="primary"
                         @click="newAppointment(sibling)"
-                        :disabled="
-                          potentialStudies(sibling).selectableStudies.length < 1
-                        "
+                        :disabled="potentialStudies(sibling).selectableStudies.length < 1"
                         >{{
-                          !!sibling.Name
-                            ? sibling.Name.split(" ")[0]
-                            : "Name is missing"
+                          !!sibling.Name ? sibling.Name.split(" ")[0] : "Name is missing"
                         }}</v-btn
                       >
                     </v-col>
                   </v-row>
                   <v-spacer></v-spacer>
                   <v-divider style="margin-bottom: 4px"></v-divider>
-                  <v-row
-                    dense
-                    style="height: 150px"
-                    align="center"
-                    justify="center"
-                  >
+                  <v-row dense style="height: 150px" align="center" justify="center">
                     <v-col md="11">
                       <v-textarea
                         class="conv-textarea"
@@ -505,11 +463,7 @@
                   </v-row>
                 </v-card>
               </v-row>
-              <v-row
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-              >
+              <v-row justify="space-between" align="center" style="padding: 8px">
                 <v-col cols="12" md="2"></v-col>
                 <v-col cols="12" md="6">
                   <v-btn
@@ -553,11 +507,7 @@
                 </v-card>
               </v-row>
               <!-- <v-divider></v-divider> -->
-              <v-row
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-              >
+              <v-row justify="space-between" align="center" style="padding: 8px">
                 <v-col cols="12" md="2">
                   <v-tooltip top>
                     <template v-slot:activator="{ on }">
@@ -621,16 +571,9 @@
                 :nextContactDialog="nextContactDialog"
               ></NextContact>
               <!-- <v-divider></v-divider> -->
-              <v-row
-                justify="space-between"
-                align="center"
-                style="padding: 8px"
-                dense
-              >
+              <v-row justify="space-between" align="center" style="padding: 8px" dense>
                 <v-col>
-                  <v-btn color="primary" @click="completeSchedule()"
-                    >Complete</v-btn
-                  >
+                  <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -879,7 +822,6 @@ export default {
 
     skipStudyDateTime() {
       this.skipStudyDateTimeStatus = !this.skipStudyDateTimeStatus;
-
       this.studyDate = moment()
         .startOf("day")
         .tz(this.$store.state.timeZone)
@@ -962,10 +904,7 @@ export default {
               ScheduledBy: this.$store.state.userID,
             };
 
-            if (
-              this.response === "Left a message" ||
-              this.response === "Interested"
-            ) {
+            if (this.response === "Left a message" || this.response === "Interested") {
               newSchedule.Status = "TBD";
             } else {
               newSchedule.Status = "Rejected";
@@ -1052,10 +991,7 @@ export default {
         AppointmentTime: currentSchedule.AppointmentTime,
         summary: studyNames.join(" + "),
         location: this.$store.state.location,
-        description: this.calendarDescription(
-          this.scheduleNotes,
-          this.appointments
-        ),
+        description: this.calendarDescription(this.scheduleNotes, this.appointments),
         // start: {
         //   dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
         //   timeZone: "America/Toronto",
@@ -1192,9 +1128,7 @@ export default {
                   this.scheduleNextPage = true;
                   this.scheduleButtonText = "Study Scheduled!";
                 } catch (error) {
-                  alert(
-                    "Calendar event wasn't created successfully, please try again."
-                  );
+                  alert("Calendar event wasn't created successfully, please try again.");
                   console.log(error);
                   this.manualCalendar = true;
                 }
@@ -1224,7 +1158,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail();
+            await this.$refs.Email.sendEmail(this.$store.state.studyName);
             // this.e1 = 3;
             // this.nextContactDialog = true;
             this.emailSent = true;
@@ -1232,7 +1166,7 @@ export default {
             this.scheduleNextPage = true;
           }
         } else {
-          await this.$refs.Email.sendEmail();
+          await this.$refs.Email.sendEmail(this.$store.state.studyName);
           // this.e1 = 3;
           // this.nextContactDialog = true;
           this.emailSent = true;
@@ -1390,8 +1324,7 @@ export default {
 
             this.editedItem.Family = {};
 
-            this.editedItem.Family.AutismHistory =
-              this.currentFamily.AutismHistory;
+            this.editedItem.Family.AutismHistory = this.currentFamily.AutismHistory;
 
             const newChild = await child.create(this.editedItem);
 
@@ -1439,8 +1372,8 @@ export default {
         newAppointment.index = this.appointments.length;
         newAppointment.Child.Family = {};
         newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
-        newAppointment.Child.Family.NamePrimary =
-          this.currentFamily.NamePrimary; // family email information used for sending email
+        newAppointment.Child.Family.NamePrimary = this.currentFamily.NamePrimary; // family email information used for sending email
+        console.log(newAppointment);
 
         this.appointments.push(newAppointment);
 
@@ -1458,8 +1391,7 @@ export default {
     studyElegibility(study, child) {
       if (child.DoB != null) {
         var age =
-          child.Age >= study.MinAge * 30.5 - 1 &&
-          child.Age <= study.MaxAge * 30.5 - 1;
+          child.Age >= study.MinAge * 30.5 - 1 && child.Age <= study.MaxAge * 30.5 - 1;
 
         var asd = false;
 
@@ -1560,8 +1492,7 @@ export default {
           months = months.toFixed(1);
 
           var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
-          var M =
-            months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+          var M = months > 0 ? months + (months === 1 ? " month " : " months ") : "";
           formated = Y + M;
         } else {
           formated = "Not born yet.";
