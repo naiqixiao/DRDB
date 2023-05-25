@@ -11,7 +11,7 @@
         v-model="selectedStudy"
         return-object
         label="Studies"
-        @change="emitSelectedStudy, handleSelect"
+        @change="emitSelectedStudy"
         :disabled="index == 0 && !!currentStudy.id > 0 && type == 'newSchedule'"
         dense
         hide-details
@@ -124,6 +124,9 @@ export default {
           };
         }
       );
+      if (!this.$store.StudyName) {
+        this.handleSelect();
+      }
 
       const appointment = {
         FK_Child: this.child.id,
@@ -200,7 +203,7 @@ export default {
     },
 
     handleSelect() {
-      this.$store.commit('setStudyName', 'value');
+      this.$store.commit('setStudyName', this.selectedStudy.StudyName);
     },
 
     clear() {
