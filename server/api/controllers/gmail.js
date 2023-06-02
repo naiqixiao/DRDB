@@ -45,35 +45,44 @@ async function sendEmail(oAuth2Client, emailContent) {
   );
 
   try {
-    const labelName = emailContent.studyName;
+    // const labelNames = emailContent.studyName;
+    const labelNames = ['study1', 'study2'];
+
     const listLabelsResponse = await gmail.users.labels.list({
       userId: 'me'
     });
 
     const labels = listLabelsResponse.data.labels;
-    const label = labels.find(l => l.name === labelName);
-    let labelId;
+    const labelIds = [];
 
-    if (label) {
-      labelId = label.id;
-    } else {
-      const labelData = {
-        userId: 'me',
-        resource: {
-          name: labelName,
-          labelListVisibility: 'labelShow'
-        }
-      };
+    for (let i = 0; i < labelNames.length; i++) {
+      const labelName = labelNames[i];
+      const label = labels.find(l => l.name === labelName);
+      let labelId;
+
+      if (label) {
+        labelId = label.id;
+      } else {
+        const labelData = {
+          userId: 'me',
+          resource: {
+            name: labelName,
+            labelListVisibility: 'labelShow'
+          }
+        };
   
-      const labelResponse = await gmail.users.labels.create(labelData);
-      labelId = await labelResponse.data.id;
+        const labelResponse = await gmail.users.labels.create(labelData);
+        labelId = labelResponse.data.id;
+      }
+
+      labelIds.push(labelId);
     }
 
     const result = await gmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
-        labelIds: [labelId]
+        labelIds: labelIds
       },
     });
 
@@ -83,7 +92,7 @@ async function sendEmail(oAuth2Client, emailContent) {
       userId: 'me',
       id: messageId,
       resource: {
-        addLabelIds: [labelId]
+        addLabelIds: labelIds
       }
     };
     await gmail.users.messages.modify(modifyRequest);
