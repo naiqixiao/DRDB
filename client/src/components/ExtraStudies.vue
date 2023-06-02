@@ -1,10 +1,11 @@
 <template>
-  <v-row align="end" justify="start" style="height: 60px; margin: 0px;" dense>
+  <v-row align="end" justify="start" style="height: 60px; margin: 0px" dense>
     <v-col cols="12" md="2" class="d-flex align-end">
       <h3 class="name">{{ child.Name + ":" }}</h3>
     </v-col>
     <v-col cols="12" md="2">
       <v-select
+        ref="currentSelected"
         :items="potentialStudies"
         :item-value="'id'"
         :item-text="'StudyName'"
@@ -97,24 +98,20 @@ export default {
     };
   },
   mounted() {
-    this.$store.commit('setStudyName', this.selectedStudy.StudyName);
+    this.$store.commit("addStudyName", this.selectedStudy.StudyName);
   },
   methods: {
     selectStudy() {
       const experimenterIds = [];
       experimenterIds.push(this.selectedExperimenters.id);
 
-      const experimenterIds_2nd = this.selectedExperimenters_2nd.map(
-        (experimenter) => {
-          return experimenter.id;
-        }
-      );
+      const experimenterIds_2nd = this.selectedExperimenters_2nd.map((experimenter) => {
+        return experimenter.id;
+      });
 
-      const experimenterNames_2nd = this.selectedExperimenters_2nd.map(
-        (experimenter) => {
-          return experimenter.Name + " (" + experimenter.Email + ")";
-        }
-      );
+      const experimenterNames_2nd = this.selectedExperimenters_2nd.map((experimenter) => {
+        return experimenter.Name + " (" + experimenter.Email + ")";
+      });
 
       const secondaryExperimenters = this.selectedExperimenters_2nd.map(
         (experimenter) => {
@@ -144,10 +141,7 @@ export default {
         ],
         SecondaryExperimenter: secondaryExperimenters,
         E1:
-          this.selectedExperimenters.Name +
-          " (" +
-          this.selectedExperimenters.Email +
-          ")",
+          this.selectedExperimenters.Name + " (" + this.selectedExperimenters.Email + ")",
         E2: experimenterNames_2nd.join(", "),
         // ZoomLink: this.selectedExperimenters.ZoomLink,
       };
@@ -190,6 +184,9 @@ export default {
     },
 
     emitSelectedStudy() {
+      const currentStudyName = this.$refs.currentSelected.internalValue;
+      this.$store.commit("removeStudyName", currentStudyName);
+
       const selectedStudy = {
         studyId: this.selectedStudy.id,
         childId: this.child.id,
@@ -200,10 +197,12 @@ export default {
       if (this.index == 0) {
         this.$emit("emitEmailTemplate", this.selectedStudy.EmailTemplate);
       }
+
+      this.$store.commit("addStudyName", this.selectedStudy.StudyName);
     },
 
     handleSelect() {
-      this.$store.commit('setStudyName', this.selectedStudy.StudyName);
+      this.$store.commit("addStudyName", this.selectedStudy.StudyName);
     },
 
     clear() {
@@ -218,9 +217,7 @@ export default {
   computed: {
     potentialExtraStudies() {
       if (this.currentStudy && this.targetChild.id == this.child.id) {
-        return this.potentialStudies.filter(
-          (study) => this.currentStudy.id != study.id
-        );
+        return this.potentialStudies.filter((study) => this.currentStudy.id != study.id);
       } else {
         return this.potentialStudies;
       }

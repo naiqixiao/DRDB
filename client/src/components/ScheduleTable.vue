@@ -800,6 +800,7 @@ export default {
         this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
         if (await this.$refs.confirmD.open(comDTitle, comDText)) {
+          this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
           switch (status) {

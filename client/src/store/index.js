@@ -14,7 +14,7 @@ export default new Vuex.Store({
     userID: null,
     lab: null,
     studies: null,
-    studyName: null,
+    studyNames: [],
     isUserLoggedIn: false,
     role: null,
     labEmail: null,
@@ -52,9 +52,24 @@ export default new Vuex.Store({
     setStudies(state, studies) {
       state.studies = studies;
     },
+
     setStudyName(state, studyName) {
-      state.studyName = studyName;
+      state.studyNames = [studyName];
     },
+    addStudyName(state, studyName) {
+      const index = state.studyNames.indexOf(studyName);
+      if (index === -1 && studyName) {
+        state.studyNames.push(studyName);
+      }
+    },
+    removeStudyName(state, studyName) {
+      console.log(studyName);
+      // const index = state.studyNames.indexOf(studyName);
+      // if (index !== -1) {
+      //   state.studyNames.splice(index, 1);
+      // }
+    },
+
     setLabEmail(state, labEmail) {
       state.labEmail = labEmail;
     },
@@ -120,9 +135,17 @@ export default new Vuex.Store({
     setStudies({ commit }, studies) {
       commit("setStudies", studies);
     },
+
     setStudyName({ commit }, studyName) {
       commit("setStudyName", studyName);
     },
+    addStudyName({ commit }, studyName) {
+      commit("addStudyName", studyName);
+    },
+    removeStudyName({ commit }, studyName) {
+      commit("removeStudyName", studyName);
+    },
+
     setLabEmail({ commit }, labEmail) {
       commit("setLabEmail", labEmail);
     },
