@@ -1094,7 +1094,7 @@ export default {
             )
           ) {
             this.loadingStatus = true;
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
             this.emailSent = true;
             this.emailButtonText = "Email Sent!";
@@ -1102,7 +1102,7 @@ export default {
           }
         } else {
           this.loadingStatus = true;
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
           this.emailSent = true;
           this.emailButtonText = "Email Sent!";
@@ -1459,7 +1459,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1468,7 +1468,7 @@ export default {
             await schedule.remind(this.editedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
           this.emailButtonText = "Email Sent!";
 
@@ -1490,7 +1490,7 @@ export default {
               "A 'thank you' email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1504,7 +1504,7 @@ export default {
             await schedule.tyEmail(updatedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
 
           this.emailButtonText = "Email Sent!";
 

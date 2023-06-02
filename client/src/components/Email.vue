@@ -605,7 +605,7 @@ export default {
         to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
-        studyName: studyNames
+        studyNames: studyNames
       };
 
       // if (this.emailType == "Reminder") {

@@ -54,7 +54,7 @@ export default new Vuex.Store({
     },
 
     setStudyName(state, studyName) {
-      state.studyNames = [studyName];
+      state.studyNames = [...studyName];
     },
     addStudyName(state, studyName) {
       const index = state.studyNames.indexOf(studyName);
