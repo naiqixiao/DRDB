@@ -118,9 +118,6 @@ export default {
           };
         }
       );
-      if (!this.$store.StudyName) {
-        this.handleSelect();
-      }
 
       const appointment = {
         FK_Child: this.child.id,
@@ -192,11 +189,6 @@ export default {
         this.$emit("emitEmailTemplate", this.selectedStudy.EmailTemplate);
       }
 
-      this.$store.commit("addStudyName", this.selectedStudy.StudyName);
-    },
-
-    handleSelect() {
-      this.$store.commit("addStudyName", this.selectedStudy.StudyName);
     },
 
     clear() {
