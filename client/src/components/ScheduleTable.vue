@@ -800,6 +800,7 @@ export default {
         this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
         if (await this.$refs.confirmD.open(comDTitle, comDText)) {
+          this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
           switch (status) {
@@ -1012,6 +1013,7 @@ export default {
     },
 
     async continue12() {
+
       var validationResults = this.$refs.scheduleDateTime.validate();
 
       if (validationResults) {
@@ -1084,6 +1086,13 @@ export default {
     },
 
     async continue23() {
+      const labelNames = [];
+      for (const appointment of this.editedSchedule.Appointments) {
+        if (appointment.Study.StudyName) {
+          labelNames.push(appointment.Study.StudyName);
+        }
+      }
+
       try {
         if (this.emailButtonText == "Email Sent!") {
           if (
@@ -1093,15 +1102,17 @@ export default {
             )
           ) {
             this.loadingStatus = true;
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(labelNames);
+
 
             this.emailSent = true;
             this.emailButtonText = "Email Sent!";
             this.scheduleNextPage = true;
           }
         } else {
+
           this.loadingStatus = true;
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(labelNames);
 
           this.emailSent = true;
           this.emailButtonText = "Email Sent!";
@@ -1450,6 +1461,13 @@ export default {
     },
 
     async sendReminderEmail() {
+      const labelNames = [];
+      for (const appointment of this.editedSchedule.Appointments) {
+        if (appointment.Study.StudyName) {
+          labelNames.push(appointment.Study.StudyName);
+        }
+      }
+
       try {
         if (this.emailButtonText == "Email Sent!") {
           if (
@@ -1458,7 +1476,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(labelNames);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1467,7 +1485,7 @@ export default {
             await schedule.remind(this.editedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(labelNames);
 
           this.emailButtonText = "Email Sent!";
 
@@ -1481,6 +1499,12 @@ export default {
     },
 
     async sendTYEmail() {
+      const labelNames = [];
+      for (const appointment of this.editedSchedule.Appointments) {
+        if (appointment.Study.StudyName) {
+          labelNames.push(appointment.Study.StudyName);
+        }
+      }
       try {
         if (this.emailButtonText == "Email Sent!") {
           if (
@@ -1489,7 +1513,7 @@ export default {
               "A 'thank you' email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyName);
+            await this.$refs.Email.sendEmail(labelNames);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1503,7 +1527,7 @@ export default {
             await schedule.tyEmail(updatedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyName);
+          await this.$refs.Email.sendEmail(labelNames);
 
           this.emailButtonText = "Email Sent!";
 

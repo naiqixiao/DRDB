@@ -14,7 +14,6 @@ export default new Vuex.Store({
     userID: null,
     lab: null,
     studies: null,
-    studyName: null,
     isUserLoggedIn: false,
     role: null,
     labEmail: null,
@@ -51,9 +50,6 @@ export default new Vuex.Store({
     },
     setStudies(state, studies) {
       state.studies = studies;
-    },
-    setStudyName(state, studyName) {
-      state.studyName = studyName;
     },
     setLabEmail(state, labEmail) {
       state.labEmail = labEmail;
@@ -119,9 +115,6 @@ export default new Vuex.Store({
     },
     setStudies({ commit }, studies) {
       commit("setStudies", studies);
-    },
-    setStudyName({ commit }, studyName) {
-      commit("setStudyName", studyName);
     },
     setLabEmail({ commit }, labEmail) {
       commit("setLabEmail", labEmail);
