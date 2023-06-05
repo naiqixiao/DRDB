@@ -659,7 +659,7 @@ export default {
 
     async sendEmail() {
       try {
-        await this.$refs.Email.sendEmail(this.$store.state.studyName);
+        await this.$refs.Email.sendEmail();
 
         this.appointmentUpdated = false;
       } catch (error) {
