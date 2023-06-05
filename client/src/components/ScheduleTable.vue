@@ -1013,6 +1013,7 @@ export default {
     },
 
     async continue12() {
+
       var validationResults = this.$refs.scheduleDateTime.validate();
 
       if (validationResults) {
@@ -1085,6 +1086,7 @@ export default {
     },
 
     async continue23() {
+
       try {
         if (this.emailButtonText == "Email Sent!") {
           if (
@@ -1094,15 +1096,16 @@ export default {
             )
           ) {
             this.loadingStatus = true;
-            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+            await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
             this.emailSent = true;
             this.emailButtonText = "Email Sent!";
             this.scheduleNextPage = true;
           }
         } else {
+
           this.loadingStatus = true;
-          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+          await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
           this.emailSent = true;
           this.emailButtonText = "Email Sent!";
@@ -1459,7 +1462,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+            await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1468,7 +1471,7 @@ export default {
             await schedule.remind(this.editedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+          await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
           this.emailButtonText = "Email Sent!";
 
@@ -1490,7 +1493,7 @@ export default {
               "A 'thank you' email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+            await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
             this.emailButtonText = "Email Sent!";
 
@@ -1504,7 +1507,7 @@ export default {
             await schedule.tyEmail(updatedSchedule);
           }
         } else {
-          await this.$refs.Email.sendEmail(this.$store.state.studyNames);
+          await this.$refs.Email.sendEmail(this.editedSchedule.Appointments);
 
           this.emailButtonText = "Email Sent!";
 

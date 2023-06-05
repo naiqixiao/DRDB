@@ -97,9 +97,6 @@ export default {
       selectedExperimenters_2nd: [],
     };
   },
-  mounted() {
-    this.$store.commit("addStudyName", this.selectedStudy.StudyName);
-  },
   methods: {
     selectStudy() {
       const experimenterIds = [];
@@ -184,9 +181,6 @@ export default {
     },
 
     emitSelectedStudy() {
-      const currentStudyName = this.$refs.currentSelected.internalValue;
-      this.$store.commit("removeStudyName", currentStudyName);
-
       const selectedStudy = {
         studyId: this.selectedStudy.id,
         childId: this.child.id,
