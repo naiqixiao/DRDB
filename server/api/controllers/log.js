@@ -37,7 +37,7 @@ exports.createLog = async function (logType, user, note) {
     }
 
     if (!fs.existsSync(folderName)) {
-      fs.mkdirSync(folderName)
+      fs.mkdirSync(folderName, { recursive: true })
     }
 
     var log = [{

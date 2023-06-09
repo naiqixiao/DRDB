@@ -596,7 +596,7 @@ export default {
       return emails.join(", ");
     },
 
-    async sendEmail() {
+    async sendEmail(labelNames) {
       // send email with the current email body
 
       var emailContent = {
@@ -605,6 +605,7 @@ export default {
         to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
+        labelNames: labelNames
       };
 
       // if (this.emailType == "Reminder") {

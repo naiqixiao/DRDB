@@ -21,12 +21,14 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
       "https://www.googleapis.com/auth/gmail.settings.basic",
       "https://www.googleapis.com/auth/calendar",
       "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/gmail.modify",
+      "https://www.googleapis.com/auth/gmail.labels"
     ];
 
     const credentialsPath = "api/google/general/credentials.json";
     // const tokenPath = "api/google/lab" + lab + "/token.json";
 
-    const credentials = fs.readFileSync(credentialsPath);
+    const credentials = fs.readFileSync(credentialsPath, {recursive: true});
     const { client_secret, client_id, redirect_uris } = JSON.parse(
       credentials
     ).installed;

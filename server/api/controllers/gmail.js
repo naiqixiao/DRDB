@@ -45,12 +45,57 @@ async function sendEmail(oAuth2Client, emailContent) {
   );
 
   try {
+    const labelNames = emailContent.labelNames;
+
+    const listLabelsResponse = await gmail.users.labels.list({
+      userId: 'me'
+    });
+
+    const labels = listLabelsResponse.data.labels;
+    const labelIds = [];
+
+    for (let i = 0; i < labelNames.length; i++) {
+      const labelName = labelNames[i];
+      const label = labels.find(l => l.name === labelName);
+      let labelId;
+
+      if (label) {
+        labelId = label.id;
+      } else {
+        const labelData = {
+          userId: 'me',
+          resource: {
+            name: labelName,
+            labelListVisibility: 'labelShow'
+          }
+        };
+  
+        const labelResponse = await gmail.users.labels.create(labelData);
+        labelId = labelResponse.data.id;
+      }
+
+      labelIds.push(labelId);
+    }
+
     const result = await gmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
+        labelIds: labelIds
       },
     });
+
+    const messageId = result.data.id;
+
+    const modifyRequest = {
+      userId: 'me',
+      id: messageId,
+      resource: {
+        addLabelIds: labelIds
+      }
+    };
+    await gmail.users.messages.modify(modifyRequest);
+
 
     return result;
   } catch (error) {
