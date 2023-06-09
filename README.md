@@ -6,6 +6,9 @@ You will find some demo videos to illustrate how we use the system to help our r
 
 Please check installation instruction and detailed introductions here: https://drdb.readthedocs.io
 
+# Recent update
+- Organize emails with labels (in gmail). Whenever an email is sent out, the email will be labelled with study name. It would be very easy to tell which study an email belongs to.
+
 # Future features
 
 As we are moving back to in-person research, we realize the current system lacks a few key functions to reflect the complexity of our in-person studies. To bridge the gaps, we aim to improve the system in the following areas over the summer of 2023.
