@@ -42,3 +42,5 @@ Each lab usually has multiple testing rooms. These rooms typically are used for 
 
 ## Misc.
 - selecting participants based on their borned year, instead of age.
+- randomized the order of available studies when booking additional studies.
+- set target sample size for each study, and show the completion percentage during booking (e.g., next to study button).
