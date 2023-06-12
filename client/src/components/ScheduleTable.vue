@@ -1461,7 +1461,7 @@ export default {
     },
 
     async sendReminderEmail() {
-      const labelNames = [];
+      const labelNames = ['Reminder-email'];
       for (const appointment of this.editedSchedule.Appointments) {
         if (appointment.Study.StudyName) {
           labelNames.push(appointment.Study.StudyName);
@@ -1499,7 +1499,7 @@ export default {
     },
 
     async sendTYEmail() {
-      const labelNames = [];
+      const labelNames = ['TY-email'];
       for (const appointment of this.editedSchedule.Appointments) {
         if (appointment.Study.StudyName) {
           labelNames.push(appointment.Study.StudyName);
