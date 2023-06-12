@@ -820,8 +820,11 @@ export default {
       // this.currentStudy = item;
 
       try {
+        this.editedIndex = this.Studies.indexOf(item);
         item.Completed = !item.Completed;
         await study.update(item);
+        Object.assign(this.Studies[this.editedIndex], item);
+        this.$store.dispatch("setStudies", this.Studies);
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
