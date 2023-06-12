@@ -221,7 +221,7 @@ function makeBody(to, from, cc, bcc, subject, body) {
   return encodedMail;
 }
 
-async function sendEmail(oAuth2Client, emailContent) {
+async function sendEmail(oAuth2Client, emailContent, emailLabels) {
   const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
   var raw = makeBody(
@@ -234,14 +234,73 @@ async function sendEmail(oAuth2Client, emailContent) {
   );
 
   try {
+
+    if (!emailLabels) {
+
+      const result = await gmail.users.messages.send({
+        userId: "me",
+        requestBody: {
+          raw: raw,
+        },
+      });
+
+      return result;
+    }
+
+    const labelNames = emailLabels;
+
+    const listLabelsResponse = await gmail.users.labels.list({
+      userId: 'me'
+    });
+
+    const labels = listLabelsResponse.data.labels;
+    const labelIds = [];
+
+    for (let i = 0; i < labelNames.length; i++) {
+      const labelName = labelNames[i];
+      const label = labels.find(l => l.name === labelName);
+      let labelId;
+
+      if (label) {
+        labelId = label.id;
+      } else {
+        const labelData = {
+          userId: 'me',
+          resource: {
+            name: labelName,
+            labelListVisibility: 'labelShow'
+          }
+        };
+  
+        const labelResponse = await gmail.users.labels.create(labelData);
+        labelId = labelResponse.data.id;
+      }
+
+      labelIds.push(labelId);
+    }
+
     const result = await gmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
+        labelIds: labelIds
       },
     });
 
+    const messageId = result.data.id;
+
+    const modifyRequest = {
+      userId: 'me',
+      id: messageId,
+      resource: {
+        addLabelIds: labelIds
+      }
+    };
+    await gmail.users.messages.modify(modifyRequest);
+
+
     return result;
+
   } catch (error) {
     return error;
   }
@@ -342,6 +401,12 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 
     schedules.forEach(async (schedule) => {
 
+      const labels = ['Reminder-email']
+
+      for (const appointment of schedule.Appointments) {
+        labels.push(appointment.Study.dataValues.StudyName)
+      }
+
       if (!!schedule.Appointments[0].Study.ReminderTemplate) {
 
         if (!!schedule.Family.Email) {
@@ -356,7 +421,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 
           const emailContent = emailBody(schedule);
 
-          await sendEmail(oAuth2Client, emailContent);
+          await sendEmail(oAuth2Client, emailContent, labels);
 
           // update schedule
           await model.schedule.update(
@@ -401,7 +466,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           emailContent.from =
             "Developmental Research Management System" + "<" + adminEmail + ">";
 
-          await sendEmail(oAuth2Client, emailContent);
+          await sendEmail(oAuth2Client, emailContent, labels);
 
           // log
           await log.createLog("Manual reminder", {
@@ -729,7 +794,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
       oAuth2Client.setCredentials(JSON.parse(token));
 
-      await sendEmail(oAuth2Client, emailContent);
+      await sendEmail(oAuth2Client, emailContent, ['Reminder-email']);
 
       // log
       await log.createLog("Auto reminder sent", {
