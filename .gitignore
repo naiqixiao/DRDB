@@ -1,5 +1,4 @@
-
-
+server/api/google/general/credentials.json
 server/api/middleware/calendar.js
 server/SequelizeTest.js
 server/index.html

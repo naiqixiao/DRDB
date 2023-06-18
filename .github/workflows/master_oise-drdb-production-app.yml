@@ -1,18 +1,18 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: push to azure
-on: push
-jobs:
-  deploy-to-production:
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: '0'
-        ref: 'master'
-    - run: |
-        git remote add azureprod https://OISE-RoleSys-Production-APP_deployment_user:${{ secrets.AZURE_DEPLOYMENT_PASSWORD }}@OISE-DRDB-Production-APP.scm.azurewebsites.net/OISE-DRDB-Production-APP.git
-        git push -u -f azureprod master
-        git checkout master
+# name: push to azure
+# on: push
+# jobs:
+#   deploy-to-production:
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/master'
+#     steps:
+#     - uses: actions/checkout@v2
+#       with:
+#         fetch-depth: '0'
+#         ref: 'master'
+#     - run: |
+#         git remote add azureprod https://OISE-RoleSys-Production-APP_deployment_user:${{ secrets.AZURE_DEPLOYMENT_PASSWORD }}@OISE-DRDB-Production-APP.scm.azurewebsites.net/OISE-DRDB-Production-APP.git
+#         git push -u -f azureprod master
+#         git checkout master
