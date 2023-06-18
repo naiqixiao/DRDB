@@ -8718,6 +8718,8 @@ server/api/google/labs
 
 server/api/google/general/index.js
 server/api/google/general/token.json
+server/api/google/general/credentials.json
+
 
 client/._.DS_Store
 .DS_Store
@@ -8750,5 +8752,5 @@ client/src/components/ScheduleTable_old.vue
 server/api/controllers/reminder copy.js
 server/api/controllers/reminder_test.js
 client/vue.config.js
-server/api/realtimeUpdate/currentFamilies.json
+server/api/realtimeUpdate
 client/vue.config.js
