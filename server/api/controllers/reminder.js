@@ -404,7 +404,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
       const labels = ['Reminder-email']
 
       for (const appointment of schedule.Appointments) {
-        labels.push(appointment.Study.dataValues.StudyName)
+        labels.push(appointment.Study.dataValues.StudyName);
       }
 
       if (!!schedule.Appointments[0].Study.ReminderTemplate) {
