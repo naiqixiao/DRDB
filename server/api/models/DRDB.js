@@ -49,12 +49,13 @@ Child.belongsToMany(Child, {
   otherKey: "FK_Child",
 });
 
-// Personnel, Study, Experimenter, Lab
+// Personnel, Study, Experimenter, Lab, TestingRoom
 
 const Lab = sequelize.import("../models/SequelizeAuto/Lab");
 const Personnel = sequelize.import("../models/SequelizeAuto/Personnel");
 const Study = sequelize.import("../models/SequelizeAuto/Study");
 const Experimenter = sequelize.import("../models/SequelizeAuto/Experimenter");
+const TestingRoom = sequelize.import("../models/SequelizeAuto/TestingRoom");
 
 Lab.hasMany(Personnel, {
   foreignKey: "FK_Lab",
@@ -75,6 +76,13 @@ Lab.hasMany(Family, {
 });
 Family.belongsTo(Lab, {
   foreignKey: "AssignedLab",
+});
+
+Lab.hasMany(TestingRoom, {
+  foreignKey: "FK_Lab",
+});
+TestingRoom.belongsTo(Lab, {
+  foreignKey: "FK_Lab",
 });
 
 Personnel.hasMany(Study, {

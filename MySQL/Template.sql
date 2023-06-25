@@ -314,6 +314,22 @@ INSERT INTO `Lab` VALUES (1,'sample_Lab','PI',NULL,'2023-02-16 16:01:47','2023-0
 /*!40000 ALTER TABLE `Lab` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- testing room table
+DROP TABLE IF EXISTS `TestingRoom`;
+CREATE TABLE `TestingRoom` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `FK_Lab` INT NOT NULL,
+  `calendar` varchar(255) NOT NULL,
+  `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `calendar` (`calendar`),
+  KEY `FK_lab` (`FK_Lab`),
+  CONSTRAINT `FK_lab` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 --
 -- Table structure for table `Personnel`
 --
@@ -507,6 +523,7 @@ CREATE TABLE `Study` (
   `Completed` int NOT NULL DEFAULT '0',
   `FK_Lab` int NOT NULL,
   `FK_Personnel` int NOT NULL,
+  `FK_TestingRoom` int NOT NULL,
   `StudyType` varchar(30) NOT NULL,
   `ASDParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
   `PrematureParticipant` enum('Include','Exclude','Only') NOT NULL DEFAULT 'Include',
@@ -519,8 +536,10 @@ CREATE TABLE `Study` (
   PRIMARY KEY (`id`),
   KEY `FK_Lab` (`FK_Lab`),
   KEY `FK_Personnel_idx` (`FK_Personnel`),
+  KEY `FK_TestingRoom` (`FK_TestingRoom`),
   CONSTRAINT `Personnel_ibfk_3` FOREIGN KEY (`FK_Personnel`) REFERENCES `Personnel` (`id`),
-  CONSTRAINT `Study_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `Study_ibfk_1` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_TestingRoom` FOREIGN KEY (`FK_TestingRoom`) REFERENCES `TestingRoom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
