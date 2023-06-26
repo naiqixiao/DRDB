@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
     online: {
-			type: DataTypes.TINYINT(1),
+			type: DataTypes.STRING(255),
 			allowNull: false,
 		},
     calendar: {
