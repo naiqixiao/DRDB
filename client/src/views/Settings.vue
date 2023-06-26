@@ -443,8 +443,21 @@
             </v-row>
           </v-form>
 
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
+            <v-btn
+              color="primary"
+              fab
+              v-bind="attrs"
+              v-on="on"
+            >
+              <v-icon>add</v-icon>
+            </v-btn>
+          </v-col>
+
           <v-card-actions>
-            <v-row justify="space-between" style="height: 50px">
+            <v-row justify="space-between" style="height: 50px; marginTop: 20px">
               <v-col md="3"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="closeNewLab">Cancel</v-btn>

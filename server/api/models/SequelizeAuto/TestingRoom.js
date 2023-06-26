@@ -17,6 +17,10 @@ module.exports = function(sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
+    online: {
+			type: DataTypes.TINYINT(1),
+			allowNull: false,
+		},
     calendar: {
 			type: DataTypes.STRING(255),
 			allowNull: false,
