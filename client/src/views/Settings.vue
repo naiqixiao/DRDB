@@ -447,50 +447,53 @@
                 <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
               </v-col>
 
-              <v-col cols="12" md="10" class="testing-room-fields">
+              <v-col cols="12" md="12">
                 <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                  <v-col cols="6">
-                    <v-text-field
-                      background-color="textbackground"
-                      label="Name of Testing Room"
-                      v-model="testingRoom.name"
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="6">
-                    <v-text-field
-                      background-color="textbackground"
-                      label="Location"
-                      v-model="testingRoom.location"
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" class="calendar-field">
-                    <v-text-field
-                      background-color="textbackground"
-                      label="Calendar"
-                      v-model="testingRoom.calendar"
-                      outlined
-                      dense
-                    ></v-text-field>
-                  </v-col>
-                  
-                  <v-col cols="12" class="testing-room-delete">
-                    <v-btn
-                      color="primary"
-                      fab
-                      v-on:click="deleteTestingRoom(index)"
-                    >
-                      <v-icon>delete</v-icon>
-                    </v-btn>
+                  <v-col>
+                    <v-row>
+                      <v-col cols="6">
+                        <v-text-field
+                          background-color="textbackground"
+                          label="Name of Testing Room"
+                          v-model="testingRoom.name"
+                          outlined
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="6">
+                        <v-text-field
+                          background-color="textbackground"
+                          label="Location"
+                          v-model="testingRoom.location"
+                          outlined
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        background-color="textbackground"
+                        label="Calendar"
+                        v-model="testingRoom.calendar"
+                        outlined
+                        dense
+                      ></v-text-field>
+                    </v-col>
+                    
+                    </v-col>
+                      <v-col cols="2" class="testing-room-delete">
+                        <v-btn
+                          color="primary"
+                          fab
+                          v-on:click="deleteTestingRoom(index)"
+                        >
+                          <v-icon>delete</v-icon>
+                        </v-btn>
+                      </v-col>                    
+                    </v-row>
                   </v-col>
                 </v-row>
-              </v-col>
-            </v-row>
-
-            <v-col>
+              <v-col>
               <v-btn
                 color="primary"
                 fab
@@ -1095,14 +1098,10 @@ export default {
 .testing-room-fields {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-}
-.calendar-field {
-  margin-top: -30px;
-}
-.testing-room-delete {
-  display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
+}
+.v-text-field__details {
+  display: none;
 }
 </style>
