@@ -458,6 +458,7 @@
                           v-model="testingRoom.name"
                           outlined
                           dense
+                          autocomplete="null"
                         ></v-text-field>
                       </v-col>
                       <v-col cols="6">
