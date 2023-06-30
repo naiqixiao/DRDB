@@ -7,6 +7,10 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false,
 			primaryKey: true
 		},
+    name: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
 		FK_Lab: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
@@ -17,7 +21,7 @@ module.exports = function(sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
-    online: {
+    location: {
 			type: DataTypes.STRING(255),
 			allowNull: false,
 		},

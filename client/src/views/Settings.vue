@@ -639,6 +639,7 @@
 <script>
 import login from "@/services/login";
 import lab from "@/services/lab";
+import testingRoom from "@/services/testingRoom";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import { VueEditor } from "vue2-editor";
@@ -692,7 +693,7 @@ export default {
         ["link"],
       ],
       testingRooms: [
-        { name: '', location: '', calendar: '' },
+        { name: '', labName: '', location: '', calendar: '' },
       ],
     };
   },
@@ -765,6 +766,7 @@ export default {
           this.currentLab.PI = this.currentLab.Personnels[0].Initial;
 
           await lab.create(this.currentLab);
+          await testingRoom.create(this.testingRooms);
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"

@@ -320,7 +320,7 @@ CREATE TABLE `TestingRoom` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `FK_Lab` INT NOT NULL,
-  `online` VARCHAR(255) NOT NULL,
+  `location` VARCHAR(255) NOT NULL,
   `calendar` varchar(255) NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

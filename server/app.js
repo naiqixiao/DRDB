@@ -50,6 +50,8 @@ const feedbackRoutes = require("./api/routes/feedback");
 const reminderRoutes = require("./api/routes/reminder");
 const rtuRoutes = require("./api/routes/RTU");
 
+const testingRoomRoutes = require("./api/routes/testingRoom");
+
 app.use("/api/user", userRoutes);
 
 app.use("/api/family", familyRoutes);
@@ -76,6 +78,7 @@ app.use("/api/feedback", feedbackRoutes);
 app.use("/api/reminder", reminderRoutes);
 app.use("/api/RTU", rtuRoutes);
 
+app.use("/api/TestingRoom", testingRoomRoutes);
 
 // Error handling
 app.use((req, res, next) => {

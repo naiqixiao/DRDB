@@ -221,5 +221,6 @@ sequelize.sync({ force: false }).then(() => {
   exports.experimenterAssignment = ExperimenterAssignment;
   exports.experimenterAssignment_2nd = SecondExperimenterAssignment;
   exports.feedback = Feedback;
+  exports.testingRoom = TestingRoom;
   exports.sequelize = sequelize;
 });
