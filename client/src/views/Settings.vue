@@ -693,7 +693,7 @@ export default {
         ["link"],
       ],
       testingRooms: [
-        { name: '', labName: '', location: '', calendar: '' },
+        { name: '', location: '', calendar: '' },
       ],
     };
   },
@@ -746,7 +746,7 @@ export default {
 
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
-
+      
       if (validationResults) {
         try {
           // const newLab = {
@@ -766,7 +766,15 @@ export default {
           this.currentLab.PI = this.currentLab.Personnels[0].Initial;
 
           await lab.create(this.currentLab);
-          await testingRoom.create(this.testingRooms);
+          const newLab = await lab.search(this.currentLab);
+
+          console.log(newLab.data[0].id);
+          const testingRoomInfo = this.testingRooms;
+
+          for (const testingRoomItem of testingRoomInfo) {
+            testingRoomItem.FK_Lab = newLab.data[0].id;
+            await testingRoom.create(testingRoomItem);
+          }          
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"

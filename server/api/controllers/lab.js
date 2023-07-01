@@ -145,7 +145,7 @@ exports.create = asyncHandler(async (req, res) => {
       IllParticipant: "Include",
       FK_Personnel: lab.Personnels[0].id,
       FK_Lab: lab.id,
-      FK_TestingRoom: '1'
+      FK_TestingRoom: 1
     };
 
     await model.study.create(sampleStudy);
