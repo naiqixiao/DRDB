@@ -726,7 +726,7 @@ export default {
     },
 
     addTestingRoom() {
-      this.testingRooms.push({ name: '', location: '' });
+      this.testingRooms.push({ name: '', location: '', calendar: '' });
     },
     deleteTestingRoom(index) {
       this.testingRooms.splice(index, 1);
@@ -768,13 +768,15 @@ export default {
           await lab.create(this.currentLab);
           const newLab = await lab.search(this.currentLab);
 
-          console.log(newLab.data[0].id);
           const testingRoomInfo = this.testingRooms;
 
-          for (const testingRoomItem of testingRoomInfo) {
-            testingRoomItem.FK_Lab = newLab.data[0].id;
-            await testingRoom.create(testingRoomItem);
-          }          
+          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
+            const testing = {...testingRoomItem};
+            testing.FK_Lab = newLab.data[0].id;
+            await testingRoom.create(testing);
+          })
+
+          await Promise.all(createPromises);     
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"

@@ -330,6 +330,7 @@ CREATE TABLE `TestingRoom` (
   KEY `FK_lab` (`FK_Lab`),
   CONSTRAINT `FK_lab` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+INSERT INTO `TestingRoom` VALUES (1,'test1','1','test1','test1','2023-02-16 16:01:47','2023-02-16 16:01:47');
 
 --
 -- Table structure for table `Personnel`
