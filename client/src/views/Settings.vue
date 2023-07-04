@@ -474,7 +474,7 @@
                     <v-col cols="12">
                       <v-text-field
                         background-color="textbackground"
-                        label="Calendar"
+                        label="Calendar Name (Recommend naming it after the location)"
                         v-model="testingRoom.calendar"
                         outlined
                         dense
@@ -596,6 +596,68 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
+
+              <v-col md="12" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
+              </v-col>
+
+              <v-col cols="12" md="12">
+                <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
+                  <v-col>
+                    <v-row>
+                      <v-col cols="6">
+                        <v-text-field
+                          background-color="textbackground"
+                          label="Name of Testing Room"
+                          v-model="testingRoom.name"
+                          outlined
+                          dense
+                          autocomplete="null"
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="6">
+                        <v-text-field
+                          background-color="textbackground"
+                          label="Location"
+                          v-model="testingRoom.location"
+                          outlined
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                    <v-col cols="12">
+                      <v-text-field
+                        background-color="textbackground"
+                        label="Calendar Name (Recommend naming it after the location)"
+                        v-model="testingRoom.calendar"
+                        outlined
+                        dense
+                      ></v-text-field>
+                    </v-col>
+                  </v-col>
+
+                  <v-col cols="2" class="testing-room-delete">
+                    <v-btn
+                      color="primary"
+                      fab
+                      v-on:click="deleteTestingRoom(index)"
+                    >
+                      <v-icon>delete</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+                <v-col>
+                  <v-btn
+                    color="primary"
+                    fab
+                    v-on:click="addTestingRoom"
+                  >
+                    <v-icon>add</v-icon>
+                  </v-btn>
+                </v-col>
+              </v-col>
+
               <v-row>
                 <v-col md="12" class="subtitle">
                   <v-divider></v-divider>
@@ -639,6 +701,7 @@
 <script>
 import login from "@/services/login";
 import lab from "@/services/lab";
+
 import testingRoom from "@/services/testingRoom";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
@@ -767,16 +830,18 @@ export default {
 
           await lab.create(this.currentLab);
           const newLab = await lab.search(this.currentLab);
-
           const testingRoomInfo = this.testingRooms;
 
-          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-            const testing = {...testingRoomItem};
-            testing.FK_Lab = newLab.data[0].id;
-            await testingRoom.create(testing);
-          })
+          if (testingRoomInfo[0]) {
 
-          await Promise.all(createPromises);     
+            const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
+              const testing = {...testingRoomItem};
+              testing.FK_Lab = newLab.data[0].id;
+              await testingRoom.create(testing);
+            })
+
+            await Promise.all(createPromises);     
+          }
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
