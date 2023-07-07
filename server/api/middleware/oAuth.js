@@ -15,6 +15,7 @@ module.exports = asyncHandler(async (req, res, next) => {
 
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/labs/lab" + lab + "/token.json";
+    console.log(tokenPath);
 
     // const credentials = await fs.promises.readFile(credentialsPath);
     const credentials = fs.readFileSync(credentialsPath);

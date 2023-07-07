@@ -1,34 +1,19 @@
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
-      <v-alert
-        border="left"
-        type="error"
-        color="#c73460"
-        dense
-        style="font-weight: 600"
+      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600"
         >Lab email is not been setup properly. Please set it up in the Settings
         page.</v-alert
       >
     </div>
     <div v-if="!$store.state.adminEmailStatus">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >Admin email is not been setup properly. Please set it up in the
-        Settings page.</v-alert
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600"
+        >Admin email is not been setup properly. Please set it up in the Settings
+        page.</v-alert
       >
     </div>
     <div v-if="$store.state.trainingMode">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600"
         >You are running in a training mode.</v-alert
       >
     </div>
@@ -37,15 +22,10 @@
       <v-col md="4">
         <v-divider></v-divider>
         <h4 class="text-left">User account settings:</h4>
-        <v-btn style="margin-top: 120px;" color="primary" @click.stop="dialog = true"
+        <v-btn style="margin-top: 120px" color="primary" @click.stop="dialog = true"
           >Change password</v-btn
         >
-        <v-dialog
-          v-model="dialog"
-          max-width="600px"
-          :retain-focus="false"
-          persistent
-        >
+        <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
           <v-card outlined>
             <v-card-title class="headline">Change password</v-card-title>
             <v-form ref="form" v-model="valid" lazy-validation>
@@ -117,8 +97,16 @@
         <v-divider></v-divider>
         <h4 class="text-left">Batch upload participant info:</h4>
         <p class="text-left">
-          You can use this <a href="https://mcmasteru365-my.sharepoint.com/:x:/g/personal/xiaon8_mcmaster_ca/EeFyaQJH4H9Imh_JzXojHeIBMCzy0mAj9DaezEQK0Ri5iQ?e=8jJIrM" target="_blank"><b>spreadsheet</b></a> as template to upload multiple participant information at once.<br>*Any information should be formatted as <b>TEXT</b> in the spreadsheet (including phone numbers, DoB, etc.).
-          <br>*Date of birth (DoB) has to be entered in <b>DD/MM/YYYY</b> format.
+          You can use this
+          <a
+            href="https://mcmasteru365-my.sharepoint.com/:x:/g/personal/xiaon8_mcmaster_ca/EeFyaQJH4H9Imh_JzXojHeIBMCzy0mAj9DaezEQK0Ri5iQ?e=8jJIrM"
+            target="_blank"
+            ><b>spreadsheet</b></a
+          >
+          as template to upload multiple participant information at once.<br />*Any
+          information should be formatted as <b>TEXT</b> in the spreadsheet (including
+          phone numbers, DoB, etc.). <br />*Date of birth (DoB) has to be entered in
+          <b>DD/MM/YYYY</b> format.
         </p>
         <template>
           <v-file-input
@@ -156,9 +144,7 @@
           <v-card-actions>
             <v-row justify="center" style="height: 50px">
               <v-col md="2">
-                <v-btn color="primary" @click="dialogImport = false"
-                  >Confirm</v-btn
-                >
+                <v-btn color="primary" @click="dialogImport = false">Confirm</v-btn>
               </v-col>
             </v-row>
           </v-card-actions>
@@ -171,10 +157,16 @@
         <v-divider></v-divider>
         <h4 class="text-left">Lab email account settings:</h4>
         <p class="text-left">
-          You can follow this <a href="https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK" target="_blank"><b>instruction</b></a> to set up Google Account for your lab.
+          You can follow this
+          <a
+            href="https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK"
+            target="_blank"
+            ><b>instruction</b></a
+          >
+          to set up Google Account for your lab.
         </p>
       </v-col>
-      
+
       <v-col cols="12" md="2">
         <v-text-field
           class="textfield-family"
@@ -207,9 +199,7 @@
               >
             </div>
           </template>
-          <span
-            >Only PI and lab manager can change the associated lab email.</span
-          >
+          <span>Only PI and lab manager can change the associated lab email.</span>
         </v-tooltip>
       </v-col>
       <v-col cols="12" md="3">
@@ -234,16 +224,9 @@
         </v-tooltip>
       </v-col>
 
-      <v-dialog
-        v-model="dialogGoogle"
-        max-width="600px"
-        :retain-focus="false"
-        persistent
-      >
+      <v-dialog v-model="dialogGoogle" max-width="600px" :retain-focus="false" persistent>
         <v-card outlined>
-          <v-card-title class="headline"
-            >Paste Google sign in code</v-card-title
-          >
+          <v-card-title class="headline">Paste Google sign in code</v-card-title>
           <v-card-text>
             <v-row justify="center">
               <v-col cols="12" md="10" class="subtitle">
@@ -262,9 +245,7 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="3"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="dialogGoogle = false"
-                  >Cancel</v-btn
-                >
+                <v-btn color="primary" @click="dialogGoogle = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
                 <v-btn
@@ -312,9 +293,7 @@
               >
             </div>
           </template>
-          <span
-            >Only the Administrator can change the adminstration email.</span
-          >
+          <span>Only the Administrator can change the adminstration email.</span>
         </v-tooltip>
       </v-col>
 
@@ -325,9 +304,7 @@
               <v-btn
                 color="primary"
                 @click.stop="createNewLab"
-                :disabled="
-                  $store.state.role != 'Admin' || !$store.state.adminEmailStatus
-                "
+                :disabled="$store.state.role != 'Admin' || !$store.state.adminEmailStatus"
                 >Create a Lab</v-btn
               >
             </div>
@@ -336,16 +313,9 @@
         </v-tooltip>
       </v-col>
 
-      <v-dialog
-        v-model="dialogNewLab"
-        max-width="800px"
-        :retain-focus="false"
-        persistent
-      >
+      <v-dialog v-model="dialogNewLab" max-width="800px" :retain-focus="false" persistent>
         <v-card outlined>
-          <v-card-title class="headline"
-            >Lab and PI/Manager information</v-card-title
-          >
+          <v-card-title class="headline">Lab and PI/Manager information</v-card-title>
 
           <v-form ref="form" v-model="valid" lazy-validation>
             <v-row>
@@ -405,12 +375,7 @@
                 <v-divider></v-divider>
                 <h4 class="text-left">PI/Lab Manager information:</h4>
               </v-col>
-              <v-col
-                cols="12"
-                md="4"
-                v-for="item in this.$labPI"
-                :key="item.label"
-              >
+              <v-col cols="12" md="4" v-for="item in this.$labPI" :key="item.label">
                 <div v-if="item.options">
                   <v-select
                     justify="start"
@@ -480,33 +445,24 @@
                         dense
                       ></v-text-field>
                     </v-col>
-                    
-                    </v-col>
-                      <v-col cols="2" class="testing-room-delete">
-                        <v-btn
-                          color="primary"
-                          fab
-                          v-on:click="deleteTestingRoom(index)"
-                        >
-                          <v-icon>delete</v-icon>
-                        </v-btn>
-                      </v-col>                    
-                    </v-row>
+                  </v-col>
+                  <v-col cols="2" class="testing-room-delete">
+                    <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
+                      <v-icon>delete</v-icon>
+                    </v-btn>
                   </v-col>
                 </v-row>
-              <v-col>
-              <v-btn
-                color="primary"
-                fab
-                v-on:click="addTestingRoom"
-              >
+              </v-col>
+            </v-row>
+            <v-col>
+              <v-btn color="primary" fab v-on:click="addTestingRoom">
                 <v-icon>add</v-icon>
               </v-btn>
             </v-col>
           </v-form>
 
           <v-card-actions>
-            <v-row justify="space-between" style="height: 50px; marginTop: 20px">
+            <v-row justify="space-between" style="height: 50px; margintop: 20px">
               <v-col md="3"></v-col>
               <v-col md="2">
                 <v-btn color="primary" @click="closeNewLab">Cancel</v-btn>
@@ -638,21 +594,13 @@
                   </v-col>
 
                   <v-col cols="2" class="testing-room-delete">
-                    <v-btn
-                      color="primary"
-                      fab
-                      v-on:click="deleteTestingRoom(index)"
-                    >
+                    <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
                       <v-icon>delete</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
                 <v-col>
-                  <v-btn
-                    color="primary"
-                    fab
-                    v-on:click="addTestingRoom"
-                  >
+                  <v-btn color="primary" fab v-on:click="addTestingRoom">
                     <v-icon>add</v-icon>
                   </v-btn>
                 </v-col>
@@ -708,6 +656,7 @@ import externalAPIs from "@/services/externalAPIs";
 import { VueEditor } from "vue2-editor";
 import XLSX from "xlsx";
 import moment from "moment";
+import calendar from "../services/calendar";
 
 export default {
   components: {
@@ -755,9 +704,7 @@ export default {
         [{ color: [] }, { background: [] }],
         ["link"],
       ],
-      testingRooms: [
-        { name: '', location: '', calendar: '' },
-      ],
+      testingRooms: [{ name: "", location: "", calendar: "" }],
     };
   },
 
@@ -789,7 +736,7 @@ export default {
     },
 
     addTestingRoom() {
-      this.testingRooms.push({ name: '', location: '', calendar: '' });
+      this.testingRooms.push({ name: "", location: "", calendar: "" });
     },
     deleteTestingRoom(index) {
       this.testingRooms.splice(index, 1);
@@ -800,8 +747,7 @@ export default {
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
       this.editedLab.TYEmail = this.$store.state.tyEmailClosing;
-      this.editedLab.TransportationInstructions =
-        this.$store.state.transportationInstructions;
+      this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
       this.editedLab.Location = this.$store.state.location;
       this.editedLab.ZoomLink = this.$store.state.ZoomLink;
       this.dialogEditLab = true;
@@ -809,7 +755,10 @@ export default {
 
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
-      
+      await calendar.createSecondaryCalendar({
+        calendarName: this.testingRooms[0].calendarName,
+      });
+
       if (validationResults) {
         try {
           // const newLab = {
@@ -832,16 +781,17 @@ export default {
           const newLab = await lab.search(this.currentLab);
           const testingRoomInfo = this.testingRooms;
 
-          if (testingRoomInfo[0]) {
+          // if (testingRoomInfo[0]) {
 
-            const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-              const testing = {...testingRoomItem};
-              testing.FK_Lab = newLab.data[0].id;
-              await testingRoom.create(testing);
-            })
+          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
+            const testing = { ...testingRoomItem };
+            testing.FK_Lab = newLab.data[0].id;
+            await testingRoom.create(testing);
+            await calendar.createSecondaryCalendar({ calendarName: testing.calendar });
+          });
 
-            await Promise.all(createPromises);     
-          }
+          await Promise.all(createPromises);
+          // }
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
@@ -1002,9 +952,7 @@ export default {
 
             if (!participant.Name) {
               participant.Name = participant.Child_Last_Name
-                ? participant.Child_First_Name +
-                  " " +
-                  participant.Child_Last_Name
+                ? participant.Child_First_Name + " " + participant.Child_Last_Name
                 : participant.Child_First_Name;
             }
 
@@ -1115,9 +1063,7 @@ export default {
   },
   computed: {
     passwordConfirmationRule() {
-      return (
-        this.newPassword === this.newPasswordVerify || "Password must match"
-      );
+      return this.newPassword === this.newPasswordVerify || "Password must match";
     },
 
     newPasswordRule() {

@@ -16,4 +16,8 @@ export default {
     calendarInfo.lab = store.state.lab;
     return api().delete("cal/", calendarInfo);
   },
+
+  createSecondaryCalendar(calendarInfo) {
+    return api().post("cal/createSecondaryCalendar/", calendarInfo);
+  },
 };

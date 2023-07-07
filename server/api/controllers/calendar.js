@@ -106,3 +106,25 @@ exports.delete = asyncHandler(async (req, res) => {
     throw error;
   }
 });
+
+exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+  const calendarName = req.body.calendarName;
+
+  try {
+    // const { summary, timeZone } = req.body;
+    
+    const createdCalendar = await calendar.calendars.insert({
+      requestBody: {
+        summary: calendarName,
+        timeZone: config.timeZone,
+        
+      },
+    });
+    
+    res.json({ calendarId: createdCalendar.data.id });
+  } catch (error) {
+    console.error('Error creating secondary calendar:', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
+});
