@@ -14,3 +14,17 @@ exports.create = asyncHandler(async (req, res) => {
     throw error;
   }
 })
+
+exports.search = asyncHandler(async (req, res) => {
+  const labId = req.query.labId;
+
+  try {
+    const testingRooms = await model.testingRoom.findAll({
+      where: {FK_Lab: labId},
+    });
+    res.status(200).send(testingRooms);
+
+  } catch (error) {
+    throw error;
+  }
+})

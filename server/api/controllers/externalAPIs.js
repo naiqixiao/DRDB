@@ -110,6 +110,7 @@ exports.googleToken = asyncHandler(async (req, res) => {
     );
 
     fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
+    console.log(JSON.stringify(token.tokens));
 
     res.status(200).send({
       message: "Google account is successfully set up!",

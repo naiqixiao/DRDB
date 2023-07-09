@@ -553,58 +553,69 @@
                 </v-col>
               </v-row>
 
-              <v-col md="12" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
-              </v-col>
+              <v-row>
+                <v-col md="12" class="subtitle">
+                  <v-divider></v-divider>
+                  <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
+                </v-col>
 
-              <v-col cols="12" md="12">
-                <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                  <v-col>
-                    <v-row>
-                      <v-col cols="6">
-                        <v-text-field
-                          background-color="textbackground"
-                          label="Name of Testing Room"
-                          v-model="testingRoom.name"
-                          outlined
-                          dense
-                          autocomplete="null"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="6">
-                        <v-text-field
-                          background-color="textbackground"
-                          label="Location"
-                          v-model="testingRoom.location"
-                          outlined
-                          dense
-                        ></v-text-field>
-                      </v-col>
-                    </v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        background-color="textbackground"
-                        label="Calendar Name (Recommend naming it after the location)"
-                        v-model="testingRoom.calendar"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                  </v-col>
-
-                  <v-col cols="2" class="testing-room-delete">
-                    <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
-                      <v-icon>delete</v-icon>
-                    </v-btn>
+                <v-row v-if="currentTestingRooms.length > 0">
+                  <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="6" md="4" lg="3">
+                    <v-card>
+                      <v-card-title>{{ room.name }}</v-card-title>
+                      <v-card-text>{{ room.location }}</v-card-text>
+                    </v-card>
                   </v-col>
                 </v-row>
-                <v-col>
-                  <v-btn color="primary" fab v-on:click="addTestingRoom">
-                    <v-icon>add</v-icon>
-                  </v-btn>
+                
+                <v-col cols="12" md="12">
+                  <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
+                    <v-col>
+                      <v-row>
+                        <v-col cols="6">
+                          <v-text-field
+                            background-color="textbackground"
+                            label="Name of Testing Room"
+                            v-model="testingRoom.name"
+                            outlined
+                            dense
+                            autocomplete="null"
+                          ></v-text-field>
+                        </v-col>
+                        <v-col cols="6">
+                          <v-text-field
+                            background-color="textbackground"
+                            label="Location"
+                            v-model="testingRoom.location"
+                            outlined
+                            dense
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                      <v-col cols="12">
+                        <v-text-field
+                          background-color="textbackground"
+                          label="Calendar Name (Recommend naming it after the location)"
+                          v-model="testingRoom.calendar"
+                          outlined
+                          dense
+                        ></v-text-field>
+                      </v-col>
+                    </v-col>
+
+                    <v-col cols="2" class="testing-room-delete">
+                      <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
+                        <v-icon>delete</v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                  <v-col>
+                    <v-btn color="primary" fab v-on:click="addTestingRoom">
+                      <v-icon>add</v-icon>
+                    </v-btn>
+                  </v-col>
                 </v-col>
-              </v-col>
+              </v-row>
 
               <v-row>
                 <v-col md="12" class="subtitle">
@@ -705,6 +716,7 @@ export default {
         ["link"],
       ],
       testingRooms: [{ name: "", location: "", calendar: "" }],
+      currentTestingRooms: []
     };
   },
 
@@ -742,7 +754,11 @@ export default {
       this.testingRooms.splice(index, 1);
     },
 
-    editLabInfo() {
+    async editLabInfo() {
+      const testingRooms = await testingRoom.search(this.$store.state.lab);
+
+      this.currentTestingRooms = testingRooms.data;
+
       this.editedLab.LabName = this.$store.state.labName;
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
       this.editedLab.EmailClosing = this.$store.state.emailClosing;
@@ -755,9 +771,9 @@ export default {
 
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
-      await calendar.createSecondaryCalendar({
-        calendarName: this.testingRooms[0].calendarName,
-      });
+      // await calendar.createSecondaryCalendar({
+      //   calendarName: this.testingRooms[0].calendarName,
+      // });
 
       if (validationResults) {
         try {
@@ -779,6 +795,7 @@ export default {
 
           await lab.create(this.currentLab);
           const newLab = await lab.search(this.currentLab);
+          this.setLabToken();
           const testingRoomInfo = this.testingRooms;
 
           // if (testingRoomInfo[0]) {

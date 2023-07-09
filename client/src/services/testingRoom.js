@@ -6,11 +6,13 @@ export default {
     testingRoomInfo.labName = store.state.labName;
     return api().post("testingRoom/add", testingRoomInfo);
   },
-  search(testingRoomInfo) {
+
+  search(labId) {
     return api().get("testingRoom/", {
-      params: testingRoomInfo,
+      params: { labId },
     });
   },
+
   update(testingRoomInfo) {
     
     return api().post("lab/", testingRoomInfo);

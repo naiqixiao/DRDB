@@ -6,7 +6,7 @@ const TestingRoomController = require("../controllers/testingRoom");
 
 router.post("/add", checkAuth, TestingRoomController.create);
 
-// router.get("/", checkAuth, TestingRoomController.search);
+router.get("/", checkAuth, TestingRoomController.search);
 
 // router.post("/", checkAuth, TestingRoomController.update);
 
