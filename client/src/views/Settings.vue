@@ -803,7 +803,7 @@ export default {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = newLab.data[0].id;
             await testingRoom.create(testing);
-            await calendar.createSecondaryCalendar({ calendarName: testing.calendar });
+            await calendar.createSecondaryCalendar({ lab: newLab.data[0].id, calendarName: testing.calendar });
           });
 
           await Promise.all(createPromises);
@@ -847,7 +847,7 @@ export default {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = this.$store.state.lab;
             await testingRoom.create(testing);
-            await calendar.createSecondaryCalendar({ calendarName: testing.calendar });
+            await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
           });
 
           await Promise.all(createPromises);

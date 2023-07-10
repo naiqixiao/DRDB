@@ -118,11 +118,11 @@ exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
       requestBody: {
         summary: calendarName,
         timeZone: config.timeZone,
-        
       },
     });
     
-    res.json({ calendarId: createdCalendar.data.id });
+    res.status(200).json({ calendarId: createdCalendar.data.id, message: 'A new calendar is created.' });
+
   } catch (error) {
     console.error('Error creating secondary calendar:', error);
     res.status(500).json({ error: 'An error occurred' });
