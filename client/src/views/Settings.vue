@@ -559,11 +559,11 @@
                   <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
                 </v-col>
 
-                <v-row v-if="currentTestingRooms.length > 0">
-                  <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="6" md="4" lg="3">
+                <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
+                  <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
                     <v-card>
-                      <v-card-title>{{ room.name }}</v-card-title>
-                      <v-card-text>{{ room.location }}</v-card-text>
+                      <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
+                      <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
                     </v-card>
                   </v-col>
                 </v-row>
@@ -795,7 +795,6 @@ export default {
 
           await lab.create(this.currentLab);
           const newLab = await lab.search(this.currentLab);
-          this.setLabToken();
           const testingRoomInfo = this.testingRooms;
 
           // if (testingRoomInfo[0]) {
@@ -842,8 +841,20 @@ export default {
           );
           this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
 
+          const testingRoomInfo = this.testingRooms;
+
+          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
+            const testing = { ...testingRoomItem };
+            testing.FK_Lab = this.$store.state.lab;
+            await testingRoom.create(testing);
+            await calendar.createSecondaryCalendar({ calendarName: testing.calendar });
+          });
+
+          await Promise.all(createPromises);
+
           alert("Lab information is updated!");
           this.$refs.formEdit.resetValidation();
+          
         } catch (error) {
           console.log(error.response);
         }
@@ -1144,5 +1155,21 @@ export default {
 }
 .v-text-field__details {
   display: none;
+}
+
+.testing-room--container {
+  display: flex;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  margin-left: 1em;
+}
+.testing-room--title {
+  display: flex;
+  justify-content: center;
+  font-size: x-large;
+}
+.testing-room--text {
+  font-size: large;
+  font-weight:500;
 }
 </style>

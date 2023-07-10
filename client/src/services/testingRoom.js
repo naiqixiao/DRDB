@@ -13,14 +13,13 @@ export default {
     });
   },
 
-  update(testingRoomInfo) {
-    
-    return api().post("lab/", testingRoomInfo);
-  },
-  delete(testingRoomInfo) {
+  // update(testingRoomInfo) {
+  //   return api().post("testingRoom/", testingRoomInfo);
+  // },
 
-    return api().delete("lab/", {
-      params: testingRoomInfo,
-    });
-  },
+  // delete(testingRoomInfo) {
+  //   return api().delete("testingRoom/", {
+  //     params: testingRoomInfo,
+  //   });
+  // },
 };
