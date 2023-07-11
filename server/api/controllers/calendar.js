@@ -52,7 +52,7 @@ exports.create = asyncHandler(async (req, res) => {
   try {
 
     const calEvent = await calendar.events.insert({
-      calendarId: "primary",
+      calendarId: event.calendarId,
       resource: event,
       sendNotifications: true,
     });

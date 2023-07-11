@@ -658,7 +658,6 @@ import AssignedExperimenters from "@/components/AssignedExperimenters";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import study from "@/services/study";
-import testingRoom from "@/services/testingRoom";
 import personnel from "@/services/personnel";
 
 import { VueEditor } from "vue2-editor";
@@ -1226,8 +1225,7 @@ export default {
   mounted: async function () {
     this.searchStudies();
     this.searchLabMembers();
-    const testingRooms = await testingRoom.search(this.$store.state.lab);
-    this.currentTestingRooms = testingRooms.data;
+    this.currentTestingRooms = this.$store.state.testingRooms;
   },
 };
 </script>

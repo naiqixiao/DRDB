@@ -755,9 +755,8 @@ export default {
     },
 
     async editLabInfo() {
-      const testingRooms = await testingRoom.search(this.$store.state.lab);
 
-      this.currentTestingRooms = testingRooms.data;
+      this.currentTestingRooms = this.$store.state.testingRooms;
 
       this.editedLab.LabName = this.$store.state.labName;
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
@@ -802,8 +801,9 @@ export default {
           const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = newLab.data[0].id;
+            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
+            testing.calendarId = newCal.data.calendarId;
             await testingRoom.create(testing);
-            await calendar.createSecondaryCalendar({ lab: newLab.data[0].id, calendarName: testing.calendar });
           });
 
           await Promise.all(createPromises);
@@ -846,8 +846,9 @@ export default {
           const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = this.$store.state.lab;
+            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
+            testing.calendarId = newCal.data.calendarId;
             await testingRoom.create(testing);
-            await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
           });
 
           await Promise.all(createPromises);

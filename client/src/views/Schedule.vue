@@ -1516,6 +1516,8 @@ export default {
 
     async createSchedule() {
       this.Experimenters = [];
+      const testingRoom = this.$store.state.testingRooms.find(room => room.id === this.selectedStudy.FK_TestingRoom);
+      const calendarId = testingRoom.calendarId;
 
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
@@ -1556,6 +1558,8 @@ export default {
               this.scheduleNotes,
               this.appointments
             ),
+            calendarId: calendarId,
+
             // start: {
             //   dateTime: moment(this.studyDateTime).toISOString(true),
             //   timeZone: this.$store.state.timeZone,

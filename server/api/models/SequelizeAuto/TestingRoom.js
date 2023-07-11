@@ -1,4 +1,3 @@
-
 module.exports = function(sequelize, DataTypes) {
 	return sequelize.define('TestingRoom', {
 		id: {
@@ -26,6 +25,10 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false,
 		},
     calendar: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+    calendarId: {
 			type: DataTypes.STRING(255),
 			allowNull: false,
 		},
