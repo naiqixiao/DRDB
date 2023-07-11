@@ -659,6 +659,7 @@ import ConfirmDlg from "@/components/ConfirmDialog";
 
 import study from "@/services/study";
 import personnel from "@/services/personnel";
+import testingRoom from "@/services/testingRoom";
 
 import { VueEditor } from "vue2-editor";
 import moment from "moment";
@@ -885,7 +886,9 @@ export default {
       this.dialog = true;
     },
 
-    createStudy() {
+    async createStudy() {
+      const testingRooms = await testingRoom.search(this.$store.state.lab);
+      this.$store.dispatch("setTestingRooms", testingRooms.data);
       this.editedStudy = Object.assign({}, this.defaultStudy);
       this.editedIndex = -1;
       this.dialog = true;

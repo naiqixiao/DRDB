@@ -36,6 +36,7 @@ const config = require("../../config/general");
 exports.create = asyncHandler(async (req, res) => {
   var event = req.body;
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+  console.log(event);
 
   event.start = {
     dateTime: moment(event.AppointmentTime).toISOString(true),
@@ -50,23 +51,26 @@ exports.create = asyncHandler(async (req, res) => {
   }
 
   try {
-
-    const calEvent = await calendar.events.insert({
-      calendarId: event.calendarId,
-      resource: event,
-      sendNotifications: true,
-    });
-
-    var updatedScheduleInfo = {};
-    updatedScheduleInfo.calendarEventId = calEvent.data.id;
-    updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
-
-    await model.schedule.update(updatedScheduleInfo, {
-      where: { id: event.scheduleId },
-    });
-
-    res.status(200).send(calEvent.data);
-    console.log("Calendar event successfully created: " + calEvent.data.id);
+    for (const appointment of event.Appointments) {
+      const calendarId = appointment.calendarId;
+      const calEvent = await calendar.events.insert({
+        calendarId: calendarId,
+        resource: event,
+        sendNotifications: true,
+      });
+  
+      var updatedScheduleInfo = {};
+      updatedScheduleInfo.calendarEventId = calEvent.data.id;
+      updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+  
+      await model.schedule.update(updatedScheduleInfo, {
+        where: { id: event.scheduleId },
+      });
+  
+      res.status(200).send(calEvent.data);
+      console.log("Calendar event successfully created: " + calEvent.data.id);
+    }
+    
   } catch (error) {
     throw error;
   }
@@ -79,7 +83,7 @@ exports.update = asyncHandler(async (req, res) => {
   try {
 
     const calEvent = await calendar.events.patch({
-      calendarId: "primary",
+      calendarId: event.appointment.calendarId,
       eventId: req.query.eventId,
       resource: event,
       sendNotifications: true,

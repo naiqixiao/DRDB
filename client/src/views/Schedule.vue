@@ -1516,8 +1516,6 @@ export default {
 
     async createSchedule() {
       this.Experimenters = [];
-      const testingRoom = this.$store.state.testingRooms.find(room => room.id === this.selectedStudy.FK_TestingRoom);
-      const calendarId = testingRoom.calendarId;
 
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
@@ -1558,7 +1556,6 @@ export default {
               this.scheduleNotes,
               this.appointments
             ),
-            calendarId: calendarId,
 
             // start: {
             //   dateTime: moment(this.studyDateTime).toISOString(true),
@@ -1621,6 +1618,11 @@ export default {
             newStudySchedule.data.AppointmentTime;
           appointment.Schedule.Status = newStudySchedule.data.Status;
           appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;
+          console.log(appointment);
+          
+          const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+          const calendarId = testingRoom.calendarId;
+          appointment.calendarId = calendarId;
         });
 
         console.log("New Scheduled Created!");

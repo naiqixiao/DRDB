@@ -755,7 +755,9 @@ export default {
     },
 
     async editLabInfo() {
-
+      
+      const testingRooms = await testingRoom.search(this.$store.state.lab);
+      this.$store.dispatch("setTestingRooms", testingRooms.data);
       this.currentTestingRooms = this.$store.state.testingRooms;
 
       this.editedLab.LabName = this.$store.state.labName;
