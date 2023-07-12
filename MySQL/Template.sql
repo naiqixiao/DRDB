@@ -323,6 +323,7 @@ CREATE TABLE `TestingRoom` (
   `location` VARCHAR(255) NOT NULL,
   `calendar` varchar(255) NOT NULL,
   `calendarId` varchar(255) NOT NULL,
+  `createdBy` INT,
   `createdAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updatedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `voided` TINYINT NOT NULL DEFAULT 0,

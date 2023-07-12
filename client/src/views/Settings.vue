@@ -562,6 +562,12 @@
                 <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
                   <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
                     <v-card>
+                      <v-icon 
+                        v-if="isAuthorized(room.createdBy)"
+                        class="testing-room--delete"
+                      >
+                        close
+                      </v-icon>
                       <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
                       <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
                     </v-card>
@@ -754,8 +760,7 @@ export default {
       this.testingRooms.splice(index, 1);
     },
 
-    async editLabInfo() {
-      
+    async editLabInfo() {     
       const testingRooms = await testingRoom.search(this.$store.state.lab);
       this.$store.dispatch("setTestingRooms", testingRooms.data);
       this.currentTestingRooms = this.$store.state.testingRooms;
@@ -803,6 +808,7 @@ export default {
           const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = newLab.data[0].id;
+            testing.createdBy = this.$store.state.userID;
             const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
             testing.calendarId = newCal.data.calendarId;
             await testingRoom.create(testing);
@@ -848,6 +854,7 @@ export default {
           const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
             const testing = { ...testingRoomItem };
             testing.FK_Lab = this.$store.state.lab;
+            testing.createdBy = this.$store.state.userID;
             const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
             testing.calendarId = newCal.data.calendarId;
             await testingRoom.create(testing);
@@ -1103,6 +1110,15 @@ export default {
         "New password must be different from the current one."
       );
     },
+
+    isAuthorized() {
+      return (createdBy) => {
+        const allowedRoles = ['Admin', 'PI', createdBy];
+        const userRole = this.$store.state.role;
+        const userId = this.$store.state.userID;
+        return allowedRoles.includes(userRole) || createdBy === userId;
+      };
+    }
   },
 
   watch: {
@@ -1174,5 +1190,16 @@ export default {
 .testing-room--text {
   font-size: large;
   font-weight:500;
+}
+.testing-room--delete {
+  position: absolute !important;
+  right: 0;
+  top: 0;
+  color: red !important;
+  transition: transform 0.3s ease;
+}
+.testing-room--delete:hover {
+  cursor: pointer;
+  transform: rotate(-90deg);
 }
 </style>
