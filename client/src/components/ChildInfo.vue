@@ -928,6 +928,9 @@ export default {
 
           this.appointments.forEach((appointment) => {
             appointment.FK_Schedule = newStudySchedule.data.id;
+            const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+            const calendarId = testingRoom.calendarId;
+            appointment.calendarId = calendarId;
           });
 
           console.log("New Scheduled Created!");

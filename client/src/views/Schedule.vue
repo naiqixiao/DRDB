@@ -1615,11 +1615,9 @@ export default {
           appointment.FK_Schedule = this.scheduleId;
           appointment.Schedule = {};
           appointment.Schedule.AppointmentTime =
-            newStudySchedule.data.AppointmentTime;
+          newStudySchedule.data.AppointmentTime;
           appointment.Schedule.Status = newStudySchedule.data.Status;
-          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;
-          console.log(appointment);
-          
+          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;          
           const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
           const calendarId = testingRoom.calendarId;
           appointment.calendarId = calendarId;
