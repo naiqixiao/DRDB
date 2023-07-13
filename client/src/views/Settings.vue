@@ -560,8 +560,15 @@
                 </v-col>
 
                 <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                  <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
-                    <v-card v-if="!room.void">
+                  <v-col 
+                    v-for="room in filteredTestingRooms" 
+                    :key="room.id" 
+                    cols="12" 
+                    sm="2" 
+                    md="4" 
+                    lg="1"
+                  >
+                    <v-card>
                       <v-icon 
                         v-if="isAuthorized(room.createdBy)"
                         class="testing-room--delete"
@@ -571,7 +578,7 @@
                       </v-icon>
                       <delete-confirmation-dialog
                         :show="showDeleteConfirmation"
-                        @confirm="confirmDelete"
+                        @confirm="confirmDelete(room)"
                         @cancel="cancelDelete"
                         :testingRoom="selectedTestingRoom"
                       ></delete-confirmation-dialog>
@@ -743,7 +750,9 @@ export default {
       this.showDeleteConfirmation = true;
       this.selectedTestingRoom = room;
     },
-    confirmDelete() {
+    async confirmDelete(room) {
+      await testingRoom.delete(room);
+      this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== room.id);
       this.showDeleteConfirmation = false;
       this.selectedTestingRoom = '';
     },
@@ -1145,7 +1154,11 @@ export default {
         const userId = this.$store.state.userID;
         return allowedRoles.includes(userRole) || createdBy === userId;
       };
-    }
+    },
+
+    filteredTestingRooms() {
+      return this.currentTestingRooms.filter(room => !room.voided);
+    },
   },
 
   watch: {

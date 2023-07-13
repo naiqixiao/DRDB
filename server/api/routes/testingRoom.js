@@ -10,6 +10,6 @@ router.get("/", checkAuth, TestingRoomController.search);
 
 // router.post("/", checkAuth, TestingRoomController.update);
 
-// router.delete("/", checkAuth, TestingRoomController.delete);
+router.delete("/", checkAuth, TestingRoomController.delete);
 
 module.exports = router;

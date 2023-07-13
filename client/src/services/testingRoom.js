@@ -17,9 +17,9 @@ export default {
   //   return api().post("testingRoom/", testingRoomInfo);
   // },
 
-  // delete(testingRoomInfo) {
-  //   return api().delete("testingRoom/", {
-  //     params: testingRoomInfo,
-  //   });
-  // },
+  delete(testingRoomInfo) {
+    return api().delete("testingRoom/", {
+      params: {testingRoomInfo},
+    });
+  },
 };

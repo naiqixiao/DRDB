@@ -46,6 +46,11 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false,
 			defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
 		},
+    voided: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 0
+		},
 	}, {
 		sequelize,
 		tableName: 'TestingRoom'

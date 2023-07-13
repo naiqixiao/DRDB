@@ -27,3 +27,21 @@ exports.search = asyncHandler(async (req, res) => {
     throw error;
   }
 })
+
+exports.delete = asyncHandler(async (req, res) => {
+  const testingRoomInfo = JSON.parse(req.query.testingRoomInfo);
+
+  try {
+
+    testingRoomInfo.voided = 1;
+
+    await model.testingRoom.update(testingRoomInfo, {
+      where: { id: testingRoomInfo.id },
+    });
+
+    res.status(200).send(`Testing Room: ${testingRoomInfo.name} has been deleted`);
+
+  } catch (error) {
+    throw error;
+  }
+})
