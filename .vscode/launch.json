@@ -2,20 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node",
+      "name": "Launch Chrome",
       "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/server/api/controllers/calendar.js"
+      "type": "chrome",
+      "url": "http://localhost:8080",
+      "webRoot": "/Users/ronjin/mcmasterBabyLab/project/DRDB/client",
     },
-    {
-      "type": "node-terminal",
-      "name": "Run Script: start",
-      "request": "launch",
-      "command": "npm run start",
-      "cwd": "${workspaceFolder}/server"
-    }
   ]
 }

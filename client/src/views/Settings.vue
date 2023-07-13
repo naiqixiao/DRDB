@@ -561,13 +561,20 @@
 
                 <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
                   <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
-                    <v-card>
+                    <v-card v-if="!room.void">
                       <v-icon 
                         v-if="isAuthorized(room.createdBy)"
                         class="testing-room--delete"
+                        @click="showDeleteConfirmationDialog(room.name)"
                       >
                         close
                       </v-icon>
+                      <delete-confirmation-dialog
+                        :show="showDeleteConfirmation"
+                        @confirm="confirmDelete"
+                        @cancel="cancelDelete"
+                        :testingRoom="selectedTestingRoom"
+                      ></delete-confirmation-dialog>
                       <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
                       <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
                     </v-card>
@@ -675,9 +682,12 @@ import XLSX from "xlsx";
 import moment from "moment";
 import calendar from "../services/calendar";
 
+import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
+
 export default {
   components: {
     VueEditor,
+    DeleteConfirmationDialog,
   },
   data() {
     return {
@@ -722,11 +732,26 @@ export default {
         ["link"],
       ],
       testingRooms: [{ name: "", location: "", calendar: "" }],
-      currentTestingRooms: []
+      currentTestingRooms: [],
+      showDeleteConfirmation: false,
+      selectedTestingRoom: '',
     };
   },
 
   methods: {
+    showDeleteConfirmationDialog(room) {
+      this.showDeleteConfirmation = true;
+      this.selectedTestingRoom = room;
+    },
+    confirmDelete() {
+      this.showDeleteConfirmation = false;
+      this.selectedTestingRoom = '';
+    },
+    cancelDelete() {
+      this.showDeleteConfirmation = false;
+      this.selectedTestingRoom = '';
+    },
+
     async changePassword() {
       try {
         const response = await login.changePassword({
@@ -907,6 +932,8 @@ export default {
 
     closeEditLab() {
       this.dialogEditLab = false;
+      this.showDeleteConfirmation = false;
+      this.selectedTestingRoom = '';
       setTimeout(() => {
         this.editedLab = {
           LabName: null,
@@ -1133,6 +1160,9 @@ export default {
     },
     dialogEditLab(val) {
       val || this.closeEditLab();
+    },
+    showDeleteConfirmation(val) {
+      val || this.cancelDelete();
     },
   },
 
