@@ -1,12 +1,12 @@
 <template>
   <v-dialog 
-    hide-overlay 
+    overlay-opacity="0.01"
     v-model="show" 
-    :max-width="500"
+    width="500"
     :retain-focus="false"
-    class="confirm-delete-testingroom"
+    persistent
   >
-    <v-card height="250px" elevation="2">
+    <v-card height="250px">
       <v-toolbar dark color="primary" flat>
         <h2 class="title-text title-p-4 ma-2">
           Confirm Delete
@@ -37,7 +37,7 @@
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </v-dialog>  
 </template>
 
 <script>
@@ -50,7 +50,8 @@ export default {
 </script>
 
 <style>
-.confirm-delete-testingroom {
+.v-dialog {
   box-shadow: none;
+  -webkit-box-shadow: none;
 }
 </style>
