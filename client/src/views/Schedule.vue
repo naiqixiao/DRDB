@@ -686,11 +686,11 @@
                       <v-spacer></v-spacer>
                       <v-divider
                         style="margin-bottom: 4px"
-                        v-show="response === 'Confirmed'"
+                        v-show="response !== 'Rejected'"
                       ></v-divider>
                       <v-row
                         dense
-                        v-if="response === 'Confirmed'"
+                        v-if="response !== 'Rejected'"
                         align="center"
                         justify="start"
                         style="height: 100px"

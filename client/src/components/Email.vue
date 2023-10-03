@@ -181,9 +181,7 @@ export default {
                 break;
             }
 
-            if (
-              this.scheduleInfo.Appointments[0].Study.StudyType !== "Online"
-            ) {
+            if (this.scheduleInfo.Appointments[0].Study.StudyType !== "Online") {
               opening =
                 "<p>Dear " +
                 parentName +
@@ -193,9 +191,7 @@ export default {
                 " with <b>" +
                 this.childNames() +
                 dateLabel +
-                moment(this.scheduleInfo.AppointmentTime).format(
-                  " [at] h:mma"
-                ) +
+                moment(this.scheduleInfo.AppointmentTime).format(" [at] h:mma") +
                 "</b>.</p>" +
                 this.$store.state.transportationInstructions;
             } else {
@@ -209,9 +205,7 @@ export default {
                 this.childNames() +
                 " will participate in our in our online study" +
                 dateLabel +
-                moment(this.scheduleInfo.AppointmentTime).format(
-                  " [at] h:mma"
-                ) +
+                moment(this.scheduleInfo.AppointmentTime).format(" [at] h:mma") +
                 "</b>.</p>";
             }
 
@@ -278,25 +272,19 @@ export default {
             }
           }
 
-          if (
-            this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0
-          ) {
-            if (
-              this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink
-            ) {
+          if (this.scheduleInfo.Appointments[0].PrimaryExperimenter.length > 0) {
+            if (this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink) {
               ZoomLink =
                 "<a href='" +
-                this.scheduleInfo.Appointments[0].PrimaryExperimenter[0]
-                  .ZoomLink +
+                this.scheduleInfo.Appointments[0].PrimaryExperimenter[0].ZoomLink +
                 "'>Zoom Link</a>";
             }
           }
 
-          var body =
-            this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
-              /\${{ZoomLink}}/g,
-              ZoomLink
-            );
+          var body = this.scheduleInfo.Appointments[0].Study.ReminderTemplate.replace(
+            /\${{ZoomLink}}/g,
+            ZoomLink
+          );
 
           body = body.replace(/\${{childName}}/g, this.childNames());
 
@@ -356,11 +344,7 @@ export default {
 
             default:
               email =
-                opening +
-                "<p></p>" +
-                emailBodyList.join("<p></p>") +
-                location +
-                closing;
+                opening + "<p></p>" + emailBodyList.join("<p></p>") + location + closing;
               break;
           }
 
@@ -384,11 +368,7 @@ export default {
 
             default:
               email =
-                opening +
-                "<p></p>" +
-                emailBodyList.join("<p></p>") +
-                location +
-                closing;
+                opening + "<p></p>" + emailBodyList.join("<p></p>") + location + closing;
               break;
           }
 
@@ -605,7 +585,7 @@ export default {
         to: this.familyInfo.NamePrimary + " <" + this.familyInfo.Email + ">",
         subject: this.emailSubject,
         body: this.formatedBody(this.$refs.emailBody.value),
-        labelNames: labelNames
+        labelNames: labelNames,
       };
 
       // if (this.emailType == "Reminder") {
@@ -655,17 +635,13 @@ export default {
               "Study appointment for " +
               this.childNames() +
               " on " +
-              moment(this.scheduleInfo.AppointmentTime).format(
-                "MMM D (ddd), [at] h:mma"
-              );
+              moment(this.scheduleInfo.AppointmentTime).format("MMM D (ddd), [at] h:mma");
             break;
 
           case "ScheduleUpdate":
             this.emailSubject =
               "An update on your visit on " +
-              moment(this.scheduleInfo.AppointmentTime).format(
-                "MMM D (ddd), [at] h:mma"
-              );
+              moment(this.scheduleInfo.AppointmentTime).format("MMM D (ddd), [at] h:mma");
             break;
 
           case "Introduction":
@@ -698,17 +674,13 @@ export default {
             "Study appointment for " +
             this.childNames() +
             " on " +
-            moment(this.scheduleInfo.AppointmentTime).format(
-              "MMM D (ddd), [at] h:mma"
-            );
+            moment(this.scheduleInfo.AppointmentTime).format("MMM D (ddd), [at] h:mma");
           break;
 
         case "ScheduleUpdate":
           this.emailSubject =
             "An update on your visit on " +
-            moment(this.scheduleInfo.AppointmentTime).format(
-              "MMM D (ddd), [at] h:mma"
-            );
+            moment(this.scheduleInfo.AppointmentTime).format("MMM D (ddd), [at] h:mma");
           break;
 
         case "Introduction":
