@@ -35,8 +35,8 @@ const config = require("../../config/general");
 
 exports.create = asyncHandler(async (req, res) => {
   var event = req.body;
-  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
   console.log(event);
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   event.start = {
     dateTime: moment(event.AppointmentTime).toISOString(true),
@@ -72,6 +72,7 @@ exports.create = asyncHandler(async (req, res) => {
     }
     
   } catch (error) {
+    console.log('*****', error);
     throw error;
   }
 });
