@@ -69,6 +69,7 @@
             class="tableIcon"
             >update</v-icon
           >
+          
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
@@ -189,7 +190,7 @@
     </template>
 
     <template #top>
-      <ConfirmDlg ref="confirmD" />
+      <ConfirmDlg :studies="['123', '456']" ref="confirmD" />
 
       <v-dialog
         v-model="nextContactDialog"
@@ -772,6 +773,7 @@ export default {
 
   methods: {
     async updateSchedule(item, status) {
+      // console.log(item);
       try {
         await login.check_login();
         // console.log("User is already logged in.");
@@ -787,7 +789,13 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText = "You're going to update Study Completion status, continue?";
+            comDText = "Confirm study(s) that you would like to mark as completed";
+            break;
+
+          case "Rescheduling":
+            comDTitle = "Study appointment update";
+            comDText =
+              "Confirm study(s) that you would like to reschedule";
             break;
 
           default:
@@ -803,6 +811,7 @@ export default {
           this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
+          // console.log(this.$store.state.studyName);
           switch (status) {
             case "Confirmed":
               this.editedIndex = this.Schedules.indexOf(item);

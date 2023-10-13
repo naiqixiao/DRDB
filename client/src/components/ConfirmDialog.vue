@@ -11,7 +11,7 @@
           {{ title }}
         </h2>
       </v-toolbar>
-      <div style="height: 120px">
+      <div>
         <v-card-text justify="center"
           v-show="!!message"
           class="pa-4 body-2 text-left"
@@ -19,6 +19,24 @@
         ></v-card-text>
       </div>
       <v-spacer></v-spacer>
+
+      <ul style="list-style-type: none">
+        <li v-for="study in studies" :key="study">
+          <v-tooltip right>
+
+            <template v-slot:activator="{ on }">
+              <div v-on="on">
+                <v-checkbox
+                  :label=study
+                  class="ma-0 pa-0 ml-5"
+                  hide-details
+                  dense
+                ></v-checkbox>
+              </div>
+            </template>
+          </v-tooltip>
+        </li>
+      </ul>
 
       <v-card-actions class="pt-3">
         <v-spacer></v-spacer>
@@ -44,6 +62,9 @@
 
 <script>
 export default {
+  props: {
+    studies: Array
+  },
   name: "ConfirmDlg",
   data() {
     return {
