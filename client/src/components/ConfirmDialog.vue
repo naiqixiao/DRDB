@@ -21,13 +21,13 @@
       <v-spacer></v-spacer>
 
       <ul style="list-style-type: none">
-        <li v-for="study in studies" :key="study">
+        <li v-for="(study, index) in studies" :key="index">
           <v-tooltip right>
 
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 <v-checkbox
-                  :label=study
+                  :label=study.Study.StudyName
                   class="ma-0 pa-0 ml-5"
                   hide-details
                   dense
@@ -66,6 +66,7 @@ export default {
     studies: Array
   },
   name: "ConfirmDlg",
+
   data() {
     return {
       dialog: false,

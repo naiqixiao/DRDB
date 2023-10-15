@@ -189,8 +189,9 @@
       </td>
     </template>
 
+    <!-- back point -->
     <template #top>
-      <ConfirmDlg :studies="['123', '456']" ref="confirmD" />
+      <ConfirmDlg v-if="Schedules[0] && Schedules[0].Appointments" :studies="Schedules[0].Appointments" ref="confirmD"/>
 
       <v-dialog
         v-model="nextContactDialog"
@@ -1784,7 +1785,7 @@ export default {
     dialogNote(val) {
       val || this.closeScheduleNotes();
     },
-  },
+  }
 };
 </script>
 
