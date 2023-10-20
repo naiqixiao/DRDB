@@ -4,7 +4,6 @@ const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 const fs = require("fs");
 const log = require("../controllers/log");
-
 // {
 //             "FK_Schedule": 35,
 //             "FK_Study": 3,
@@ -578,6 +577,8 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
 
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
+
+
   try {
     var Schedule = await model.schedule.findOne({
       where: { id: req.query.FK_Schedule },
@@ -646,13 +647,20 @@ exports.delete = asyncHandler(async (req, res) => {
     };
 
     try {
+      const testingRooms = await model.testingRoom.findAll({
+        where: {FK_Lab: req.query.lab},
+      });
+      const testingRoomId = updatedAppointments[0].Study.FK_TestingRoom;
+      const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+      const calId = curTestingRoom.calendarId;
+
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
       });
 
       await calendar.events.patch({
-        calendarId: "primary",
+        calendarId: calId,
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
         // sendNotifications: true

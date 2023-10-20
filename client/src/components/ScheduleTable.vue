@@ -189,9 +189,8 @@
       </td>
     </template>
 
-    <!-- back point -->
     <template #top>
-      <ConfirmDlg v-if="Schedules[0] && Schedules[0].Appointments" :studies="Schedules[0].Appointments" ref="confirmD"/>
+      <ConfirmDlg ref="confirmD" />
 
       <v-dialog
         v-model="nextContactDialog"
@@ -686,6 +685,8 @@ import moment from "moment-timezone";
 
 import login from "@/services/login";
 
+import appointment from "@/services/appointment";
+
 export default {
   components: {
     DateDisplay,
@@ -704,6 +705,7 @@ export default {
   },
   data() {
     return {
+      selectedAppointments: [],
       skipStudyDateTimeStatus: false,
       skipConfirmationEmailStatus: false,
       skipReminderEmailStatus: false,
@@ -774,7 +776,6 @@ export default {
 
   methods: {
     async updateSchedule(item, status) {
-      // console.log(item);
       try {
         await login.check_login();
         // console.log("User is already logged in.");
@@ -808,7 +809,13 @@ export default {
 
         this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
-        if (await this.$refs.confirmD.open(comDTitle, comDText)) {
+        const result = await this.$refs.confirmD.open(comDTitle, comDText, item);
+
+        if (result) {     
+
+          const {allChecked, newItem} = result;
+          
+
           this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
@@ -834,8 +841,20 @@ export default {
 
             case "Completed":
               try {
-                item.Completed = !item.Completed;
-                await schedule.complete(item);
+                if (allChecked) {
+                  item.Completed = !item.Completed;
+                  await schedule.complete(item);
+                } else {
+                  for (const app of newItem.Appointments) {
+                    await appointment.delete({
+                      id: app.id,
+                      FK_Schedule: newItem.id,
+                    });
+                  }
+                  await schedule.create(newItem);
+                  
+                  // console.log(newItem);
+                }
               } catch (error) {
                 console.log(error);
               }

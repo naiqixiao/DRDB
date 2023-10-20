@@ -21,13 +21,13 @@
       <v-spacer></v-spacer>
 
       <ul style="list-style-type: none">
-        <li v-for="(study, index) in studies" :key="index">
+        <li v-for="(appointment, index) in item.Appointments" :key="index">
           <v-tooltip right>
-
             <template v-slot:activator="{ on }">
               <div v-on="on">
                 <v-checkbox
-                  :label=study.Study.StudyName
+                  v-model="appointment.checked" 
+                  :label=appointment.Study.StudyName
                   class="ma-0 pa-0 ml-5"
                   hide-details
                   dense
@@ -62,9 +62,7 @@
 
 <script>
 export default {
-  props: {
-    studies: Array
-  },
+
   name: "ConfirmDlg",
 
   data() {
@@ -74,6 +72,8 @@ export default {
       reject: null,
       message: null,
       title: null,
+      item: {},
+      selectedAppointment: [],
       options: {
         color: "grey lighten-3",
         width: 500,
@@ -84,10 +84,11 @@ export default {
   },
 
   methods: {
-    open(title, message, options) {
+    open(title, message, item, options) {
       this.dialog = true;
       this.title = title;
       this.message = message;
+      this.item = {...item};
       this.options = Object.assign(this.options, options);
       return new Promise((resolve, reject) => {
         this.resolve = resolve;
@@ -95,8 +96,20 @@ export default {
       });
     },
     agree() {
-      this.resolve(true);
-      this.dialog = false;
+      // filter the selected studies
+      const selectedAppointments = this.item.Appointments.filter(appointment => appointment.checked);
+      // determine if all checkboxes are checked
+      const allChecked = this.item.Appointments.every(appointment => appointment.checked);
+
+      if (allChecked) {
+        this.resolve({ allChecked: true, newItem: this.item });
+        this.dialog = false;
+      } else {
+        this.item.Appointments = selectedAppointments;
+        const newItem = {...this.item};
+        this.resolve({ allChecked: false, newItem });
+        this.dialog = false;
+      }
     },
     cancel() {
       this.resolve(false);
