@@ -791,13 +791,13 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText = "Confirm study(s) that you would like to mark as completed";
+            comDText = "Confirm appointment(s) that you would like to mark as completed";
             break;
 
           case "Rescheduling":
             comDTitle = "Study appointment update";
             comDText =
-              "Confirm study(s) that you would like to reschedule";
+              "Confirm appointment(s) that you would like to reschedule";
             break;
 
           default:
@@ -813,7 +813,7 @@ export default {
 
         if (result) {     
 
-          const {allChecked, newItem} = result;
+          const {allChecked, newItem, selectedItem} = result;
           
 
           this.$store.commit("setStudyName", []);
@@ -845,15 +845,40 @@ export default {
                   item.Completed = !item.Completed;
                   await schedule.complete(item);
                 } else {
-                  for (const app of newItem.Appointments) {
+                  console.log(selectedItem);
+                  // delete the selected appointments
+                  for (const app of selectedItem.Appointments) {
                     await appointment.delete({
                       id: app.id,
-                      FK_Schedule: newItem.id,
+                      FK_Schedule: selectedItem.id,
                     });
                   }
-                  await schedule.create(newItem);
+                  newItem.Completed = !newItem.Completed;
+                  //complete rest of the appointments
+                  await schedule.complete(newItem);
+
+                  //re-create the selected appointments
+                  const newStudyNames = [];
+
+                  for (const appointment of selectedItem.Appointments) {
+                    newStudyNames.push(appointment.Study.StudyName)
+                  }
+
+                  const newSelectedItem = {
+                    AppointmentTime: selectedItem.AppointmentTime,
+                    Status: selectedItem.Status,
+                    FK_Family: selectedItem.FK_Family,
+                    Note: selectedItem.Note,
+                    summary: newStudyNames.join(" + "),
+                    Appointments: selectedItem.Appointments,
+                    ScheduledBy: selectedItem.ScheduledBy,
+                    location: selectedItem.location,
+                    description: selectedItem.description,
+                    attendees: selectedItem.attendees,
+                  }; 
+                  console.log(newSelectedItem);
+                  await schedule.create(newSelectedItem);
                   
-                  // console.log(newItem);
                 }
               } catch (error) {
                 console.log(error);

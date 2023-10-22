@@ -5,7 +5,7 @@
     :style="{ zIndex: options.zIndex }"
     @keydown.esc="cancel"
   >
-    <v-card height="250px">
+    <v-card height="300px">
       <v-toolbar dark color="primary" flat>
         <h2 class="title-text title-p-4 ma-2">
           {{ title }}
@@ -27,7 +27,7 @@
               <div v-on="on">
                 <v-checkbox
                   v-model="appointment.checked" 
-                  :label=appointment.Study.StudyName
+                  :label="`${appointment.Child.Name} (${appointment.Study.StudyName})`"
                   class="ma-0 pa-0 ml-5"
                   hide-details
                   dense
@@ -98,16 +98,20 @@ export default {
     agree() {
       // filter the selected studies
       const selectedAppointments = this.item.Appointments.filter(appointment => appointment.checked);
+      const updatedAppointments = this.item.Appointments.filter((appointment) => {
+        return !selectedAppointments.includes(appointment);
+      });
       // determine if all checkboxes are checked
       const allChecked = this.item.Appointments.every(appointment => appointment.checked);
 
       if (allChecked) {
-        this.resolve({ allChecked: true, newItem: this.item });
+        this.resolve({ allChecked: true});
         this.dialog = false;
       } else {
-        this.item.Appointments = selectedAppointments;
-        const newItem = {...this.item};
-        this.resolve({ allChecked: false, newItem });
+        const selectedItem = {...this.item};
+        this.item.Appointments = updatedAppointments;
+        selectedItem.Appointments = selectedAppointments
+        this.resolve({ allChecked: false, newItem: this.item, selectedItem});
         this.dialog = false;
       }
     },
