@@ -113,17 +113,34 @@ exports.create = asyncHandler(async (req, res) => {
     };
 
     try {
-      const calendar = google.calendar({
-        version: "v3",
-        auth: req.oAuth2Client,
-      });
+      console.log('erCheck1');
+      const updatedCal = [];
 
-      await calendar.events.patch({
-        calendarId: "primary",
-        eventId: Schedule.calendarEventId,
-        resource: updatedScheduleInfo,
-        sendNotifications: true,
-      });
+      for (const appointment of Schedule.Appointments) {
+
+        if (updatedCal.includes(appointment.FK_Study)) continue;
+        updatedCal.push(appointment.FK_Study);
+
+        const testingRooms = await model.testingRoom.findAll({
+          where: {FK_Lab: req.query.lab},
+        });
+        
+        const testingRoomId = appointment.Study.FK_TestingRoom;
+        const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+        const calId = curTestingRoom.calendarId;
+
+        const calendar = google.calendar({
+          version: "v3",
+          auth: req.oAuth2Client,
+        });
+
+        calendar.events.patch({
+          calendarId: calId,
+          eventId: Schedule.calendarEventId,
+          resource: updatedScheduleInfo,
+          sendNotifications: true
+        });
+      }
     } catch (error) {
       throw error;
     }
@@ -379,6 +396,7 @@ exports.update = asyncHandler(async (req, res) => {
     };
 
     try {
+      console.log('erCheck2');
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
@@ -545,6 +563,8 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
         auth: req.oAuth2Client,
       });
 
+      console.log('erCheck3');
+
       await calendar.events.patch({
         calendarId: "primary",
         eventId: calendarId,
@@ -647,6 +667,7 @@ exports.delete = asyncHandler(async (req, res) => {
     };
 
     try {
+      console.log('erCheck4');
       const updatedCal = [];
 
       for (const appointment of updatedAppointments) {
@@ -666,6 +687,8 @@ exports.delete = asyncHandler(async (req, res) => {
           version: "v3",
           auth: req.oAuth2Client,
         });
+
+        console.log(calId);
   
         calendar.events.patch({
           calendarId: calId,

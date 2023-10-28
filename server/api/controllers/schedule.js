@@ -458,6 +458,7 @@ exports.update = asyncHandler(async (req, res) => {
       //
       if (!updatedScheduleInfo.skipStudyDateTimeStatus) {
         if (updatedScheduleInfo.calendarEventId) {
+          console.log('erCheck6');
           await calendar.events.patch({
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
@@ -486,6 +487,7 @@ exports.update = asyncHandler(async (req, res) => {
         // check if there was an calendar event created before.
 
         try {
+          console.log('erCheck7');
           await calendar.events.patch({
             calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,

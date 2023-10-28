@@ -845,12 +845,11 @@ export default {
                   item.Completed = !item.Completed;
                   await schedule.complete(item);
                 } else {
-                  console.log(selectedItem);
                   // delete the selected appointments
                   for (const app of selectedItem.Appointments) {
                     await appointment.delete({
                       id: app.id,
-                      FK_Schedule: selectedItem.id,
+                      FK_Schedule: item.id,
                     });
                   }
                   newItem.Completed = !newItem.Completed;
@@ -865,8 +864,8 @@ export default {
                   }
 
                   const newSelectedItem = {
-                    AppointmentTime: selectedItem.AppointmentTime,
-                    Status: selectedItem.Status,
+                    AppointmentTime: null,
+                    Status: "TBD",
                     FK_Family: selectedItem.FK_Family,
                     Note: selectedItem.Note,
                     summary: newStudyNames.join(" + "),
@@ -876,9 +875,9 @@ export default {
                     description: selectedItem.description,
                     attendees: selectedItem.attendees,
                   }; 
-                  console.log(newSelectedItem);
-                  await schedule.create(newSelectedItem);
                   
+                  const newSchedule = await schedule.create(newSelectedItem);
+                  console.log(newSchedule);
                 }
               } catch (error) {
                 console.log(error);

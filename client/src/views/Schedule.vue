@@ -1589,6 +1589,7 @@ export default {
             this.response === "Left a message" ||
             this.response === "Interested"
           ) {
+            console.log(this.appointments);
             this.currentSchedule.Status = "TBD";
           } else {
             this.currentSchedule.Status = "Rejected";

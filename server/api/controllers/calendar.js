@@ -53,6 +53,7 @@ exports.create = asyncHandler(async (req, res) => {
   try {
     for (const appointment of event.Appointments) {
       const calendarId = appointment.calendarId;
+      console.log(calendarId);
       const calEvent = await calendar.events.insert({
         calendarId: calendarId,
         resource: event,
@@ -67,10 +68,10 @@ exports.create = asyncHandler(async (req, res) => {
         where: { id: event.scheduleId },
       });
   
-      res.status(200).send(calEvent.data);
+      // res.status(200).send(calEvent.data);
       console.log("Calendar event successfully created: " + calEvent.data.id);
     }
-    
+    res.status(200).send('calendar event created');
   } catch (error) {
     console.log('*****', error);
     throw error;
@@ -82,7 +83,7 @@ exports.update = asyncHandler(async (req, res) => {
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   try {
-
+    console.log('erCheck5');
     const calEvent = await calendar.events.patch({
       calendarId: event.appointment.calendarId,
       eventId: req.query.eventId,
