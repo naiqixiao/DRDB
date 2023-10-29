@@ -51,21 +51,25 @@ exports.create = asyncHandler(async (req, res) => {
   }
 
   try {
-    for (const appointment of event.Appointments) {
-      const calendarId = appointment.calendarId;
-      console.log(calendarId);
+    for (const app of event.Appointments) {
+      const calendarId = app.calendarId;
       const calEvent = await calendar.events.insert({
         calendarId: calendarId,
         resource: event,
         sendNotifications: true,
       });
+      const appointmentInfo = await model.appointment.findOne({
+        where: {FK_Study: app.FK_Study,
+                FK_Child: app.FK_Child}
+      });
   
-      var updatedScheduleInfo = {};
-      updatedScheduleInfo.calendarEventId = calEvent.data.id;
-      updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+      console.log('*****this is calevent*****',calEvent.data);
+      var updatedAppointmentInfo = {};
+      updatedAppointmentInfo.calendarEventId = calEvent.data.id;
+      updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
   
-      await model.schedule.update(updatedScheduleInfo, {
-        where: { id: event.scheduleId },
+      await model.appointment.update(updatedAppointmentInfo, {
+        where: { id: appointmentInfo.dataValues.id },
       });
   
       // res.status(200).send(calEvent.data);

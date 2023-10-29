@@ -57,7 +57,13 @@ module.exports = function(sequelize, DataTypes) {
 				},
 				key: 'id'
 			}
-		}
+		},
+    eventURL: {
+			type: DataTypes.STRING(150)
+		},
+		calendarEventId: {
+			type: DataTypes.STRING(30)
+		},
 	}, {
 		sequelize,
 		tableName: 'Appointment'
