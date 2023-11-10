@@ -813,7 +813,7 @@ export default {
 
         if (result) {     
 
-          const {allChecked, newItem, selectedItem} = result;
+          const {allChecked, newItem, unSelectedItem, selectedItem} = result;
           
 
           this.$store.commit("setStudyName", []);
@@ -846,7 +846,7 @@ export default {
                   await schedule.complete(item);
                 } else {
                   // delete the selected appointments
-                  for (const app of selectedItem.Appointments) {
+                  for (const app of unSelectedItem.Appointments) {
                     await appointment.delete({
                       id: app.id,
                       FK_Schedule: item.id,
@@ -859,31 +859,73 @@ export default {
                   //re-create the selected appointments
                   const newStudyNames = [];
 
-                  for (const appointment of selectedItem.Appointments) {
-                    newStudyNames.push(appointment.Study.StudyName)
+                  for (const appointment of unSelectedItem.Appointments) {
+                    newStudyNames.push(appointment.Study.StudyName);
+                    appointment.calendarEventId = null;
+                    appointment.eventURL = null;
+
                   }
 
-                  const newSelectedItem = {
-                    AppointmentTime: null,
-                    Status: "TBD",
-                    FK_Family: selectedItem.FK_Family,
-                    Note: selectedItem.Note,
-                    summary: newStudyNames.join(" + "),
-                    Appointments: selectedItem.Appointments,
-                    ScheduledBy: selectedItem.ScheduledBy,
-                    location: selectedItem.location,
-                    description: selectedItem.description,
-                    attendees: selectedItem.attendees,
+                  const newUnSelectedItem = {
+                    AppointmentTime: this.TodaysDate,
+                    Status: "Rescheduling",
+                    FK_Family: unSelectedItem.FK_Family,
+                    Note: unSelectedItem.Note,
+                    summary: unSelectedItem.summery,
+                    Appointments: unSelectedItem.Appointments,
+                    ScheduledBy: unSelectedItem.ScheduledBy,
+                    location: unSelectedItem.location,
+                    description: unSelectedItem.description,
+                    attendees: unSelectedItem.attendees,
                   }; 
-                  
-                  const newSchedule = await schedule.create(newSelectedItem);
-                  console.log(newSchedule);
+                  await schedule.create(newUnSelectedItem);
                 }
               } catch (error) {
                 console.log(error);
               }
 
               item.updatedAt = new Date().toISOString();
+              break;
+
+            case "Rescheduling":
+
+              try {
+                for (const app of selectedItem.Appointments) {
+                  await appointment.delete({
+                    id: app.id,
+                    FK_Schedule: item.id,
+                  });
+                }
+
+                const newStudyNames = [];
+
+                for (const appointment of selectedItem.Appointments) {
+                  newStudyNames.push(appointment.Study.StudyName);
+                  appointment.calendarEventId = null;
+                  appointment.eventURL = null;
+                }
+
+                const newSelectedItem = {
+                  AppointmentTime: this.TodaysDate,
+                  Status: "Rescheduling",
+                  FK_Family: selectedItem.FK_Family,
+                  Note: selectedItem.Note,
+                  summary: selectedItem.summery,
+                  Appointments: selectedItem.Appointments,
+                  ScheduledBy: selectedItem.ScheduledBy,
+                  location: selectedItem.location,
+                  description: selectedItem.description,
+                  attendees: selectedItem.attendees,
+                }; 
+
+                await schedule.create(newSelectedItem);
+
+              } catch (error) {
+                console.log(error);
+              }
+
+              item.updatedAt = new Date().toISOString();
+                
               break;
 
             case "Reminded":
@@ -1031,10 +1073,10 @@ export default {
 
           this.editedSchedule.Reminded = 0;
 
-          const calendarEvent = await schedule.update(this.editedSchedule);
+          await schedule.update(this.editedSchedule);
 
-          this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
-          this.editedSchedule.eventURL = calendarEvent.eventURL;
+          // this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
+          // this.editedSchedule.eventURL = calendarEvent.eventURL;
           this.editedSchedule.updatedAt = new Date().toISOString();
 
           this.editedSchedule.Appointments[0].Schedule = {};

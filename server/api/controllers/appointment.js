@@ -113,8 +113,12 @@ exports.create = asyncHandler(async (req, res) => {
     };
 
     try {
-      console.log('erCheck1');
       const updatedCal = [];
+
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
 
       for (const appointment of Schedule.Appointments) {
 
@@ -128,11 +132,6 @@ exports.create = asyncHandler(async (req, res) => {
         const testingRoomId = appointment.Study.FK_TestingRoom;
         const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
         const calId = curTestingRoom.calendarId;
-
-        const calendar = google.calendar({
-          version: "v3",
-          auth: req.oAuth2Client,
-        });
 
         calendar.events.patch({
           calendarId: calId,
@@ -396,7 +395,6 @@ exports.update = asyncHandler(async (req, res) => {
     };
 
     try {
-      console.log('erCheck2');
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
@@ -563,8 +561,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
         auth: req.oAuth2Client,
       });
 
-      console.log('erCheck3');
-
       await calendar.events.patch({
         calendarId: "primary",
         eventId: calendarId,
@@ -667,37 +663,28 @@ exports.delete = asyncHandler(async (req, res) => {
     };
 
     try {
-      console.log('erCheck4');
-      const updatedCal = [];
 
-      for (const appointment of updatedAppointments) {
+      const calendar = google.calendar({
+        version: "v3",
+        auth: req.oAuth2Client,
+      });
+      const appointment = Schedule.Appointments.find(appointment => `${appointment.id}` === req.query.id);
 
-        if (updatedCal.includes(appointment.FK_Study)) continue;
-        updatedCal.push(appointment.FK_Study);
-
-        const testingRooms = await model.testingRoom.findAll({
-          where: {FK_Lab: req.query.lab},
-        });
-        
-        const testingRoomId = appointment.Study.FK_TestingRoom;
-        const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-        const calId = curTestingRoom.calendarId;
-
-        const calendar = google.calendar({
-          version: "v3",
-          auth: req.oAuth2Client,
-        });
-
-        console.log(calId);
-  
-        calendar.events.patch({
-          calendarId: calId,
-          eventId: Schedule.calendarEventId,
-          resource: updatedScheduleInfo,
-          // sendNotifications: true
-        });
-      }
+      const testingRooms = await model.testingRoom.findAll({
+        where: {FK_Lab: req.query.lab},
+      });
       
+      const testingRoomId = appointment.Study.FK_TestingRoom;
+      const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+      const calId = curTestingRoom.calendarId;
+
+      calendar.events.delete({
+        calendarId: calId,
+        eventId: appointment.calendarEventId
+      });
+
+      await model.appointment.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.id}});
+
     } catch (err) {
       throw err;
     }
@@ -712,7 +699,7 @@ exports.delete = asyncHandler(async (req, res) => {
       { where: { id: req.query.FK_Schedule } }
     );
 
-    Schedule.dataValues.updatedAt = new Date();
+    Schedule.dataValues.updatedAt = new Date(); 
 
     // Log
     const User = JSON.parse(req.query.User);

@@ -97,9 +97,10 @@ export default {
     },
     agree() {
       // filter the selected studies
-      const selectedAppointments = this.item.Appointments.filter(appointment => appointment.checked);
-      const updatedAppointments = this.item.Appointments.filter((appointment) => {
-        return !selectedAppointments.includes(appointment);
+      const unSelectedAppointments = this.item.Appointments.filter(appointment => !appointment.checked); //appointments to be deleted
+      const selectedAppointments = this.item.Appointments.filter(appointment => appointment.checked); //appointments to be rescheduled
+      const updatedAppointments = this.item.Appointments.filter((appointment) => {  //new item without appointments to be deleted
+        return !unSelectedAppointments.includes(appointment);
       });
       // determine if all checkboxes are checked
       const allChecked = this.item.Appointments.every(appointment => appointment.checked);
@@ -108,10 +109,12 @@ export default {
         this.resolve({ allChecked: true});
         this.dialog = false;
       } else {
+        const unSelectedItem = {...this.item};
         const selectedItem = {...this.item};
         this.item.Appointments = updatedAppointments;
-        selectedItem.Appointments = selectedAppointments
-        this.resolve({ allChecked: false, newItem: this.item, selectedItem});
+        unSelectedItem.Appointments = unSelectedAppointments;
+        selectedItem.Appointments = selectedAppointments;
+        this.resolve({ allChecked: false, newItem: this.item, unSelectedItem, selectedItem});
         this.dialog = false;
       }
     },

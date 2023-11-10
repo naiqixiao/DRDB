@@ -384,6 +384,7 @@ exports.update = asyncHandler(async (req, res) => {
   });
 
   switch (updatedScheduleInfo.Status) {
+
     case "Confirmed":
       // add primary experimenter
       var experimenterList = [];
@@ -456,29 +457,48 @@ exports.update = asyncHandler(async (req, res) => {
       });
 
       //
-      if (!updatedScheduleInfo.skipStudyDateTimeStatus) {
-        if (updatedScheduleInfo.calendarEventId) {
-          console.log('erCheck6');
-          await calendar.events.patch({
-            calendarId: "primary",
-            eventId: updatedScheduleInfo.calendarEventId,
-            resource: updatedScheduleInfo,
-            sendNotifications: true,
-          });
-        } else {
-          // Create a calendar event
-          const calEvent = await calendar.events.insert({
-            calendarId: "primary",
-            resource: updatedScheduleInfo,
-            sendNotifications: true,
-          });
 
-          updatedScheduleInfo.calendarEventId = calEvent.data.id;
-          updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
+      try {
+        
+        for (const app of updatedScheduleInfo.Appointments) {
+          console.log(app);
+          const testingRooms = await model.testingRoom.findAll({
+            where: {FK_Lab: app.Study.FK_Lab},
+          });
+          
+          const testingRoomId = app.Study.FK_TestingRoom;
+          const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+          const calId = curTestingRoom.calendarId;
+  
+          const calEvent = await calendar.events.insert({
+            calendarId: calId,
+            resource: updatedScheduleInfo,
+            sendNotifications: true,
+          });
+          const appointmentInfo = await model.appointment.findOne({
+            where: {FK_Study: app.FK_Study,
+                    FK_Child: app.FK_Child}
+          });
+      
+          const updatedAppointmentInfo = {};
+  
+          updatedAppointmentInfo.calendarEventId = calEvent.data.id;
+          updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
+      
+          await model.appointment.update(updatedAppointmentInfo, {
+            where: { id: appointmentInfo.dataValues.id },
+          });
+      
+          console.log("Calendar event successfully created: " + calEvent.data.id);
         }
+
+
+      } catch (error) {
+        console.log('*****', error);
+        throw error;
       }
 
-      break;
+    break;
 
     default:
       // update the calendar event, if an appointment is rescheduled.
@@ -487,13 +507,14 @@ exports.update = asyncHandler(async (req, res) => {
         // check if there was an calendar event created before.
 
         try {
-          console.log('erCheck7');
-          await calendar.events.patch({
-            calendarId: "primary",
-            eventId: updatedScheduleInfo.calendarEventId,
-            resource: updatedScheduleInfo,
-            sendNotifications: true,
-          });
+          for (const app of updatedScheduleInfo.Appointments) {
+            const calendarId = app.calendarId;
+            await calendar.events.patch({
+              calendarId: calendarId,
+              resource: updatedScheduleInfo,
+              sendNotifications: true,
+            });
+          }
         } catch (err) {
           throw err;
         }

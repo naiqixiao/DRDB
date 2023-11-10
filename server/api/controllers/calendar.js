@@ -63,7 +63,6 @@ exports.create = asyncHandler(async (req, res) => {
                 FK_Child: app.FK_Child}
       });
   
-      console.log('*****this is calevent*****',calEvent.data);
       var updatedAppointmentInfo = {};
       updatedAppointmentInfo.calendarEventId = calEvent.data.id;
       updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
@@ -72,7 +71,6 @@ exports.create = asyncHandler(async (req, res) => {
         where: { id: appointmentInfo.dataValues.id },
       });
   
-      // res.status(200).send(calEvent.data);
       console.log("Calendar event successfully created: " + calEvent.data.id);
     }
     res.status(200).send('calendar event created');
@@ -87,7 +85,6 @@ exports.update = asyncHandler(async (req, res) => {
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   try {
-    console.log('erCheck5');
     const calEvent = await calendar.events.patch({
       calendarId: event.appointment.calendarId,
       eventId: req.query.eventId,
