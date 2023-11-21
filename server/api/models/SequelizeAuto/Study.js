@@ -59,7 +59,7 @@ module.exports = function (sequelize, DataTypes) {
 		},
     FK_TestingRoom: {
 			type: DataTypes.INTEGER,
-			allowNull: false,
+			allowNull: true,
 			references: {
 				model: {
 					tableName: 'TestingRoom',
