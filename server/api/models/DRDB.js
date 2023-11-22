@@ -1,6 +1,8 @@
 // const { Op } = require("sequelize");
 
 const config = require("../../config/general");
+const fs = require('fs');
+const path = require('path');
 
 const sequelize = config.sequelize;
 
@@ -224,3 +226,76 @@ sequelize.sync({ force: false }).then(() => {
   exports.testingRoom = TestingRoom;
   exports.sequelize = sequelize;
 });
+
+  // Function to import SQL file
+async function importSqlFile(filePath) {
+  try {
+    // Read SQL file
+    const sql = fs.readFileSync(path.resolve(__dirname,filePath), 'utf8');
+
+    // Split SQL file into individualqueries
+    const queries = sql.split(';');
+
+    // Execute only ALTER TABLE statements for adding columns if they do not exist
+    for (const query of queries) {
+      if (query.trim().startsWith('ALTER TABLE')) {
+        // Check if the column already exists
+        const columnExists = await columnExistsInTable(query);
+
+        // If the column does not exist, execute the ALTER TABLE statement
+        if (!columnExists) {
+          await sequelize.query(query);
+        }
+        continue;
+      } 
+      if (query.trim().startsWith('CREATE TABLE')) {
+        const tableExists = await tableExistsInDatabase(query);
+        if (!tableExists) {
+          await sequelize.query(query);
+        }
+      }
+    }
+    console.log('SQL file imported successfully');
+  } catch (error) {
+    console.error('Error importing SQL file:', error);
+  }
+}
+
+// Function to check if a column exists in the table
+async function columnExistsInTable(query) {
+  const columnNameIndex = query.search('ADD') + 4;
+  const substring = query.substring(columnNameIndex);
+  const columnNameMatch = substring.match(/^\s*(\S+)/);
+  const columnName = columnNameMatch ? columnNameMatch[1] : null;
+
+  if (!columnName) {
+    return false;
+  }
+
+  const tableNameIndex = query.search('TABLE') + 5;
+  const tableSubstring = query.substring(tableNameIndex);
+  const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
+  const tableName = tableNameMatch ? tableNameMatch[1] : null;
+
+  const tableDescription = await sequelize.getQueryInterface().describeTable(tableName);
+
+  return tableDescription[columnName] !== undefined;
+}
+
+async function tableExistsInDatabase(query) {
+  try {
+    const tables = await sequelize.getQueryInterface().showAllTables();
+    const tableNameIndex = query.search('TABLE') + 5;
+    const tableSubstring = query.substring(tableNameIndex);
+    const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
+    const tableName = tableNameMatch ? tableNameMatch[1] : null;
+
+    return tables.includes(tableName);
+  } catch (error) {
+    console.error('Error checking if table exists:', error);
+    return false;
+  }
+}
+
+// Import SQL file
+importSqlFile('/Users/ronjin/mcmasterBabyLab/project/DRDB/MySQL/databaseUpdate.sql');

@@ -1,8 +1,8 @@
 /*
-in Terminal, log in to the MySQL Server using the user you created before.
-mysql -u yourusername -p
-cd ~/DRDB
-mysql -u yourusername -p DRDB < MySQL/databasePatch1.01.sql
+in Terminal, go to your DRDB file location:
+1. cd ~/DRDB
+2. mysql -u yourusername -p DRDB < MySQL/databasePatch1.01.sql
+3. enter your password
 */
 DELIMITER $$
 DROP PROCEDURE IF EXISTS updateDatabase $$
