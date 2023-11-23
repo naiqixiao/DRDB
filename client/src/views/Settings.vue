@@ -578,7 +578,7 @@
                       </v-icon>
                       <delete-confirmation-dialog
                         :show="showDeleteConfirmation"
-                        @confirm="confirmDelete(room)"
+                        @confirm="confirmDelete(selectedTestingRoom)"
                         @cancel="cancelDelete"
                         :testingRoom="selectedTestingRoom"
                       ></delete-confirmation-dialog>
@@ -750,11 +750,13 @@ export default {
       this.showDeleteConfirmation = true;
       this.selectedTestingRoom = room;
     },
-    async confirmDelete(room) {
-      await testingRoom.delete(room);
-      this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== room.id);
+    async confirmDelete(selectedRoom) {
+      const testingRoomInfo = this.currentTestingRooms.find(room => room.name === selectedRoom)
+      this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== testingRoomInfo.id);
+
       this.showDeleteConfirmation = false;
       this.selectedTestingRoom = '';
+      await testingRoom.delete(testingRoomInfo);
     },
     cancelDelete() {
       this.showDeleteConfirmation = false;

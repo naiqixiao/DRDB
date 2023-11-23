@@ -678,6 +678,7 @@ import Email from "@/components/Email";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import schedule from "@/services/schedule";
+import calendar from "@/services/calendar";
 
 import ExtraStudies from "@/components/ExtraStudies";
 
@@ -809,7 +810,7 @@ export default {
 
         this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
-        const result = await this.$refs.confirmD.open(comDTitle, comDText, item);
+        const result = await this.$refs.confirmD.open(comDTitle, comDText, item, status);
 
         if (result) {     
 
@@ -842,6 +843,9 @@ export default {
             case "Completed":
               try {
                 if (allChecked) {
+                  item.Completed = !item.Completed;
+                  await schedule.complete(item);
+                } else if (item.calendarEventId) {
                   item.Completed = !item.Completed;
                   await schedule.complete(item);
                 } else {
@@ -888,38 +892,58 @@ export default {
               break;
 
             case "Rescheduling":
+              item.Status = 'Rescheduling'
 
               try {
-                for (const app of selectedItem.Appointments) {
-                  await appointment.delete({
-                    id: app.id,
-                    FK_Schedule: item.id,
-                  });
+                await schedule.update(item);
+
+                if (item.calendarEventId) {
+                  await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+
+                } else if (allChecked) {
+                  for (const appointment of item.Appointments) {
+                    await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+                  }
+                } else {
+
+                  for (const app of selectedItem.Appointments) {
+                    await appointment.delete({
+                      id: app.id,
+                      FK_Schedule: item.id,
+                    });
+                  }
+
+                  const newStudyNames = [];
+
+                  for (const appointment of selectedItem.Appointments) {
+                    newStudyNames.push(appointment.Study.StudyName);
+                    appointment.calendarEventId = null;
+                    appointment.eventURL = null;
+                  }
+
+                  const newSelectedItem = {
+                    AppointmentTime: this.TodaysDate,
+                    Status: "Rescheduling",
+                    FK_Family: selectedItem.FK_Family,
+                    Note: selectedItem.Note,
+                    summary: selectedItem.summery,
+                    Appointments: selectedItem.Appointments,
+                    ScheduledBy: selectedItem.ScheduledBy,
+                    location: selectedItem.location,
+                    description: selectedItem.description,
+                    attendees: selectedItem.attendees,
+                  }; 
+
+                  await schedule.create(newSelectedItem);
                 }
-
-                const newStudyNames = [];
-
-                for (const appointment of selectedItem.Appointments) {
-                  newStudyNames.push(appointment.Study.StudyName);
-                  appointment.calendarEventId = null;
-                  appointment.eventURL = null;
-                }
-
-                const newSelectedItem = {
-                  AppointmentTime: this.TodaysDate,
-                  Status: "Rescheduling",
-                  FK_Family: selectedItem.FK_Family,
-                  Note: selectedItem.Note,
-                  summary: selectedItem.summery,
-                  Appointments: selectedItem.Appointments,
-                  ScheduledBy: selectedItem.ScheduledBy,
-                  location: selectedItem.location,
-                  description: selectedItem.description,
-                  attendees: selectedItem.attendees,
-                }; 
-
-                await schedule.create(newSelectedItem);
-
               } catch (error) {
                 console.log(error);
               }
@@ -940,6 +964,35 @@ export default {
               item.updatedAt = new Date().toISOString();
               item.Reminded = true;
               break;
+
+            case "Cancelled":
+              item.Status = 'Cancelled'
+              
+              try {
+                await schedule.update(item);
+
+                if (item.calendarEventId) {
+                  await calendar.delete({
+                    id: appointment.id,
+                    FK_Schedule: item.id,
+                    lab: this.$store.state.lab
+                  });
+                } else {
+                  for (const appointment of item.Appointments) {
+                    await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+                  }
+                }
+                
+              } catch (error) {
+                console.log(error);
+              }
+              
+              item.updatedAt = new Date().toISOString();
+            break;
 
             default:
               item.Status = status;

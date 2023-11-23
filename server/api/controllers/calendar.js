@@ -99,16 +99,49 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.delete = asyncHandler(async (req, res) => {
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+  
   try {
-    const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
-
-    const calEvent = await calendar.events.delete({
-      calendarId: "primary",
-      eventId: req.query.eventId,
-      sendNotifications: true,
+    const Schedule = await model.schedule.findOne({
+      where: { id: req.query.FK_Schedule },
     });
-    res.status(200).send(calEvent.data);
-    console.log("Calendar event successfully deleted: " + calEvent.data.id);
+
+    if (Schedule.calendarEventId) {
+      calendar.events.delete({
+        calendarId: 'primary',
+        eventId: Schedule.calendarEventId
+      });
+      await model.schedule.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.FK_Schedule}});
+      return;
+    }
+
+    const Appointment = await model.appointment.findOne({
+      where: { id: req.query.id },
+    });
+    
+    const TestingRooms = await model.testingRoom.findAll({
+      where: {FK_Lab: req.query.lab},
+    });
+
+    const Study = await model.study.findOne({
+      where: { id: Appointment.FK_Study },
+    });
+
+    
+    const testingRoomId = Study.FK_TestingRoom;
+    const curTestingRoom = TestingRooms.find(room => room.id === testingRoomId);
+    const calId = curTestingRoom.calendarId;
+
+    if (Appointment.calendarEventId) {
+      calendar.events.delete({
+        calendarId: calId,
+        eventId: Appointment.calendarEventId
+      });
+    }
+    
+    await model.appointment.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.id}});
+
+    console.log("Calendar event successfully deleted.");
   } catch (error) {
     throw error;
   }

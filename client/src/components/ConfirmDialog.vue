@@ -20,7 +20,7 @@
       </div>
       <v-spacer></v-spacer>
 
-      <ul style="list-style-type: none">
+      <ul v-if="status !== 'No Show' && status !== 'Cancelled'" style="list-style-type: none">
         <li v-for="(appointment, index) in item.Appointments" :key="index">
           <v-tooltip right>
             <template v-slot:activator="{ on }">
@@ -73,6 +73,7 @@ export default {
       message: null,
       title: null,
       item: {},
+      status: null,
       selectedAppointment: [],
       options: {
         color: "grey lighten-3",
@@ -84,11 +85,12 @@ export default {
   },
 
   methods: {
-    open(title, message, item, options) {
+    open(title, message, item, status, options) {
       this.dialog = true;
       this.title = title;
       this.message = message;
       this.item = {...item};
+      this.status = status;
       this.options = Object.assign(this.options, options);
       return new Promise((resolve, reject) => {
         this.resolve = resolve;
@@ -105,7 +107,10 @@ export default {
       // determine if all checkboxes are checked
       const allChecked = this.item.Appointments.every(appointment => appointment.checked);
 
-      if (allChecked) {
+      if (this.status === 'No Show' || this.status === 'Cancelled') {
+        this.resolve(true);
+        this.dialog = false;
+      } else if (allChecked) {
         this.resolve({ allChecked: true});
         this.dialog = false;
       } else {

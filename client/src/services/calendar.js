@@ -13,8 +13,9 @@ export default {
   },
 
   delete(calendarInfo) {
-    calendarInfo.lab = store.state.lab;
-    return api().delete("cal/", calendarInfo);
+    return api().delete(`cal/`, {
+      params: calendarInfo
+    });
   },
 
   createSecondaryCalendar(calendarInfo) {
