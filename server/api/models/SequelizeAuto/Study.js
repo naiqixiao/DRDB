@@ -57,6 +57,16 @@ module.exports = function (sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
+    FK_TestingRoom: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
+			references: {
+				model: {
+					tableName: 'TestingRoom',
+				},
+				key: 'id'
+			}
+		},
 		StudyType: {
 			type: DataTypes.STRING(30),
 			allowNull: false

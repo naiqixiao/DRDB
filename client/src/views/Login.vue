@@ -123,6 +123,7 @@
 
 <script>
 import login from "@/services/login";
+import testingRoom from "@/services/testingRoom";
 import externalAPIs from "@/services/externalAPIs";
 
 export default {
@@ -179,6 +180,8 @@ export default {
             "setTransportationInstructions",
             response.data.transportationInstructions
           );
+          const testingRooms = await testingRoom.search(this.$store.state.lab);
+          this.$store.dispatch("setTestingRooms", testingRooms.data);
 
           if (response.data.temporaryPassword) {
             // reset password

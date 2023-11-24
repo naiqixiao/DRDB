@@ -9,7 +9,7 @@
     >
       <v-card
         class="child-card d-flex flex-column"
-        height="180px"
+        height="200px"
         style="border-width: medium !important; margin: 12px"
       >
         <v-card-title class="title" style="padding: 8px">
@@ -789,6 +789,8 @@ export default {
     },
 
     ExperimentersNames(appointment) {
+      const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+
       var E1 = "not assigned";
       if (appointment.PrimaryExperimenter.length > 0) {
         E1 = appointment.PrimaryExperimenter[0].Initial;
@@ -811,6 +813,9 @@ export default {
         "</strong> (" +
         appointment.Study.StudyType +
         ")" +
+        "<br>" +
+        "<strong>Location: </strong>" +
+        testingRoom.location +
         "<br>" +
         "<strong>E1:</strong> " +
         E1 +

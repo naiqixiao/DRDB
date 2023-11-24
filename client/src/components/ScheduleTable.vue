@@ -69,6 +69,7 @@
             class="tableIcon"
             >update</v-icon
           >
+          
         </template>
         <span>Reschedule this appointment</span>
       </v-tooltip>
@@ -677,12 +678,15 @@ import Email from "@/components/Email";
 import ConfirmDlg from "@/components/ConfirmDialog";
 
 import schedule from "@/services/schedule";
+import calendar from "@/services/calendar";
 
 import ExtraStudies from "@/components/ExtraStudies";
 
 import moment from "moment-timezone";
 
 import login from "@/services/login";
+
+import appointment from "@/services/appointment";
 
 export default {
   components: {
@@ -702,6 +706,7 @@ export default {
   },
   data() {
     return {
+      selectedAppointments: [],
       skipStudyDateTimeStatus: false,
       skipConfirmationEmailStatus: false,
       skipReminderEmailStatus: false,
@@ -787,7 +792,13 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText = "You're going to update Study Completion status, continue?";
+            comDText = "Confirm appointment(s) that you would like to mark as completed";
+            break;
+
+          case "Rescheduling":
+            comDTitle = "Study appointment update";
+            comDText =
+              "Confirm appointment(s) that you would like to reschedule";
             break;
 
           default:
@@ -799,10 +810,17 @@ export default {
 
         this.editedSchedule.skipStudyDateTimeStatus = this.skipStudyDateTimeStatus;
 
-        if (await this.$refs.confirmD.open(comDTitle, comDText)) {
+        const result = await this.$refs.confirmD.open(comDTitle, comDText, item, status);
+
+        if (result) {     
+
+          const {allChecked, newItem, unSelectedItem, selectedItem} = result;
+          
+
           this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
+          // console.log(this.$store.state.studyName);
           switch (status) {
             case "Confirmed":
               this.editedIndex = this.Schedules.indexOf(item);
@@ -824,13 +842,114 @@ export default {
 
             case "Completed":
               try {
-                item.Completed = !item.Completed;
-                await schedule.complete(item);
+                if (allChecked) {
+                  item.Completed = !item.Completed;
+                  await schedule.complete(item);
+                } else if (item.calendarEventId) {
+                  item.Completed = !item.Completed;
+                  await schedule.complete(item);
+                } else {
+                  // delete the selected appointments
+                  for (const app of unSelectedItem.Appointments) {
+                    await appointment.delete({
+                      id: app.id,
+                      FK_Schedule: item.id,
+                    });
+                  }
+                  newItem.Completed = !newItem.Completed;
+                  //complete rest of the appointments
+                  await schedule.complete(newItem);
+
+                  //re-create the selected appointments
+                  const newStudyNames = [];
+
+                  for (const appointment of unSelectedItem.Appointments) {
+                    newStudyNames.push(appointment.Study.StudyName);
+                    appointment.calendarEventId = null;
+                    appointment.eventURL = null;
+
+                  }
+
+                  const newUnSelectedItem = {
+                    AppointmentTime: this.TodaysDate,
+                    Status: "Rescheduling",
+                    FK_Family: unSelectedItem.FK_Family,
+                    Note: unSelectedItem.Note,
+                    summary: unSelectedItem.summery,
+                    Appointments: unSelectedItem.Appointments,
+                    ScheduledBy: unSelectedItem.ScheduledBy,
+                    location: unSelectedItem.location,
+                    description: unSelectedItem.description,
+                    attendees: unSelectedItem.attendees,
+                  }; 
+                  await schedule.create(newUnSelectedItem);
+                }
               } catch (error) {
                 console.log(error);
               }
 
               item.updatedAt = new Date().toISOString();
+              break;
+
+            case "Rescheduling":
+              item.Status = 'Rescheduling'
+
+              try {
+                await schedule.update(item);
+
+                if (item.calendarEventId) {
+                  await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+
+                } else if (allChecked) {
+                  for (const appointment of item.Appointments) {
+                    await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+                  }
+                } else {
+
+                  for (const app of selectedItem.Appointments) {
+                    await appointment.delete({
+                      id: app.id,
+                      FK_Schedule: item.id,
+                    });
+                  }
+
+                  const newStudyNames = [];
+
+                  for (const appointment of selectedItem.Appointments) {
+                    newStudyNames.push(appointment.Study.StudyName);
+                    appointment.calendarEventId = null;
+                    appointment.eventURL = null;
+                  }
+
+                  const newSelectedItem = {
+                    AppointmentTime: this.TodaysDate,
+                    Status: "Rescheduling",
+                    FK_Family: selectedItem.FK_Family,
+                    Note: selectedItem.Note,
+                    summary: selectedItem.summery,
+                    Appointments: selectedItem.Appointments,
+                    ScheduledBy: selectedItem.ScheduledBy,
+                    location: selectedItem.location,
+                    description: selectedItem.description,
+                    attendees: selectedItem.attendees,
+                  }; 
+
+                  await schedule.create(newSelectedItem);
+                }
+              } catch (error) {
+                console.log(error);
+              }
+
+              item.updatedAt = new Date().toISOString();
+                
               break;
 
             case "Reminded":
@@ -845,6 +964,35 @@ export default {
               item.updatedAt = new Date().toISOString();
               item.Reminded = true;
               break;
+
+            case "Cancelled":
+              item.Status = 'Cancelled'
+              
+              try {
+                await schedule.update(item);
+
+                if (item.calendarEventId) {
+                  await calendar.delete({
+                    id: appointment.id,
+                    FK_Schedule: item.id,
+                    lab: this.$store.state.lab
+                  });
+                } else {
+                  for (const appointment of item.Appointments) {
+                    await calendar.delete({
+                      id: appointment.id,
+                      FK_Schedule: item.id,
+                      lab: this.$store.state.lab
+                    });
+                  }
+                }
+                
+              } catch (error) {
+                console.log(error);
+              }
+              
+              item.updatedAt = new Date().toISOString();
+            break;
 
             default:
               item.Status = status;
@@ -978,10 +1126,10 @@ export default {
 
           this.editedSchedule.Reminded = 0;
 
-          const calendarEvent = await schedule.update(this.editedSchedule);
+          await schedule.update(this.editedSchedule);
 
-          this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
-          this.editedSchedule.eventURL = calendarEvent.eventURL;
+          // this.editedSchedule.calendarEventId = calendarEvent.calendarEventId;
+          // this.editedSchedule.eventURL = calendarEvent.eventURL;
           this.editedSchedule.updatedAt = new Date().toISOString();
 
           this.editedSchedule.Appointments[0].Schedule = {};
@@ -1775,7 +1923,7 @@ export default {
     dialogNote(val) {
       val || this.closeScheduleNotes();
     },
-  },
+  }
 };
 </script>
 

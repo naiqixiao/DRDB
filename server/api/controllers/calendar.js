@@ -35,6 +35,7 @@ const config = require("../../config/general");
 
 exports.create = asyncHandler(async (req, res) => {
   var event = req.body;
+  console.log(event);
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   event.start = {
@@ -50,24 +51,31 @@ exports.create = asyncHandler(async (req, res) => {
   }
 
   try {
-
-    const calEvent = await calendar.events.insert({
-      calendarId: "primary",
-      resource: event,
-      sendNotifications: true,
-    });
-
-    var updatedScheduleInfo = {};
-    updatedScheduleInfo.calendarEventId = calEvent.data.id;
-    updatedScheduleInfo.eventURL = calEvent.data.htmlLink;
-
-    await model.schedule.update(updatedScheduleInfo, {
-      where: { id: event.scheduleId },
-    });
-
-    res.status(200).send(calEvent.data);
-    console.log("Calendar event successfully created: " + calEvent.data.id);
+    for (const app of event.Appointments) {
+      const calendarId = app.calendarId;
+      const calEvent = await calendar.events.insert({
+        calendarId: calendarId,
+        resource: event,
+        sendNotifications: true,
+      });
+      const appointmentInfo = await model.appointment.findOne({
+        where: {FK_Study: app.FK_Study,
+                FK_Child: app.FK_Child}
+      });
+  
+      var updatedAppointmentInfo = {};
+      updatedAppointmentInfo.calendarEventId = calEvent.data.id;
+      updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
+  
+      await model.appointment.update(updatedAppointmentInfo, {
+        where: { id: appointmentInfo.dataValues.id },
+      });
+  
+      console.log("Calendar event successfully created: " + calEvent.data.id);
+    }
+    res.status(200).send('calendar event created');
   } catch (error) {
+    console.log('*****', error);
     throw error;
   }
 });
@@ -77,9 +85,8 @@ exports.update = asyncHandler(async (req, res) => {
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   try {
-
     const calEvent = await calendar.events.patch({
-      calendarId: "primary",
+      calendarId: event.appointment.calendarId,
       eventId: req.query.eventId,
       resource: event,
       sendNotifications: true,
@@ -92,17 +99,72 @@ exports.update = asyncHandler(async (req, res) => {
 });
 
 exports.delete = asyncHandler(async (req, res) => {
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+  
   try {
-    const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
-
-    const calEvent = await calendar.events.delete({
-      calendarId: "primary",
-      eventId: req.query.eventId,
-      sendNotifications: true,
+    const Schedule = await model.schedule.findOne({
+      where: { id: req.query.FK_Schedule },
     });
-    res.status(200).send(calEvent.data);
-    console.log("Calendar event successfully deleted: " + calEvent.data.id);
+
+    if (Schedule.calendarEventId) {
+      calendar.events.delete({
+        calendarId: 'primary',
+        eventId: Schedule.calendarEventId
+      });
+      await model.schedule.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.FK_Schedule}});
+      return;
+    }
+
+    const Appointment = await model.appointment.findOne({
+      where: { id: req.query.id },
+    });
+    
+    const TestingRooms = await model.testingRoom.findAll({
+      where: {FK_Lab: req.query.lab},
+    });
+
+    const Study = await model.study.findOne({
+      where: { id: Appointment.FK_Study },
+    });
+
+    
+    const testingRoomId = Study.FK_TestingRoom;
+    const curTestingRoom = TestingRooms.find(room => room.id === testingRoomId);
+    const calId = curTestingRoom.calendarId;
+
+    if (Appointment.calendarEventId) {
+      calendar.events.delete({
+        calendarId: calId,
+        eventId: Appointment.calendarEventId
+      });
+    }
+    
+    await model.appointment.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.id}});
+
+    console.log("Calendar event successfully deleted.");
   } catch (error) {
     throw error;
+  }
+});
+
+exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+  const calendarName = req.body.calendarName;
+
+  try {
+    // const { summary, timeZone } = req.body;
+    
+    const createdCalendar = await calendar.calendars.insert({
+      requestBody: {
+        summary: calendarName,
+        timeZone: config.timeZone,
+      },
+    });
+    
+    res.status(200).json({ calendarId: createdCalendar.data.id, message: 'A new calendar is created.' });
+
+  } catch (error) {
+    console.error('Error creating secondary calendar:', error);
+    res.status(500).json({ error: 'An error occurred' });
   }
 });

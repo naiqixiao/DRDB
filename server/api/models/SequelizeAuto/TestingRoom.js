@@ -1,42 +1,40 @@
-/* jshint indent: 1 */
-
 module.exports = function(sequelize, DataTypes) {
-	return sequelize.define('Appointment', {
+	return sequelize.define('TestingRoom', {
 		id: {
 			autoIncrement: true,
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			primaryKey: true
 		},
-		FK_Study: {
+    name: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+		FK_Lab: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
 				model: {
-					tableName: 'Study',
+					tableName: 'Lab',
 				},
 				key: 'id'
 			}
 		},
-		FK_Child: {
-			type: DataTypes.INTEGER,
+    location: {
+			type: DataTypes.STRING(255),
 			allowNull: false,
-			references: {
-				model: {
-					tableName: 'Child',
-				},
-				key: 'id'
-			}
 		},
-		FK_Schedule: {
-			type: DataTypes.INTEGER,
+    calendar: {
+			type: DataTypes.STRING(255),
 			allowNull: false,
-			references: {
-				model: {
-					tableName: 'Schedule',
-				},
-				key: 'id'
-			}
+		},
+    calendarId: {
+			type: DataTypes.STRING(255),
+			allowNull: false,
+		},
+    createdBy: {
+			type: DataTypes.INTEGER,
+			allowNull: true,
 		},
 		createdAt: {
 			type: DataTypes.DATE,
@@ -48,24 +46,13 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: false,
 			defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
 		},
-		FK_Family: {
+    voided: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
-			references: {
-				model: {
-					tableName: 'Family',
-				},
-				key: 'id'
-			}
-		},
-    eventURL: {
-			type: DataTypes.STRING(150)
-		},
-		calendarEventId: {
-			type: DataTypes.STRING(30)
+			defaultValue: 0
 		},
 	}, {
 		sequelize,
-		tableName: 'Appointment'
+		tableName: 'TestingRoom'
 	});
 };

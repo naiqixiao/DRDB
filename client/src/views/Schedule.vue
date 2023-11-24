@@ -686,11 +686,11 @@
                       <v-spacer></v-spacer>
                       <v-divider
                         style="margin-bottom: 4px"
-                        v-show="response === 'Confirmed'"
+                        v-show="response !== 'Rejected'"
                       ></v-divider>
                       <v-row
                         dense
-                        v-if="response === 'Confirmed'"
+                        v-if="response !== 'Rejected'"
                         align="center"
                         justify="start"
                         style="height: 100px"
@@ -1556,6 +1556,7 @@ export default {
               this.scheduleNotes,
               this.appointments
             ),
+
             // start: {
             //   dateTime: moment(this.studyDateTime).toISOString(true),
             //   timeZone: this.$store.state.timeZone,
@@ -1614,9 +1615,12 @@ export default {
           appointment.FK_Schedule = this.scheduleId;
           appointment.Schedule = {};
           appointment.Schedule.AppointmentTime =
-            newStudySchedule.data.AppointmentTime;
+          newStudySchedule.data.AppointmentTime;
           appointment.Schedule.Status = newStudySchedule.data.Status;
-          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;
+          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;          
+          const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+          const calendarId = testingRoom.calendarId;
+          appointment.calendarId = calendarId;
         });
 
         console.log("New Scheduled Created!");
@@ -1826,6 +1830,12 @@ export default {
     },
 
     async continue23() {
+      const labelNames = [];
+      for (const appointment of this.appointments) {
+        if (appointment.Study.StudyName) {
+          labelNames.push(appointment.Study.StudyName);
+        }
+      }
       this.loadingStatus = true;
       try {
         if (this.emailButtonText == "Email Sent!") {
@@ -1835,7 +1845,7 @@ export default {
               "An email was just sent to this family. Do you want to send it again?"
             )
           ) {
-            await this.$refs.Email.sendEmail([this.selectedStudy.StudyName]);
+            await this.$refs.Email.sendEmail(labelNames);
             // this.e1 = 3;
             // this.nextContactDialog = true;
             this.emailSent = true;
@@ -1843,7 +1853,7 @@ export default {
             this.scheduleNextPage = true;
           }
         } else {
-          await this.$refs.Email.sendEmail([this.selectedStudy.StudyName]);
+          await this.$refs.Email.sendEmail(labelNames);
           // this.e1 = 3;
           // this.nextContactDialog = true;
           this.emailSent = true;

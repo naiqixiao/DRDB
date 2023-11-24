@@ -239,6 +239,17 @@
             ></v-text-field>
           </v-col>
         </v-row>
+        <v-row>
+          <v-col md="12" class="subtitle">
+            <v-divider></v-divider>
+            <h4 class="text-left">Testing room:</h4>
+          </v-col>
+          <v-card class="individual-room-card" v-if="selectedRoomInfo">
+            <v-card-title class="testing-room--title">{{ this.selectedRoomInfo.name }}</v-card-title>
+            <v-card-text class="testing-room--text">Location: {{ this.selectedRoomInfo.location }}</v-card-text>
+          </v-card>
+        </v-row>
+        
         <v-row justify="space-between">
           <v-col cols="12" md="2" dense>
             <v-tooltip right>
@@ -455,6 +466,22 @@
                     </v-col>
                   </v-row>
 
+                  <v-row>
+                    <v-col md="12" class="subtitle">
+                      <v-divider></v-divider>
+                      <h4 class="text-left">Testing room:</h4>
+                    </v-col>
+
+                    <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
+                      <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
+                        <v-card :class="{ 'testing-room-card': true, 'selected-card': isSelected(room.id) }" @click="selectRoom(room.id)">
+                          <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
+                          <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
+                        </v-card>
+                      </v-col>
+                    </v-row>
+                  </v-row>
+
                   <v-row justify="space-around">
                     <v-col md="12">
                       <v-divider></v-divider>
@@ -632,6 +659,7 @@ import ConfirmDlg from "@/components/ConfirmDialog";
 
 import study from "@/services/study";
 import personnel from "@/services/personnel";
+import testingRoom from "@/services/testingRoom";
 
 import { VueEditor } from "vue2-editor";
 import moment from "moment";
@@ -708,6 +736,7 @@ export default {
       editedStudy: {
         StudyName: null,
         FK_Lab: this.$store.state.lab,
+        FK_TestingRoom: null,
         MinAge: null,
         MaxAge: null,
         Description: "",
@@ -763,10 +792,19 @@ export default {
       inclusionOptions: ["Include", "Exclude", "Only"],
       inProgressStudyFilter: true,
       search: "",
+      currentTestingRooms: [],
+      selectedRoomId: null,
+      selectedRoomInfo: null
     };
   },
 
   methods: {
+    selectRoom(roomId) {
+      this.selectedRoomId = roomId;    
+    },
+    isSelected(roomId) {
+      return this.selectedRoomId === roomId;
+    },
     async searchStudies() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
@@ -839,6 +877,7 @@ export default {
       row.select(true);
       this.currentStudy = item;
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
+      this.selectedRoomInfo = this.currentTestingRooms.find(room => room.id === item.FK_TestingRoom);
     },
 
     editStudy() {
@@ -847,7 +886,9 @@ export default {
       this.dialog = true;
     },
 
-    createStudy() {
+    async createStudy() {
+      const testingRooms = await testingRoom.search(this.$store.state.lab);
+      this.$store.dispatch("setTestingRooms", testingRooms.data);
       this.editedStudy = Object.assign({}, this.defaultStudy);
       this.editedIndex = -1;
       this.dialog = true;
@@ -855,7 +896,7 @@ export default {
 
     async save() {
       this.editedStudy.FK_Personnel = this.pointofContact.id;
-
+      this.editedStudy.FK_TestingRoom = this.selectedRoomId;
       if (this.editedStudy.id === undefined) {
         try {
           const Result = await study.create(this.editedStudy);
@@ -1184,9 +1225,10 @@ export default {
     },
   },
 
-  mounted: function () {
+  mounted: async function () {
     this.searchStudies();
     this.searchLabMembers();
+    this.currentTestingRooms = this.$store.state.testingRooms;
   },
 };
 </script>
@@ -1239,4 +1281,14 @@ body {
 .fabIcon {
   color: var(--v-secondary-base) !important;
 }
+.testing-room-card:hover,
+.selected-card {
+  background-color: rgb(232, 232, 232);
+  cursor: pointer;
+}
+.individual-room-card {
+  margin-left: 0.7em;
+  margin-bottom: 1em;
+}
+
 </style>

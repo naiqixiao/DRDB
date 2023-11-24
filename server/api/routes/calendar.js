@@ -10,4 +10,6 @@ router.patch("/", oAuth2, CalController.update);
 
 router.delete("/", oAuth2, CalController.delete);
 
+router.post('/createSecondaryCalendar', oAuth2, CalController.createSecondaryCalendar);
+
 module.exports = router;
