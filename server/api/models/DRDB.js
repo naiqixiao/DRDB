@@ -284,13 +284,16 @@ async function columnExistsInTable(query) {
 
 async function tableExistsInDatabase(query) {
   try {
+    const allTables = [];
     const tables = await sequelize.getQueryInterface().showAllTables();
+    for (const table of tables) {
+      allTables.push(table.toLowerCase());
+    }
     const tableNameIndex = query.search('TABLE') + 5;
     const tableSubstring = query.substring(tableNameIndex);
     const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
     const tableName = tableNameMatch ? tableNameMatch[1] : null;
-
-    return tables.includes(tableName);
+    return allTables.includes(tableName);
   } catch (error) {
     console.error('Error checking if table exists:', error);
     return false;
