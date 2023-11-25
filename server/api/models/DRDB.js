@@ -301,4 +301,4 @@ async function tableExistsInDatabase(query) {
 }
 
 // Import SQL file
-importSqlFile('/Users/ronjin/mcmasterBabyLab/project/DRDB/MySQL/databaseUpdate.sql');
+importSqlFile('../../../MySQL/databaseUpdate.sql');
