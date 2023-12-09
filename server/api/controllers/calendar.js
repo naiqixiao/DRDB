@@ -169,7 +169,7 @@ exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
       requestBody: {
         summary: calendarName,
         timeZone: config.timeZone,
-        backgroundColor: getRandomColor(),
+        backgroundColor: generateDarkColorHex(),
       },
     });
     
@@ -180,14 +180,34 @@ exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
     res.status(500).json({ error: 'An error occurred' });
   }
 
-  function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
+//   function getRandomColor() {
+//     const letters = '0123456789ABCDEF';
+//     let color = '#';
   
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
+//     for (let i = 0; i < 6; i++) {
+//       color += letters[Math.floor(Math.random() * 16)];
+//     }
+  
+//     return color;
+//   }
+// });
+
+function generateDarkColorHex() {
+    // Function to generate a random number in a given range
+    function randomInRange(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-  
-    return color;
-  }
-});
+
+    // Generate each color component
+    var r = randomInRange(0, 200); // Red component
+    var g = randomInRange(0, 200); // Green component
+    var b = randomInRange(0, 200); // Blue component
+
+    // Convert each component to a hexadecimal string and pad with zero if necessary
+    r = r.toString(16).padStart(2, '0');
+    g = g.toString(16).padStart(2, '0');
+    b = b.toString(16).padStart(2, '0');
+
+    // Combine components into a full hex color string
+    return "#" + r + g + b;
+}
