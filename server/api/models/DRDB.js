@@ -313,14 +313,14 @@ async function updateColumn(filePath) {
  
      const scheduleDataType = await sequelize.query(`
       SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = 'test_drdb'
+      WHERE TABLE_SCHEMA = 'drdb'
       AND TABLE_NAME = 'Schedule'
       AND COLUMN_NAME = 'eventURL';
      `);
      
      const appointmentDataType = await sequelize.query(`
       SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = 'test_drdb'
+      WHERE TABLE_SCHEMA = 'drdb'
       AND TABLE_NAME = 'Appointment'
       AND COLUMN_NAME = 'eventURL';
      `);
