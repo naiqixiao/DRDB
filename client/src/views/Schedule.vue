@@ -1619,7 +1619,13 @@ export default {
           appointment.Schedule.Status = newStudySchedule.data.Status;
           appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;          
           const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
-          const calendarId = testingRoom.calendarId;
+          let calendarId;
+          if (testingRoom) {
+            calendarId = testingRoom.calendarId;
+          } else {
+            calendarId = 'primary';
+          }
+          
           appointment.calendarId = calendarId;
         });
 

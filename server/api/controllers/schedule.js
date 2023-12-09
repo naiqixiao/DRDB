@@ -499,8 +499,13 @@ exports.update = asyncHandler(async (req, res) => {
           });
           
           const testingRoomId = app.Study.FK_TestingRoom;
-          const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-          const calId = curTestingRoom.calendarId;
+          let calId;
+          if (testingRoomId) {
+            const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+            calId = curTestingRoom.calendarId;
+          } else {
+            calId = 'primary';
+          }
   
           const calEvent = await calendar.events.insert({
             calendarId: calId,

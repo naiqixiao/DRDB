@@ -130,12 +130,17 @@ exports.create = asyncHandler(async (req, res) => {
         });
         
         const testingRoomId = appointment.Study.FK_TestingRoom;
-        const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-        const calId = curTestingRoom.calendarId;
+        let calId;
+        if (testingRoomId) {
+          const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+          calId = curTestingRoom.calendarId;
+        } else {
+          calId = 'primary';
+        }
 
         calendar.events.patch({
           calendarId: calId,
-          eventId: Schedule.calendarEventId,
+          eventId: appointment.calendarEventId,
           resource: updatedScheduleInfo,
           sendNotifications: true
         });
@@ -675,8 +680,13 @@ exports.delete = asyncHandler(async (req, res) => {
       });
       
       const testingRoomId = appointment.Study.FK_TestingRoom;
-      const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-      const calId = curTestingRoom.calendarId;
+      let calId;
+      if (testingRoomId) {
+        const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+        calId = curTestingRoom.calendarId;
+      } else {
+        calId = 'primary';
+      }
 
       calendar.events.delete({
         calendarId: calId,

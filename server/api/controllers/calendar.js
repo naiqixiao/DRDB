@@ -52,7 +52,13 @@ exports.create = asyncHandler(async (req, res) => {
 
   try {
     for (const app of event.Appointments) {
-      const calendarId = app.calendarId;
+      let calendarId;
+      if (app.calendarId) {
+        calendarId = app.calendarId;
+      } else {
+        calendarId = 'primary';
+      }
+      
       const calEvent = await calendar.events.insert({
         calendarId: calendarId,
         resource: event,
@@ -129,8 +135,13 @@ exports.delete = asyncHandler(async (req, res) => {
 
     
     const testingRoomId = Study.FK_TestingRoom;
-    const curTestingRoom = TestingRooms.find(room => room.id === testingRoomId);
-    const calId = curTestingRoom.calendarId;
+    let calId;
+    if (testingRoomId) {
+      const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+      calId = curTestingRoom.calendarId;
+    } else {
+      calId = 'primary';
+    }
 
     if (Appointment.calendarEventId) {
       calendar.events.delete({
