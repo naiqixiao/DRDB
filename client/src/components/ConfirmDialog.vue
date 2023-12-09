@@ -20,7 +20,7 @@
       </div>
       <v-spacer></v-spacer>
 
-      <ul v-if="status !== 'No Show' && status !== 'Cancelled'" style="list-style-type: none">
+      <ul v-if="status !== 'No Show' && status !== 'Cancelled' && status !== 'Confirmed'" style="list-style-type: none">
         <li v-for="(appointment, index) in item.Appointments" :key="index">
           <v-tooltip right>
             <template v-slot:activator="{ on }">

@@ -663,10 +663,10 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="3"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="closeEditLab">Cancel</v-btn>
+                <v-btn color="primary" @click="closeEditLab" :disabled="requestInProgress">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="saveEditLab">Confirm</v-btn>
+                <v-btn color="primary" @click="saveEditLab" :disabled="requestInProgress">Confirm</v-btn>
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -742,6 +742,7 @@ export default {
       currentTestingRooms: [],
       showDeleteConfirmation: false,
       selectedTestingRoom: '',
+      requestInProgress: false,
     };
   },
 
@@ -847,7 +848,9 @@ export default {
             testing.createdBy = this.$store.state.userID;
             const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
             testing.calendarId = newCal.data.calendarId;
-            await testingRoom.create(testing);
+            const currentTestingRooms = await testingRoom.create(testing);
+            this.currentTestingRooms.push(currentTestingRooms.data);
+            this.$store.dispatch("setTestingRooms", this.currentTestingRooms);
           });
 
           await Promise.all(createPromises);
@@ -867,8 +870,10 @@ export default {
     },
 
     async saveEditLab() {
-      var validationResults = this.$refs.formEdit.validate();
+      this.requestInProgress = true;
 
+      var validationResults = this.$refs.formEdit.validate();
+      
       if (validationResults) {
         try {
           await lab.update(this.editedLab);
@@ -893,11 +898,13 @@ export default {
             testing.createdBy = this.$store.state.userID;
             const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
             testing.calendarId = newCal.data.calendarId;
-            await testingRoom.create(testing);
+            const currentTestingRooms = await testingRoom.create(testing);
+            this.currentTestingRooms.push(currentTestingRooms.data);
+            this.$store.dispatch("setTestingRooms", this.currentTestingRooms);
           });
 
           await Promise.all(createPromises);
-
+          
           alert("Lab information is updated!");
           this.$refs.formEdit.resetValidation();
           
@@ -905,7 +912,7 @@ export default {
           console.log(error.response);
         }
       }
-
+      this.requestInProgress = false;
       this.closeEditLab();
     },
 
@@ -1178,7 +1185,7 @@ export default {
     },
     showDeleteConfirmation(val) {
       val || this.cancelDelete();
-    },
+    }
   },
 
   async mounted() {

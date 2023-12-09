@@ -1014,6 +1014,7 @@ export default {
   },
 
   computed: {
+    
     htmlText() {
       var htmlText = this.currentStudy.EmailTemplate.split("<p>")
         .join("")

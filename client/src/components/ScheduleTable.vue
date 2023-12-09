@@ -851,10 +851,12 @@ export default {
                 } else {
                   // delete the selected appointments
                   for (const app of unSelectedItem.Appointments) {
-                    await appointment.delete({
-                      id: app.id,
-                      FK_Schedule: item.id,
-                    });
+                    if (app.calendarEventId) {
+                      await appointment.delete({
+                        id: app.id,
+                        FK_Schedule: item.id,
+                      });
+                    }
                   }
                   newItem.Completed = !newItem.Completed;
                   //complete rest of the appointments
@@ -871,7 +873,7 @@ export default {
                   }
 
                   const newUnSelectedItem = {
-                    AppointmentTime: this.TodaysDate,
+                    AppointmentTime: unSelectedItem.AppointmentTime,
                     Status: "Rescheduling",
                     FK_Family: unSelectedItem.FK_Family,
                     Note: unSelectedItem.Note,
@@ -882,6 +884,7 @@ export default {
                     description: unSelectedItem.description,
                     attendees: unSelectedItem.attendees,
                   }; 
+                  console.log(newUnSelectedItem);
                   await schedule.create(newUnSelectedItem);
                 }
               } catch (error) {
@@ -893,18 +896,10 @@ export default {
 
             case "Rescheduling":
               item.Status = 'Rescheduling'
-
+              
               try {
-                await schedule.update(item);
 
-                if (item.calendarEventId) {
-                  await calendar.delete({
-                      id: appointment.id,
-                      FK_Schedule: item.id,
-                      lab: this.$store.state.lab
-                    });
-
-                } else if (allChecked) {
+                if (allChecked) {
                   for (const appointment of item.Appointments) {
                     await calendar.delete({
                       id: appointment.id,
@@ -913,12 +908,13 @@ export default {
                     });
                   }
                 } else {
-
-                  for (const app of selectedItem.Appointments) {
-                    await appointment.delete({
-                      id: app.id,
-                      FK_Schedule: item.id,
-                    });
+                  if (!item.calendarEventId) {
+                    for (const app of selectedItem.Appointments) {
+                      await appointment.delete({
+                        id: app.id,
+                        FK_Schedule: item.id,
+                      });
+                    }
                   }
 
                   const newStudyNames = [];
@@ -930,7 +926,7 @@ export default {
                   }
 
                   const newSelectedItem = {
-                    AppointmentTime: this.TodaysDate,
+                    AppointmentTime: selectedItem.AppointmentTime,
                     Status: "Rescheduling",
                     FK_Family: selectedItem.FK_Family,
                     Note: selectedItem.Note,

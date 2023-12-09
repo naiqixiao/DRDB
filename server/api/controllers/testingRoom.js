@@ -5,9 +5,9 @@ exports.create = asyncHandler(async (req, res) => {
   const testingRoomInfo = req.body;
 
   try {
-    await model.testingRoom.create(testingRoomInfo);
+    const testingRoom = await model.testingRoom.create(testingRoomInfo);
 
-    res.status(200).send('a new testingRoom is created.');
+    res.status(200).send(testingRoom);
 
   } catch (error) {
     throw error;

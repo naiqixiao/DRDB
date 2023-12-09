@@ -48,11 +48,31 @@ const config = require("../../config/general");
 exports.create = asyncHandler(async (req, res) => {
   var newScheduleInfo = req.body;
   newScheduleInfo.AppointmentTime = moment(newScheduleInfo.AppointmentTime).toISOString(true)
-
   try {
-    const schedule = await model.schedule.create(newScheduleInfo, {
-      include: [model.appointment],
-    });
+    let schedule;
+    if (!newScheduleInfo.Appointments[0].FK_Schedule) {
+      schedule = await model.schedule.create(newScheduleInfo, {
+        include: [model.appointment],
+      });
+    } else {
+      const appointmentIdsToUpdate = [];
+      for (const app of newScheduleInfo.Appointments) {
+        appointmentIdsToUpdate.push(app.id);
+      }
+      schedule = await model.schedule.create(newScheduleInfo);
+      const newScheduleId = schedule.id;
+
+      const appointmentsToUpdate = newScheduleInfo.Appointments.map(appointment => {
+        return {
+          ...appointment,
+          FK_Schedule: newScheduleId,
+        };
+      });
+
+      for (const app of appointmentsToUpdate) {
+        await model.appointment.create(app);
+      }
+    }
 
     if (newScheduleInfo.Status == 'Confirmed') {
 
@@ -60,7 +80,6 @@ exports.create = asyncHandler(async (req, res) => {
       var experimenterList = [];
       // add secondary experimenters
       var experimenter_2ndList = [];
-
       for (var i = 0; i < schedule.Appointments.length; i++) {
         var appointmentId = schedule.Appointments[i].id;
 
@@ -459,9 +478,22 @@ exports.update = asyncHandler(async (req, res) => {
       //
 
       try {
+
+        if (updatedScheduleInfo.calendarEventId && !updatedScheduleInfo.skipStudyDateTimeStatus) {
+          // check if there was an calendar event created before.
+  
+          try {
+            await calendar.events.delete({
+              calendarId: 'primary',
+              eventId: updatedScheduleInfo.calendarEventId,
+              sendNotifications: true,
+            });
+          } catch (err) {
+            throw err;
+          }
+        }
         
         for (const app of updatedScheduleInfo.Appointments) {
-          console.log(app);
           const testingRooms = await model.testingRoom.findAll({
             where: {FK_Lab: app.Study.FK_Lab},
           });
@@ -507,14 +539,11 @@ exports.update = asyncHandler(async (req, res) => {
         // check if there was an calendar event created before.
 
         try {
-          for (const app of updatedScheduleInfo.Appointments) {
-            const calendarId = app.calendarId;
-            await calendar.events.patch({
-              calendarId: calendarId,
-              resource: updatedScheduleInfo,
-              sendNotifications: true,
-            });
-          }
+          await calendar.events.delete({
+            calendarId: 'primary',
+            eventId: updatedScheduleInfo.calendarEventId,
+            sendNotifications: true,
+          });
         } catch (err) {
           throw err;
         }
@@ -626,12 +655,12 @@ exports.tyEmail = asyncHandler(async (req, res) => {
 
 exports.complete = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
-
   if (updatedScheduleInfo.id) {
-    var ID = updatedScheduleInfo.id;
+    ID = updatedScheduleInfo.id;
     delete updatedScheduleInfo["id"];
   }
-
+  
+  console.log(updatedScheduleInfo);
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
       where: { id: ID },

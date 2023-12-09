@@ -51,11 +51,11 @@ module.exports = function(sequelize, DataTypes) {
 			}
 		},
 		eventURL: {
-			type: DataTypes.STRING(150),
+			type: DataTypes.STRING(255),
 			allowNull: true
 		},
 		calendarEventId: {
-			type: DataTypes.STRING(30),
+			type: DataTypes.STRING(255),
 			allowNull: true
 		},
 		createdAt: {
