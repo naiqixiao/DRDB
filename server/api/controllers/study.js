@@ -15,11 +15,15 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Study Created", User, "created a study (" + study.StudyName + ")");
+    await log.createLog(
+      "Study Created",
+      User,
+      "created a study (" + study.StudyName + ")"
+    );
 
     res.status(200).send(study);
   } catch (error) {
-    throw error
+    throw error;
     // res.status(500).send(error);
   }
 });
@@ -28,31 +32,57 @@ exports.create = asyncHandler(async (req, res) => {
 exports.search = asyncHandler(async (req, res) => {
   var queryString = req.query;
 
+  includeScheules = queryString.includeScheules;
+  delete queryString.includeScheules;
+
   try {
-    const study = await model.study.findAll({
-      where: queryString,
-      include: [
-        model.appointment,
-        model.lab,
-        {
-          model: model.personnel,
-          as: 'PointofContact'
-        },
-        {
-          model: model.personnel,
-          as: 'Experimenters',
-          through: {
-            model: model.experimenter,
+    let study = [];
+
+    if (includeScheules === "true") {
+      study = await model.study.findAll({
+        where: queryString,
+        include: [
+          model.appointment,
+          model.lab,
+          {
+            model: model.personnel,
+            as: "PointofContact",
           },
-        },
-      ],
-    });
+          {
+            model: model.personnel,
+            as: "Experimenters",
+            through: {
+              model: model.experimenter,
+            },
+          },
+        ],
+      });
+
+    } else {
+      study = await model.study.findAll({
+        where: queryString,
+        include: [
+          model.lab,
+          {
+            model: model.personnel,
+            as: "PointofContact",
+          },
+          {
+            model: model.personnel,
+            as: "Experimenters",
+            through: {
+              model: model.experimenter,
+            },
+          },
+        ],
+      });
+    }
 
     console.log("Search successful!");
 
     res.status(200).send(study);
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
@@ -77,11 +107,11 @@ exports.update = asyncHandler(async (req, res) => {
         model.lab,
         {
           model: model.personnel,
-          as: 'PointofContact'
+          as: "PointofContact",
         },
         {
           model: model.personnel,
-          as: 'Experimenters',
+          as: "Experimenters",
           through: {
             model: model.experimenter,
           },
@@ -92,17 +122,20 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Study Updated", User, "update a study's information (" + updatedStudyInfo.StudyName + ")");
+    await log.createLog(
+      "Study Updated",
+      User,
+      "update a study's information (" + updatedStudyInfo.StudyName + ")"
+    );
 
     res.status(200).send(study);
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
 // Delete a Tutorial with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
-
   try {
     const study = await model.study.destroy({
       where: { id: req.query.id },
@@ -111,10 +144,14 @@ exports.delete = asyncHandler(async (req, res) => {
     // Log
     const User = JSON.parse(req.query.User);
 
-    await log.createLog("Study Deleted", User, "deleted a study (" + req.query.id + ")");
+    await log.createLog(
+      "Study Deleted",
+      User,
+      "deleted a study (" + req.query.id + ")"
+    );
 
     res.status(200).json(study);
   } catch (error) {
-    throw error
+    throw error;
   }
 });

@@ -436,6 +436,7 @@ export default {
     async searchLabStudies() {
       var queryString = {
         FK_Lab: store.state.lab,
+        includeScheules: false,
         Completed: 0,
       };
 
@@ -619,7 +620,7 @@ export default {
   background-color: var(--v-secondary-lighten1) !important;
 } */
 
-/deep/ tr.v-data-table__selected {
+.tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */
