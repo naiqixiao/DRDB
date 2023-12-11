@@ -473,7 +473,7 @@
                     </v-col>
 
                     <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                      <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
+                      <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="3">
                         <v-card :class="{ 'testing-room-card': true, 'selected-card': isSelected(room.id) }" @click="selectRoom(room.id)">
                           <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
                           <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
@@ -808,6 +808,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
+        includeScheules: false
       };
 
       try {
@@ -1256,7 +1257,7 @@ body {
   background-color: var(--v-secondary-lighten1) !important;
 } */
 
-/deep/ tr.v-data-table__selected {
+.tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */
