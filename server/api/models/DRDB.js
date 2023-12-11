@@ -239,14 +239,23 @@ async function importSqlFile(filePath) {
     // Execute only ALTER TABLE statements for adding columns if they do not exist
     for (const query of queries) {
       if (query.trim().startsWith('ALTER TABLE')) {
-        // Check if the column already exists
-        const columnExists = await columnExistsInTable(query);
+        if (query.includes('MODIFY')) {
+          const updateColumn = updateColumnLength(query);
 
-        // If the column does not exist, execute the ALTER TABLE statement
-        if (!columnExists) {
-          await sequelize.query(query);
+          if (updateColumn) {
+            await sequelize.query(query);
+          }
+          continue;
+        } else if (query.includes('ADD')) {
+          // Check if the column already exists
+          const columnExists = await columnExistsInTable(query);
+
+          // If the column does not exist, execute the ALTER TABLE statement
+          if (!columnExists) {
+            await sequelize.query(query);
+          }
+          continue;
         }
-        continue;
       } 
       if (query.trim().startsWith('CREATE TABLE')) {
         const tableExists = await tableExistsInDatabase(query);
@@ -300,46 +309,35 @@ async function tableExistsInDatabase(query) {
   }
 }
 
-// Import SQL file
-importSqlFile('../../../MySQL/databaseUpdate.sql');
 
-async function updateColumn(filePath) {
+async function updateColumnLength(query) {
   try {
-     // Read SQL file
-     const sql = fs.readFileSync(path.resolve(__dirname,filePath), 'utf8');
-
-     // Split SQL file into individualqueries
-     const queries = sql.split(';');
- 
-     const scheduleDataType = await sequelize.query(`
-      SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = 'drdb'
-      AND TABLE_NAME = 'Schedule'
-      AND COLUMN_NAME = 'eventURL';
-     `);
-     
-     const appointmentDataType = await sequelize.query(`
-      SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = 'drdb'
-      AND TABLE_NAME = 'Appointment'
-      AND COLUMN_NAME = 'eventURL';
-     `);
-     
-     const scheduleEventURLLength = scheduleDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
-     const appointmentEventURLLength = appointmentDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
-     
+    const scheduleDataType = await sequelize.query(`
+    SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'drdb'
+    AND TABLE_NAME = 'Schedule'
+    AND COLUMN_NAME = 'eventURL';
+    `);
+    
+    const appointmentDataType = await sequelize.query(`
+    SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = 'drdb'
+    AND TABLE_NAME = 'Appointment'
+    AND COLUMN_NAME = 'eventURL';
+    `);
+    
+    const scheduleEventURLLength = scheduleDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
+    const appointmentEventURLLength = appointmentDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
+    
     if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
-      for (const query of queries) {
-        console.log(query);
-        await sequelize.query(query);
-      }
-      console.log('Columns updated')
-    } else {
-      console.log('Columns up to date')
+      return true
     }
+    
+    return false;
   } catch(err) {
     console.error('error: ' + err.message);
   }
 }
-updateColumn('../../../MySQL/databaseUpdate02.sql');
 
+// Import SQL file
+importSqlFile('../../../MySQL/databaseUpdate.sql');
