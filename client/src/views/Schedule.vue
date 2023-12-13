@@ -1,36 +1,18 @@
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
-      <v-alert
-        border="left"
-        type="error"
-        color="#c73460"
-        dense
-        style="font-weight: 600"
-        >Lab email is not been setup properly. Please set it up in the Settings
-        page.</v-alert
-      >
+      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600">Lab email is not been setup
+        properly. Please set it up in the Settings
+        page.</v-alert>
     </div>
     <div v-if="!$store.state.adminEmailStatus">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >Admin email is not been setup properly. Please set it up in the
-        Settings page.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">Admin email is not been setup
+        properly. Please set it up in the
+        Settings page.</v-alert>
     </div>
     <div v-if="$store.state.trainingMode">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >You are running in a training mode.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">You are running in a training
+        mode.</v-alert>
     </div>
 
     <ConfirmDlg ref="confirmD" />
@@ -42,20 +24,9 @@
             <h1 class="text-left">Choose a study</h1>
           </v-col>
           <v-col cols="12" md="12">
-            <v-select
-              class="selection"
-              :items="studies"
-              :item-value="'id'"
-              :item-text="'StudyName'"
-              v-model="selectedStudy"
-              return-object
-              label="Studies"
-              @change="searchChild"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-            ></v-select>
+            <v-select class="selection" :items="studies" :item-value="'id'" :item-text="'StudyName'"
+              v-model="selectedStudy" return-object label="Studies" @change="searchChild"
+              background-color="textbackground" hide-details outlined dense></v-select>
           </v-col>
         </v-row>
 
@@ -92,12 +63,8 @@
           </v-col>
           <v-spacer></v-spacer>
           <v-col cols="12" md="3" style="text-align: end">
-            <Page
-              :page="page"
-              :NofPages="Children ? Children.length : 0"
-              @nextPage="nextPage"
-              @previousPage="previousPage"
-            ></Page>
+            <Page :page="page" :NofPages="Children ? Children.length : 0" @nextPage="nextPage"
+              @previousPage="previousPage"></Page>
           </v-col>
         </v-row>
         <v-row justify="start" align="center">
@@ -105,39 +72,20 @@
             <v-divider></v-divider>
             <h4 class="text-left">Family information:</h4>
           </v-col>
-          <v-col
-            cols="12"
-            v-for="item in familyField.map((i) => this.$familyFields[i])"
-            :md="item.width"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="
-                item.label === 'Phone' || item.label === 'Cell Phone'
-                  ? PhoneFormated(currentFamily[item.field])
-                  : currentFamily[item.field]
-              "
-              readonly
-              placeholder="  "
-              outlined
-              dense
-            ></v-text-field>
+          <v-col cols="12" v-for="item in familyField.map((i) => this.$familyFields[i])" :md="item.width"
+            :key="item.label">
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+              :value="item.label === 'Phone' || item.label === 'Cell Phone'
+                ? PhoneFormated(currentFamily[item.field])
+                : currentFamily[item.field]
+                " readonly placeholder="  " outlined dense></v-text-field>
           </v-col>
           <!-- <v-col cols="12" md="2"></v-col> -->
           <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    color="primary"
-                    fab
-                    @click.stop="editFamily"
-                    :disabled="!currentFamily.id"
-                  >
+                  <v-btn color="primary" fab @click.stop="editFamily" :disabled="!currentFamily.id">
                     <v-icon>edit</v-icon>
                   </v-btn>
                 </div>
@@ -147,11 +95,7 @@
           </v-col>
         </v-row>
 
-        <v-dialog
-          v-model="dialogFamilyEdit"
-          max-width="1200px"
-          :retain-focus="false"
-        >
+        <v-dialog v-model="dialogFamilyEdit" max-width="1200px" :retain-focus="false">
           <v-card outlined>
             <v-card-title>
               <span class="headline">Edit family information</span>
@@ -167,55 +111,27 @@
                     <v-divider></v-divider>
                     <h4 class="text-left">Family information:</h4>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    :md="item.width"
-                    v-for="item in this.$familyBasicInfo"
-                    :key="item.label"
-                  >
+                  <v-col cols="12" :md="item.width" v-for="item in this.$familyBasicInfo" :key="item.label">
                     <div v-if="!!item.options">
                       <!-- :item-value="$Options[item.options]" -->
                       <div v-if="item.field != 'AutismHistory'">
-                        <v-combobox
-                          justify="start"
-                          v-model="editedFamily[item.field]"
-                          :items="$Options[item.options]"
-                          outlined
-                          :label="item.label"
-                          dense
-                        ></v-combobox>
+                        <v-combobox justify="start" v-model="editedFamily[item.field]" :items="$Options[item.options]"
+                          outlined :label="item.label" dense></v-combobox>
                       </div>
                       <div v-else>
                         <!-- :item-value="editedFamily[item.field]"
                         :item-text="AutismText(editedFamily[item.field])" -->
-                        <v-select
-                          :items="$Options[item.options]"
-                          v-model="editedFamily[item.field]"
-                          :return-object="false"
-                          :label="item.label"
-                          outlined
-                          dense
-                        ></v-select>
+                        <v-select :items="$Options[item.options]" v-model="editedFamily[item.field]"
+                          :return-object="false" :label="item.label" outlined dense></v-select>
                       </div>
                     </div>
                     <div v-else-if="item.rules">
-                      <v-text-field
-                        :label="item.label"
-                        :rules="$rules[item.rules]"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        hide-details
-                        dense
-                      ></v-text-field>
+                      <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedFamily[item.field]"
+                        outlined hide-details dense></v-text-field>
                     </div>
                     <div v-else>
-                      <v-text-field
-                        :label="item.label"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        hide-details
-                        dense
-                      ></v-text-field>
+                      <v-text-field :label="item.label" v-model="editedFamily[item.field]" outlined hide-details
+                        dense></v-text-field>
                     </div>
                   </v-col>
 
@@ -223,40 +139,18 @@
                     <v-divider></v-divider>
                     <h4 class="text-left">Contact information:</h4>
                   </v-col>
-                  <v-col
-                    cols="12"
-                    :md="item.width"
-                    v-for="item in this.$familyContactInfo"
-                    :key="item.label"
-                  >
+                  <v-col cols="12" :md="item.width" v-for="item in this.$familyContactInfo" :key="item.label">
                     <div v-if="item.options">
-                      <v-combobox
-                        justify="start"
-                        :items="$Options[item.options]"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        :label="item.label"
-                        dense
-                      ></v-combobox>
+                      <v-combobox justify="start" :items="$Options[item.options]" v-model="editedFamily[item.field]"
+                        outlined :label="item.label" dense></v-combobox>
                     </div>
                     <div v-else-if="item.rules">
-                      <v-text-field
-                        :label="item.label"
-                        :rules="$rules[item.rules]"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        hide-details
-                        dense
-                      ></v-text-field>
+                      <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedFamily[item.field]"
+                        outlined hide-details dense></v-text-field>
                     </div>
                     <div v-else>
-                      <v-text-field
-                        :label="item.label"
-                        v-model="editedFamily[item.field]"
-                        outlined
-                        hide-details
-                        dense
-                      ></v-text-field>
+                      <v-text-field :label="item.label" v-model="editedFamily[item.field]" outlined hide-details
+                        dense></v-text-field>
                     </div>
                   </v-col>
                 </v-row>
@@ -266,9 +160,7 @@
               <v-row justify="space-between">
                 <v-col md="4"></v-col>
                 <v-col md="2">
-                  <v-btn color="primary" @click="dialogFamilyEdit = false"
-                    >Cancel</v-btn
-                  >
+                  <v-btn color="primary" @click="dialogFamilyEdit = false">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
                   <v-btn color="primary" @click="saveFamily">Save</v-btn>
@@ -285,61 +177,26 @@
             <h4 class="text-left">Child information:</h4>
           </v-col>
 
-          <v-col
-            cols="12"
-            :md="item.width"
-            v-for="item in childField"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              v-model="currentChild[item.field]"
-              readonly
-              placeholder="  "
-              outlined
-              dense
-            ></v-text-field>
+          <v-col cols="12" :md="item.width" v-for="item in childField" :key="item.label">
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+              v-model="currentChild[item.field]" readonly placeholder="  " outlined dense></v-text-field>
           </v-col>
 
           <v-col cols="12" md="3">
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              label="Age"
-              :value="AgeFormated(currentChild.DoB)"
-              readonly
-              placeholder="  "
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Age"
+              :value="AgeFormated(currentChild.DoB)" readonly placeholder="  " outlined dense></v-text-field>
           </v-col>
           <v-col cols="12" md="1"></v-col>
 
           <v-col md="10">
-            <v-textarea
-              class="conv-textarea"
-              label="Note about this child"
-              outlined
-              no-resize
-              rows="4"
-              hide-details
-              v-model="currentChild.Note"
-            ></v-textarea>
+            <v-textarea class="conv-textarea" label="Note about this child" outlined no-resize rows="4" hide-details
+              v-model="currentChild.Note"></v-textarea>
           </v-col>
           <v-col cols="12" md="2" style="text-align: center">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    color="primary"
-                    fab
-                    @click.stop="editChild"
-                    :disabled="!currentChild.id"
-                  >
+                  <v-btn color="primary" fab @click.stop="editChild" :disabled="!currentChild.id">
                     <v-icon>edit</v-icon>
                   </v-btn>
                 </div>
@@ -355,38 +212,22 @@
             <h4 class="text-left">Schedule a study for this child:</h4>
           </v-col>
           <v-col cols="12" md="9">
-            <v-select
-              :items="Responses"
-              v-model="response"
-              :label="
-                currentChild.scheduled || contactedByOthers
-                  ? 'This family is already scheduled.'
-                  : 'Parents\'\ response'
-              "
-              :disabled="
-                !currentChild.id ||
-                currentChild.scheduled ||
-                !$store.state.labEmailStatus ||
-                contactedByOthers
-              "
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-            ></v-select>
+            <v-select :items="Responses" v-model="response" :label="currentChild.scheduled || contactedByOthers
+              ? 'This family is already scheduled.'
+              : 'Parents\'\ response'
+              " :disabled="!currentChild.id ||
+    currentChild.scheduled ||
+    !$store.state.labEmailStatus ||
+    contactedByOthers
+    " class="textfield-family" background-color="textbackground" hide-details outlined dense></v-select>
           </v-col>
 
           <v-col cols="12" md="3">
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    color="primary"
-                    large
-                    @click.stop="scheduleChild"
-                    :disabled="response == null"
-                    >{{ response === "Rejected" ? "¯\\\_(ツ)_/¯" : "" }}
+                  <v-btn color="primary" large @click.stop="scheduleChild" :disabled="response == null">{{ response ===
+                    "Rejected" ? "¯\\\_(ツ)_/¯" : "" }}
                     <v-icon>{{ scheduleButtonIcon }}</v-icon>
                   </v-btn>
                 </div>
@@ -397,20 +238,12 @@
 
           <v-dialog v-model="dobPicker" max-width="290px">
             <v-card outlined>
-              <v-date-picker
-                v-model="editedChild.DoB"
-                show-current
-                :max="new Date().toISOString()"
-                @click:date="dobPicker = false"
-              ></v-date-picker>
+              <v-date-picker v-model="editedChild.DoB" show-current :max="new Date().toISOString()"
+                @click:date="dobPicker = false"></v-date-picker>
             </v-card>
           </v-dialog>
 
-          <v-dialog
-            v-model="dialogChildEdit"
-            max-width="1000px"
-            :retain-focus="false"
-          >
+          <v-dialog v-model="dialogChildEdit" max-width="1000px" :retain-focus="false">
             <v-card outlined>
               <v-card-title>
                 <span class="headline">Child's information</span>
@@ -419,93 +252,36 @@
                 <v-form ref="formChild" v-model="validChild" lazy-validation>
                   <v-container>
                     <v-row dense style="padding: 8px 8px 4px">
-                      <v-col
-                        cols="12"
-                        :md="item.width"
-                        v-for="item in this.$childInfo"
-                        :key="item.label"
-                      >
+                      <v-col cols="12" :md="item.width" v-for="item in this.$childInfo" :key="item.label">
                         <div v-if="!!item.options">
-                          <v-combobox
-                            :label="item.label"
-                            :items="$Options[item.options]"
-                            justify="start"
-                            v-model="editedChild[item.field]"
-                            outlined
-                            hide-details
-                            dense
-                          ></v-combobox>
+                          <v-combobox :label="item.label" :items="$Options[item.options]" justify="start"
+                            v-model="editedChild[item.field]" outlined hide-details dense></v-combobox>
                         </div>
                         <div v-else-if="item.label === 'Note'">
-                          <v-textarea
-                            class="conv-textarea"
-                            :label="item.label"
-                            outlined
-                            no-resize
-                            rows="4"
-                            hide-details
-                            v-model="editedChild[item.field]"
-                          ></v-textarea>
+                          <v-textarea class="conv-textarea" :label="item.label" outlined no-resize rows="4" hide-details
+                            v-model="editedChild[item.field]"></v-textarea>
                         </div>
                         <div v-else-if="item.field === 'DoB'">
-                          <v-text-field
-                            v-model="editedChild.DoB"
-                            append-icon="event"
-                            @click:append="dobPicker = true"
-                            :rules="$rules.dob"
-                            :label="item.label"
-                            class="textfield-family"
-                            filled
-                            hide-details
-                            dense
-                            placeholder="  "
-                            outlined
-                            background-color="textbackground"
-                          ></v-text-field>
+                          <v-text-field v-model="editedChild.DoB" append-icon="event" @click:append="dobPicker = true"
+                            :rules="$rules.dob" :label="item.label" class="textfield-family" filled hide-details dense
+                            placeholder="  " outlined background-color="textbackground"></v-text-field>
                         </div>
                         <div v-else-if="!!item.rules">
-                          <v-text-field
-                            class="textfield-family"
-                            filled
-                            hide-details
-                            :label="item.label"
-                            v-model="editedChild[item.field]"
-                            dense
-                            placeholder="  "
-                            outlined
-                            :rules="$rules[item.rules]"
-                            background-color="textbackground"
-                          ></v-text-field>
+                          <v-text-field class="textfield-family" filled hide-details :label="item.label"
+                            v-model="editedChild[item.field]" dense placeholder="  " outlined :rules="$rules[item.rules]"
+                            background-color="textbackground"></v-text-field>
                         </div>
                         <div v-else>
-                          <v-text-field
-                            class="textfield-family"
-                            filled
-                            hide-details
-                            :label="item.label"
-                            v-model="editedChild[item.field]"
-                            dense
-                            placeholder="  "
-                            outlined
-                            background-color="textbackground"
-                          ></v-text-field>
+                          <v-text-field class="textfield-family" filled hide-details :label="item.label"
+                            v-model="editedChild[item.field]" dense placeholder="  " outlined
+                            background-color="textbackground"></v-text-field>
                         </div>
                       </v-col>
                     </v-row>
                     <v-row>
-                      <v-col
-                        cols="12"
-                        :md="item.width"
-                        v-for="item in this.$childSensitiveInfo"
-                        :key="item.label"
-                      >
-                        <v-checkbox
-                          class="checkbox-child"
-                          hide-details
-                          :label="item.label"
-                          v-model="editedChild[item.field]"
-                          dense
-                        >
+                      <v-col cols="12" :md="item.width" v-for="item in this.$childSensitiveInfo" :key="item.label">
+                        <v-checkbox class="checkbox-child" hide-details :label="item.label"
+                          v-model="editedChild[item.field]" dense>
                         </v-checkbox>
                       </v-col>
                     </v-row>
@@ -518,9 +294,7 @@
                 <v-row justify="space-between">
                   <v-col md="4"></v-col>
                   <v-col md="2">
-                    <v-btn color="primary" @click="dialogChildEdit = false"
-                      >Cancel</v-btn
-                    >
+                    <v-btn color="primary" @click="dialogChildEdit = false">Cancel</v-btn>
                   </v-col>
                   <v-col md="2">
                     <v-btn color="primary" @click="saveChild">Save</v-btn>
@@ -531,26 +305,15 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog
-            v-model="dialogSchedule"
-            max-width="1200px"
-            :retain-focus="false"
-          >
+          <v-dialog v-model="dialogSchedule" max-width="1200px" :retain-focus="false">
             <v-stepper v-model="e1">
               <v-stepper-header>
-                <v-stepper-step
-                  :complete="e1 > 1"
-                  editable
-                  step="1"
-                  @click="emailDialog = false"
-                  >Schedule studies for {{ currentChild.Name }}</v-stepper-step
-                >
+                <v-stepper-step :complete="e1 > 1" editable step="1" @click="emailDialog = false">Schedule studies for {{
+                  currentChild.Name }}</v-stepper-step>
 
                 <v-divider></v-divider>
 
-                <v-stepper-step :complete="e1 > 2" step="2"
-                  >Email</v-stepper-step
-                >
+                <v-stepper-step :complete="e1 > 2" step="2">Email</v-stepper-step>
 
                 <v-divider></v-divider>
 
@@ -559,341 +322,175 @@
 
               <v-stepper-items>
                 <v-stepper-content step="1">
-                  <v-row
-                    style="height: 650px"
-                    align="start"
-                    justify="center"
-                    dense
-                  >
+                  <v-row style="height: 650px" align="start" justify="center" dense>
                     <v-card outlined style="height: 650px" width="90%">
-                      <v-form
-                        ref="scheduleDateTime"
-                        v-model="validScheduleDateTime"
-                        lazy-validation
-                      >
-                        <v-row
-                          style="height: 100px"
-                          align="center"
-                          justify="start"
-                          dense
-                        >
+                      <v-form ref="scheduleDateTime" v-model="validScheduleDateTime" lazy-validation>
+                        <v-row style="height: 100px" align="center" justify="start" dense>
                           <v-col cols="12" md="3" class="text-left">
                             <div class="title" style="padding-left: 8px">
                               {{ "Study date & time:" }}
                             </div>
                           </v-col>
                           <v-col cols="12" md="2">
-                            <v-text-field
-                              ref="studyDate"
-                              label="Study date"
-                              v-model="studyDate"
-                              append-icon="event"
-                              :rules="$rules.dob"
-                              @click:append="datePicker = true"
-                              :disabled="
-                                this.response != 'Confirmed' ||
+                            <v-text-field ref="studyDate" label="Study date" v-model="studyDate" append-icon="event"
+                              :rules="$rules.dob" @click:append="datePicker = true" :disabled="this.response != 'Confirmed' ||
                                 this.skipStudyDateTimeStatus
-                              "
-                              hide-details
-                              dense
-                            ></v-text-field>
+                                " hide-details dense></v-text-field>
                           </v-col>
                           <v-col cols="12" md="1"></v-col>
                           <v-col cols="12" md="2">
-                            <v-combobox
-                              v-model="studyTime"
-                              :items="this.$studyTimeSlots"
-                              :rules="$rules.time"
-                              label="Study time"
-                              :disabled="
-                                this.response != 'Confirmed' ||
+                            <v-combobox v-model="studyTime" :items="this.$studyTimeSlots" :rules="$rules.time"
+                              label="Study time" :disabled="this.response != 'Confirmed' ||
                                 this.skipStudyDateTimeStatus
-                              "
-                              hide-details
-                              dense
-                            ></v-combobox>
+                                " hide-details dense></v-combobox>
                           </v-col>
                           <v-col cols="12" md="1"></v-col>
                           <v-col cols="12" md="3">
                             <v-tooltip right>
                               <template v-slot:activator="{ on }">
                                 <div v-on="on">
-                                  <v-checkbox
-                                    style="padding: 4px !important"
-                                    label="Skip study date/time"
-                                    class="ma-0 pa-0"
-                                    :value="skipStudyDateTimeStatus"
-                                    @change="skipStudyDateTime()"
-                                    :disabled="response != 'Confirmed'"
-                                    hide-details
-                                    dense
-                                  ></v-checkbox>
+                                  <v-checkbox style="padding: 4px !important" label="Skip study date/time"
+                                    class="ma-0 pa-0" :value="skipStudyDateTimeStatus" @change="skipStudyDateTime()"
+                                    :disabled="response != 'Confirmed'" hide-details dense></v-checkbox>
                                 </div>
                               </template>
-                              <span
-                                >Check this box to use current date/time for the
+                              <span>Check this box to use current date/time for the
                                 current appointment.<br />NO Google Calendar
-                                event will be created.</span
-                              >
+                                event will be created.</span>
                             </v-tooltip>
                             <v-tooltip right>
                               <template v-slot:activator="{ on }">
                                 <div v-on="on">
-                                  <v-checkbox
-                                    style="padding: 4px !important"
-                                    label="Skip reminder email"
-                                    class="ma-0 pa-0"
-                                    :value="skipReminderEmailStatus"
-                                    @change="skipReminderEmail()"
-                                    :disabled="response != 'Confirmed'"
-                                    hide-details
-                                    dense
-                                  ></v-checkbox>
+                                  <v-checkbox style="padding: 4px !important" label="Skip reminder email"
+                                    class="ma-0 pa-0" :value="skipReminderEmailStatus" @change="skipReminderEmail()"
+                                    :disabled="response != 'Confirmed'" hide-details dense></v-checkbox>
                                 </div>
                               </template>
-                              <span
-                                >Check this box to prevent reminder email from
-                                being sent to the participant.</span
-                              >
+                              <span>Check this box to prevent reminder email from
+                                being sent to the participant.</span>
                             </v-tooltip>
                           </v-col>
                         </v-row>
                       </v-form>
                       <v-divider style="margin-bottom: 16px"></v-divider>
                       <div style="height: 290px; overflow-y: scroll !important">
-                        <ExtraStudies
-                          v-for="(appointment, index) in appointments"
-                          :key="appointment.index"
-                          ref="extraStudies"
-                          :child="appointment.Child"
-                          :targetChild="currentChild"
-                          :currentStudy="selectedStudy"
-                          :index="index"
-                          :response="response"
-                          :potentialStudies="
-                            potentialStudies(appointment.Child)
-                              .potentialStudyList
-                          "
-                          type="newSchedule"
-                          :nOfAppointments="appointments.length"
-                          @selectStudy="selectStudy"
-                          @deleteAppointment="deleteAppointment"
-                          @emitSelectedStudy="receiveSelectedStudy"
-                          @primaryExperimenterStatus="checkPrimaryExperimenter"
-                          align="start"
-                        ></ExtraStudies>
+                        <ExtraStudies v-for="(appointment, index) in appointments" :key="appointment.index"
+                          ref="extraStudies" :child="appointment.Child" :targetChild="currentChild"
+                          :currentStudy="selectedStudy" :index="index" :response="response" :potentialStudies="potentialStudies(appointment.Child)
+                            .potentialStudyList
+                            " type="newSchedule" :nOfAppointments="appointments.length" @selectStudy="selectStudy"
+                          @deleteAppointment="deleteAppointment" @emitSelectedStudy="receiveSelectedStudy"
+                          @primaryExperimenterStatus="checkPrimaryExperimenter" align="start"></ExtraStudies>
                       </div>
                       <v-spacer></v-spacer>
-                      <v-divider
-                        style="margin-bottom: 4px"
-                        v-show="response !== 'Rejected'"
-                      ></v-divider>
-                      <v-row
-                        dense
-                        v-if="response !== 'Rejected'"
-                        align="center"
-                        justify="start"
-                        style="height: 100px"
-                      >
+                      <v-divider style="margin-bottom: 4px" v-show="response !== 'Rejected'"></v-divider>
+                      <v-row dense v-if="response !== 'Rejected'" align="center" justify="start" style="height: 100px">
                         <v-col cols="12" md="3" class="text-left">
                           <h4 class="text-left">
                             Additional appointment(s) for:
                           </h4>
                         </v-col>
                         <v-col cols="12" md="2" class="text-left">
-                          <v-btn
-                            class="text-capitalize"
-                            rounded
-                            color="primary"
-                            @click="newAppointment(currentChild)"
-                            :disabled="
-                              potentialStudies(currentChild).selectableStudies
-                                .length < 1
-                            "
-                            >{{
-                              !!currentChild.Name
-                                ? currentChild.Name.split(" ")[0]
-                                : "Name is missing"
-                            }}</v-btn
-                          >
+                          <v-btn class="text-capitalize" rounded color="primary" @click="newAppointment(currentChild)"
+                            :disabled="potentialStudies(currentChild).selectableStudies
+                              .length < 1
+                              ">{{
+    !!currentChild.Name
+    ? currentChild.Name.split(" ")[0]
+    : "Name is missing"
+  }}</v-btn>
                         </v-col>
-                        <v-col
-                          cols="12"
-                          md="2"
-                          v-for="child in currentChild.sibling"
-                          :key="child.id"
-                        >
-                          <v-btn
-                            class="text-capitalize"
-                            rounded
-                            color="primary"
-                            @click="newAppointment(child)"
-                            :disabled="
-                              potentialStudies(child).selectableStudies.length <
-                              1
-                            "
-                            >{{
-                              !!child.Name
-                                ? child.Name.split(" ")[0]
-                                : "Name is missing"
-                            }}</v-btn
-                          >
+                        <v-col cols="12" md="2" v-for="child in currentChild.sibling" :key="child.id">
+                          <v-btn class="text-capitalize" rounded color="primary" @click="newAppointment(child)" :disabled="potentialStudies(child).selectableStudies.length <
+                            1
+                            ">{{
+    !!child.Name
+    ? child.Name.split(" ")[0]
+    : "Name is missing"
+  }}</v-btn>
                         </v-col>
                       </v-row>
                       <v-spacer></v-spacer>
                       <v-divider style="margin-bottom: 4px"></v-divider>
-                      <v-row
-                        dense
-                        style="height: 150px"
-                        align="center"
-                        justify="center"
-                      >
+                      <v-row dense style="height: 150px" align="center" justify="center">
                         <v-col md="11">
-                          <v-textarea
-                            class="conv-textarea"
-                            label="Notes for this schedule"
-                            outlined
-                            no-resize
-                            rows="6"
-                            hide-details
-                            v-model="scheduleNotes"
-                          ></v-textarea>
+                          <v-textarea class="conv-textarea" label="Notes for this schedule" outlined no-resize rows="6"
+                            hide-details v-model="scheduleNotes"></v-textarea>
                         </v-col>
                       </v-row>
                     </v-card>
                   </v-row>
                   <!-- <v-divider></v-divider> -->
-                  <v-row
-                    justify="space-between"
-                    align="center"
-                    style="padding: 8px"
-                  >
+                  <v-row justify="space-between" align="center" style="padding: 8px">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
-                      <v-btn
-                        :loading="loadingStatus"
-                        color="primary"
-                        :disabled="
-                          response === 'Confirmed'
-                            ? !(studyDateTime || skipStudyDateTimeStatus)
-                            : false
-                        "
-                        @click="continue12()"
-                      >
-                        <v-icon dark left v-show="scheduleId"
-                          >mdi-checkbox-marked-circle</v-icon
-                        >
+                      <v-btn :loading="loadingStatus" color="primary" :disabled="response === 'Confirmed'
+                        ? !(studyDateTime || skipStudyDateTimeStatus)
+                        : false
+                        " @click="continue12()">
+                        <v-icon dark left v-show="scheduleId">mdi-checkbox-marked-circle</v-icon>
                         {{ scheduleButtonText }}
                       </v-btn>
 
-                      <v-btn
-                        v-if="response == 'Confirmed' && manualCalendar"
-                        @click="createCalendarbyScheduleId"
-                        >Create Calendar</v-btn
-                      >
+                      <v-btn v-if="response == 'Confirmed' && manualCalendar" @click="createCalendarbyScheduleId">Create
+                        Calendar</v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn
-                        :disabled="!scheduleNextPage"
-                        @click="scheduleNextStep"
-                        >Next</v-btn
-                      >
+                      <v-btn :disabled="!scheduleNextPage" @click="scheduleNextStep">Next</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
 
                 <v-stepper-content step="2">
-                  <v-row
-                    style="height: 700px"
-                    align="start"
-                    justify="center"
-                    dense
-                  >
+                  <v-row style="height: 700px" align="start" justify="center" dense>
                     <v-card outlined style="height: 700px" width="90%">
-                      <Email
-                        ref="Email"
-                        :dialog="emailDialog"
-                        :familyInfo="currentFamily"
-                        :scheduleInfo="currentSchedule"
-                        :appointments="appointments"
-                        :emailType="emailType"
-                      ></Email>
+                      <Email ref="Email" :dialog="emailDialog" :familyInfo="currentFamily" :scheduleInfo="currentSchedule"
+                        :appointments="appointments" :emailType="emailType"></Email>
                     </v-card>
                   </v-row>
                   <!-- <v-divider></v-divider> -->
-                  <v-row
-                    justify="space-between"
-                    align="center"
-                    style="padding: 8px"
-                  >
+                  <v-row justify="space-between" align="center" style="padding: 8px">
                     <v-col cols="12" md="2">
                       <v-tooltip top>
                         <template v-slot:activator="{ on }">
                           <div v-on="on">
-                            <v-checkbox
-                              label="Skip email"
-                              class="ma-0 pa-0"
-                              :value="skipConfirmationEmailStatus"
-                              @change="skipConfirmationEmail()"
-                              :disabled="response != 'Confirmed'"
-                              dense
-                            ></v-checkbox>
+                            <v-checkbox label="Skip email" class="ma-0 pa-0" :value="skipConfirmationEmailStatus"
+                              @change="skipConfirmationEmail()" :disabled="response != 'Confirmed'" dense></v-checkbox>
                           </div>
                         </template>
                         <span>Check this box to skip emailing to parents.</span>
                       </v-tooltip>
                     </v-col>
                     <v-col cols="12" md="6">
-                      <v-btn
-                        :loading="loadingStatus"
-                        color="primary"
-                        @click="continue23()"
-                        :disabled="
-                          !currentFamily.Email ||
-                          this.skipConfirmationEmailStatus ||
-                          !this.$store.state.labEmailStatus
-                        "
-                      >
-                        <v-icon dark left v-show="emailSent"
-                          >mdi-checkbox-marked-circle</v-icon
-                        >{{ emailButtonText }}
+                      <v-btn :loading="loadingStatus" color="primary" @click="continue23()" :disabled="!currentFamily.Email ||
+                        this.skipConfirmationEmailStatus ||
+                        !this.$store.state.labEmailStatus
+                        ">
+                        <v-icon dark left v-show="emailSent">mdi-checkbox-marked-circle</v-icon>{{ emailButtonText }}
                       </v-btn>
                     </v-col>
                     <v-col cols="12" md="2">
-                      <v-btn
-                        :disabled="
-                          !scheduleNextPage &&
-                          !!currentFamily.Email &&
-                          !this.skipConfirmationEmailStatus
-                        "
-                        @click="scheduleNextStep"
-                        >{{
-                          !!currentFamily.Email &&
-                          !this.skipConfirmationEmailStatus &&
-                          this.$store.state.labEmailStatus
-                            ? "Next"
-                            : "Skip email"
-                        }}</v-btn
-                      >
+                      <v-btn :disabled="!scheduleNextPage &&
+                        !!currentFamily.Email &&
+                        !this.skipConfirmationEmailStatus
+                        " @click="scheduleNextStep">{{
+                        !!currentFamily.Email &&
+                        !this.skipConfirmationEmailStatus &&
+                        this.$store.state.labEmailStatus
+                        ? "Next"
+                        : "Skip email"
+                      }}</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
 
                 <v-stepper-content step="3">
-                  <NextContact
-                    ref="NextContact"
-                    :familyId="currentFamily.id"
-                    :labId="$store.state.lab"
-                    :studyDate="studyDate"
-                    :contactType="response"
-                    :nextContactDialog="nextContactDialog"
-                  ></NextContact>
+                  <NextContact ref="NextContact" :familyId="currentFamily.id" :labId="$store.state.lab"
+                    :studyDate="studyDate" :contactType="response" :nextContactDialog="nextContactDialog"></NextContact>
 
                   <v-row dense justify="center" align="center">
                     <v-col>
-                      <v-btn color="primary" @click="completeSchedule()"
-                        >Complete</v-btn
-                      >
+                      <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -903,13 +500,8 @@
 
           <v-dialog v-model="datePicker" max-width="290px">
             <v-card outlined>
-              <v-date-picker
-                v-model="studyDate"
-                show-current
-                @click:date="datePick"
-                :min="earliestDate"
-                :max="latestDate"
-              ></v-date-picker>
+              <v-date-picker v-model="studyDate" show-current @click:date="datePick" :min="earliestDate"
+                :max="latestDate"></v-date-picker>
             </v-card>
           </v-dialog>
         </v-row>
@@ -928,14 +520,8 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    fab
-                    @click="NoMoreContact()"
-                    :disabled="!currentChild.id"
-                  >
-                    <v-icon color="warning" style="padding-right: 5px"
-                      >pan_tool</v-icon
-                    >
+                  <v-btn fab @click="NoMoreContact()" :disabled="!currentChild.id">
+                    <v-icon color="warning" style="padding-right: 5px">pan_tool</v-icon>
                   </v-btn>
                 </div>
               </template>
@@ -945,21 +531,14 @@
         </v-row>
       </v-col>
       <v-col cols="12" md="3">
-        <NotesConversation
-          :Conversation="currentFamily.Conversations"
-          :familyId="parseInt(currentFamily.id)"
-          :notes="currentFamily.Note"
-          @updateNotes="saveNotes"
-        ></NotesConversation>
+        <NotesConversation :Conversation="currentFamily.Conversations" :familyId="parseInt(currentFamily.id)"
+          :notes="currentFamily.Note" @updateNotes="saveNotes"></NotesConversation>
       </v-col>
     </v-row>
 
     <v-row justify="start" height="450px">
       <v-col cols="12" md="9">
-        <AppointmentTableBrief
-          :Appointments="currentFamily.Appointments"
-          :family="currentFamily"
-        ></AppointmentTableBrief>
+        <AppointmentTableBrief :Appointments="currentFamily.Appointments" :family="currentFamily"></AppointmentTableBrief>
       </v-col>
 
       <v-col cols="12" md="3">
@@ -1484,13 +1063,13 @@ export default {
         extraAppointments.appointment
       );
 
-      if (this.Experimenters.lenth < 1) {
-        this.Experimenters = extraAppointments.attendees;
-      } else {
-        extraAppointments.attendees.forEach((experimenter) => {
-          this.Experimenters.push(experimenter);
-        });
-      }
+      // if (this.Experimenters.lenth < 1) {
+      //   this.Experimenters = extraAppointments.attendees;
+      // } else {
+      //   extraAppointments.attendees.forEach((experimenter) => {
+      //     this.Experimenters.push(experimenter);
+      //   });
+      // }
     },
 
     checkPrimaryExperimenter(primaryExperimenterStatus) {
@@ -1516,7 +1095,7 @@ export default {
     },
 
     async createSchedule() {
-      this.Experimenters = [];
+      // this.Experimenters = [];
 
       for (var i = 0; i < this.appointments.length; i++) {
         this.$refs.extraStudies[i].selectStudy();
@@ -1536,14 +1115,6 @@ export default {
 
           studyNames = Array.from(new Set(studyNames));
 
-          // var calendarDescription =
-          //   "<b>Note: </b>" + this.scheduleNotes + "<br>";
-          // if (this.appointments[0].Study.StudyType == "Online")
-          //   calendarDescription =
-          //     calendarDescription +
-          //     "<b>zoom link: </b>" +
-          //     this.appointments[0].ZoomLink;
-
           this.currentSchedule = {
             AppointmentTime: this.studyDateTime,
             Status: this.response,
@@ -1553,22 +1124,8 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
-            description: this.calendarDescription(
-              this.scheduleNotes,
-              this.appointments
-            ),
-
-            // start: {
-            //   dateTime: moment(this.studyDateTime).toISOString(true),
-            //   timeZone: this.$store.state.timeZone,
-            // },
-            // end: {
-            //   dateTime: moment(this.studyDateTime)
-            //     .add(1, "h")
-            //     .toISOString(true),
-            //   timeZone: this.$store.state.timeZone,
-            // },
-            attendees: this.Experimenters,
+            
+            // attendees: this.Experimenters,
           };
 
           if (this.skipReminderEmailStatus) {
@@ -1601,34 +1158,37 @@ export default {
       try {
         const newStudySchedule = await schedule.create(this.currentSchedule);
 
-        var calendarEvent = Object.assign({}, this.currentSchedule);
-
         this.scheduleId = newStudySchedule.data.id;
 
         this.currentSchedule.id = this.scheduleId;
 
-        calendarEvent.scheduleId = this.scheduleId;
-
         // attach schedule info to the current appointments.
         newStudySchedule.data.updatedAt = moment().toString();
 
-        this.appointments.forEach((appointment) => {
+        this.appointments.forEach((appointment, index) => {
+          appointment.id = newStudySchedule.data.Appointments[index].id
           appointment.FK_Schedule = this.scheduleId;
           appointment.Schedule = {};
           appointment.Schedule.AppointmentTime =
-          newStudySchedule.data.AppointmentTime;
+            newStudySchedule.data.AppointmentTime;
           appointment.Schedule.Status = newStudySchedule.data.Status;
-          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;          
-          const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
-          let calendarId;
-          if (testingRoom) {
-            calendarId = testingRoom.calendarId;
-          } else {
-            calendarId = 'primary';
-          }
-          
-          appointment.calendarId = calendarId;
+          appointment.Schedule.updatedAt = newStudySchedule.data.updatedAt;
+          //   const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+          //   let calendarId;
+          //   if (testingRoom) {
+          //     calendarId = testingRoom.calendarId;
+          //   } else {
+          //     calendarId = 'primary';
+          //   }
+
+          //   appointment.calendarId = calendarId;
         });
+
+        this.currentSchedule.Appointments = this.appointments;
+
+        var calendarEvent = Object.assign({}, this.currentSchedule);
+
+        calendarEvent.scheduleId = this.scheduleId;
 
         console.log("New Scheduled Created!");
 
@@ -1651,58 +1211,12 @@ export default {
     },
 
     async createCalendarbyScheduleId() {
-      var queryString = { id: this.scheduleId };
-      const currentSchedules = await schedule.search(queryString);
+      var calendarEvent = Object.assign({}, this.currentSchedule);
 
-      const currentSchedule = currentSchedules.data[0];
-
-      var studyNames = currentSchedule.Appointments.map((appointment) => {
-        return (
-          appointment.Study.StudyName +
-          " (" +
-          currentSchedule.FK_Family +
-          appointment.Child.IdWithinFamily +
-          ")"
-        );
-      });
-
-      studyNames = Array.from(new Set(studyNames));
-
-      const attendees = [];
-
-      currentSchedule.Appointments.forEach((appointment) => {
-        appointment.Personnels.forEach((experimenter) => {
-          attendees.push({
-            displayName: experimenter.Name,
-            email: experimenter.Calendar,
-          });
-        });
-      });
-
-      var calendarEvent = {
-        AppointmentTime: currentSchedule.AppointmentTime,
-        summary: studyNames.join(" + "),
-        location: this.$store.state.location,
-        description: this.calendarDescription(
-          this.scheduleNotes,
-          this.appointments
-        ),
-        // start: {
-        //   dateTime: moment(currentSchedule.AppointmentTime).toISOString(true),
-        //   timeZone: this.$store.state.timeZone,
-        // },
-        // end: {
-        //   dateTime: moment(currentSchedule.AppointmentTime)
-        //     .add(1, "h")
-        //     .toISOString(true),
-        //   timeZone: this.$store.state.timeZone,
-        // },
-        attendees: attendees,
-        scheduleId: this.scheduleId,
-      };
+      calendarEvent.scheduleId = this.scheduleId;
 
       try {
-        await calendar.create(calendarEvent);
+        await this.createCalendarEvent(calendarEvent);
 
         this.manualCalendar = false;
 
@@ -1955,7 +1469,7 @@ export default {
         } else {
           this.skipReminderEmailStatus = false;
         }
-        this.Experimenters = [];
+        // this.Experimenters = [];
         this.primaryExperimenterList = [];
         for (var i = 0; i < this.appointments.length; i++) {
           this.$refs.extraStudies[i].resetExperimenters();
@@ -2183,37 +1697,6 @@ export default {
           console.log(error);
         }
       }
-    },
-
-    calendarDescription(notes, appointments) {
-      const schedule = {
-        Note: notes,
-        Appointments: appointments,
-      };
-      var description = "<b>Note: </b>" + schedule.Note + "<br>";
-
-      schedule.Appointments.forEach((appointment) => {
-        description =
-          description +
-          "<br>==================" +
-          "<br><b>" +
-          appointment.Study.StudyName +
-          "</b><br>" +
-          "<b>E1: </b>" +
-          appointment.E1 +
-          "<br>" +
-          "<b>E2: </b>" +
-          appointment.E2 +
-          "<br>";
-
-        if (appointment.Study.StudyType == "Online")
-          description =
-            description +
-            "<b>zoom link: </b>" +
-            appointment.PrimaryExperimenter[0].ZoomLink;
-      });
-
-      return description;
     },
   },
 

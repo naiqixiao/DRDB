@@ -792,13 +792,13 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText = "Confirm appointment(s) that you would like to mark as completed";
+            comDText = "Confirm the appointment(s) that you would like to mark as completed";
             break;
 
           case "Rescheduling":
             comDTitle = "Study appointment update";
             comDText =
-              "Confirm appointment(s) that you would like to reschedule";
+              "Confirm the appointment(s) that you would like to reschedule";
             break;
 
           default:
@@ -877,14 +877,14 @@ export default {
                     Status: "Rescheduling",
                     FK_Family: unSelectedItem.FK_Family,
                     Note: unSelectedItem.Note,
-                    summary: unSelectedItem.summery,
+                    summary: unSelectedItem.summary,
                     Appointments: unSelectedItem.Appointments,
                     ScheduledBy: unSelectedItem.ScheduledBy,
                     location: unSelectedItem.location,
                     description: unSelectedItem.description,
                     attendees: unSelectedItem.attendees,
                   }; 
-                  console.log(newUnSelectedItem);
+                  // console.log(newUnSelectedItem);
                   await schedule.create(newUnSelectedItem);
                 }
               } catch (error) {
@@ -930,7 +930,7 @@ export default {
                     Status: "Rescheduling",
                     FK_Family: selectedItem.FK_Family,
                     Note: selectedItem.Note,
-                    summary: selectedItem.summery,
+                    summary: selectedItem.summary,
                     Appointments: selectedItem.Appointments,
                     ScheduledBy: selectedItem.ScheduledBy,
                     location: selectedItem.location,

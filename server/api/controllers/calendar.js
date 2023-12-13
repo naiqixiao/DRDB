@@ -35,7 +35,7 @@ const config = require("../../config/general");
 
 exports.create = asyncHandler(async (req, res) => {
   var event = req.body;
-  console.log(event);
+  // console.log(event);
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
 
   event.start = {
@@ -50,33 +50,35 @@ exports.create = asyncHandler(async (req, res) => {
 
   try {
     for (const app of event.Appointments) {
-      let calendarId;
-      if (app.calendarId) {
-        calendarId = app.calendarId;
-      } else {
-        calendarId = "primary";
-      }
 
       const calEvent = await calendar.events.insert({
-        calendarId: calendarId,
-        resource: event,
+        calendarId: app.calendarId,
+        resource: {
+          "start": event.start,
+          "end": event.end,
+          "Note": 'sample note text',
+          "summary": event.summary,
+          "location": event.location,
+          "description": calendarDescription(event.Note, app),
+          "attendees": app.attendees,
+        },
         sendNotifications: true,
       });
-      const appointmentInfo = await model.appointment.findOne({
-        where: { FK_Study: app.FK_Study, FK_Child: app.FK_Child },
-      });
 
+      // update appointment info by inserting calendarEventID and URL.
       var updatedAppointmentInfo = {};
       updatedAppointmentInfo.calendarEventId = calEvent.data.id;
       updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
 
       await model.appointment.update(updatedAppointmentInfo, {
-        where: { id: appointmentInfo.dataValues.id },
+        where: { id: app.id },
       });
 
       console.log("Calendar event successfully created: " + calEvent.data.id);
     }
+    
     res.status(200).send("calendar event created");
+
   } catch (error) {
     console.log("*****", error);
     throw error;
@@ -218,4 +220,30 @@ function generateDarkColorHex() {
 
   // Combine components into a full hex color string
   return "#" + r + g + b;
+};
+
+function calendarDescription(notes, appointment) {
+
+  var description = "<b>Note: </b>" + notes + "<br>";
+
+  description =
+    description +
+    "=================" +
+    "<br><b>" +
+    appointment.Study.StudyName +
+    "</b><br>" +
+    "<b>E1: </b>" +
+    appointment.E1 +
+    "<br>" +
+    "<b>E2: </b>" +
+    appointment.E2 +
+    "<br>";
+
+    if (appointment.Study.StudyType == "Online")
+      description =
+        description +
+        "<b>zoom link: </b>" +
+        appointment.PrimaryExperimenter[0].ZoomLink;
+
+  return description;
 }

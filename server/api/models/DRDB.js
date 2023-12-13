@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const sequelize = config.sequelize;
+const log = require("../controllers/log");
 
 sequelize
   .authenticate()
@@ -236,13 +237,59 @@ async function importSqlFile(filePath) {
     // Split SQL file into individualqueries
     const queries = sql.split(';');
 
+    let dbName = config.DBName;
+
+    // update child age info whenever connect to the database.
+    var queryString = "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
+    queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
+
+    try {
+
+      await sequelize.query(queryString);
+  
+      await log.createLog("Age Updated", {}, "Children's age is updated");
+  
+    } catch (error) {
+      throw error;
+    }
+
+
+    // database updates
+    let MySQLSyntax =
+      "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
+      dbName +
+      "' AND TABLE_NAME = 'Schedule' AND COLUMN_NAME = 'eventURL';";
+    const scheduleDataType = await sequelize.query(MySQLSyntax);
+
+    MySQLSyntax =
+      "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
+      dbName +
+      "' AND TABLE_NAME = 'Appointment' AND COLUMN_NAME = 'eventURL';";
+    const appointmentDataType = await sequelize.query(MySQLSyntax);
+
+    const scheduleEventURLLength =
+      scheduleDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
+    const appointmentEventURLLength =
+      appointmentDataType[0][0].CHARACTER_MAXIMUM_LENGTH;
+
+    if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
+      for (const query of queries) {
+        console.log(query);
+        await sequelize.query(query);
+      }
+      console.log("Columns updated");
+    } else {
+      console.log("Columns up to date");
+    }
+
+
     // Execute only ALTER TABLE statements for adding columns if they do not exist
     for (const query of queries) {
       if (query.trim().startsWith('ALTER TABLE')) {
         if (query.includes('MODIFY')) {
           const updateColumn = updateColumnLength(query);
-
           if (updateColumn) {
+            console.log(query)
             await sequelize.query(query);
           }
           continue;
@@ -257,6 +304,7 @@ async function importSqlFile(filePath) {
           continue;
         }
       } 
+
       if (query.trim().startsWith('CREATE TABLE')) {
         const tableExists = await tableExistsInDatabase(query);
         if (!tableExists) {
@@ -264,7 +312,9 @@ async function importSqlFile(filePath) {
         }
       }
     }
+
     console.log('SQL file imported successfully');
+
   } catch (error) {
     console.error('Error importing SQL file:', error);
   }
