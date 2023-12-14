@@ -1,35 +1,28 @@
 <template>
   <!-- <v-card outlined class="d-flex flex-column"> -->
   <div>
-    <v-alert
-      v-if="!familyInfo.Email"
-      border="left"
-      type="error"
-      color="#c73460"
-      dense
-      style="font-weight: 600"
-      >Participant email is not available.</v-alert
-    >
-    <v-row dense justify="start">
+    <v-alert v-if="!familyInfo.Email" border="left" type="error" color="#c73460" dense
+      style="font-weight: 600">Participant email is not available.</v-alert>
+    <v-row dense justify="start" style="margin: 12px">
       <v-col cols="12" md="1"></v-col>
       <v-col cols="12" md="8">
-        <v-text-field
-          v-model="familyInfo.Email"
-          label="Email"
-          :rules="this.$rules.email"
-          @change="checkEmail"
-        ></v-text-field>
+        <v-text-field v-model="familyInfo.Email" label="Email" :rules="this.$rules.email"
+          @change="checkEmail"></v-text-field>
         <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
       </v-col>
     </v-row>
     <v-row justify="center" style="height: 500px">
       <v-col cols="12" md="11">
-        <vue-editor
+        <!-- <vue-editor
           style="height: 450px"
           ref="emailBody"
           v-model="emailBody"
           :editor-toolbar="customToolbar"
-        ></vue-editor>
+        ></vue-editor> -->
+        <div>
+          <ckeditor ref="emailBody" :editor="editor" v-model="emailBody" :config="editorConfig">
+          </ckeditor>
+        </div>
       </v-col>
     </v-row>
   </div>
@@ -37,11 +30,12 @@
 </template>
 
 <script>
-import { VueEditor } from "vue2-editor";
+// import { VueEditor } from "vue2-editor";
 import email from "@/services/email";
 import moment from "moment";
 import family from "@/services/family";
 import store from "@/store";
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default {
   props: {
@@ -53,7 +47,7 @@ export default {
   },
 
   components: {
-    VueEditor,
+    // VueEditor,
   },
 
   data() {
@@ -61,11 +55,24 @@ export default {
       emailUpdate: false,
       emailBody: "",
       emailSubject: "",
-      customToolbar: [
-        ["bold", "italic", "underline"],
-        [{ color: [] }, { background: [] }],
-        ["link"],
-      ],
+      // customToolbar: [
+      //   ["bold", "italic", "underline"],
+      //   [{ color: [] }, { background: [] }],
+      //   ["link"],
+      // ],
+      editor: ClassicEditor,
+      editorData: '<p>Content of the editor.</p>',
+      editorConfig: {
+        toolbar: {
+          items: [
+            'undo', 'redo',
+            '|', 'heading',
+            '|', 'bold', 'italic',
+            '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed', 'blockQuote',
+            '|', 'bulletedList', 'numberedList', 'outdent', 'indent'
+          ]
+        }
+      },
     };
   },
 
@@ -295,7 +302,9 @@ export default {
               "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
           }
 
-          email = opening + "<p></p>" + body + closing;
+          email = opening + 
+          // "<p></p>" +
+           body + closing;
           break;
 
         case "Confirmation":
@@ -325,8 +334,8 @@ export default {
             emailBody = emailBody.replace(
               /\${{ZoomLink}}/g,
               "<a href='" +
-                appointment.PrimaryExperimenter[0].ZoomLink +
-                "'>Zoom Link</a>"
+              appointment.PrimaryExperimenter[0].ZoomLink +
+              "'>Zoom Link</a>"
             );
 
             emailBodyList.push(emailBody);
@@ -336,7 +345,7 @@ export default {
             case "Online":
               email =
                 opening +
-                "<p></p>" +
+                // "<p></p>" +
                 emailBodyList.join("<p></p>") +
                 "<p>This study is an online study. You can participate at home! :)</p>" +
                 closing;
@@ -344,7 +353,9 @@ export default {
 
             default:
               email =
-                opening + "<p></p>" + emailBodyList.join("<p></p>") + location + closing;
+              opening +
+                // "<p></p>" +
+                emailBodyList.join("<p></p>") + location + closing;
               break;
           }
 
@@ -360,7 +371,7 @@ export default {
             case "Online":
               email =
                 opening +
-                "<p></p>" +
+                // "<p></p>" +
                 emailBodyList.join("<p></p>") +
                 "<p>This study is an online study. You can participate at home. :)</p>" +
                 closing;
@@ -368,7 +379,9 @@ export default {
 
             default:
               email =
-                opening + "<p></p>" + emailBodyList.join("<p></p>") + location + closing;
+                opening + 
+                // "<p></p>" +
+                 emailBodyList.join("<p></p>") + location + closing;
               break;
           }
 
@@ -611,13 +624,13 @@ export default {
       var formattedEmailBody = "";
 
       for (var i = 0; i < k.length; i++) {
-        // formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        formattedEmailBody = formattedEmailBody + k[i] + "<br>";
 
-        if (i < k.length - 3) {
-          formattedEmailBody = formattedEmailBody + k[i] + "<br><br>";
-        } else {
-          formattedEmailBody = formattedEmailBody + k[i] + "<br>";
-        }
+        // if (i < k.length - 3) {
+        //   formattedEmailBody = formattedEmailBody + k[i] + "<br><br>";
+        // } else {
+        //   formattedEmailBody = formattedEmailBody + k[i] + "<br>";
+        // }
       }
 
       return formattedEmailBody;
@@ -704,4 +717,9 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.ck-editor__editable_inline:not(.ck-comment__input *) {
+  height: 450px !important;
+  overflow-y: auto;
+}
+</style>

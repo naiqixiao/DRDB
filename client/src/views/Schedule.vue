@@ -395,19 +395,19 @@
                             :disabled="potentialStudies(currentChild).selectableStudies
                               .length < 1
                               ">{{
-    !!currentChild.Name
-    ? currentChild.Name.split(" ")[0]
-    : "Name is missing"
-  }}</v-btn>
+                                  !!currentChild.Name
+                                  ? currentChild.Name.split(" ")[0]
+                                  : "Name is missing"
+                                }}</v-btn>
                         </v-col>
                         <v-col cols="12" md="2" v-for="child in currentChild.sibling" :key="child.id">
                           <v-btn class="text-capitalize" rounded color="primary" @click="newAppointment(child)" :disabled="potentialStudies(child).selectableStudies.length <
                             1
                             ">{{
-    !!child.Name
-    ? child.Name.split(" ")[0]
-    : "Name is missing"
-  }}</v-btn>
+                                !!child.Name
+                                ? child.Name.split(" ")[0]
+                                : "Name is missing"
+                              }}</v-btn>
                         </v-col>
                       </v-row>
                       <v-spacer></v-spacer>
@@ -474,12 +474,12 @@
                         !!currentFamily.Email &&
                         !this.skipConfirmationEmailStatus
                         " @click="scheduleNextStep">{{
-                        !!currentFamily.Email &&
-                        !this.skipConfirmationEmailStatus &&
-                        this.$store.state.labEmailStatus
-                        ? "Next"
-                        : "Skip email"
-                      }}</v-btn>
+                                                      !!currentFamily.Email &&
+                                                      !this.skipConfirmationEmailStatus &&
+                                                      this.$store.state.labEmailStatus
+                                                      ? "Next"
+                                                      : "Skip email"
+                                                    }}</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -1124,7 +1124,7 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
-            
+
             // attendees: this.Experimenters,
           };
 
