@@ -33,8 +33,9 @@
                 class="conv-textarea"
                 label="Notes for next contact"
                 no-resize
-                rows="3"
+                rows="6"
                 hide-details
+                outlined
                 v-model="nextContactNote"
               ></v-textarea>
             </v-col>
@@ -58,11 +59,11 @@
           <v-row align="center">
             <v-col cols="12" lg="9">
               <v-textarea
-                class="conv-textarea"
                 label="Notes for next contact"
                 no-resize
-                rows="3"
+                rows="6"
                 hide-details
+                outlined
                 v-model="nextContactNote"
               ></v-textarea>
             </v-col>

@@ -414,7 +414,7 @@
                       <v-divider style="margin-bottom: 4px"></v-divider>
                       <v-row dense style="height: 150px" align="center" justify="center">
                         <v-col md="11">
-                          <v-textarea class="conv-textarea" label="Notes for this schedule" outlined no-resize rows="6"
+                          <v-textarea class="conv-textarea" label="Notes for this schedule" outlined no-resize rows="4"
                             hide-details v-model="scheduleNotes"></v-textarea>
                         </v-col>
                       </v-row>

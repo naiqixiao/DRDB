@@ -294,10 +294,6 @@ h4 {
   height: 180px;
 }
 
-.v-textarea textarea {
-  line-height: 20px !important;
-}
-
 .conv-textarea {
   border-radius: 5px !important;
   // border-style: solid !important;

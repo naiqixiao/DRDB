@@ -3,14 +3,12 @@
   <div>
     <v-alert v-if="!familyInfo.Email" border="left" type="error" color="#c73460" dense
       style="font-weight: 600">Participant email is not available.</v-alert>
-    <v-row dense justify="start" style="margin: 12px">
-      <v-col cols="12" md="1"></v-col>
-      <v-col cols="12" md="8">
-        <v-text-field v-model="familyInfo.Email" label="Email" :rules="this.$rules.email"
-          @change="checkEmail"></v-text-field>
-        <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
-      </v-col>
-    </v-row>
+    <div class="input-container">
+      
+      <v-text-field v-model="familyInfo.Email" label="Email" :rules="this.$rules.email"
+        @change="checkEmail"></v-text-field>
+      <v-text-field v-model="emailSubject" label="Subject"></v-text-field>
+    </div>
     <v-row justify="center" style="height: 500px">
       <v-col cols="12" md="11">
         <!-- <vue-editor
@@ -117,51 +115,51 @@ export default {
         switch (this.emailType) {
           case "Confirmation":
             opening =
-              "<p>Dear " +
+              "Dear " +
               parentName +
-              ",</p>" +
-              "<p>Thanks for your support to our research! This is a confirmation for your participation in our study with <b>" +
+              ",<br><br>" +
+              "Thanks for your support to our research! This is a confirmation for your participation in our study with <b>" +
               this.childNames() +
               moment(this.scheduleInfo.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"
               ) +
-              "</b>.</p>";
+              "</b>.<br><br>";
             break;
 
           case "ScheduleUpdate":
             opening =
-              "<p>Dear " +
+              "Dear " +
               parentName +
-              ",</p>" +
-              "<p>This is an update on your visit with <b>" +
+              ",<br><br>" +
+              "This is an update on your visit with <b>" +
               this.childNames() +
               moment(this.scheduleInfo.AppointmentTime).format(
                 " [on] dddd [(]MMM Do[)] [at] h:mma"
               ) +
-              "</b>.</p>";
+              "</b>.<br><br>";
             break;
 
           case "Introduction":
             opening =
-              "<p>Dear " +
+              "Dear " +
               parentName +
-              ",</p>" +
-              "<p>We are " +
+              ",<br><br>" +
+              "We are " +
               this.$store.state.labName +
               ". We would love to have you and " +
               this.childNames() +
-              " to participate in our study.</p>" +
-              "<p>Here is the information about the study:<br>";
+              " to participate in our study.<br><br>" +
+              "Here is the information about the study:<br>";
             break;
 
           case "ThankYou":
             opening =
-              "<p>Dear " +
+              "Dear " +
               parentName +
-              ",</p>" +
-              "<p>Thank you so much for participating in our study with " +
+              ",<br><br>" +
+              "Thank you so much for participating in our study with " +
               this.childNames() +
-              "! We had a wonderful time with you both! :-) </p>";
+              "! We had a wonderful time with you both! :-) <br><br>";
             break;
 
           case "Reminder":
@@ -190,30 +188,30 @@ export default {
 
             if (this.scheduleInfo.Appointments[0].Study.StudyType !== "Online") {
               opening =
-                "<p>Dear " +
+                "Dear " +
                 parentName +
-                ",</p>" +
-                "<p>Hope you are doing great! This is a reminder for your visit to " +
+                ",<br><br>" +
+                "Hope you are doing great! This is a reminder for your visit to " +
                 this.$store.state.labName +
                 " with <b>" +
                 this.childNames() +
                 dateLabel +
                 moment(this.scheduleInfo.AppointmentTime).format(" [at] h:mma") +
-                "</b>.</p>" +
+                "</b>.<br><br>" +
                 this.$store.state.transportationInstructions;
             } else {
               opening =
-                "<p>Dear " +
+                "Dear " +
                 parentName +
-                ",</p>" +
-                "<p>Hope you are doing great! This is " +
+                ",<br><br>" +
+                "Hope you are doing great! This is " +
                 this.$store.state.labName +
                 ". Just a reminder that you and <b>" +
                 this.childNames() +
                 " will participate in our in our online study" +
                 dateLabel +
                 moment(this.scheduleInfo.AppointmentTime).format(" [at] h:mma") +
-                "</b>.</p>";
+                "</b>.<br><br>";
             }
 
             break;
@@ -247,23 +245,21 @@ export default {
 
       const closing =
         this.$store.state.emailClosing +
-        "<p>Best,</p><p>" +
+        "<br>Best,<br>" +
         name +
-        "</p><p>" +
+        "<br>" +
         role +
-        "</p><p>" +
-        this.$store.state.labName +
-        "</p>";
+        "<br>" +
+        this.$store.state.labName;
 
       const TYclosing =
         this.$store.state.tyEmailClosing +
-        "<p>Best,</p><p>" +
+        "<br>Best,<br>" +
         name +
-        "</p><p>" +
+        "<br>" +
         role +
-        "</p><p>" +
-        this.$store.state.labName +
-        "</p>";
+        "<br>" +
+        this.$store.state.labName;
       // specific content for each schedueld study.
 
       switch (this.emailType) {
@@ -298,8 +294,8 @@ export default {
           if (this.scheduleInfo.Appointments[0].Study.StudyType === "Online") {
             body =
               body +
-              "<p>You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a></p>" +
-              "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.</p>";
+              "You can download Zoom for your computer here: <a href='https://zoom.us/download'>Download Link</a><br><br>" +
+              "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/EdhORdZeCwlPn-X54WquFz8Boegr1YpaNy9mzlW_wJ8ZjQ?e=hvDNGr'>CLICK HERE</a> to learn a few tips to setup online study with your child.<br><br>";
           }
 
           email = opening + 
@@ -346,8 +342,8 @@ export default {
               email =
                 opening +
                 // "<p></p>" +
-                emailBodyList.join("<p></p>") +
-                "<p>This study is an online study. You can participate at home! :)</p>" +
+                emailBodyList.join("<br><br>") +
+                "This study is an online study. You can participate at home! :)<br>" +
                 closing;
               break;
 
@@ -355,7 +351,7 @@ export default {
               email =
               opening +
                 // "<p></p>" +
-                emailBodyList.join("<p></p>") + location + closing;
+                emailBodyList.join("<br><br>") + location + closing;
               break;
           }
 
@@ -372,8 +368,8 @@ export default {
               email =
                 opening +
                 // "<p></p>" +
-                emailBodyList.join("<p></p>") +
-                "<p>This study is an online study. You can participate at home. :)</p>" +
+                emailBodyList.join("<br><br>") +
+                "This study is an online study. You can participate at home! :)<br>" +
                 closing;
               break;
 
@@ -381,7 +377,7 @@ export default {
               email =
                 opening + 
                 // "<p></p>" +
-                 emailBodyList.join("<p></p>") + location + closing;
+                 emailBodyList.join("<br><br>") + location + closing;
               break;
           }
 
@@ -620,6 +616,7 @@ export default {
 
     // this function is to replace the last few </p><p> with <br>, giving a better look to the emails.
     formatedBody(emailBody) {
+      console.log(emailBody)
       const k = emailBody.split("</p><p>");
       var formattedEmailBody = "";
 
@@ -633,8 +630,23 @@ export default {
         // }
       }
 
+      formattedEmailBody = formattedEmailBody + this.studyLabels(this.appointments);
+      console.log(formattedEmailBody)
       return formattedEmailBody;
     },
+
+    studyLabels(appointments){
+
+      var labels = "";
+
+      appointments.forEach((appointment) => {
+
+        labels = labels + "#%#" + appointment.Study.StudyName+ "#%# ";
+      })
+
+      labels = "<br><br><div style='opacity: 0'>" + labels + "</div>";
+      return labels;
+    }
   },
 
   watch: {
@@ -719,7 +731,14 @@ export default {
 
 <style>
 .ck-editor__editable_inline:not(.ck-comment__input *) {
-  height: 450px !important;
+  height: 480px !important;
   overflow-y: auto;
+}
+.input-container .v-text-field {
+  display: block;
+  margin: 16px 80px 12px 50px; /* Adjust the space between the input boxes */
+}
+.input-container {
+  margin: 24px 4px 8px; /* Adjust the space between the input boxes */
 }
 </style>
