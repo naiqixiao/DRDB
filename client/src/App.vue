@@ -314,8 +314,16 @@ h4 {
   padding-top: 0px !important;
 }
 
-.v-application p {
-  margin-bottom: 8px !important;
+// .v-application p {
+//   margin-bottom: 8px !important;
+// }
+
+.ck.ck-editor__editable_inline > * {
+    display: block;
+    margin-block-start: 0px !important;
+    margin-block-end: 0px !important;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
 }
 
 #app .v-list-item__title {

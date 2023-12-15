@@ -1270,7 +1270,7 @@ body {
   margin: 8px 8px 8px 8px;
   padding: 8px 8px 8px 8px;
   border-width: 1px;
-  width: 100%;
+  width: 90%;
 }
 
 .theme--light.v-icon {
@@ -1292,5 +1292,6 @@ body {
   margin-left: 0.7em;
   margin-bottom: 1em;
 }
+
 
 </style>

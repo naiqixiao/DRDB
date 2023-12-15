@@ -1083,5 +1083,7 @@ export default {
 .ck-editor__editable_inline:not(.ck-comment__input *) {
     height: 300px;
     overflow-y: auto;
+    margin: 0px;
 }
+
 </style>
