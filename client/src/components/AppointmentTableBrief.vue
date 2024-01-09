@@ -125,20 +125,7 @@ export default {
   padding-right: 2px;
 }
 
-/* .theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
-  color: var(--v-secondary-base) !important;
-}
-
-.v-data-table
-  /deep/
-  tbody
-  /deep/
-  tr:hover:not(.v-data-table__expanded__content) {
-  border-bottom-width: 2px !important;
-  background-color: var(--v-secondary-lighten1) !important;
-} */
-
-/deep/ tr.v-data-table__selected {
+ tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */

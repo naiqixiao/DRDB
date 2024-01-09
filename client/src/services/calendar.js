@@ -2,8 +2,11 @@ import api from "./api";
 import store from "@/store";
 
 export default {
-  create(calendarInfo) {
-    calendarInfo.lab = store.state.lab;
+  create(events) {
+    const calendarInfo = {
+      events: events,
+      lab: store.state.lab,
+    };
     return api().post("cal/", calendarInfo);
   },
 
@@ -14,7 +17,7 @@ export default {
 
   delete(calendarInfo) {
     return api().delete(`cal/`, {
-      params: calendarInfo
+      params: calendarInfo,
     });
   },
 

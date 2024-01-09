@@ -33,7 +33,44 @@ const config = require("../../config/general");
 //     "sendUpdates": "all"
 // }
 
+// a new calendar event creation function to generate a list of events for each appointment, and then send the output back to frontend.
 exports.create = asyncHandler(async (req, res) => {
+  const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+
+  var calendarInfo = req.body;
+
+  try {
+    for (const event of calendarInfo.events) {
+      event.start = {
+        dateTime: moment(event.AppointmentTime).toISOString(true),
+        timeZone: config.timeZone,
+      };
+
+      event.end = {
+        dateTime: moment(event.AppointmentTime)
+          .add(1, "h")
+          .toISOString(true),
+        timeZone: config.timeZone,
+      };
+
+      const calEvent = await calendar.events.insert({
+        calendarId: event.calendarId,
+        resource: event,
+        sendNotifications: true,
+      });
+
+      event.eventURL = calEvent.data.htmlLink;
+      event.calendarEventId = calEvent.data.id;
+    }
+
+    res.status(200).send(calendarInfo.events);
+  } catch (error) {
+    console.log("*****", error);
+    throw error;
+  }
+});
+
+exports.create0 = asyncHandler(async (req, res) => {
   var event = req.body;
   // console.log(event);
   const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
@@ -44,23 +81,24 @@ exports.create = asyncHandler(async (req, res) => {
   };
 
   event.end = {
-    dateTime: moment(event.AppointmentTime).add(1, "h").toISOString(true),
+    dateTime: moment(event.AppointmentTime)
+      .add(1, "h")
+      .toISOString(true),
     timeZone: config.timeZone,
   };
 
   try {
     for (const app of event.Appointments) {
-
       const calEvent = await calendar.events.insert({
         calendarId: app.calendarId,
         resource: {
-          "start": event.start,
-          "end": event.end,
-          "Note": 'sample note text',
-          "summary": event.summary,
-          "location": event.location,
-          "description": calendarDescription(event.Note, app),
-          "attendees": app.attendees,
+          start: event.start,
+          end: event.end,
+          Note: "sample note text",
+          summary: event.summary,
+          location: event.location,
+          description: calendarDescription(event.Note, app),
+          attendees: app.attendees,
         },
         sendNotifications: true,
       });
@@ -76,9 +114,8 @@ exports.create = asyncHandler(async (req, res) => {
 
       console.log("Calendar event successfully created: " + calEvent.data.id);
     }
-    
-    res.status(200).send("calendar event created");
 
+    res.status(200).send("calendar event created");
   } catch (error) {
     console.log("*****", error);
     throw error;
@@ -179,27 +216,14 @@ exports.createSecondaryCalendar = asyncHandler(async (req, res) => {
       },
     });
 
-    res
-      .status(200)
-      .json({
-        calendarId: createdCalendar.data.id,
-        message: "A new calendar is created.",
-      });
+    res.status(200).json({
+      calendarId: createdCalendar.data.id,
+      message: "A new calendar is created.",
+    });
   } catch (error) {
     console.error("Error creating secondary calendar:", error);
     res.status(500).json({ error: "An error occurred" });
   }
-
-  //   function getRandomColor() {
-  //     const letters = '0123456789ABCDEF';
-  //     let color = '#';
-
-  //     for (let i = 0; i < 6; i++) {
-  //       color += letters[Math.floor(Math.random() * 16)];
-  //     }
-
-  //     return color;
-  //   }
 });
 
 function generateDarkColorHex() {
@@ -220,10 +244,9 @@ function generateDarkColorHex() {
 
   // Combine components into a full hex color string
   return "#" + r + g + b;
-};
+}
 
 function calendarDescription(notes, appointment) {
-
   var description = "<b>Note: </b>" + notes + "<br>";
 
   description =
@@ -239,11 +262,11 @@ function calendarDescription(notes, appointment) {
     appointment.E2 +
     "<br>";
 
-    if (appointment.Study.StudyType == "Online")
-      description =
-        description +
-        "<b>zoom link: </b>" +
-        appointment.PrimaryExperimenter[0].ZoomLink;
+  if (appointment.Study.StudyType == "Online")
+    description =
+      description +
+      "<b>zoom link: </b>" +
+      appointment.PrimaryExperimenter[0].ZoomLink;
 
   return description;
 }

@@ -1235,7 +1235,7 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
+<style scoped>
 body {
   border: 2px solid rgb(0, 153, 255);
   border-radius: 5px;
@@ -1292,6 +1292,5 @@ body {
   margin-left: 0.7em;
   margin-bottom: 1em;
 }
-
 
 </style>

@@ -281,7 +281,7 @@
 </template>
 
 <script>
-import ScheduleTable from "@/components/ScheduleTable";
+import ScheduleTable from "@/components/ScheduleTableNew";
 import FamilyInfo from "@/components/FamilyInfo";
 
 // import family from "@/services/family";

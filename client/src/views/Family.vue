@@ -1,4 +1,4 @@
-<template>
+<template app>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
       <v-alert

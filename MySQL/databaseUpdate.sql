@@ -1,9 +1,4 @@
-
-ALTER TABLE Appointment ADD eventURL varchar(255) DEFAULT NULL AFTER FK_Family;
-
-ALTER TABLE Appointment ADD calendarEventId varchar(255) DEFAULT NULL AFTER eventURL;
-
-CREATE TABLE testingroom (
+CREATE TABLE IF NOT EXISTS TestingRoom (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `FK_Lab` INT NOT NULL,

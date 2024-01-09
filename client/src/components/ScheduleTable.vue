@@ -812,11 +812,10 @@ export default {
 
         const result = await this.$refs.confirmD.open(comDTitle, comDText, item, status);
 
-        if (result) {     
+        if (result) {
 
           const {allChecked, newItem, unSelectedItem, selectedItem} = result;
           
-
           this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
@@ -830,13 +829,6 @@ export default {
               this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
               this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
-              // console.log(this.editedSchedule);
-              // console.log(
-              //   this.potentialStudies(
-              //     this.editedSchedule.Appointments[0].Child,
-              //     this.editedSchedule.Appointments[0].FK_Study
-              //   )
-              // );
               this.dialog = true;
               break;
 
@@ -1098,17 +1090,6 @@ export default {
           studyNames = Array.from(new Set(studyNames));
 
           this.editedSchedule.summary = studyNames.join(" + ");
-
-          // this.editedSchedule.start = {
-          //   dateTime: moment(this.studyDateTime).toISOString(true),
-          //   timeZone: "America/Toronto",
-          // };
-          // this.editedSchedule.end = {
-          //   dateTime: moment(this.studyDateTime)
-          //     .add(1, "h") // might change if multiple studies are scheduled for one visit
-          //     .toISOString(true),
-          //   timeZone: "America/Toronto",
-          // };
 
           if (this.skipReminderEmailStatus) {
             this.editedSchedule.Reminded = true;
@@ -1944,10 +1925,12 @@ export default {
   background-color: var(--v-secondary-lighten1) !important;
 } */
 
-/deep/ tr.v-data-table__selected {
+tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
 }
+
+
 </style>

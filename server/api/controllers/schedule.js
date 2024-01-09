@@ -7,8 +7,40 @@ const moment = require("moment");
 const log = require("../controllers/log");
 const config = require("../../config/general");
 
+// output
 
-// Create and Save an appointment
+// {
+//   "createdAt": {
+//       "val": "CURRENT_TIMESTAMP"
+//   },
+//   "updatedAt": {
+//       "val": "CURRENT_TIMESTAMP"
+//   },
+//   "Reminded": 0,
+//   "ThankYouEmail": 0,
+//   "Completed": 0,
+//   "id": 5400,
+//   "AppointmentTime": "2024-01-11T16:00:00.000Z",
+//   "Status": "Confirmed",
+//   "FK_Family": 204,
+//   "Note": "",
+//   "Appointments": [
+//       {
+//           "createdAt": {
+//               "val": "CURRENT_TIMESTAMP"
+//           },
+//           "updatedAt": {
+//               "val": "CURRENT_TIMESTAMP"
+//           },
+//           "id": 5215,
+//           "FK_Family": 204,
+//           "FK_Child": 407,
+//           "FK_Study": 45,
+//           "FK_Schedule": 5400
+//       }
+//   ],
+//   "ScheduledBy": 58
+// }
 
 // {
 //   "AppointmentTime": "2020-04-24T14:00:00.000",
@@ -47,9 +79,14 @@ const config = require("../../config/general");
 
 exports.create = asyncHandler(async (req, res) => {
   var newScheduleInfo = req.body;
-  newScheduleInfo.AppointmentTime = moment(newScheduleInfo.AppointmentTime).toISOString(true)
+
+  newScheduleInfo.AppointmentTime = moment(
+    newScheduleInfo.AppointmentTime
+  ).toISOString(true);
+
   try {
     let schedule;
+
     if (!newScheduleInfo.Appointments[0].FK_Schedule) {
       schedule = await model.schedule.create(newScheduleInfo, {
         include: [model.appointment],
@@ -62,20 +99,21 @@ exports.create = asyncHandler(async (req, res) => {
       schedule = await model.schedule.create(newScheduleInfo);
       const newScheduleId = schedule.id;
 
-      const appointmentsToUpdate = newScheduleInfo.Appointments.map(appointment => {
-        return {
-          ...appointment,
-          FK_Schedule: newScheduleId,
-        };
-      });
+      const appointmentsToUpdate = newScheduleInfo.Appointments.map(
+        (appointment) => {
+          return {
+            ...appointment,
+            FK_Schedule: newScheduleId,
+          };
+        }
+      );
 
       for (const app of appointmentsToUpdate) {
         await model.appointment.create(app);
       }
     }
 
-    if (newScheduleInfo.Status == 'Confirmed') {
-
+    if (newScheduleInfo.Status == "Confirmed") {
       // add primary experimenter
       var experimenterList = [];
       // add secondary experimenters
@@ -83,12 +121,14 @@ exports.create = asyncHandler(async (req, res) => {
       for (var i = 0; i < schedule.Appointments.length; i++) {
         var appointmentId = schedule.Appointments[i].id;
 
-        newScheduleInfo.Appointments[i].Experimenters.forEach((experimenter) => {
-          experimenterList.push({
-            FK_Experimenter: experimenter,
-            FK_Appointment: appointmentId,
-          });
-        });
+        newScheduleInfo.Appointments[i].Experimenters.forEach(
+          (experimenter) => {
+            experimenterList.push({
+              FK_Experimenter: experimenter,
+              FK_Appointment: appointmentId,
+            });
+          }
+        );
 
         newScheduleInfo.Appointments[i].Experimenters_2nd.forEach(
           (experimenter_2nd) => {
@@ -100,20 +140,23 @@ exports.create = asyncHandler(async (req, res) => {
         );
       }
 
-      await model.experimenterAssignment.bulkCreate(experimenterList);
+      if (experimenterList.length > 0) {
+        await model.experimenterAssignment.bulkCreate(experimenterList);
+      }
 
-      await model.experimenterAssignment_2nd.bulkCreate(
-        experimenter_2ndList
-      );
-
+      if (experimenter_2ndList.length > 0) {
+        await model.experimenterAssignment_2nd.bulkCreate(experimenter_2ndList);
+      }
     }
 
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Created", User, "added a study appointment to a schedule(" +
-      schedule.id +
-      ")");
+    await log.createLog(
+      "Appointment Created",
+      User,
+      "added a study appointment to a schedule(" + schedule.id + ")"
+    );
 
     res.status(200).send(schedule);
     console.log("appointment created!");
@@ -197,7 +240,7 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await searchScheudles(queryString)
+    const schedule = await searchScheudles(queryString);
     res.status(200).send(schedule);
     console.log("Search successful!");
   } catch (error) {
@@ -208,7 +251,7 @@ exports.search = asyncHandler(async (req, res) => {
 exports.searchFollowUps = asyncHandler(async (req, res) => {
   var queryString = {};
 
-  queryString['$Family.NextContactDate$'] = {
+  queryString["$Family.NextContactDate$"] = {
     [Op.or]: [
       {
         [Op.lte]: moment()
@@ -218,9 +261,9 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
       { [Op.eq]: null },
     ],
   };
-  queryString['$Family.NoMoreContact$'] = 0;
+  queryString["$Family.NoMoreContact$"] = 0;
 
-  queryString.Status = { [Op.in]: ['TBD', 'Rescheduling', 'No Show'] }
+  queryString.Status = { [Op.in]: ["TBD", "Rescheduling", "No Show"] };
 
   if (req.query.trainingMode === "true") {
     queryString["$Family.TrainingSet$"] = true;
@@ -228,7 +271,7 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
     queryString["$Family.TrainingSet$"] = false;
   }
 
-  queryString['$Family.AssignedLab$'] = req.query.lab;
+  queryString["$Family.AssignedLab$"] = req.query.lab;
 
   if (req.query.lab) {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
@@ -283,7 +326,8 @@ exports.today = asyncHandler(async (req, res) => {
 exports.tomorrow = asyncHandler(async (req, res) => {
   var queryString = {};
 
-  if (moment().day() >= 5) { // if today is Friday or weekend, return the schedule from today to the coming Monday.
+  if (moment().day() >= 5) {
+    // if today is Friday or weekend, return the schedule from today to the coming Monday.
     queryString.AppointmentTime = {
       [Op.between]: [
         moment()
@@ -296,8 +340,7 @@ exports.tomorrow = asyncHandler(async (req, res) => {
           .startOf("day")
           .toDate(),
       ],
-    }
-
+    };
   } else {
     queryString.AppointmentTime = {
       [Op.between]: [
@@ -324,8 +367,7 @@ exports.tomorrow = asyncHandler(async (req, res) => {
   }
 
   try {
-
-    const schedule = await searchScheudles(queryString)
+    const schedule = await searchScheudles(queryString);
 
     res.status(200).send(schedule);
     console.log("Search successful!");
@@ -362,7 +404,7 @@ exports.week = asyncHandler(async (req, res) => {
   }
 
   try {
-    const schedule = await searchScheudles(queryString)
+    const schedule = await searchScheudles(queryString);
 
     res.status(200).send(schedule);
     console.log("Search successful!");
@@ -376,20 +418,21 @@ exports.update = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
 
   if (updatedScheduleInfo.AppointmentTime) {
-    
     updatedScheduleInfo.start = {
       dateTime: moment(updatedScheduleInfo.AppointmentTime).toISOString(true),
       timeZone: config.timeZone,
     };
-    
+
     updatedScheduleInfo.end = {
       dateTime: moment(updatedScheduleInfo.AppointmentTime)
-      .add(1, "h") // might change if multiple studies are scheduled for one visit
-      .toISOString(true),
+        .add(1, "h") // might change if multiple studies are scheduled for one visit
+        .toISOString(true),
       timeZone: config.timeZone,
     };
 
-    updatedScheduleInfo.AppointmentTime = moment(updatedScheduleInfo.AppointmentTime).toISOString(true)
+    updatedScheduleInfo.AppointmentTime = moment(
+      updatedScheduleInfo.AppointmentTime
+    ).toISOString(true);
   }
 
   if (updatedScheduleInfo.id) {
@@ -403,7 +446,6 @@ exports.update = asyncHandler(async (req, res) => {
   });
 
   switch (updatedScheduleInfo.Status) {
-
     case "Confirmed":
       // add primary experimenter
       var experimenterList = [];
@@ -411,11 +453,11 @@ exports.update = asyncHandler(async (req, res) => {
       var experimenter_2ndList = [];
 
       updatedScheduleInfo.Appointments.forEach(async (appointment) => {
+        if (!appointment.id) {
+          // new appointment added to the schedule
+          appointment.FK_Schedule = ID;
 
-        if (!appointment.id) { // new appointment added to the schedule
-          appointment.FK_Schedule = ID
-
-          const newAppointment = await model.appointment.create(appointment)
+          const newAppointment = await model.appointment.create(appointment);
 
           appointment.Experimenters.forEach((experimenter) => {
             experimenterList.push({
@@ -430,10 +472,10 @@ exports.update = asyncHandler(async (req, res) => {
               FK_Appointment: newAppointment.id,
             });
           });
-
         } else {
-
-          await model.appointment.update(appointment, { where: { id: appointment.id } })
+          await model.appointment.update(appointment, {
+            where: { id: appointment.id },
+          });
 
           // remove exist experimenter assignment
           await model.experimenterAssignment.destroy({
@@ -454,16 +496,14 @@ exports.update = asyncHandler(async (req, res) => {
 
           appointment.Experimenters_2nd.forEach((experimenter) => {
             experimenter_2ndList.push({
-              'FK_Experimenter': experimenter,
-              'FK_Appointment': appointment.id,
-
-            })
-
-          })
+              FK_Experimenter: experimenter,
+              FK_Appointment: appointment.id,
+            });
+          });
 
           // reset reminder setting
           updatedScheduleInfo.Reminded = 0;
-        };
+        }
 
         await model.experimenterAssignment.bulkCreate(experimenterList);
 
@@ -472,19 +512,20 @@ exports.update = asyncHandler(async (req, res) => {
             experimenter_2ndList
           );
         }
-
       });
 
       //
 
       try {
-
-        if (updatedScheduleInfo.calendarEventId && !updatedScheduleInfo.skipStudyDateTimeStatus) {
+        if (
+          updatedScheduleInfo.calendarEventId &&
+          !updatedScheduleInfo.skipStudyDateTimeStatus
+        ) {
           // check if there was an calendar event created before.
-  
+
           try {
             await calendar.events.delete({
-              calendarId: 'primary',
+              calendarId: "primary",
               eventId: updatedScheduleInfo.calendarEventId,
               sendNotifications: true,
             });
@@ -492,60 +533,64 @@ exports.update = asyncHandler(async (req, res) => {
             throw err;
           }
         }
-        
+
         for (const app of updatedScheduleInfo.Appointments) {
           const testingRooms = await model.testingRoom.findAll({
-            where: {FK_Lab: app.Study.FK_Lab},
+            where: { FK_Lab: app.Study.FK_Lab },
           });
-          
+
           const testingRoomId = app.Study.FK_TestingRoom;
           let calId;
           if (testingRoomId) {
-            const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
+            const curTestingRoom = testingRooms.find(
+              (room) => room.id === testingRoomId
+            );
             calId = curTestingRoom.calendarId;
           } else {
-            calId = 'primary';
+            calId = "primary";
           }
-  
+
           const calEvent = await calendar.events.insert({
             calendarId: calId,
             resource: updatedScheduleInfo,
             sendNotifications: true,
           });
           const appointmentInfo = await model.appointment.findOne({
-            where: {FK_Study: app.FK_Study,
-                    FK_Child: app.FK_Child}
+            where: { FK_Study: app.FK_Study, FK_Child: app.FK_Child },
           });
-      
+
           const updatedAppointmentInfo = {};
-  
+
           updatedAppointmentInfo.calendarEventId = calEvent.data.id;
           updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
-      
+
           await model.appointment.update(updatedAppointmentInfo, {
             where: { id: appointmentInfo.dataValues.id },
           });
-      
-          console.log("Calendar event successfully created: " + calEvent.data.id);
+
+          console.log(
+            "Calendar event successfully created: " + calEvent.data.id
+          );
         }
-
-
       } catch (error) {
-        console.log('*****', error);
+        console.log("*****", error);
         throw error;
       }
 
-    break;
+      break;
 
     default:
       // update the calendar event, if an appointment is rescheduled.
 
-      if (updatedScheduleInfo.calendarEventId && !updatedScheduleInfo.skipStudyDateTimeStatus) {
+      if (
+        updatedScheduleInfo.calendarEventId &&
+        !updatedScheduleInfo.skipStudyDateTimeStatus
+      ) {
         // check if there was an calendar event created before.
 
         try {
           await calendar.events.delete({
-            calendarId: 'primary',
+            calendarId: "primary",
             eventId: updatedScheduleInfo.calendarEventId,
             sendNotifications: true,
           });
@@ -557,8 +602,10 @@ exports.update = asyncHandler(async (req, res) => {
       break;
   }
 
-  if (updatedScheduleInfo.Status == "Cancelled" || updatedScheduleInfo.Status == "Rejected") {
-
+  if (
+    updatedScheduleInfo.Status == "Cancelled" ||
+    updatedScheduleInfo.Status == "Rejected"
+  ) {
     updatedScheduleInfo.Completed = true;
 
     // update family by removing AssignedLab from the family
@@ -568,15 +615,14 @@ exports.update = asyncHandler(async (req, res) => {
       where: { id: updatedScheduleInfo.FK_Family },
     });
   } else {
-
-    if (updatedScheduleInfo.FK_Family) {// update family's AssignedLab with the current lab
+    if (updatedScheduleInfo.FK_Family) {
+      // update family's AssignedLab with the current lab
       updateFamilyInfo = { AssignedLab: req.body.lab };
 
       await model.family.update(updateFamilyInfo, {
         where: { id: updatedScheduleInfo.FK_Family },
       });
     }
-
   }
 
   try {
@@ -587,9 +633,11 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Update", User, "updated a study appointment (" +
-      ID +
-      ")");
+    await log.createLog(
+      "Appointment Update",
+      User,
+      "updated a study appointment (" + ID + ")"
+    );
 
     res.status(200).send(updatedSchedule);
 
@@ -609,16 +657,21 @@ exports.remind = asyncHandler(async (req, res) => {
   }
 
   try {
-    const updatedSchedule = await model.schedule.update({ Reminded: 1 }, {
-      where: { id: ID },
-    });
+    const updatedSchedule = await model.schedule.update(
+      { Reminded: 1 },
+      {
+        where: { id: ID },
+      }
+    );
 
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Remind", User, "sent a reminding email for a study appointment (" +
-      ID +
-      ")");
+    await log.createLog(
+      "Appointment Remind",
+      User,
+      "sent a reminding email for a study appointment (" + ID + ")"
+    );
 
     res.status(200).send(updatedSchedule);
 
@@ -645,9 +698,11 @@ exports.tyEmail = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment update", User, "sent a thank you email for study schedule (" +
-      ID +
-      ")");
+    await log.createLog(
+      "Appointment update",
+      User,
+      "sent a thank you email for study schedule (" + ID + ")"
+    );
 
     res.status(200).send(updatedSchedule);
 
@@ -664,7 +719,7 @@ exports.complete = asyncHandler(async (req, res) => {
     ID = updatedScheduleInfo.id;
     delete updatedScheduleInfo["id"];
   }
-  
+
   console.log(updatedScheduleInfo);
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
@@ -681,9 +736,11 @@ exports.complete = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Complete", User, "marked the study appointment (" +
-      ID +
-      ") as completed");
+    await log.createLog(
+      "Appointment Complete",
+      User,
+      "marked the study appointment (" + ID + ") as completed"
+    );
 
     res.status(200).send(updatedSchedule);
 
@@ -719,9 +776,11 @@ exports.delete = asyncHandler(async (req, res) => {
     // Log
     const User = JSON.parse(req.query.User);
 
-    await log.createLog("Appointment Delete", User, "deleted a study appointment (" +
-      req.query.id +
-      ")");
+    await log.createLog(
+      "Appointment Delete",
+      User,
+      "deleted a study appointment (" + req.query.id + ")"
+    );
 
     res.status(200).send("schedule deleted.");
   } catch (error) {
@@ -734,7 +793,7 @@ exports.special = asyncHandler(async (req, res) => {
   queryString["$Appointments.Study.FK_Lab$"] = 2;
 
   try {
-    var schedules = await searchScheudles(queryString)
+    var schedules = await searchScheudles(queryString);
 
     schedules.forEach((schedule) => {
       // if (schedule.Appointments[0].FK_Family) {
@@ -759,9 +818,7 @@ exports.special = asyncHandler(async (req, res) => {
   }
 });
 
-
 async function searchScheudles(queryString) {
-
   const schedule = await model.schedule.findAll({
     where: queryString,
     include: [
@@ -770,37 +827,64 @@ async function searchScheudles(queryString) {
         include: [
           {
             model: model.child,
-            attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"],
-            include: [{
-              model: model.appointment,
-              attributes: ['FK_Study']
-            }, {
-              model: model.family,
-              attributes: ['AutismHistory']
-            }]
+            attributes: [
+              "id",
+              "Name",
+              "DoB",
+              "Age",
+              "Sex",
+              "FK_Family",
+              "IdWithinFamily",
+            ],
+            include: [
+              {
+                model: model.appointment,
+                attributes: ["FK_Study"],
+              },
+              {
+                model: model.family,
+                attributes: ["AutismHistory"],
+              },
+            ],
           },
           {
             model: model.study,
-            include: [{ model: model.lab },
-            {
-              model: model.personnel,
-              as: 'Experimenters',
-              through: {
-                model: model.experimenter,
+            include: [
+              { model: model.lab },
+              {
+                model: model.personnel,
+                as: "Experimenters",
+                through: {
+                  model: model.experimenter,
+                },
               },
-            },],
+            ],
           },
           {
             model: model.personnel,
             as: "PrimaryExperimenter",
             through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+            attributes: [
+              "id",
+              "Name",
+              "Email",
+              "Calendar",
+              "ZoomLink",
+              "Initial",
+            ],
           },
           {
             model: model.personnel,
             as: "SecondaryExperimenter",
             through: { model: model.experimenterAssignment_2nd },
-            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+            attributes: [
+              "id",
+              "Name",
+              "Email",
+              "Calendar",
+              "ZoomLink",
+              "Initial",
+            ],
           },
         ],
       },
@@ -809,15 +893,19 @@ async function searchScheudles(queryString) {
         include: [
           {
             model: model.child,
-            include: [{
-              model: model.appointment,
-              attributes: ['FK_Study']
-            }, {
-              model: model.family,
-              attributes: ['AutismHistory']
-            }]
+            include: [
+              {
+                model: model.appointment,
+                attributes: ["FK_Study"],
+              },
+              {
+                model: model.family,
+                attributes: ["AutismHistory"],
+              },
+            ],
           },
-          { model: model.conversations, }]
+          { model: model.conversations },
+        ],
       },
       {
         model: model.personnel,
@@ -826,5 +914,5 @@ async function searchScheudles(queryString) {
     order: [["AppointmentTime", "ASC"]],
   });
 
-  return schedule
+  return schedule;
 }

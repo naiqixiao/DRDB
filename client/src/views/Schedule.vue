@@ -17,7 +17,7 @@
 
     <ConfirmDlg ref="confirmD" />
 
-    <v-row justify="space-around" style="height: 620px">
+    <v-row justify="space-around" style="height: 700px">
       <v-col cols="12" md="4">
         <v-row dense>
           <v-col cols="12" md="12">
@@ -35,23 +35,6 @@
             <StudySummary :selectedStudy="selectedStudy"></StudySummary>
           </v-col>
         </v-row>
-
-        <!-- <h4>{{ selectedStudy.StudyName }}</h4>
-        <h4>{{ selectedStudy.MinAge }}</h4>
-        <h4>{{ selectedStudy.MaxAge }}</h4>
-        <p>{{ selectedStudy.Description }}</p>-->
-
-        <!-- <v-btn @click.stop="dialogEmail = true" color="primary">Email test</v-btn>
-        <EmailDialog
-          :dialog="dialogEmail"
-          :emailTemplate="selectedStudy.EmailTemplate"
-          :data="{
-            NamePrimary: currentFamily.NamePrimary,
-            ChildName: currentChild.Name,
-            Email: 'nx@kangleelab.com',
-          }"
-          @cancelEmail="closeEmail"
-        ></EmailDialog>-->
       </v-col>
 
       <v-col cols="12" md="5">
@@ -218,8 +201,8 @@
               " :disabled="!currentChild.id ||
     currentChild.scheduled ||
     !$store.state.labEmailStatus ||
-    contactedByOthers
-    " class="textfield-family" background-color="textbackground" hide-details outlined dense></v-select>
+    contactedByOthers" class="textfield-family" background-color="textbackground" hide-details outlined dense>
+            </v-select>
           </v-col>
 
           <v-col cols="12" md="3">
@@ -305,7 +288,13 @@
             </v-card>
           </v-dialog>
 
-          <v-dialog v-model="dialogSchedule" max-width="1200px" :retain-focus="false">
+
+          <!-- Dialog Component, to create or update a schedule -->
+          <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
+            :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create" @close-dialog="closeDialog()"
+            @newAppointment="addAppointment" @deletCurrentAppointment="deletCurrentAppointment" />
+
+          <!-- <v-dialog v-model="dialogSchedule" max-width="1200px" :retain-focus="false">
             <v-stepper v-model="e1">
               <v-stepper-header>
                 <v-stepper-step :complete="e1 > 1" editable step="1" @click="emailDialog = false">Schedule studies for {{
@@ -420,7 +409,7 @@
                       </v-row>
                     </v-card>
                   </v-row>
-                  <!-- <v-divider></v-divider> -->
+
                   <v-row justify="space-between" align="center" style="padding: 8px">
                     <v-col cols="12" md="2"></v-col>
                     <v-col cols="12" md="6">
@@ -448,7 +437,7 @@
                         :appointments="appointments" :emailType="emailType"></Email>
                     </v-card>
                   </v-row>
-                  <!-- <v-divider></v-divider> -->
+
                   <v-row justify="space-between" align="center" style="padding: 8px">
                     <v-col cols="12" md="2">
                       <v-tooltip top>
@@ -474,12 +463,12 @@
                         !!currentFamily.Email &&
                         !this.skipConfirmationEmailStatus
                         " @click="scheduleNextStep">{{
-                                                      !!currentFamily.Email &&
-                                                      !this.skipConfirmationEmailStatus &&
-                                                      this.$store.state.labEmailStatus
-                                                      ? "Next"
-                                                      : "Skip email"
-                                                    }}</v-btn>
+                          !!currentFamily.Email &&
+                          !this.skipConfirmationEmailStatus &&
+                          this.$store.state.labEmailStatus
+                          ? "Next"
+                          : "Skip email"
+                        }}</v-btn>
                     </v-col>
                   </v-row>
                 </v-stepper-content>
@@ -496,7 +485,7 @@
                 </v-stepper-content>
               </v-stepper-items>
             </v-stepper>
-          </v-dialog>
+          </v-dialog> -->
 
           <v-dialog v-model="datePicker" max-width="290px">
             <v-card outlined>
@@ -561,14 +550,16 @@ import RTU from "@/services/realtimeUpdate";
 
 import moment from "moment-timezone";
 
-import ExtraStudies from "@/components/ExtraStudies";
+// import ExtraStudies from "@/components/ExtraStudies";
 
 import NotesConversation from "@/components/NotesConversation";
 import StudySummary from "@/components/StudySummary";
 
-import Email from "@/components/Email";
+// import Email from "@/components/Email";
 // import EmailDialog from "@/components/EmailDialog";
-import NextContact from "@/components/NextContact";
+// import NextContact from "@/components/NextContact";
+import scheduleDialog from '@/components/scheduleDialog.vue';
+
 
 import AppointmentTableBrief from "@/components/AppointmentTableBrief";
 import ParticipationHistory from "@/components/ParticipationHistoryChart";
@@ -584,12 +575,13 @@ import login from "@/services/login";
 
 export default {
   components: {
+    scheduleDialog,
     NotesConversation,
     StudySummary,
-    ExtraStudies,
-    Email,
+    // ExtraStudies,
+    // Email,
     // EmailDialog,
-    NextContact,
+    // NextContact,
     Page,
     AppointmentTableBrief,
     ParticipationHistory,
@@ -950,6 +942,14 @@ export default {
       }, 300);
     },
 
+    addAppointment(appointment) {
+      this.currentSchedule.Appointments.push(appointment);
+    },
+
+    deletCurrentAppointment(index) {
+      this.currentSchedule.Appointments.splice(index, 1);
+    },
+
     async scheduleChild() {
       try {
         await login.check_login();
@@ -966,8 +966,18 @@ export default {
           newAppointment.Child = this.currentChild;
           newAppointment.Study = this.selectedStudy;
           newAppointment.index = this.appointments.length;
+          newAppointment.status = this.response;
           this.appointments.push(newAppointment);
         }
+
+        this.currentSchedule = {
+          AppointmentTime: null,
+          Status: this.response,
+          FK_Family: this.currentChild.FK_Family,
+          Appointments: this.appointments,
+          Note: null,
+          ScheduledBy: this.$store.state.userID,
+        };
 
         this.dialogSchedule = true;
       } catch (error) {
@@ -1124,8 +1134,6 @@ export default {
             Appointments: this.appointments,
             ScheduledBy: this.$store.state.userID,
             location: this.$store.state.location,
-
-            // attendees: this.Experimenters,
           };
 
           if (this.skipReminderEmailStatus) {
@@ -1449,7 +1457,7 @@ export default {
 
     resetSchedule() {
       this.emailButtonText = "Send email";
-      this.scheduleButtonText = "Schedule";
+      // this.scheduleButtonText = "Schedule";
 
       setTimeout(() => {
         this.e1 = 1;
@@ -1598,6 +1606,12 @@ export default {
       }
       return formated;
     },
+
+    closeDialog() {
+            this.dialogSchedule = false;
+            this.dialogType = null;
+           
+        },
 
     PhoneFormated(Phone) {
       if (Phone) {
