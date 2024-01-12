@@ -599,7 +599,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
 // Delete an appointment with the specified id in the request
 exports.delete = asyncHandler(async (req, res) => {
 
-
   try {
     var Schedule = await model.schedule.findOne({
       where: { id: req.query.FK_Schedule },

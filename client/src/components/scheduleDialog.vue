@@ -30,9 +30,10 @@
                             <v-card-text>
 
                                 <!-- Schedule date and time -->
+                                <!--  == 1) & (parentResponse !== 'Confirmed') -->
                                 <v-divider style="margin-bottom: 20px"></v-divider>
                                 <dateTimePicker ref="dateTimePicker"
-                                    :dateTimePickerDisable="(dateTimePickerDisable || (parentResponse !== 'Confirmed'))"
+                                    :dateTimePickerDisable="((dateTimePickerDisable) && (parentResponse !== 'Confirmed'))"
                                     :appointmentTime="currentSchedule.AppointmentTime" />
 
                                 <!-- Appointment Data Table -->
@@ -193,7 +194,7 @@ import moment from "moment";
 import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
 // import login from "@/services/login";
-// import appointment from "@/services/appointment";
+import appointment from "@/services/appointment";
 
 export default {
     components: {
@@ -281,173 +282,36 @@ export default {
             // create/update schedules according to the appointment time, appointments, and other information.
             const newAppointments = this.$refs.appointmentDetails.generateAppointments();
 
-            var statusValues = [];
-            var status = "";
             this.studyDateTime = this.$refs.dateTimePicker.studyDateTime();
 
             // create new schedule
             if (newAppointments.newAppointments.length > 0) {
-                // Get the unique status values from the newAppointments array
-                statusValues = [...new Set(newAppointments.newAppointments.map(appointment => appointment.status))];
+                const newSchedule = await this.newSchedule(newAppointments.newAppointments);
 
-                switch (statusValues[0]) {
-                    case 'Update appointment time':
-                        status = 'Confirmed';
-                        break;
-                    case 'Reschedule (need to follow-up)':
-                        status = 'Rescheduling';
-                        break;
-                    default:
-                        status = statusValues[0]
-                        break;
-                }
-
-                var newSchedule = {
-                    AppointmentTime: this.studyDateTime,
-                    Status: status,
-                    FK_Family: this.currentSchedule.FK_Family,
-                    Note: this.Note,
-                    summary: this.calendarSummary(newAppointments.newAppointments),
-                    Appointments: newAppointments.newAppointments,
-                    ScheduledBy: this.$store.state.userID, //todo
-                    location: this.$store.state.location,
-                    description: this.calendarDescription(newAppointments.newAppointments, this.Note),
-                    Reminded: 0
-                }
-
-                var calendarEvents = []
-                newSchedule.Appointments.forEach((appointment) => {
-
-                    const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
-                    let calendarId;
-                    if (testingRoom) {
-                        calendarId = testingRoom.calendarId;
-                    } else {
-                        calendarId = 'primary';
-                    }
-
-                    appointment.calendarId = calendarId;
-
-                    calendarEvents.push(
-                        {
-                            calendarId: appointment.calendarId,
-                            AppointmentTime: newSchedule.AppointmentTime,
-                            description: newSchedule.description,
-                            summary: newSchedule.summary,
-                            location: newSchedule.location,
-                            attendees: appointment.attendees
-                        })
-                })
-
-                // 1. create calendar events, save the calendarEventId and eventURL to the appointment object
-                const createdCalendarEvents = await calendar.create(calendarEvents);
-
-                console.log("newSchedule")
                 console.log(newSchedule)
-                console.log(calendarEvents)
-
-                console.log("createdCalendarEvents")
-                console.log(createdCalendarEvents.data)
-
-                newSchedule.Appointments.forEach((appointment, index) => {
-                    appointment.calendarEventId = createdCalendarEvents.data[index].calendarEventId;
-                    appointment.eventURL = createdCalendarEvents.data[index].eventURL;
-
-                    appointment.Experimenters = appointment.PrimaryExperimenter.map((experimenter) => {
-                        return experimenter.id;
-                    })
-
-                    appointment.Experimenters_2nd = appointment.SecondaryExperimenter.map((experimenter) => {
-                        return experimenter.id;
-                    })
-
-                })
-
-                console.log("newSchedule")
-                console.log(newSchedule)
-
-                // 2. create schedule and associted appointments (experimenters and assistant experimenters)
-                const createdSchedule = await this.createScheduleBackend(newSchedule);
-
-                console.log("createdSchedule")
-                console.log(createdSchedule)
-
-                // 3. update frontend store?
-
             }
 
+
             // update existing schedule
-            if (newAppointments.updateAppointments.length > 0) {
+            if (newAppointments.updatedAppointments.length > 0) {
+                const updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
 
-                statusValues = [];
-                status = "";
-
-                // Get the unique status values from the updateAppointments array
-                statusValues = [...new Set(newAppointments.updateAppointments.map(appointment => appointment.status))];
-
-                switch (statusValues[0]) {
-                    case 'Update appointment time':
-                        status = 'Confirmed';
-                        break;
-                    case 'Reschedule (need to follow-up)':
-                        status = 'Rescheduling';
-                        break;
-                    default:
-                        status = statusValues[0]
-                        break;
-                }
-
-                var updatedSchedule = {
-                    id: this.currentSchedule.id,
-                    AppointmentTime: this.studyDateTime,
-                    Status: status,
-                    FK_Family: this.currentSchedule.FK_Family,
-                    Note: this.Note,
-                    summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments.updateAppointments),
-                    Appointments: newAppointments.updateAppointments,
-                    ScheduledBy: this.$store.state.userID,
-                    location: this.$store.state.location,
-                    description: this.calendarDescription(newAppointments.updateAppointments, this.Note),
-                    Reminded: 0,
-                }
-
-                console.log("updatedSchedule")
                 console.log(updatedSchedule)
+            }
 
-                var updatedCalendarEvents = []
-                updatedSchedule.Appointments.forEach((appointment) => {
 
-                    const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
-                    let calendarId;
-                    if (testingRoom) {
-                        calendarId = testingRoom.calendarId;
-                    } else {
-                        calendarId = 'primary';
-                    }
+            // todo, complete the schedule if the status is "Completed".
+            console.log(newAppointments.completedAppointments);
 
-                    appointment.calendarId = calendarId;
+            if (newAppointments.completedAppointments.length > 0) {
+                console.log('todo...')
+            }
 
-                    var calendarEvent = {
-                        calendarId: appointment.calendarId,
-                        AppointmentTime: updatedSchedule.AppointmentTime,
-                        description: updatedSchedule.description,
-                        summary: updatedSchedule.summary,
-                        location: updatedSchedule.location,
-                        attendees: appointment.attendees,
-                        calendarEventId: appointment.calendarEventId || updatedSchedule.calendarEventId || null,
-                        eventURL: appointment.eventURL || updatedSchedule.eventURL || null,
-                    }
 
-                    updatedCalendarEvents.push(calendarEvent)
-
-                })
-
-                // 1. update/create calendar events, save the calendarEventId and eventURL to the appointment object
-                const updatedCalendarEventsOutput = await calendar.update(calendarEvents);
-
-                console.log("updatedCalendarEvents")
-                console.log(updatedCalendarEventsOutput)
-
+            // delete the appointment previously scheduled in the current schedule.
+            if (newAppointments.deletedAppointments.length > 0) {
+                // todo. delete appointments from the database. Backend update needed.
+                await appointment.delete(newAppointments.deletedAppointments);
             }
 
             // ///////////////////////////////////////////////
@@ -465,7 +329,7 @@ export default {
             //     }
 
             //     // update existing schedule
-            //     if (newAppointments.updateAppointments.length > 0) {
+            //     if (newAppointments.updatedAppointments.length > 0) {
 
             //         await this.updateScheduleBackend(updatedSchedule);
 
@@ -483,7 +347,7 @@ export default {
             // this.loadingStatus = false;
 
             // create the list of appointments to draft emails.
-            this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updateAppointments).filter(appointment => {
+            this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updatedAppointments).filter(appointment => {
                 return appointment.status === 'Confirmed' || appointment.status === 'Tentative' || appointment.status === 'Update appointment time' || appointment.status === 'No Show';
             });
 
@@ -504,13 +368,242 @@ export default {
         //     Status: status,
         //     FK_Family: this.currentSchedule.FK_Family,
         //     Note: this.Note,
-        //     summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments.updateAppointments),
-        //     Appointments: newAppointments.updateAppointments,
+        //     summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments.updatedAppointments),
+        //     Appointments: newAppointments.updatedAppointments,
         //     ScheduledBy: this.$store.state.userID,
         //     location: this.$store.state.location,
-        //     description: this.calendarDescription(newAppointments.updateAppointments, this.Note),
-        //     // attendees: newAppointments.updateAppointments.attendees,
+        //     description: this.calendarDescription(newAppointments.updatedAppointments, this.Note),
+        //     // attendees: newAppointments.updatedAppointments.attendees,
         // }
+
+        async newSchedule(newAppointments) {
+
+            var statusValues = [];
+            var status = "";
+
+            // Get the unique status values from the newAppointments array
+            statusValues = [...new Set(newAppointments.map(appointment => appointment.status))];
+
+            switch (statusValues[0]) {
+                case 'Update appointment time':
+                    status = 'Confirmed';
+                    break;
+                case "Left a message":
+                case "Interested":
+                    status = "TBD";
+                    break;
+                case 'Reschedule (need to follow-up)':
+                    status = 'Rescheduling';
+                    break;
+                default:
+                    status = statusValues[0]
+                    break;
+            }
+
+            var newSchedule = {
+                AppointmentTime: this.studyDateTime,
+                Status: status,
+                FK_Family: this.currentSchedule.FK_Family,
+                Note: this.Note,
+                summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments),
+                Appointments: newAppointments,
+                ScheduledBy: this.$store.state.userID, //todo
+                location: this.$store.state.location,
+                description: this.calendarDescription(newAppointments, this.Note),
+                Reminded: 0
+            }
+
+            // prepare calendar events for the appointments
+            var calendarEvents = []
+            newSchedule.Appointments.forEach((appointment) => {
+
+                const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+                let calendarId;
+                if (testingRoom) {
+                    calendarId = testingRoom.calendarId;
+                } else {
+                    calendarId = 'primary';
+                }
+
+                appointment.calendarId = calendarId;
+
+                calendarEvents.push(
+                    {
+                        calendarId: appointment.calendarId,
+                        AppointmentTime: newSchedule.AppointmentTime,
+                        description: newSchedule.description,
+                        summary: newSchedule.summary,
+                        location: newSchedule.location,
+                        attendees: appointment.attendees,
+                        eventId: appointment.calendarEventId || newSchedule.calendarEventId || null,
+                        eventURL: appointment.eventURL || newSchedule.eventURL || null,
+                    })
+            })
+
+            // 1. create calendar events, save the calendarEventId and eventURL to the appointment object
+            for (const event of calendarEvents) {
+                if (event.eventId) {
+
+                    // update the calendar event with a new time/experimenters
+                    await calendar.update(event);
+
+                } else {
+
+                    // create a new calendar event
+                    if (newSchedule.Status === 'Confirmed') {
+                        const createdCalendarEvents = await calendar.create(event);
+                        event.eventURL = createdCalendarEvents.data.eventURL;
+                        event.eventId = createdCalendarEvents.data.eventId;
+                    }
+                }
+            }
+
+            console.log(calendarEvents)
+
+            newSchedule.Appointments.forEach((appointment, index) => {
+                appointment.calendarEventId = calendarEvents[index].eventId;
+                appointment.eventURL = calendarEvents[index].eventURL;
+
+                appointment.Experimenters = appointment.PrimaryExperimenter.map((experimenter) => {
+                    return experimenter.id;
+                })
+
+                appointment.Experimenters_2nd = appointment.SecondaryExperimenter.map((experimenter) => {
+                    return experimenter.id;
+                })
+            })
+
+            console.log("newSchedule")
+            console.log(newSchedule)
+            // 2. create schedule and associted appointments (experimenters and assistant experimenters)
+            const createdSchedule = await this.createScheduleBackend(newSchedule);
+
+            // 3. update frontend store?
+
+            return createdSchedule;
+
+        },
+
+        async updateSchedule(updateAppointments) {
+
+            var statusValues = [];
+            var status = "";
+
+            // Get the unique status values from the updateAppointments array
+            statusValues = [...new Set(updateAppointments.map(appointment => appointment.status))];
+
+            // convert the status to the one used in the database
+            switch (statusValues[0]) {
+                case 'Update appointment time':
+                    status = 'Confirmed';
+                    break;
+                case 'Reschedule (need to follow-up)':
+                    status = 'Rescheduling';
+                    break;
+                default:
+                    status = statusValues[0]
+                    break;
+            }
+
+            var updatedSchedule = {
+                id: this.currentSchedule.id,
+                AppointmentTime: this.studyDateTime,
+                Status: status,
+                FK_Family: this.currentSchedule.FK_Family,
+                Note: this.Note,
+                summary: status.toUpperCase() + " - " + this.calendarSummary(updateAppointments),
+                Appointments: updateAppointments,
+                ScheduledBy: this.$store.state.userID,
+                location: this.$store.state.location,
+                description: this.calendarDescription(updateAppointments, this.Note),
+                Reminded: 0,
+            }
+
+            console.log("updatedSchedule")
+            console.log(updatedSchedule)
+
+            var updatedCalendarEvents = []
+            updatedSchedule.Appointments.forEach((appointment) => {
+
+                const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+                let calendarId;
+                if (testingRoom) {
+                    calendarId = testingRoom.calendarId;
+                } else {
+                    calendarId = 'primary';
+                }
+
+                appointment.calendarId = calendarId;
+
+                var calendarEvent = {
+                    calendarId: appointment.calendarId,
+                    AppointmentTime: updatedSchedule.AppointmentTime,
+                    description: updatedSchedule.description,
+                    summary: updatedSchedule.summary,
+                    location: updatedSchedule.location,
+                    attendees: appointment.attendees,
+                    eventId: appointment.calendarEventId || updatedSchedule.calendarEventId || null,
+                    eventURL: appointment.eventURL || updatedSchedule.eventURL || null,
+                }
+
+                updatedCalendarEvents.push(calendarEvent)
+
+            })
+
+            console.log(updatedCalendarEvents)
+
+            // 1. update/create calendar events, save the calendarEventId and eventURL to the appointment object
+
+            for (const event of updatedCalendarEvents) {
+                // check if there was an calendar event created before. There is no calendar event created when the schedule was previously in TBD status.
+                if (event.eventId) {
+
+                    // update the calendar event
+                    await calendar.update(event);
+
+                } else {
+                    
+                    // create a new calendar event
+                    if (updatedSchedule.Status === 'Confirmed') {
+                        const createdCalendarEvent = await calendar.create(event);
+                        event.eventURL = createdCalendarEvent.data.eventURL;
+                        event.eventId = createdCalendarEvent.data.eventId;
+                    }
+
+                }
+
+            }
+
+            updatedSchedule.Appointments.forEach((appointment, index) => {
+                appointment.calendarEventId = updatedCalendarEvents[index].eventId;
+                appointment.eventURL = updatedCalendarEvents[index].eventURL;
+
+                appointment.Experimenters = appointment.PrimaryExperimenter.map((experimenter) => {
+                    return experimenter.id;
+                })
+
+                appointment.Experimenters_2nd = appointment.SecondaryExperimenter.map((experimenter) => {
+                    return experimenter.id;
+                })
+
+                appointment.FK_Schedule = updatedSchedule.id; // newly added appointment does not have this field.
+
+            })
+
+            console.log("updatedSchedule")
+            console.log(updatedSchedule)
+
+            // 2. update schedule and associted appointments (experimenters and assistant experimenters)
+
+            const createdSchedule = await this.updateScheduleBackend(updatedSchedule);
+
+            console.log("updatedSchedule")
+            console.log(createdSchedule)
+
+            // 3. update frontend store?
+
+            return createdSchedule;
+        },
 
         async createScheduleBackend(newSchedule) {
             const createdSchedule = await schedule.create(newSchedule);
@@ -518,7 +611,8 @@ export default {
         },
 
         async updateScheduleBackend(updatedSchedule) {
-            await schedule.update(updatedSchedule);
+            const createdSchedule = await schedule.update(updatedSchedule);
+            return createdSchedule.data
         },
 
         calendarSummary(Appointments) {
@@ -706,10 +800,13 @@ export default {
     watch: {
 
         currentSchedule(newVal) {
-            this.Note = newVal.Note;
-            this.nextNote = newVal.nextContactNote;
+            if (newVal) {
+                this.Note = newVal.Note;
+                this.nextNote = newVal.nextContactNote;
 
-            this.initiateVariables(this.dialogType);
+                this.initiateVariables(this.dialogType);
+                this.$refs.appointmentDetails.resetVariables();
+            }
 
         }
     },

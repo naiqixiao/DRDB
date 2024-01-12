@@ -1,3 +1,5 @@
+<!-- todo, no need to choose Experimenters when the status is not confirmed. E1 is required when the status is confirmed.-->
+
 <template>
     <v-container style="padding: 0px !important; flex-direction: column;">
         <h2 class=" text-left" style="margin-right: 0px;">
@@ -159,6 +161,7 @@ export default {
             optionsE1: [],
             optionsE2: [],
             nSelectableStudies: [],
+            deletedAppointments: [],
         }
     },
     methods: {
@@ -319,7 +322,7 @@ export default {
             switch (newVal) {
 
                 // if any appointment is set to be cancelled or No show, the status of all appointment of this schedule will be set the same.
-                case "Cancel":
+                case "Cancelled":
                 case "No show":
                 case "Confirmed":
                 case "Interested":
@@ -336,7 +339,7 @@ export default {
                     changedItem.status = newVal;
                     this.editedAppointments.forEach(item => {
                         if (item.id !== changedItem.id) {
-                            if (item.status === 'Cancel' | item.status === 'No show') {
+                            if (item.status === 'Cancelled' | item.status === 'No show') {
                                 item.status = null;
                             }
                         }
@@ -349,10 +352,10 @@ export default {
             // to set new time, a date/time input will reveal (or enabled)
             if (this.editedAppointments.every(appointment => 'status' in appointment && appointment.status != null)) {
                 if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time" || appointment.status === "Confirmed")) {
-                    this.$emit("dateTimePickerDisableUpdate", true)
+                    this.$emit("dateTimePickerDisableUpdate", false)
                 }
                 else {
-                    this.$emit("dateTimePickerDisableUpdate", false)
+                    this.$emit("dateTimePickerDisableUpdate", true)
                 }
             }
         },
@@ -398,7 +401,7 @@ export default {
             const newAppointment = {
                 FK_Child: child.id,
                 FK_Family: child.FK_Family,
-                FK_Schedule: this.editedAppointments[0].FK_Schedule,
+                FK_Schedule: this.editedAppointments[0].FK_Schedule || null,
                 Child: child
             }
 
@@ -416,6 +419,8 @@ export default {
         },
 
         deletCurrentAppointment(index) {
+            if (this.editedAppointments[index].id) { this.deletedAppointments.push(this.editedAppointments[index].id) }
+
             this.editedAppointments.splice(index, 1)
         },
 
@@ -445,16 +450,6 @@ export default {
         },
 
         generateAppointments() {
-            // console.log(this.Appointments)
-            // for (var i = 0; i < this.editedAppointments.length; i++) {
-            //     console.log(this.editedAppointments[i].Child.Name)
-            //     console.log(this.selectedStudies[i].StudyName)
-            //     console.log(this.selectedExperimenters[i])
-            //     console.log(this.selectedExperimenters_2nd[i])
-            //     console.log(this.editedAppointments[i].status)
-
-            // }
-
             // add variables to the editedAppointments array: Experimenter, SecondaryExperimenter, Study, and Child
             this.editedAppointments.forEach((appointment, index) => {
                 appointment.PrimaryExperimenter = [this.selectedExperimenters[index]];
@@ -472,45 +467,58 @@ export default {
             // Get the unique status values from the editedAppointments array
             const statusValues = [...new Set(this.editedAppointments.map(appointment => appointment.status))];
 
-            var updateAppointments = []; // appointments that need to be updated with the same schedule ID
+            var updatedAppointments = []; // appointments that need to be updated with the same schedule ID
             var newAppointments = []; // appointments that need to be created with a new schedule ID
+            var completedAppointments = []; // appointments that need to be completed
 
             if (statusValues.length > 1) {
+                // when appointments within a schedule have different status (e.g., one completes, the other needs to be rescheduled).
+                // This situation should only happen when updating existing schedules, not when creating new schedules.
 
                 // Separate the array based on the status values
                 newAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Update appointment time' || appointment.status === 'Reschedule (need to follow-up)');
 
-                updateAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Complete');
+                completedAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Completed');
             }
-            else {
+
+            else { // when all appointments within a schedule share the same status.
 
                 switch (statusValues[0]) {
+                    // the following status belong to updating existing schedules, not creating new schedules.
                     case 'Update appointment time':
                     case 'Reschedule (need to follow-up)':
-                    case 'Complete':
-                    case 'Cancel':
+                    case 'Cancelled':
                     case 'No show':
-                        updateAppointments = this.editedAppointments;
+                        updatedAppointments = this.editedAppointments;
                         break
 
+                    // the following status belong to creating new schedules, not updating existing schedules.
                     case 'Confirmed':
                     case "Interested":
                     case "Left a message":
                     case 'Rejected':
                         newAppointments = this.editedAppointments;
                         break;
+
+                    case 'Completed':
+                        completedAppointments = this.editedAppointments;
+                        break;
+
                 }
 
             }
 
-            updateAppointments.forEach(appointment => {
+            updatedAppointments.forEach(appointment => {
                 appointment.attendees = this.generateAttendees(appointment);
             })
             newAppointments.forEach(appointment => {
                 appointment.attendees = this.generateAttendees(appointment);
             })
 
-            return { updateAppointments, newAppointments }
+            //
+            const deletedAppointments = this.deletedAppointments
+
+            return { updatedAppointments, newAppointments, deletedAppointments, completedAppointments }
 
         },
 
@@ -573,7 +581,19 @@ export default {
         childPopUpInfo(child) {
             const nPreviousParticipation = child.Appointments.length
             return '<strong>Age:  </strong>' + childAge(child) + "<br><strong>Gender: </strong>" + child.Sex + "<br><strong>Participation (N): </strong>" + nPreviousParticipation
-        }
+        },
+
+        resetVariables() {
+            this.editedAppointments = [];
+            this.selectedExperimenters = [];
+            this.selectedExperimenters_2nd = [];
+            this.selectedStudies = [];
+            this.optionsE1 = [];
+            this.optionsE2 = [];
+            this.nSelectableStudies = [];
+            this.deletedAppointments = [];
+
+        },
 
     },
 
@@ -588,7 +608,7 @@ export default {
                     break;
 
                 case 'update':
-                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancel", "Complete"];
+                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
                     break;
 
             }

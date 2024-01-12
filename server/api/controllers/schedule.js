@@ -85,39 +85,42 @@ exports.create = asyncHandler(async (req, res) => {
   ).toISOString(true);
 
   try {
-    let schedule;
+    
+    // check if there is any of the appointment has been scheduled before (with FK_Schedule and id).
+    for (const app of newScheduleInfo.Appointments) {
 
-    if (!newScheduleInfo.Appointments[0].FK_Schedule) {
-      schedule = await model.schedule.create(newScheduleInfo, {
-        include: [model.appointment],
-      });
-    } else {
-      const appointmentIdsToUpdate = [];
-      for (const app of newScheduleInfo.Appointments) {
-        appointmentIdsToUpdate.push(app.id);
-      }
-      schedule = await model.schedule.create(newScheduleInfo);
-      const newScheduleId = schedule.id;
+      if (app.FK_Schedule) {
+        //  1. remove the appointments based on the id
+        await model.appointment.destroy({ where: { id: app.id } });
 
-      const appointmentsToUpdate = newScheduleInfo.Appointments.map(
-        (appointment) => {
-          return {
-            ...appointment,
-            FK_Schedule: newScheduleId,
-          };
-        }
-      );
+        // 2. remove the experimenter assignment associated with this appointment
+        await model.experimenterAssignment.destroy({
+          where: { FK_Appointment: app.id },
+        });
 
-      for (const app of appointmentsToUpdate) {
-        await model.appointment.create(app);
+        await model.experimenterAssignment_2nd.destroy({
+          where: { FK_Appointment: app.id },
+        });
+
+        //  2. remove the FK_Schedule and id from each of the appointment
+        delete app.FK_Schedule;
+        delete app.id;
       }
     }
+
+    console.log(newScheduleInfo.Appointments)
+
+    // create new schedule, associated appointments, and experimenter assignment.
+    const schedule = await model.schedule.create(newScheduleInfo, {
+      include: [model.appointment],
+    });
 
     if (newScheduleInfo.Status == "Confirmed") {
       // add primary experimenter
       var experimenterList = [];
       // add secondary experimenters
       var experimenter_2ndList = [];
+
       for (var i = 0; i < schedule.Appointments.length; i++) {
         var appointmentId = schedule.Appointments[i].id;
 
@@ -149,6 +152,15 @@ exports.create = asyncHandler(async (req, res) => {
       }
     }
 
+    if (newScheduleInfo.FK_Family) {
+      // update family's AssignedLab with the current lab
+      updateFamilyInfo = { AssignedLab: req.body.lab };
+
+      await model.family.update(updateFamilyInfo, {
+        where: { id: newScheduleInfo.FK_Family },
+      });
+    }
+
     // Log
     const User = req.body.User;
 
@@ -159,9 +171,9 @@ exports.create = asyncHandler(async (req, res) => {
     );
 
     res.status(200).send(schedule);
-    console.log("appointment created!");
+    console.log("schedule created!");
   } catch (error) {
-    throw error;
+    console.log( error);
   }
 });
 
@@ -413,37 +425,21 @@ exports.week = asyncHandler(async (req, res) => {
   }
 });
 
-// Update an appointment by the id in the request
+// ////////////////////////////////////////////
+// update an schedule.
 exports.update = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
 
   if (updatedScheduleInfo.AppointmentTime) {
-    updatedScheduleInfo.start = {
-      dateTime: moment(updatedScheduleInfo.AppointmentTime).toISOString(true),
-      timeZone: config.timeZone,
-    };
-
-    updatedScheduleInfo.end = {
-      dateTime: moment(updatedScheduleInfo.AppointmentTime)
-        .add(1, "h") // might change if multiple studies are scheduled for one visit
-        .toISOString(true),
-      timeZone: config.timeZone,
-    };
-
     updatedScheduleInfo.AppointmentTime = moment(
       updatedScheduleInfo.AppointmentTime
     ).toISOString(true);
   }
 
-  if (updatedScheduleInfo.id) {
-    var ID = updatedScheduleInfo.id;
-    delete updatedScheduleInfo["id"];
-  }
-
-  const calendar = google.calendar({
-    version: "v3",
-    auth: req.oAuth2Client,
-  });
+  // if (updatedScheduleInfo.id) {
+  //   const ID = updatedScheduleInfo.id;
+  //   delete updatedScheduleInfo["id"];
+  // }
 
   switch (updatedScheduleInfo.Status) {
     case "Confirmed":
@@ -452,27 +448,17 @@ exports.update = asyncHandler(async (req, res) => {
       // add secondary experimenters
       var experimenter_2ndList = [];
 
-      updatedScheduleInfo.Appointments.forEach(async (appointment) => {
+      // check each appointment, and update the experimenter assignment
+      for (const appointment of updatedScheduleInfo.Appointments) {
         if (!appointment.id) {
+          // create new appointment and experimenter assignment, it happens when a new appointment is added to the schedule.
           // new appointment added to the schedule
-          appointment.FK_Schedule = ID;
 
           const newAppointment = await model.appointment.create(appointment);
 
-          appointment.Experimenters.forEach((experimenter) => {
-            experimenterList.push({
-              FK_Experimenter: experimenter,
-              FK_Appointment: newAppointment.id,
-            });
-          });
-
-          appointment.Experimenters_2nd.forEach((experimenter) => {
-            experimenter_2ndList.push({
-              FK_Experimenter: experimenter,
-              FK_Appointment: newAppointment.id,
-            });
-          });
+          appointment.id = newAppointment.id;
         } else {
+          // Because the assigned study might be changed or the appointment now includes calendar events, we need to update it.
           await model.appointment.update(appointment, {
             where: { id: appointment.id },
           });
@@ -486,148 +472,63 @@ exports.update = asyncHandler(async (req, res) => {
             where: { FK_Appointment: appointment.id },
           });
 
-          // new experimenter assigment
-          appointment.Experimenters.forEach((experimenter) => {
-            experimenterList.push({
-              FK_Experimenter: experimenter,
-              FK_Appointment: appointment.id,
-            });
-          });
-
-          appointment.Experimenters_2nd.forEach((experimenter) => {
-            experimenter_2ndList.push({
-              FK_Experimenter: experimenter,
-              FK_Appointment: appointment.id,
-            });
-          });
-
           // reset reminder setting
           updatedScheduleInfo.Reminded = 0;
         }
 
-        await model.experimenterAssignment.bulkCreate(experimenterList);
+        // new experimenter assigment
+        appointment.Experimenters.forEach((experimenter) => {
+          experimenterList.push({
+            FK_Experimenter: experimenter,
+            FK_Appointment: appointment.id,
+          });
+        });
+
+        appointment.Experimenters_2nd.forEach((experimenter) => {
+          experimenter_2ndList.push({
+            FK_Experimenter: experimenter,
+            FK_Appointment: appointment.id,
+          });
+        });
+
+        if (experimenterList.length > 0) {
+          await model.experimenterAssignment.bulkCreate(experimenterList);
+        }
 
         if (experimenter_2ndList.length > 0) {
           await model.experimenterAssignment_2nd.bulkCreate(
             experimenter_2ndList
           );
         }
-      });
+      }
 
-      //
+      if (updatedScheduleInfo.FK_Family) {
+        // update family's AssignedLab with the current lab
+        updateFamilyInfo = { AssignedLab: req.body.lab };
 
-      try {
-        if (
-          updatedScheduleInfo.calendarEventId &&
-          !updatedScheduleInfo.skipStudyDateTimeStatus
-        ) {
-          // check if there was an calendar event created before.
-
-          try {
-            await calendar.events.delete({
-              calendarId: "primary",
-              eventId: updatedScheduleInfo.calendarEventId,
-              sendNotifications: true,
-            });
-          } catch (err) {
-            throw err;
-          }
-        }
-
-        for (const app of updatedScheduleInfo.Appointments) {
-          const testingRooms = await model.testingRoom.findAll({
-            where: { FK_Lab: app.Study.FK_Lab },
-          });
-
-          const testingRoomId = app.Study.FK_TestingRoom;
-          let calId;
-          if (testingRoomId) {
-            const curTestingRoom = testingRooms.find(
-              (room) => room.id === testingRoomId
-            );
-            calId = curTestingRoom.calendarId;
-          } else {
-            calId = "primary";
-          }
-
-          const calEvent = await calendar.events.insert({
-            calendarId: calId,
-            resource: updatedScheduleInfo,
-            sendNotifications: true,
-          });
-          const appointmentInfo = await model.appointment.findOne({
-            where: { FK_Study: app.FK_Study, FK_Child: app.FK_Child },
-          });
-
-          const updatedAppointmentInfo = {};
-
-          updatedAppointmentInfo.calendarEventId = calEvent.data.id;
-          updatedAppointmentInfo.eventURL = calEvent.data.htmlLink;
-
-          await model.appointment.update(updatedAppointmentInfo, {
-            where: { id: appointmentInfo.dataValues.id },
-          });
-
-          console.log(
-            "Calendar event successfully created: " + calEvent.data.id
-          );
-        }
-      } catch (error) {
-        console.log("*****", error);
-        throw error;
+        await model.family.update(updateFamilyInfo, {
+          where: { id: updatedScheduleInfo.FK_Family },
+        });
       }
 
       break;
 
-    default:
-      // update the calendar event, if an appointment is rescheduled.
+    case "Cancelled":
+    case "Rejected":
+      updatedScheduleInfo.Completed = true;
 
-      if (
-        updatedScheduleInfo.calendarEventId &&
-        !updatedScheduleInfo.skipStudyDateTimeStatus
-      ) {
-        // check if there was an calendar event created before.
-
-        try {
-          await calendar.events.delete({
-            calendarId: "primary",
-            eventId: updatedScheduleInfo.calendarEventId,
-            sendNotifications: true,
-          });
-        } catch (err) {
-          throw err;
-        }
-      }
-
-      break;
-  }
-
-  if (
-    updatedScheduleInfo.Status == "Cancelled" ||
-    updatedScheduleInfo.Status == "Rejected"
-  ) {
-    updatedScheduleInfo.Completed = true;
-
-    // update family by removing AssignedLab from the family
-    updateFamilyInfo = { AssignedLab: null };
-
-    await model.family.update(updateFamilyInfo, {
-      where: { id: updatedScheduleInfo.FK_Family },
-    });
-  } else {
-    if (updatedScheduleInfo.FK_Family) {
-      // update family's AssignedLab with the current lab
-      updateFamilyInfo = { AssignedLab: req.body.lab };
+      // update family by removing AssignedLab from the family
+      updateFamilyInfo = { AssignedLab: null };
 
       await model.family.update(updateFamilyInfo, {
         where: { id: updatedScheduleInfo.FK_Family },
       });
-    }
+      break;
   }
 
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
-      where: { id: ID },
+      where: { id: updatedScheduleInfo.id },
     });
 
     // Log
@@ -636,7 +537,7 @@ exports.update = asyncHandler(async (req, res) => {
     await log.createLog(
       "Appointment Update",
       User,
-      "updated a study appointment (" + ID + ")"
+      "updated a study appointment (" + updatedScheduleInfo.id + ")"
     );
 
     res.status(200).send(updatedSchedule);

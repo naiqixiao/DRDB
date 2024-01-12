@@ -104,8 +104,13 @@ export default {
         },
 
         resetDateTime() {
-            this.studyTime = null;
-            this.studyDate = null
+            if (this.appointmentTime) {
+                this.studyDate = moment(this.appointmentTime).format("YYYY-MM-DD");
+                this.studyTime = moment(this.appointmentTime).format("hh:mmA");
+            } else {
+                this.studyDate = null;
+                this.studyTime = null;
+            }
         },
 
         assignDateTime() {
