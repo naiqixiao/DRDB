@@ -125,6 +125,7 @@ export default {
         currentSchedule: {
             FK_Family: 1,
             Family: { NamePrimary: "" },
+            Note: "",
             Appointments: [
                 {
                     FK_Family: 1,

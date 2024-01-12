@@ -108,8 +108,6 @@ exports.create = asyncHandler(async (req, res) => {
       }
     }
 
-    console.log(newScheduleInfo.Appointments)
-
     // create new schedule, associated appointments, and experimenter assignment.
     const schedule = await model.schedule.create(newScheduleInfo, {
       include: [model.appointment],

@@ -538,7 +538,7 @@
 </template>
 
 <script>
-import store from "@/store";
+// import store from "@/store";
 import child from "@/services/child";
 import study from "@/services/study";
 import family from "@/services/family";
@@ -710,7 +710,7 @@ export default {
   methods: {
     async searchStudies() {
       var queryString = {
-        FK_Lab: store.state.lab,
+        FK_Lab: this.$store.state.lab,
         includeScheules: true,
         Completed: 0,
       };
@@ -868,7 +868,7 @@ export default {
       var validationResults = this.$refs.formFamily.validate();
 
       if (validationResults) {
-        this.editedFamily.UpdatedBy = store.state.userID;
+        this.editedFamily.UpdatedBy = this.$store.state.userID;
 
         try {
           await family.update(this.editedFamily);
@@ -891,7 +891,7 @@ export default {
     async saveNotes(newNotes) {
       this.currentFamily.Note = newNotes;
 
-      this.currentFamily.UpdatedBy = store.state.userID;
+      this.currentFamily.UpdatedBy = this.$store.state.userID;
 
       await family.update(this.currentFamily);
 
@@ -1005,7 +1005,7 @@ export default {
     potentialStudies(child) {
       var ElegibleStudies = [];
 
-      store.state.studies.forEach((study) => {
+      this.$store.state.studies.forEach((study) => {
         if (!study.Completed) {
           if (this.studyElegibility(study, child)) {
             ElegibleStudies.push(study.id);
@@ -1040,7 +1040,7 @@ export default {
         (study) => !currentSelectedStudies.includes(study)
       );
 
-      var potentialStudyList = store.state.studies.filter((study) =>
+      var potentialStudyList = this.$store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
@@ -1146,7 +1146,7 @@ export default {
           this.currentSchedule = {
             AppointmentTime: null,
             Appointments: this.appointments,
-            ScheduledBy: store.state.userID,
+            ScheduledBy: this.$store.state.userID,
             FK_Family: this.currentFamily.id,
             Note: this.scheduleNotes,
           };

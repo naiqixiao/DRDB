@@ -584,15 +584,8 @@ export default {
         },
 
         resetVariables() {
-            this.editedAppointments = [];
-            this.selectedExperimenters = [];
-            this.selectedExperimenters_2nd = [];
-            this.selectedStudies = [];
-            this.optionsE1 = [];
-            this.optionsE2 = [];
             this.nSelectableStudies = [];
             this.deletedAppointments = [];
-
         },
 
     },
@@ -621,7 +614,8 @@ export default {
         Appointments(newVal) {
 
             if (newVal) {
-                this.assignStudyExperimenters()
+                this.assignStudyExperimenters();
+                this.resetVariables();
             }
         },
 

@@ -4,6 +4,9 @@
 
 <!-- In this UI, there will be three steps: determining schedule details, send email, and arrange next contact. -->
 
+<!-- todo: no need to select E1, E2, or additional studies for tentative or rejected schedules -->
+<!-- todo: check the disable logis for the study day/time component and the schedule button -->
+
 <template>
     <v-dialog :value="dialog" @input="onDialogClose" transition="dialog-bottom-transition">
         <v-card>
@@ -805,7 +808,6 @@ export default {
                 this.nextNote = newVal.nextContactNote;
 
                 this.initiateVariables(this.dialogType);
-                this.$refs.appointmentDetails.resetVariables();
             }
 
         }
