@@ -4,9 +4,6 @@
 
 <!-- In this UI, there will be three steps: determining schedule details, send email, and arrange next contact. -->
 
-<!-- todo: no need to select E1, E2, or additional studies for tentative or rejected schedules -->
-<!-- todo: check the disable logis for the study day/time component and the schedule button -->
-
 <template>
     <v-dialog :value="dialog" @input="onDialogClose" transition="dialog-bottom-transition">
         <v-card>
@@ -33,10 +30,8 @@
                             <v-card-text>
 
                                 <!-- Schedule date and time -->
-                                <!--  == 1) & (parentResponse !== 'Confirmed') -->
                                 <v-divider style="margin-bottom: 20px"></v-divider>
-                                <dateTimePicker ref="dateTimePicker"
-                                    :dateTimePickerDisable="((dateTimePickerDisable) && (parentResponse !== 'Confirmed'))"
+                                <dateTimePicker ref="dateTimePicker" :dateTimePickerDisable="dateTimePickerDisable"
                                     :appointmentTime="currentSchedule.AppointmentTime" />
 
                                 <!-- Appointment Data Table -->
@@ -66,8 +61,7 @@
                                 <v-btn @click="createSchedule()" :disabled="!scheduleEnable"
                                     :loading="loadingStatus"><v-icon dark left
                                         v-show="scheduleButtonIconShow">mdi-checkbox-circle-line</v-icon>{{
-                                            (this.scheduleType == 'create') ? "Create Schedule" : "Update Schedule"
-                                        }}</v-btn>
+                                            scheduleButtonText }}</v-btn>
                                 <v-btn @click="step12" :disabled="disableStep12">Next</v-btn>
 
                             </v-container>
@@ -217,7 +211,7 @@ export default {
     },
     data: () => ({
         studyDateTime: null,
-        dateTimePickerDisable: false,
+        dateTimePickerDisable: true,
         stepperPage: 1,
         contactDate: null,
         datePicker: false,
@@ -250,7 +244,7 @@ export default {
         contactType: "",
         loadingStatus: false,
         scheduleButtonIconShow: false,
-        scheduleButtonText: "Confirm new study appointment",
+        scheduleButtonText: "Create appointment",
         emailButtonIconShow: false,
         emailButtonText: "Send email",
     }),
@@ -277,11 +271,15 @@ export default {
         },
 
         readyToCreateSchedule(val) {
+            console.log(val)
             this.scheduleEnable = val;
         },
 
         // the most important function.
         async createSchedule() {
+
+            this.loadingStatus = true;
+
             // create/update schedules according to the appointment time, appointments, and other information.
             const newAppointments = this.$refs.appointmentDetails.generateAppointments();
 
@@ -292,29 +290,31 @@ export default {
                 const newSchedule = await this.newSchedule(newAppointments.newAppointments);
 
                 console.log(newSchedule)
+                this.scheduleButtonText = "Appointment created!";
             }
-
 
             // update existing schedule
             if (newAppointments.updatedAppointments.length > 0) {
                 const updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
 
                 console.log(updatedSchedule)
+                this.scheduleButtonText = "Appointment updated!";
             }
 
-
-            // todo, complete the schedule if the status is "Completed".
-            console.log(newAppointments.completedAppointments);
-
+            // Complete the schedule if the status is "Completed".
             if (newAppointments.completedAppointments.length > 0) {
-                console.log('todo...')
+                await this.schedule.complete({
+                    id: newAppointments.completedAppointments[0].FK_Schedule,
+                    Completed: 1
+                })
             }
-
 
             // delete the appointment previously scheduled in the current schedule.
             if (newAppointments.deletedAppointments.length > 0) {
-                // todo. delete appointments from the database. Backend update needed.
-                await appointment.delete(newAppointments.deletedAppointments);
+                for (const app of newAppointments.deletedAppointments) {
+                    await appointment.delete({ id: app.id });
+
+                }
             }
 
             // ///////////////////////////////////////////////
@@ -347,7 +347,9 @@ export default {
             //     console.log(error);
             //     alert("Failed to update the appointment, please try again.");
             // }
-            // this.loadingStatus = false;
+
+            this.loadingStatus = false;
+            this.scheduleButtonIconShow = true;
 
             // create the list of appointments to draft emails.
             this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updatedAppointments).filter(appointment => {
@@ -362,22 +364,6 @@ export default {
             this.disableStep12 = false;
 
         },
-
-
-        // backend functions
-        // {
-        //     id: this.currentSchedule.id,
-        //     AppointmentTime: this.studyDateTime,
-        //     Status: status,
-        //     FK_Family: this.currentSchedule.FK_Family,
-        //     Note: this.Note,
-        //     summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments.updatedAppointments),
-        //     Appointments: newAppointments.updatedAppointments,
-        //     ScheduledBy: this.$store.state.userID,
-        //     location: this.$store.state.location,
-        //     description: this.calendarDescription(newAppointments.updatedAppointments, this.Note),
-        //     // attendees: newAppointments.updatedAppointments.attendees,
-        // }
 
         async newSchedule(newAppointments) {
 
@@ -410,7 +396,7 @@ export default {
                 Note: this.Note,
                 summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments),
                 Appointments: newAppointments,
-                ScheduledBy: this.$store.state.userID, //todo
+                ScheduledBy: this.$store.state.userID,
                 location: this.$store.state.location,
                 description: this.calendarDescription(newAppointments, this.Note),
                 Reminded: 0
@@ -565,7 +551,7 @@ export default {
                     await calendar.update(event);
 
                 } else {
-                    
+
                     // create a new calendar event
                     if (updatedSchedule.Status === 'Confirmed') {
                         const createdCalendarEvent = await calendar.create(event);
@@ -673,7 +659,7 @@ export default {
 
         resetVariables() {
             this.studyDateTime = null;
-            this.dateTimePickerDisable = false;
+            this.dateTimePickerDisable = true;
             this.stepperPage = 1;
             this.emailUpdate = false;
             this.emailBody = "";
@@ -695,7 +681,7 @@ export default {
             this.emailOptions = ['Confirmation', 'ScheduleUpdate', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'];
             this.contactType = "";
             this.loadingStatus = false;
-            this.scheduleButtonText = "Confirm new study appointment";
+            this.scheduleButtonText = "Create Appointment";
             this.emailButtonIconShow = false;
             this.emailButtonText = "Send email";
             this.scheduleButtonIconShow = false;
@@ -726,7 +712,6 @@ export default {
 
             this.resetVariables();
             this.$emit('close-dialog')
-
         },
 
         sendEmail() {
@@ -778,6 +763,7 @@ export default {
         },
 
     },
+
     computed: {
         daysLate() {
 
@@ -806,19 +792,39 @@ export default {
             if (newVal) {
                 this.Note = newVal.Note;
                 this.nextNote = newVal.nextContactNote;
+                this.scheduleButtonText = (this.scheduleType == 'create') ? "Create Appointment" : "Update Appointment"
 
                 this.initiateVariables(this.dialogType);
-            }
+                this.dateTimePickerDisable = (this.parentResponse !== 'Confirmed');
 
-        }
+                switch (this.parentResponse) {
+                    case 'Interested':
+                    case 'Left a message':
+                    case 'Rejected':
+                        this.scheduleEnable = true;
+                        break;
+                }
+
+            }
+        },
     },
 
     mounted() {
         this.Note = this.currentSchedule.Note;
         this.nextNote = this.currentSchedule.nextContactNote;
+        this.scheduleButtonText = (this.scheduleType == 'create') ? "Create Schedule" : "Update Schedule"
 
         this.initiateVariables(this.dialogType);
+        this.dateTimePickerDisable = (this.parentResponse !== 'Confirmed');
 
+        switch (this.parentResponse) {
+
+            case 'Interested':
+            case 'Left a message':
+            case 'Rejected':
+                this.scheduleEnable = true;
+                break;
+        }
     }
 }
 </script>

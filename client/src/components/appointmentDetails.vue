@@ -82,7 +82,7 @@
                         <div v-on="on" style="align-self: end">
                             <!-- Button to create new appointment -->
                             <v-btn class="text-capitalize" large rounded color="primary" @click="newAppointment(child)"
-                                :disabled="nSelectableStudies[index] < 1 || parentResponse == 'Rejected'">
+                                :disabled="nSelectableStudies[index] < 1 || parentResponse == 'Rejected' || additionalStudyButtonDisable">
                                 <!-- Display child's name -->
                                 {{
                                     !!child.Name ? child.Name.split(" ")[0] : "Name is missing"
@@ -162,6 +162,7 @@ export default {
             optionsE2: [],
             nSelectableStudies: [],
             deletedAppointments: [],
+            additionalStudyButtonDisable: false,
         }
     },
     methods: {
@@ -347,17 +348,18 @@ export default {
                     break;
             }
 
-            this.readyToCreateSchedule();
-
-            // to set new time, a date/time input will reveal (or enabled)
-            if (this.editedAppointments.every(appointment => 'status' in appointment && appointment.status != null)) {
-                if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time" || appointment.status === "Confirmed")) {
-                    this.$emit("dateTimePickerDisableUpdate", false)
-                }
-                else {
-                    this.$emit("dateTimePickerDisableUpdate", true)
-                }
+            // to determine if setting up a day / time is necessary by issuing a signal to the dateTimePicker component
+            if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time" || appointment.status === "Confirmed")) {
+                this.$emit("dateTimePickerDisableUpdate", false) // enable the date/time input
+                this.additionalStudyButtonDisable = false;
             }
+            else {
+                this.$emit("dateTimePickerDisableUpdate", true) // disable the date/time input
+                this.additionalStudyButtonDisable = true;
+            }
+
+            // check if all conditions per appointment are met to create a schedule
+            this.readyToCreateSchedule();
         },
 
         optionChangedStudy(newVal, index) {
@@ -427,20 +429,46 @@ export default {
         readyToCreateSchedule() {
             // this function examines if the information to create a schedule is met. If so, it will emit the enable status to the parent component.
 
-            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+            if (this.editedAppointments.every(appointment => 'status' in appointment && appointment.status != null)) {
+                if (this.scheduleType === 'create') {
+                    switch (this.parentResponse) {
 
+                        case 'Confirmed':
+                            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                            break;
+
+                        case 'Interested':
+                        case 'Left a message':
+                        case 'Rejected':
+                            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                            break;
+                    }
+                } else {
+
+                    if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time")) {
+                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                    } else {
+                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                    }
+
+                }
+            } else {
+                this.$emit("readyToCreateSchedule", false)
+            }
         },
 
         // check if all appointments have been assigned a study
         checkAppointmentsAssignedStudy() {
             const allAssigned = this.editedAppointments.every(appointment => appointment.FK_Study != null);
-
             return allAssigned;
         },
 
         // check if all appointments have been assigned a primary experimenter
         checkAppointmentsAssignedExperimenter() {
-            const allAssigned = this.selectedExperimenters.every(Experimenters => Experimenters != null);
+
+            const allAssigned = this.editedAppointments.some((appointment, index) => (appointment.status === "Update appointment time" || appointment.status === "Confirmed") && this.selectedExperimenters[index] !== null)
+
+            // const allAssigned = this.selectedExperimenters.every(Experimenters => Experimenters != null);
             return allAssigned;
         },
 
@@ -586,6 +614,7 @@ export default {
         resetVariables() {
             this.nSelectableStudies = [];
             this.deletedAppointments = [];
+            this.additionalStudyButtonDisable = false;
         },
 
     },

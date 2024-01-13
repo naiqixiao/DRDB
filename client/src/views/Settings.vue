@@ -1,3 +1,6 @@
+<!-- todo: update testing room UI. 
+separate add and / edit functions. -->
+
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">

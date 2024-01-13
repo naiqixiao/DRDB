@@ -619,7 +619,6 @@ exports.complete = asyncHandler(async (req, res) => {
     delete updatedScheduleInfo["id"];
   }
 
-  console.log(updatedScheduleInfo);
   try {
     const updatedSchedule = await model.schedule.update(updatedScheduleInfo, {
       where: { id: ID },

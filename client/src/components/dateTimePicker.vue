@@ -14,6 +14,8 @@
                 outlined></v-combobox>
             <v-spacer></v-spacer>
 
+            
+
             <!-- <v-tooltip right>
                         <template v-slot:activator="{ on }">
                             <div v-on="on">
@@ -44,6 +46,8 @@
                 </v-card>
             </v-dialog>
         </v-container>
+        <!-- <body align="start" v-html="parentContact(item.Family)"></body> -->
+        <body align="center" v-html="dateTimeNotice"></body>
     </v-form>
 </template>
 
@@ -120,13 +124,23 @@ export default {
             }
         }
     },
-    watch: {
-        dateTimePickerDisable(newVal) {
+    computed: {
+        dateTimeNotice() {
 
-            if (newVal) {
-                this.resetDateTime()
+            if (this.dateTimePickerDisable) {
+                return `<p style="font-size: 14px; margin: 0px;">No appointment date or time is required</p>`
+            } else {
+                return `<p style="color: #ff0000; font-weight: 500; font-size: 14px; margin: 0px;">Please select or update appointment date and time.</p>`
             }
-        },
+        }
+    },
+    watch: {
+        // dateTimePickerDisable(newVal) {
+
+        //     if (newVal) {
+        //         this.resetDateTime()
+        //     }
+        // },
         appointmentTime(newVal) {
 
             if (newVal) {
