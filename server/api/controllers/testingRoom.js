@@ -44,7 +44,7 @@ exports.update = asyncHandler(async (req, res) => {
 
 exports.delete = asyncHandler(async (req, res) => {
   var testingRoomInfo = JSON.parse(req.query.testingRoomInfo);
-  console.log(testingRoomInfo);
+
   try {
     testingRoomInfo.voided = 1;
 

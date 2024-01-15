@@ -20,7 +20,7 @@
             </v-col>
             <v-col cols="12" md="3" v-for="(testingRoom, index) in testingRooms" :key="testingRoom.id">
                 <v-card style="height: 176px !important; ">
-                    <v-card-title>{{ testingRoom.name }}</v-card-title>
+                    <v-card-title class="text-truncate">{{ testingRoom.name }}</v-card-title>
                     <v-card-text style="height: 100px !important; ">
 
                         <body align="start" v-html="testingRoomInfo(testingRoom)"></body>
