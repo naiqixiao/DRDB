@@ -13,9 +13,9 @@ export default {
     });
   },
 
-  // update(testingRoomInfo) {
-  //   return api().post("testingRoom/", testingRoomInfo);
-  // },
+  update(testingRoomInfo) {
+    return api().post("testingRoom/", testingRoomInfo);
+  },
 
   delete(testingRoomInfo) {
     return api().delete("testingRoom/", {

@@ -1,7 +1,6 @@
-<!-- Todo: use the new scheduleDialog component to replace the current schedule component. -->
-
 <template>
   <div>
+    <!-- child info cards -->
     <div style="overflow-y: scroll" v-if="familyId">
       <v-row dense align="start" style="height: 500px">
         <v-col cols="12" v-for="(child, index) in Children" :key="child.id">
@@ -40,12 +39,12 @@
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn small color="warning" dark outlined :v-show="!(
-                    $store.state.role != 'Admin' &&
-                    $store.state.role != 'PI' &&
-                    $store.state.role != 'PostDoc' &&
-                    $store.state.role != 'GradStudent' &&
-                    $store.state.role != 'Lab manager'
-                  )
+                  $store.state.role != 'Admin' &&
+                  $store.state.role != 'PI' &&
+                  $store.state.role != 'PostDoc' &&
+                  $store.state.role != 'GradStudent' &&
+                  $store.state.role != 'Lab manager'
+                )
                   " @click.stop="deleteChild(child, index)"><v-icon>delete</v-icon>Delete</v-btn>
                 <v-spacer></v-spacer>
 
@@ -76,6 +75,8 @@
         </v-col>
       </v-row>
     </div>
+
+    <!-- additional card to add new child -->
     <div style="overflow-y: scroll" v-else>
       <v-row dense align="start" style="height: 500px">
         <v-col cols="12" v-for="child in 3" :key="child">
@@ -88,15 +89,15 @@
       </v-row>
     </div>
 
-    <div>
+<!-- date input box -->
       <v-dialog v-model="dobPicker" max-width="290px">
         <v-card outlined>
           <v-date-picker v-model="editedItem.DoB" show-current :max="new Date().toISOString()"
             @click:date="dobPicker = false"></v-date-picker>
         </v-card>
       </v-dialog>
-    </div>
 
+      <!-- child info editing dialog -->
     <div>
       <v-dialog v-model="dialogChild" max-width="1000px" :retain-focus="false">
         <v-card outlined>
@@ -162,8 +163,10 @@
     </div>
 
     <ConfirmDlg ref="confirmD" />
-    <div>
-      <v-dialog v-model="dialogSchedule" max-width="1200px" :retain-focus="false">
+    
+    
+    <!-- <div>
+      <v-dialog value=0 max-width="1200px" :retain-focus="false">
         <v-stepper v-model="e1">
           <v-stepper-header>
             <v-stepper-step :complete="e1 > 1" editable step="1" @click="emailDialog = false">Schedule studies for {{
@@ -227,18 +230,7 @@
                       </v-col>
                     </v-row>
                   </v-form>
-                  <!-- <v-row
-                  style="height: 60px"
-                  align="center"
-                  justify="start"
-                  v-else
-                >
-                  <v-col cols="12" md="3" class="text-left">
-                    <div class="title" style="padding-left: 8px">
-                      {{ "Study date & time: NA" }}
-                    </div>
-                  </v-col>
-                </v-row> -->
+
                   <v-divider style="margin-bottom: 16px"></v-divider>
                   <div style="height: 290px; overflow-y: scroll !important">
                     <ExtraStudies ref="extraStudies" v-for="(appointment, index) in appointments" :key="appointment.index"
@@ -255,18 +247,7 @@
                     <v-col cols="12" md="4" class="text-left">
                       <h4 class="text-left">Additional appointment(s) for:</h4>
                     </v-col>
-                    <!-- <v-col cols="12" md="2">
-                            <v-btn
-                              color="green darken-2"
-                              text
-                              @click="newAppointment(currentChild)"
-                              :disabled="
-                                potentialStudies(currentChild).selectableStudies
-                                  .length < 1
-                              "
-                              >{{ currentChild.Name }}
-                            </v-btn>
-                      </v-col>-->
+
                     <v-col cols="12" md="2" v-for="sibling in Children" :key="sibling.id">
                       <v-btn class="text-capitalize" rounded color="primary" @click="newAppointment(sibling)"
                         :disabled="potentialStudies(sibling).selectableStudies.length < 1">{{
@@ -309,7 +290,6 @@
                     :scheduleInfo="currentSchedule" emailType="Confirmation"></Email>
                 </v-card>
               </v-row>
-              <!-- <v-divider></v-divider> -->
               <v-row justify="space-between" align="center" style="padding: 8px">
                 <v-col cols="12" md="2">
                   <v-tooltip top>
@@ -335,12 +315,12 @@
                     !!currentFamily.Email &&
                     !this.skipConfirmationEmailStatus
                     " @click="scheduleNextStep">{{
-    !!currentFamily.Email ||
-    (!this.skipConfirmationEmailStatus &&
-      this.$store.state.labEmailStatus)
-    ? "Next"
-    : "Skip email"
-  }}</v-btn>
+                    !!currentFamily.Email ||
+                    (!this.skipConfirmationEmailStatus &&
+                      this.$store.state.labEmailStatus)
+                    ? "Next"
+                    : "Skip email"
+                  }}</v-btn>
                 </v-col>
               </v-row>
             </v-stepper-content>
@@ -348,7 +328,6 @@
             <v-stepper-content step="3">
               <NextContact ref="NextContact" :familyId="currentFamily.id" :labId="$store.state.lab" :studyDate="studyDate"
                 :contactType="response" :nextContactDialog="nextContactDialog"></NextContact>
-              <!-- <v-divider></v-divider> -->
               <v-row justify="space-between" align="center" style="padding: 8px" dense>
                 <v-col>
                   <v-btn color="primary" @click="completeSchedule()">Complete</v-btn>
@@ -365,28 +344,20 @@
             :max="latestDate"></v-date-picker>
         </v-card>
       </v-dialog>
-    </div>
-    <!-- <v-spacer></v-spacer>
+    </div> -->
 
-    <v-row align-content="end" justify="end" style="height: 120px;" dense>
-      <v-tooltip top>
-        <template v-slot:activator="{ on }">
-          <div v-on="on">
-            <v-btn class="c1" fab @click.stop="addChild" :disabled="!familyId">
-              <v-icon>add</v-icon>
-            </v-btn>
-          </div>
-        </template>
-        <span>Add a child to this family</span>
-      </v-tooltip>
-    </v-row>-->
+    <!-- Dialog Component, to create or update a schedule -->
+    <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
+      :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
+      @close-dialog="closeSchedule" @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment" />
+
   </div>
 </template>
 
 <script>
-import ExtraStudies from "@/components/ExtraStudies";
-import Email from "@/components/Email";
-import NextContact from "@/components/NextContact";
+// import ExtraStudies from "@/components/ExtraStudies";
+// import Email from "@/components/Email";
+// import NextContact from "@/components/NextContact";
 
 import child from "@/services/child";
 
@@ -399,11 +370,15 @@ import ConfirmDlg from "@/components/ConfirmDialog";
 
 import login from "@/services/login";
 
+import scheduleDialog from '@/components/scheduleDialog.vue';
+
+
 export default {
   components: {
-    ExtraStudies,
-    Email,
-    NextContact,
+    scheduleDialog,
+    // ExtraStudies,
+    // Email,
+    // NextContact,
     ConfirmDlg,
   },
   props: {
@@ -428,6 +403,7 @@ export default {
       scheduleNextPage: false,
       emailSent: false,
       validScheduleDateTime: true,
+
       defaultAppointment: {
         index: null,
         FK_Family: null,
@@ -480,7 +456,6 @@ export default {
         BirthWeight: null,
         Appointments: [],
       },
-      Responses: ["Confirmed", "Interested", "Left a message", "Rejected"],
       response: "Confirmed",
       currentSchedule: {
         id: null,
@@ -525,6 +500,10 @@ export default {
       this.appointments.splice(index, 1);
     },
 
+    deleteCurrentAppointment(index) {
+      this.currentSchedule.Appointments.splice(index, 1);
+    },
+
     receiveSelectedStudy(selectedStudy) {
       this.appointments[selectedStudy.index].FK_Study = selectedStudy.studyId;
       this.appointments[selectedStudy.index].FK_Child = selectedStudy.childId;
@@ -536,9 +515,13 @@ export default {
       newAppointment.FK_Child = child.id;
       newAppointment.Child = child;
       newAppointment.FK_Family = child.FK_Family;
-      newAppointment.index = this.appointments.length;
+      // newAppointment.index = this.appointments.length;
 
       this.appointments.push(newAppointment);
+    },
+
+    addAppointment(appointment) {
+      this.currentSchedule.Appointments.push(appointment);
     },
 
     potentialStudies(child) {
@@ -994,7 +977,6 @@ export default {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
         this.scheduleNotes = "";
-        // this.response = null;
         this.studyDate = null;
         this.studyTime = null;
         this.selectedStudy = [];
@@ -1138,16 +1120,25 @@ export default {
 
         var newAppointment = Object.assign({}, this.defaultAppointment);
 
+        newAppointment.status = "Confirmed";
         newAppointment.FK_Child = child.id;
         newAppointment.Child = child;
         newAppointment.FK_Family = child.FK_Family;
-        newAppointment.index = this.appointments.length;
         newAppointment.Child.Family = {};
         newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
         newAppointment.Child.Family.NamePrimary = this.currentFamily.NamePrimary; // family email information used for sending email
-        console.log(newAppointment);
+        // newAppointment.index = this.appointments.length; // todo, might not need this field.
 
         this.appointments.push(newAppointment);
+
+        this.currentSchedule = {
+          AppointmentTime: null,
+          Status: this.response,
+          FK_Family: child.FK_Family,
+          Appointments: this.appointments,
+          Note: null,
+          ScheduledBy: this.$store.state.userID,
+         };
 
         this.dialogSchedule = true;
       }

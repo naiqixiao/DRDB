@@ -485,7 +485,7 @@ export default {
       var formattedEmail = this.emailBody;
       formattedEmail = formattedEmail.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px; font-size: 12pt;'>");
 
-      const [studyLabel] = this.studyLabels(this.appointments);
+      const [studyLabel, gmailLabels] = this.studyLabels(this.appointments);
 
       formattedEmail = formattedEmail + studyLabel; // study labels, to insert special characters identifying studies, e.g., "#%#" + appointment.Study.StudyName + "#%# "
 
@@ -495,7 +495,7 @@ export default {
         to: this.familyInfo.NamePrimary + " <" + this.emailAddress + " >",
         subject: this.emailSubject,
         body: formattedEmail,
-        // labelNames: gmailLabels, // todo, add labelName back, but generate the labels within the function, rather than relying on input.
+        labelNames: gmailLabels, // todo, add labelName back, but generate the labels within the function, rather than relying on input.
       };
 
       try {

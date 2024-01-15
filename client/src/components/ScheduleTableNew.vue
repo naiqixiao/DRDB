@@ -99,7 +99,7 @@
         <!-- Dialog Component, to create or update a schedule -->
         <scheduleDialog ref="scheduleDialog" :dialog="dialog" :currentSchedule="currentSchedule" :dialogType="dialogType"
             :currentFamily="currentSchedule.Family" :scheduleType="scheduleType" @close-dialog="closeDialog()"
-            @newAppointment="addAppointment" @deletCurrentAppointment="deletCurrentAppointment" />
+            @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment" />
     </div>
 </template>
   
@@ -179,7 +179,7 @@ export default {
             this.currentSchedule.Appointments.push(appointment);
         },
 
-        deletCurrentAppointment(index) {
+        deleteCurrentAppointment(index) {
             this.currentSchedule.Appointments.splice(index, 1);
         },
         parentContact(Family) {

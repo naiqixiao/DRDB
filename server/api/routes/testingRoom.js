@@ -8,7 +8,7 @@ router.post("/add", checkAuth, TestingRoomController.create);
 
 router.get("/", checkAuth, TestingRoomController.search);
 
-// router.post("/", checkAuth, TestingRoomController.update);
+router.post("/", checkAuth, TestingRoomController.update);
 
 router.delete("/", checkAuth, TestingRoomController.delete);
 

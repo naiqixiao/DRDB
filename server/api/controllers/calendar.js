@@ -29,7 +29,7 @@ exports.create = asyncHandler(async (req, res) => {
     const calEvent = await calendar.events.insert({
       calendarId: event.calendarId,
       resource: event,
-      sendNotifications: true,
+      sendupdates: 'all',
     });
 
     event.eventURL = calEvent.data.htmlLink;
@@ -72,7 +72,7 @@ exports.create = asyncHandler(async (req, res) => {
 //           description: calendarDescription(event.Note, app),
 //           attendees: app.attendees,
 //         },
-//         sendNotifications: true,
+//         sendupdates: 'all',
 //       });
 
 //       // update appointment info by inserting eventId and URL.
@@ -116,7 +116,7 @@ exports.update = asyncHandler(async (req, res) => {
       calendarId: event.calendarId,
       eventId: event.eventId,
       resource: event,
-      sendNotifications: true,
+      sendupdates: 'all',
     });
 
     event.eventURL = calEvent.data.htmlLink;

@@ -4,6 +4,8 @@ const asyncHandler = require("express-async-handler");
 exports.create = asyncHandler(async (req, res) => {
   const testingRoomInfo = req.body;
 
+  console.log(testingRoomInfo);
+
   try {
     const testingRoom = await model.testingRoom.create(testingRoomInfo);
 
@@ -22,6 +24,21 @@ exports.search = asyncHandler(async (req, res) => {
       where: {FK_Lab: labId},
     });
     res.status(200).send(testingRooms);
+
+  } catch (error) {
+    throw error;
+  }
+})
+
+exports.update = asyncHandler(async (req, res) => {
+  const testingRoomInfo = req.body;
+  
+  try {
+    const testingRoom = await model.testingRoom.update(testingRoomInfo, {
+      where: { id: testingRoomInfo.id },
+    });
+
+    res.status(200).send(testingRoom);
 
   } catch (error) {
     throw error;

@@ -387,15 +387,20 @@ separate add and / edit functions. -->
                     v-model="editedLab.ZoomLink" placeholder="  " outlined dense></v-text-field>
                 </v-col>
               </v-row>
+              <v-container>
+                <v-divider style="margin-bottom: 20px"></v-divider>
+                <h2 class="text-left" style="margin-right: 0px;">Testing Rooms</h2>
+                <testingRooms :testingRooms="currentTestingRooms" :labId="$store.state.lab"/>
+              </v-container>
 
-              <v-row>
+              <!-- <v-row>
                 <v-col md="12" class="subtitle">
                   <v-divider></v-divider>
                   <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
                 </v-col>
 
                 <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                  <v-col v-for="room in filteredTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="2">
+                  <v-col v-for="room in filteredTestingRooms" :key="room.id" cols="12" sm="4" md="3" lg="3">
                     <v-card>
                       <v-icon v-if="isAuthorized(room.createdBy)" class="testing-room--delete"
                         @click="showDeleteConfirmationDialog(room.name)">
@@ -442,7 +447,7 @@ separate add and / edit functions. -->
                     </v-btn>
                   </v-col>
                 </v-col>
-              </v-row>
+              </v-row> -->
 
               <v-row>
                 <v-col md="12" class="subtitle">
@@ -451,14 +456,8 @@ separate add and / edit functions. -->
                 </v-col>
                 <v-col cols="12" md="6" v-for="item in this.$labEmailTemplate" :key="item.label">
                   <h3 class="text-left">{{ item.label }}</h3>
-                  <!-- 
-                  <vue-editor
-                    v-model="editedLab[item.field]"
-                    :editor-toolbar="customToolbar"
-                  ></vue-editor> -->
                   <div>
-                    <ckeditor :editor="editor" v-model="editedLab[item.field]" :config="editorConfig">
-                    </ckeditor>
+                    <ckeditor :editor="editor" v-model="editedLab[item.field]" :config="editorConfig"></ckeditor>
                   </div>
                 </v-col>
               </v-row>
@@ -498,13 +497,14 @@ import XLSX from "xlsx";
 import moment from "moment";
 import calendar from "../services/calendar";
 
-import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
+// import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
+import testingRooms from '../components/testingRooms.vue';
 
 export default {
   components: {
     // VueEditor,
-    DeleteConfirmationDialog,
-    // ClassicEditor,
+    // DeleteConfirmationDialog,
+    testingRooms,
   },
   data() {
     return {
@@ -637,25 +637,9 @@ export default {
 
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
-      // await calendar.createSecondaryCalendar({
-      //   calendarName: this.testingRooms[0].calendarName,
-      // });
 
       if (validationResults) {
         try {
-          // const newLab = {
-          //   LabName: "RHPCS",
-          //   PI: "TP",
-          //   Personnels: [
-          //     {
-          //       Name: "Todd Pfaff",
-          //       Initial: "TP",
-          //       Role: "PI",
-          //       Email: "xiaon8@mcmaster.ca",
-          //       Calendar: "xiaon8@mcmaster.ca",
-          //     },
-          //   ],
-          // };
 
           this.currentLab.PI = this.currentLab.Personnels[0].Initial;
 
@@ -967,6 +951,7 @@ export default {
       return alertText;
     },
   },
+
   computed: {
     passwordConfirmationRule() {
       return this.newPassword === this.newPasswordVerify || "Password must match";
@@ -1084,9 +1069,8 @@ export default {
 }
 
 .ck-editor__editable_inline:not(.ck-comment__input *) {
-    height: 300px;
-    overflow-y: auto;
-    margin: 0px;
+  height: 300px;
+  overflow-y: auto;
+  margin: 0px;
 }
-
 </style>

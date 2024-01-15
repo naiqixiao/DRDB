@@ -291,8 +291,9 @@
 
           <!-- Dialog Component, to create or update a schedule -->
           <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
-            :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create" @close-dialog="closeDialog()"
-            @newAppointment="addAppointment" @deletCurrentAppointment="deletCurrentAppointment" />
+            :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
+            @close-dialog="closeDialog()" @newAppointment="addAppointment"
+            @deleteCurrentAppointment="deleteCurrentAppointment" />
 
           <v-dialog v-model="datePicker" max-width="290px">
             <v-card outlined>
@@ -753,7 +754,7 @@ export default {
       this.currentSchedule.Appointments.push(appointment);
     },
 
-    deletCurrentAppointment(index) {
+    deleteCurrentAppointment(index) {
       this.currentSchedule.Appointments.splice(index, 1);
     },
 
@@ -772,7 +773,7 @@ export default {
           newAppointment.FK_Study = this.selectedStudy.id;
           newAppointment.Child = this.currentChild;
           newAppointment.Study = this.selectedStudy;
-          newAppointment.index = this.appointments.length;
+          // newAppointment.index = this.appointments.length;
           newAppointment.status = this.response;
           this.appointments.push(newAppointment);
         }
@@ -1415,10 +1416,10 @@ export default {
     },
 
     closeDialog() {
-            this.dialogSchedule = false;
-            this.dialogType = null;
-           
-        },
+      this.dialogSchedule = false;
+      this.dialogType = null;
+
+    },
 
     PhoneFormated(Phone) {
       if (Phone) {

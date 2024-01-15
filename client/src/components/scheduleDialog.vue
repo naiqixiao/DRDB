@@ -4,6 +4,7 @@
 
 <!-- In this UI, there will be three steps: determining schedule details, send email, and arrange next contact. -->
 
+<!-- todo, return schedule object after creation / update. Parent component will use the output to update the frontend UI. -->
 <template>
     <v-dialog :value="dialog" @input="onDialogClose" transition="dialog-bottom-transition">
         <v-card>
@@ -40,7 +41,7 @@
                                     :Children="currentFamily.Children" :scheduleType="scheduleType"
                                     :parentResponse="parentResponse"
                                     @dateTimePickerDisableUpdate="dateTimePickerDisableUpdate"
-                                    @newAppointment="addAppointment" @deletCurrentAppointment="deletCurrentAppointment"
+                                    @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment"
                                     @readyToCreateSchedule="readyToCreateSchedule">
                                 </appointmentDetails>
 
@@ -250,9 +251,9 @@ export default {
     }),
     methods: {
 
-        deletCurrentAppointment(index) {
+        deleteCurrentAppointment(index) {
             this.$emit(
-                "deletCurrentAppointment", index
+                "deleteCurrentAppointment", index
             );
         },
 

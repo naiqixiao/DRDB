@@ -1,5 +1,4 @@
-<!-- todo, no need to choose Experimenters when the status is not confirmed. E1 is required when the status is confirmed.-->
-
+<!-- todo check the criteria for readytoSchedul. When recruit from Family Info page, it is enables after study is selected without E1.-->
 <template>
     <v-container style="padding: 0px !important; flex-direction: column;">
         <h2 class=" text-left" style="margin-right: 0px;">
@@ -19,7 +18,7 @@
                             :items="potentialStudies(item.Child, item.FK_Study).potentialStudyList" :item-value="'id'"
                             :item-text="'StudyName'" v-model="selectedStudies[index]" return-object label="Study"
                             hide-details @change="optionChangedStudy($event, index, item)"
-                            :disabled="index == 0"></v-select>
+                            :disabled="index == 10"></v-select>
                     </div>
                 </template>
 
@@ -52,7 +51,7 @@
                         <v-tooltip top>
                             <template v-slot:activator="{ on }">
                                 <div v-on="on" style="align-self: end">
-                                    <v-btn text icon color="primary" @click="deletCurrentAppointment(index)"
+                                    <v-btn text icon color="primary" @click="deleteCurrentAppointment(index)"
                                         :disabled="appointmentDeletable(item, index)">
                                         <v-icon>{{ appointmentDeletable(item, index) ? "mdi-delete-off" : "mdi-delete"
                                         }}</v-icon>
@@ -420,7 +419,7 @@ export default {
             this.editedAppointments.push(newAppointment)
         },
 
-        deletCurrentAppointment(index) {
+        deleteCurrentAppointment(index) {
             if (this.editedAppointments[index].id) { this.deletedAppointments.push(this.editedAppointments[index].id) }
 
             this.editedAppointments.splice(index, 1)
@@ -558,106 +557,111 @@ export default {
                 this.selectedStudies[index] = Object.assign({}, appointment.Study);
                 this.selectedExperimenters[index] = Object.assign({}, appointment.PrimaryExperimenter[0]);
                 this.selectedExperimenters_2nd[index] = appointment.SecondaryExperimenter;
-                this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => this.selectedExperimenters[index].id !== experimenter.id);
-                this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !this.selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
-            })
-        },
 
-        appointmentDeletable(item, index) {
-            // if an appointment was created before today, it won't be deletable.
+                // E1 and E2 options will only be available when study is selected. This happens when the appointment is created on Family Info page, where study is not selected initially.
+                if (Object.keys(this.selectedStudies[index]).length > 0) {
+                    this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => this.selectedExperimenters[index].id !== experimenter.id);
+                    this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !this.
+                    selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
+                }
+        })
+    },
 
-            var differentDays = 0;
-            if (item.createdAt) {
-                differentDays = moment
-                    .duration(
-                        moment(item.createdAt)
-                            .startOf("day")
-                            .diff(moment().startOf("day"))
-                    )
-                    .asDays()
-            }
+    appointmentDeletable(item, index) {
+        // if an appointment was created before today, it won't be deletable.
 
-            if (differentDays < 0 || index == 0) {
-                return true
-            } else {
-                return false
-            }
+        var differentDays = 0;
+        if (item.createdAt) {
+            differentDays = moment
+                .duration(
+                    moment(item.createdAt)
+                        .startOf("day")
+                        .diff(moment().startOf("day"))
+                )
+                .asDays()
+        }
 
-        },
+        if (differentDays < 0 || index == 0) {
+            return true
+        } else {
+            return false
+        }
 
-        generateAttendees(appointment) {
-            // this function generates the attendees for the google calendar event
+    },
 
-            var attendees = [];
+    generateAttendees(appointment) {
+        // this function generates the attendees for the google calendar event
 
-            appointment.PrimaryExperimenter.forEach((experimenter) => {
-                attendees.push({
-                    displayName: experimenter.Name,
-                    email: experimenter.Calendar,
-                });
-            })
-            appointment.SecondaryExperimenter.forEach((experimenter) => {
-                attendees.push({
-                    displayName: experimenter.Name,
-                    email: experimenter.Calendar,
-                });
+        var attendees = [];
+
+        appointment.PrimaryExperimenter.forEach((experimenter) => {
+            attendees.push({
+                displayName: experimenter.Name,
+                email: experimenter.Calendar,
             });
+        })
+        appointment.SecondaryExperimenter.forEach((experimenter) => {
+            attendees.push({
+                displayName: experimenter.Name,
+                email: experimenter.Calendar,
+            });
+        });
 
-            return attendees;
-        },
-
-        childPopUpInfo(child) {
-            const nPreviousParticipation = child.Appointments.length
-            return '<strong>Age:  </strong>' + childAge(child) + "<br><strong>Gender: </strong>" + child.Sex + "<br><strong>Participation (N): </strong>" + nPreviousParticipation
-        },
-
-        resetVariables() {
-            this.nSelectableStudies = [];
-            this.deletedAppointments = [];
-            this.additionalStudyButtonDisable = false;
-        },
-
+        return attendees;
     },
 
-    computed: {
-        statusOptions() {
-            var statusOptions = [];
+    childPopUpInfo(child) {
+        const nPreviousParticipation = child.Appointments.length
+        return '<strong>Age:  </strong>' + childAge(child) + "<br><strong>Gender: </strong>" + child.Sex + "<br><strong>Participation (N): </strong>" + nPreviousParticipation
+    },
 
-            switch (this.scheduleType) {
+    resetVariables() {
+        this.nSelectableStudies = [];
+        this.deletedAppointments = [];
+        this.additionalStudyButtonDisable = false;
+    },
 
-                case 'create':
-                    statusOptions = ["Confirmed", "Interested", "Left a message", "Rejected"];
-                    break;
+},
 
-                case 'update':
-                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
-                    break;
+computed: {
+    statusOptions() {
+        var statusOptions = [];
 
-            }
+        switch (this.scheduleType) {
 
-            return statusOptions;
+            case 'create':
+                statusOptions = ["Confirmed", "Interested", "Left a message", "Rejected"];
+                break;
+
+            case 'update':
+                statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
+                break;
+
         }
-    },
 
-    watch: {
-        Appointments(newVal) {
-
-            if (newVal) {
-                this.assignStudyExperimenters();
-                this.resetVariables();
-            }
-        },
-
-        editedAppointments() {
-
-            this.nSelectableStudies = this.Children.map(child => {
-                return this.potentialStudies(child).selectableStudies.length
-            })
-        }
-    },
-
-    mounted() {
-        this.assignStudyExperimenters()
+        return statusOptions;
     }
+},
+
+watch: {
+    Appointments(newVal) {
+
+        if (newVal) {
+            this.assignStudyExperimenters();
+            this.resetVariables();
+        }
+    },
+
+    editedAppointments() {
+
+        this.nSelectableStudies = this.Children.map(child => {
+            return this.potentialStudies(child).selectableStudies.length
+        })
+    }
+},
+
+mounted() {
+    this.assignStudyExperimenters()
+}
 }
 </script>
