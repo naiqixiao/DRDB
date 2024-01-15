@@ -1,6 +1,8 @@
 <!-- todo: update testing room UI. 
 separate add and / edit functions. -->
 
+<!-- todo double check testing room related functions, such as the one associated with confirm button on dialog windows -->
+
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
@@ -390,71 +392,16 @@ separate add and / edit functions. -->
               <v-container>
                 <v-divider style="margin-bottom: 20px"></v-divider>
                 <h2 class="text-left" style="margin-right: 0px;">Testing Rooms</h2>
-                <testingRooms :testingRooms="currentTestingRooms" :labId="$store.state.lab"/>
+                <testingRooms :testingRooms="currentTestingRooms" :labId="$store.state.lab"
+                  @testingRoomsUpdated="testingRoomsUpdated" />
               </v-container>
-
-              <!-- <v-row>
-                <v-col md="12" class="subtitle">
-                  <v-divider></v-divider>
-                  <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
-                </v-col>
-
-                <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                  <v-col v-for="room in filteredTestingRooms" :key="room.id" cols="12" sm="4" md="3" lg="3">
-                    <v-card>
-                      <v-icon v-if="isAuthorized(room.createdBy)" class="testing-room--delete"
-                        @click="showDeleteConfirmationDialog(room.name)">
-                        close
-                      </v-icon>
-                      <delete-confirmation-dialog :show="showDeleteConfirmation"
-                        @confirm="confirmDelete(selectedTestingRoom)" @cancel="cancelDelete"
-                        :testingRoom="selectedTestingRoom"></delete-confirmation-dialog>
-                      <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
-                      <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
-                    </v-card>
-                  </v-col>
-                </v-row>
-
-                <v-col cols="12" md="12">
-                  <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                    <v-col>
-                      <v-row>
-                        <v-col cols="6">
-                          <v-text-field background-color="textbackground" label="Name of Testing Room"
-                            v-model="testingRoom.name" outlined dense autocomplete="null"></v-text-field>
-                        </v-col>
-                        <v-col cols="6">
-                          <v-text-field background-color="textbackground" label="Location" v-model="testingRoom.location"
-                            outlined dense></v-text-field>
-                        </v-col>
-                      </v-row>
-                      <v-col cols="12">
-                        <v-text-field background-color="textbackground"
-                          label="Calendar Name (Recommend naming it after the location)" v-model="testingRoom.calendar"
-                          outlined dense></v-text-field>
-                      </v-col>
-                    </v-col>
-
-                    <v-col cols="2" class="testing-room-delete">
-                      <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
-                        <v-icon>delete</v-icon>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                  <v-col>
-                    <v-btn color="primary" fab v-on:click="addTestingRoom">
-                      <v-icon>add</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-col>
-              </v-row> -->
 
               <v-row>
                 <v-col md="12" class="subtitle">
                   <v-divider></v-divider>
                   <h4 class="text-left">Email snipplets:</h4>
                 </v-col>
-                <v-col cols="12" md="6" v-for="item in this.$labEmailTemplate" :key="item.label">
+                <v-col cols="12" md="6" v-for=" item  in  this.$labEmailTemplate " :key="item.label">
                   <h3 class="text-left">{{ item.label }}</h3>
                   <div>
                     <ckeditor :editor="editor" v-model="editedLab[item.field]" :config="editorConfig"></ckeditor>
@@ -495,7 +442,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 import XLSX from "xlsx";
 import moment from "moment";
-import calendar from "../services/calendar";
+// import calendar from "../services/calendar";
 
 // import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
 import testingRooms from '../components/testingRooms.vue';
@@ -621,8 +568,8 @@ export default {
     },
 
     async editLabInfo() {
-      const testingRooms = await testingRoom.search(this.$store.state.lab);
-      this.$store.dispatch("setTestingRooms", testingRooms.data);
+      // const testingRooms = await testingRoom.search(this.$store.state.lab);
+      // this.$store.dispatch("setTestingRooms", testingRooms.data);
       this.currentTestingRooms = this.$store.state.testingRooms;
 
       this.editedLab.LabName = this.$store.state.labName;
@@ -644,24 +591,9 @@ export default {
           this.currentLab.PI = this.currentLab.Personnels[0].Initial;
 
           await lab.create(this.currentLab);
-          const newLab = await lab.search(this.currentLab);
-          const testingRoomInfo = this.testingRooms;
+          // const newLab = await lab.search(this.currentLab);
+          // const testingRoomInfo = this.testingRooms;
 
-          // if (testingRoomInfo[0]) {
-
-          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-            const testing = { ...testingRoomItem };
-            testing.FK_Lab = newLab.data[0].id;
-            testing.createdBy = this.$store.state.userID;
-            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
-            testing.calendarId = newCal.data.calendarId;
-            const currentTestingRooms = await testingRoom.create(testing);
-            this.currentTestingRooms.push(currentTestingRooms.data);
-            this.$store.dispatch("setTestingRooms", this.currentTestingRooms);
-          });
-
-          await Promise.all(createPromises);
-          // }
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
@@ -697,21 +629,6 @@ export default {
           );
           this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
 
-          const testingRoomInfo = this.testingRooms;
-
-          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-            const testing = { ...testingRoomItem };
-            testing.FK_Lab = this.$store.state.lab;
-            testing.createdBy = this.$store.state.userID;
-            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
-            testing.calendarId = newCal.data.calendarId;
-            const currentTestingRooms = await testingRoom.create(testing);
-            this.currentTestingRooms.push(currentTestingRooms.data);
-            this.$store.dispatch("setTestingRooms", this.currentTestingRooms);
-          });
-
-          await Promise.all(createPromises);
-
           alert("Lab information is updated!");
           this.$refs.formEdit.resetValidation();
 
@@ -730,6 +647,11 @@ export default {
         this.newPassword = null;
         this.newPasswordVerify = null;
       }, 300);
+    },
+
+    testingRoomsUpdated(testingRooms) {
+      this.currentTestingRooms = testingRooms;
+      this.$store.dispatch("setTestingRooms", testingRooms);
     },
 
     closeNewLab() {
@@ -973,9 +895,6 @@ export default {
       };
     },
 
-    filteredTestingRooms() {
-      return this.currentTestingRooms.filter(room => !room.voided);
-    },
   },
 
   watch: {

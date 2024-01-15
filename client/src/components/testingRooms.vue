@@ -18,20 +18,19 @@
                     </v-tooltip>
                 </v-card>
             </v-col>
-            <v-col cols="12" md="3" v-for="testingRoom in testingRooms" :key="testingRoom.id">
+            <v-col cols="12" md="3" v-for="(testingRoom, index) in testingRooms" :key="testingRoom.id">
                 <v-card style="height: 176px !important; ">
                     <v-card-title>{{ testingRoom.name }}</v-card-title>
                     <v-card-text style="height: 100px !important; ">
 
                         <body align="start" v-html="testingRoomInfo(testingRoom)"></body>
                     </v-card-text>
-                    <!-- style="display: flex !important; flex-wrap: wrap; align-content: center; justify-content: end;" -->
-
 
                     <v-card-actions
                         style="display: flex; flex-wrap: wrap; align-content: baseline; justify-content: space-around;">
-                        <v-btn small color="primary" dark outlined @click="editTestingRoom(testingRoom)">Edit</v-btn>
-                        <v-btn small color="warning" dark outlined @click="deleteTestingRoom(testingRoom)">Delete</v-btn>
+                        <v-btn small color="primary" dark outlined @click="editTestingRoom(testingRoom, index)">Edit</v-btn>
+                        <v-btn small color="warning" dark outlined
+                            @click="deleteTestingRoom(testingRoom, index)">Delete</v-btn>
                     </v-card-actions>
                 </v-card>
             </v-col>
@@ -92,6 +91,7 @@ export default {
     },
     methods: {
         createTestingRoom() {
+            // prepare data for dialog to create a new testing room
             this.dialogTitle = 'Create Testing Room';
             this.currentTestingRoom = {
                 name: '',
@@ -102,17 +102,29 @@ export default {
 
             this.dialogVisible = true;
         },
-        editTestingRoom(testingRoom) {
+        editTestingRoom(testingRoom, index) {
+            // prepare data for dialog to edit an existing testing room
             this.dialogTitle = 'Edit Testing Room';
             this.currentTestingRoom = testingRoom;
-            this.testingRoomIndex = this.testingRooms.indexOf(testingRoom);
+            this.testingRoomIndex = index;
             this.dialogVisible = true;
         },
-        deleteTestingRoom(testingRoom) {
-            console.log(testingRoom)
-            // Handle delete logic here
+        async deleteTestingRoom(currentTestingRoom, index) {
+
+            try {
+                await testingRoom.delete({ id: currentTestingRoom.id, name: currentTestingRoom.name });
+                
+                alert("Testing Room: " + currentTestingRoom.name + " has been deleted.\nBut the associated Google Calendar has not been deleted.");
+                this.testingRooms.splice(index, 1);
+
+                this.$emit('testing-rooms-updated', this.testingRooms);
+
+            } catch (error) {
+                return error;
+            }
         },
         async confirmChanges() {
+            // confirm changes to testing room. If creating a new testing room, create it. If editing an existing testing room, update it.
             const validationResults = this.$refs.formTestRoom.validate();
 
             if (validationResults) {
@@ -145,15 +157,23 @@ export default {
                     this.testingRooms[this.testingRoomIndex] = this.currentTestingRoom;
                 }
 
-                this.$store.dispatch("setTestingRooms", this.testingRooms);
+                this.$emit('testingRoomsUpdated', this.testingRooms);
+
                 this.dialogVisible = false;
             }
         },
         cancelChanges() {
-            // Handle cancel logic here
+            // close the dialog without saving changes
+            this.currentTestingRoom = {
+                name: '',
+                location: '',
+                calendarId: '',
+                FK_Lab: this.labId
+            }
             this.dialogVisible = false;
         },
         testingRoomInfo(testingRoom) {
+            // some basid info about the testing room
             const studiesInthisRoom = this.$store.state.studies.filter(study => study.FK_TestingRoom === testingRoom.id)
 
             return `
