@@ -74,7 +74,8 @@ async function sendEmail(emailContent) {
 
   var adminEmail = sendAsEmail.sendAsEmail;
 
-  emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
+  emailContent.from =
+    "Developmental Research Management System" + "<" + adminEmail + ">";
 
   var raw = makeBody(
     emailContent.to,
@@ -91,7 +92,6 @@ async function sendEmail(emailContent) {
         raw: raw,
       },
     });
-
   } catch (error) {
     return error;
   }
@@ -101,12 +101,15 @@ async function sendEmail(emailContent) {
 exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
-
-    newLabInfo.EmailOpening = "<p>PEmail opening (currently not in use).<\p>";
-    newLabInfo.EmailClosing = "<p>Please feel free to let us know if you wish to change the time for your study. You can either send us an email.<\p>";
-    newLabInfo.TYEmail = "<p>Please, if you have a chance, consider spreading the word to other families you may know who might like to participate.<\p>";
-    newLabInfo.Location = "Psychology Building, McMaster University (used in calendar events)";
-    newLabInfo.TransportationInstructions = "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.<\p>";
+    newLabInfo.EmailOpening = "<p>PEmail opening (currently not in use).<p>";
+    newLabInfo.EmailClosing =
+      "<p>Please feel free to let us know if you wish to change the time for your study. You can either send us an email.<p>";
+    newLabInfo.TYEmail =
+      "<p>Please, if you have a chance, consider spreading the word to other families you may know who might like to participate.<p>";
+    newLabInfo.Location =
+      "Psychology Building, McMaster University (used in calendar events)";
+    newLabInfo.TransportationInstructions =
+      "<p>Our lab is located at Psychology Building, McMaster University. There are 3 parking lots in front of the building that you can park when you come. We will wait for you at the parking lot.<p>";
 
     newLabInfo.Personnels.forEach((personnel) => {
       var password = Math.random()
@@ -125,16 +128,17 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     // create a sample study
-    const sampleStudy =
-    {
+    const sampleStudy = {
       StudyName: "Sample study for " + lab.LabName,
       MinAge: "8.00",
       MaxAge: "24.00",
       PhoneScript: "hello there",
-      Description: "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
+      Description:
+        "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
       EmailTemplate:
         "<p><strong style='background- color: rgb(254, 254, 254); '>${{childName}}&nbsp;</strong><span style='background - color: rgb(254, 254, 254); '>will be sitting on your lap and watch a short clip of videos on a screen in front of ${{him/her}}. To understand the development of neural system, ${{childName}} will be wearing a recording cap while watching the videos. We will use a camera to monitor ${{his/her}} attention status, which will help us determine the quality of recorded neural signals. The study will last for about 10 minutes.</span></p>",
-      ReminderTemplate: "<p>Please enter a template for reminder email sent to parents for their upcoming study.</p>",
+      ReminderTemplate:
+        "<p>Please enter a template for reminder email sent to parents for their upcoming study.</p>",
       FollowUPEmailSnippet: "<p>As we ment.</p>",
       Completed: false,
       StudyType: "Behavioural",
@@ -145,16 +149,19 @@ exports.create = asyncHandler(async (req, res) => {
       IllParticipant: "Include",
       FK_Personnel: lab.Personnels[0].id,
       FK_Lab: lab.id,
-      FK_TestingRoom: 1
+      FK_TestingRoom: 1,
     };
 
     await model.study.create(sampleStudy);
 
     // Send email to the associated personnel
     const emailContent = {
-      to: newLabInfo.Personnels[0].Name + "<" + newLabInfo.Personnels[0].Email + ">",
-      subject:
-        "Your user account has been created!",
+      to:
+        newLabInfo.Personnels[0].Name +
+        "<" +
+        newLabInfo.Personnels[0].Email +
+        ">",
+      subject: "Your user account has been created!",
       body:
         "<p>Hello " +
         newLabInfo.Personnels[0].Name.split(" ")[0] +
@@ -164,11 +171,15 @@ exports.create = asyncHandler(async (req, res) => {
         newLabInfo.Personnels[0].Role +
         "</b>, and your temporary password is <b><em>" +
         newLabInfo.Personnels[0].unencryptedPassword +
-        "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+        "</em></b>. Please login with your email and temporary password at <a href=" +
+        config.URL +
+        ">" +
+        config.URL +
+        "</a> to set your password" +
+        config.otherRequirement +
+        ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
         "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
-
         "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-
         "<p>Thank you!<br>" +
         "Developmental Research Management System</p>",
     };
@@ -189,10 +200,13 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Lab Created", User, "created a lab (" +
-      newLabInfo.LabName + ")");
+    await log.createLog(
+      "Lab Created",
+      User,
+      "created a lab (" + newLabInfo.LabName + ")"
+    );
 
-    res.status(200).send('a new lab is created.');
+    res.status(200).send("a new lab is created.");
   } catch (error) {
     throw error;
   }
@@ -231,8 +245,11 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  await log.createLog("Lab Updated", User, "updated lab information (" +
-    updatedLabInfo.LabName + ")");
+  await log.createLog(
+    "Lab Updated",
+    User,
+    "updated lab information (" + updatedLabInfo.LabName + ")"
+  );
 
   res.status(200).send(lab);
   console.log("Lab Information Updated!");
@@ -256,8 +273,11 @@ exports.delete = asyncHandler(async (req, res) => {
   // Log
   const User = JSON.parse(req.query.User);
 
-  await log.createLog("Lab Deleted", User, "deleted lab (" +
-    req.query.id + ") from the database");
+  await log.createLog(
+    "Lab Deleted",
+    User,
+    "deleted lab (" + req.query.id + ") from the database"
+  );
 
   res.status(200).json(lab);
   console.log("Lab removal succeeds.");

@@ -433,7 +433,7 @@ export default {
                     switch (this.parentResponse) {
 
                         case 'Confirmed':
-                            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                            (this.checkAppointmentsAssignedStudy() && this.checkAppointmentsAssignedExperimenter() && this.checkAppointmentsAssignedStatus()) ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
                             break;
 
                         case 'Interested':
@@ -465,7 +465,7 @@ export default {
         // check if all appointments have been assigned a primary experimenter
         checkAppointmentsAssignedExperimenter() {
 
-            const allAssigned = this.editedAppointments.some((appointment, index) => (appointment.status === "Update appointment time" || appointment.status === "Confirmed") && this.selectedExperimenters[index] !== null)
+            const allAssigned = this.editedAppointments.some((appointment, index) => (appointment.status === "Update appointment time" || appointment.status === "Confirmed") && ('id' in this.selectedExperimenters[index]))
 
             // const allAssigned = this.selectedExperimenters.every(Experimenters => Experimenters != null);
             return allAssigned;
@@ -562,106 +562,106 @@ export default {
                 if (Object.keys(this.selectedStudies[index]).length > 0) {
                     this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => this.selectedExperimenters[index].id !== experimenter.id);
                     this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !this.
-                    selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
+                        selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
                 }
-        })
-    },
+            })
+        },
 
-    appointmentDeletable(item, index) {
-        // if an appointment was created before today, it won't be deletable.
+        appointmentDeletable(item, index) {
+            // if an appointment was created before today, it won't be deletable.
 
-        var differentDays = 0;
-        if (item.createdAt) {
-            differentDays = moment
-                .duration(
-                    moment(item.createdAt)
-                        .startOf("day")
-                        .diff(moment().startOf("day"))
-                )
-                .asDays()
-        }
+            var differentDays = 0;
+            if (item.createdAt) {
+                differentDays = moment
+                    .duration(
+                        moment(item.createdAt)
+                            .startOf("day")
+                            .diff(moment().startOf("day"))
+                    )
+                    .asDays()
+            }
 
-        if (differentDays < 0 || index == 0) {
-            return true
-        } else {
-            return false
-        }
+            if (differentDays < 0 || index == 0) {
+                return true
+            } else {
+                return false
+            }
 
-    },
+        },
 
-    generateAttendees(appointment) {
-        // this function generates the attendees for the google calendar event
+        generateAttendees(appointment) {
+            // this function generates the attendees for the google calendar event
 
-        var attendees = [];
+            var attendees = [];
 
-        appointment.PrimaryExperimenter.forEach((experimenter) => {
-            attendees.push({
-                displayName: experimenter.Name,
-                email: experimenter.Calendar,
+            appointment.PrimaryExperimenter.forEach((experimenter) => {
+                attendees.push({
+                    displayName: experimenter.Name,
+                    email: experimenter.Calendar,
+                });
+            })
+            appointment.SecondaryExperimenter.forEach((experimenter) => {
+                attendees.push({
+                    displayName: experimenter.Name,
+                    email: experimenter.Calendar,
+                });
             });
-        })
-        appointment.SecondaryExperimenter.forEach((experimenter) => {
-            attendees.push({
-                displayName: experimenter.Name,
-                email: experimenter.Calendar,
-            });
-        });
 
-        return attendees;
+            return attendees;
+        },
+
+        childPopUpInfo(child) {
+            const nPreviousParticipation = child.Appointments.length
+            return '<strong>Age:  </strong>' + childAge(child) + "<br><strong>Gender: </strong>" + child.Sex + "<br><strong>Participation (N): </strong>" + nPreviousParticipation
+        },
+
+        resetVariables() {
+            this.nSelectableStudies = [];
+            this.deletedAppointments = [];
+            this.additionalStudyButtonDisable = false;
+        },
+
     },
 
-    childPopUpInfo(child) {
-        const nPreviousParticipation = child.Appointments.length
-        return '<strong>Age:  </strong>' + childAge(child) + "<br><strong>Gender: </strong>" + child.Sex + "<br><strong>Participation (N): </strong>" + nPreviousParticipation
-    },
+    computed: {
+        statusOptions() {
+            var statusOptions = [];
 
-    resetVariables() {
-        this.nSelectableStudies = [];
-        this.deletedAppointments = [];
-        this.additionalStudyButtonDisable = false;
-    },
+            switch (this.scheduleType) {
 
-},
+                case 'create':
+                    statusOptions = ["Confirmed", "Interested", "Left a message", "Rejected"];
+                    break;
 
-computed: {
-    statusOptions() {
-        var statusOptions = [];
+                case 'update':
+                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
+                    break;
 
-        switch (this.scheduleType) {
+            }
 
-            case 'create':
-                statusOptions = ["Confirmed", "Interested", "Left a message", "Rejected"];
-                break;
-
-            case 'update':
-                statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
-                break;
-
-        }
-
-        return statusOptions;
-    }
-},
-
-watch: {
-    Appointments(newVal) {
-
-        if (newVal) {
-            this.assignStudyExperimenters();
-            this.resetVariables();
+            return statusOptions;
         }
     },
 
-    editedAppointments() {
+    watch: {
+        Appointments(newVal) {
 
-        this.nSelectableStudies = this.Children.map(child => {
-            return this.potentialStudies(child).selectableStudies.length
-        })
+            if (newVal) {
+                this.assignStudyExperimenters();
+                this.resetVariables();
+            }
+        },
+
+        editedAppointments() {
+
+            this.nSelectableStudies = this.Children.map(child => {
+                return this.potentialStudies(child).selectableStudies.length
+            })
+        }
+    },
+
+    mounted() {
+        this.assignStudyExperimenters()
     }
-},
-
-mounted() {
-    this.assignStudyExperimenters()
-}
 }
 </script>

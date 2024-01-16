@@ -495,7 +495,7 @@ export default {
         to: this.familyInfo.NamePrimary + " <" + this.emailAddress + " >",
         subject: this.emailSubject,
         body: formattedEmail,
-        labelNames: gmailLabels, // todo, add labelName back, but generate the labels within the function, rather than relying on input.
+        labelNames: gmailLabels,
       };
 
       try {

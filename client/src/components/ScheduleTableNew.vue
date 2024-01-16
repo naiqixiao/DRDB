@@ -97,9 +97,11 @@
         </v-data-table>
 
         <!-- Dialog Component, to create or update a schedule -->
+        <!-- todo, generate functions for add, updated, and complete schedules. -->
         <scheduleDialog ref="scheduleDialog" :dialog="dialog" :currentSchedule="currentSchedule" :dialogType="dialogType"
             :currentFamily="currentSchedule.Family" :scheduleType="scheduleType" @close-dialog="closeDialog()"
-            @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment" />
+            @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment" @newSchedule="addSchedule"
+            @updatedSchedule="updatedSchedule" @completedSchedule="completedSchedule" />
     </div>
 </template>
   

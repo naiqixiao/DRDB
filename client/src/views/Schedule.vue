@@ -293,7 +293,9 @@
           <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
             :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
             @close-dialog="closeDialog()" @newAppointment="addAppointment"
-            @deleteCurrentAppointment="deleteCurrentAppointment" />
+            @deleteCurrentAppointment="deleteCurrentAppointment" @newSchedule="addSchedule"
+            />
+            <!-- @updatedSchedule="updatedSchedule" @completedSchedule="completedSchedule" -->
 
           <v-dialog v-model="datePicker" max-width="290px">
             <v-card outlined>
@@ -858,6 +860,14 @@ export default {
       };
     },
 
+    addSchedule(schedule){
+
+      schedule.Appointments.forEach((appointment) => {
+        this.currentFamily.Appointments.push(appointment)
+      });
+      
+    },
+
     newAppointment(child) {
       var newAppointment = Object.assign({}, this.defaultAppointment);
 
@@ -868,7 +878,6 @@ export default {
 
       this.appointments.push(newAppointment);
 
-      // console.log(this.appointments);
     },
 
     deleteAppointment(index) {

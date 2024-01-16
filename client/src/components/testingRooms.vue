@@ -2,7 +2,7 @@
     <v-container>
         <v-row style="overflow-x: scroll; align-items: stretch">
             <v-col cols="12" md="3">
-                <v-card
+                <v-card class="placeholder-card"
                     style="height: 176px !important; justify-content: space-around; align-content: center; display: flex; flex-wrap: wrap; ">
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
@@ -19,7 +19,7 @@
                 </v-card>
             </v-col>
             <v-col cols="12" md="3" v-for="(testingRoom, index) in testingRooms" :key="testingRoom.id">
-                <v-card style="height: 176px !important; ">
+                <v-card class="child-card" style="height: 176px !important; ">
                     <v-card-title class="text-truncate">{{ testingRoom.name }}</v-card-title>
                     <v-card-text style="height: 100px !important; ">
 
@@ -186,3 +186,21 @@ export default {
     }
 }
 </script>
+
+<style lang="scss">
+.child-card {
+  border-radius: 10px !important;
+  border-style: solid !important;
+  border-width: thin !important;
+  border-color: var(--v-primary-base) !important;
+  background-color: var(--v-background-lighten4) !important;
+}
+
+.placeholder-card {
+  border-radius: 10px !important;
+  border-style: dashed !important;
+  border-width: thin !important;
+  border-color: var(--v-primary-lighten4) !important;
+  background-color: var(--v-textbackground-lighten4) !important;
+}
+</style>

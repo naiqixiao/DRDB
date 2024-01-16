@@ -60,7 +60,7 @@
                             <v-container
                                 style="display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 60px">
                                 <v-btn @click="createSchedule()" :disabled="!scheduleEnable"
-                                    :loading="loadingStatus"><v-icon dark left
+                                    :loading="loadingStatus"><v-icon left
                                         v-show="scheduleButtonIconShow">mdi-checkbox-circle-line</v-icon>{{
                                             scheduleButtonText }}</v-btn>
                                 <v-btn @click="step12" :disabled="disableStep12">Next</v-btn>
@@ -103,7 +103,7 @@
                         <v-card-actions>
                             <v-container
                                 style="display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 60px">
-                                <v-btn @click="sendEmail()"><v-icon dark left v-show="emailButtonIconShow"
+                                <v-btn @click="sendEmail()"><v-icon left v-show="emailButtonIconShow"
                                         :loading="loadingStatus">mdi-checkbox-marked-circle</v-icon>{{ emailButtonText
                                         }}</v-btn>
                                 <v-btn @click="stepperPage = 3" :disabled="disableStep23">Next</v-btn>
@@ -292,6 +292,9 @@ export default {
 
                 console.log(newSchedule)
                 this.scheduleButtonText = "Appointment created!";
+
+                this.$emit("newSchedule", newSchedule);
+
             }
 
             // update existing schedule
@@ -300,6 +303,8 @@ export default {
 
                 console.log(updatedSchedule)
                 this.scheduleButtonText = "Appointment updated!";
+
+                this.$emit("updatedSchedule", updatedSchedule);
             }
 
             // Complete the schedule if the status is "Completed".
@@ -308,46 +313,20 @@ export default {
                     id: newAppointments.completedAppointments[0].FK_Schedule,
                     Completed: 1
                 })
+
+                this.$emit("completedSchedule", {
+                    id: newAppointments.completedAppointments[0].FK_Schedule,
+                    Completed: 1
+                });
             }
 
             // delete the appointment previously scheduled in the current schedule.
             if (newAppointments.deletedAppointments.length > 0) {
                 for (const app of newAppointments.deletedAppointments) {
                     await appointment.delete({ id: app.id });
-
                 }
             }
 
-            // ///////////////////////////////////////////////
-            // update backend database
-            // this.loadingStatus = true;
-
-            // try {
-            //     // create a new schedule
-            //     if (newAppointments.newAppointments.length > 0) {
-
-            //         const createdSchedule = await this.createScheduleBackend(newSchedule);
-
-            //         createdSchedule.data.id
-
-            //     }
-
-            //     // update existing schedule
-            //     if (newAppointments.updatedAppointments.length > 0) {
-
-            //         await this.updateScheduleBackend(updatedSchedule);
-
-            //     }
-
-            //     // update frontend store
-            //     this.scheduleButtonShow = true;
-            //     this.disableStep12 = false;
-            //     this.scheduleButtonText = "Study appointment updated!";
-
-            // } catch (error) {
-            //     console.log(error);
-            //     alert("Failed to update the appointment, please try again.");
-            // }
 
             this.loadingStatus = false;
             this.scheduleButtonIconShow = true;

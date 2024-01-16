@@ -89,15 +89,15 @@
       </v-row>
     </div>
 
-<!-- date input box -->
-      <v-dialog v-model="dobPicker" max-width="290px">
-        <v-card outlined>
-          <v-date-picker v-model="editedItem.DoB" show-current :max="new Date().toISOString()"
-            @click:date="dobPicker = false"></v-date-picker>
-        </v-card>
-      </v-dialog>
+    <!-- date input box -->
+    <v-dialog v-model="dobPicker" max-width="290px">
+      <v-card outlined>
+        <v-date-picker v-model="editedItem.DoB" show-current :max="new Date().toISOString()"
+          @click:date="dobPicker = false"></v-date-picker>
+      </v-card>
+    </v-dialog>
 
-      <!-- child info editing dialog -->
+    <!-- child info editing dialog -->
     <div>
       <v-dialog v-model="dialogChild" max-width="1000px" :retain-focus="false">
         <v-card outlined>
@@ -163,8 +163,8 @@
     </div>
 
     <ConfirmDlg ref="confirmD" />
-    
-    
+
+
     <!-- <div>
       <v-dialog value=0 max-width="1200px" :retain-focus="false">
         <v-stepper v-model="e1">
@@ -347,9 +347,12 @@
     </div> -->
 
     <!-- Dialog Component, to create or update a schedule -->
+    <!-- todo, generate functions for add a schedules. -->
+
     <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
       :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
-      @close-dialog="closeSchedule" @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment" />
+      @close-dialog="closeSchedule" @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment"
+      @newSchedule="addSchedule" />
 
   </div>
 </template>
@@ -1127,7 +1130,6 @@ export default {
         newAppointment.Child.Family = {};
         newAppointment.Child.Family.Email = this.currentFamily.Email; // family email information used for sending email
         newAppointment.Child.Family.NamePrimary = this.currentFamily.NamePrimary; // family email information used for sending email
-        // newAppointment.index = this.appointments.length; // todo, might not need this field.
 
         this.appointments.push(newAppointment);
 
@@ -1138,7 +1140,7 @@ export default {
           Appointments: this.appointments,
           Note: null,
           ScheduledBy: this.$store.state.userID,
-         };
+        };
 
         this.dialogSchedule = true;
       }

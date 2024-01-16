@@ -1,8 +1,3 @@
-<!-- todo: update testing room UI. 
-separate add and / edit functions. -->
-
-<!-- todo double check testing room related functions, such as the one associated with confirm button on dialog windows -->
-
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
@@ -198,7 +193,8 @@ separate add and / edit functions. -->
       </v-dialog>
     </v-row>
 
-    <v-row style="margin: 24px 10%; overflow-y: scroll;">
+    <!-- testing room setting will appear once the lab calendar is set up. -->
+    <v-row style="margin: 24px 10%; overflow-y: scroll;" v-show="$store.state.labEmailStatus">
       <v-col md="12" class="subtitle">
         <v-divider style="margin-bottom: 20px"></v-divider>
         <h2 class="text-left" style="margin-right: 0px;">Testing Rooms</h2>
@@ -299,45 +295,8 @@ separate add and / edit functions. -->
                     :rules="$rules[item.rules]" outlined dense></v-text-field>
                 </div>
               </v-col>
-
-              <!-- optional testing room for users to add -->
-              <v-col md="12" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
-              </v-col>
-
-              <v-col cols="12" md="12">
-                <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                  <v-col>
-                    <v-row>
-                      <v-col cols="6">
-                        <v-text-field background-color="textbackground" label="Name of Testing Room"
-                          v-model="testingRoom.name" outlined dense autocomplete="null"></v-text-field>
-                      </v-col>
-                      <v-col cols="6">
-                        <v-text-field background-color="textbackground" label="Location" v-model="testingRoom.location"
-                          outlined dense></v-text-field>
-                      </v-col>
-                    </v-row>
-                    <v-col cols="12">
-                      <v-text-field background-color="textbackground"
-                        label="Calendar Name (Recommend naming it after the location)" v-model="testingRoom.calendar"
-                        outlined dense></v-text-field>
-                    </v-col>
-                  </v-col>
-                  <v-col cols="2" class="testing-room-delete">
-                    <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
-                      <v-icon>delete</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
             </v-row>
-            <v-col>
-              <v-btn color="primary" fab v-on:click="addTestingRoom">
-                <v-icon>add</v-icon>
-              </v-btn>
-            </v-col>
+
           </v-form>
 
           <v-card-actions>
@@ -444,7 +403,7 @@ separate add and / edit functions. -->
 import login from "@/services/login";
 import lab from "@/services/lab";
 
-import testingRoom from "@/services/testingRoom";
+// import testingRoom from "@/services/testingRoom";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 // import { VueEditor } from "vue2-editor";
@@ -522,7 +481,7 @@ export default {
       testingRooms: [{ name: "", location: "", calendar: "" }],
       currentTestingRooms: [],
       showDeleteConfirmation: false,
-      selectedTestingRoom: '',
+      // selectedTestingRoom: '',
       requestInProgress: false,
     };
   },
@@ -532,17 +491,17 @@ export default {
       this.showDeleteConfirmation = true;
       this.selectedTestingRoom = room;
     },
-    async confirmDelete(selectedRoom) {
-      const testingRoomInfo = this.currentTestingRooms.find(room => room.name === selectedRoom)
-      this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== testingRoomInfo.id);
+    // async confirmDelete(selectedRoom) {
+    //   const testingRoomInfo = this.currentTestingRooms.find(room => room.name === selectedRoom)
+    //   this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== testingRoomInfo.id);
 
-      this.showDeleteConfirmation = false;
-      this.selectedTestingRoom = '';
-      await testingRoom.delete(testingRoomInfo);
-    },
+    //   this.showDeleteConfirmation = false;
+    //   this.selectedTestingRoom = '';
+    //   await testingRoom.delete(testingRoomInfo);
+    // },
     cancelDelete() {
       this.showDeleteConfirmation = false;
-      this.selectedTestingRoom = '';
+      // this.selectedTestingRoom = '';
     },
 
     async changePassword() {
@@ -571,12 +530,12 @@ export default {
       this.dialogNewLab = true;
     },
 
-    addTestingRoom() {
-      this.testingRooms.push({ name: "", location: "", calendar: "" });
-    },
-    deleteTestingRoom(index) {
-      this.testingRooms.splice(index, 1);
-    },
+    // addTestingRoom() {
+    //   this.testingRooms.push({ name: "", location: "", calendar: "" });
+    // },
+    // deleteTestingRoom(index) {
+    //   this.testingRooms.splice(index, 1);
+    // },
 
     async editLabInfo() {
       // const testingRooms = await testingRoom.search(this.$store.state.lab);
@@ -603,7 +562,6 @@ export default {
           await lab.create(this.currentLab);
           // const newLab = await lab.search(this.currentLab);
           // const testingRoomInfo = this.testingRooms;
-
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
