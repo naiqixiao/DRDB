@@ -74,14 +74,15 @@
       </v-card>
     </v-dialog>
 
-    <v-navigation-drawer v-model="drawer" app temporary  clipped>
-
-      <v-list dense nav>
-        <v-list-item link v-for="nav in navs" :key="nav.label" :to="nav.address" @click="pageTitle = nav.label">
-          <v-icon>{{ nav.icon }}</v-icon>
-          <v-list-item-title>
+    <v-navigation-drawer app v-model="drawer" temporary width="300" clipped>
+      <v-list dense>
+        <v-list-item v-for="nav in navs" :key="nav.label" :to="nav.address" @click="pageTitle = nav.label">
+          <v-list-item-action>
+            <v-icon>{{ nav.icon }}</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
             <v-list-item>{{ nav.label }}</v-list-item>
-          </v-list-item-title>
+          </v-list-item-content>
         </v-list-item>
       </v-list>
 

@@ -177,6 +177,7 @@ export default {
 
             this.$refs.scheduleDialog.initiateVariables(this.dialogType);
         },
+
         addAppointment(appointment) {
             this.currentSchedule.Appointments.push(appointment);
         },
@@ -184,6 +185,20 @@ export default {
         deleteCurrentAppointment(index) {
             this.currentSchedule.Appointments.splice(index, 1);
         },
+
+        addSchedule(schedule) {
+            this.$emit("updatedSchedule", schedule);
+        },
+
+        updatedSchedule(schedule) {
+            this.$emit("updatedSchedule", schedule);
+
+        },
+
+        completedSchedule(schedule) {
+            this.$emit("updatedSchedule", schedule);
+        },
+
         parentContact(Family) {
 
             var formated = "<strong>Parent: </strong>" + Family.NamePrimary + '<br>';

@@ -61,7 +61,7 @@
                                 style="display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 60px">
                                 <v-btn @click="createSchedule()" :disabled="!scheduleEnable"
                                     :loading="loadingStatus"><v-icon left
-                                        v-show="scheduleButtonIconShow">mdi-checkbox-circle-line</v-icon>{{
+                                        v-show="scheduleButtonIconShow">mdi-checkbox-marked-circle-outline</v-icon>{{
                                             scheduleButtonText }}</v-btn>
                                 <v-btn @click="step12" :disabled="disableStep12">Next</v-btn>
 
@@ -103,9 +103,11 @@
                         <v-card-actions>
                             <v-container
                                 style="display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 60px">
-                                <v-btn @click="sendEmail()"><v-icon left v-show="emailButtonIconShow"
-                                        :loading="loadingStatus">mdi-checkbox-marked-circle</v-icon>{{ emailButtonText
+                                <v-btn @click="sendEmail()" :loading="loadingStatus"><v-icon left
+                                        v-show="emailButtonIconShow">mdi-checkbox-marked-circle-outline</v-icon>{{
+                                            emailButtonText
                                         }}</v-btn>
+
                                 <v-btn @click="stepperPage = 3" :disabled="disableStep23">Next</v-btn>
 
                             </v-container>
@@ -272,7 +274,7 @@ export default {
         },
 
         readyToCreateSchedule(val) {
-            console.log(val)
+            // console.log(val)
             this.scheduleEnable = val;
         },
 
@@ -290,7 +292,6 @@ export default {
             if (newAppointments.newAppointments.length > 0) {
                 const newSchedule = await this.newSchedule(newAppointments.newAppointments);
 
-                console.log(newSchedule)
                 this.scheduleButtonText = "Appointment created!";
 
                 this.$emit("newSchedule", newSchedule);
@@ -301,7 +302,6 @@ export default {
             if (newAppointments.updatedAppointments.length > 0) {
                 const updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
 
-                console.log(updatedSchedule)
                 this.scheduleButtonText = "Appointment updated!";
 
                 this.$emit("updatedSchedule", updatedSchedule);
@@ -309,13 +309,15 @@ export default {
 
             // Complete the schedule if the status is "Completed".
             if (newAppointments.completedAppointments.length > 0) {
-                await this.schedule.complete({
+                await schedule.complete({
                     id: newAppointments.completedAppointments[0].FK_Schedule,
+                    FK_Family: newAppointments.completedAppointments[0].FK_Family,
                     Completed: 1
                 })
 
                 this.$emit("completedSchedule", {
                     id: newAppointments.completedAppointments[0].FK_Schedule,
+                    FK_Family: newAppointments.completedAppointments[0].FK_Family,
                     Completed: 1
                 });
             }
@@ -336,6 +338,7 @@ export default {
                 return appointment.status === 'Confirmed' || appointment.status === 'Tentative' || appointment.status === 'Update appointment time' || appointment.status === 'No Show';
             });
 
+            
             // if there is no email to send, skip the email step.
             if (this.emailAppointments.length === 0) {
                 this.skipEmail = true;
@@ -488,9 +491,6 @@ export default {
                 Reminded: 0,
             }
 
-            console.log("updatedSchedule")
-            console.log(updatedSchedule)
-
             var updatedCalendarEvents = []
             updatedSchedule.Appointments.forEach((appointment) => {
 
@@ -518,8 +518,6 @@ export default {
                 updatedCalendarEvents.push(calendarEvent)
 
             })
-
-            console.log(updatedCalendarEvents)
 
             // 1. update/create calendar events, save the calendarEventId and eventURL to the appointment object
 
@@ -564,14 +562,11 @@ export default {
 
             // 2. update schedule and associted appointments (experimenters and assistant experimenters)
 
-            const createdSchedule = await this.updateScheduleBackend(updatedSchedule);
-
-            console.log("updatedSchedule")
-            console.log(createdSchedule)
+            await this.updateScheduleBackend(updatedSchedule);
 
             // 3. update frontend store?
 
-            return createdSchedule;
+            return updatedSchedule;
         },
 
         async createScheduleBackend(newSchedule) {
@@ -704,6 +699,7 @@ export default {
             if (this.skipEmail) {
                 this.emailDialog = false;
                 this.stepperPage = 3;
+                console.log(this.stepperPage)
             } else {
 
                 for (const appointment of this.emailAppointments) {
@@ -723,13 +719,13 @@ export default {
                     }
                 }
 
+                this.stepperPage = 2;
+                this.emailDialog = true;
             }
 
             this.loadingStatus = false;
             this.contactDate = moment(this.studyDateTime).add(7, 'days').startOf("day").tz(this.$store.state.timeZone).format("YYYY-MM-DD");
             this.emailSelectionShow = false;
-            this.emailDialog = true;
-            this.stepperPage = 2;
         },
 
         step23() {

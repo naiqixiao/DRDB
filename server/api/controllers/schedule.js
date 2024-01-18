@@ -168,7 +168,9 @@ exports.create = asyncHandler(async (req, res) => {
       "added a study appointment to a schedule(" + schedule.id + ")"
     );
 
-    res.status(200).send(schedule);
+    const fullSchedule = await searchScheudles({id: schedule.id});
+
+    res.status(200).send(fullSchedule[0]);
     console.log("schedule created!");
   } catch (error) {
     console.log( error);
@@ -614,6 +616,7 @@ exports.tyEmail = asyncHandler(async (req, res) => {
 
 exports.complete = asyncHandler(async (req, res) => {
   var updatedScheduleInfo = req.body;
+  
   if (updatedScheduleInfo.id) {
     ID = updatedScheduleInfo.id;
     delete updatedScheduleInfo["id"];
