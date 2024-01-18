@@ -4,7 +4,6 @@
 
 <!-- In this UI, there will be three steps: determining schedule details, send email, and arrange next contact. -->
 
-<!-- todo, return schedule object after creation / update. Parent component will use the output to update the frontend UI. -->
 <template>
     <v-dialog :value="dialog" @input="onDialogClose" transition="dialog-bottom-transition">
         <v-card>
@@ -33,7 +32,8 @@
                                 <!-- Schedule date and time -->
                                 <v-divider style="margin-bottom: 20px"></v-divider>
                                 <dateTimePicker ref="dateTimePicker" :dateTimePickerDisable="dateTimePickerDisable"
-                                    :appointmentTime="currentSchedule.AppointmentTime" />
+                                    :appointmentTime="currentSchedule.AppointmentTime"
+                                    @readyToCreateSchedule="readyToCreateSchedule" />
 
                                 <!-- Appointment Data Table -->
                                 <v-divider style="margin-bottom: 20px"></v-divider>
@@ -273,9 +273,31 @@ export default {
             this.$emit("newAppointment", appointment);
         },
 
-        readyToCreateSchedule(val) {
-            // console.log(val)
-            this.scheduleEnable = val;
+        readyToCreateSchedule() {
+            // check appointmentDetails
+            if (this.$refs.appointmentDetails.appointmentDetailReady && this.$refs.dateTimePicker.studyDateTimeReady) {
+                this.scheduleEnable = true;
+            } else {
+                this.scheduleEnable = false;
+            }
+
+            // // check appointment time
+            // var statusValues = [];
+
+            // const newAppointments = this.$refs.appointmentDetails.generateAppointments();
+            // // Get the unique status values from the newAppointments array
+            // statusValues = [...new Set(newAppointments.map(appointment => appointment.status))];
+
+            // if (statusValues[0] === 'Update appointment time' || statusValues[0] === 'Confirmed') {
+
+            //     const studyDateTimeValid = this.$refs.dateTimePicker.dateTimeValidation();
+            //     if (studyDateTimeValid) {
+            //         this.scheduleEnable = val;
+            //     }
+            // } else {
+            //     this.scheduleEnable = val;
+            // }
+
         },
 
         // the most important function.
@@ -329,7 +351,6 @@ export default {
                 }
             }
 
-
             this.loadingStatus = false;
             this.scheduleButtonIconShow = true;
 
@@ -338,7 +359,7 @@ export default {
                 return appointment.status === 'Confirmed' || appointment.status === 'Tentative' || appointment.status === 'Update appointment time' || appointment.status === 'No Show';
             });
 
-            
+
             // if there is no email to send, skip the email step.
             if (this.emailAppointments.length === 0) {
                 this.skipEmail = true;

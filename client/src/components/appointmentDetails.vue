@@ -1,4 +1,3 @@
-<!-- todo check the criteria for readytoSchedul. When recruit from Family Info page, it is enables after study is selected without E1.-->
 <template>
     <v-container style="padding: 0px !important; flex-direction: column;">
         <h2 class=" text-left" style="margin-right: 0px;">
@@ -121,6 +120,7 @@ export default {
     },
     data() {
         return {
+            appointmentDetailReady: false,
             editedAppointments: [],
             apptHeaders: [
                 { text: "Child", align: "center", value: "Child.Name", width: "10%", sortable: false, },
@@ -416,7 +416,9 @@ export default {
             this.selectedExperimenters.push({});
             this.selectedExperimenters_2nd.push([]);
 
-            this.editedAppointments.push(newAppointment)
+            this.editedAppointments.push(newAppointment);
+
+            this.readyToCreateSchedule();
         },
 
         deleteCurrentAppointment(index) {
@@ -428,32 +430,38 @@ export default {
         readyToCreateSchedule() {
             // this function examines if the information to create a schedule is met. If so, it will emit the enable status to the parent component.
 
+            var readyToCreateSchedule = false;
+
             if (this.editedAppointments.every(appointment => 'status' in appointment && appointment.status != null)) {
                 if (this.scheduleType === 'create') {
                     switch (this.parentResponse) {
 
                         case 'Confirmed':
-                            (this.checkAppointmentsAssignedStudy() && this.checkAppointmentsAssignedExperimenter() && this.checkAppointmentsAssignedStatus()) ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                            (this.checkAppointmentsAssignedStudy() && this.checkAppointmentsAssignedExperimenter() && this.checkAppointmentsAssignedStatus()) ? readyToCreateSchedule = true : readyToCreateSchedule = false
                             break;
 
                         case 'Interested':
                         case 'Left a message':
                         case 'Rejected':
-                            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                            this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? readyToCreateSchedule = true : readyToCreateSchedule = false
                             break;
                     }
                 } else {
 
                     if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time")) {
-                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? readyToCreateSchedule = true : readyToCreateSchedule = false
                     } else {
-                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.$emit("readyToCreateSchedule", true) : this.$emit("readyToCreateSchedule", false)
+                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.readyToCreateSchedule = true : readyToCreateSchedule = false
                     }
 
                 }
             } else {
-                this.$emit("readyToCreateSchedule", false)
+                readyToCreateSchedule = false;
             }
+
+            this.appointmentDetailReady = readyToCreateSchedule;
+            this.$emit("readyToCreateSchedule")
+
         },
 
         // check if all appointments have been assigned a study
@@ -553,7 +561,6 @@ export default {
 
             this.editedAppointments = JSON.parse(JSON.stringify(this.Appointments));
             this.editedAppointments.forEach((appointment, index) => {
-                // appointment.status = "Confirmed"; // ToDo, needs to update the status from the schedule. parentResponse
                 this.selectedStudies[index] = Object.assign({}, appointment.Study);
                 this.selectedExperimenters[index] = Object.assign({}, appointment.PrimaryExperimenter[0]);
                 this.selectedExperimenters_2nd[index] = appointment.SecondaryExperimenter;
@@ -619,6 +626,7 @@ export default {
             this.nSelectableStudies = [];
             this.deletedAppointments = [];
             this.additionalStudyButtonDisable = false;
+            this.appointmentDetailReady = false;
         },
 
     },

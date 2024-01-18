@@ -1,5 +1,5 @@
 <template>
-    <v-form v-model="validScheduleDateTime" lazy-validation>
+    <v-form ref="validScheduleDateTime" v-model="validScheduleDateTime" lazy-validation>
         <v-container
             style="padding: 0px !important; display: flex; flex-wrap: wrap; justify-content: start; align-items: center; gap: 40px; height:80px">
             <h2 class="text-left" style="margin-right: 0px;">Study date & time:
@@ -9,12 +9,12 @@
                 :rules="$rules.dob" :disabled="dateTimePickerDisable" hide-details prepend-inner-icon="mdi-calendar"
                 @click:prepend-inner="datePicker = true" @click="datePicker = true"></v-text-field>
 
-            <v-combobox v-model="studyTime" :items="$studyTimeSlots" :rules="$rules.time" label="Study time"
-                prepend-inner-icon="mdi-clock-time-nine-outline" :disabled="dateTimePickerDisable" hide-details filled dense
-                outlined></v-combobox>
+            <v-combobox v-model="studyTime" :items="$studyTimeSlots" :rules="$rules.time" @change="dateTimeValidation"
+                label="Study time" prepend-inner-icon="mdi-clock-time-nine-outline" :disabled="dateTimePickerDisable"
+                hide-details filled dense outlined></v-combobox>
             <v-spacer></v-spacer>
 
-            
+
 
             <!-- <v-tooltip right>
                         <template v-slot:activator="{ on }">
@@ -47,7 +47,8 @@
             </v-dialog>
         </v-container>
         <!-- <body align="start" v-html="parentContact(item.Family)"></body> -->
-        <body align="center" v-html="dateTimeNotice"></body>
+
+        <body align="center" v-html="dateTimeNotice" v-show="!studyDateTimeReady"></body>
     </v-form>
 </template>
 
@@ -62,6 +63,7 @@ export default {
     data() {
         return {
             datePicker: false,
+            studyDateTimeReady: false,
             validScheduleDateTime: true,
             studyDate: null,
             studyTime: null,
@@ -107,13 +109,21 @@ export default {
             }
         },
 
+        dateTimeValidation() {
+            var validationResults = this.$refs.validScheduleDateTime.validate();
+            this.studyDateTimeReady = (validationResults && (this.studyTime !== null) && (this.studyDate !== null));
+            this.$emit("readyToCreateSchedule")
+        },
+
         resetDateTime() {
             if (this.appointmentTime) {
                 this.studyDate = moment(this.appointmentTime).format("YYYY-MM-DD");
                 this.studyTime = moment(this.appointmentTime).format("hh:mmA");
+                this.studyDateTimeReady = true;
             } else {
                 this.studyDate = null;
                 this.studyTime = null;
+                this.studyDateTimeReady = false;
             }
         },
 
@@ -146,7 +156,14 @@ export default {
             if (newVal) {
                 this.assignDateTime()
             }
-        }
+        },
+
+        studyDate(newVal) {
+
+            if (newVal) {
+                this.dateTimeValidation()
+            }
+        },
     },
     mounted() {
         this.assignDateTime()

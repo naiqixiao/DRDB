@@ -295,7 +295,6 @@
             @close-dialog="closeDialog()" @newAppointment="addAppointment"
             @deleteCurrentAppointment="deleteCurrentAppointment" @newSchedule="addSchedule"
             />
-            <!-- @updatedSchedule="updatedSchedule" @completedSchedule="completedSchedule" -->
 
           <v-dialog v-model="datePicker" max-width="290px">
             <v-card outlined>
@@ -861,8 +860,15 @@ export default {
     },
 
     addSchedule(schedule){
-
+      // add newly created schedule to the current family. Frontend update only.
       schedule.Appointments.forEach((appointment) => {
+        appointment.Schedule = {
+          AppointmentTime: schedule.AppointmentTime,
+          Status: schedule.Status,
+          updatedAt: schedule.updatedAt,
+          Completed: schedule.Completed
+        };
+
         this.currentFamily.Appointments.push(appointment)
       });
       
@@ -1295,13 +1301,13 @@ export default {
           this.skipReminderEmailStatus = false;
         }
         // this.Experimenters = [];
-        this.primaryExperimenterList = [];
-        for (var i = 0; i < this.appointments.length; i++) {
-          this.$refs.extraStudies[i].resetExperimenters();
-        }
-        if (this.$refs.scheduleDateTime) {
-          this.$refs.scheduleDateTime.resetValidation();
-        }
+        // this.primaryExperimenterList = [];
+        // for (var i = 0; i < this.appointments.length; i++) {
+        //   this.$refs.extraStudies[i].resetExperimenters();
+        // }
+        // if (this.$refs.scheduleDateTime) {
+        //   this.$refs.scheduleDateTime.resetValidation();
+        // }
       }, 1000);
     },
 

@@ -1,3 +1,5 @@
+<!-- todo, make the data management simpler, create the list of Appointments based on Schedule. -->
+<!-- todo, need to update the pie chart the same way. -->
 <template>
   <v-data-table
     hide-default-footer

@@ -41,12 +41,12 @@
               @click.stop="searchMode"
               :disabled="searchStatus"
             >
-              <v-icon left v-bind="iconSize">mdi-magnify</v-icon>Search
+              <v-icon left >mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
           <v-col cols="12" md="3" style="text-align: start">
             <v-btn v-bind="btnSize" @click="followupSearch">
-              <v-icon left v-bind="iconSize">mdi-phone</v-icon>Follow-ups
+              <v-icon left >mdi-phone</v-icon>Follow-ups
             </v-btn>
           </v-col>
 

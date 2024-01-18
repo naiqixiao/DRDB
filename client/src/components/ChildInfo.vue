@@ -347,8 +347,6 @@
     </div> -->
 
     <!-- Dialog Component, to create or update a schedule -->
-    <!-- todo, generate functions for add a schedules. -->
-
     <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
       :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
       @close-dialog="closeSchedule" @newAppointment="addAppointment" @deleteCurrentAppointment="deleteCurrentAppointment"
@@ -521,6 +519,10 @@ export default {
       // newAppointment.index = this.appointments.length;
 
       this.appointments.push(newAppointment);
+    },
+
+    addSchedule() {
+      this.$emit("newSchedule");
     },
 
     addAppointment(appointment) {
