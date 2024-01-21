@@ -487,6 +487,8 @@
     </v-row>
     <v-row justify="start" dense height="450px">
       <v-col cols="12" md="9">
+        
+        <!-- todo, replace the table with new ScheduleTable and update related functions. -->
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
           tableHeight="450px"
@@ -514,7 +516,8 @@
 
 <script>
 import ChildInfo from "@/components/ChildInfo";
-import ScheduleTable from "@/components/ScheduleTable";
+// import ScheduleTable from "@/components/ScheduleTable";
+import ScheduleTable from "@/components/ScheduleTableNew";
 // import AppointmentTable from "@/components/AppointmentTable";
 import NotesConversation from "@/components/NotesConversation";
 import Page from "@/components/Page";

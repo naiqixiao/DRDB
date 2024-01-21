@@ -31,7 +31,7 @@
 
                                 <!-- Schedule date and time -->
                                 <v-divider style="margin-bottom: 20px"></v-divider>
-                                <dateTimePicker ref="dateTimePicker" :dateTimePickerDisable="dateTimePickerDisable"
+                                <dateTimePicker ref="dateTimePickerComp" :dateTimePickerDisable="dateTimePickerDisable"
                                     :appointmentTime="currentSchedule.AppointmentTime"
                                     @readyToCreateSchedule="readyToCreateSchedule" />
 
@@ -76,6 +76,7 @@
                     Email
                 </v-stepper-step>
 
+                <!-- todo, skip email checkbox -->
                 <v-stepper-content step="2">
 
                     <v-card>
@@ -119,6 +120,7 @@
                     Next Contact
                 </v-stepper-step>
 
+                <!-- todo, program next contact message. -->
                 <v-stepper-content step="3">
                     <v-card>
                         <v-card-title>
@@ -643,16 +645,6 @@ export default {
             return description;
         },
 
-        onDialogClose(value) {
-            if (!value) {
-                // console.log('Dialog closed');
-                this.$emit('close-dialog')
-                // Additional logic for when the dialog closes
-            } else {
-                // console.log('Dialog opens');
-            }
-        },
-
         resetVariables() {
             this.studyDateTime = null;
             this.dateTimePickerDisable = true;
@@ -704,9 +696,15 @@ export default {
             }
         },
 
-        close() {
+        onDialogClose(value) {
+            // when the dialog is closed by clicking the background
+            if (!value) {
+                this.$emit('close-dialog')
+            }
+        },
 
-            this.resetVariables();
+        close() {
+            // when the close button is clicked
             this.$emit('close-dialog')
         },
 
@@ -784,6 +782,13 @@ export default {
     },
 
     watch: {
+        dialog() {
+            if (!this.dialog) {
+                // console.log("dialog closed", val)
+                this.resetVariables();
+                this.$refs.dateTimePickerComp.resetDateTime();
+            }
+        },
 
         currentSchedule(newVal) {
             if (newVal) {

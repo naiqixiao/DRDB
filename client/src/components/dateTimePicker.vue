@@ -48,7 +48,7 @@
         </v-container>
         <!-- <body align="start" v-html="parentContact(item.Family)"></body> -->
 
-        <body align="center" v-html="dateTimeNotice" v-show="!studyDateTimeReady"></body>
+        <body align="center" v-html="dateTimeNotice"></body>
     </v-form>
 </template>
 
@@ -131,16 +131,24 @@ export default {
             if (this.appointmentTime) {
                 this.studyDate = moment(this.appointmentTime).format("YYYY-MM-DD");
                 this.studyTime = moment(this.appointmentTime).format("hh:mmA");
+            } else {
+                this.studyDate = null;
+                this.studyTime = null;
             }
         }
     },
+
     computed: {
         dateTimeNotice() {
+            if (this.studyDateTimeReady) {
+                return `<p style="font-size: 14px; margin: 0px;">Appointment date and time are entered correctly!</p>`
 
-            if (this.dateTimePickerDisable) {
-                return `<p style="font-size: 14px; margin: 0px;">No appointment date or time is required</p>`
             } else {
-                return `<p style="color: #ff0000; font-weight: 500; font-size: 14px; margin: 0px;">Please select or update appointment date and time.</p>`
+                if (this.dateTimePickerDisable) {
+                    return `<p style="font-size: 14px; margin: 0px;">No appointment date or time is required</p>`
+                } else {
+                    return `<p style="color: #ff0000; font-weight: 500; font-size: 14px; margin: 0px;">Please select or update appointment date and time.</p>`
+                }
             }
         }
     },
@@ -152,9 +160,11 @@ export default {
         //     }
         // },
         appointmentTime(newVal) {
+            // console.log("appointmentTimeChanged")
 
             if (newVal) {
                 this.assignDateTime()
+                // console.log("appointmentTime", newVal)
             }
         },
 
@@ -167,6 +177,7 @@ export default {
     },
     mounted() {
         this.assignDateTime()
+        // console.log("appointmentTimeMounted")
     }
 }
 </script>

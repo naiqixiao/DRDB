@@ -1433,7 +1433,6 @@ export default {
     closeDialog() {
       this.dialogSchedule = false;
       this.dialogType = null;
-
     },
 
     PhoneFormated(Phone) {
