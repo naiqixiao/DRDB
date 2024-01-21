@@ -44,3 +44,26 @@ Each lab usually has multiple testing rooms. These rooms typically are used for 
 - selecting participants based on their borned year, instead of age.
 - randomized the order of available studies when booking additional studies.
 - set target sample size for each study, and show the completion percentage during booking (e.g., next to study button).
+
+# Automated Rules
+- Whenever a schedule is created, the family is assigned to a lab.
+    - And a warning will appear when this family is searched. 
+    - This family will not appear in search for elegible families for any other studies.
+- Study schedules will be marked as **Completed**, if
+    - With a **Confirmed** appointment:
+        - Release if their studies were completed (appointment time has passed and the status was Comfirmed).
+        - NOT release, if there appointments are in the future.
+    - With a **Tentative** appointment:
+        - Release, if the last contact happened **two weeks** ago.
+            - they haven't responded to previous recruitment email for 2 weeks (based on updatedAt).
+        - NOT release, if they were contacted within **2 weeks**.
+            - they don't have any upcoming studies (including pending schedules) or was not previously contacted within 2 weeks.
+
+- Alternatively, families will be release if their schedules are **Completed**.
+
+- Schedules will be marked **Completed**, if there is no update for 2 weeks. Related families will be released.
+
+- If we don't follow up with the pending families for **two weeks**, we will release them. And the schedule will be marked as rejected.
+
+Q: when we choose noshow or cancel, should we just label the status as **Rescheduling**? We might as well just keep the no-show or cancel in a log file
+Q: whats the value having the status of **Rescheduled**?

@@ -321,9 +321,9 @@ export default {
 
             switch (newVal) {
 
-                // if any appointment is set to be cancelled or No show, the status of all appointment of this schedule will be set the same.
+                // if any appointment is set to be cancelled or No Show, the status of all appointment of this schedule will be set the same.
                 case "Cancelled":
-                case "No show":
+                case "No Show":
                 case "Confirmed":
                 case "Interested":
                 case "Left a message":
@@ -339,7 +339,7 @@ export default {
                     changedItem.status = newVal;
                     this.editedAppointments.forEach(item => {
                         if (item.id !== changedItem.id) {
-                            if (item.status === 'Cancelled' | item.status === 'No show') {
+                            if (item.status === 'Cancelled' | item.status === 'No Show') {
                                 item.status = null;
                             }
                         }
@@ -523,7 +523,7 @@ export default {
                     case 'Update appointment time':
                     case 'Reschedule (need to follow-up)':
                     case 'Cancelled':
-                    case 'No show':
+                    case 'No Show':
                         updatedAppointments = this.editedAppointments;
                         break
 
@@ -642,7 +642,7 @@ export default {
                     break;
 
                 case 'update':
-                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No show", "Cancelled", "Completed"];
+                    statusOptions = ["Update appointment time", "Reschedule (need to follow-up)", "No Show", "Cancelled", "Completed"];
                     break;
 
             }

@@ -91,7 +91,7 @@
             >sentiment_dissatisfied</v-icon
           >
         </template>
-        <span>No show</span>
+        <span>No Show</span>
       </v-tooltip>
 
       <v-tooltip top>
