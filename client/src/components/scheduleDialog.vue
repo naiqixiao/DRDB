@@ -72,11 +72,11 @@
 
                 </v-stepper-content>
 
+                <!-- todo, generate correct email type. -->
                 <v-stepper-step step="2" :complete="stepperPage > 2">
                     Email
                 </v-stepper-step>
 
-                <!-- todo, skip email checkbox -->
                 <v-stepper-content step="2">
 
                     <v-card>
@@ -104,12 +104,26 @@
                         <v-card-actions>
                             <v-container
                                 style="display: flex; align-items: center; flex-wrap: wrap; justify-content: end; gap: 60px">
+
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on }">
+                                        <div v-on="on">
+                                            <v-checkbox label="Skip Email" class="ma-0 pa-0"
+                                                :value="skipConfirmationEmailStatus" @change="skipConfirmationEmail()"
+                                                dense></v-checkbox>
+                                        </div>
+                                    </template>
+                                    <span>Check this box to skip emailing to parents.</span>
+                                </v-tooltip>
+                                <v-spacer></v-spacer>
+
                                 <v-btn @click="sendEmail()" :loading="loadingStatus"><v-icon left
                                         v-show="emailButtonIconShow">mdi-checkbox-marked-circle-outline</v-icon>{{
                                             emailButtonText
                                         }}</v-btn>
 
-                                <v-btn @click="stepperPage = 3" :disabled="disableStep23">Next</v-btn>
+                                <v-btn @click="stepperPage = 3"
+                                    :disabled="disableStep23 && !skipConfirmationEmailStatus">Next</v-btn>
 
                             </v-container>
                         </v-card-actions>
@@ -120,7 +134,6 @@
                     Next Contact
                 </v-stepper-step>
 
-                <!-- todo, program next contact message. -->
                 <v-stepper-content step="3">
                     <v-card>
                         <v-card-title>
@@ -232,6 +245,7 @@ export default {
         emailUpdate: false,
         emailBody: "",
         emailSubject: "",
+        skipConfirmationEmailStatus: false,
         editor: ClassicEditor,
         editorData: '<p>Content of the editor.</p>',
         editorConfig: {
@@ -277,29 +291,11 @@ export default {
 
         readyToCreateSchedule() {
             // check appointmentDetails
-            if (this.$refs.appointmentDetails.appointmentDetailReady && this.$refs.dateTimePicker.studyDateTimeReady) {
+            if (this.$refs.appointmentDetails.appointmentDetailReady && this.$refs.dateTimePickerComp.studyDateTimeReady) {
                 this.scheduleEnable = true;
             } else {
                 this.scheduleEnable = false;
             }
-
-            // // check appointment time
-            // var statusValues = [];
-
-            // const newAppointments = this.$refs.appointmentDetails.generateAppointments();
-            // // Get the unique status values from the newAppointments array
-            // statusValues = [...new Set(newAppointments.map(appointment => appointment.status))];
-
-            // if (statusValues[0] === 'Update appointment time' || statusValues[0] === 'Confirmed') {
-
-            //     const studyDateTimeValid = this.$refs.dateTimePicker.dateTimeValidation();
-            //     if (studyDateTimeValid) {
-            //         this.scheduleEnable = val;
-            //     }
-            // } else {
-            //     this.scheduleEnable = val;
-            // }
-
         },
 
         // the most important function.
@@ -310,11 +306,14 @@ export default {
             // create/update schedules according to the appointment time, appointments, and other information.
             const newAppointments = this.$refs.appointmentDetails.generateAppointments();
 
-            this.studyDateTime = this.$refs.dateTimePicker.studyDateTime();
+            this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
+
+            var newSchedule = {};
+            var updatedSchedule = {};
 
             // create new schedule
             if (newAppointments.newAppointments.length > 0) {
-                const newSchedule = await this.newSchedule(newAppointments.newAppointments);
+                newSchedule = await this.newSchedule(newAppointments.newAppointments);
 
                 this.scheduleButtonText = "Appointment created!";
 
@@ -324,7 +323,7 @@ export default {
 
             // update existing schedule
             if (newAppointments.updatedAppointments.length > 0) {
-                const updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
+                updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
 
                 this.scheduleButtonText = "Appointment updated!";
 
@@ -357,16 +356,63 @@ export default {
             this.scheduleButtonIconShow = true;
 
             // create the list of appointments to draft emails.
+            const statusArray = ['Confirmed', 'Left a message', 'Interested', 'Update appointment time', 'Reschedule (need to follow-up)', 'No Show', 'Cancelled'];
             this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updatedAppointments).filter(appointment => {
-                return appointment.status === 'Confirmed' || appointment.status === 'Tentative' || appointment.status === 'Update appointment time' || appointment.status === 'No Show';
+                return statusArray.includes(appointment.status);
             });
-
 
             // if there is no email to send, skip the email step.
             if (this.emailAppointments.length === 0) {
                 this.skipEmail = true;
             }
 
+            // determine the type of next contact based on status.
+            if (newAppointments.completedAppointments.length > 0) {
+                console.log("Completed")
+                this.contactType = "Completed";
+            }
+
+            // if we need to create new schedule (for confirmed, tentative, or rejected ones)
+            if (newAppointments.newAppointments.length > 0) {
+                console.log(newSchedule.Status)
+                switch (newSchedule.Status) {
+                    case 'Confirmed':
+                        this.contactType = "nextStudy"; // condtact the family at least one week after the study is completed.
+                        break;
+                    case "TBD":
+                        this.contactType = "followUP"; // condtact the family at least tow days after the current contact.
+                        break;
+                    case 'Rejected':
+                        this.contactType = "rejectAndFutureStudy"; // condtact the family at least two weeks after the current contact.
+                        break;
+                }
+            }
+
+            // if we need to update the schedule (for confirmed, rescheduling, no show, or cancelled ones)
+            if (newAppointments.updatedAppointments.length > 0) {
+                console.log(updatedSchedule.Status)
+                switch (updatedSchedule.Status) {
+                    case 'Confirmed':
+                        this.contactType = "nextStudy"; // condtact the family at least one week after the study is completed.
+                        break;
+                    case "Rescheduling":
+                        this.contactType = "followUP"; // condtact the family at least tow days after the current contact.
+                        break;
+
+                    case 'Cancelled':
+                        this.contactType = "followUpforCancelledAppointment"; // condtact the family at least tow days after the current contact.
+                        break;
+                    case 'No Show':
+                        this.contactType = "followUpforNoShow"; // condtact the family at least tow days after the current contact.
+                        break;
+                    case 'Rejected':
+                        this.contactType = "rejectAndFutureStudy"; // condtact the family at least two weeks after the current contact.
+                        break;
+                }
+            }
+
+            console.log(this.contactType)
+            // 
             this.disableStep12 = false;
 
         },
@@ -390,7 +436,7 @@ export default {
                 case 'Reschedule (need to follow-up)':
                     status = 'Rescheduling';
                     break;
-                default:
+                default: // Rejected
                     status = statusValues[0]
                     break;
             }
@@ -453,7 +499,7 @@ export default {
                 }
             }
 
-            console.log(calendarEvents)
+            // console.log(calendarEvents)
 
             newSchedule.Appointments.forEach((appointment, index) => {
                 appointment.calendarEventId = calendarEvents[index].eventId;
@@ -468,8 +514,8 @@ export default {
                 })
             })
 
-            console.log("newSchedule")
-            console.log(newSchedule)
+            // console.log("newSchedule")
+            // console.log(newSchedule)
             // 2. create schedule and associted appointments (experimenters and assistant experimenters)
             const createdSchedule = await this.createScheduleBackend(newSchedule);
 
@@ -495,7 +541,7 @@ export default {
                 case 'Reschedule (need to follow-up)':
                     status = 'Rescheduling';
                     break;
-                default:
+                default: // No Show || Cancelled
                     status = statusValues[0]
                     break;
             }
@@ -580,8 +626,8 @@ export default {
 
             })
 
-            console.log("updatedSchedule")
-            console.log(updatedSchedule)
+            // console.log("updatedSchedule")
+            // console.log(updatedSchedule)
 
             // 2. update schedule and associted appointments (experimenters and assistant experimenters)
 
@@ -664,6 +710,7 @@ export default {
             this.emailDialog = false;
             this.emailSelectionShow = false;
             this.emailAppointments = [];
+            this.skipConfirmationEmailStatus = false;
             this.skipEmail = false;
             this.emailType = "";
             this.emailOptions = ['Confirmation', 'ScheduleUpdate', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'];
@@ -708,9 +755,103 @@ export default {
             this.$emit('close-dialog')
         },
 
-        sendEmail() {
-            this.$refs.emailComponent.sendEmail();
+        async sendEmail() {
+            this.loadingStatus = true;
+            await this.$refs.emailComponent.sendEmail();
+            this.emailButtonIconShow = true;
             this.disableStep23 = false
+            this.loadingStatus = false;
+        },
+
+        skipConfirmationEmail() {
+            this.skipConfirmationEmailStatus = !this.skipConfirmationEmailStatus;
+        },
+
+        generateNextContactNote() {
+
+            switch (this.contactType) {
+                case "nextStudy":
+                    this.contactDate = moment(this.studyDateTime).tz(this.$store.state.timeZone)
+                        .add(7, "days")
+                        .format("YYYY-MM-DD");
+
+                    this.nextContactNote =
+                        "The family is about to participate in a study on " +
+                        moment(this.studyDateTime).tz(this.$store.state.timeZone).format("YYYY-MM-DD") +
+                        ". Contact the family at least 7 days (" +
+                        moment(this.studyDateTime)
+                            .add(7, "days").tz(this.$store.state.timeZone)
+                            .format("YYYY-MM-DD") +
+                        ") after their participation.";
+                    break;
+
+                case "followUP":
+                    this.contactDate = moment().tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(2, "days")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote =
+                        "Left a message or sent an email on " +
+                        moment().tz(this.$store.state.timeZone)
+                            .startOf("day")
+                            .add(2, "days")
+                            .format("YYYY-MM-DD") +
+                        ", follow up in 2 days to confirm the participation.";
+                    break;
+
+                case "followUpforNoShow":
+                    this.contactDate = moment().tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(2, "days")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote =
+                        "The family didn't show up. Contact the family again on " +
+                        moment().tz(this.$store.state.timeZone)
+                            .startOf("day")
+                            .add(2, "days")
+                            .format("YYYY-MM-DD") +
+                        ", to confirm their participation.";
+                    break;
+
+                case "followUpforCancelledAppointment":
+                    this.contactDate = moment().tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(2, "days")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote =
+                        "We had to cancel the study dueto our problems. Contact the family again on " +
+                        moment().tz(this.$store.state.timeZone)
+                            .startOf("day")
+                            .add(2, "days")
+                            .format("YYYY-MM-DD") +
+                        ", to confirm their participation.";
+                    break;
+
+                case "rejectAndFutureStudy":
+                    this.contactDate = moment().tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(2, "w")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote =
+                        "Rejected participation on " +
+                        moment().tz(this.$store.state.timeZone).startOf("day").format("YYYY-MM-DD") +
+                        ". Recommend contacting the family for other studies after 2 weeks.";
+                    break;
+
+                case "Completed":
+                    this.contactDate = moment(this.studyDateTime).tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(1, "w")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote =
+                        "Finished a study on " +
+                        moment(this.studyDateTime).tz(this.$store.state.timeZone).startOf("day")
+                            .add(1, "w").format("YYYY-MM-DD") +
+                        ". Contact the family again for other studies at least after one week.";
+                    break;
+
+            }
+
         },
 
         step12() {
@@ -718,7 +859,7 @@ export default {
             if (this.skipEmail) {
                 this.emailDialog = false;
                 this.stepperPage = 3;
-                console.log(this.stepperPage)
+                // console.log(this.stepperPage)
             } else {
 
                 for (const appointment of this.emailAppointments) {
@@ -743,7 +884,7 @@ export default {
             }
 
             this.loadingStatus = false;
-            this.contactDate = moment(this.studyDateTime).add(7, 'days').startOf("day").tz(this.$store.state.timeZone).format("YYYY-MM-DD");
+            this.generateNextContactNote();
             this.emailSelectionShow = false;
         },
 
@@ -753,8 +894,6 @@ export default {
             this.emailDialog = false;
             this.stepperPage = 3;
             this.contactType = '';
-            this.nextContactNote = "";
-
         },
 
     },

@@ -318,7 +318,7 @@ export default {
         },
 
         optionChangedStatus(newVal, changedItem) {
-
+            var statusArray = [];
             switch (newVal) {
 
                 // if any appointment is set to be cancelled or No Show, the status of all appointment of this schedule will be set the same.
@@ -331,6 +331,28 @@ export default {
                     this.editedAppointments.forEach(item => {
                         if (item.id !== changedItem.id) {
                             item.status = newVal;
+                        }
+                    });
+                    break;
+
+                case "Update appointment time":
+                    statusArray = ['Cancelled', 'No Show', 'Reschedule (need to follow-up)'];
+                    this.editedAppointments.forEach(item => {
+                        if (item.id !== changedItem.id) {
+                            if (statusArray.includes(item.status)) {
+                                item.status = null;
+                            }
+                        }
+                    });
+                    break;
+
+                case "Reschedule (need to follow-up)":
+                    statusArray = ['Cancelled', 'No Show', 'Update appointment time'];
+                    this.editedAppointments.forEach(item => {
+                        if (item.id !== changedItem.id) {
+                            if (statusArray.includes(item.status)) {
+                                item.status = null;
+                            }
                         }
                     });
                     break;
@@ -451,7 +473,7 @@ export default {
                     if (this.editedAppointments.some(appointment => appointment.status === "Update appointment time")) {
                         this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedExperimenter && this.checkAppointmentsAssignedStatus ? readyToCreateSchedule = true : readyToCreateSchedule = false
                     } else {
-                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? this.readyToCreateSchedule = true : readyToCreateSchedule = false
+                        this.checkAppointmentsAssignedStudy && this.checkAppointmentsAssignedStatus ? readyToCreateSchedule = true : readyToCreateSchedule = false
                     }
 
                 }

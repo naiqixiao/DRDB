@@ -4,6 +4,7 @@
         <v-data-table :headers="headers" :items="Schedules" :items-per-page="5" class="elevation-1" single-select
             no-data-text="No study appointment to display." item-key="id" single-expand @click:row="rowSelected"
             height="800px">
+
             <!-- appointment info -->
             <template v-slot:[`item.participantInfo`]="{ item, row }">
                 <v-container style="display: flex; align-items: center; flex-wrap: wrap;">
@@ -27,6 +28,8 @@
             <template v-slot:[`item.AppointmentTime`]="{ item, value }">
                 <DateDisplay :date="value" :format="'long'" :status="item.Status" style="font-weight: 500;" />
             </template>
+
+            <!-- appointment status -->
             <template v-slot:[`item.Status`]="{ item }">
                 <v-chip :color="getColor(item.Status, item.Completed)" dark>
                     {{ item.Status == "Confirmed" && item.Completed ? "Completed" : item.Status }}
@@ -39,7 +42,7 @@
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
                             <div v-on="on" style="align-self: end">
-                                <v-btn fab outlined @click.stop="showDialog(item, 'schedule')" class="tableIcon">
+                                <v-btn fab outlined @click.stop="showDialog(item, 'schedule')" class="tableIcon" :disabled="item.Status === 'Confirmed' && item.Completed === true">
                                     <v-icon>mdi-autorenew</v-icon>
                                 </v-btn>
                             </div>
@@ -52,7 +55,7 @@
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
                             <div v-on="on" style="align-self: end">
-                                <v-btn fab outlined class="tableIcon" @click.stop="showDialog(item, 'email')">
+                                <v-btn fab outlined class="tableIcon" @click.stop="showDialog(item, 'email')" :disabled="item.Status === 'Confirmed' && item.Completed === true">
                                     <v-icon dark>
                                         mdi-email
                                     </v-icon>
@@ -138,17 +141,17 @@ export default {
         },
         headers: [
             {
+                text: "Study Time",
+                align: "center",
+                value: "AppointmentTime",
+                width: "10%",
+            }, {
                 text: "Participant Info",
                 align: "center",
                 value: "participantInfo",
                 width: "45%",
             },
-            {
-                text: "Study Time",
-                align: "center",
-                value: "AppointmentTime",
-                width: "10%",
-            },
+
             {
                 text: "Status",
                 align: "center",
