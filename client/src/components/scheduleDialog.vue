@@ -72,7 +72,6 @@
 
                 </v-stepper-content>
 
-                <!-- todo, generate correct email type. -->
                 <v-stepper-step step="2" :complete="stepperPage > 2">
                     Email
                 </v-stepper-step>
@@ -259,7 +258,7 @@ export default {
             }
         },
         emailType: "",
-        emailOptions: ['Confirmation', 'ScheduleUpdate', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'],
+        emailOptions: ['Confirmation', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'],
         contactType: "",
         loadingStatus: false,
         scheduleButtonIconShow: false,
@@ -368,13 +367,13 @@ export default {
 
             // determine the type of next contact based on status.
             if (newAppointments.completedAppointments.length > 0) {
-                console.log("Completed")
+                // console.log("Completed")
                 this.contactType = "Completed";
             }
 
             // if we need to create new schedule (for confirmed, tentative, or rejected ones)
             if (newAppointments.newAppointments.length > 0) {
-                console.log(newSchedule.Status)
+                // console.log(newSchedule.Status)
                 switch (newSchedule.Status) {
                     case 'Confirmed':
                         this.contactType = "nextStudy"; // condtact the family at least one week after the study is completed.
@@ -390,7 +389,7 @@ export default {
 
             // if we need to update the schedule (for confirmed, rescheduling, no show, or cancelled ones)
             if (newAppointments.updatedAppointments.length > 0) {
-                console.log(updatedSchedule.Status)
+                // console.log(updatedSchedule.Status)
                 switch (updatedSchedule.Status) {
                     case 'Confirmed':
                         this.contactType = "nextStudy"; // condtact the family at least one week after the study is completed.
@@ -411,7 +410,7 @@ export default {
                 }
             }
 
-            console.log(this.contactType)
+            // console.log(this.contactType)
             // 
             this.disableStep12 = false;
 
@@ -713,7 +712,7 @@ export default {
             this.skipConfirmationEmailStatus = false;
             this.skipEmail = false;
             this.emailType = "";
-            this.emailOptions = ['Confirmation', 'ScheduleUpdate', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'];
+            this.emailOptions = ['Confirmation', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'];
             this.contactType = "";
             this.loadingStatus = false;
             this.scheduleButtonText = "Create Appointment";
@@ -846,7 +845,7 @@ export default {
                     this.nextContactNote =
                         "Finished a study on " +
                         moment(this.studyDateTime).tz(this.$store.state.timeZone).startOf("day")
-                            .add(1, "w").format("YYYY-MM-DD") +
+                            .format("YYYY-MM-DD") +
                         ". Contact the family again for other studies at least after one week.";
                     break;
 
@@ -862,6 +861,7 @@ export default {
                 // console.log(this.stepperPage)
             } else {
 
+                // ['Confirmed', 'Left a message', 'Interested', 'Update appointment time', 'Reschedule (need to follow-up)', 'No Show', 'Cancelled']
                 for (const appointment of this.emailAppointments) {
                     switch (appointment.status) {
                         case 'Confirmed':
@@ -870,8 +870,15 @@ export default {
                         case 'Update appointment time':
                             this.emailType = "ScheduleUpdate";
                             break;
-                        case 'Tentative':
+                        case 'Left a message':
+                        case 'Interested':
                             this.emailType = "Introduction";
+                            break;
+                        case 'Reschedule (need to follow-up)':
+                            this.emailType = "Reschedule";
+                            break;
+                        case 'Cancelled':
+                            this.emailType = "cancelledReminder";
                             break;
                         case 'No Show':
                             this.emailType = "noShowReminder";

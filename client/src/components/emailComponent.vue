@@ -1,7 +1,5 @@
 <!-- <div style="font-family: Aptos, Aptos_EmbeddedFont, Aptos_MSFontService, Calibri, Helvetica, sans-serif; font-size: 12pt; color: rgb(0, 0, 0);" >type</div> -->
 
-<!-- ## todo, email for no show, as a reminder. the emailType will be noShowReminder -->
-
 <template>
   <v-container style="display: flex; flex-direction: column; flex-wrap: wrap; justify-content: end; gap: 20px">
     <v-alert v-if="!familyInfo.Email" border="left" type="error" color="#c73460" dense
@@ -105,6 +103,15 @@ export default {
           this.emailSubject = "An eligible study for " + this.childNames();
           break;
 
+        case "Reschedule":
+        case "cancelledReminder":
+        case "noShowReminder":
+          this.emailSubject = "Reschedule " + this.childNames() + "'s study appointment";
+          break;
+
+        case "Follow-up":
+          this.emailSubject = "We would love to hear from you: Invitation to participate in our study";
+          break;
         case "Reminder":
           this.emailSubject =
             "Reminder for your study appointment with " + this.childNames();
@@ -228,6 +235,46 @@ export default {
               this.childNames() +
               " to participate in our study.</p>" +
               "Here is the information about the study:</p>";
+            break;
+
+          case "Reschedule":
+            opening =
+              "<p>Dear " +
+              parentName +
+              ",</p><p>" +
+              "Thank you so much for coming today! I'm glad that you and " + this.childNames() + " could come back again soon to finish up this study.</p>" +
+              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>"
+
+            break;
+
+          case "cancelledReminder":
+            opening =
+              "<p>Dear " +
+              parentName +
+              ",</p><p>" +
+              "We are sorry for the cancellation of " + this.childNames() + "'s study appointment. We are looking forward to your visit soon.</p>" +
+              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>"
+
+            break;
+
+          case "noShowReminder":
+            opening =
+              "<p>Dear " +
+              parentName +
+              ",</p>" +
+              "<p>We missed you and " + this.childNames() + " today. We hope everything is okay.</p>" +
+              "<p>We understand that life can get busy and unpredictable sometimes. We're happy to reschedule your child's visit our lab, if you're still interested in participation.</p>" +
+              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>"
+            break;
+
+          case "Follow-up":
+            opening =
+              "<p>Dear " +
+              parentName +
+              ",</p>" +
+              "<p>This is " + this.$store.state.labName + ". We hope this email finds you well!</p>" +
+              "<p>We are writing to follow up with our previous email regarding inviting " + this.childNames() + " to participate in our study.</p>" +
+              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>"
             break;
 
           case "ThankYou":
@@ -379,7 +426,6 @@ export default {
           break;
 
         case "ThankYou":
-          // ##todo: we might just need to add the first study's template for thank you email.
 
           this.appointments.forEach((appointment) => {
             if (appointment.Study.FollowUPEmailSnippet != "") {
