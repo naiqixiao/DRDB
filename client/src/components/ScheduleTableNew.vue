@@ -42,7 +42,8 @@
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
                             <div v-on="on" style="align-self: end">
-                                <v-btn fab outlined @click.stop="showDialog(item, 'schedule')" class="tableIcon" :disabled="item.Status === 'Confirmed' && item.Completed === true">
+                                <v-btn fab outlined @click.stop="showDialog(item, 'schedule')" class="tableIcon"
+                                    :disabled="item.Status === 'Confirmed' && item.Completed === true">
                                     <v-icon>mdi-autorenew</v-icon>
                                 </v-btn>
                             </div>
@@ -55,7 +56,8 @@
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
                             <div v-on="on" style="align-self: end">
-                                <v-btn fab outlined class="tableIcon" @click.stop="showDialog(item, 'email')" :disabled="item.Status === 'Confirmed' && item.Completed === true">
+                                <v-btn fab outlined class="tableIcon" @click.stop="showDialog(item, 'email')"
+                                    :disabled="item.Status === 'Confirmed' && item.Completed === true">
                                     <v-icon dark>
                                         mdi-email
                                     </v-icon>
@@ -81,10 +83,12 @@
                     </body>
                     <v-spacer></v-spacer>
                     <v-divider class="mx-4" vertical></v-divider>
+
+                    <!-- todo, working on the editing popup window. -->
                     <v-tooltip top>
                         <template v-slot:activator="{ on }">
                             <div v-on="on" style="align-self: end">
-                                <v-btn fab outlined
+                                <v-btn fab outlined v-show="false" class="tableIcon"
                                     @click.stop="showAlert('WIP, an family info editing page will show up.')">
                                     <v-icon dark>
                                         mdi-pencil-outline
@@ -178,6 +182,17 @@ export default {
             this.dialog = true;
 
             this.$refs.scheduleDialog.initiateVariables(this.dialogType);
+
+            if (this.dialogType === "email") {
+                if (this.currentSchedule.Status === "Confirmed" && this.currentSchedule.Completed === true) {
+                    this.$refs.scheduleDialog.emailType = "ThankYou";
+                }
+                
+                if (this.currentSchedule.Status === "TBA" || this.currentSchedule.Status === "Rescheduling" || this.currentSchedule.Status === "No Show" ||  this.currentSchedule.Status === "Cancelled") {
+                    this.$refs.scheduleDialog.emailType = "Follow-up";
+                    console.log(this.$refs.scheduleDialog.emailType);
+                }
+            } 
         },
 
         addAppointment(appointment) {
@@ -371,5 +386,4 @@ export default {
 .detailBox {
     color: var(--v-primary-base);
     margin: 8px !important;
-}
-</style>
+}</style>

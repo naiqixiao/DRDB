@@ -84,7 +84,8 @@
                             <v-spacer></v-spacer>
                             <!-- a possible dropdown menu to select the type of email. -->
                             <v-select hide-details filled dense outlined :items="emailOptions" v-model="emailType"
-                                v-show="emailSelectionShow" label="Email Type "></v-select>
+                                v-show="emailSelectionShow" label="Choose the type of email you want to send"
+                                @change="emailTypeChange($event)"></v-select>
                             <v-spacer></v-spacer>
                             <v-btn icon @click="close()">
                                 <v-icon>mdi-close</v-icon>
@@ -121,8 +122,8 @@
                                             emailButtonText
                                         }}</v-btn>
 
-                                <v-btn @click="stepperPage = 3"
-                                    :disabled="disableStep23 && !skipConfirmationEmailStatus">Next</v-btn>
+                                <v-btn @click="step23" :disabled="disableStep23 && !skipConfirmationEmailStatus">{{
+                                    step23ButtonText }}</v-btn>
 
                             </v-container>
                         </v-card-actions>
@@ -178,7 +179,7 @@
                         <v-card-actions>
                             <v-container
                                 style="display: flex; align-items: baseline; flex-wrap: wrap; justify-content: end; gap: 40px">
-                                <v-btn @click="close()">Complete</v-btn>
+                                <v-btn @click="finalizeSchedule">Complete</v-btn>
 
                             </v-container>
                         </v-card-actions>
@@ -205,6 +206,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import moment from "moment";
 
 // backend services
+import family from "@/services/family";
 import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
 // import login from "@/services/login";
@@ -265,6 +267,7 @@ export default {
         scheduleButtonText: "Create appointment",
         emailButtonIconShow: false,
         emailButtonText: "Send email",
+        step23ButtonText: "Next",
     }),
     methods: {
 
@@ -690,6 +693,33 @@ export default {
             return description;
         },
 
+        emailTypeChange(newVal) {
+            switch (newVal) {
+                case "Reminder":
+                case "ThankYou":
+                    // no need to update next contact data or note.
+                    // name of the next button is complete.
+                    // click to end turn off the window.
+                    this.step23ButtonText = "Complete";
+                    break;
+
+                case "Follow-up":
+                    this.step23ButtonText = "Next";
+                    this.contactDate = moment().tz(this.$store.state.timeZone)
+                        .startOf("day")
+                        .add(2, "days")
+                        .format("YYYY-MM-DD");
+                    this.nextContactNote = "Sent a follow-up email on " +
+                        moment().tz(this.$store.state.timeZone)
+                            .startOf("day")
+                            .format("YYYY-MM-DD") +
+                        ", follow up in 2 days to confirm the participation.";
+
+                    break;
+            }
+
+        },
+
         resetVariables() {
             this.studyDateTime = null;
             this.dateTimePickerDisable = true;
@@ -719,6 +749,7 @@ export default {
             this.emailButtonIconShow = false;
             this.emailButtonText = "Send email";
             this.scheduleButtonIconShow = false;
+            this.step23ButtonText = "Next";
         },
 
         initiateVariables(dialogType) {
@@ -733,11 +764,19 @@ export default {
                     this.emailAppointments = this.currentSchedule.Appointments;
                     this.studyDateTime = this.currentSchedule.AppointmentTime;
                     this.contactDate = this.currentFamily.NextContactDate;
-                    this.nextContactNote = this.currentFamily.nextContactNote;
+                    this.nextContactNote = this.currentFamily.NextContactNote;
                     this.emailDialog = true;
                     this.emailSelectionShow = true;
-                    this.emailType = "Reminder";
                     this.emailOptions = ['Reminder', 'Follow-up', 'ThankYou'];
+
+                    this.emailType = "Reminder";
+                    if (this.currentSchedule.Status === "Confirmed" && this.currentSchedule.Completed === 1) {
+                        this.emailType = "ThankYou";
+                    }
+
+                    if (this.currentSchedule.Status === "TBA" || this.currentSchedule.Status === "Rescheduling" || this.currentSchedule.Status === "No Show" || this.currentSchedule.Status === "Cancelled") {
+                        this.emailType = "Follow-up";
+                    }
                     break;
             }
         },
@@ -757,6 +796,7 @@ export default {
         async sendEmail() {
             this.loadingStatus = true;
             await this.$refs.emailComponent.sendEmail();
+            this.emailButtonText = "Email sent!";
             this.emailButtonIconShow = true;
             this.disableStep23 = false
             this.loadingStatus = false;
@@ -897,11 +937,32 @@ export default {
 
         step23() {
             // moving from email step to the next step while checking if sending email is neccesary.
-            this.loadingStatus = false;
-            this.emailDialog = false;
-            this.stepperPage = 3;
-            this.contactType = '';
+
+            if (this.emailType === "ThankYou" || this.emailType === "Reminder") {
+                this.close();
+            } else {
+                this.stepperPage = 3;
+                this.emailDialog = false;
+            }
         },
+
+        async finalizeSchedule() {
+            // update the next contact date and note.
+            try {
+                await family.update({
+                    id: this.currentFamily.id,
+                    NextContactDate: this.contactDate,
+                    LastContactDate: moment().tz(this.$store.state.timeZone).startOf("day").format("YYYY-MM-DD"),
+                    NextContactNote: this.nextContactNote,
+                });
+
+                this.close();
+
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
 
     },
 
