@@ -833,7 +833,6 @@ export default {
                         "Left a message or sent an email on " +
                         moment().tz(this.$store.state.timeZone)
                             .startOf("day")
-                            .add(2, "days")
                             .format("YYYY-MM-DD") +
                         ", follow up in 2 days to confirm the participation.";
                     break;
@@ -858,7 +857,7 @@ export default {
                         .add(2, "days")
                         .format("YYYY-MM-DD");
                     this.nextContactNote =
-                        "We had to cancel the study dueto our problems. Contact the family again on " +
+                        "We had to cancel the study (e.g., due to our problems). Contact the family again on " +
                         moment().tz(this.$store.state.timeZone)
                             .startOf("day")
                             .add(2, "days")

@@ -488,12 +488,12 @@
     <v-row justify="start" dense height="450px">
       <v-col cols="12" md="9">
         
-        <!-- todo, replace the table with new ScheduleTable and update related functions. -->
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
-          tableHeight="450px"
-          @nextContactDone="updateNextContactFrontend"
-        ></ScheduleTable>
+          tableHeight="400px"
+          @updatedSchedule="updatedSchedule"
+          ></ScheduleTable>
+          <!-- @nextContactDone="updateNextContactFrontend" -->
       </v-col>
 
       <v-col cols="12" md="3">
@@ -843,6 +843,29 @@ export default {
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    updatedSchedule(schedule) {
+      // update front-end schedule table
+      
+      var index = this.currentFamily.Schedules.findIndex((item) => item.id === schedule.id);
+
+      if (index < 0) {
+        if (this.index) {
+          this.currentFamily.Schedules.splice(this.index, 0, schedule);
+        } else {
+          this.currentFamily.Schedules.push(schedule);
+        }
+      } else {
+        if (schedule.Completed === 1) {
+          this.currentFamily.Schedules[index].Completed = 1;
+        } else {
+          this.currentFamily.Schedules[index] = Object.assign(this.currentFamily.Schedules[index], schedule);
+        }
+      }
+
+      Object.assign(this.Families[this.page - 1], this.currentFamily);
+
     },
 
     updateNextContactFrontend(nextContact) {

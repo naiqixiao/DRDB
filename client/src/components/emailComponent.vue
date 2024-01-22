@@ -242,8 +242,8 @@ export default {
               "<p>Dear " +
               parentName +
               ",</p><p>" +
-              "Thank you so much for coming today! I'm glad that you and " + this.childNames() + " could come back again soon to finish up this study.</p>" +
-              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>"
+              "I'm happy to schedule another visit for you and " + this.childNames() + ".</p>" +
+              "<p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you.</p>"
 
             break;
 

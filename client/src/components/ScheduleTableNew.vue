@@ -8,18 +8,18 @@
             <!-- appointment info -->
             <template v-slot:[`item.participantInfo`]="{ item, row }">
                 <v-container style="display: flex; align-items: center; flex-wrap: wrap;">
-
-                    <body align="start" v-html="parentContact(item.Family)"></body>
-                    <v-spacer></v-spacer>
-
-                    <body align="start" v-html="familyID(item.Family)"></body>
-                    <v-divider style="margin: 8px 12px; flex: 0 0 100%;"></v-divider>
-
                     <body align="start" v-html="apptInfo(item)"></body>
                     <v-spacer></v-spacer>
                     <v-btn dark outlined x-small @click="rowSelected(item, row)">
                         details...
                     </v-btn>
+                    <v-divider style="margin: 8px 12px; flex: 0 0 100%;"></v-divider>
+
+                    <body align="start" v-html="parentContact(item.Family)"></body>
+                    <v-spacer></v-spacer>
+
+                    <body align="start" v-html="familyID(item.Family)"></body>
+
                 </v-container>
 
             </template>
@@ -224,17 +224,18 @@ export default {
             return formated;
         },
         familyID(Family) {
-            return "<span style='font-size: 18px; font-weight: 700;''>ID: " + Family.id + "</span>"
+            return "<span style='font-size: 18px; font-weight: 700;''>family ID: " + Family.id + "</span>"
         },
         apptInfo(item) {
 
             var apptInfo = [];
             item.Appointments.forEach((appointment, index) => {
                 var age = this.childAge(appointment.Child);
-                var appointmentInfo = "<strong>Appt. ";
-                var childInfo = "<span style='text-decoration: underline;'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
-                appointmentInfo = appointmentInfo + (index + 1) + ":</strong> " +
-                    childInfo + " ==> <b><i> " + appointment.Study.StudyName + "</i></b><br>"
+                var appointmentInfo = "<strong>" + (index + 1) + ". </strong> "
+                var childInfo = "<span style='font-size: 20px; font-weight: 700'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
+
+                appointmentInfo = appointmentInfo +
+                    childInfo + " <b style='font-size: 20px;'><i>==>  " + appointment.Study.StudyName + "</i></b><br>"
                 // + "</span> (" + appointment.Study.StudyType + ")<br>"
 
                 apptInfo.push(appointmentInfo);
