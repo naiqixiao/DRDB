@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS TestingRoom (
+CREATE TABLE IF NOT EXISTS  ${{DBName}}.TestingRoom (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `FK_Lab` INT NOT NULL,
@@ -20,10 +20,10 @@ ALTER TABLE Study ADD FK_TestingRoom int AFTER FK_Personnel,
 ADD KEY `FK_TestingRoom` (`FK_TestingRoom`),
 ADD CONSTRAINT `FK_TestingRoom` FOREIGN KEY (`FK_TestingRoom`) REFERENCES `TestingRoom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
-ALTER TABLE Schedule MODIFY eventURL varchar(255);
+ALTER TABLE ${{DBName}}.Schedule MODIFY eventURL varchar(255);
 
-ALTER TABLE Schedule MODIFY calendarEventId varchar(255);
+ALTER TABLE ${{DBName}}.Schedule MODIFY calendarEventId varchar(255);
 
-ALTER TABLE Appointment MODIFY eventURL varchar(255);
+ALTER TABLE ${{DBName}}.Appointment MODIFY eventURL varchar(255);
 
-ALTER TABLE Appointment MODIFY calendarEventId varchar(255);
+ALTER TABLE ${{DBName}}.Appointment MODIFY calendarEventId varchar(255);
