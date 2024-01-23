@@ -1,131 +1,54 @@
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
-      <v-alert
-        border="left"
-        type="error"
-        color="#c73460"
-        dense
-        style="font-weight: 600"
-        >Lab email is not been setup properly. Please set it up in the Settings
-        page.</v-alert
-      >
+      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600">Lab email is not been setup
+        properly. Please set it up in the Settings
+        page.</v-alert>
     </div>
     <div v-if="!$store.state.adminEmailStatus">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >Admin email is not been setup properly. Please set it up in the
-        Settings page.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">Admin email is not been setup
+        properly. Please set it up in the
+        Settings page.</v-alert>
     </div>
     <div v-if="$store.state.trainingMode">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >You are running in a training mode.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">You are running in a training
+        mode.</v-alert>
     </div>
 
     <v-row dense>
       <v-col cols="12" md="9">
         <v-row justify="start">
-          <v-col
-            cols="12"
-            v-for="item in searchingFields"
-            :md="item.width"
-            :key="item.label"
-          >
-            <v-text-field
-              @keydown.enter="searchSchedule"
-              @input="getSearchKeys(item.field, $event)"
-              :label="item.label"
-              v-model="queryString[item.field]"
-              append-icon="mdi-magnify"
-              height="48px"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-            ></v-text-field>
+          <v-col cols="12" v-for="item in searchingFields" :md="item.width" :key="item.label">
+            <v-text-field @keydown.enter="searchSchedule" @input="getSearchKeys(item.field, $event)" :label="item.label"
+              v-model="queryString[item.field]" append-icon="mdi-magnify" height="48px" background-color="textbackground"
+              hide-details outlined dense></v-text-field>
           </v-col>
         </v-row>
         <v-row justify="start">
           <v-col cols="12" md="3">
             <!-- @blur="searchSchedule" -->
-            <v-select
-              @input="getSearchKeys('StudyName', $event)"
-              v-model="queryString.StudyName"
-              @keydown.enter="searchSchedule"
-              :items="$store.state.studies"
-              :item-value="'id'"
-              :item-text="'StudyName'"
-              label="Study Name"
-              append-icon="mdi-magnify"
-              height="48px"
-              multiple
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-              chip
-            ></v-select>
+            <v-select @input="getSearchKeys('StudyName', $event)" v-model="queryString.StudyName"
+              @keydown.enter="searchSchedule" :items="$store.state.studies" :item-value="'id'" :item-text="'StudyName'"
+              label="Study Name" append-icon="mdi-magnify" height="48px" multiple background-color="textbackground"
+              hide-details outlined dense chip></v-select>
           </v-col>
           <v-col cols="12" md="3">
             <!-- @blur="searchScheduleByStatus" -->
-            <v-select
-              @input="getSearchKeys('Status', $event)"
-              v-model="queryString.Status"
-              @keydown.enter="searchSchedule"
-              :items="Status"
-              label="Status"
-              multiple
-              append-icon="mdi-magnify"
-              height="48px"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-              chip
-            ></v-select>
+            <v-select @input="getSearchKeys('Status', $event)" v-model="queryString.Status"
+              @keydown.enter="searchSchedule" :items="Status" label="Status" multiple append-icon="mdi-magnify"
+              height="48px" background-color="textbackground" hide-details outlined dense chip></v-select>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field
-              @input="getSearchKeys(item.field, $event)"
-              @keydown.enter="searchSchedule"
-              ref="textfieldAfter"
-              label="After"
-              v-model="queryString.AppointmentTimeAfter"
-              append-icon="event"
-              @click:append="dialogPickerAfter = true"
-              height="48px"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field @input="getSearchKeys(item.field, $event)" @keydown.enter="searchSchedule" ref="textfieldAfter"
+              label="After" v-model="queryString.AppointmentTimeAfter" append-icon="event"
+              @click:append="dialogPickerAfter = true" height="48px" background-color="textbackground" hide-details
+              outlined dense></v-text-field>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field
-              @keydown.enter="searchSchedule"
-              @input="getSearchKeys(item.field, $event)"
-              ref="textfieldBefore"
-              label="Before"
-              v-model="queryString.AppointmentTimeBefore"
-              append-icon="event"
-              @click:append="dialogPickerBefore = true"
-              height="48px"
-              background-color="textbackground"
-              hide-details
-              outlined
-              dense
-            ></v-text-field>
+            <v-text-field @keydown.enter="searchSchedule" @input="getSearchKeys(item.field, $event)" ref="textfieldBefore"
+              label="Before" v-model="queryString.AppointmentTimeBefore" append-icon="event"
+              @click:append="dialogPickerBefore = true" height="48px" background-color="textbackground" hide-details
+              outlined dense></v-text-field>
           </v-col>
         </v-row>
         <v-row justify="space-around">
@@ -135,22 +58,14 @@
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
-                    <v-btn
-                      tile
-                      style="
+                    <v-btn tile style="
                     color: var(--v-secondary-base);
                     background-color: var(--v-primary-base) !important;
-                  "
-                      large
-                      @click="studiesInaPeriod('today')"
-                    >
-                      <v-icon
-                        style="
+                  " large @click="studiesInaPeriod('today')">
+                      <v-icon style="
                       color: var(--v-secondary-base);
                       background-color: var(--v-primary-base) !important;
-                    "
-                        >today</v-icon
-                      >
+                    ">today</v-icon>
                     </v-btn>
                   </div>
                 </template>
@@ -159,22 +74,14 @@
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
-                    <v-btn
-                      tile
-                      style="
+                    <v-btn tile style="
                     color: var(--v-secondary-base);
                     background-color: var(--v-primary-base) !important;
-                  "
-                      large
-                      @click="studiesInaPeriod('tomorrow')"
-                    >
-                      <v-icon
-                        style="
+                  " large @click="studiesInaPeriod('tomorrow')">
+                      <v-icon style="
                       color: var(--v-secondary-base);
                       background-color: var(--v-primary-base) !important;
-                    "
-                        >event</v-icon
-                      >
+                    ">event</v-icon>
                     </v-btn>
                   </div>
                 </template>
@@ -183,22 +90,14 @@
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
-                    <v-btn
-                      tile
-                      style="
+                    <v-btn tile style="
                     color: var(--v-secondary-base);
                     background-color: var(--v-primary-base) !important;
-                  "
-                      large
-                      @click="studiesInaPeriod('thisWeek')"
-                    >
-                      <v-icon
-                        style="
+                  " large @click="studiesInaPeriod('thisWeek')">
+                      <v-icon style="
                       color: var(--v-secondary-base);
                       background-color: var(--v-primary-base) !important;
-                    "
-                        >date_range</v-icon
-                      >
+                    ">date_range</v-icon>
                     </v-btn>
                   </div>
                 </template>
@@ -214,23 +113,18 @@
           </v-col>
 
           <v-col cols="12" md="1" style="text-align: center">
-            <v-btn
-              large
-              @click="searchSchedule"
-              :disabled="
-                !(
-                  queryString.Email ||
-                  queryString.AppointmentTimeAfter ||
-                  queryString.AppointmentTimeBefore ||
-                  queryString.Status.length > 0 ||
-                  queryString.StudyName.length > 0 ||
-                  queryString.Phone ||
-                  queryString.NamePrimary ||
-                  queryString.NameSecondary ||
-                  queryString.FamilyId
-                )
-              "
-            >
+            <v-btn large @click="searchSchedule" :disabled="!(
+              queryString.Email ||
+              queryString.AppointmentTimeAfter ||
+              queryString.AppointmentTimeBefore ||
+              queryString.Status.length > 0 ||
+              queryString.StudyName.length > 0 ||
+              queryString.Phone ||
+              queryString.NamePrimary ||
+              queryString.NameSecondary ||
+              queryString.FamilyId
+            )
+              ">
               <v-icon left dark>mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
@@ -238,30 +132,21 @@
 
         <v-row justify="center" style="padding-top: 28px">
           <v-col>
-            <ScheduleTable
-              :Schedules="Schedules"
-              @rowSelected="updateFamily"
-              tableHeight="800px"
-            ></ScheduleTable>
+            <ScheduleTable :Schedules="Schedules" @rowSelected="updateFamily" nofItems="6"
+              @updatedSchedule="updatedSchedule"></ScheduleTable>
           </v-col>
         </v-row>
       </v-col>
       <v-col cols="12" md="3">
-        <FamilyInfo
-          :currentFamily="currentFamily"
-          @updateFamily="updateCurrentFamily"
-        ></FamilyInfo>
+        <FamilyInfo :currentFamily="currentFamily" @updateFamily="updateCurrentFamily"></FamilyInfo>
       </v-col>
     </v-row>
 
     <div>
       <v-dialog v-model="dialogPickerBefore" max-width="290px">
         <v-card outlined>
-          <v-date-picker
-            v-model="queryString.AppointmentTimeBefore"
-            show-current
-            @click:date="beforeDatePick"
-          ></v-date-picker>
+          <v-date-picker v-model="queryString.AppointmentTimeBefore" show-current
+            @click:date="beforeDatePick"></v-date-picker>
         </v-card>
       </v-dialog>
     </div>
@@ -269,11 +154,8 @@
     <div>
       <v-dialog v-model="dialogPickerAfter" max-width="290px">
         <v-card outlined>
-          <v-date-picker
-            v-model="queryString.AppointmentTimeAfter"
-            show-current
-            @click:date="afterDatePick"
-          ></v-date-picker>
+          <v-date-picker v-model="queryString.AppointmentTimeAfter" show-current
+            @click:date="afterDatePick"></v-date-picker>
         </v-card>
       </v-dialog>
     </div>
@@ -281,7 +163,7 @@
 </template>
 
 <script>
-import ScheduleTable from "@/components/ScheduleTable";
+import ScheduleTable from "@/components/ScheduleTableNew";
 import FamilyInfo from "@/components/FamilyInfo";
 
 // import family from "@/services/family";
@@ -325,10 +207,10 @@ export default {
       Schedules: [],
       searchingFields: [
         { label: "Family ID", field: "FamilyId", width: 2 },
-        { label: "Email", field: "Email", width: 3  },
-        { label: "Phone", field: "Phone", width: 3  },
-        { label: "Primary Caregiver", field: "NamePrimary", width: 2  },
-        { label: "Secondary Caregiver", field: "NameSecondary", width: 2  },
+        { label: "Email", field: "Email", width: 3 },
+        { label: "Phone", field: "Phone", width: 3 },
+        { label: "Primary Caregiver", field: "NamePrimary", width: 2 },
+        { label: "Secondary Caregiver", field: "NameSecondary", width: 2 },
         // { label: "Study Name", field: "StudyName"},
       ],
       Status: [
@@ -454,32 +336,24 @@ export default {
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
 
-    // async thisWeekStudies() {
-    //   this.$store.dispatch("setLoadingStatus", true);
+    updatedSchedule(schedule) {
+      var index = this.Schedules.findIndex((item) => item.id === schedule.id);
 
-    //   this.queryString.trainingMode = this.$store.state.trainingMode;
+      if (index < 0) {
+        if (this.index) {
+          this.Schedules.splice(this.index, 0, schedule);
+        } else {
+          this.Schedules.push(schedule);
+        }
+      } else {
+        if (schedule.Completed === 1) {
+          this.Schedules[index].Completed = 1;
+        } else {
+          this.Schedules[index] = Object.assign(this.Schedules[index], schedule);
+        }
+      }
 
-    //   try {
-    //     const Result = await schedule.week(this.queryString);
-    //     this.Schedules = Result.data;
-    //     if (this.Schedules.length == 0) {
-    //       alert("No study appointment can be found. Sorry~");
-    //     }
-    //   } catch (error) {
-    //     if (error.response.status === 401) {
-    //       alert("Authentication failed, please login.");
-    //       this.$router.push({
-    //         name: "Login",
-    //       });
-    //     } else {
-    //       console.log(JSON.stringify(error.response));
-    //     }
-    //   }
-
-    //   this.queryString = Object.assign({}, this.defaultQueryString);
-    //   this.index = -1;
-    //   setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
-    // },
+    },
 
     updateFamily(family, index) {
       this.index = index;

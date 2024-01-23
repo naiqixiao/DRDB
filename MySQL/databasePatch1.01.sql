@@ -14,14 +14,14 @@ IF
 NOT EXISTS ((SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=database()
             AND COLUMN_NAME='eventURL' AND TABLE_NAME='Appointment')) 
 THEN
-    ALTER TABLE Appointment ADD eventURL varchar(150) DEFAULT NULL AFTER FK_Family;
+    ALTER TABLE Appointment ADD eventURL varchar(255) DEFAULT NULL AFTER FK_Family;
 END IF;
 
 IF 
 NOT EXISTS ((SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=database()
             AND COLUMN_NAME='calendarEventId' AND TABLE_NAME='Appointment')) 
 THEN
-    ALTER TABLE Appointment ADD calendarEventId varchar(30) DEFAULT NULL AFTER eventURL;
+    ALTER TABLE Appointment ADD calendarEventId varchar(255) DEFAULT NULL AFTER eventURL;
 END IF;
 
 CREATE TABLE IF NOT EXISTS TestingRoom (

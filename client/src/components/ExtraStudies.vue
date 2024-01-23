@@ -4,19 +4,9 @@
       <h3 class="name">{{ child.Name + ":" }}</h3>
     </v-col>
     <v-col cols="12" md="2">
-      <v-select
-        ref="currentSelected"
-        :items="potentialStudies"
-        :item-value="'id'"
-        :item-text="'StudyName'"
-        v-model="selectedStudy"
-        return-object
-        label="Studies"
-        @change="emitSelectedStudy"
-        :disabled="index == 0 && !!currentStudy.id > 0 && type == 'newSchedule'"
-        dense
-        hide-details
-      ></v-select>
+      <v-select ref="currentSelected" :items="potentialStudies" :item-value="'id'" :item-text="'StudyName'"
+        v-model="selectedStudy" return-object label="Studies" @change="emitSelectedStudy"
+        :disabled="index == 0 && !!currentStudy.id > 0 && type == 'newSchedule'" dense hide-details></v-select>
       <!-- <v-select
         v-else
         :items="potentialExtraStudies"
@@ -31,39 +21,16 @@
       ></v-select> -->
     </v-col>
     <v-col cols="12" md="3" v-if="response == 'Confirmed'">
-      <v-select
-        style="margin-left: 10px"
-        :items="selectedStudy.Experimenters"
-        :item-value="'id'"
-        :item-text="'Name'"
-        v-model="selectedExperimenters"
-        return-object
-        label="Experimenter (Primary)"
-        hide-details
-        dense
-      ></v-select>
+      <v-select style="margin-left: 10px" :items="selectedStudy.Experimenters" :item-value="'id'" :item-text="'Name'"
+        v-model="selectedExperimenters" return-object label="Experimenter (Primary)" hide-details dense></v-select>
     </v-col>
     <v-col cols="12" md="4" v-if="response == 'Confirmed'">
-      <v-select
-        :items="secondaryExperimenterList"
-        :item-value="'id'"
-        :item-text="'Name'"
-        v-model="selectedExperimenters_2nd"
-        return-object
-        label="Experimenters (Secondary)"
-        multiple
-        hide-details
-        dense
-      ></v-select>
+      <v-select :items="secondaryExperimenterList" :item-value="'id'" :item-text="'Name'"
+        v-model="selectedExperimenters_2nd" return-object label="Experimenters (Secondary)" multiple hide-details
+        dense></v-select>
     </v-col>
     <v-col cols="12" md="1">
-      <v-btn
-        text
-        icon
-        color="primary"
-        @click="deleteAppointment"
-        :disabled="nOfAppointments < 2"
-      >
+      <v-btn text icon color="primary" @click="deleteAppointment" :disabled="nOfAppointments < 2">
         <v-icon>delete</v-icon>
       </v-btn>
     </v-col>
@@ -119,12 +86,21 @@ export default {
         }
       );
 
-      const appointment = {
+      const testingRoom = this.$store.state.testingRooms.find(room => room.id === this.selectedStudy.FK_TestingRoom);
+      let calendarId;
+      if (testingRoom) {
+        calendarId = testingRoom.calendarId;
+      } else {
+        calendarId = 'primary';
+      }
+
+      let appointment = {
         FK_Child: this.child.id,
         FK_Family: this.child.FK_Family,
         FK_Study: this.selectedStudy.id,
         Child: this.child,
         Study: this.selectedStudy,
+        calendarId: calendarId,
         Experimenters: experimenterIds,
         Experimenters_2nd: experimenterIds_2nd,
         PrimaryExperimenter: [
@@ -157,11 +133,12 @@ export default {
           // zoomLink: experimenter.ZoomLink,
         });
       });
+      appointment.attendees = attendees;
 
       this.$emit("selectStudy", {
         index: this.index,
         appointment: appointment,
-        attendees: attendees,
+        // attendees: attendees,
       });
     },
 
@@ -212,9 +189,9 @@ export default {
     defaultSelected() {
       return this.currentStudy
         ? {
-            id: this.currentStudy.id,
-            StudyName: this.currentStudy.StudyName,
-          }
+          id: this.currentStudy.id,
+          StudyName: this.currentStudy.StudyName,
+        }
         : {};
     },
 

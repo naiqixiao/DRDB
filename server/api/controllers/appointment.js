@@ -121,23 +121,29 @@ exports.create = asyncHandler(async (req, res) => {
       });
 
       for (const appointment of Schedule.Appointments) {
-
         if (updatedCal.includes(appointment.FK_Study)) continue;
         updatedCal.push(appointment.FK_Study);
 
         const testingRooms = await model.testingRoom.findAll({
-          where: {FK_Lab: req.query.lab},
+          where: { FK_Lab: req.query.lab },
         });
-        
+
         const testingRoomId = appointment.Study.FK_TestingRoom;
-        const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-        const calId = curTestingRoom.calendarId;
+        let calId;
+        if (testingRoomId) {
+          const curTestingRoom = testingRooms.find(
+            (room) => room.id === testingRoomId
+          );
+          calId = curTestingRoom.calendarId;
+        } else {
+          calId = "primary";
+        }
 
         calendar.events.patch({
           calendarId: calId,
-          eventId: Schedule.calendarEventId,
+          eventId: appointment.calendarEventId,
           resource: updatedScheduleInfo,
-          sendNotifications: true
+          sendupdates: 'all',
         });
       }
     } catch (error) {
@@ -157,9 +163,11 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Added", User, "added a study appointment to a schedule(" +
-      Schedule.id +
-      ")");
+    await log.createLog(
+      "Appointment Added",
+      User,
+      "added a study appointment to a schedule(" + Schedule.id + ")"
+    );
 
     res.status(200).send(Schedule);
   } catch (error) {
@@ -287,11 +295,9 @@ exports.update = asyncHandler(async (req, res) => {
     });
 
     if (updatedAppointmentInfo_2nd.length > 0) {
-
       await model.experimenterAssignment_2nd.bulkCreate(
         updatedAppointmentInfo_2nd
       );
-
     }
 
     // update calendar event
@@ -353,10 +359,11 @@ exports.update = asyncHandler(async (req, res) => {
         });
       });
 
-      appointment.E1 = appointment.PrimaryExperimenter[0].Name +
+      appointment.E1 =
+        appointment.PrimaryExperimenter[0].Name +
         " (" +
         appointment.PrimaryExperimenter[0].Email +
-        ")"
+        ")";
 
       const experimenterNames_2nd = appointment.SecondaryExperimenter.map(
         (experimenter) => {
@@ -364,29 +371,26 @@ exports.update = asyncHandler(async (req, res) => {
         }
       );
 
-      appointment.E2 = experimenterNames_2nd.join(", "),
-
-        description =
-        description +
-        "<br>==================" +
-        "<br><b>" +
-        appointment.Study.StudyName +
-        "</b><br>" +
-        "<b>E1: </b>" +
-        appointment.E1 +
-        "<br>" +
-        "<b>E2: </b>" +
-        appointment.E2 +
-        "<br>";
+      (appointment.E2 = experimenterNames_2nd.join(", ")),
+        (description =
+          description +
+          "<br>==================" +
+          "<br><b>" +
+          appointment.Study.StudyName +
+          "</b><br>" +
+          "<b>E1: </b>" +
+          appointment.E1 +
+          "<br>" +
+          "<b>E2: </b>" +
+          appointment.E2 +
+          "<br>");
 
       if (appointment.Study.StudyType == "Online")
         description =
           description +
           "<b>zoom link: </b>" +
           appointment.PrimaryExperimenter[0].ZoomLink;
-
     });
-
 
     const updatedScheduleInfo = {
       summary: studyNames.join(" + "),
@@ -404,7 +408,7 @@ exports.update = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendNotifications: true,
+        sendupdates: 'all',
       });
     } catch (err) {
       throw err;
@@ -415,7 +419,11 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Updated", User, "updated experimenters in study appointment");
+    await log.createLog(
+      "Appointment Updated",
+      User,
+      "updated experimenters in study appointment"
+    );
 
     res.status(200).send(Schedule);
 
@@ -436,14 +444,12 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     FK_Experimenter: updatedAppointmentInfo.id,
   };
 
-  const experimenterIds_2nd = updatedAppointmentInfo_2nd.map(
-    (experimenter) => {
-      return {
-        FK_Appointment: appointmentId,
-        FK_Experimenter: experimenter.id,
-      };
-    }
-  );
+  const experimenterIds_2nd = updatedAppointmentInfo_2nd.map((experimenter) => {
+    return {
+      FK_Appointment: appointmentId,
+      FK_Experimenter: experimenter.id,
+    };
+  });
 
   try {
     await model.experimenterAssignment.destroy({
@@ -452,22 +458,15 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
 
     await model.experimenterAssignment.create(experimenterId);
 
-
     await model.experimenterAssignment_2nd.destroy({
       where: { FK_Appointment: appointmentId },
     });
 
     if (experimenterIds_2nd.length > 0) {
-
-      await model.experimenterAssignment_2nd.bulkCreate(
-        experimenterIds_2nd
-      );
-
+      await model.experimenterAssignment_2nd.bulkCreate(experimenterIds_2nd);
     }
 
-
     if (calendarId) {
-
       // update calendar event
       const schedule = await model.schedule.findOne({
         where: { id: req.body.scheduleId },
@@ -497,7 +496,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
         ],
       });
 
-
       var attendees = [];
       var description = "<b>Note: </b>" + schedule.Note + "<br>";
 
@@ -516,10 +514,11 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
           });
         });
 
-        appointment.E1 = appointment.PrimaryExperimenter[0].Name +
+        appointment.E1 =
+          appointment.PrimaryExperimenter[0].Name +
           " (" +
           appointment.PrimaryExperimenter[0].Email +
-          ")"
+          ")";
 
         const experimenterNames_2nd = appointment.SecondaryExperimenter.map(
           (experimenter) => {
@@ -527,20 +526,19 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
           }
         );
 
-        appointment.E2 = experimenterNames_2nd.join(", "),
-
-          description =
-          description +
-          "<br>==================" +
-          "<br><b>" +
-          appointment.Study.StudyName +
-          "</b><br>" +
-          "<b>E1: </b>" +
-          appointment.E1 +
-          "<br>" +
-          "<b>E2: </b>" +
-          appointment.E2 +
-          "<br>";
+        (appointment.E2 = experimenterNames_2nd.join(", ")),
+          (description =
+            description +
+            "<br>==================" +
+            "<br><b>" +
+            appointment.Study.StudyName +
+            "</b><br>" +
+            "<b>E1: </b>" +
+            appointment.E1 +
+            "<br>" +
+            "<b>E2: </b>" +
+            appointment.E2 +
+            "<br>");
 
         if (appointment.Study.StudyType == "Online") {
           description =
@@ -555,7 +553,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
         attendees: attendees,
       };
 
-
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
@@ -566,7 +563,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
         eventId: calendarId,
         resource: updatedScheduleInfo,
       });
-
     }
 
     // // await model.schedule.update(
@@ -579,22 +575,51 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Appointment Updated", User, "updated experimenters in study appointment");
+    await log.createLog(
+      "Appointment Updated",
+      User,
+      "updated experimenters in study appointment"
+    );
 
-    res.status(200).send('Experimenters updated!');
+    res.status(200).send("Experimenters updated!");
 
     console.log("Experimenters updated!");
   } catch (error) {
     console.log("Experimenters update error:" + error);
   }
-
 });
 
+// delete an appointment by the id in the request
+exports.delete = asyncHandler(async (req, res) => {
+  try {
+
+    await model.appointment.destroy({
+      where: { id: req.query.id },
+    });
+
+    // remove exist experimenter assignment
+    await model.experimenterAssignment.destroy({
+      where: { FK_Appointment: req.query.id },
+    });
+
+    await model.experimenterAssignment_2nd.destroy({
+      where: { FK_Appointment: req.query.id },
+    });
+
+    await log.createLog(
+      "Appointment Delete",
+      User,
+      "delelete a study appointment from a schedule (" + Schedule.id + ")"
+    );
+
+    res.status(200).send("appointment deleted");
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
 
 // Delete an appointment with the specified id in the request
-exports.delete = asyncHandler(async (req, res) => {
-
-
+exports.delete0 = asyncHandler(async (req, res) => {
   try {
     var Schedule = await model.schedule.findOne({
       where: { id: req.query.FK_Schedule },
@@ -663,28 +688,38 @@ exports.delete = asyncHandler(async (req, res) => {
     };
 
     try {
-
       const calendar = google.calendar({
         version: "v3",
         auth: req.oAuth2Client,
       });
-      const appointment = Schedule.Appointments.find(appointment => `${appointment.id}` === req.query.id);
+      const appointment = Schedule.Appointments.find(
+        (appointment) => `${appointment.id}` === req.query.id
+      );
 
       const testingRooms = await model.testingRoom.findAll({
-        where: {FK_Lab: req.query.lab},
+        where: { FK_Lab: req.query.lab },
       });
-      
+
       const testingRoomId = appointment.Study.FK_TestingRoom;
-      const curTestingRoom = testingRooms.find(room => room.id === testingRoomId);
-      const calId = curTestingRoom.calendarId;
+      let calId;
+      if (testingRoomId) {
+        const curTestingRoom = testingRooms.find(
+          (room) => room.id === testingRoomId
+        );
+        calId = curTestingRoom.calendarId;
+      } else {
+        calId = "primary";
+      }
 
       calendar.events.delete({
         calendarId: calId,
-        eventId: appointment.calendarEventId
+        eventId: appointment.calendarEventId,
       });
 
-      await model.appointment.update({eventURL: null, calendarEventId: null}, {where: {id: req.query.id}});
-
+      await model.appointment.update(
+        { eventURL: null, calendarEventId: null },
+        { where: { id: req.query.id } }
+      );
     } catch (err) {
       throw err;
     }
@@ -699,13 +734,16 @@ exports.delete = asyncHandler(async (req, res) => {
       { where: { id: req.query.FK_Schedule } }
     );
 
-    Schedule.dataValues.updatedAt = new Date(); 
+    Schedule.dataValues.updatedAt = new Date();
 
     // Log
     const User = JSON.parse(req.query.User);
 
-    await log.createLog("Appointment Delete", User, "delelete a study appointment from a schedule (" + Schedule.id +
-      ")");
+    await log.createLog(
+      "Appointment Delete",
+      User,
+      "delelete a study appointment from a schedule (" + Schedule.id + ")"
+    );
 
     res.status(200).send(Schedule);
   } catch (error) {

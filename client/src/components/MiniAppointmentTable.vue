@@ -790,6 +790,13 @@ export default {
 
     ExperimentersNames(appointment) {
       const testingRoom = this.$store.state.testingRooms.find(room => room.id === appointment.Study.FK_TestingRoom);
+      
+      let testingRoomLocation = "<strong>Room: </strong> NA" 
+      
+      if(testingRoom){
+        testingRoomLocation = "<strong>Room: </strong>" +
+        testingRoom.name 
+      }
 
       var E1 = "not assigned";
       if (appointment.PrimaryExperimenter.length > 0) {
@@ -814,8 +821,7 @@ export default {
         appointment.Study.StudyType +
         ")" +
         "<br>" +
-        "<strong>Location: </strong>" +
-        testingRoom.location +
+        testingRoomLocation +
         "<br>" +
         "<strong>E1:</strong> " +
         E1 +

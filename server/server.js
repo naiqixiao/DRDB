@@ -45,7 +45,7 @@ var cron = require('node-cron');
 
 const ReminderController = require("./api/controllers/reminder");
 
-cron.schedule('0 18 * * *', async (req, res) => {
+cron.schedule('0 17 * * *', async (req, res) => {
 
   ReminderController.reminderEmail();
 
@@ -59,7 +59,7 @@ cron.schedule('0 16 * * *', async (req, res) => {
 
 const FamilyController = require("./api/controllers/family");
 
-cron.schedule('0 9 * * *', async (req, res) => {
+cron.schedule('0 8 * * *', async (req, res) => {
 
   FamilyController.releaseFamily();
 

@@ -1,36 +1,18 @@
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
-      <v-alert
-        border="left"
-        type="error"
-        color="#c73460"
-        dense
-        style="font-weight: 600"
-        >Lab email is not been setup properly. Please set it up in the Settings
-        page.</v-alert
-      >
+      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600">Lab email is not been setup
+        properly. Please set it up in the Settings
+        page.</v-alert>
     </div>
     <div v-if="!$store.state.adminEmailStatus">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >Admin email is not been setup properly. Please set it up in the
-        Settings page.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">Admin email is not been setup
+        properly. Please set it up in the
+        Settings page.</v-alert>
     </div>
     <div v-if="$store.state.trainingMode">
-      <v-alert
-        border="left"
-        type="warning"
-        color="#c7792c"
-        dense
-        style="font-weight: 600"
-        >You are running in a training mode.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">You are running in a training
+        mode.</v-alert>
     </div>
 
     <ConfirmDlg ref="confirmD" />
@@ -39,38 +21,20 @@
       <v-col cols="12" md="4">
         <v-card>
           <v-card-title>
-            <v-text-field
-              v-model="search"
-              label="Search by Study Name"
-              class="mx-4"
-              single-line
-              hide-details
-            ></v-text-field>
+            <v-text-field v-model="search" label="Search by Study Name" class="mx-4" single-line
+              hide-details></v-text-field>
             <v-spacer></v-spacer>
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-checkbox
-                    v-model="inProgressStudyFilter"
-                    label="In progress"
-                    hide-details
-                  ></v-checkbox></div
-              ></template>
-              <span>Show on-going studies</span></v-tooltip
-            >
+                  <v-checkbox v-model="inProgressStudyFilter" label="In progress" hide-details></v-checkbox>
+                </div>
+              </template>
+              <span>Show on-going studies</span></v-tooltip>
           </v-card-title>
-          <v-data-table
-            fixed-header
-            height="600"
-            single-select
-            no-data-text="No study to display."
-            :headers="headersStudy"
-            :items="Studies"
-            :search="search"
-            :custom-filter="filterByText"
-            @click:row="rowSelected"
-            class="elevation-1"
-          >
+          <v-data-table fixed-header height="600" single-select no-data-text="No study to display."
+            :headers="headersStudy" :items="Studies" :search="search" :custom-filter="filterByText"
+            @click:row="rowSelected" class="elevation-1">
             <template #item.updatedAt="{ value }">
               <DateDisplay :date="value" :format="'short'" />
             </template>
@@ -79,21 +43,15 @@
               <v-tooltip top>
                 <template v-slot:activator="{ on }">
                   <div v-on="on">
-                    <v-simple-checkbox
-                      class="checkbox"
-                      :value="!!item.Completed"
-                      @input="changeStudyStatus(item)"
-                      :disabled="
-                        !(
-                          currentStudy.PointofContact.id ==
-                            $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager'
-                        )
-                      "
-                      dense
-                    ></v-simple-checkbox>
+                    <v-simple-checkbox class="checkbox" :value="!!item.Completed" @input="changeStudyStatus(item)"
+                      :disabled="!(
+                        currentStudy.PointofContact.id ==
+                        $store.state.userID ||
+                        $store.state.role == 'Admin' ||
+                        $store.state.role == 'PI' ||
+                        $store.state.role == 'Lab manager'
+                      )
+                        " dense></v-simple-checkbox>
                   </div>
                 </template>
                 <span>Mark whether this study is still on going</span>
@@ -106,19 +64,14 @@
             <v-tooltip top>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    fab
-                    @click.stop="createStudy"
-                    :disabled="
-                      !(
-                        $store.state.role == 'Admin' ||
-                        $store.state.role == 'PI' ||
-                        $store.state.role == 'PostDoc' ||
-                        $store.state.role == 'GradStudent' ||
-                        $store.state.role == 'Lab manager'
-                      )
-                    "
-                  >
+                  <v-btn fab @click.stop="createStudy" :disabled="!(
+                    $store.state.role == 'Admin' ||
+                    $store.state.role == 'PI' ||
+                    $store.state.role == 'PostDoc' ||
+                    $store.state.role == 'GradStudent' ||
+                    $store.state.role == 'Lab manager'
+                  )
+                    ">
                     <v-icon class="fabIcon">add</v-icon>
                   </v-btn>
                 </div>
@@ -133,142 +86,80 @@
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
-            <h4 class="text-left">Study information:</h4>
+            <h3 class="text-left">Study information:</h3>
           </v-col>
-          <v-col
-            cols="12"
-            sm="6"
-            md="5"
-            v-for="item in this.$studyBasicFields"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              v-model="currentStudy[item.field]"
-              placeholder="  "
-              outlined
-              dense
-              readonly
-            ></v-text-field>
+          <v-col cols="12" sm="6" md="5" v-for="item in this.$studyBasicFields" :key="item.label">
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+              v-model="currentStudy[item.field]" placeholder="  " outlined dense readonly></v-text-field>
           </v-col>
           <v-col md="6">
-            <v-textarea
-              label="Study summary"
-              background-color="textbackground"
-              outlined
-              no-resize
-              rows="8"
-              v-model="currentStudy.Description"
-              readonly
-              hide-details
-            ></v-textarea>
+            <v-textarea label="Study summary" background-color="textbackground" outlined no-resize rows="8"
+              v-model="currentStudy.Description" readonly hide-details></v-textarea>
           </v-col>
           <v-col md="6">
-            <v-textarea
-              label="Phone Script"
-              background-color="textbackground"
-              outlined
-              no-resize
-              rows="8"
-              v-model="currentStudy.PhoneScript"
-              readonly
-              hide-details
-            ></v-textarea>
+            <v-textarea label="Phone Script" background-color="textbackground" outlined no-resize rows="8"
+              v-model="currentStudy.PhoneScript" readonly hide-details></v-textarea>
           </v-col>
         </v-row>
 
         <v-row justify="space-around">
           <v-col md="12">
             <v-divider></v-divider>
-            <h4 class="text-left">Point of contact:</h4>
+            <h3 class="text-left">Point of contact:</h3>
           </v-col>
-          <v-col
-            cols="12"
-            sm="4"
-            v-for="item in this.$studyPointofContact"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="
-                item.label === 'Phone'
-                  ? PhoneFormated(currentStudy.PointofContact[item.field])
-                  : currentStudy.PointofContact[item.field]
-              "
-              placeholder="  "
-              readonly
-              outlined
-              dense
-            ></v-text-field>
+          <v-col cols="12" sm="4" v-for="item in this.$studyPointofContact" :key="item.label">
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+              :value="item.label === 'Phone'
+                ? PhoneFormated(currentStudy.PointofContact[item.field])
+                : currentStudy.PointofContact[item.field]
+                " placeholder="  " readonly outlined dense></v-text-field>
           </v-col>
         </v-row>
 
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
-            <h4 class="text-left">Study criteria:</h4>
+            <h3 class="text-left">Recruitment criteria:</h3>
           </v-col>
 
-          <v-col
-            cols="12"
-            sm="6"
-            :md="item.width"
-            v-for="item in this.$studyCriteriaFields"
-            :key="item.label"
-          >
-            <v-text-field
-              class="textfield-family"
-              background-color="textbackground"
-              hide-details
-              :label="item.label"
-              :value="
-                item.field == 'MinAge' || item.field == 'MaxAge'
-                  ? AgeFormated2(currentStudy[item.field])
-                  : currentStudy[item.field]
-              "
-              placeholder="  "
-              readonly
-              outlined
-              dense
-            ></v-text-field>
+          <v-col cols="12" sm="6" :md="item.width" v-for="item in this.$studyCriteriaFields" :key="item.label">
+            <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+              :value="item.field == 'MinAge' || item.field == 'MaxAge'
+                ? AgeFormated2(currentStudy[item.field])
+                : currentStudy[item.field]
+                " placeholder="  " readonly outlined dense></v-text-field>
           </v-col>
         </v-row>
         <v-row>
           <v-col md="12" class="subtitle">
             <v-divider></v-divider>
-            <h4 class="text-left">Testing room:</h4>
+            <h3 class="text-left">Testing room:</h3>
           </v-col>
-          <v-card class="individual-room-card" v-if="selectedRoomInfo">
+          <v-card class="individual-room-card" v-if="selectedRoomInfo" height="100px">
             <v-card-title class="testing-room--title">{{ this.selectedRoomInfo.name }}</v-card-title>
-            <v-card-text class="testing-room--text">Location: {{ this.selectedRoomInfo.location }}</v-card-text>
+            <v-card-text class="testing-room--text">{{ this.selectedRoomInfo.location }}</v-card-text>
           </v-card>
+          <v-col md="12" class="subtitle" v-else>
+            <h3 class="text-center" style="color: red">Testing room has not been assigned to this study.</h3>
+          </v-col>
         </v-row>
-        
+
+        <v-divider style="margin: 8px 12px; flex: 0 0 100%;"></v-divider>
         <v-row justify="space-between">
           <v-col cols="12" md="2" dense>
             <v-tooltip right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    @click.stop="editStudy"
-                    :disabled="
-                      !(
-                        currentStudy.id &&
-                        (currentStudy.PointofContact.id ==
-                          $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager')
-                      )
-                    "
-                  >
-                    <v-icon left v-bind="iconSize" class="fabIcon">edit</v-icon>
+                  <v-btn @click.stop="editStudy" :disabled="!(
+                    currentStudy.id &&
+                    (currentStudy.PointofContact.id ==
+                      $store.state.userID ||
+                      $store.state.role == 'Admin' ||
+                      $store.state.role == 'PI' ||
+                      $store.state.role == 'Lab manager')
+                  )
+                    ">
+                    <v-icon left class="fabIcon">edit</v-icon>
                     Edit study info
                   </v-btn>
                 </div>
@@ -280,13 +171,8 @@
             <v-tooltip right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    @click.stop="dialogShowEmailPreviews = true"
-                    :disabled="!currentStudy.id"
-                  >
-                    <v-icon left v-bind="iconSize" class="fabIcon"
-                      >drafts</v-icon
-                    >Preview email templates
+                  <v-btn @click.stop="dialogShowEmailPreviews = true" :disabled="!currentStudy.id">
+                    <v-icon left class="fabIcon">drafts</v-icon>Preview email templates
                   </v-btn>
                 </div>
               </template>
@@ -297,22 +183,16 @@
             <v-tooltip right>
               <template v-slot:activator="{ on }">
                 <div v-on="on">
-                  <v-btn
-                    @click.stop="deleteStudy"
-                    :disabled="
-                      !(
-                        currentStudy.id &&
-                        (currentStudy.PointofContact.id ==
-                          $store.state.userID ||
-                          $store.state.role == 'Admin' ||
-                          $store.state.role == 'PI' ||
-                          $store.state.role == 'Lab manager')
-                      )
-                    "
-                  >
-                    <v-icon left v-bind="iconSize" class="fabIcon"
-                      >delete</v-icon
-                    >Delete
+                  <v-btn @click.stop="deleteStudy" :disabled="!(
+                    currentStudy.id &&
+                    (currentStudy.PointofContact.id ==
+                      $store.state.userID ||
+                      $store.state.role == 'Admin' ||
+                      $store.state.role == 'PI' ||
+                      $store.state.role == 'Lab manager')
+                  )
+                    ">
+                    <v-icon left class="fabIcon">delete</v-icon>Delete
                   </v-btn>
                 </div>
               </template>
@@ -325,25 +205,15 @@
           <v-col>
             <v-divider></v-divider>
 
-            <h3 class="text-left">Experimenters</h3>
+            <h3 class="text-left">Experimenters:</h3>
 
-            <AssignedExperimenters
-              :Experimenters="currentStudy.Experimenters"
-              :labMembers="labMembers"
-              :studyId="currentStudy.id"
-              :PointofContactId="currentStudy.PointofContact.id"
-              @updatedExperimenters="updateExperimenters"
-            ></AssignedExperimenters>
+            <AssignedExperimenters :Experimenters="currentStudy.Experimenters" :labMembers="labMembers"
+              :studyId="currentStudy.id" :PointofContactId="currentStudy.PointofContact.id"
+              @updatedExperimenters="updateExperimenters"></AssignedExperimenters>
           </v-col>
         </v-row>
         <div>
-          <v-dialog
-            fullscreen
-            hide-overlay
-            transition="dialog-bottom-transition"
-            v-model="dialog"
-            :retain-focus="false"
-          >
+          <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialog" :retain-focus="false">
             <v-card outlined>
               <v-card-title>
                 <span class="headline">Study information</span>
@@ -354,114 +224,48 @@
                   <v-row justify="start" dense style="padding: 8px 8px 4px">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Basic information:</h4>
+                      <h3 class="text-left">Basic information:</h3>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      sm="3"
-                      md="2"
-                      v-for="item in this.$studyBasicFields"
-                      :key="item.label"
-                    >
+                    <v-col cols="12" sm="3" md="2" v-for="item in this.$studyBasicFields" :key="item.label">
                       <div v-if="item.options">
-                        <v-select
-                          justify="start"
-                          :items="$Options[item.options]"
-                          v-model="editedStudy[item.field]"
-                          :label="item.label"
-                          class="textfield-family"
-                          background-color="textbackground"
-                          hide-details
-                          placeholder="  "
-                          outlined
-                          dense
-                        ></v-select>
+                        <v-select justify="start" :items="$Options[item.options]" v-model="editedStudy[item.field]"
+                          :label="item.label" class="textfield-family" background-color="textbackground" hide-details
+                          placeholder="  " outlined dense></v-select>
                       </div>
                       <div v-else-if="item.rules">
-                        <v-text-field
-                          :label="item.label"
-                          v-model="editedStudy[item.field]"
-                          :rules="$rules[item.rules]"
-                          class="textfield-family"
-                          background-color="textbackground"
-                          hide-details
-                          placeholder="  "
-                          outlined
-                          dense
-                        ></v-text-field>
+                        <v-text-field :label="item.label" v-model="editedStudy[item.field]" :rules="$rules[item.rules]"
+                          class="textfield-family" background-color="textbackground" hide-details placeholder="  "
+                          outlined dense></v-text-field>
                       </div>
                       <div v-else>
-                        <v-text-field
-                          :label="item.label"
-                          v-model="editedStudy[item.field]"
-                          class="textfield-family"
-                          background-color="textbackground"
-                          hide-details
-                          placeholder="  "
-                          outlined
-                          dense
-                        ></v-text-field>
+                        <v-text-field :label="item.label" v-model="editedStudy[item.field]" class="textfield-family"
+                          background-color="textbackground" hide-details placeholder="  " outlined dense></v-text-field>
                       </div>
                     </v-col>
                     <v-col cols="12" sm="3">
-                      <v-select
-                        class="textfield-family"
-                        :items="labMembers"
-                        :item-value="'id'"
-                        :item-text="'Name'"
-                        v-model="pointofContact"
-                        label="Point of Contact"
-                        outlined
-                        dense
-                        hide-details
-                        return-object
-                      ></v-select>
+                      <v-select class="textfield-family" :items="labMembers" :item-value="'id'" :item-text="'Name'"
+                        v-model="pointofContact" label="Point of Contact" outlined dense hide-details
+                        return-object></v-select>
                     </v-col>
                   </v-row>
 
                   <v-row justify="start">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Study criteria:</h4>
+                      <h3 class="text-left">Recruitment criteria:</h3>
                     </v-col>
 
-                    <v-col
-                      cols="12"
-                      sm="2"
-                      md="2"
-                      v-for="item in this.$studyCriteriaFields"
-                      :key="item.label"
-                    >
+                    <v-col cols="12" sm="2" md="2" v-for="item in this.$studyCriteriaFields" :key="item.label">
                       <div v-if="item.options">
-                        <v-select
-                          justify="start"
-                          :items="inclusionOptions"
-                          v-model="editedStudy[item.field]"
-                          :label="item.label"
-                          class="textfield-family"
-                          background-color="textbackground"
-                          hide-details
-                          placeholder="  "
-                          outlined
-                          dense
-                          chip
-                        ></v-select>
+                        <v-select justify="start" :items="inclusionOptions" v-model="editedStudy[item.field]"
+                          :label="item.label" class="textfield-family" background-color="textbackground" hide-details
+                          placeholder="  " outlined dense chip></v-select>
                       </div>
                       <div v-else>
-                        <v-text-field
-                          class="textfield-family"
-                          background-color="textbackground"
-                          hide-details
-                          :label="
-                            item.field == 'MinAge' || item.field == 'MaxAge'
-                              ? item.label + ' (months)'
-                              : item.label
-                          "
-                          v-model="editedStudy[item.field]"
-                          placeholder="  "
-                          outlined
-                          dense
-                        ></v-text-field>
+                        <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.field == 'MinAge' || item.field == 'MaxAge'
+                          ? item.label + ' (months)'
+                          : item.label
+                          " v-model="editedStudy[item.field]" placeholder="  " outlined dense></v-text-field>
                       </div>
                     </v-col>
                   </v-row>
@@ -469,87 +273,66 @@
                   <v-row>
                     <v-col md="12" class="subtitle">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Testing room:</h4>
+                      <h3 class="text-left">Testing room:</h3>
                     </v-col>
 
                     <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                      <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="4" lg="1">
-                        <v-card :class="{ 'testing-room-card': true, 'selected-card': isSelected(room.id) }" @click="selectRoom(room.id)">
+                      <v-col v-for="room in currentTestingRooms" :key="room.id" cols="12" sm="2" md="3">
+                        <v-card :class="{ 'testing-room-card': true, 'selected-card': isSelected(room.id) }"
+                          @click="selectRoom(room.id)">
                           <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
                           <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
                         </v-card>
                       </v-col>
                     </v-row>
+                    <div>
+                    </div>
                   </v-row>
 
                   <v-row justify="space-around">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Study summary & Phone script:</h4>
+                      <h3 class="text-left">Study summary & Phone script:</h3>
 
                       <p class="text-left">
-                        You can follow this 
-                        <a
-                          href="https://drdb.readthedocs.io/en/latest/Email%20Template.html"
-                          target="_blank"
-                          ><b>instruction</b></a
-                        >
+                        You can follow this
+                        <a href="https://drdb.readthedocs.io/en/latest/Email%20Template.html"
+                          target="_blank"><b>instruction</b></a>
                         to set up email templates for your study.
                       </p>
                     </v-col>
 
                     <v-col cols="12" md="6">
-                      <v-textarea
-                        label="Study summary"
-                        outlined
-                        no-resize
-                        rows="6"
-                        v-model="editedStudy.Description"
-                        hide-details
-                      ></v-textarea>
+                      <v-textarea label="Study summary" outlined no-resize rows="6" v-model="editedStudy.Description"
+                        hide-details></v-textarea>
                     </v-col>
 
                     <v-col cols="12" md="6">
-                      <v-textarea
-                        label="Phone Script"
-                        outlined
-                        no-resize
-                        rows="6"
-                        v-model="editedStudy.PhoneScript"
-                        hide-details
-                      ></v-textarea>
+                      <v-textarea label="Phone Script" outlined no-resize rows="6" v-model="editedStudy.PhoneScript"
+                        hide-details></v-textarea>
                     </v-col>
                   </v-row>
 
                   <v-row justify="start">
                     <v-col md="6">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Email template:</h4>
+                      <h3 class="text-left">Email template:</h3>
 
-                      <vue-editor
-                        v-model="editedStudy.EmailTemplate"
-                        :editor-toolbar="customToolbar"
-                      ></vue-editor>
+                      <vue-editor v-model="editedStudy.EmailTemplate" :editor-toolbar="customToolbar"></vue-editor>
                     </v-col>
 
                     <v-col md="6">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Reminder email template:</h4>
+                      <h3 class="text-left">Reminder email template:</h3>
 
-                      <vue-editor
-                        v-model="editedStudy.ReminderTemplate"
-                        :editor-toolbar="customToolbar"
-                      ></vue-editor>
+                      <vue-editor v-model="editedStudy.ReminderTemplate" :editor-toolbar="customToolbar"></vue-editor>
                     </v-col>
 
                     <v-col md="6">
                       <v-divider></v-divider>
-                      <h4 class="text-left">Follow up email snippet:</h4>
+                      <h3 class="text-left">Follow up email snippet:</h3>
 
-                      <vue-editor
-                        v-model="editedStudy.FollowUPEmailSnippet"
-                        :editor-toolbar="customToolbar"
-                      ></vue-editor>
+                      <vue-editor v-model="editedStudy.FollowUPEmailSnippet" :editor-toolbar="customToolbar"></vue-editor>
                     </v-col>
                   </v-row>
                 </v-form>
@@ -573,13 +356,8 @@
         <!-- </v-form> -->
 
         <div>
-          <v-dialog
-            fullscreen
-            hide-overlay
-            transition="dialog-bottom-transition"
-            v-model="dialogShowEmailPreviews"
-            :retain-focus="false"
-          >
+          <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogShowEmailPreviews"
+            :retain-focus="false">
             <v-card outlined>
               <v-toolbar dark color="primary">
                 <v-btn icon dark @click="dialogShowEmailPreviews = false">
@@ -598,16 +376,11 @@
                     dark colour):
                   </h3>
                 </v-col>
-                <body
-                  v-html="confirmationPreview"
-                  align="start"
-                  class="template"
-                  v-show="currentStudy.id"
-                  style="
+
+                <body v-html="confirmationPreview" align="start" class="template" v-show="currentStudy.id" style="
                     height: 350px !important;
                     overflow-y: scroll !important;
-                  "
-                ></body>
+                  "></body>
 
                 <v-col md="12">
                   <v-divider></v-divider>
@@ -615,16 +388,11 @@
                     Reminder email preview (email template is in dark colour):
                   </h3>
                 </v-col>
-                <body
-                  v-html="reminderPreview"
-                  align="start"
-                  class="template"
-                  v-show="currentStudy.id"
-                  style="
+
+                <body v-html="reminderPreview" align="start" class="template" v-show="currentStudy.id" style="
                     height: 350px !important;
                     overflow-y: scroll !important;
-                  "
-                ></body>
+                  "></body>
 
                 <v-col md="12">
                   <v-divider></v-divider>
@@ -632,16 +400,11 @@
                     Follow-up email preview (email template is in dark colour):
                   </h3>
                 </v-col>
-                <body
-                  v-html="followupPreview"
-                  align="start"
-                  class="template"
-                  v-show="currentStudy.id"
-                  style="
+
+                <body v-html="followupPreview" align="start" class="template" v-show="currentStudy.id" style="
                     height: 350px !important;
                     overflow-y: scroll !important;
-                  "
-                ></body>
+                  "></body>
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -800,7 +563,7 @@ export default {
 
   methods: {
     selectRoom(roomId) {
-      this.selectedRoomId = roomId;    
+      this.selectedRoomId = roomId;
     },
     isSelected(roomId) {
       return this.selectedRoomId === roomId;
@@ -808,6 +571,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
+        includeScheules: false
       };
 
       try {
@@ -1014,6 +778,7 @@ export default {
   },
 
   computed: {
+
     htmlText() {
       var htmlText = this.currentStudy.EmailTemplate.split("<p>")
         .join("")
@@ -1233,7 +998,7 @@ export default {
 };
 </script>
 
-<style lang="css" scoped>
+<style scoped>
 body {
   border: 2px solid rgb(0, 153, 255);
   border-radius: 5px;
@@ -1255,7 +1020,7 @@ body {
   background-color: var(--v-secondary-lighten1) !important;
 } */
 
-/deep/ tr.v-data-table__selected {
+.tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */
@@ -1268,7 +1033,7 @@ body {
   margin: 8px 8px 8px 8px;
   padding: 8px 8px 8px 8px;
   border-width: 1px;
-  width: 100%;
+  width: 90%;
 }
 
 .theme--light.v-icon {
@@ -1281,14 +1046,15 @@ body {
 .fabIcon {
   color: var(--v-secondary-base) !important;
 }
+
 .testing-room-card:hover,
 .selected-card {
   background-color: rgb(232, 232, 232);
   cursor: pointer;
 }
+
 .individual-room-card {
   margin-left: 0.7em;
   margin-bottom: 1em;
 }
-
 </style>

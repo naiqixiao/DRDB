@@ -39,7 +39,7 @@
           <v-col cols="12" md="12" class="noPadding">
             <v-data-table
               hide-default-footer
-              height="380px"
+              height="450px"
               dense
               fixed-header
               single-select
@@ -193,7 +193,7 @@ export default {
 
 .tabs-items {
   background-color: rgba($color: #000000, $alpha: 0);
-  height: 500px;
+  height: 600px;
 }
 .v-tab {
   max-width: 50%;

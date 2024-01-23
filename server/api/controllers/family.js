@@ -107,9 +107,11 @@ exports.create = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    await log.createLog("Family Created", User, "added a family (" +
-      newFamily.id +
-      ")");
+    await log.createLog(
+      "Family Created",
+      User,
+      "added a family (" + newFamily.id + ")"
+    );
 
     res.status(200).send(newFamily);
   } catch (error) {
@@ -209,16 +211,16 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 
       var searchString = [];
 
-      if (phone && phone != '') {
-        searchString.push({ 'Phone': phone });
+      if (phone && phone != "") {
+        searchString.push({ Phone: phone });
       }
-      if (email && email != '') {
-        searchString.push({ "Email": email });
+      if (email && email != "") {
+        searchString.push({ Email: email });
       }
 
       var family = await model.family.findOne({
         where: {
-          [Op.or]: searchString
+          [Op.or]: searchString,
         },
         include: [model.child],
       });
@@ -232,31 +234,28 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
         //   child.FK_Family = family.id;
         // });
 
-        if ('DoB' in newFamilies[i]) {
-
-          family.Children.forEach(existingChild => {
+        if ("DoB" in newFamilies[i]) {
+          family.Children.forEach((existingChild) => {
             if (existingChild.DoB == child.DoB) {
-
               if (existingChild.Name == child.Name) {
-                skipImport = true
-                nOfSkip += 1
+                skipImport = true;
+                nOfSkip += 1;
                 skipList.push({
-                  "Email": family.Email,
-                  "Name": child.Name,
-                  "DoB": child.DoB
-                })
+                  Email: family.Email,
+                  Name: child.Name,
+                  DoB: child.DoB,
+                });
               } else {
                 doubleCheckList.push({
-                  "FK_Family": family.id,
-                  "Email": family.Email,
-                  "childID": existingChild.id
-                })
+                  FK_Family: family.id,
+                  Email: family.Email,
+                  childID: existingChild.id,
+                });
               }
             }
-          })
+          });
 
           if (!skipImport) {
-
             child.FK_Family = family.id;
 
             // if any of the children was already imported to the database, would the child be skipped?
@@ -268,14 +267,12 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
             });
           }
         } else {
-          skipImport = true
+          skipImport = true;
         }
       } else {
-
         family = await model.family.create(newFamilies[i]);
 
-        if ('DoB' in newFamilies[i]) {
-
+        if ("DoB" in newFamilies[i]) {
           child.FK_Family = family.id;
           child.IdWithinFamily = IdWithinFamily = alphabet[0];
 
@@ -286,13 +283,12 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
             include: [model.child],
           });
         } else {
-          skipImport = true
+          skipImport = true;
         }
       }
 
       // update sibbling table & assign child id within this family
       if (!skipImport) {
-
         if (newFamily.Children.length > 1) {
           var Children = newFamily.Children;
 
@@ -331,7 +327,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
             },
           });
 
-          var filteredSiblings = siblings.filter(function (value) {
+          var filteredSiblings = siblings.filter(function(value) {
             return !containsObject(value, existingSibling);
           });
 
@@ -342,24 +338,23 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
       if (skipImport) {
         skipImport = false;
       } else {
-        nOfAdded += 1
+        nOfAdded += 1;
       }
     }
 
-    doubleCheckList = doubleCheckList.filter((item, index, self) =>
-      index === self.findIndex((t) => (
-        t.FK_Family === item.FK_Family
-      ))
-    )
+    doubleCheckList = doubleCheckList.filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.FK_Family === item.FK_Family)
+    );
 
     res.status(200).send({
       doubleCheckList,
       nOfSkip,
       nOfAdded,
-      skipList
+      skipList,
     });
   } catch (error) {
-    throw error
+    throw error;
   }
 });
 
@@ -458,15 +453,18 @@ exports.search = asyncHandler(async (req, res) => {
             include: [
               {
                 model: model.child,
-                include: [{
-                  model: model.appointment,
-                  attributes: ['FK_Study']
-                },
-                {
-                  model: model.family,
-                  attributes: ["AutismHistory"],
-                }]
-              },]
+                include: [
+                  {
+                    model: model.appointment,
+                    attributes: ["FK_Study"],
+                  },
+                  {
+                    model: model.family,
+                    attributes: ["AutismHistory"],
+                  },
+                ],
+              },
+            ],
           },
           {
             model: model.personnel,
@@ -476,36 +474,55 @@ exports.search = asyncHandler(async (req, res) => {
             include: [
               {
                 model: model.child,
-                include: [{
-                  model: model.appointment,
-                  attributes: ['FK_Study']
-                }, {
-                  model: model.family,
-                  attributes: ['AutismHistory']
-                }]
+                include: [
+                  {
+                    model: model.appointment,
+                    attributes: ["FK_Study"],
+                  },
+                  {
+                    model: model.family,
+                    attributes: ["AutismHistory"],
+                  },
+                ],
               },
               {
                 model: model.study,
-                include: [{ model: model.lab },
-                {
-                  model: model.personnel,
-                  as: 'Experimenters',
-                  through: {
-                    model: model.experimenter,
+                include: [
+                  { model: model.lab },
+                  {
+                    model: model.personnel,
+                    as: "Experimenters",
+                    through: {
+                      model: model.experimenter,
+                    },
                   },
-                },],
+                ],
               },
               {
                 model: model.personnel,
                 as: "PrimaryExperimenter",
                 through: { model: model.experimenterAssignment },
-                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+                attributes: [
+                  "id",
+                  "Name",
+                  "Email",
+                  "Calendar",
+                  "ZoomLink",
+                  "Initial",
+                ],
               },
               {
                 model: model.personnel,
                 as: "SecondaryExperimenter",
                 through: { model: model.experimenterAssignment_2nd },
-                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+                attributes: [
+                  "id",
+                  "Name",
+                  "Email",
+                  "Calendar",
+                  "ZoomLink",
+                  "Initial",
+                ],
               },
             ],
           },
@@ -516,37 +533,26 @@ exports.search = asyncHandler(async (req, res) => {
   });
 
   // remove families who requested "No more contact."
-  var nOfRemoval = 0
+  var nOfRemoval = 0;
   families.forEach((family) => {
-
     if (family.NoMoreContact === 1) {
-
-      var i = families.indexOf(family)
+      var i = families.indexOf(family);
       families.splice(i, 1);
 
-      nOfRemoval += 1
-
+      nOfRemoval += 1;
     }
+  });
 
-  })
-
-  var message = '';
+  var message = "";
 
   if (families.length < 1) {
-
     if (nOfRemoval > 0) {
-
-      message = "The family was removed from database upon parents' request."
-
+      message = "The family was removed from database upon parents' request.";
     } else {
-
-      message = "Oops, we can't find the family you're looking for."
+      message = "Oops, we can't find the family you're looking for.";
     }
-
   } else {
-
     shuffle(families);
-
   }
 
   res.status(200).send({ families: families, message: message });
@@ -580,7 +586,9 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
   queryString.NoMoreContact = 0;
 
-  queryString['$Schedules.Status$'] = { [Op.in]: ['TBD', 'Rescheduling', 'No Show'] }
+  queryString["$Schedules.Status$"] = {
+    [Op.in]: ["TBD", "Rescheduling", "No Show"],
+  };
 
   const families = await model.family.findAll({
     where: queryString,
@@ -615,10 +623,11 @@ exports.followupSearch = asyncHandler(async (req, res) => {
           {
             model: model.appointment,
             attributes: ["FK_Study"],
-          }, {
+          },
+          {
             model: model.family,
-            attributes: ['AutismHistory']
-          }
+            attributes: ["AutismHistory"],
+          },
         ],
       },
       {
@@ -629,14 +638,18 @@ exports.followupSearch = asyncHandler(async (req, res) => {
             include: [
               {
                 model: model.child,
-                include: [{
-                  model: model.appointment,
-                  attributes: ['FK_Study']
-                }, {
-                  model: model.family,
-                  attributes: ['AutismHistory']
-                }]
-              },]
+                include: [
+                  {
+                    model: model.appointment,
+                    attributes: ["FK_Study"],
+                  },
+                  {
+                    model: model.family,
+                    attributes: ["AutismHistory"],
+                  },
+                ],
+              },
+            ],
           },
           {
             model: model.personnel,
@@ -646,36 +659,55 @@ exports.followupSearch = asyncHandler(async (req, res) => {
             include: [
               {
                 model: model.child,
-                include: [{
-                  model: model.appointment,
-                  attributes: ['FK_Study']
-                }, {
-                  model: model.family,
-                  attributes: ['AutismHistory']
-                }]
+                include: [
+                  {
+                    model: model.appointment,
+                    attributes: ["FK_Study"],
+                  },
+                  {
+                    model: model.family,
+                    attributes: ["AutismHistory"],
+                  },
+                ],
               },
               {
                 model: model.study,
-                include: [{ model: model.lab },
-                {
-                  model: model.personnel,
-                  as: 'Experimenters',
-                  through: {
-                    model: model.experimenter,
+                include: [
+                  { model: model.lab },
+                  {
+                    model: model.personnel,
+                    as: "Experimenters",
+                    through: {
+                      model: model.experimenter,
+                    },
                   },
-                },],
+                ],
               },
               {
                 model: model.personnel,
                 as: "PrimaryExperimenter",
                 through: { model: model.experimenterAssignment },
-                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+                attributes: [
+                  "id",
+                  "Name",
+                  "Email",
+                  "Calendar",
+                  "ZoomLink",
+                  "Initial",
+                ],
               },
               {
                 model: model.personnel,
                 as: "SecondaryExperimenter",
                 through: { model: model.experimenterAssignment_2nd },
-                attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+                attributes: [
+                  "id",
+                  "Name",
+                  "Email",
+                  "Calendar",
+                  "ZoomLink",
+                  "Initial",
+                ],
               },
             ],
           },
@@ -725,17 +757,19 @@ exports.update = asyncHandler(async (req, res) => {
     // Log
     const User = req.body.User;
 
-    var logKeywords = 'Family Updated';
+    var logKeywords = "Family Updated";
 
-    if ('NoMoreContact' in updatedFamilyInfo) {
+    if ("NoMoreContact" in updatedFamilyInfo) {
       if (updatedFamilyInfo.NoMoreContact) {
-        logKeywords = 'Family Removed'
+        logKeywords = "Family Removed";
       }
     }
 
-    await log.createLog(logKeywords, User, "updated a family's information (" +
-      ID +
-      ")");
+    await log.createLog(
+      logKeywords,
+      User,
+      "updated a family's information (" + ID + ")"
+    );
 
     res.status(200).send(family);
   } catch (error) {
@@ -743,34 +777,78 @@ exports.update = asyncHandler(async (req, res) => {
   }
 });
 
+exports.releaseFamilyNew = asyncHandler(async (req, res) => {
+  var queryString = {};
+
+  queryString.Completed === true;
+  queryString["$Family.AssignedLab$"] !== null;
+
+  try {
+    const schedules = await model.schedule.findAll({
+      where: queryString,
+      include: [{ model: model.family }],
+    });
+
+    // release the families.
+    IDs = schedules.map((schedule) => {
+      return schedule.FK_Family;
+    });
+    IDs = Array.from(new Set(IDs)); // unique IDs
+
+    if (IDs.length > 0) {
+      // update family by removing AssignedLab from the family
+      const updateFamilyInfo = { AssignedLab: null };
+
+      await model.family.update(updateFamilyInfo, {
+        where: { id: IDs },
+      });
+
+      // Log
+      await log.createLog(
+        "Family Lab Assisgnment Release",
+        {},
+        "Families (" +
+          IDs.join(", ") +
+          ") were no longer assigned to any lab due to schedule completion."
+      );
+    }
+
+    // res.status(200).send(schedules);
+  } catch (error) {
+    throw error;
+  }
+});
+
 exports.releaseFamily = asyncHandler(async (req, res) => {
-  // get the ids of family whoes study has completed.
+  // get the ids of family whose study has completed studies, according to the following rules:
   var queryString = {};
   var queryString2 = {};
   var queryString3 = {};
 
+  // 1. the appointment time is within the past 7 days and the appointment status was Confirmed. These studies are considered as completed.
   queryString.AppointmentTime = {
     [Op.between]: [
       moment()
-      .subtract(1, "w")
-      .startOf("day")
-      .toDate(),
+        .subtract(1, "w")
+        .startOf("day")
+        .toDate(),
       moment()
-      .subtract(1, "days")
-      .startOf("day")
-      .toDate(),
-    ]
+        .subtract(1, "days")
+        .startOf("day")
+        .toDate(),
+    ],
   };
 
   queryString.Status = "Confirmed";
   // queryString.Completed = 0;
 
+  // 2. The families have been contacted within the past 2 weeks, yet the appointment is tentative. These appointments are regarded as onGoing.
   queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show"];
   // queryString2.Completed = 0;
   queryString2.updatedAt = {
     [Op.between]: [
       moment()
-        .subtract(1, "M")
+        .subtract(2, "w")
         .startOf("day")
         .toDate(),
       moment()
@@ -780,20 +858,20 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
     ],
   };
 
+  // 3. Recently rejected or cancelled studies. These studies are considered as completed.
   queryString3.Status = ["Cancelled", "Rejected"];
   queryString3.updatedAt = {
     [Op.between]: [
       moment()
-        .subtract(1, "M")
+        .subtract(2, "w")
         .startOf("day")
         .toDate(),
       moment()
-        .subtract(1, "days")
+        .subtract(1, "w")
         .startOf("day")
         .toDate(),
     ],
-  }
-  // queryString3.Completed = 0;
+  };
 
   try {
     const schedules = await model.schedule.findAll({
@@ -821,7 +899,7 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
 
       IDs = Array.from(new Set(IDs)); // unique IDs
 
-      // remove the families with incoming studies from the family list
+      // remove the families with onGoing study appointments from the family list
       if (schedulesOnGoing.length > 0) {
         var IDsOnGoing = schedulesOnGoing.map((schedule) => {
           return schedule.FK_Family;
@@ -829,15 +907,19 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
 
         IDsOnGoing = Array.from(new Set(IDsOnGoing)); // unique IDs
 
-        IDsOnGoing.forEach((familyOnGoing) => {
-          const index = IDs.indexOf(familyOnGoing);
-          if (index > -1) {
-            IDs.splice(index, 1);
-          }
-        });
+        // remove the families with onGoing study appointments from the list of families completed studies.
+        IDs = IDs.filter((id) => !IDsOnGoing.includes(id));
+
+        // IDsOnGoing.forEach((familyOnGoing) => {
+        //   const index = IDs.indexOf(familyOnGoing);
+        //   if (index > -1) {
+        //     IDs.splice(index, 1);
+        //   }
+        // });
       }
     }
 
+    // update schedule by setting Completed to true
     var scheduleIDs = schedules.map((schedule) => {
       return schedule.id;
     });
@@ -850,7 +932,7 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
 
     if (scheduleIDs.length > 0) {
       await model.schedule.update(
-        { Completed: true },
+        { Completed: 1 },
         {
           where: { id: scheduleIDs },
         }
@@ -866,10 +948,13 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
       });
 
       // Log
-      await log.createLog("Family Lab Assisgnment Release", {}, "Families (" +
-        IDs.join(", ") +
-        ") were no longer assigned to any lab due to study completion");
-
+      await log.createLog(
+        "Family Lab Assisgnment Release",
+        {},
+        "Families (" +
+          IDs.join(", ") +
+          ") were no longer assigned to any lab due to study completion"
+      );
 
       // res.status(200).send(IDs.length + " families released.");
     }
@@ -890,9 +975,11 @@ exports.delete = asyncHandler(async (req, res) => {
   // Log
   const User = JSON.parse(req.query.User);
 
-  await log.createLog("Family Deleted", User, "deleted family (" +
-    ID +
-    ") from the database");
+  await log.createLog(
+    "Family Deleted",
+    User,
+    "deleted family (" + ID + ") from the database"
+  );
 
   res.status(200).json(family);
 });

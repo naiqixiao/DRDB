@@ -14,10 +14,10 @@ const vuetify = new Vuetify({
       light: {
         primary: "#344955",
         secondary: "#F9AA33",
-        tertiary: "#232F34",
+        tertiary: "#4A6572",
         quaternary: "#4A6572",
-        background: "#F4EFE3",
-        textbackground: "#FEFEFE",
+        background: "#B2B2B2",
+        textbackground: "#f4f4f4",
         warning: "#cc3300"
       },
     },

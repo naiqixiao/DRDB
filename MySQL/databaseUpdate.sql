@@ -1,9 +1,4 @@
-
-ALTER TABLE Appointment ADD eventURL varchar(150) DEFAULT NULL AFTER FK_Family;
-
-ALTER TABLE Appointment ADD calendarEventId varchar(30) DEFAULT NULL AFTER eventURL;
-
-CREATE TABLE testingroom (
+CREATE TABLE IF NOT EXISTS  ${{DBName}}.TestingRoom (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   `FK_Lab` INT NOT NULL,
@@ -24,3 +19,11 @@ CREATE TABLE testingroom (
 ALTER TABLE Study ADD FK_TestingRoom int AFTER FK_Personnel,
 ADD KEY `FK_TestingRoom` (`FK_TestingRoom`),
 ADD CONSTRAINT `FK_TestingRoom` FOREIGN KEY (`FK_TestingRoom`) REFERENCES `TestingRoom` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE ${{DBName}}.Schedule MODIFY eventURL varchar(255);
+
+ALTER TABLE ${{DBName}}.Schedule MODIFY calendarEventId varchar(255);
+
+ALTER TABLE ${{DBName}}.Appointment MODIFY eventURL varchar(255);
+
+ALTER TABLE ${{DBName}}.Appointment MODIFY calendarEventId varchar(255);

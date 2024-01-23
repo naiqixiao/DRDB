@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 
+
 function makeBody(to, from, cc, bcc, subject, body) {
   var message = [
     'Content-Type: text/html; charset="UTF-8"\n',
@@ -44,70 +45,68 @@ async function sendEmail(oAuth2Client, emailContent) {
     emailContent.body
   );
 
+  const labelIds = [];
+
   try {
-    if (!emailContent.labelNames) {
+    if (emailContent.labelNames) {
+      const labelNames = emailContent.labelNames;
 
-      const result = await gmail.users.messages.send({
+      const gmailLabelList = await gmail.users.labels.list({
         userId: "me",
-        requestBody: {
-          raw: raw,
-        },
       });
-  
-      return result;
-    }
 
-    const labelNames = emailContent.labelNames;
+      const labels = gmailLabelList.data.labels;
 
-    const listLabelsResponse = await gmail.users.labels.list({
-      userId: 'me'
-    });
+      for (const labelName of labelNames) {
+        const label = labels.find(
+          (label) =>
+            label.name.replace(/[^a-zA-Z0-9]/g, "") ===
+            labelName.replace(/[^a-zA-Z0-9]/g, "")
+        );
 
-    const labels = listLabelsResponse.data.labels;
-    const labelIds = [];
+        let labelId;
 
-    for (let i = 0; i < labelNames.length; i++) {
-      const labelName = labelNames[i];
-      const label = labels.find(l => l.name === labelName);
-      let labelId;
+        if (label) {
+          labelId = label.id;
+        } else {
+          const labelData = {
+            userId: "me",
+            resource: {
+              name: labelName,
+              labelListVisibility: "labelShow",
+            },
+          };
 
-      if (label) {
-        labelId = label.id;
-      } else {
-        const labelData = {
-          userId: 'me',
-          resource: {
-            name: labelName,
-            labelListVisibility: 'labelShow'
-          }
-        };
-  
-        const labelResponse = await gmail.users.labels.create(labelData);
-        labelId = labelResponse.data.id;
+          const labelResponse = await gmail.users.labels.create(labelData);
+          labelId = labelResponse.data.id;
+
+        }
+
+        labelIds.push(labelId);
       }
-
-      labelIds.push(labelId);
     }
 
     const result = await gmail.users.messages.send({
       userId: "me",
       requestBody: {
         raw: raw,
-        labelIds: labelIds
+        labelIds: labelIds,
       },
     });
 
-    const messageId = result.data.id;
+    // apply labels after sending the email
+    if (labelIds.length > 0) {
+      const messageId = result.data.id;
 
-    const modifyRequest = {
-      userId: 'me',
-      id: messageId,
-      resource: {
-        addLabelIds: labelIds
-      }
-    };
-    await gmail.users.messages.modify(modifyRequest);
-
+      const modifyRequest = {
+        userId: "me",
+        id: messageId,
+        resource: {
+          addLabelIds: labelIds,
+        },
+      };
+      await gmail.users.messages.modify(modifyRequest);
+    }
 
     return result;
   } catch (error) {

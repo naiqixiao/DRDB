@@ -1,4 +1,4 @@
-<template>
+<template app>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
       <v-alert
@@ -41,12 +41,12 @@
               @click.stop="searchMode"
               :disabled="searchStatus"
             >
-              <v-icon left v-bind="iconSize">mdi-magnify</v-icon>Search
+              <v-icon left >mdi-magnify</v-icon>Search
             </v-btn>
           </v-col>
           <v-col cols="12" md="3" style="text-align: start">
             <v-btn v-bind="btnSize" @click="followupSearch">
-              <v-icon left v-bind="iconSize">mdi-phone</v-icon>Follow-ups
+              <v-icon left >mdi-phone</v-icon>Follow-ups
             </v-btn>
           </v-col>
 
@@ -487,11 +487,13 @@
     </v-row>
     <v-row justify="start" dense height="450px">
       <v-col cols="12" md="9">
+        
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
-          tableHeight="450px"
-          @nextContactDone="updateNextContactFrontend"
-        ></ScheduleTable>
+          nofItems = "3"
+          @updatedSchedule="updatedSchedule"
+          ></ScheduleTable>
+          <!-- @nextContactDone="updateNextContactFrontend" -->
       </v-col>
 
       <v-col cols="12" md="3">
@@ -514,7 +516,8 @@
 
 <script>
 import ChildInfo from "@/components/ChildInfo";
-import ScheduleTable from "@/components/ScheduleTable";
+// import ScheduleTable from "@/components/ScheduleTable";
+import ScheduleTable from "@/components/ScheduleTableNew";
 // import AppointmentTable from "@/components/AppointmentTable";
 import NotesConversation from "@/components/NotesConversation";
 import Page from "@/components/Page";
@@ -840,6 +843,29 @@ export default {
       } catch (error) {
         console.log(error.response);
       }
+    },
+
+    updatedSchedule(schedule) {
+      // update front-end schedule table
+      
+      var index = this.currentFamily.Schedules.findIndex((item) => item.id === schedule.id);
+
+      if (index < 0) {
+        if (this.index) {
+          this.currentFamily.Schedules.splice(this.index, 0, schedule);
+        } else {
+          this.currentFamily.Schedules.push(schedule);
+        }
+      } else {
+        if (schedule.Completed === 1) {
+          this.currentFamily.Schedules[index].Completed = 1;
+        } else {
+          this.currentFamily.Schedules[index] = Object.assign(this.currentFamily.Schedules[index], schedule);
+        }
+      }
+
+      Object.assign(this.Families[this.page - 1], this.currentFamily);
+
     },
 
     updateNextContactFrontend(nextContact) {

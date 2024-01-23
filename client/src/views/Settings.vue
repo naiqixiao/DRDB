@@ -1,30 +1,28 @@
 <template>
   <v-container fluid>
     <div v-if="!$store.state.labEmailStatus">
-      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600"
-        >Lab email is not been setup properly. Please set it up in the Settings
-        page.</v-alert
-      >
+      <v-alert border="left" type="error" color="#c73460" dense style="font-weight: 600">Lab email is not been setup
+        properly. Please set it up in the Settings
+        page.</v-alert>
     </div>
     <div v-if="!$store.state.adminEmailStatus">
-      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600"
-        >Admin email is not been setup properly. Please set it up in the Settings
-        page.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">Admin email is not been setup
+        properly. Please set it up in the Settings
+        page.</v-alert>
     </div>
     <div v-if="$store.state.trainingMode">
-      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600"
-        >You are running in a training mode.</v-alert
-      >
+      <v-alert border="left" type="warning" color="#c7792c" dense style="font-weight: 600">You are running in a training
+        mode.</v-alert>
     </div>
 
-    <v-row style="height: 200px">
+    <v-row style="height: 200px; margin: 24px 10%;">
       <v-col md="4">
-        <v-divider></v-divider>
-        <h4 class="text-left">User account settings:</h4>
-        <v-btn style="margin-top: 120px" color="primary" @click.stop="dialog = true"
-          >Change password</v-btn
-        >
+        <v-divider style="margin-bottom: 20px"></v-divider>
+        <h2 class="text-left" style="margin-right: 0px;">User account settings</h2>
+        <div style="height: 80%;  display: flex;  justify-content: space-around; align-content: center;flex-wrap: wrap; ">
+
+          <v-btn style="align-self: center !important" color="primary" @click.stop="dialog = true">Change password</v-btn>
+        </div>
         <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
           <v-card outlined>
             <v-card-title class="headline">Change password</v-card-title>
@@ -33,12 +31,7 @@
                 <v-col cols="12" md="6" class="subtitle">
                   <v-divider></v-divider>
                   <h4 class="text-left">Current password:</h4>
-                  <v-text-field
-                    v-model="password"
-                    type="password"
-                    hide-details
-                    dense
-                  ></v-text-field>
+                  <v-text-field v-model="password" type="password" hide-details dense></v-text-field>
                 </v-col>
               </v-row>
               <v-row justify="center">
@@ -47,24 +40,15 @@
                 </v-col>
                 <v-col cols="12" md="6" class="subtitle">
                   <h4 class="text-left">New password:</h4>
-                  <v-text-field
-                    v-model="newPassword"
-                    type="password"
-                    :rules="[newPasswordRule]"
-                    clearable
-                  ></v-text-field>
+                  <v-text-field v-model="newPassword" type="password" :rules="[newPasswordRule]" clearable></v-text-field>
                 </v-col>
               </v-row>
               <br />
               <v-row justify="center">
                 <v-col cols="12" md="6" class="subtitle">
                   <h4 class="text-left">Confirm new password:</h4>
-                  <v-text-field
-                    v-model="newPasswordVerify"
-                    clearable
-                    type="password"
-                    :rules="[passwordConfirmationRule]"
-                  ></v-text-field>
+                  <v-text-field v-model="newPasswordVerify" clearable type="password"
+                    :rules="[passwordConfirmationRule]"></v-text-field>
                 </v-col>
               </v-row>
             </v-form>
@@ -75,17 +59,11 @@
                   <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
                 </v-col>
                 <v-col md="2">
-                  <v-btn
-                    color="primary"
-                    :disabled="
-                      passwordConfirmationRule != true ||
-                      newPassword == null ||
-                      password == null ||
-                      newPasswordRule != true
-                    "
-                    @click="changePassword"
-                    >Confirm</v-btn
-                  >
+                  <v-btn color="primary" :disabled="passwordConfirmationRule != true ||
+                    newPassword == null ||
+                    password == null ||
+                    newPasswordRule != true
+                    " @click="changePassword">Confirm</v-btn>
                 </v-col>
                 <v-col md="3"></v-col>
               </v-row>
@@ -94,44 +72,29 @@
         </v-dialog>
       </v-col>
       <v-col cols="12" md="8">
-        <v-divider></v-divider>
-        <h4 class="text-left">Batch upload participant info:</h4>
+        <v-divider style="margin-bottom: 20px"></v-divider>
+        <h2 class="text-left" style="margin-right: 0px;">Batch upload participant info</h2>
         <p class="text-left">
           You can use this
-          <a
-            href="https://mcmasteru365-my.sharepoint.com/:x:/g/personal/xiaon8_mcmaster_ca/EeFyaQJH4H9Imh_JzXojHeIBMCzy0mAj9DaezEQK0Ri5iQ?e=8jJIrM"
-            target="_blank"
-            ><b>spreadsheet</b></a
-          >
+          <a href="https://mcmasteru365-my.sharepoint.com/:x:/g/personal/xiaon8_mcmaster_ca/EeFyaQJH4H9Imh_JzXojHeIBMCzy0mAj9DaezEQK0Ri5iQ?e=8jJIrM"
+            target="_blank"><b>spreadsheet</b></a>
           as template to upload multiple participant information at once.<br />*Any
           information should be formatted as <b>TEXT</b> in the spreadsheet (including
           phone numbers, DoB, etc.). <br />*Date of birth (DoB) has to be entered in
           <b>DD/MM/YYYY</b> format.
         </p>
         <template>
-          <v-file-input
-            ref="fileSelect"
-            accept=".xlsx, .csv"
-            background-color="textbackground"
-            label="Click here to select import file"
-            @change="selectFile"
-            v-model="inputFile"
-            outlined
-            dense
-            :disabled="
-              $store.state.role != 'Admin' &&
+          <v-file-input ref="fileSelect" accept=".xlsx, .csv" background-color="textbackground"
+            label="Click here to select import file" @change="selectFile" v-model="inputFile" outlined dense :disabled="$store.state.role != 'Admin' &&
               $store.state.role != 'PI' &&
               $store.state.role != 'Lab manager'
-            "
-          ></v-file-input>
+              "></v-file-input>
 
-          <v-btn
-            color="primary"
-            @click.stop="batchImport()"
-            :disabled="!inputFile"
-            :loading="loadingStatus"
-            >Upload</v-btn
-          >
+          <div style="display: flex; justify-content: end">
+
+            <v-btn color="primary" @click.stop="batchImport()" :disabled="!inputFile"
+              :loading="loadingStatus">Upload</v-btn>
+          </div>
         </template>
       </v-col>
 
@@ -139,6 +102,7 @@
         <v-card outlined>
           <v-card-title class="headline">Batch import results</v-card-title>
           <v-card-text>
+
             <body align="start" v-html="importReport"></body>
           </v-card-text>
           <v-card-actions>
@@ -152,51 +116,34 @@
       </v-dialog>
     </v-row>
 
-    <v-row justify="center" align="center" style="height: 200px">
+    <v-row justify="center" align="center" style="height: 200px; margin: 24px 10%">
       <v-col md="12" class="subtitle">
-        <v-divider></v-divider>
-        <h4 class="text-left">Lab email account settings:</h4>
+        <v-divider style="margin-bottom: 20px"></v-divider>
+        <h2 class="text-left" style="margin-right: 0px;">Lab email account settings</h2>
+
         <p class="text-left">
           You can follow this
-          <a
-            href="https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK"
-            target="_blank"
-            ><b>instruction</b></a
-          >
+          <a href="https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK"
+            target="_blank"><b>instruction</b></a>
           to set up Google Account for your lab.
         </p>
       </v-col>
 
       <v-col cols="12" md="2">
-        <v-text-field
-          class="textfield-family"
-          background-color="textbackground"
-          hide-details
-          label="Associated lab email"
-          :value="this.labEmail"
-          readonly
-          placeholder="No email is set up"
-          outlined
-          dense
-        ></v-text-field>
+        <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Associated lab email"
+          :value="this.labEmail" readonly placeholder="No email is set up" outlined dense></v-text-field>
       </v-col>
 
       <v-col cols="12" md="3">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn
-                color="primary"
-                @click.stop="googleCredentialsURL('lab')"
-                :disabled="
-                  $store.state.role != 'Admin' &&
-                  $store.state.role != 'PI' &&
-                  $store.state.role != 'PostDoc' &&
-                  $store.state.role != 'GradStudent' &&
-                  $store.state.role != 'Lab manager'
-                "
-                >Setup Google Account</v-btn
-              >
+              <v-btn color="primary" @click.stop="googleCredentialsURL('lab')" :disabled="$store.state.role != 'Admin' &&
+                $store.state.role != 'PI' &&
+                $store.state.role != 'PostDoc' &&
+                $store.state.role != 'GradStudent' &&
+                $store.state.role != 'Lab manager'
+                ">Setup Google Account</v-btn>
             </div>
           </template>
           <span>Only PI and lab manager can change the associated lab email.</span>
@@ -206,18 +153,12 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn
-                color="primary"
-                @click.stop="editLabInfo"
-                :disabled="
-                  $store.state.role != 'Admin' &&
-                  $store.state.role != 'PI' &&
-                  $store.state.role != 'PostDoc' &&
-                  $store.state.role != 'GradStudent' &&
-                  $store.state.role != 'Lab manager'
-                "
-                >Update Lab Info</v-btn
-              >
+              <v-btn color="primary" @click.stop="editLabInfo" :disabled="$store.state.role != 'Admin' &&
+                $store.state.role != 'PI' &&
+                $store.state.role != 'PostDoc' &&
+                $store.state.role != 'GradStudent' &&
+                $store.state.role != 'Lab manager'
+                ">Update Lab Info</v-btn>
             </div>
           </template>
           <span>Only PI and lab manager can change lab information.</span>
@@ -230,14 +171,8 @@
           <v-card-text>
             <v-row justify="center">
               <v-col cols="12" md="10" class="subtitle">
-                <v-textarea
-                  label="Paste the sign-in code here."
-                  outlined
-                  no-resize
-                  rows="1"
-                  v-model="signInCode"
-                  hide-details
-                ></v-textarea>
+                <v-textarea label="Paste the sign-in code here." outlined no-resize rows="1" v-model="signInCode"
+                  hide-details></v-textarea>
               </v-col>
             </v-row>
           </v-card-text>
@@ -248,12 +183,8 @@
                 <v-btn color="primary" @click="dialogGoogle = false">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn
-                  color="primary"
-                  :disabled="!signInCode"
-                  @click="setAdmin ? setAdminToken() : setLabToken()"
-                  >Confirm</v-btn
-                >
+                <v-btn color="primary" :disabled="!signInCode"
+                  @click="setAdmin ? setAdminToken() : setLabToken()">Confirm</v-btn>
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -262,35 +193,33 @@
       </v-dialog>
     </v-row>
 
-    <v-row justify="center" align="center" style="height: 200px">
+    <!-- testing room setting will appear once the lab calendar is set up. -->
+    <v-row style="margin: 24px 10%; overflow-y: scroll;" v-show="$store.state.labEmailStatus">
       <v-col md="12" class="subtitle">
-        <v-divider></v-divider>
-        <h4 class="text-left">Administration email account settings:</h4>
+        <v-divider style="margin-bottom: 20px"></v-divider>
+        <h2 class="text-left" style="margin-right: 0px;">Testing Rooms</h2>
+      </v-col>
+      <testingRooms :testingRooms="currentTestingRooms" :labId="$store.state.lab"
+        @testingRoomsUpdated="testingRoomsUpdated" />
+    </v-row>
+
+    <v-row justify="center" align="center" style="height: 200px; margin: 24px 10%; overflow-y: scroll;">
+      <v-col md="12" class="subtitle">
+        <v-divider style="margin-bottom: 20px"></v-divider>
+        <h2 class="text-left" style="margin-right: 0px;">Administration email account settings</h2>
+
       </v-col>
       <v-col cols="12" md="2">
-        <v-text-field
-          class="textfield-family"
-          background-color="textbackground"
-          hide-details
-          label="Administration email"
-          :value="this.adminEmail"
-          readonly
-          placeholder="No email is set up"
-          outlined
-          dense
-        ></v-text-field>
+        <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Administration email"
+          :value="this.adminEmail" readonly placeholder="No email is set up" outlined dense></v-text-field>
       </v-col>
 
       <v-col cols="12" md="4">
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn
-                color="primary"
-                @click.stop="googleCredentialsURL('admin')"
-                :disabled="$store.state.role != 'Admin'"
-                >Setup Admin Account</v-btn
-              >
+              <v-btn color="primary" @click.stop="googleCredentialsURL('admin')"
+                :disabled="$store.state.role != 'Admin'">Setup Admin Account</v-btn>
             </div>
           </template>
           <span>Only the Administrator can change the adminstration email.</span>
@@ -301,12 +230,8 @@
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <div v-on="on">
-              <v-btn
-                color="primary"
-                @click.stop="createNewLab"
-                :disabled="$store.state.role != 'Admin' || !$store.state.adminEmailStatus"
-                >Create a Lab</v-btn
-              >
+              <v-btn color="primary" @click.stop="createNewLab"
+                :disabled="$store.state.role != 'Admin' || !$store.state.adminEmailStatus">Create a Lab</v-btn>
             </div>
           </template>
           <span>Only the Administrator can create new lab.</span>
@@ -324,17 +249,8 @@
                 <h4 class="text-left">Lab information:</h4>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  class="textfield-family"
-                  background-color="textbackground"
-                  hide-details
-                  label="Lab's Name"
-                  v-model="currentLab.LabName"
-                  placeholder="  "
-                  :rules="$rules.required"
-                  outlined
-                  dense
-                ></v-text-field>
+                <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Lab's Name"
+                  v-model="currentLab.LabName" placeholder="  " :rules="$rules.required" outlined dense></v-text-field>
               </v-col>
               <!-- <v-col md="12" class="subtitle">
                 <v-divider></v-divider>
@@ -359,16 +275,8 @@
                 <h4 class="text-left">Zoom Link (for online studies):</h4>
               </v-col>
               <v-col cols="12" md="12">
-                <v-text-field
-                  class="textfield-family"
-                  background-color="textbackground"
-                  hide-details
-                  label="Zoom Link"
-                  v-model="currentLab.ZoomLink"
-                  placeholder="  "
-                  outlined
-                  dense
-                ></v-text-field>
+                <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Zoom Link"
+                  v-model="currentLab.ZoomLink" placeholder="  " outlined dense></v-text-field>
               </v-col>
 
               <v-col md="12" class="subtitle">
@@ -377,88 +285,18 @@
               </v-col>
               <v-col cols="12" md="4" v-for="item in this.$labPI" :key="item.label">
                 <div v-if="item.options">
-                  <v-select
-                    justify="start"
-                    :items="roleOptions"
-                    v-model="currentLab.Personnels[0][item.field]"
-                    :label="item.label"
-                    hide-details
-                    class="textfield-family"
-                    placeholder="  "
-                    :rules="$rules[item.rules]"
-                    outlined
-                    dense
-                    chip
-                  ></v-select>
+                  <v-select justify="start" :items="roleOptions" v-model="currentLab.Personnels[0][item.field]"
+                    :label="item.label" hide-details class="textfield-family" placeholder="  " :rules="$rules[item.rules]"
+                    outlined dense chip></v-select>
                 </div>
                 <div v-else>
-                  <v-text-field
-                    class="textfield-family"
-                    background-color="textbackground"
-                    hide-details
-                    :label="item.label"
-                    v-model="currentLab.Personnels[0][item.field]"
-                    placeholder="  "
-                    :rules="$rules[item.rules]"
-                    outlined
-                    dense
-                  ></v-text-field>
+                  <v-text-field class="textfield-family" background-color="textbackground" hide-details
+                    :label="item.label" v-model="currentLab.Personnels[0][item.field]" placeholder="  "
+                    :rules="$rules[item.rules]" outlined dense></v-text-field>
                 </div>
               </v-col>
-
-              <!-- optional testing room for users to add -->
-              <v-col md="12" class="subtitle">
-                <v-divider></v-divider>
-                <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
-              </v-col>
-
-              <v-col cols="12" md="12">
-                <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                  <v-col>
-                    <v-row>
-                      <v-col cols="6">
-                        <v-text-field
-                          background-color="textbackground"
-                          label="Name of Testing Room"
-                          v-model="testingRoom.name"
-                          outlined
-                          dense
-                          autocomplete="null"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="6">
-                        <v-text-field
-                          background-color="textbackground"
-                          label="Location"
-                          v-model="testingRoom.location"
-                          outlined
-                          dense
-                        ></v-text-field>
-                      </v-col>
-                    </v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        background-color="textbackground"
-                        label="Calendar Name (Recommend naming it after the location)"
-                        v-model="testingRoom.calendar"
-                        outlined
-                        dense
-                      ></v-text-field>
-                    </v-col>
-                  </v-col>
-                  <v-col cols="2" class="testing-room-delete">
-                    <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
-                      <v-icon>delete</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
             </v-row>
-            <v-col>
-              <v-btn color="primary" fab v-on:click="addTestingRoom">
-                <v-icon>add</v-icon>
-              </v-btn>
-            </v-col>
+
           </v-form>
 
           <v-card-actions>
@@ -476,34 +314,17 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog
-        fullscreen
-        hide-overlay
-        transition="dialog-bottom-transition"
-        v-model="dialogEditLab"
-        :retain-focus="false"
-      >
+      <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogEditLab"
+        :retain-focus="false">
         <v-card outlined>
           <v-card-title class="headline">Lab information</v-card-title>
           <v-card-text>
             <v-form ref="formEdit" v-model="valid" lazy-validation>
               <v-row justify="start">
-                <v-col
-                  cols="12"
-                  :md="item.width"
-                  v-for="item in this.$labInfo"
-                  :key="item.label"
-                  ><v-text-field
-                    class="textfield-family"
-                    background-color="textbackground"
-                    hide-details
-                    :label="item.label"
-                    v-model="editedLab[item.field]"
-                    placeholder="  "
-                    :rules="$rules[item.rules]"
-                    outlined
-                    dense
-                  ></v-text-field>
+                <v-col cols="12" :md="item.width" v-for="item in this.$labInfo" :key="item.label"><v-text-field
+                    class="textfield-family" background-color="textbackground" hide-details :label="item.label"
+                    v-model="editedLab[item.field]" placeholder="  " :rules="$rules[item.rules]" outlined
+                    dense></v-text-field>
                 </v-col>
 
                 <!-- <v-col cols="12" md="3">
@@ -540,100 +361,8 @@
                   <h4 class="text-left">Zoom Link (for online studies):</h4>
                 </v-col>
                 <v-col cols="12" md="12">
-                  <v-text-field
-                    class="textfield-family"
-                    background-color="textbackground"
-                    hide-details
-                    label="Zoom Link"
-                    v-model="editedLab.ZoomLink"
-                    placeholder="  "
-                    outlined
-                    dense
-                  ></v-text-field>
-                </v-col>
-              </v-row>
-
-              <v-row>
-                <v-col md="12" class="subtitle">
-                  <v-divider></v-divider>
-                  <h4 class="text-left">Testing Rooms (physical/online testing rooms):</h4>
-                </v-col>
-
-                <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
-                  <v-col 
-                    v-for="room in filteredTestingRooms" 
-                    :key="room.id" 
-                    cols="12" 
-                    sm="2" 
-                    md="4" 
-                    lg="1"
-                  >
-                    <v-card>
-                      <v-icon 
-                        v-if="isAuthorized(room.createdBy)"
-                        class="testing-room--delete"
-                        @click="showDeleteConfirmationDialog(room.name)"
-                      >
-                        close
-                      </v-icon>
-                      <delete-confirmation-dialog
-                        :show="showDeleteConfirmation"
-                        @confirm="confirmDelete(selectedTestingRoom)"
-                        @cancel="cancelDelete"
-                        :testingRoom="selectedTestingRoom"
-                      ></delete-confirmation-dialog>
-                      <v-card-title class="testing-room--title">{{ room.name }}</v-card-title>
-                      <v-card-text class="testing-room--text">Location: {{ room.location }}</v-card-text>
-                    </v-card>
-                  </v-col>
-                </v-row>
-                
-                <v-col cols="12" md="12">
-                  <v-row v-for="(testingRoom, index) in testingRooms" :key="index">
-                    <v-col>
-                      <v-row>
-                        <v-col cols="6">
-                          <v-text-field
-                            background-color="textbackground"
-                            label="Name of Testing Room"
-                            v-model="testingRoom.name"
-                            outlined
-                            dense
-                            autocomplete="null"
-                          ></v-text-field>
-                        </v-col>
-                        <v-col cols="6">
-                          <v-text-field
-                            background-color="textbackground"
-                            label="Location"
-                            v-model="testingRoom.location"
-                            outlined
-                            dense
-                          ></v-text-field>
-                        </v-col>
-                      </v-row>
-                      <v-col cols="12">
-                        <v-text-field
-                          background-color="textbackground"
-                          label="Calendar Name (Recommend naming it after the location)"
-                          v-model="testingRoom.calendar"
-                          outlined
-                          dense
-                        ></v-text-field>
-                      </v-col>
-                    </v-col>
-
-                    <v-col cols="2" class="testing-room-delete">
-                      <v-btn color="primary" fab v-on:click="deleteTestingRoom(index)">
-                        <v-icon>delete</v-icon>
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                  <v-col>
-                    <v-btn color="primary" fab v-on:click="addTestingRoom">
-                      <v-icon>add</v-icon>
-                    </v-btn>
-                  </v-col>
+                  <v-text-field class="textfield-family" background-color="textbackground" hide-details label="Zoom Link"
+                    v-model="editedLab.ZoomLink" placeholder="  " outlined dense></v-text-field>
                 </v-col>
               </v-row>
 
@@ -642,18 +371,11 @@
                   <v-divider></v-divider>
                   <h4 class="text-left">Email snipplets:</h4>
                 </v-col>
-                <v-col
-                  cols="12"
-                  md="6"
-                  v-for="item in this.$labEmailTemplate"
-                  :key="item.label"
-                >
+                <v-col cols="12" md="6" v-for=" item  in  this.$labEmailTemplate " :key="item.label">
                   <h3 class="text-left">{{ item.label }}</h3>
-
-                  <vue-editor
-                    v-model="editedLab[item.field]"
-                    :editor-toolbar="customToolbar"
-                  ></vue-editor>
+                  <div>
+                    <ckeditor :editor="editor" v-model="editedLab[item.field]" :config="editorConfig"></ckeditor>
+                  </div>
                 </v-col>
               </v-row>
             </v-form>
@@ -663,10 +385,10 @@
             <v-row justify="space-between" style="height: 50px">
               <v-col md="3"></v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="closeEditLab">Cancel</v-btn>
+                <v-btn color="primary" @click="closeEditLab" :disabled="requestInProgress">Cancel</v-btn>
               </v-col>
               <v-col md="2">
-                <v-btn color="primary" @click="saveEditLab">Confirm</v-btn>
+                <v-btn color="primary" @click="saveEditLab" :disabled="requestInProgress">Confirm</v-btn>
               </v-col>
               <v-col md="3"></v-col>
             </v-row>
@@ -681,23 +403,41 @@
 import login from "@/services/login";
 import lab from "@/services/lab";
 
-import testingRoom from "@/services/testingRoom";
+// import testingRoom from "@/services/testingRoom";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
-import { VueEditor } from "vue2-editor";
+// import { VueEditor } from "vue2-editor";
+
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
 import XLSX from "xlsx";
 import moment from "moment";
-import calendar from "../services/calendar";
+// import calendar from "../services/calendar";
 
-import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
+// import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog.vue';
+import testingRooms from '../components/testingRooms.vue';
 
 export default {
   components: {
-    VueEditor,
-    DeleteConfirmationDialog,
+    // VueEditor,
+    // DeleteConfirmationDialog,
+    testingRooms,
   },
   data() {
     return {
+      editor: ClassicEditor,
+      editorData: '<p>Content of the editor.</p>',
+      editorConfig: {
+        toolbar: {
+          items: [
+            'undo', 'redo',
+            '|', 'heading',
+            '|', 'bold', 'italic',
+            '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed', 'blockQuote',
+            '|', 'bulletedList', 'numberedList', 'outdent', 'indent'
+          ]
+        }
+      },
       password: null,
       newPassword: null,
       newPasswordVerify: null,
@@ -741,7 +481,8 @@ export default {
       testingRooms: [{ name: "", location: "", calendar: "" }],
       currentTestingRooms: [],
       showDeleteConfirmation: false,
-      selectedTestingRoom: '',
+      // selectedTestingRoom: '',
+      requestInProgress: false,
     };
   },
 
@@ -750,17 +491,17 @@ export default {
       this.showDeleteConfirmation = true;
       this.selectedTestingRoom = room;
     },
-    async confirmDelete(selectedRoom) {
-      const testingRoomInfo = this.currentTestingRooms.find(room => room.name === selectedRoom)
-      this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== testingRoomInfo.id);
+    // async confirmDelete(selectedRoom) {
+    //   const testingRoomInfo = this.currentTestingRooms.find(room => room.name === selectedRoom)
+    //   this.currentTestingRooms = this.currentTestingRooms.filter(curRoom => curRoom.id !== testingRoomInfo.id);
 
-      this.showDeleteConfirmation = false;
-      this.selectedTestingRoom = '';
-      await testingRoom.delete(testingRoomInfo);
-    },
+    //   this.showDeleteConfirmation = false;
+    //   this.selectedTestingRoom = '';
+    //   await testingRoom.delete(testingRoomInfo);
+    // },
     cancelDelete() {
       this.showDeleteConfirmation = false;
-      this.selectedTestingRoom = '';
+      // this.selectedTestingRoom = '';
     },
 
     async changePassword() {
@@ -789,17 +530,16 @@ export default {
       this.dialogNewLab = true;
     },
 
-    addTestingRoom() {
-      this.testingRooms.push({ name: "", location: "", calendar: "" });
-    },
-    deleteTestingRoom(index) {
-      this.testingRooms.splice(index, 1);
-    },
+    // addTestingRoom() {
+    //   this.testingRooms.push({ name: "", location: "", calendar: "" });
+    // },
+    // deleteTestingRoom(index) {
+    //   this.testingRooms.splice(index, 1);
+    // },
 
-    async editLabInfo() {     
-      const testingRooms = await testingRoom.search(this.$store.state.lab);
-      this.$store.dispatch("setTestingRooms", testingRooms.data);
-      this.currentTestingRooms = this.$store.state.testingRooms;
+    async editLabInfo() {
+      // const testingRooms = await testingRoom.search(this.$store.state.lab);
+      // this.$store.dispatch("setTestingRooms", testingRooms.data);
 
       this.editedLab.LabName = this.$store.state.labName;
       this.editedLab.EmailOpening = this.$store.state.emailOpening;
@@ -813,45 +553,15 @@ export default {
 
     async saveNewLab() {
       var validationResults = this.$refs.form.validate();
-      // await calendar.createSecondaryCalendar({
-      //   calendarName: this.testingRooms[0].calendarName,
-      // });
 
       if (validationResults) {
         try {
-          // const newLab = {
-          //   LabName: "RHPCS",
-          //   PI: "TP",
-          //   Personnels: [
-          //     {
-          //       Name: "Todd Pfaff",
-          //       Initial: "TP",
-          //       Role: "PI",
-          //       Email: "xiaon8@mcmaster.ca",
-          //       Calendar: "xiaon8@mcmaster.ca",
-          //     },
-          //   ],
-          // };
 
           this.currentLab.PI = this.currentLab.Personnels[0].Initial;
 
           await lab.create(this.currentLab);
-          const newLab = await lab.search(this.currentLab);
-          const testingRoomInfo = this.testingRooms;
-
-          // if (testingRoomInfo[0]) {
-
-          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-            const testing = { ...testingRoomItem };
-            testing.FK_Lab = newLab.data[0].id;
-            testing.createdBy = this.$store.state.userID;
-            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
-            testing.calendarId = newCal.data.calendarId;
-            await testingRoom.create(testing);
-          });
-
-          await Promise.all(createPromises);
-          // }
+          // const newLab = await lab.search(this.currentLab);
+          // const testingRoomInfo = this.testingRooms;
 
           alert(
             "A new lab is created!\nPI's account is created! \nA sample study is created!"
@@ -867,6 +577,8 @@ export default {
     },
 
     async saveEditLab() {
+      this.requestInProgress = true;
+
       var validationResults = this.$refs.formEdit.validate();
 
       if (validationResults) {
@@ -885,27 +597,14 @@ export default {
           );
           this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
 
-          const testingRoomInfo = this.testingRooms;
-
-          const createPromises = testingRoomInfo.map(async (testingRoomItem) => {
-            const testing = { ...testingRoomItem };
-            testing.FK_Lab = this.$store.state.lab;
-            testing.createdBy = this.$store.state.userID;
-            const newCal = await calendar.createSecondaryCalendar({ lab: this.$store.state.lab, calendarName: testing.calendar });
-            testing.calendarId = newCal.data.calendarId;
-            await testingRoom.create(testing);
-          });
-
-          await Promise.all(createPromises);
-
           alert("Lab information is updated!");
           this.$refs.formEdit.resetValidation();
-          
+
         } catch (error) {
           console.log(error.response);
         }
       }
-
+      this.requestInProgress = false;
       this.closeEditLab();
     },
 
@@ -916,6 +615,11 @@ export default {
         this.newPassword = null;
         this.newPasswordVerify = null;
       }, 300);
+    },
+
+    testingRoomsUpdated(testingRooms) {
+      this.currentTestingRooms = testingRooms;
+      this.$store.dispatch("setTestingRooms", testingRooms);
     },
 
     closeNewLab() {
@@ -1137,6 +841,7 @@ export default {
       return alertText;
     },
   },
+
   computed: {
     passwordConfirmationRule() {
       return this.newPassword === this.newPasswordVerify || "Password must match";
@@ -1158,9 +863,6 @@ export default {
       };
     },
 
-    filteredTestingRooms() {
-      return this.currentTestingRooms.filter(room => !room.voided);
-    },
   },
 
   watch: {
@@ -1178,10 +880,13 @@ export default {
     },
     showDeleteConfirmation(val) {
       val || this.cancelDelete();
-    },
+    }
   },
 
   async mounted() {
+
+    this.currentTestingRooms = this.$store.state.testingRooms;
+
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
 
@@ -1217,6 +922,7 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
 .v-text-field__details {
   display: none;
 }
@@ -1227,15 +933,19 @@ export default {
   margin-bottom: 1.5em;
   margin-left: 1em;
 }
+
 .testing-room--title {
   display: flex;
   justify-content: center;
-  font-size: x-large;
+  font-size: large;
 }
+
 .testing-room--text {
   font-size: large;
-  font-weight:500;
+  justify-content: left;
+  font-weight: 500;
 }
+
 .testing-room--delete {
   position: absolute !important;
   right: 0;
@@ -1243,8 +953,15 @@ export default {
   color: red !important;
   transition: transform 0.3s ease;
 }
+
 .testing-room--delete:hover {
   cursor: pointer;
   transform: rotate(-90deg);
+}
+
+.ck-editor__editable_inline:not(.ck-comment__input *) {
+  height: 300px;
+  overflow-y: auto;
+  margin: 0px;
 }
 </style>

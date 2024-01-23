@@ -52,6 +52,8 @@ const rtuRoutes = require("./api/routes/RTU");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
 
+const auto = require("./api/routes/auto");
+
 app.use("/api/user", userRoutes);
 
 app.use("/api/family", familyRoutes);
@@ -67,6 +69,7 @@ app.use("/api/appointment", appointmentRoutes);
 app.use("/api/experimentAssignment", experimenterAssignmentRoutes);
 app.use("/api/experimentAssignment", experimenterAssignment2ndRoutes);
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/auto", auto);
 
 app.use("/api/cal", calRoutes);
 app.use("/api/gmail", gmailRoutes);

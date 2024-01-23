@@ -91,7 +91,7 @@
             >sentiment_dissatisfied</v-icon
           >
         </template>
-        <span>No show</span>
+        <span>No Show</span>
       </v-tooltip>
 
       <v-tooltip top>
@@ -792,13 +792,13 @@ export default {
 
           case "Completed":
             comDTitle = "Study appointment update";
-            comDText = "Confirm appointment(s) that you would like to mark as completed";
+            comDText = "Confirm the appointment(s) that you would like to mark as completed";
             break;
 
           case "Rescheduling":
             comDTitle = "Study appointment update";
             comDText =
-              "Confirm appointment(s) that you would like to reschedule";
+              "Confirm the appointment(s) that you would like to reschedule";
             break;
 
           default:
@@ -812,11 +812,10 @@ export default {
 
         const result = await this.$refs.confirmD.open(comDTitle, comDText, item, status);
 
-        if (result) {     
+        if (result) {
 
           const {allChecked, newItem, unSelectedItem, selectedItem} = result;
           
-
           this.$store.commit("setStudyName", []);
           this.$emit("rowSelected", item.Family, this.Schedules.indexOf(item));
           this.response = status;
@@ -830,13 +829,6 @@ export default {
               this.editedSchedule.Appointments[0].Child.Family.Email = this.editedSchedule.Family.Email;
               this.editedSchedule.Appointments[0].Child.Family.NamePrimary = this.editedSchedule.Family.NamePrimary;
 
-              // console.log(this.editedSchedule);
-              // console.log(
-              //   this.potentialStudies(
-              //     this.editedSchedule.Appointments[0].Child,
-              //     this.editedSchedule.Appointments[0].FK_Study
-              //   )
-              // );
               this.dialog = true;
               break;
 
@@ -851,10 +843,12 @@ export default {
                 } else {
                   // delete the selected appointments
                   for (const app of unSelectedItem.Appointments) {
-                    await appointment.delete({
-                      id: app.id,
-                      FK_Schedule: item.id,
-                    });
+                    if (app.calendarEventId) {
+                      await appointment.delete({
+                        id: app.id,
+                        FK_Schedule: item.id,
+                      });
+                    }
                   }
                   newItem.Completed = !newItem.Completed;
                   //complete rest of the appointments
@@ -871,17 +865,18 @@ export default {
                   }
 
                   const newUnSelectedItem = {
-                    AppointmentTime: this.TodaysDate,
+                    AppointmentTime: unSelectedItem.AppointmentTime,
                     Status: "Rescheduling",
                     FK_Family: unSelectedItem.FK_Family,
                     Note: unSelectedItem.Note,
-                    summary: unSelectedItem.summery,
+                    summary: unSelectedItem.summary,
                     Appointments: unSelectedItem.Appointments,
                     ScheduledBy: unSelectedItem.ScheduledBy,
                     location: unSelectedItem.location,
                     description: unSelectedItem.description,
                     attendees: unSelectedItem.attendees,
                   }; 
+                  // console.log(newUnSelectedItem);
                   await schedule.create(newUnSelectedItem);
                 }
               } catch (error) {
@@ -893,18 +888,10 @@ export default {
 
             case "Rescheduling":
               item.Status = 'Rescheduling'
-
+              
               try {
-                await schedule.update(item);
 
-                if (item.calendarEventId) {
-                  await calendar.delete({
-                      id: appointment.id,
-                      FK_Schedule: item.id,
-                      lab: this.$store.state.lab
-                    });
-
-                } else if (allChecked) {
+                if (allChecked) {
                   for (const appointment of item.Appointments) {
                     await calendar.delete({
                       id: appointment.id,
@@ -913,12 +900,13 @@ export default {
                     });
                   }
                 } else {
-
-                  for (const app of selectedItem.Appointments) {
-                    await appointment.delete({
-                      id: app.id,
-                      FK_Schedule: item.id,
-                    });
+                  if (!item.calendarEventId) {
+                    for (const app of selectedItem.Appointments) {
+                      await appointment.delete({
+                        id: app.id,
+                        FK_Schedule: item.id,
+                      });
+                    }
                   }
 
                   const newStudyNames = [];
@@ -930,11 +918,11 @@ export default {
                   }
 
                   const newSelectedItem = {
-                    AppointmentTime: this.TodaysDate,
+                    AppointmentTime: selectedItem.AppointmentTime,
                     Status: "Rescheduling",
                     FK_Family: selectedItem.FK_Family,
                     Note: selectedItem.Note,
-                    summary: selectedItem.summery,
+                    summary: selectedItem.summary,
                     Appointments: selectedItem.Appointments,
                     ScheduledBy: selectedItem.ScheduledBy,
                     location: selectedItem.location,
@@ -1102,17 +1090,6 @@ export default {
           studyNames = Array.from(new Set(studyNames));
 
           this.editedSchedule.summary = studyNames.join(" + ");
-
-          // this.editedSchedule.start = {
-          //   dateTime: moment(this.studyDateTime).toISOString(true),
-          //   timeZone: "America/Toronto",
-          // };
-          // this.editedSchedule.end = {
-          //   dateTime: moment(this.studyDateTime)
-          //     .add(1, "h") // might change if multiple studies are scheduled for one visit
-          //     .toISOString(true),
-          //   timeZone: "America/Toronto",
-          // };
 
           if (this.skipReminderEmailStatus) {
             this.editedSchedule.Reminded = true;
@@ -1948,10 +1925,12 @@ export default {
   background-color: var(--v-secondary-lighten1) !important;
 } */
 
-/deep/ tr.v-data-table__selected {
+tr.v-data-table__selected {
   /* color: var(--v-secondary-lighten1) !important; */
   /* margin: 2px !important;
   border-style: double   !important; */
   background-color: var(--v-secondary-lighten1) !important;
 }
+
+
 </style>
