@@ -19,7 +19,8 @@
         </div>
       </v-col>
       <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-        <h4>V1.2.20240122</h4>
+        <div align="start" v-html="releaseNote" style="height: 400px; overflow-y: scroll !important;">
+        </div>
       </v-col>
 
       <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
@@ -75,17 +76,17 @@
         </v-alert>
       </v-col>
     </v-row>
-    <body align="start" v-html="releaseNote">
 
-    </body>
 
-    </v-container>  
+
+  </v-container>
 </template>
 
 <script>
 import login from "@/services/login";
 import testingRoom from "@/services/testingRoom";
 import externalAPIs from "@/services/externalAPIs";
+// import {releaseNote} from '@/assets/releaseNote.html';
 
 export default {
   data() {
@@ -99,7 +100,6 @@ export default {
       changeTemporaryPassword: false,
       valid: true,
       validLogin: false,
-      releaseNote: require('raw-loader! @/assets/releaseNote.html'),
     };
   },
   methods: {
@@ -289,6 +289,12 @@ export default {
       return (
         this.newPassword === this.newPasswordVerify || "Password must match"
       );
+    },
+
+    releaseNote() {
+      const releaseNote = "<html><head><title>Release Notes</title></head><h1>Release Notes (V1.2.20240122)</h1><body><h2>Schedule Appointments Enhancements</h2><ul><li><strong>Partial Update Feature</strong>: Capability to modify individual appointments within a schedule, beneficial for scheduling subsequent visits.</li><li><strong>Direct Reschedule Functionality</strong>: Directly reschedule appointments to a new date and time, ideal for specific rescheduling needs.</li><li><strong>Multiple Studies Per Visit</strong>: Supports booking multiple studies per visit, with each represented as separate Google Calendar events.</li></ul><h2>Testing Rooms Feature</h2><ul><li>Create testing rooms via the Settings page, each linked to an independent Google Calendar.</li><li>Associate studies with a testing room on the Study Management page; appointments will appear in the relevant Google Calendar.</li><li>Default to the main calendar if no specific testing room is set up.</li></ul><h2>Email System Enhancements</h2><ul><li><strong>Email Tags</strong>: Organize emails by study name. Automatic in Gmail, manual format #%#study.name#%# for others.</li><li><strong>Email Templates</strong>: New follow-up and reschedule email templates accessible via the Mail icon on scheduling pages.</li><li><strong>Reminder Emails</strong>: Daily reminders for schedule follow-up and study completion.</li></ul><h2>Daily Database Updates</h2><ul><li><strong>Study Completion</strong>: Automatic marking of appointments as Completed based on specific criteria.</li><li><strong>Family Release</strong>: Release families from a lab when associated study appointment is marked as Completed.</li></ul><h2>New User Interface</h2><p>A new user interface for scheduling studies. Explore through the <a href='https://gentle-pithivier-6d0847.netlify.app'>DRDB scheduling demo</a>.</p><h2>Performance Improvements and Bug Fixes</h2><p>Various system enhancements and bug fixes to improve performance and functionality.</p></body></html>";
+
+      return releaseNote;
     },
   },
 
