@@ -667,6 +667,7 @@ exports.delete = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: schedule.calendarEventId,
         sendupdates: 'all',
+        sendNotifications: true,
       });
     }
 

@@ -30,6 +30,7 @@ exports.create = asyncHandler(async (req, res) => {
       calendarId: event.calendarId,
       resource: event,
       sendupdates: 'all',
+      sendNotifications: true,
     });
 
     event.eventURL = calEvent.data.htmlLink;
@@ -117,6 +118,7 @@ exports.update = asyncHandler(async (req, res) => {
       eventId: event.eventId,
       resource: event,
       sendupdates: 'all',
+      sendNotifications: true,
     });
 
     event.eventURL = calEvent.data.htmlLink;
