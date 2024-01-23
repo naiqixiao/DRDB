@@ -349,6 +349,10 @@ span {
   border-bottom-right-radius: 8px !important;
 }
 
+#app > div > main > div > div > div.row > div.col-md-4.col-12 > div > div.v-data-table.elevation-1.v-data-table--fixed-header.v-data-table--has-bottom.theme--light > div.v-data-footer {
+  margin-right: 0px;
+}
+
 .theme--light.v-btn.v-btn--disabled .v-icon, .theme--light.v-btn.v-btn--disabled .v-btn__loading {
   color: var(--v-tertiary-lighten1) !important;
 }

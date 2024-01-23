@@ -1,13 +1,19 @@
 <template>
     <div style="margin: 0px">
         <!-- Main Data Table -->
-        <v-data-table :headers="headers" :items="Schedules" :items-per-page="5" class="elevation-1" single-select
+       
+        <v-data-table :headers="headers" :items="Schedules" :items-per-page=parseInt(nofItems) class="elevation-1" single-select
             no-data-text="No study appointment to display." item-key="id" single-expand @click:row="rowSelected"
-            height="800px">
+            :footer-props="{
+                'items-per-page-text': 'Schedules per page:',
+                'items-per-page-options': [parseInt(this.nofItems), 2* parseInt(this.nofItems)],
+                // 'disable-items-per-page': true,
+            }">
 
             <!-- appointment info -->
             <template v-slot:[`item.participantInfo`]="{ item, row }">
                 <v-container style="display: flex; align-items: center; flex-wrap: wrap;">
+
                     <body align="start" v-html="apptInfo(item)"></body>
                     <v-spacer></v-spacer>
                     <v-btn dark outlined x-small @click="rowSelected(item, row)">
@@ -120,6 +126,8 @@ import { childAge } from '@/assets/JS/displayFunctions.js';
 export default {
     props: {
         Schedules: Array,
+        tableHeight: String,
+        nofItems: String,
     },
 
     components: {
@@ -148,7 +156,7 @@ export default {
                 text: "Study Time",
                 align: "center",
                 value: "AppointmentTime",
-                width: "10%",
+                width: "13%",
             }, {
                 text: "Participant Info",
                 align: "center",
@@ -187,12 +195,12 @@ export default {
                 if (this.currentSchedule.Status === "Confirmed" && this.currentSchedule.Completed === true) {
                     this.$refs.scheduleDialog.emailType = "ThankYou";
                 }
-                
-                if (this.currentSchedule.Status === "TBA" || this.currentSchedule.Status === "Rescheduling" || this.currentSchedule.Status === "No Show" ||  this.currentSchedule.Status === "Cancelled") {
+
+                if (this.currentSchedule.Status === "TBA" || this.currentSchedule.Status === "Rescheduling" || this.currentSchedule.Status === "No Show" || this.currentSchedule.Status === "Cancelled") {
                     this.$refs.scheduleDialog.emailType = "Follow-up";
                     console.log(this.$refs.scheduleDialog.emailType);
                 }
-            } 
+            }
         },
 
         addAppointment(appointment) {
@@ -380,6 +388,13 @@ export default {
             // };
         }
     },
+
+    computed: {
+        // itemsPerPage(){
+        //     const itemsPerPage = parseInt(this.nofItems);
+        //     return [itemsPerPage, 2 * itemsPerPage];
+        // }
+    }
 };
 </script>
 
@@ -387,4 +402,5 @@ export default {
 .detailBox {
     color: var(--v-primary-base);
     margin: 8px !important;
-}</style>
+}
+</style>

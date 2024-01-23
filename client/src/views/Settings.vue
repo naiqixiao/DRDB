@@ -937,11 +937,12 @@ export default {
 .testing-room--title {
   display: flex;
   justify-content: center;
-  font-size: x-large;
+  font-size: large;
 }
 
 .testing-room--text {
   font-size: large;
+  justify-content: left;
   font-weight: 500;
 }
 

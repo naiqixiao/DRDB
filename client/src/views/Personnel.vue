@@ -106,7 +106,7 @@
       <v-col cols="12" md="8">
         <v-col md="12" class="subtitle">
           <v-divider></v-divider>
-          <h4 class="text-left">Personnel information:</h4>
+          <h3 class="text-left">Personnel information:</h3>
         </v-col>
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container>
@@ -151,7 +151,7 @@
                               $store.state.role != 'Lab manager'
                             "
                           >
-                            <v-icon left v-bind="iconSize" class="fabIcon"
+                            <v-icon left  class="fabIcon"
                               >add</v-icon
                             >Add a person
                           </v-btn>
@@ -174,7 +174,7 @@
                                 $store.state.role != 'Lab manager')
                             "
                           >
-                            <v-icon left v-bind="iconSize" class="fabIcon"
+                            <v-icon left  class="fabIcon"
                               >edit</v-icon
                             >Update info
                           </v-btn>
@@ -196,7 +196,7 @@
                                 $store.state.role != 'Lab manager')
                             "
                           >
-                            <v-icon left v-bind="iconSize" class="fabIcon"
+                            <v-icon left  class="fabIcon"
                               >delete</v-icon
                             >delete
                           </v-btn>
@@ -210,7 +210,7 @@
 
               <v-col md="12" class="subtitle">
                 <v-divider></v-divider>
-                <h4 class="text-left">Assigned studies:</h4>
+                <h3 class="text-left">Assigned studies:</h3>
               </v-col>
               <v-col cols="12" md="12">
                 <AssignedStudies
@@ -637,4 +637,5 @@ export default {
 .fabIcon {
   color: var(--v-secondary-base) !important;
 }
+
 </style>

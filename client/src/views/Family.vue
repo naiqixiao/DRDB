@@ -490,7 +490,7 @@
         
         <ScheduleTable
           :Schedules="currentFamily.Schedules"
-          tableHeight="400px"
+          nofItems = "3"
           @updatedSchedule="updatedSchedule"
           ></ScheduleTable>
           <!-- @nextContactDone="updateNextContactFrontend" -->

@@ -132,7 +132,7 @@
 
         <v-row justify="center" style="padding-top: 28px">
           <v-col>
-            <ScheduleTable :Schedules="Schedules" @rowSelected="updateFamily" tableHeight="800px"
+            <ScheduleTable :Schedules="Schedules" @rowSelected="updateFamily" nofItems="6"
               @updatedSchedule="updatedSchedule"></ScheduleTable>
           </v-col>
         </v-row>
