@@ -228,161 +228,161 @@ sequelize.sync({ force: false }).then(() => {
 });
 
 // Function to import SQL file
-async function importSqlFile(filePath) {
-  try {
-    // Read SQL file
-    const sql = fs.readFileSync(path.resolve(__dirname, filePath), "utf8");
+// async function importSqlFile(filePath) {
+//   try {
+//     // Read SQL file
+//     const sql = fs.readFileSync(path.resolve(__dirname, filePath), "utf8");
 
-    // Split SQL file into individualqueries
-    const queries = sql.split(";");
+//     // Split SQL file into individualqueries
+//     const queries = sql.split(";");
 
-    let dbName = config.DBName;
+//     let dbName = config.DBName;
 
-    // update child age info whenever connect to the database.
-    var queryString =
-      "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
-    queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
+//     // update child age info whenever connect to the database.
+//     var queryString =
+//       "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
+//     queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
-    try {
-      await sequelize.query(queryString);
+//     try {
+//       await sequelize.query(queryString);
 
-      await log.createLog("Age Updated", {}, "Children's age is updated");
-    } catch (error) {
-      throw error;
-    }
+//       await log.createLog("Age Updated", {}, "Children's age is updated");
+//     } catch (error) {
+//       throw error;
+//     }
 
-    // database updates
-    let MySQLSyntax =
-      "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
-      dbName +
-      "' AND TABLE_NAME = 'Schedule' AND COLUMN_NAME = 'eventURL';";
-    const scheduleDataType = await sequelize.query(MySQLSyntax);
+//     // database updates
+//     let MySQLSyntax =
+//       "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
+//       dbName +
+//       "' AND TABLE_NAME = 'Schedule' AND COLUMN_NAME = 'eventURL';";
+//     const scheduleDataType = await sequelize.query(MySQLSyntax);
 
-    MySQLSyntax =
-      "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
-      dbName +
-      "' AND TABLE_NAME = 'Appointment' AND COLUMN_NAME = 'eventURL';";
-    const appointmentDataType = await sequelize.query(MySQLSyntax);
+//     MySQLSyntax =
+//       "SELECT CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '" +
+//       dbName +
+//       "' AND TABLE_NAME = 'Appointment' AND COLUMN_NAME = 'eventURL';";
+//     const appointmentDataType = await sequelize.query(MySQLSyntax);
 
-    const scheduleEventURLLength =
-      scheduleDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
-    const appointmentEventURLLength =
-      appointmentDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
+//     const scheduleEventURLLength =
+//       scheduleDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
+//     const appointmentEventURLLength =
+//       appointmentDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
 
-    if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
-      for (const query of queries) {
-        console.log(query);
-        await sequelize.query(query);
-      }
-      console.log("Columns updated");
-    } else {
-      console.log("Columns up to date");
-    }
+//     if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
+//       for (const query of queries) {
+//         console.log(query);
+//         await sequelize.query(query);
+//       }
+//       console.log("Columns updated");
+//     } else {
+//       console.log("Columns up to date");
+//     }
 
-    // Execute only ALTER TABLE statements for adding columns if they do not exist
-    for (const query of queries) {
-      queryString = query.replace(/\${{DBName}}/g, config.DBName);
+//     // Execute only ALTER TABLE statements for adding columns if they do not exist
+//     for (const query of queries) {
+//       queryString = query.replace(/\${{DBName}}/g, config.DBName);
 
-      if (queryString.trim().startsWith("ALTER TABLE")) {
-        if (queryString.includes("MODIFY")) {
-          const updateColumn = updateColumnLength(queryString);
-          if (updateColumn) {
-            await sequelize.query(queryString);
-          }
-          continue;
-        } else if (queryString.includes("ADD")) {
-          // Check if the column already exists
-          const columnExists = await columnExistsInTable(queryString);
+//       if (queryString.trim().startsWith("ALTER TABLE")) {
+//         if (queryString.includes("MODIFY")) {
+//           const updateColumn = updateColumnLength(queryString);
+//           if (updateColumn) {
+//             await sequelize.query(queryString);
+//           }
+//           continue;
+//         } else if (queryString.includes("ADD")) {
+//           // Check if the column already exists
+//           const columnExists = await columnExistsInTable(queryString);
 
-          // If the column does not exist, execute the ALTER TABLE statement
-          if (!columnExists) {
-            await sequelize.query(queryString);
-          }
-          continue;
-        }
-      }
+//           // If the column does not exist, execute the ALTER TABLE statement
+//           if (!columnExists) {
+//             await sequelize.query(queryString);
+//           }
+//           continue;
+//         }
+//       }
 
-      if (queryString.trim().startsWith("CREATE TABLE")) {
-        const tableExists = await tableExistsInDatabase(queryString);
-        if (!tableExists) {
-          await sequelize.query(queryString);
-        }
-      }
-    }
+//       if (queryString.trim().startsWith("CREATE TABLE")) {
+//         const tableExists = await tableExistsInDatabase(queryString);
+//         if (!tableExists) {
+//           await sequelize.query(queryString);
+//         }
+//       }
+//     }
 
-    console.log("SQL file imported successfully");
-  } catch (error) {
-    console.error("Error importing SQL file:", error);
-  }
-}
+//     console.log("SQL file imported successfully");
+//   } catch (error) {
+//     console.error("Error importing SQL file:", error);
+//   }
+// }
 
-// Function to check if a column exists in the table
-async function columnExistsInTable(queryString) {
-  const columnNameIndex = queryString.search("ADD") + 4;
-  const substring = queryString.substring(columnNameIndex);
-  const columnNameMatch = substring.match(/^\s*(\S+)/);
-  const columnName = columnNameMatch ? columnNameMatch[1] : null;
+// // Function to check if a column exists in the table
+// async function columnExistsInTable(queryString) {
+//   const columnNameIndex = queryString.search("ADD") + 4;
+//   const substring = queryString.substring(columnNameIndex);
+//   const columnNameMatch = substring.match(/^\s*(\S+)/);
+//   const columnName = columnNameMatch ? columnNameMatch[1] : null;
 
-  if (!columnName) {
-    return false;
-  }
+//   if (!columnName) {
+//     return false;
+//   }
 
-  const tableNameIndex = queryString.search("TABLE") + 5;
-  const tableSubstring = queryString.substring(tableNameIndex);
-  const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
-  const tableName = tableNameMatch ? tableNameMatch[1] : null;
+//   const tableNameIndex = queryString.search("TABLE") + 5;
+//   const tableSubstring = queryString.substring(tableNameIndex);
+//   const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
+//   const tableName = tableNameMatch ? tableNameMatch[1] : null;
 
-  const tableDescription = await sequelize
-    .getQueryInterface()
-    .describeTable(tableName);
+//   const tableDescription = await sequelize
+//     .getQueryInterface()
+//     .describeTable(tableName);
 
-  return tableDescription[columnName] !== undefined;
-}
+//   return tableDescription[columnName] !== undefined;
+// }
 
-async function tableExistsInDatabase(queryString) {
-  try {
-    const allTables = [];
-    const tables = await sequelize.getQueryInterface().showAllTables();
-    for (const table of tables) {
-      allTables.push(table.toLowerCase());
-    }
-    const tableNameIndex = queryString.search("TABLE") + 5;
-    const tableSubstring = queryString.substring(tableNameIndex);
-    const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
-    const tableName = tableNameMatch ? tableNameMatch[1] : null;
-    return allTables.includes(tableName);
-  } catch (error) {
-    console.error("Error checking if table exists:", error);
-    return false;
-  }
-}
+// async function tableExistsInDatabase(queryString) {
+//   try {
+//     const allTables = [];
+//     const tables = await sequelize.getQueryInterface().showAllTables();
+//     for (const table of tables) {
+//       allTables.push(table.toLowerCase());
+//     }
+//     const tableNameIndex = queryString.search("TABLE") + 5;
+//     const tableSubstring = queryString.substring(tableNameIndex);
+//     const tableNameMatch = tableSubstring.match(/^\s*(\S+)/);
+//     const tableName = tableNameMatch ? tableNameMatch[1] : null;
+//     return allTables.includes(tableName);
+//   } catch (error) {
+//     console.error("Error checking if table exists:", error);
+//     return false;
+//   }
+// }
 
-async function updateColumnLength() {
-  try {
-    var queryString =
-      "SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Schedule' AND COLUMN_NAME = 'eventURL'";
+// async function updateColumnLength() {
+//   try {
+//     var queryString =
+//       "SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Schedule' AND COLUMN_NAME = 'eventURL'";
 
-    const scheduleDataType = await sequelize.query(queryString);
+//     const scheduleDataType = await sequelize.query(queryString);
 
-    queryString =
-      "SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Appointment' AND COLUMN_NAME = 'eventURL'";
+//     queryString =
+//       "SELECT TABLE_NAME, COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Appointment' AND COLUMN_NAME = 'eventURL'";
 
-    const appointmentDataType = await sequelize.query(queryString);
+//     const appointmentDataType = await sequelize.query(queryString);
 
-    const scheduleEventURLLength =
-      scheduleDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
-    const appointmentEventURLLength =
-      appointmentDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
+//     const scheduleEventURLLength =
+//       scheduleDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
+//     const appointmentEventURLLength =
+//       appointmentDataType[0][0]["CHARACTER_MAXIMUM_LENGTH"];
 
-    if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
-      return true;
-    }
+//     if (scheduleEventURLLength < 255 || appointmentEventURLLength < 255) {
+//       return true;
+//     }
 
-    return false;
-  } catch (err) {
-    console.error("error: " + err.message);
-  }
-}
+//     return false;
+//   } catch (err) {
+//     console.error("error: " + err.message);
+//   }
+// }
 
-// Import SQL file
-importSqlFile("../../../MySQL/databaseUpdate.sql");
+// // Import SQL file
+// importSqlFile("../../../MySQL/databaseUpdate.sql");
