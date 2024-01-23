@@ -1,124 +1,85 @@
 <template>
-  <v-row justify="center" align="center" style="height: 900px">
-    <v-col cols="12" md="3">
-      <v-form ref="formLogin" v-model="validLogin" lazy-validation>
-        <v-text-field
-          label="Email"
-          :rules="this.$rules.email"
-          v-model="email"
-          clearable
-        ></v-text-field>
-        <br />
-        <v-text-field
-          label="Password"
-          type="password"
-          v-model="password"
-          clearable
-          @keydown.enter="login"
-          :rules="this.$rules.required"
-        ></v-text-field>
-      </v-form>
-    </v-col>
-    <v-col cols="12" md="3">
-      <div class="text-center">
-        <v-btn
-          rounded
-          color="primary"
-          large
-          @click.stop="login"
-          :disabled="!validLogin || !email"
-          >Login</v-btn
-        >
-      </div>
-      <div class="text-center" v-if="error">
-        <br />
-        <v-btn
-          rounded
-          color="primary"
-          large
-          @click="resetPassword"
-          :disabled="!email"
-          >Reset Password?</v-btn
-        >
-      </div>
-    </v-col>
-    <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-      <h4>V1.2.20240122</h4>
-    </v-col>
-
-    <v-dialog
-      v-model="dialog"
-      max-width="600px"
-      :retain-focus="false"
-      persistent
-    >
-      <v-card outlined>
-        <v-card-title class="headline"
-          >Welcome to the system! Please set your password.</v-card-title
-        >
-        <v-form ref="form" v-model="valid" lazy-validation>
-          <v-row v-if="!changeTemporaryPassword" justify="center">
-            <v-col cols="12" md="6" class="subtitle">
-              <v-divider></v-divider>
-              <h4 class="text-left">Current password:</h4>
-              <v-text-field
-                v-model="password"
-                type="password"
-                hide-details
-                dense
-              ></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row justify="center">
-            <v-col cols="12" md="12">
-              <v-divider></v-divider>
-            </v-col>
-            <v-col cols="12" md="6" class="subtitle">
-              <h4 class="text-left">New password:</h4>
-              <v-text-field
-                v-model="newPassword"
-                type="password"
-                clearable
-                hide-details
-              ></v-text-field>
-            </v-col>
-          </v-row>
+  <v-container>
+    <v-row justify="center" align="center" style="height: 900px">
+      <v-col cols="12" md="3">
+        <v-form ref="formLogin" v-model="validLogin" lazy-validation>
+          <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
           <br />
-          <v-row justify="center">
-            <v-col cols="12" md="6" class="subtitle">
-              <h4 class="text-left">Confirm password:</h4>
-              <v-text-field
-                v-model="newPasswordVerify"
-                clearable
-                type="password"
-                :rules="[passwordConfirmationRule]"
-              ></v-text-field>
-            </v-col>
-          </v-row>
+          <v-text-field label="Password" type="password" v-model="password" clearable @keydown.enter="login"
+            :rules="this.$rules.required"></v-text-field>
         </v-form>
+      </v-col>
+      <v-col cols="12" md="3">
+        <div class="text-center">
+          <v-btn rounded color="primary" large @click.stop="login" :disabled="!validLogin || !email">Login</v-btn>
+        </div>
+        <div class="text-center" v-if="error">
+          <br />
+          <v-btn rounded color="primary" large @click="resetPassword" :disabled="!email">Reset Password?</v-btn>
+        </div>
+      </v-col>
+      <v-col cols="12" lg="12" class="d-flex align-end justify-end">
+        <h4>V1.2.20240122</h4>
+      </v-col>
 
-        <v-card-actions>
-          <v-row justify="space-between" style="height: 50px">
-            <v-col md="2"></v-col>
-            <v-col md="2">
-              <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
-            </v-col>
-            <v-col md="2">
-              <v-btn
-                color="primary"
-                :disabled="
-                  passwordConfirmationRule != true || newPassword == null
-                "
-                @click="changePassword"
-                >Confirm</v-btn
-              >
-            </v-col>
-            <v-col md="2"></v-col>
-          </v-row>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+      <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>
+        <v-card outlined>
+          <v-card-title class="headline">Welcome to the system! Please set your password.</v-card-title>
+          <v-form ref="form" v-model="valid" lazy-validation>
+            <v-row v-if="!changeTemporaryPassword" justify="center">
+              <v-col cols="12" md="6" class="subtitle">
+                <v-divider></v-divider>
+                <h4 class="text-left">Current password:</h4>
+                <v-text-field v-model="password" type="password" hide-details dense></v-text-field>
+              </v-col>
+            </v-row>
+            <v-row justify="center">
+              <v-col cols="12" md="12">
+                <v-divider></v-divider>
+              </v-col>
+              <v-col cols="12" md="6" class="subtitle">
+                <h4 class="text-left">New password:</h4>
+                <v-text-field v-model="newPassword" type="password" clearable hide-details></v-text-field>
+              </v-col>
+            </v-row>
+            <br />
+            <v-row justify="center">
+              <v-col cols="12" md="6" class="subtitle">
+                <h4 class="text-left">Confirm password:</h4>
+                <v-text-field v-model="newPasswordVerify" clearable type="password"
+                  :rules="[passwordConfirmationRule]"></v-text-field>
+              </v-col>
+            </v-row>
+          </v-form>
+
+          <v-card-actions>
+            <v-row justify="space-between" style="height: 50px">
+              <v-col md="2"></v-col>
+              <v-col md="2">
+                <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+              </v-col>
+              <v-col md="2">
+                <v-btn color="primary" :disabled="passwordConfirmationRule != true || newPassword == null
+                  " @click="changePassword">Confirm</v-btn>
+              </v-col>
+              <v-col md="2"></v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-row>
+    <v-row justify="center">
+      <v-col cols="12" md="6">
+        <v-alert type="error" dismissible v-model="error" border="left" elevation="2">
+          {{ error }}
+        </v-alert>
+      </v-col>
+    </v-row>
+    <body align="start" v-html="releaseNote">
+
+    </body>
+
+    </v-container>  
 </template>
 
 <script>
@@ -138,6 +99,7 @@ export default {
       changeTemporaryPassword: false,
       valid: true,
       validLogin: false,
+      releaseNote: require('raw-loader! @/assets/releaseNote.html'),
     };
   },
   methods: {
@@ -239,8 +201,8 @@ export default {
           this.error = null;
           alert(
             "Your password is reset, please find the temporary passowrd in your email (" +
-              this.email +
-              ") inbox."
+            this.email +
+            ") inbox."
           );
           this.email = null;
           this.password = null;
