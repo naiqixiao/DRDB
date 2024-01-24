@@ -143,7 +143,7 @@ exports.create = asyncHandler(async (req, res) => {
           calendarId: calId,
           eventId: appointment.calendarEventId,
           resource: updatedScheduleInfo,
-          sendupdates: 'all',
+          
           sendNotifications: true,
         });
       }
@@ -409,7 +409,7 @@ exports.update = asyncHandler(async (req, res) => {
         calendarId: "primary",
         eventId: Schedule.calendarEventId,
         resource: updatedScheduleInfo,
-        sendupdates: 'all',
+        
         sendNotifications: true,
       });
     } catch (err) {
