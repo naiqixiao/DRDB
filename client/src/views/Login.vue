@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-row justify="center" align="center" style="height: 900px">
+    <v-row justify="center" align="center" style="height: 800px">
       <v-col cols="12" md="3">
         <v-form ref="formLogin" v-model="validLogin" lazy-validation>
           <v-text-field label="Email" :rules="this.$rules.email" v-model="email" clearable></v-text-field>
@@ -19,8 +19,11 @@
         </div>
       </v-col>
       <v-col cols="12" lg="12" class="d-flex align-end justify-end">
-        <div align="start" v-html="releaseNote" style="height: 400px; overflow-y: scroll !important;">
-        </div>
+        <v-card outlined elevation="3" style="height: 462px; overflow-y: scroll !important; ">
+
+          <div align="start" v-html="releaseNote" style="margin: 36px">
+          </div>
+        </v-card>
       </v-col>
 
       <v-dialog v-model="dialog" max-width="600px" :retain-focus="false" persistent>

@@ -649,6 +649,7 @@ export default {
             this.deletedAppointments = [];
             this.additionalStudyButtonDisable = false;
             this.appointmentDetailReady = false;
+            this.assignStudyExperimenters();
         },
 
     },
@@ -677,8 +678,8 @@ export default {
         Appointments(newVal) {
 
             if (newVal) {
-                this.assignStudyExperimenters();
                 this.resetVariables();
+                // this.assignStudyExperimenters();
             }
         },
 
@@ -691,7 +692,8 @@ export default {
     },
 
     mounted() {
-        this.assignStudyExperimenters()
+        this.resetVariables();
+        // this.assignStudyExperimenters()
     }
 }
 </script>

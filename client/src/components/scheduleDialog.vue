@@ -988,18 +988,18 @@ export default {
     },
 
     watch: {
-        dialog() {
-            if (!this.dialog) {
-                // console.log("dialog closed", val)
-                this.resetVariables();
+        dialog(val) {
+            if (!val) {
                 this.$refs.dateTimePickerComp.resetDateTime();
+                this.$refs.appointmentDetails.resetVariables();
+                this.resetVariables();
             }
         },
 
         currentSchedule(newVal) {
             if (newVal) {
-                this.Note = newVal.Note;
-                this.nextNote = newVal.nextContactNote;
+                this.Note = newVal.Note || "";
+                this.nextNote = newVal.nextContactNote || "";
                 this.scheduleButtonText = (this.scheduleType == 'create') ? "Create Appointment" : "Update Appointment"
 
                 this.initiateVariables(this.dialogType);
@@ -1018,15 +1018,14 @@ export default {
     },
 
     mounted() {
-        this.Note = this.currentSchedule.Note;
-        this.nextNote = this.currentSchedule.nextContactNote;
+        this.Note = this.currentSchedule.Note || "";
+        this.nextNote = this.currentSchedule.nextContactNote || "";
         this.scheduleButtonText = (this.scheduleType == 'create') ? "Create Schedule" : "Update Schedule"
 
         this.initiateVariables(this.dialogType);
         this.dateTimePickerDisable = (this.parentResponse !== 'Confirmed');
 
         switch (this.parentResponse) {
-
             case 'Interested':
             case 'Left a message':
             case 'Rejected':

@@ -27,7 +27,7 @@ exports.create = asyncHandler(async (req, res) => {
     const calEvent = await calendar.events.insert({
       calendarId: event.calendarId,
       resource: event,
-
+      sendUpdates: "all",
       sendNotifications: true,
     });
 
@@ -113,7 +113,7 @@ exports.update = asyncHandler(async (req, res) => {
       calendarId: event.calendarId,
       eventId: event.eventId,
       resource: event,
-
+      sendUpdates: "all",
       sendNotifications: true,
     });
 

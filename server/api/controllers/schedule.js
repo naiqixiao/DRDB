@@ -666,7 +666,7 @@ exports.delete = asyncHandler(async (req, res) => {
       await calendar.events.delete({
         calendarId: "primary",
         eventId: schedule.calendarEventId,
-        
+        sendUpdates: "all",
         sendNotifications: true,
       });
     }
