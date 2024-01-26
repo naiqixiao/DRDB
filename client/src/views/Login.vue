@@ -18,7 +18,7 @@
           <v-btn rounded color="primary" large @click="resetPassword" :disabled="!email">Reset Password?</v-btn>
         </div>
       </v-col>
-      <v-col cols="12" lg="12" class="d-flex align-end justify-end">
+      <v-col cols="12" lg="12" class="d-flex align-center justify-center">
         <v-card outlined elevation="3" style="height: 462px; overflow-y: scroll !important; ">
 
           <div align="start" v-html="releaseNote" style="margin: 36px">

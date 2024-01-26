@@ -52,6 +52,11 @@
           </v-col>
         </v-row>
         <v-row justify="space-around">
+          <v-col cols="12" md="10">
+            <body align="center" v-html="searchNotice"></body>
+          </v-col>
+        </v-row>
+        <v-row justify="space-around">
           <h2>Short-cuts:</h2>
           <v-col cols="12" md="2">
             <v-btn-toggle dark>
@@ -179,6 +184,7 @@ export default {
   },
   data() {
     return {
+      searchNotice: "<p style='color: #ff0000; font-weight: 600; font-size: 16px; margin: 0px;''>To facilitate your search, you could enter <i>MULTIPLE</i> search criteria (e.g., Study Name, Status, Appointment Time) before clicking Search button.<br>You could also use the short-cuts below to search for studies in a period of time.</p>",
       dialogPickerBefore: false,
       dialogPickerAfter: false,
       currentFamily: {},
