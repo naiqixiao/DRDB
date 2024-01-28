@@ -794,7 +794,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
   }
 });
 
-// Retrieve today's appointments from the database.
+// reminder email for families
 exports.reminderEmail = asyncHandler(async (req, res) => {
   var startDate = moment();
   switch (moment().weekday()) {
@@ -987,7 +987,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
   }
 });
 
-// Retrieve today's appointments from the database.
+// reminder email for experimenters
 exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
   try {
     const experimenters = await model.personnel.findAll({
@@ -1407,7 +1407,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
       const emailContent = {
         from: experimenter.Lab.LabName + "<" + experimenter.Lab.Email + ">",
         to: experimenter.Name + "<" + experimenter.Email + ">",
-        subject: "Baby Lab Study Reminder",
+        subject: "[DRDB] Reminder for upcoming studies",
         body: body,
       };
 

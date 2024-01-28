@@ -51,17 +51,31 @@ cron.schedule('0 17 * * *', async (req, res) => {
 
 });
 
+cron.schedule('30 9 * * *', async (req, res) => {
+
+  ReminderController.autoCompletionReminder();
+
+});
+
+cron.schedule('35 9 * * *', async (req, res) => {
+
+  ReminderController.autoRejectionReminder();
+
+});
+
 cron.schedule('0 16 * * *', async (req, res) => {
 
   ReminderController.reminderEmailforExperimenters();
 
 });
 
+
+
 const FamilyController = require("./api/controllers/family");
 
-cron.schedule('0 8 * * *', async (req, res) => {
+cron.schedule('0 6 * * *', async (req, res) => {
 
-  FamilyController.releaseFamily();
+  FamilyController.releaseFamilyNew();
 
 });
 
@@ -78,7 +92,7 @@ const autoCancelController = require("./api/controllers/autoCancellation");
 
 cron.schedule('15 0 * * *', async (req, res) => {
 
-  autoCancelController.autoCancellation();
+  autoCancelController.autoCompletion();
 
 });
 

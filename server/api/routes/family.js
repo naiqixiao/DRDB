@@ -14,7 +14,7 @@ router.get("/followup", checkAuth, FamilyController.followupSearch);
 
 // router.post("/special", checkAuth, FamilyController.changeTrainingFamilyEmail);
 
-router.post("/releaseFamily", checkAuth, FamilyController.releaseFamily);
+router.post("/releaseFamily", checkAuth, FamilyController.releaseFamilyNew);
 
 router.post("/", checkAuth, FamilyController.update);
 
