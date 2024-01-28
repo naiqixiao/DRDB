@@ -180,13 +180,13 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
       );
     });
 
-    res
-      .status(200)
-      .send({
-        schedule1: schedules1,
-        schedule2: schedules2,
-        schedule3: schedules3,
-      });
+    // res
+    //   .status(200)
+    //   .send({
+    //     schedule1: schedules1,
+    //     schedule2: schedules2,
+    //     schedule3: schedules3,
+    //   });
   } catch (error) {
     throw error;
   }
