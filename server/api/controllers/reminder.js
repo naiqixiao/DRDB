@@ -539,7 +539,7 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
 
       // log
       await log.createLog(
-        "Auto reminder sent",
+        "AutoCompletion reminder sent",
         {
           Name: "",
           Email: "",
@@ -773,7 +773,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
 
       // log
       await log.createLog(
-        "Auto reminder sent",
+        "AutoRejection reminder sent",
         {
           Name: "",
           Email: "",
@@ -1425,7 +1425,7 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
 
       // log
       await log.createLog(
-        "Auto reminder sent",
+        "Auto experimenterReminder sent",
         {
           Name: "",
           Email: "",
