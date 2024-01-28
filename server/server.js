@@ -54,12 +54,14 @@ cron.schedule('0 17 * * *', async (req, res) => {
 cron.schedule('30 9 * * *', async (req, res) => {
 
   ReminderController.autoCompletionReminder();
+  console.log(new Date().toLocaleString() + ": autoCompletionReminder ran.");
 
 });
 
 cron.schedule('35 9 * * *', async (req, res) => {
 
   ReminderController.autoRejectionReminder();
+  console.log(new Date().toLocaleString() + ": autoRejectionReminder ran.");
 
 });
 

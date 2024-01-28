@@ -45,6 +45,26 @@ Each lab usually has multiple testing rooms. These rooms typically are used for 
 - randomized the order of available studies when booking additional studies.
 - set target sample size for each study, and show the completion percentage during booking (e.g., next to study button).
 
+# Periodic Automated Processes Schedule
+The following task can be customized in **server/server.js**.
+
+## Study Schedule Management
+- **00:15 AM**: The system will update study schedules as follows:
+  - **Confirmed** study schedules from two days prior will be marked as ***Completed***.
+  - **Tentative** study schedules that have not been updated for two weeks will also be marked as ***Rejected*** and ***Completed***.
+  - **Rejected** study schedules will be finalized and marked as ***Completed***.
+
+## Email Reminders
+- **04:00 PM**: Reminder emails will be sent to experimenters about their studies scheduled for the following day.
+- **05:00 PM**: Reminder emails will be dispatched to parents regarding their upcoming studies for the next day.
+- **09:30 AM**: Primary experimenters will receive reminders about their past studies being marked as ***Completed***.
+- **09:35 AM**: Recruiters will be reminded to follow up with families they previously contacted. Without follow-up, tentative study schedules will be marked as ***Rejected*** in one week.
+
+## Participant Availability and Data Maintenance
+- **06:00 AM**: Families linked to ***Completed*** study schedules will be made available for new studies.
+- **00:05 AM**: Children's ages in the system will be updated to reflect their current age.
+
+
 # Automated Rules
 - Whenever a schedule is created, the family is assigned to a lab.
     - And a warning will appear when this family is searched. 

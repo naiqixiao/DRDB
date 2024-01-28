@@ -114,7 +114,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
 
       await log.createLog(
         "Auto Completion",
-        User,
+        {},
         "marked a schedule(" +
           schedule.id +
           ") as Completed, due to its completion."
@@ -149,7 +149,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
 
       await log.createLog(
         "Auto Completion",
-        User,
+        {},
         "marked a schedule(" +
           schedule.id +
           ") as Rejected, due to the lack of update for two weeks. The schedule was marked as Completed."
@@ -175,7 +175,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
 
       await log.createLog(
         "Auto Completion",
-        User,
+        {},
         "marked a schedule(" + schedule.id + ") as Completed."
       );
     });
