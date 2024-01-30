@@ -800,8 +800,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
   try {
     const schedules = await model.schedule.findAll({
       where: queryString,
-      include: [{ model: model.family },
-      {model: model.appointment, include: [model.study] }],
+      include: [{ model: model.family }],
     });
 
     // release the families.
