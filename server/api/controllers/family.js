@@ -779,28 +779,58 @@ exports.update = asyncHandler(async (req, res) => {
 
 exports.releaseFamilyNew = asyncHandler(async (req, res) => {
   var queryString = {};
+  var IDs = [];
 
-  queryString.Completed === true;
-  queryString["$Family.AssignedLab$"] !== null;
+  queryString.Completed = 1;
+  queryString["$Family.AssignedLab$"] = { [Op.ne]: null };
+
+  // queryString.Completed = 0;
+  // queryString["$Family.AssignedLab$"] = { [Op.eq]: null };
+  // queryString.createdAt = {
+  //   [Op.between]: [
+  //     moment()
+  //       .subtract(15, "days")
+  //       .startOf("day")
+  //       .toDate(),
+  //     moment()
+  //       .toDate(),
+  //   ],
+  // };
 
   try {
     const schedules = await model.schedule.findAll({
       where: queryString,
-      include: [{ model: model.family }],
+      include: [{ model: model.family },
+      {model: model.appointment, include: [model.study] }],
     });
 
     // release the families.
     IDs = schedules.map((schedule) => {
-      return schedule.FK_Family;
+      // return {familyID: schedule.FK_Family,
+      // labID: schedule.Appointments[0].Study.FK_Lab};
+      return schedule.FK_Family
     });
+
     IDs = Array.from(new Set(IDs)); // unique IDs
+
+    // IDs.forEach(async (idItem) => {
+    //   const updateFamilyInfo = { AssignedLab: idItem.labID };
+
+    //   await model.family.update(updateFamilyInfo, {
+    //     where: {id: idItem.familyID},
+    //   });
+
+    // })
 
     if (IDs.length > 0) {
       // update family by removing AssignedLab from the family
       const updateFamilyInfo = { AssignedLab: null };
 
+      queryString = {};
+      queryString.id = {[Op.in]: IDs};
+
       await model.family.update(updateFamilyInfo, {
-        where: { id: IDs },
+        where: queryString,
       });
 
       // Log
@@ -813,7 +843,11 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
       );
     }
 
-    // res.status(200).send(schedules);
+    if(res){
+
+      res.status(200).send(IDs);
+    }
+
   } catch (error) {
     throw error;
   }

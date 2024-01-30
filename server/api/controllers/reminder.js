@@ -783,12 +783,14 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       );
     });
 
-    // res.status(200).send({
-    //   info: "autoRejection reminder email sent!",
-    //   autoRejectionList: autoRejectionList,
-    //   schedules: schedules,
-    //   contactResearchers: contactResearchers,
-    // });
+    if (res){
+      res.status(200).send({
+        info: "autoRejection reminder email sent!",
+        autoRejectionList: autoRejectionList,
+        schedules: schedules,
+        contactResearchers: contactResearchers,
+      });
+    }
   } catch (error) {
     throw error;
   }
