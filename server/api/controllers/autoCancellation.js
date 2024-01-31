@@ -81,16 +81,16 @@ exports.autoCancellation = asyncHandler(async (req, res) => {
 
 exports.autoCompletion = asyncHandler(async (req, res) => {
   var queryString = {};
-  const User = {
-    Name: "",
-    Email: "",
-    LabName: "",
-  };
+  // const User = {
+  //   Name: "",
+  //   Email: "",
+  //   LabName: "",
+  // };
 
   // 1. search study appointments whose schedule time has passed but are yet marked as completed.
   // appointment time was 2 days before the current date.
   queryString.Status = "Confirmed";
-  queryString.Completed = false;
+  queryString.Completed = 0;
   queryString.AppointmentTime = {
     [Op.lt]: moment()
       .subtract(2, "days")
@@ -107,7 +107,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
     schedules1.forEach(async (schedule) => {
       await model.schedule.update(
         {
-          Completed: true,
+          Completed: 1,
         },
         { where: { id: schedule.id } }
       );
@@ -122,10 +122,11 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
     });
 
     // 2. search for appointments with **Tentative** status, if the last contacted date was 2 weeks ago, mark them as rejected, and completed.
+    queryString = {};
     queryString.Status = {
       [Op.in]: ["TBD", "Rescheduling", "No Show", "Cancelled"],
     };
-    queryString.Completed = false;
+    queryString.Completed = 0;
     queryString.updatedAt = {
       [Op.lt]: moment()
         .subtract(13, "days")
@@ -157,6 +158,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
     });
 
     // 3. search for appointments with **Rejected** status, mark them as completed.
+    queryString = {};
     queryString.Status = "Rejected";
     queryString.Completed = false;
 
@@ -180,13 +182,13 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
       );
     });
 
-    // res
-    //   .status(200)
-    //   .send({
-    //     schedule1: schedules1,
-    //     schedule2: schedules2,
-    //     schedule3: schedules3,
-    //   });
+    if (res) {
+      res.status(200).send({
+        schedule1: schedules1,
+        schedule2: schedules2,
+        schedule3: schedules3,
+      });
+    }
   } catch (error) {
     throw error;
   }

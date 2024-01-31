@@ -32,7 +32,7 @@ export default {
             formatedTime = moment(date).tz("America/Toronto").format("hh:mm");
           }
 
-          if (status != "Confirmed") {
+          if (status != "Confirmed" && status != "Completed") {
             formatedTime = "[orig.] " + formatedTime;
           }
 

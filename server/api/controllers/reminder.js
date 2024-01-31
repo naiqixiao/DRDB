@@ -550,12 +550,14 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
       );
     });
 
-    // res.status(200).send({
-    //   info: "reminder email sent!",
-    //   autoCompletionList: autoCompletionList,
-    //   schedules: schedules,
-    //   primaryExperimenters: primaryExperimenters,
-    // });
+    if (res) {
+      res.status(200).send({
+        info: "reminder email sent!",
+        autoCompletionList: autoCompletionList,
+        schedules: schedules,
+        primaryExperimenters: primaryExperimenters,
+      });
+    }
   } catch (error) {
     throw error;
   }
@@ -783,7 +785,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       );
     });
 
-    if (res){
+    if (res) {
       res.status(200).send({
         info: "autoRejection reminder email sent!",
         autoRejectionList: autoRejectionList,
