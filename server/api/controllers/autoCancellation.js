@@ -178,7 +178,7 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
       await log.createLog(
         "Auto Completion",
         {},
-        "marked a schedule(" + schedule.id + ") as Completed."
+        "marked a schedule(" + schedule.id + ") as Completed due to rejection."
       );
     });
 

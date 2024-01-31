@@ -16,6 +16,8 @@ router.get("/followup", checkAuth, FamilyController.followupSearch);
 
 router.post("/releaseFamily", checkAuth, FamilyController.releaseFamilyNew);
 
+router.post("/assignLabtoFamilies", checkAuth, FamilyController.assignLabtoFamilies);
+
 router.post("/", checkAuth, FamilyController.update);
 
 router.delete("/", checkAuth, FamilyController.delete);

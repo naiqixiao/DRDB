@@ -784,18 +784,22 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
   queryString.Completed = 1;
   queryString["$Family.AssignedLab$"] = { [Op.ne]: null };
 
-  // queryString.Completed = 0;
-  // queryString["$Family.AssignedLab$"] = { [Op.eq]: null };
-  // queryString.createdAt = {
-  //   [Op.between]: [
-  //     moment()
-  //       .subtract(15, "days")
-  //       .startOf("day")
-  //       .toDate(),
-  //     moment()
-  //       .toDate(),
-  //   ],
-  // };
+  // 2. The families have been contacted within the past 2 weeks, yet the appointment is tentative. These appointments are regarded as onGoing.
+  var queryString2 = {};
+  
+  // queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show", ];
+  queryString2.Completed = 0;
+  queryString2.updatedAt = {
+    [Op.between]: [
+      moment()
+        .subtract(2, "w")
+        .startOf("day")
+        .toDate(),
+      moment()
+        .startOf("day")
+        .toDate(),
+    ],
+  };
 
   try {
     const schedules = await model.schedule.findAll({
@@ -812,14 +816,22 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
 
     IDs = Array.from(new Set(IDs)); // unique IDs
 
-    // IDs.forEach(async (idItem) => {
-    //   const updateFamilyInfo = { AssignedLab: idItem.labID };
+    const schedulesOnGoing = await model.schedule.findAll({
+      where: queryString2,
+    });
 
-    //   await model.family.update(updateFamilyInfo, {
-    //     where: {id: idItem.familyID},
-    //   });
+    // remove the families with onGoing study appointments from the family list
+    if (schedulesOnGoing.length > 0) {
+      var IDsOnGoing = schedulesOnGoing.map((schedule) => {
+        return schedule.FK_Family;
+      });
 
-    // })
+      IDsOnGoing = Array.from(new Set(IDsOnGoing)); // unique IDs
+
+      // remove the families with onGoing study appointments from the list of families completed studies.
+      IDs = IDs.filter((id) => !IDsOnGoing.includes(id));
+
+    }
 
     if (IDs.length > 0) {
       // update family by removing AssignedLab from the family
@@ -841,6 +853,78 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
           ") were no longer assigned to any lab due to schedule completion."
       );
     }
+
+    if(res){
+
+      res.status(200).send(IDs);
+    }
+
+  } catch (error) {
+    throw error;
+  }
+});
+
+// reassign lab to families which have ongoing studies
+exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
+  var queryString = {};
+  var IDs = [];
+
+  queryString.Completed = 0;
+  queryString["$Family.AssignedLab$"] = { [Op.eq]: null };
+  queryString.createdAt = {
+    [Op.between]: [
+      moment()
+        .subtract(15, "days")
+        .startOf("day")
+        .toDate(),
+      moment()
+        .toDate(),
+    ],
+  };
+
+  try {
+    const schedules = await model.schedule.findAll({
+      where: queryString,
+      include: [{ model: model.family }, {model: model.appointment, include: [model.study]}],
+    });
+
+    // release the families.
+    IDs = schedules.map((schedule) => {
+      return {familyID: schedule.FK_Family,
+      labID: schedule.Appointments[0].Study.FK_Lab};
+    });
+
+    IDs = Array.from(new Set(IDs)); // unique IDs
+
+    IDs.forEach(async (idItem) => {
+      const updateFamilyInfo = { AssignedLab: idItem.labID };
+
+      await model.family.update(updateFamilyInfo, {
+        where: {id: idItem.familyID},
+      });
+
+    })
+
+    // if (IDs.length > 0) {
+    //   // update family by removing AssignedLab from the family
+    //   const updateFamilyInfo = { AssignedLab: null };
+
+    //   queryString = {};
+    //   queryString.id = {[Op.in]: IDs};
+
+    //   await model.family.update(updateFamilyInfo, {
+    //     where: queryString,
+    //   });
+
+    //   // Log
+    //   await log.createLog(
+    //     "Family Lab Assisgnment Release",
+    //     {},
+    //     "Families (" +
+    //       IDs.join(", ") +
+    //       ") were no longer assigned to any lab due to schedule completion."
+    //   );
+    // }
 
     if(res){
 

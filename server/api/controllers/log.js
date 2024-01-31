@@ -22,6 +22,7 @@ exports.createLog = async function (logType, user, note) {
       case 'Login Not Exist':
       case 'Age Updated':
       case 'Auto cancellation':
+      case 'Auto Completion':
         folderName = "api/logs/AutoLogs"
 
         user = {
