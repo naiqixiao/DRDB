@@ -1,12 +1,12 @@
 <template>
     <div style="margin: 0px">
         <!-- Main Data Table -->
-       
-        <v-data-table :headers="headers" :items="Schedules" :items-per-page=parseInt(nofItems) class="elevation-1" single-select
-            no-data-text="No study appointment to display." item-key="id" single-expand @click:row="rowSelected"
-            :footer-props="{
+
+        <v-data-table :headers="headers" :items="Schedules" :items-per-page=parseInt(nofItems) class="elevation-1"
+            single-select no-data-text="No study appointment to display." item-key="id" single-expand
+            @click:row="rowSelected" :footer-props="{
                 'items-per-page-text': 'Schedules per page:',
-                'items-per-page-options': [parseInt(this.nofItems), 2* parseInt(this.nofItems)],
+                'items-per-page-options': [parseInt(this.nofItems), 2 * parseInt(this.nofItems)],
                 // 'disable-items-per-page': true,
             }">
 
@@ -33,7 +33,8 @@
             <!-- appointment time -->
             <template v-slot:[`item.AppointmentTime`]="{ item, value }">
                 <DateDisplay :date="value" :format="'long'" :status="item.Status" style="font-weight: 500;" />
-                <body align="end">{{ "Lab: " + item.Appointments[0].Study.Lab.PI }}</body>
+
+                <body align="end" class="labTag">{{ "Lab: " + item.Appointments[0].Study.Lab.PI }}</body>
             </template>
 
             <!-- appointment status -->
@@ -403,5 +404,15 @@ export default {
 .detailBox {
     color: var(--v-primary-base);
     margin: 8px !important;
+}
+
+.labTag {
+    font-size: 12px;
+    font-weight: 500;
+    /* color: var(--v-primary-base); */
+    border: 1px solid;
+    /* Black border */
+    border-radius: 10px;
+    /* Rounded corners */
 }
 </style>
