@@ -33,6 +33,7 @@
             <!-- appointment time -->
             <template v-slot:[`item.AppointmentTime`]="{ item, value }">
                 <DateDisplay :date="value" :format="'long'" :status="item.Status" style="font-weight: 500;" />
+                <body align="end">{{ "Lab: " + item.Appointments[0].Study.Lab.PI }}</body>
             </template>
 
             <!-- appointment status -->
