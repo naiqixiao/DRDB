@@ -2,6 +2,13 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
+
+google.options({
+  params: {
+      sendUpdates: 'all'
+  }
+});
+
 const moment = require("moment");
 // const fs = require("fs");
 const log = require("../controllers/log");

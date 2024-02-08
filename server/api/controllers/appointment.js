@@ -2,6 +2,13 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
+
+google.options({
+  params: {
+      sendUpdates: 'all'
+  }
+});
+
 const fs = require("fs");
 const log = require("../controllers/log");
 // {
@@ -143,8 +150,8 @@ exports.create = asyncHandler(async (req, res) => {
           calendarId: calId,
           eventId: appointment.calendarEventId,
           resource: updatedScheduleInfo,
-          sendNotifications: true,
           sendUpdates: "all",
+          sendNotifications: true,
         });
       }
     } catch (error) {

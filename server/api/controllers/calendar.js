@@ -5,6 +5,12 @@ const moment = require("moment");
 // Require google from googleapis package.
 const { google } = require("googleapis");
 
+google.options({
+  params: {
+      sendUpdates: 'all'
+  }
+});
+
 const config = require("../../config/general");
 
 // a new calendar event creation function to generate a list of events for each appointment, and then send the output back to frontend.
