@@ -455,6 +455,8 @@ exports.update = asyncHandler(async (req, res) => {
       // add secondary experimenters
       var experimenter_2ndList = [];
 
+      updatedScheduleInfo.Completed = false;
+
       // check each appointment, and update the experimenter assignment
       for (const appointment of updatedScheduleInfo.Appointments) {
         if (!appointment.id) {
