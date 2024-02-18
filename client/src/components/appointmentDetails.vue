@@ -648,6 +648,7 @@ export default {
         resetVariables() {
             this.nSelectableStudies = [];
             this.deletedAppointments = [];
+            this.selectedStudies = [];
             this.selectedExperimenters = [];
             this.selectedExperimenters_2nd = [];
             this.additionalStudyButtonDisable = false;
