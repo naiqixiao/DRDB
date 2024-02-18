@@ -176,7 +176,7 @@ export default {
 
             // get the list of studies the child is eligible for, regardless if the child has participated in the study before.
             this.$store.state.studies.forEach((study) => {
-                if (this.studyElegibility(study, child)) {
+                if (this.studyElegibility(study, child) && !study.Completed) {
                     eligibleStudies.push(study.id);
                 }
             });
@@ -425,6 +425,7 @@ export default {
                 FK_Child: child.id,
                 FK_Family: child.FK_Family,
                 FK_Schedule: this.editedAppointments[0].FK_Schedule || null,
+                FK_Study: null,
                 Child: child
             }
 
@@ -647,6 +648,8 @@ export default {
         resetVariables() {
             this.nSelectableStudies = [];
             this.deletedAppointments = [];
+            this.selectedExperimenters = [];
+            this.selectedExperimenters_2nd = [];
             this.additionalStudyButtonDisable = false;
             this.appointmentDetailReady = false;
             this.assignStudyExperimenters();
