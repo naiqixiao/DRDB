@@ -488,15 +488,27 @@ export default {
                 if (event.eventId) {
 
                     // update the calendar event with a new time/experimenters
-                    await calendar.update(event);
+
+                    try {
+                        await calendar.update(event);
+
+                    } catch (error) {
+
+                        alert("Google Calendar update failed. Please update it manually!");
+                    }
 
                 } else {
 
                     // create a new calendar event
                     if (newSchedule.Status === 'Confirmed') {
-                        const createdCalendarEvents = await calendar.create(event);
-                        event.eventURL = createdCalendarEvents.data.eventURL;
-                        event.eventId = createdCalendarEvents.data.eventId;
+                        try {
+                            const createdCalendarEvents = await calendar.create(event);
+                            event.eventURL = createdCalendarEvents.data.eventURL;
+                            event.eventId = createdCalendarEvents.data.eventId;
+                        } catch (error) {
+
+                            alert("Google Calendar creation failed. Please create one manually!");
+                        }
                     }
                 }
             }
@@ -597,15 +609,25 @@ export default {
                 if (event.eventId) {
 
                     // update the calendar event
-                    await calendar.update(event);
+                    try {
+                        await calendar.update(event);
+
+                    } catch (error) {
+
+                        alert("Google Calendar update failed. Please update it manually!");
+                    }
 
                 } else {
 
                     // create a new calendar event
                     if (updatedSchedule.Status === 'Confirmed') {
-                        const createdCalendarEvent = await calendar.create(event);
-                        event.eventURL = createdCalendarEvent.data.eventURL;
-                        event.eventId = createdCalendarEvent.data.eventId;
+                        try {
+                            const createdCalendarEvent = await calendar.create(event);
+                            event.eventURL = createdCalendarEvent.data.eventURL;
+                            event.eventId = createdCalendarEvent.data.eventId;
+                        } catch (error) {
+                            alert("Google Calendar creation failed. Please create one manually!");
+                        }
                     }
 
                 }

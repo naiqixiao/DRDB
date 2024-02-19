@@ -556,6 +556,7 @@ export default {
         }
       } catch (error) {
         console.log(error);
+        alert("Email was not sent successfully. Please send it again manually!");
       }
 
     },
