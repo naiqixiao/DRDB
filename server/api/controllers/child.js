@@ -278,7 +278,7 @@ exports.search = asyncHandler(async (req, res) => {
         include: [{ model: model.appointment, include: [model.schedule] }, { model: model.family }],
       },
     ],
-    order: [[model.appointment, model.schedule, "AppointmentTime", "DESC"]],
+    order: [[model.family, model.appointment, "id", "DESC"]],
   });
 
   shuffle(children);

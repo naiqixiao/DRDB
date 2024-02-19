@@ -444,6 +444,7 @@ exports.search = asyncHandler(async (req, res) => {
             attributes: ["AutismHistory"],
           },
         ],
+        order: [['id', 'DESC']]
       },
       {
         model: model.schedule,
@@ -527,9 +528,10 @@ exports.search = asyncHandler(async (req, res) => {
             ],
           },
         ],
-        order: [['createdAt', 'DESC']],
+        order: [[{model: model.schedule}, 'id', 'DESC']],
       },
     ],
+    order: [[{model: model.schedule}, 'id', 'DESC']],
   });
 
   // remove families who requested "No more contact."
@@ -715,6 +717,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
         order: [[model.schedule, "AppointmentTime", "DESC"]],
       },
     ],
+    order: [[{model: model.schedule}, 'id', 'DESC']],
   });
 
   shuffle(families);
