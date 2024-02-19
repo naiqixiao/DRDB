@@ -527,7 +527,7 @@ exports.search = asyncHandler(async (req, res) => {
             ],
           },
         ],
-        order: [[model.schedule, "AppointmentTime", "DESC"]],
+        order: [['createdAt', 'DESC']],
       },
     ],
   });

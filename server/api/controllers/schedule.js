@@ -822,7 +822,7 @@ async function searchScheudles(queryString) {
         model: model.personnel,
       },
     ],
-    order: [["AppointmentTime", "ASC"]],
+    order: [['id', 'DESC']],
   });
 
   return schedule;
