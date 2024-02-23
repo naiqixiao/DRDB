@@ -648,6 +648,8 @@ export default {
       this.editedStudy = Object.assign({}, this.currentStudy);
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
       this.dialog = true;
+      this.selectedRoomId = null;
+      this.selectedRoomInfo = null;
     },
 
     async createStudy() {
@@ -689,6 +691,8 @@ export default {
         }
       }
 
+      this.selectedRoomInfo = this.currentTestingRooms.find(room => room.id === this.editedStudy.FK_TestingRoom);
+      this.selectedRoomId = null;
       this.close();
     },
 
