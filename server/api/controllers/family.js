@@ -431,9 +431,10 @@ exports.search = asyncHandler(async (req, res) => {
   var families = await model.family.findAll({
     where: queryString,
     include: [
-      model.conversations,
+      {model: model.conversations, separate: true},
       {
         model: model.child,
+        separate: true,
         include: [
           {
             model: model.appointment,
@@ -448,6 +449,8 @@ exports.search = asyncHandler(async (req, res) => {
       },
       {
         model: model.schedule,
+        separate: true,
+        order: [['id', 'DESC']],
         include: [
           {
             model: model.family,
@@ -472,6 +475,7 @@ exports.search = asyncHandler(async (req, res) => {
           },
           {
             model: model.appointment,
+            separate: true,
             include: [
               {
                 model: model.child,
@@ -528,10 +532,10 @@ exports.search = asyncHandler(async (req, res) => {
             ],
           },
         ],
-        order: [[{model: model.schedule}, 'id', 'DESC']],
+        // order: [[{model: model.schedule}, 'id', 'DESC']],
       },
     ],
-    order: [[{model: model.schedule}, 'id', 'DESC']],
+    // order: [[{model: model.schedule}, 'id', 'DESC']],
   });
 
   // remove families who requested "No more contact."
@@ -618,9 +622,10 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
     // },
     include: [
-      model.conversations,
+      {model: model.conversations, separate: true},
       {
         model: model.child,
+        separate: true,
         include: [
           {
             model: model.appointment,
@@ -634,6 +639,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
       },
       {
         model: model.schedule,
+        separate: false,
         include: [
           {
             model: model.family,

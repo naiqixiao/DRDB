@@ -520,7 +520,7 @@ export default {
     async searchStudies() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
-        includeScheules: true,
+        includeScheules: false,
         Completed: 0,
       };
 

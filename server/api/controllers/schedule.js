@@ -735,6 +735,7 @@ async function searchScheudles(queryString) {
     include: [
       {
         model: model.appointment,
+        separate: false,
         include: [
           {
             model: model.child,
@@ -750,6 +751,7 @@ async function searchScheudles(queryString) {
             include: [
               {
                 model: model.appointment,
+                separate: true,
                 attributes: ["FK_Study"],
               },
               {
@@ -788,6 +790,7 @@ async function searchScheudles(queryString) {
             model: model.personnel,
             as: "SecondaryExperimenter",
             through: { model: model.experimenterAssignment_2nd },
+            // separate: true,
             attributes: [
               "id",
               "Name",
@@ -804,9 +807,11 @@ async function searchScheudles(queryString) {
         include: [
           {
             model: model.child,
+            separate: true,
             include: [
               {
                 model: model.appointment,
+                separate: true,
                 attributes: ["FK_Study"],
               },
               {
@@ -815,7 +820,9 @@ async function searchScheudles(queryString) {
               },
             ],
           },
-          { model: model.conversations },
+          { model: model.conversations,
+            // separate: true, 
+          },
         ],
       },
       {

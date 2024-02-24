@@ -42,7 +42,7 @@ exports.search = asyncHandler(async (req, res) => {
       study = await model.study.findAll({
         where: queryString,
         include: [
-          model.appointment,
+          { model: model.appointment, separate: true },
           model.lab,
           {
             model: model.personnel,
@@ -57,7 +57,6 @@ exports.search = asyncHandler(async (req, res) => {
           },
         ],
       });
-
     } else {
       study = await model.study.findAll({
         where: queryString,

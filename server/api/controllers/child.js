@@ -68,9 +68,11 @@ exports.create = asyncHandler(async (req, res) => {
 
     // Log
     const User = req.body.User;
-    await log.createLog("Child Created", User, "added a child to a family (" +
-      child.FK_Family +
-      ")");
+    await log.createLog(
+      "Child Created",
+      User,
+      "added a child to a family (" + child.FK_Family + ")"
+    );
 
     res.status(200).send(child);
 
@@ -202,18 +204,18 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   if (req.query.studyID) {
-
     const studyInfo = await model.study.findOne({
-      where: { id: req.query.studyID }, include: [
+      where: { id: req.query.studyID },
+      include: [
         model.appointment,
         model.lab,
         {
           model: model.personnel,
-          as: 'PointofContact'
+          as: "PointofContact",
         },
         {
           model: model.personnel,
-          as: 'Experimenters',
+          as: "Experimenters",
           through: {
             model: model.experimenter,
           },
@@ -221,11 +223,9 @@ exports.search = asyncHandler(async (req, res) => {
       ],
     });
 
-    const pastParticipants = studyInfo.Appointments.map(
-      (appointment) => {
-        return appointment.FK_Child;
-      }
-    );
+    const pastParticipants = studyInfo.Appointments.map((appointment) => {
+      return appointment.FK_Child;
+    });
 
     queryString.id = { [Op.notIn]: pastParticipants };
   }
@@ -233,22 +233,28 @@ exports.search = asyncHandler(async (req, res) => {
   const children = await model.child.findAll({
     where: queryString,
     include: [
-      { model: model.appointment, include: [model.schedule] },
+      { model: model.appointment, separate: true, include: [model.schedule] },
       {
         model: model.family,
         include: [
           {
-            model: model.conversations,
+            model: model.conversations, separate: true, 
           },
           {
             model: model.child,
-            include: [{ model: model.appointment, attributes: ["FK_Study"] }, {
-              model: model.family,
-              attributes: ['AutismHistory']
-            }],
+            separate: true, 
+            include: [
+              { model: model.appointment, attributes: ["FK_Study"] },
+              {
+                model: model.family,
+                attributes: ["AutismHistory"],
+              },
+            ],
           },
           {
             model: model.appointment,
+            order: [["id", "DESC"]],
+            separate: true, 
             include: [
               { model: model.child, attributes: ["Name", "DoB"] },
               {
@@ -275,10 +281,15 @@ exports.search = asyncHandler(async (req, res) => {
         through: {
           model: model.sibling,
         },
-        include: [{ model: model.appointment, include: [model.schedule] }, { model: model.family }],
+        include: [
+          { model: model.appointment, 
+            separate: true, 
+            include: [model.schedule] },
+          { model: model.family },
+        ],
       },
     ],
-    order: [[model.family, model.appointment, "id", "DESC"]],
+    // order: [[model.family, model.appointment, "id", "DESC"]],
   });
 
   shuffle(children);
@@ -302,7 +313,11 @@ exports.update = asyncHandler(async (req, res) => {
   // Log
   const User = req.body.User;
 
-  await log.createLog("Child Updated", User, "updated a child's information (" + ID + ")");
+  await log.createLog(
+    "Child Updated",
+    User,
+    "updated a child's information (" + ID + ")"
+  );
 
   res.status(200).json(child);
 });
@@ -316,21 +331,24 @@ exports.delete = asyncHandler(async (req, res) => {
   // Log
   const User = JSON.parse(req.query.User);
 
-  await log.createLog("Child Deleted", User, "deleted a child (" + req.query.id + ")");
+  await log.createLog(
+    "Child Deleted",
+    User,
+    "deleted a child (" + req.query.id + ")"
+  );
 
   res.status(200).json(child);
 });
 
 // Update a sibling table
 exports.siblings = asyncHandler(async (req, res) => {
-
-  var queryString = "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from ${{DBName}}.Child c inner join ${{DBName}}.Child s on c.FK_Family  = s.FK_Family where c.IdWithinFamily <> s.IdWithinFamily "
+  var queryString =
+    "Select `s`.`id` as FK_Child, `c`.`id` as Sibling from ${{DBName}}.Child c inner join ${{DBName}}.Child s on c.FK_Family  = s.FK_Family where c.IdWithinFamily <> s.IdWithinFamily ";
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
-  const siblings = await model.sequelize.query(
-    queryString,
-    { type: QueryTypes.SELECT }
-  );
+  const siblings = await model.sequelize.query(queryString, {
+    type: QueryTypes.SELECT,
+  });
 
   const results = await model.sibling.bulkCreate(siblings);
 
@@ -339,17 +357,15 @@ exports.siblings = asyncHandler(async (req, res) => {
 
 // update Age
 exports.updateAge = asyncHandler(async (req, res) => {
-
-  var queryString = "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
+  var queryString =
+    "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
   try {
-
     await model.sequelize.query(queryString);
 
     await log.createLog("Age Updated", {}, "Children's age is updated");
-
   } catch (error) {
     throw error;
   }
-})
+});

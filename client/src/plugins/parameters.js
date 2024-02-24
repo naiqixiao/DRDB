@@ -424,7 +424,7 @@ export default {
         text: "Study",
         align: "center",
         value: "Study.StudyName",
-        width: "20%",
+        width: "10%",
       },
       {
         text: "Study Time",
@@ -443,20 +443,20 @@ export default {
         text: "Status",
         align: "center",
         value: "Schedule.Status",
-        width: "15%",
+        width: "12%",
       },
       {
-        text: "Updated",
+        text: "Updated at",
         align: "center",
         value: "Schedule.updatedAt",
-        width: "10%",
+        width: "12%",
       },
       // {
       //   text: "Complete",
       //   align: "center",
       //   value: "Schedule.Completed",
       //   sortable: false,
-      //   width: "10%",
+      //   width: "12%",
       // },
     ];
 
