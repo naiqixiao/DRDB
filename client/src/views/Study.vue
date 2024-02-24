@@ -131,20 +131,23 @@
           </v-col>
         </v-row>
         <v-row>
-          <v-col md="12" class="subtitle">
+          <v-col md="12" class="subtitle" v-if="currentStudy.FK_TestingRoom">
             <v-divider></v-divider>
             <h3 class="text-left">Testing room:</h3>
           </v-col>
-          <v-card class="individual-room-card" v-if="selectedRoomInfo" height="100px">
-            <v-card-title class="testing-room--title">{{ this.selectedRoomInfo.name }}</v-card-title>
-            <v-card-text class="testing-room--text">{{ this.selectedRoomInfo.location }}</v-card-text>
-          </v-card>
           <v-col md="12" class="subtitle" v-else>
-            <h3 class="text-center" style="color: red">Testing room has not been assigned to this study.</h3>
+            <h3 style="color: red">Testing room has not been assigned to this study.</h3>
           </v-col>
+
+          <v-col md="4" height="100px">
+            <v-select filled dense outlined :items='currentTestingRooms' v-model="selectedRoomId" :item-value="'id'"
+              :item-text="item => `${item.name} =>> ${item.location}`" @change="optionChangedTestingRoom"
+              hide-details></v-select>
+          </v-col>
+
         </v-row>
 
-        <v-divider style="margin: 8px 12px; flex: 0 0 100%;"></v-divider>
+        <v-divider style="margin: 12px 12px; flex: 0 0 100%;"></v-divider>
         <v-row justify="space-between">
           <v-col cols="12" md="2" dense>
             <v-tooltip right>
@@ -244,7 +247,7 @@
                     </v-col>
                     <v-col cols="12" sm="3">
                       <v-select class="textfield-family" :items="labMembers" :item-value="'id'" :item-text="'Name'"
-                        v-model="pointofContact" label="Point of Contact" outlined dense hide-details
+                        v-model="PointofContact" label="Point of Contact" outlined dense hide-details
                         return-object></v-select>
                     </v-col>
                   </v-row>
@@ -270,7 +273,7 @@
                     </v-col>
                   </v-row>
 
-                  <v-row>
+                  <!-- <v-row>
                     <v-col md="12" class="subtitle">
                       <v-divider></v-divider>
                       <h3 class="text-left">Testing room:</h3>
@@ -287,7 +290,7 @@
                     </v-row>
                     <div>
                     </div>
-                  </v-row>
+                  </v-row> -->
 
                   <v-row justify="space-around">
                     <v-col md="12">
@@ -546,7 +549,7 @@ export default {
       editedIndex: -1,
       labMembers: [],
       valid: true,
-      pointofContact: {},
+      PointofContact: {},
       customToolbar: [
         ["bold", "italic", "underline"],
         [{ color: [] }, { background: [] }],
@@ -556,18 +559,35 @@ export default {
       inProgressStudyFilter: true,
       search: "",
       currentTestingRooms: [],
-      selectedRoomId: null,
-      selectedRoomInfo: null
+      selectedRoomId: null
     };
   },
 
   methods: {
-    selectRoom(roomId) {
-      this.selectedRoomId = roomId;
+    async optionChangedTestingRoom() {
+      this.editedStudy = {
+        id: this.currentStudy.id,
+        FK_TestingRoom: this.selectedRoomId
+      }
+
+      try {
+        await study.update(this.editedStudy);
+
+        this.currentStudy.FK_TestingRoom = this.editedStudy.FK_TestingRoom;
+        Object.assign(this.Studies[this.editedIndex], this.editedStudy);
+        this.$store.dispatch("setStudies", this.Studies);
+
+      } catch (error) {
+        if (error.response.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({
+            name: "Login",
+          });
+        }
+      }
+
     },
-    isSelected(roomId) {
-      return this.selectedRoomId === roomId;
-    },
+
     async searchStudies() {
       var queryString = {
         FK_Lab: this.$store.state.lab,
@@ -579,10 +599,10 @@ export default {
 
         this.Studies = Result.data;
 
-        if (this.Studies.length > 0) {
-          this.editedIndex = this.editedIndex === -1 ? 0 : this.editedIndex;
-          this.currentStudy = this.Studies[this.editedIndex];
-        }
+        // if (this.Studies.length > 0) {
+        //   this.editedIndex = this.editedIndex === -1 ? 0 : this.editedIndex;
+        //   this.currentStudy = this.Studies[this.editedIndex];
+        // }
       } catch (error) {
         if (error.response.status === 401) {
           alert("Authentication failed, please login.");
@@ -641,15 +661,14 @@ export default {
       row.select(true);
       this.currentStudy = item;
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
-      this.selectedRoomInfo = this.currentTestingRooms.find(room => room.id === item.FK_TestingRoom);
+      this.selectedRoomId = this.currentStudy.FK_TestingRoom || null;
     },
 
     editStudy() {
       this.editedStudy = Object.assign({}, this.currentStudy);
       this.editedIndex = this.Studies.indexOf(this.currentStudy);
+      this.PointofContact = this.currentStudy.PointofContact;
       this.dialog = true;
-      this.selectedRoomId = null;
-      this.selectedRoomInfo = null;
     },
 
     async createStudy() {
@@ -661,12 +680,11 @@ export default {
     },
 
     async save() {
-      this.editedStudy.FK_Personnel = this.pointofContact.id;
-      this.editedStudy.FK_TestingRoom = this.selectedRoomId;
+      this.editedStudy.FK_Personnel = this.PointofContact.id;
       if (this.editedStudy.id === undefined) {
         try {
           const Result = await study.create(this.editedStudy);
-          this.editedStudy.PointofContact = this.pointofContact;
+          this.editedStudy.PointofContact = this.PointofContact;
           this.editedStudy.id = Result.data.id;
           this.Studies.push(this.editedStudy);
           this.editedIndex = this.Studies.length - 1;
@@ -677,7 +695,7 @@ export default {
       } else {
         try {
           await study.update(this.editedStudy);
-
+          this.editedStudy.PointofContact = this.PointofContact;
           this.currentStudy = this.editedStudy;
           Object.assign(this.Studies[this.editedIndex], this.editedStudy);
           this.$store.dispatch("setStudies", this.Studies);
@@ -691,8 +709,6 @@ export default {
         }
       }
 
-      this.selectedRoomInfo = this.currentTestingRooms.find(room => room.id === this.editedStudy.FK_TestingRoom);
-      this.selectedRoomId = null;
       this.close();
     },
 
@@ -700,7 +716,7 @@ export default {
       this.dialog = false;
 
       setTimeout(() => {
-        this.pointofContact = {};
+        this.PointofContact = {};
         this.editedStudy = {};
         // this.editedIndex = -1;
       }, 300);
