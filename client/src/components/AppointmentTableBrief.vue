@@ -42,6 +42,11 @@
         }}
       </v-chip>
     </template>
+
+    <template #item.Study.StudyName="{ item }">
+      {{ "[ Lab: " + item.Study.Lab.PI + " ] " + item.Study.StudyName}}
+    </template>
+
   </v-data-table>
 </template>
 

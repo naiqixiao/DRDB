@@ -269,6 +269,7 @@ exports.search = asyncHandler(async (req, res) => {
                   "StudyType",
                   "FK_Lab",
                 ],
+                include: [model.lab]
               },
               { model: model.schedule },
             ],
