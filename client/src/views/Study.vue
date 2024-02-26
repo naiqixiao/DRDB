@@ -86,7 +86,7 @@
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
-            <h3 class="text-left">Study information:</h3>
+            <h2 class="text-left" style="margin-right: 0px;">Study information:</h2>
           </v-col>
           <v-col cols="12" sm="6" md="5" v-for="item in this.$studyBasicFields" :key="item.label">
             <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
@@ -105,7 +105,7 @@
         <v-row justify="space-around">
           <v-col md="12">
             <v-divider></v-divider>
-            <h3 class="text-left">Point of contact:</h3>
+            <h2 class="text-left" style="margin-right: 0px;">Point of contact:</h2>
           </v-col>
           <v-col cols="12" sm="4" v-for="item in this.$studyPointofContact" :key="item.label">
             <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
@@ -119,7 +119,7 @@
         <v-row>
           <v-col md="12">
             <v-divider></v-divider>
-            <h3 class="text-left">Recruitment criteria:</h3>
+            <h2 class="text-left" style="margin-right: 0px;">Recruitment criteria:</h2>
           </v-col>
 
           <v-col cols="12" sm="6" :md="item.width" v-for="item in this.$studyCriteriaFields" :key="item.label">
@@ -133,7 +133,7 @@
         <v-row>
           <v-col md="12" class="subtitle" v-if="currentStudy.FK_TestingRoom">
             <v-divider></v-divider>
-            <h3 class="text-left">Testing room:</h3>
+            <h2 class="text-left" style="margin-right: 0px;">Testing room:</h2>
           </v-col>
           <v-col md="12" class="subtitle" v-else>
             <h3 style="color: red">Testing room has not been assigned to this study.</h3>
@@ -208,7 +208,7 @@
           <v-col>
             <v-divider></v-divider>
 
-            <h3 class="text-left">Experimenters:</h3>
+            <h2 class="text-left" style="margin-right: 0px;">Experimenters:</h2>
 
             <AssignedExperimenters :Experimenters="currentStudy.Experimenters" :labMembers="labMembers"
               :studyId="currentStudy.id" :PointofContactId="currentStudy.PointofContact.id"
@@ -217,17 +217,17 @@
         </v-row>
         <div>
           <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialog" :retain-focus="false">
-            <v-card outlined>
+            <v-card outlined class="card">
               <v-card-title>
                 <span class="headline">Study information</span>
               </v-card-title>
 
-              <v-card-text>
+              <v-card-text style="margin-bottom: 16px">
                 <v-form ref="form" v-model="valid" lazy-validation>
-                  <v-row justify="start" dense style="padding: 8px 8px 4px">
+                  <v-row justify="start" style="padding: 8px">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h3 class="text-left">Basic information:</h3>
+                      <h2 class="text-left" style="margin-right: 0px;">Basic information:</h2>
                     </v-col>
                     <v-col cols="12" sm="3" md="2" v-for="item in this.$studyBasicFields" :key="item.label">
                       <div v-if="item.options">
@@ -252,10 +252,10 @@
                     </v-col>
                   </v-row>
 
-                  <v-row justify="start">
+                  <v-row justify="start" style="padding: 8px">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h3 class="text-left">Recruitment criteria:</h3>
+                      <h2 class="text-left" style="margin-right: 0px;">Recruitment criteria:</h2>
                     </v-col>
 
                     <v-col cols="12" sm="2" md="2" v-for="item in this.$studyCriteriaFields" :key="item.label">
@@ -276,7 +276,7 @@
                   <!-- <v-row>
                     <v-col md="12" class="subtitle">
                       <v-divider></v-divider>
-                      <h3 class="text-left">Testing room:</h3>
+                      <h2 class="text-left" style="margin-right: 0px;">Testing room:</h2>
                     </v-col>
 
                     <v-row class="testing-room--container" v-if="currentTestingRooms.length > 0">
@@ -292,17 +292,11 @@
                     </div>
                   </v-row> -->
 
-                  <v-row justify="space-around">
+                  <v-row justify="space-around" style="padding: 8px">
                     <v-col md="12">
                       <v-divider></v-divider>
-                      <h3 class="text-left">Study summary & Phone script:</h3>
+                      <h2 class="text-left" style="margin-right: 0px;">Study summary & Phone script:</h2>
 
-                      <p class="text-left">
-                        You can follow this
-                        <a href="https://drdb.readthedocs.io/en/latest/Email%20Template.html"
-                          target="_blank"><b>instruction</b></a>
-                        to set up email templates for your study.
-                      </p>
                     </v-col>
 
                     <v-col cols="12" md="6">
@@ -316,32 +310,65 @@
                     </v-col>
                   </v-row>
 
-                  <v-row justify="start">
-                    <v-col md="6">
-                      <v-divider></v-divider>
-                      <h3 class="text-left">Email template:</h3>
+                  <v-row justify="start" style="padding: 8px" height="600px">
+                    <v-col md="12">
 
-                      <vue-editor v-model="editedStudy.EmailTemplate" :editor-toolbar="customToolbar"></vue-editor>
+                      <v-divider style="margin-bottom: 20px"></v-divider>
+                      <h2 class="text-left" style="margin-right: 0px;">Email Snippets:</h2>
+                      <p class="text-left">
+                        You can follow this
+                        <a href="https://drdb.readthedocs.io/en/latest/Email%20Template.html"
+                          target="_blank"><b>instruction</b></a>
+                        to set up email snippets for your study.
+                      </p>
                     </v-col>
 
-                    <v-col md="6">
-                      <v-divider></v-divider>
-                      <h3 class="text-left">Reminder email template:</h3>
+                    <v-tabs vertical v-mode=tab fixed-tabs color="var(--v-secondary-base)"
+                      background-color="var(--v-primary-base)" dark height="200px">
+                      <v-tab>
+                        Study Info
+                      </v-tab>
+                      <v-tab>
+                        Reminder Email
+                      </v-tab>
+                      <v-tab>
+                        Follow-up Email
+                      </v-tab>
 
-                      <vue-editor v-model="editedStudy.ReminderTemplate" :editor-toolbar="customToolbar"></vue-editor>
-                    </v-col>
+                      <v-tab-item style="margin: 12px">
+                        <h2 class="text-left" style="margin-right: 0px;">Email template:</h2>
+                        <div>
+                          <ckeditor :editor="editor" v-model="editedStudy.EmailTemplate" :config="editorConfig">
+                          </ckeditor>
+                        </div>
+                        <!-- <vue-editor v-model="editedStudy.EmailTemplate" :editor-toolbar="customToolbar" height="480px"></vue-editor> -->
+                      </v-tab-item>
 
-                    <v-col md="6">
-                      <v-divider></v-divider>
-                      <h3 class="text-left">Follow up email snippet:</h3>
+                      <v-tab-item style="margin: 12px">
+                        <h2 class="text-left" style="margin-right: 0px;">Email template:</h2>
+                        <div>
+                          <ckeditor :editor="editor" v-model="editedStudy.ReminderTemplate" :config="editorConfig">
+                          </ckeditor>
+                        </div>
+                        <!-- <vue-editor v-model="editedStudy.ReminderTemplate" :editor-toolbar="customToolbar"></vue-editor> -->
+                      </v-tab-item>
 
-                      <vue-editor v-model="editedStudy.FollowUPEmailSnippet" :editor-toolbar="customToolbar"></vue-editor>
-                    </v-col>
+                      <v-tab-item style="margin: 12px">
+                        <h2 class="text-left" style="margin-right: 0px;">Follow up email snippet:</h2>
+                        <div>
+                          <ckeditor :editor="editor" v-model="editedStudy.FollowUPEmailSnippet" :config="editorConfig">
+                          </ckeditor>
+                        </div>
+                        <!-- <vue-editor v-model="editedStudy.FollowUPEmailSnippet"
+                          :editor-toolbar="customToolbar"></vue-editor> -->
+                      </v-tab-item>
+                    </v-tabs>
+
                   </v-row>
                 </v-form>
               </v-card-text>
 
-              <v-card-actions style="padding: 16px">
+              <v-card-actions style="padding: 16px; justify-self: end">
                 <v-row justify="space-between">
                   <v-col md="4"></v-col>
                   <v-col md="2">
@@ -427,18 +454,33 @@ import study from "@/services/study";
 import personnel from "@/services/personnel";
 import testingRoom from "@/services/testingRoom";
 
-import { VueEditor } from "vue2-editor";
+// import { VueEditor } from "vue2-editor";
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import moment from "moment";
 
 export default {
   components: {
     DateDisplay,
     AssignedExperimenters,
-    VueEditor,
+    // VueEditor,
     ConfirmDlg,
   },
   data() {
     return {
+      editor: ClassicEditor,
+      editorData: '<p>Content of the editor.</p>',
+      editorConfig: {
+        toolbar: {
+          items: [
+            'undo', 'redo',
+            '|', 'heading',
+            '|', 'bold', 'italic',
+            '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed', 'blockQuote',
+            '|', 'bulletedList', 'numberedList', 'outdent', 'indent'
+          ]
+        }
+      },
+      tab: null,
       headersStudy: [
         {
           text: "Study Name",
@@ -813,10 +855,10 @@ export default {
         var opening =
           "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
           "Lisa,</p>" +
-          "<p style= 'color: var(--v-primary-lighten3)'>Thanks for your support to our research! This is a confirmation for your participation in our study with " +
+          "<p style= 'color: var(--v-primary-lighten3)'>Thanks for your support to our research! This is a confirmation for your participation in our study with <strong>" +
           "Emma" +
           moment().format(" [on] dddd [(]MMM Do[)] [at] h:mma") +
-          ".</p>";
+          "</strong>.</p>";
 
         var emailBody = this.currentStudy.EmailTemplate;
 
@@ -873,6 +915,9 @@ export default {
 
             break;
         }
+
+        email = email.replace(/\/p><p/g, "/p><p></p><p");
+        email = email.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px;'>");
 
         return email;
       } else {
@@ -950,6 +995,9 @@ export default {
 
         var email = opening + emailBody + closing;
 
+        email = email.replace(/\/p><p/g, "/p><p></p><p");
+        email = email.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px;'>");
+
         return email;
       } else {
         return "<p>Email template hasn't setup yet. No email preview is available.</p>";
@@ -962,7 +1010,10 @@ export default {
           "<p style= 'color: var(--v-primary-lighten3)'>Dear " +
           "Lisa,</p>" +
           "<p style= 'color: var(--v-primary-lighten3)'>Thank you so much for participating in our study with " +
-          "Emma!</p>";
+          "Emma!</p>"
+        "<p style= 'color: var(--v-primary-lighten3)'>This is " + this.$store.state.labName + ". We hope this email finds you well!</p>" +
+          "<p style= 'color: var(--v-primary-lighten3)'>We are writing to follow up with our previous email regarding inviting Emma to participate in our study.</p>" +
+          "<p style= 'color: var(--v-primary-lighten3)'>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and Emma.</p>"
 
         const TYclosing =
           "<p></p><p>" +
@@ -990,7 +1041,10 @@ export default {
         emailBody = emailBody.replace(/<p>/g, "<p><strong>" || "");
         emailBody = emailBody.replace(/<\/p>/g, "</strong></p>" || "");
 
-        const email = opening + emailBody + TYclosing;
+        var email = opening + emailBody + TYclosing;
+
+        email = email.replace(/\/p><p/g, "/p><p></p><p");
+        email = email.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px;'>");
 
         return email;
       } else {
@@ -1018,7 +1072,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 body {
   border: 2px solid rgb(0, 153, 255);
   border-radius: 5px;
@@ -1026,25 +1080,6 @@ body {
 
 .complete {
   align-items: flex-end !important;
-}
-
-/* .theme--light.v-data-table /deep/ thead /deep/ tr th:hover {
-  color: var(--v-secondary-base) !important;
-} */
-
-/* .v-data-table
-  /deep/
-  tbody
-  /deep/
-  tr:hover:not(.v-data-table__expanded__content) {
-  background-color: var(--v-secondary-lighten1) !important;
-} */
-
-.tr.v-data-table__selected {
-  /* color: var(--v-secondary-lighten1) !important; */
-  /* margin: 2px !important;
-  border-style: double   !important; */
-  background-color: var(--v-secondary-lighten1) !important;
 }
 
 .template {
@@ -1067,14 +1102,15 @@ body {
   color: var(--v-secondary-base) !important;
 }
 
-.testing-room-card:hover,
-.selected-card {
-  background-color: rgb(232, 232, 232);
-  cursor: pointer;
+.ck-editor__editable_inline:not(.ck-comment__input *) {
+  height: 250px !important;
+  overflow-y: auto;
+  margin: 0px;
 }
 
-.individual-room-card {
-  margin-left: 0.7em;
-  margin-bottom: 1em;
+.card {
+  display: flex;
+  flex-direction: column;
+  /* align-content: space-around; */
 }
 </style>

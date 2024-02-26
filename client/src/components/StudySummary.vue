@@ -1,19 +1,17 @@
 <template>
   <v-card outlined>
     <v-tabs v-model="tabs" fixed-tabs color="var(--v-secondary-base)" background-color="var(--v-primary-base)">
-      <v-tab href="#tabs-1">
+      <v-tab>
         <v-icon style="padding-right: 8px">record_voice_over </v-icon>
         Phone Script
       </v-tab>
 
-      <v-tab href="#tabs-2">
+      <v-tab>
         <v-icon style="padding-right: 8px">view_list</v-icon>
         Study Info
       </v-tab>
-    </v-tabs>
 
-    <v-tabs-items v-model="tabs">
-      <v-tab-item value="tabs-1" class="tabs-items">
+      <v-tab-item class="tabs-items">
         <v-row dense>
           <v-col md="12" class="subtitle">
             <v-textarea label="" background-color="textbackground" outlined no-resize :value="selectedStudy.PhoneScript
@@ -23,8 +21,8 @@
           </v-col>
         </v-row>
       </v-tab-item>
-
-      <v-tab-item value="tabs-2" class="tabs-items">
+  
+      <v-tab-item class="tabs-items">
         <v-row dense style="overflow-y: scroll !important">
           <v-row dense>
             <v-col md="12" class="subtitle">
@@ -40,7 +38,7 @@
                 :value="selectedStudy.Description" readonly hide-details></v-textarea>
             </v-col>
           </v-row>
-
+  
           <v-row justify="space-around" dense>
             <v-col md="12">
               <v-divider></v-divider>
@@ -51,13 +49,13 @@
                 :value="selectedStudy.PointofContact[item.field]" placeholder="  " readonly outlined dense></v-text-field>
             </v-col>
           </v-row>
-
+  
           <v-row dense>
             <v-col md="12" class="subtitle">
               <v-divider></v-divider>
               <h4 class="text-left">Study criteria:</h4>
             </v-col>
-
+  
             <v-col cols="12" sm="6" :md="item.width" v-for="item in this.$studyCriteriaFields" :key="item.label">
               <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
                 :value="item.field == 'MinAge' || item.field == 'MaxAge'
@@ -68,7 +66,8 @@
           </v-row>
         </v-row>
       </v-tab-item>
-    </v-tabs-items>
+    </v-tabs>
+
   </v-card>
 </template>
 

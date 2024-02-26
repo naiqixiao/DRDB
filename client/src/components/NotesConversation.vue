@@ -1,56 +1,30 @@
 <template>
   <v-card>
-    <v-tabs
-      fixed-tabs
-      v-model="tabs"
-      color="var(--v-secondary-base)"
-      background-color="var(--v-primary-base)"
-    >
-      <v-tab href="#tabs-1">
+    <v-tabs fixed-tabs v-model="tabs" color="var(--v-secondary-base)" background-color="var(--v-primary-base)">
+      <v-tab>
         <v-icon style="padding-right: 4px">format_list_bulleted</v-icon>
         Notes
       </v-tab>
-      <v-tab href="#tabs-2">
+      <v-tab>
         <v-icon style="padding-right: 4px">forum</v-icon>
         Conv.
       </v-tab>
-    </v-tabs>
 
-    <v-tabs-items v-model="tabs">
-      <v-tab-item value="tabs-1" class="tabs-items">
+      <v-tab-item class="tabs-items">
         <v-row justify="space-between" align="end" dense>
           <v-col class="noPadding">
-            <v-textarea
-              class="conv-textarea"
-              label="Notes about the family."
-              no-resize
-              rows="23"
-              hide-details
-              v-model="newNotes"
-              :disabled="!familyId"
-              @change="saveNotes"
-            ></v-textarea>
+            <v-textarea class="conv-textarea" label="Notes about the family." no-resize rows="23" hide-details
+              v-model="newNotes" :disabled="!familyId" @change="saveNotes"></v-textarea>
           </v-col>
         </v-row>
       </v-tab-item>
 
-      <v-tab-item value="tabs-2" class="tabs-items">
+      <v-tab-item class="tabs-items">
         <v-row justify="space-between" align="end" dense>
           <v-col cols="12" md="12" class="noPadding">
-            <v-data-table
-              hide-default-footer
-              height="450px"
-              dense
-              fixed-header
-              single-select
-              no-data-text="No conversation is stored."
-              :headers="headers"
-              :items="Conversation"
-              class="elevation-1"
-              justify-center
-              calculate-widths
-              disable-pagination
-            >
+            <v-data-table hide-default-footer height="450px" dense fixed-header single-select
+              no-data-text="No conversation is stored." :headers="headers" :items="Conversation" class="elevation-1"
+              justify-center calculate-widths disable-pagination>
               <template #item.Time="{ value }">
                 <DateDisplay :date="value" :format="'short'" />
               </template>
@@ -64,22 +38,13 @@
             </v-data-table>
           </v-col>
           <v-col class="noPadding">
-            <v-textarea
-              class="conv-textarea"
-              label="Conversation with parents"
-              outlined
-              no-resize
-              rows="4"
-              hide-details
-              v-model="conv"
-              :disabled="!familyId"
-              append-icon="mdi-send"
-              @click:append="submitConversation"
-            ></v-textarea>
+            <v-textarea class="conv-textarea" label="Conversation with parents" outlined no-resize rows="4" hide-details
+              v-model="conv" :disabled="!familyId" append-icon="mdi-send" @click:append="submitConversation"></v-textarea>
           </v-col>
         </v-row>
       </v-tab-item>
-    </v-tabs-items>
+    </v-tabs>
+
   </v-card>
 </template>
 
@@ -195,6 +160,7 @@ export default {
   background-color: rgba($color: #000000, $alpha: 0);
   height: 600px;
 }
+
 .v-tab {
   max-width: 50%;
 }
