@@ -101,7 +101,7 @@ async function sendEmail(emailContent) {
 exports.create = asyncHandler(async (req, res) => {
   var newLabInfo = req.body;
   try {
-    newLabInfo.EmailOpening = "<p>PEmail opening (currently not in use).<p>";
+    newLabInfo.EmailOpening = "<p>Email opening (currently not in use).<p>";
     newLabInfo.EmailClosing =
       "<p>Please feel free to let us know if you wish to change the time for your study. You can either send us an email.<p>";
     newLabInfo.TYEmail =
