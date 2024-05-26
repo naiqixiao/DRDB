@@ -1258,11 +1258,16 @@ export default {
           months = months - years * 12;
           months = months.toFixed(1);
 
-          var Y = years > 0 ? years + (years > 1 ? " years " : " year ") : "";
-          var M = months > 0 ? months + (months === 1 ? " month " : " months ") : "";
+          var Y = years > 0 ? years + " y " : "";
+          var M = months > 0 ? months + " m" : "";
           formated = Y + M;
+
+          formatedDoB = moment(DoB).format("MMM DD, YYYY");
+          
+          formated = "<strong>DoB: </strong> " + formatedDoB + " (" + formated + ")";
+
         } else {
-          formated = "Not born yet.";
+          formated = "<strong>Not born yet.</strong>";
         }
       }
       return formated;
@@ -1300,7 +1305,7 @@ export default {
     },
 
     age(child) {
-      var formatedAge = "<strong>Age:</strong> " + this.AgeFormated(child.DoB);
+      var formatedAge = this.AgeFormated(child.DoB);
       return formatedAge;
     },
 

@@ -11,7 +11,7 @@
           {{ title }}
         </h2>
       </v-toolbar>
-      <div>
+      <div style="height: 120px">
         <v-card-text justify="center"
           v-show="!!message"
           class="pa-4 body-2 text-left"
@@ -19,24 +19,6 @@
         ></v-card-text>
       </div>
       <v-spacer></v-spacer>
-
-      <ul v-if="status !== 'No Show' && status !== 'Cancelled' && status !== 'Confirmed'" style="list-style-type: none">
-        <li v-for="(appointment, index) in item.Appointments" :key="index">
-          <v-tooltip right>
-            <template v-slot:activator="{ on }">
-              <div v-on="on">
-                <v-checkbox
-                  v-model="appointment.checked" 
-                  :label="`${appointment.Child.Name} (${appointment.Study.StudyName})`"
-                  class="ma-0 pa-0 ml-5"
-                  hide-details
-                  dense
-                ></v-checkbox>
-              </div>
-            </template>
-          </v-tooltip>
-        </li>
-      </ul>
 
       <v-card-actions class="pt-3">
         <v-spacer></v-spacer>
@@ -62,9 +44,7 @@
 
 <script>
 export default {
-
   name: "ConfirmDlg",
-
   data() {
     return {
       dialog: false,
@@ -72,9 +52,6 @@ export default {
       reject: null,
       message: null,
       title: null,
-      item: {},
-      status: null,
-      selectedAppointment: [],
       options: {
         color: "grey lighten-3",
         width: 500,
@@ -85,12 +62,10 @@ export default {
   },
 
   methods: {
-    open(title, message, item, status, options) {
+    open(title, message, options) {
       this.dialog = true;
       this.title = title;
       this.message = message;
-      this.item = {...item};
-      this.status = status;
       this.options = Object.assign(this.options, options);
       return new Promise((resolve, reject) => {
         this.resolve = resolve;
@@ -98,30 +73,8 @@ export default {
       });
     },
     agree() {
-      // filter the selected studies
-      const unSelectedAppointments = this.item.Appointments.filter(appointment => !appointment.checked); //appointments to be deleted
-      const selectedAppointments = this.item.Appointments.filter(appointment => appointment.checked); //appointments to be rescheduled
-      const updatedAppointments = this.item.Appointments.filter((appointment) => {  //new item without appointments to be deleted
-        return !unSelectedAppointments.includes(appointment);
-      });
-      // determine if all checkboxes are checked
-      const allChecked = this.item.Appointments.every(appointment => appointment.checked);
-
-      if (this.status === 'No Show' || this.status === 'Cancelled') {
-        this.resolve(true);
-        this.dialog = false;
-      } else if (allChecked) {
-        this.resolve({ allChecked: true});
-        this.dialog = false;
-      } else {
-        const unSelectedItem = {...this.item};
-        const selectedItem = {...this.item};
-        this.item.Appointments = updatedAppointments;
-        unSelectedItem.Appointments = unSelectedAppointments;
-        selectedItem.Appointments = selectedAppointments;
-        this.resolve({ allChecked: false, newItem: this.item, unSelectedItem, selectedItem});
-        this.dialog = false;
-      }
+      this.resolve(true);
+      this.dialog = false;
     },
     cancel() {
       this.resolve(false);
