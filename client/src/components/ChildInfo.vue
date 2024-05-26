@@ -1262,7 +1262,7 @@ export default {
           var M = months > 0 ? months + " m" : "";
           formated = Y + M;
 
-          formatedDoB = moment(DoB).format("MMM DD, YYYY");
+          var formatedDoB = moment(DoB).format("MMM DD, YYYY");
           
           formated = "<strong>DoB: </strong> " + formatedDoB + " (" + formated + ")";
 
