@@ -13,6 +13,8 @@ router.post("/exp", checkAuth, oAuth2, AppointmentController.updateExperimenters
 
 router.get("/", checkAuth, AppointmentController.search);
 
+router.get("/monthYearN", AppointmentController.monthYearN);
+
 router.delete("/", checkAuth, oAuth2, AppointmentController.delete);
 
 module.exports = router;
