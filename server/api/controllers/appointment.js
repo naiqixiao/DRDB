@@ -771,7 +771,7 @@ exports.monthYearN = asyncHandler(async (req, res) => {
 
   const monthYearN = await model.sequelize.query(queryString);
 
-  const jsonString = JSON.stringify(monthYearN, null, 2);
+  const jsonString = JSON.stringify(monthYearN[0], null, 2);
 
   // Specify the file path
   if (!fs.existsSync("./stats/")) {
@@ -798,7 +798,7 @@ exports.monthYearWeekN = asyncHandler(async (req, res) => {
 
   const monthYearWeekN = await model.sequelize.query(queryString);
 
-  const jsonString = JSON.stringify(monthYearWeekN, null, 2);
+  const jsonString = JSON.stringify(monthYearWeekN[0], null, 2);
 
   // Specify the file path
   if (!fs.existsSync("./stats/")) {
