@@ -8,7 +8,7 @@ const config = require("../../config/general");
 
 google.options({
   params: {
-      sendUpdates: 'all'
+    sendUpdates: 'all'
   }
 });
 
@@ -765,7 +765,7 @@ exports.delete0 = asyncHandler(async (req, res) => {
 
 // Update monthYearN
 exports.monthYearN = asyncHandler(async (req, res) => {
-  var queryString =  "SELECT YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id WHERE     ${{DBName}}.Schedule.createdAt BETWEEN '2021-01-01'     AND '2090-12-31'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020 GROUP BY YearMonth, Year,  Month   ORDER BY     Year,     Month;";
+  var queryString = "SELECT YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id WHERE     ${{DBName}}.Schedule.createdAt BETWEEN '2021-01-01'     AND '2090-12-31'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020 GROUP BY YearMonth, Year,  Month   ORDER BY     Year,     Month;";
 
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
@@ -777,14 +777,16 @@ exports.monthYearN = asyncHandler(async (req, res) => {
   if (!fs.existsSync("./stats/")) {
     fs.mkdirSync("./stats/");
   }
-  const filePath = './stats/monthYearN.json';
+  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearN.json';
+
 
   try {
-
-    // Write the JSON string to the file
-    fs.writeFileSync(filePath, jsonString);
-    console.log('File has been written successfully.');
-    res.status(200).send("File has been written successfully.");
+    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
+      // Write the JSON string to the file
+      fs.writeFileSync(filePath, jsonString);
+      console.log('File has been written successfully.');
+      res.status(200).send("File has been written successfully.");
+    }
   } catch (err) {
     console.error('Error writing file:', err);
   }
@@ -792,7 +794,7 @@ exports.monthYearN = asyncHandler(async (req, res) => {
 
 // Update monthYearWeekN
 exports.monthYearWeekN = asyncHandler(async (req, res) => {
-  var queryString =  "SELECT YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%a') AS weekday, COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment  INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id  INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id  INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id WHERE  ${{DBName}}.Schedule.createdAt BETWEEN '2021-01-01'  AND '2090-12-31'  AND ${{DBName}}.Schedule.Status = 'Confirmed' AND ${{DBName}}.Lab.id = 2 AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020 GROUP BY weekday, Year,  Month   ORDER BY  Year,  Month, weekday;";
+  var queryString = "SELECT YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month, DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%a') AS weekday, COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment  INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id  INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id  INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id WHERE  ${{DBName}}.Schedule.createdAt BETWEEN '2021-01-01'  AND '2090-12-31'  AND ${{DBName}}.Schedule.Status = 'Confirmed' AND ${{DBName}}.Lab.id = 2 AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020 GROUP BY weekday, Year,  Month   ORDER BY  Year,  Month, weekday;";
 
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
@@ -804,13 +806,17 @@ exports.monthYearWeekN = asyncHandler(async (req, res) => {
   if (!fs.existsSync("./stats/")) {
     fs.mkdirSync("./stats/");
   }
-  const filePath = './stats/monthYearWeekN.json';
+  // const filePath = './stats/monthYearWeekN.json';
+  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearWeekN.json';
 
   try {
-    // Write the JSON string to the file
-    fs.writeFileSync(filePath, jsonString);
-    console.log('File has been written successfully.');
-    res.status(200).send("File has been written successfully.");
+    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
+
+      // Write the JSON string to the file
+      fs.writeFileSync(filePath, jsonString);
+      console.log('File has been written successfully.');
+      res.status(200).send("File has been written successfully.");
+    }
   } catch (err) {
     console.error('Error writing file:', err);
   }
