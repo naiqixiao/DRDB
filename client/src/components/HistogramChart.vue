@@ -51,7 +51,7 @@ export default {
 
       const spec = {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-        "width": 1000,
+        "width": 900,
         "background": null,
         "signals": [
           {
@@ -141,13 +141,11 @@ export default {
               { "field": "Time", "type": "nominal" },
               { "field": "NumberOfParticipants", "type": "quantitative", "title": "N of participants" }
             ],
-            // "color": { "value": "#f4a261" },
             "color": {
-              "aggregate": "max",
-              "field": "NumberOfParticipants",
-              "scale": { "scheme": "lightorange" },
-              "type": "quantitative",
-              "legend": null
+                "field": "StudyType",
+                "type": "nominal",
+                "legend": { "title": "Study type" },
+                "scale": { "scheme": "set2" },
             },
             "opacity": {
               "condition": {
