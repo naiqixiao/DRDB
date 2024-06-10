@@ -58,4 +58,8 @@ export default {
       params: removedAppointment,
     });
   },
+
+  monthYearN() {
+    return api().get("appointment/monthYearN0");
+  }
 };

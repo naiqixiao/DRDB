@@ -15,6 +15,8 @@ router.get("/", checkAuth, AppointmentController.search);
 
 router.get("/monthYearN", AppointmentController.monthYearN);
 
+router.get("/monthYearN0", AppointmentController.monthYearN0);
+
 router.get("/monthYearWeekN", AppointmentController.monthYearWeekN);
 
 router.delete("/", checkAuth, oAuth2, AppointmentController.delete);
