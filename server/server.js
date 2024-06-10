@@ -106,7 +106,19 @@ cron.schedule('35 0 * * *', () => {
 
 });
 
+// update study summaries
+
+const AppointmentController = require("./api/controllers/appointment");
+
 const config = require("./config/general");
+
+cron.schedule('46 22 * * *', () => {
+
+  AppointmentController.monthYearN();
+
+  AppointmentController.monthYearWeekN();
+
+});
 
 const options = {
   cors: {
@@ -114,6 +126,7 @@ const options = {
     methods: ["GET", "POST"]
   }
 };
+
 
 // const io = require("socket.io")(server, options);
 

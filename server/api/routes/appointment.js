@@ -15,6 +15,8 @@ router.get("/", checkAuth, AppointmentController.search);
 
 router.get("/monthYearN", AppointmentController.monthYearN);
 
+router.get("/monthYearWeekN", AppointmentController.monthYearWeekN);
+
 router.delete("/", checkAuth, oAuth2, AppointmentController.delete);
 
 module.exports = router;
