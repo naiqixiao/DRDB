@@ -6,6 +6,8 @@ const StudyController = require("../controllers/study");
 
 router.get("/", checkAuth, StudyController.search);
 
+router.get("/studyStats", checkAuth, StudyController.studyStats);
+
 router.post("/add", checkAuth, StudyController.create);
 
 router.post("/", checkAuth, StudyController.update);
