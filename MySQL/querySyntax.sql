@@ -81,3 +81,66 @@ GROUP BY
     DAYOFWEEK(pnb_drdb.Schedule.AppointmentTime)
 ORDER BY
     DAYOFWEEK(pnb_drdb.Schedule.AppointmentTime);
+
+
+-- number of participants ran as primary experimenter
+SELECT
+    pnb_drdb.Study.StudyName,
+    PrimaryExperimenter.Name as PrimaryExperimenter,
+    COUNT(DISTINCT pnb_drdb.Appointment.id) AS NumberOfParticipants
+FROM
+    pnb_drdb.Appointment
+    JOIN pnb_drdb.ExperimenterAssignment ON pnb_drdb.Appointment.id = pnb_drdb.ExperimenterAssignment.FK_Appointment
+	JOIN pnb_drdb.Personnel AS PrimaryExperimenter ON pnb_drdb.ExperimenterAssignment.FK_Experimenter = PrimaryExperimenter.id
+    INNER JOIN pnb_drdb.Schedule ON pnb_drdb.Appointment.FK_Schedule = pnb_drdb.Schedule.id
+    INNER JOIN pnb_drdb.Personnel ON pnb_drdb.Schedule.ScheduledBy = pnb_drdb.Personnel.id
+    INNER JOIN pnb_drdb.Study ON pnb_drdb.Appointment.FK_Study = pnb_drdb.Study.id
+    INNER JOIN pnb_drdb.Lab ON pnb_drdb.Study.FK_Lab = pnb_drdb.Lab.id
+WHERE
+    pnb_drdb.Schedule.createdAt > '2021-01-01'
+    AND pnb_drdb.Study.id = 217
+    AND pnb_drdb.Schedule.Status = 'Confirmed'
+GROUP BY
+    PrimaryExperimenter.Name,
+    pnb_drdb.Schedule.Status;
+
+-- number of participants ran as assistant experimenter
+SELECT
+    pnb_drdb.Study.StudyName,
+    AssistantExperimenter.Name as AssistantExperimenter,
+    COUNT(DISTINCT pnb_drdb.Appointment.id) AS NumberOfParticipants
+FROM
+    pnb_drdb.Appointment
+    INNER JOIN pnb_drdb.ExperimenterAssignment ON pnb_drdb.Appointment.id = pnb_drdb.ExperimenterAssignment.FK_Appointment
+	INNER JOIN pnb_drdb.Personnel AS PrimaryExperimenter ON pnb_drdb.ExperimenterAssignment.FK_Experimenter = PrimaryExperimenter.id
+    INNER JOIN pnb_drdb.SecondExperimenterAssignment ON pnb_drdb.Appointment.id = pnb_drdb.SecondExperimenterAssignment.FK_Appointment
+    INNER JOIN pnb_drdb.Personnel AS AssistantExperimenter ON pnb_drdb.SecondExperimenterAssignment.FK_Experimenter = AssistantExperimenter.id
+    INNER JOIN pnb_drdb.Schedule ON pnb_drdb.Appointment.FK_Schedule = pnb_drdb.Schedule.id
+    INNER JOIN pnb_drdb.Personnel ON pnb_drdb.Schedule.ScheduledBy = pnb_drdb.Personnel.id
+    INNER JOIN pnb_drdb.Study ON pnb_drdb.Appointment.FK_Study = pnb_drdb.Study.id
+    INNER JOIN pnb_drdb.Lab ON pnb_drdb.Study.FK_Lab = pnb_drdb.Lab.id
+WHERE
+    pnb_drdb.Schedule.createdAt > '2021-01-01'
+    AND pnb_drdb.Study.id = 217
+    AND pnb_drdb.Schedule.Status = 'Confirmed'
+GROUP BY
+    AssistantExperimenter.Name,
+    pnb_drdb.Schedule.Status;
+
+-- number of participants recruited by each personnel and appointment status
+SELECT
+    pnb_drdb.Study.StudyName,
+    pnb_drdb.Personnel.Name as RecruitedBy,
+    pnb_drdb.Schedule.Status,
+    COUNT(DISTINCT pnb_drdb.Appointment.id) AS NumberOfParticipants
+FROM
+    pnb_drdb.Appointment
+    INNER JOIN pnb_drdb.Schedule ON pnb_drdb.Appointment.FK_Schedule = pnb_drdb.Schedule.id
+    INNER JOIN pnb_drdb.Personnel ON pnb_drdb.Schedule.ScheduledBy = pnb_drdb.Personnel.id
+    INNER JOIN pnb_drdb.Study ON pnb_drdb.Appointment.FK_Study = pnb_drdb.Study.id
+    INNER JOIN pnb_drdb.Lab ON pnb_drdb.Study.FK_Lab = pnb_drdb.Lab.id
+WHERE
+     pnb_drdb.Study.id = 217
+GROUP BY
+    ScheduledBy,
+    pnb_drdb.Schedule.Status;
