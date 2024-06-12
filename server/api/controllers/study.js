@@ -161,7 +161,7 @@ exports.delete = asyncHandler(async (req, res) => {
 exports.studyStats = asyncHandler(async (req, res) => {
   var studyID = req.query.studyID;
 
-  if(typeof studyID === 'undefined'){
+  if (typeof studyID === 'undefined') {
     studyID = 127
   }
 
@@ -192,7 +192,7 @@ exports.studyStats = asyncHandler(async (req, res) => {
     const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp);
     const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp);
 
-    const results = { totalNperStatus: totalNperStatus, totalNperPersonnelStatus: totalNperPersonnelStatus, totalNperPersonnelPriExp: totalNperPersonnelPriExp, totalNperPersonnelAssistExp: totalNperPersonnelAssistExp };
+    const results = { totalNperStatus: totalNperStatus[0], totalNperPersonnelStatus: totalNperPersonnelStatus[0], totalNperPersonnelPriExp: totalNperPersonnelPriExp[0], totalNperPersonnelAssistExp: totalNperPersonnelAssistExp[0] };
 
     res.status(200).send(results);
   } catch (err) {
