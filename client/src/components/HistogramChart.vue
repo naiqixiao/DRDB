@@ -105,6 +105,10 @@ export default {
             "domain": false,
             "labelFontSize": 12,
             "titleFontSize": 14
+          },
+          "text": {
+              "fontSize": 14,
+              "fontWeight": "bold"
           }
         },
         "layer": [{
@@ -157,28 +161,64 @@ export default {
         },
         {
           "transform": [{
-            "filter": { "selection": "brush" }
-          }],
+              "filter": { "selection": "brush" }
+            },
+            {
+                "aggregate": [{ "op": "sum", "field": "NumberOfParticipants", "as": "total_value" }],
+                "groupby": ["YearMonth"]
+            }
+          ],
           "mark": "rule",
           "encoding": {
             "y": {
               "aggregate": "mean",
-              "field": "NumberOfParticipants",
+              "field": "total_value",
               "type": "quantitative"
             },
             "tooltip": [
-              {
-                "aggregate": "mean",
-                "field": "NumberOfParticipants",
-                "type": "quantitative",
-                "title": "Mean",
-                "format": ".0f"
-              }
+                {
+                    "aggregate": "mean",
+                    "field": "total_value",
+                    "type": "quantitative",
+                    "title": "Mean",
+                    "format": ".0f"
+                }
             ],
             "color": { "value": "firebrick" },
 
             "size": { "value": 3 }
           }
+        },
+        {
+            "transform": [{
+                "filter": { "selection": "brush" }
+            },
+            {
+                "aggregate": [{ "op": "sum", "field": "NumberOfParticipants", "as": "total_value" }],
+                "groupby": ["YearMonth"]
+            },
+            {
+                "aggregate": [{ "op": "mean", "field": "total_value", "as": "mean_value" }],
+            },
+            {
+                "calculate": "'Mean N per month: ' + format(datum.mean_value, '.0f')",
+                "as": "mean_label",
+            }
+            ],
+            "mark": {
+                "type": "text",
+                "x": 80,
+                "y": 20,
+                "xOffset": 0,
+                "yOffset": 0,
+                "color": "black"
+            },
+            "encoding": {
+                "text": {
+                    "field": "mean_label",
+                    "type": "nominal",
+                }
+            }
         }]
 
       };

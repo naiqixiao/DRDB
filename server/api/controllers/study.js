@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 
 const log = require("../controllers/log");
+const config = require("../../config/general");
 
 // Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
@@ -158,8 +159,12 @@ exports.delete = asyncHandler(async (req, res) => {
 
 // Retrieve study progress infomation from the database.
 exports.studyStats = asyncHandler(async (req, res) => {
+  var studyID = req.query.studyID;
 
-  const studyID = req.studyID;
+  if(typeof studyID === 'undefined'){
+    studyID = 127
+  }
+
   try {
     var queryStringN = "SELECT     ${{DBName}}.Study.StudyName,     ${{DBName}}.Schedule.Status,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Personnel ON ${{DBName}}.Schedule.ScheduledBy = ${{DBName}}.Personnel.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY ${{DBName}}.Schedule.Status;";
 
