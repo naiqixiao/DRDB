@@ -1,5 +1,5 @@
 <template>
-    <div ref="chart" class="histogram"></div>
+    <div ref="chart" class="histogramChart"></div>
 </template>
 
 <script>
@@ -16,11 +16,12 @@ function loadScript(src) {
 }
 
 export default {
-    name: 'HistogramChart',
+    name: 'ProgressChart',
     props: {
         stats: Array,
     },
-     mounted() {
+
+    async mounted() {
         try {
             await loadScript('https://cdn.jsdelivr.net/npm/vega@5.25.0');
             await loadScript('https://cdn.jsdelivr.net/npm/vega-lite@5.16.3');
@@ -32,6 +33,7 @@ export default {
     },
 
     methods: {
+
         renderChart() {
             if (typeof window.vegaEmbed === 'undefined') {
                 console.error('vegaEmbed is not loaded');
@@ -40,175 +42,155 @@ export default {
 
             const spec = {
                 "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-                "width": 900,
                 "background": null,
-                "signals": [
-                    {
-                        "name": "xdom",
-                        "update": "domain('x')"
-                    },
-                    {
-                        "name": "xzoom",
-                        "value": 1,
-                        "on": [
-                            {
-                                "events": { "type": "wheel", "filter": ["!event.ctrlKey", "event.deltaY > 0"] },
-                                "update": "clamp(xzoom * 1.1, 1, 10)"
-                            },
-                            {
-                                "events": { "type": "wheel", "filter": ["!event.ctrlKey", "event.deltaY < 0"] },
-                                "update": "clamp(xzoom / 1.1, 1, 10)"
-                            }
-                        ]
-                    },
-                    {
-                        "name": "xpan",
-                        "value": 0,
-                        "on": [
-                            {
-                                "events": { "type": "mousedown", "filter": "event.button === 0" },
-                                "update": "[xdom[0], xdom[1]]"
-                            },
-                            {
-                                "events": { "type": "mousemove", "filter": "event.buttons === 1" },
-                                "update": "clampRange([xdom[0] - (event.dx / width) * (xdom[1] - xdom[0]), xdom[1] - (event.dx / width) * (xdom[1] - xdom[0])], 0, 1)"
-                            }
-                        ]
-                    }
-                ],
-
                 "data": {
                     "values": this.stats
                 },
-
-                "title": "Number of infant/child participants recruited throughout the years (combinded across all labs)",
+                "width": 700,
                 "config": {
-                    "view": {
-                        "strokeWidth": 0,
-                        "step": 30
-                    },
-                    "title": {
-                        "fontSize": 24
-                    },
-                    "axis": {
-                        "domain": false,
-                        "labelFontSize": 12,
-                        "titleFontSize": 14
-                    },
-                    "text": {
-                        "fontSize": 14,
-                        "fontWeight": "bold"
+                    "title": { "fontSize": 24, "offset": 20 },
+                    "axis": { "domain": false, "labelFontSize": 12, "titleFontSize": 14 },
+                    "headerFacet": { "titleFontSize": 14, "labelFontSize": 14 },
+                    "text": { "fontSize": 18 },
+                    "legend": {
+                        "titleFontSize": 24,
+                        "labelFontSize": 18,
+                        "offset": 40,
+                        "orient": "bottom",
+                        "layout": { "bottom": { "anchor": "middle" } }
                     }
                 },
-                "layer": [{
-                    "selection": {
-                        "brush": {
-                            "type": "interval",
-                            "encodings": ["x"]
-                        }
+                "title": "Number of participants recruited per week",
+                "facet": {
+                    "field": "Status",
+                    "type": "nominal",
+                    "title": "",
+                    "header": {
+                        "titleColor": "black",
+                        "titleFontSize": 24,
+                        "titleAnchor": "start",
+                        "labelColor": "steelblue",
+                        "labelFontSize": 24,
+                        "labelAnchor": "start",
+                        "labelAlign": "left",
+                        "labelPadding": 20
                     },
-
-                    "mark": "bar",
-                    "transform": [
+                    "sort": [
+                        "Confirmed",
+                        "TBD",
+                        "Rescheduling",
+                        "No Show",
+                        "Cancelled",
+                        "Rejected"
+                    ]
+                },
+                "spacing": 40,
+                "columns": 2,
+                "resolve": { "axis": { "y": "independent" }, "scale": { "y": "independent" } },
+                "spec": {
+                    "layer": [
                         {
-                            "calculate": "datum.Month + ' ' + datum.Year",
-                            "as": "Time"
-                        }
-                    ],
-                    "encoding": {
-                        "x": {
-                            "title": null,
-                            "timeUnit": "binnedyearmonth",
-                            "field": "YearMonth",
-                            "type": "temporal",
-                            "axis": {
-                                "labelAngle": -30,
+                            "selection": { "brush": { "type": "interval", "encodings": ["x"] } },
+                            "mark": "bar",
+                            "transform": [
+                                { "calculate": "datum.Month + ' ' + datum.Year", "as": "Time" }
+                            ],
+                            "encoding": {
+                                "x": {
+                                    "title": null,
+                                    "timeUnit": "binnedyearmonth",
+                                    "field": "WeekStartDate",
+                                    "type": "temporal",
+                                    "axis": { "labelAngle": -30 }
+                                },
+                                "y": {
+                                    "title": "N of participants",
+                                    "field": "NumberOfParticipants",
+                                    "type": "quantitative"
+                                },
+                                "tooltip": [
+                                    { "field": "WeekStartDate", "type": "nominal" },
+                                    {
+                                        "field": "NumberOfParticipants",
+                                        "type": "quantitative",
+                                        "title": "N of participants"
+                                    }
+                                ],
+                                "opacity": {
+                                    "condition": { "selection": "brush", "value": 1 },
+                                    "value": 0.7
+                                }
                             }
                         },
-                        "y": {
-                            "title": "N of participants",
-                            "field": "NumberOfParticipants",
-                            "type": "quantitative"
+                        {
+                            "transform": [
+                                { "filter": { "selection": "brush" } },
+                                {
+                                    "aggregate": [
+                                        {
+                                            "op": "sum",
+                                            "field": "NumberOfParticipants",
+                                            "as": "total_value"
+                                        }
+                                    ],
+                                    "groupby": ["WeekStartDate"]
+                                }
+                            ],
+                            "mark": "rule",
+                            "encoding": {
+                                "y": {
+                                    "aggregate": "mean",
+                                    "field": "total_value",
+                                    "type": "quantitative"
+                                },
+                                "tooltip": [
+                                    {
+                                        "aggregate": "mean",
+                                        "field": "total_value",
+                                        "type": "quantitative",
+                                        "title": "Mean",
+                                        "format": ".0f"
+                                    }
+                                ],
+                                "color": { "value": "firebrick" },
+                                "size": { "value": 3 }
+                            }
                         },
-                        "tooltip": [
-                            { "field": "Time", "type": "nominal" },
-                            { "field": "NumberOfParticipants", "type": "quantitative", "title": "N of participants" }
-                        ],
-                        "color": {
-                            "field": "StudyType",
-                            "type": "nominal",
-                            "legend": { "title": "Study type" },
-                            "scale": { "scheme": "set2" },
-                        },
-                        "opacity": {
-                            "condition": {
-                                "selection": "brush", "value": 1
+                        {
+                            "transform": [
+                                { "filter": { "selection": "brush" } },
+                                {
+                                    "aggregate": [
+                                        {
+                                            "op": "sum",
+                                            "field": "NumberOfParticipants",
+                                            "as": "total_value"
+                                        }
+                                    ],
+                                    "groupby": ["YearMonth"]
+                                },
+                                {
+                                    "aggregate": [
+                                        { "op": "mean", "field": "total_value", "as": "mean_value" }
+                                    ]
+                                },
+                                {
+                                    "calculate": "'Mean N per month: ' + format(datum.mean_value, '.0f')",
+                                    "as": "mean_label"
+                                }
+                            ],
+                            "mark": {
+                                "type": "text",
+                                "x": 80,
+                                "y": 20,
+                                "xOffset": 0,
+                                "yOffset": 0,
+                                "color": "black"
                             },
-                            "value": 0.7
+                            "encoding": { "text": { "field": "mean_label", "type": "nominal" } }
                         }
-                    }
-                },
-                {
-                    "transform": [{
-                        "filter": { "selection": "brush" }
-                    },
-                    {
-                        "aggregate": [{ "op": "sum", "field": "NumberOfParticipants", "as": "total_value" }],
-                        "groupby": ["YearMonth"]
-                    }
-                    ],
-                    "mark": "rule",
-                    "encoding": {
-                        "y": {
-                            "aggregate": "mean",
-                            "field": "total_value",
-                            "type": "quantitative"
-                        },
-                        "tooltip": [
-                            {
-                                "aggregate": "mean",
-                                "field": "total_value",
-                                "type": "quantitative",
-                                "title": "Mean",
-                                "format": ".0f"
-                            }
-                        ],
-                        "color": { "value": "firebrick" },
-
-                        "size": { "value": 3 }
-                    }
-                },
-                {
-                    "transform": [{
-                        "filter": { "selection": "brush" }
-                    },
-                    {
-                        "aggregate": [{ "op": "sum", "field": "NumberOfParticipants", "as": "total_value" }],
-                        "groupby": ["YearMonth"]
-                    },
-                    {
-                        "aggregate": [{ "op": "mean", "field": "total_value", "as": "mean_value" }],
-                    },
-                    {
-                        "calculate": "'Mean N per month: ' + format(datum.mean_value, '.0f')",
-                        "as": "mean_label",
-                    }
-                    ],
-                    "mark": {
-                        "type": "text",
-                        "x": 80,
-                        "y": 20,
-                        "xOffset": 0,
-                        "yOffset": 0,
-                        "color": "black"
-                    },
-                    "encoding": {
-                        "text": {
-                            "field": "mean_label",
-                            "type": "nominal",
-                        }
-                    }
-                }]
+                    ]
+                }
 
             };
 
@@ -232,7 +214,7 @@ export default {
 </script>
 
 <style scoped>
-.histogram {
+.histogramChart {
     padding: 20px;
 
 }

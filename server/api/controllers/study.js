@@ -184,12 +184,19 @@ exports.studyStats = asyncHandler(async (req, res) => {
     queryStringNAssistExp = queryStringNAssistExp.replace(/\${{studyID}}/g, studyID);
 
 
+    var queryStringNWeeklyRecrtuiment = "SELECT     YEAR(${{DBName}}.Schedule.updatedAt) AS Year,     WEEK(${{DBName}}.Schedule.updatedAt) AS weekIndex,     ${{DBName}}.Schedule.Status AS Status,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants,     DATE_FORMAT(         ${{DBName}}.Schedule.updatedAt,         '%Y-%m-%d'     ) AS WeekStartDate FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed'     AND ${{DBName}}.Study = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY     Year,     Status,     weekIndex ORDER BY     Year,     weekIndex;";
+
+    queryStringNWeeklyRecrtuiment = queryStringNWeeklyRecrtuiment.replace(/\${{DBName}}/g, config.DBName);
+    queryStringNWeeklyRecrtuiment = queryStringNWeeklyRecrtuiment.replace(/\${{studyID}}/g, studyID);
+
+
     const totalNperStatus = await model.sequelize.query(queryStringN);
     const totalNperPersonnelStatus = await model.sequelize.query(queryStringNperPersonnel);
     const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp);
     const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp);
+    const totalNWeeklyRecrtuiment = await model.sequelize.query(queryStringNWeeklyRecrtuiment);
 
-    const results = { totalNperStatus: totalNperStatus[0], totalNperPersonnelStatus: totalNperPersonnelStatus[0], totalNperPersonnelPriExp: totalNperPersonnelPriExp[0], totalNperPersonnelAssistExp: totalNperPersonnelAssistExp[0] };
+    const results = { totalNperStatus: totalNperStatus[0], totalNperPersonnelStatus: totalNperPersonnelStatus[0], totalNperPersonnelPriExp: totalNperPersonnelPriExp[0], totalNperPersonnelAssistExp: totalNperPersonnelAssistExp[0], totalNWeeklyRecrtuiment: totalNWeeklyRecrtuiment[0] };
 
     res.status(200).send(results);
   } catch (err) {

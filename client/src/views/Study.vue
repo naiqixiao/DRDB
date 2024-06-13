@@ -204,6 +204,20 @@
                       </v-col>
                     </v-row>
 
+                    <v-row>
+                      <v-col md="8" class="subtitle">
+                        <v-divider></v-divider>
+                        <h2 class="text-left" style="margin-right: 0px;">Study history</h2>
+                        <v-row class="align-start">
+                          <v-col>
+                            <studyHistoryChart
+                              :stats="this.studyStats.totalNWeeklyRecrtuiment">
+                            </studyHistoryChart>
+                          </v-col>
+                        </v-row>
+                      </v-col>
+                    </v-row>
+
 
                   </v-card-text>
                 </v-card>
