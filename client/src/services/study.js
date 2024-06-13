@@ -16,6 +16,11 @@ export default {
       params: studyInfo
     });
   },
+  studyStats(studyID) {
+    return api().get("study/studyStats", {
+      params: studyID
+    });
+  },
   update(studyInfo) {
     studyInfo.User = {
       

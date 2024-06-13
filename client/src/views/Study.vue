@@ -130,13 +130,13 @@
                 " placeholder="  " readonly outlined dense></v-text-field>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col md="12" class="subtitle" v-if="currentStudy.FK_TestingRoom">
+        <v-row justify="space-between" align="center">
+          <v-col md="12" class="subtitle" justify="start" v-if="currentStudy.FK_TestingRoom">
             <v-divider></v-divider>
-            <h2 class="text-left" style="margin-right: 0px;">Testing room:</h2>
+            <h2 justify="start" class="text-left" style="margin-right: 0px;">Testing room:</h2>
           </v-col>
           <v-col md="12" class="subtitle" v-else>
-            <h3 style="color: red">Testing room has not been assigned to this study.</h3>
+            <h3 justify="start" style="color: red">Testing room has not been assigned to this study.</h3>
           </v-col>
 
           <v-col md="4" height="100px">
@@ -145,9 +145,75 @@
               hide-details></v-select>
           </v-col>
 
+          <v-col md="4" height="100px">
+            <v-btn @click.stop="dialogStudyProgress = true" :disabled="!(
+              $store.state.role == 'Admin' ||
+              $store.state.role == 'PI' ||
+              $store.state.role == 'PostDoc' ||
+              $store.state.role == 'GradStudent' ||
+              $store.state.role == 'Lab manager'
+            )">Study progress </v-btn>
+
+            <div>
+              <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialogStudyProgress"
+                :retain-focus="false">
+                <v-card outlined>
+                  <v-toolbar dark color="primary">
+                    <v-btn icon dark @click="dialogStudyProgress = false">
+                      <v-icon class="fabIcon">mdi-close</v-icon>
+                    </v-btn>
+                    <h2 class="title-text title-p-4 ma-2">Study progress</h2>
+                    <v-spacer></v-spacer>
+                  </v-toolbar>
+
+                  <v-card-text style="padding-top: 36px">
+                    <v-row>
+                      <v-col md="4" class="subtitle" justify="start">
+                        <v-divider></v-divider>
+                        <h2 justify="start" class="text-left" style="margin-right: 0px;">Study progress</h2>
+                        <v-col cols="12" lg="12">
+                          <div>
+                            <studyProgressChart :stats="this.studyStats.totalNperStatus"></studyProgressChart>
+                          </div>
+                        </v-col>
+                      </v-col>
+
+                      <v-col col="8">
+                        <v-divider></v-divider>
+                        <h2 justify="start" class="text-left" style="margin-right: 0px;">Recruitment by researcher</h2>
+                        <v-col cols="12" lg="12">
+                          <div>
+                            <recruitmentProgressChart :stats="this.studyStats.totalNperPersonnelStatus">
+                            </recruitmentProgressChart>
+                          </div>
+                        </v-col>
+                      </v-col>
+                    </v-row>
+
+                    <v-row>
+                      <v-col md="4" class="subtitle">
+                        <v-divider></v-divider>
+                        <h2 class="text-left" style="margin-right: 0px;">Experimenter stats</h2>
+                        <v-row class="align-start">
+                          <v-col>
+                            <experimenterStatsChart
+                              :stats="[...this.studyStats.totalNperPersonnelPriExp, ...this.studyStats.totalNperPersonnelAssistExp]">
+                            </experimenterStatsChart>
+                          </v-col>
+                        </v-row>
+                      </v-col>
+                    </v-row>
+
+
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
+            </div>
+          </v-col>
+
         </v-row>
 
-        <v-divider style="margin: 12px 12px; flex: 0 0 100%;"></v-divider>
+        <v-divider style=" margin: 12px 12px; flex: 0 0 100%;"></v-divider>
         <v-row justify="space-between">
           <v-col cols="12" md="2" dense>
             <v-tooltip right>
@@ -216,7 +282,8 @@
           </v-col>
         </v-row>
         <div>
-          <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialog" :retain-focus="false">
+          <v-dialog fullscreen hide-overlay transition="dialog-bottom-transition" v-model="dialog"
+            :retain-focus="false">
             <v-card outlined class="card">
               <v-card-title>
                 <span class="headline">Study information</span>
@@ -458,12 +525,19 @@ import testingRoom from "@/services/testingRoom";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import moment from "moment";
 
+import studyProgressChart from '@/components/studyProgressChart.vue';
+import recruitmentProgressChart from '@/components/recruitmentProgressChart.vue';
+import experimenterStatsChart from '@/components/experimenterStatsChart.vue';
+
 export default {
   components: {
     DateDisplay,
     AssignedExperimenters,
     // VueEditor,
     ConfirmDlg,
+    studyProgressChart,
+    recruitmentProgressChart,
+    experimenterStatsChart
   },
   data() {
     return {
@@ -519,6 +593,13 @@ export default {
       ],
       dialog: false,
       dialogShowEmailPreviews: false,
+      studyStats: {
+        totalNperStatus: [],
+        totalNperPersonnelStatus: [],
+        totalNperPersonnelPriExp: [],
+        totalNperPersonnelAssistExp: []
+      },
+      dialogStudyProgress: false,
       Studies: [],
       currentStudy: {
         StudyName: null,
@@ -628,6 +709,17 @@ export default {
         }
       }
 
+    },
+
+    async fetchStudyProgress() {
+      try {
+        const Result = await study.studyStats({ studyID: this.currentStudy.id });
+        this.studyStats = Result.data;
+
+        // const hist
+      } catch (error) {
+        console.log(error.response);
+      }
     },
 
     async searchStudies() {
@@ -1061,6 +1153,23 @@ export default {
         xl: "large",
       }[this.$vuetify.breakpoint.name];
       return size ? { [size]: true } : {};
+    },
+  },
+
+  watch: {
+    dialogStudyProgress(val) {
+      if (val) {
+        this.fetchStudyProgress();
+      } else {
+        this.studyStats = {
+          totalNperStatus: [],
+          totalNperPersonnelStatus: [],
+          totalNperPersonnelPriExp: [],
+          totalNperPersonnelAssistExp: []
+        };
+
+        console.log(this.studyStats);
+      }
     },
   },
 
