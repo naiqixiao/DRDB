@@ -108,6 +108,21 @@ export default {
                                     "field": "NumberOfParticipants",
                                     "type": "quantitative"
                                 },
+                                "color": {
+                                    "field": "Status",
+                                    "type": "nominal",
+                                    "scale": {
+                                        "scheme": "tableau10"
+                                    },
+                                    "sort": [
+                                        "Confirmed",
+                                        "TBD",
+                                        "Rescheduling",
+                                        "No Show",
+                                        "Cancelled",
+                                        "Rejected"
+                                    ]
+                                },
                                 "tooltip": [
                                     { "field": "WeekStartDate", "type": "nominal" },
                                     {
