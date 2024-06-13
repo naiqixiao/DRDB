@@ -542,6 +542,7 @@ import moment from "moment";
 import studyProgressChart from '@/components/studyProgressChart.vue';
 import recruitmentProgressChart from '@/components/recruitmentProgressChart.vue';
 import experimenterStatsChart from '@/components/experimenterStatsChart.vue';
+import studyHistoryChart from '@/components/studyHistoryChart.vue';
 
 export default {
   components: {
@@ -551,7 +552,8 @@ export default {
     ConfirmDlg,
     studyProgressChart,
     recruitmentProgressChart,
-    experimenterStatsChart
+    experimenterStatsChart,
+    studyHistoryChart
   },
   data() {
     return {

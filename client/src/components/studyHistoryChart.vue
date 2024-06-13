@@ -16,7 +16,7 @@ function loadScript(src) {
 }
 
 export default {
-    name: 'ProgressChart',
+    name: 'histogramChart',
     props: {
         stats: Array,
     },
