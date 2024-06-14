@@ -96,14 +96,14 @@ export default {
           layer: [
             {
               selection: { brush: { type: "interval", encodings: ["x"] } },
-              mark: { type: "bar", width: { band: 0.15 } },
+              mark: { type: "bar"},
               transform: [
                 { calculate: "datum.Month + ' ' + datum.Year", as: "Time" },
               ],
               encoding: {
                 x: {
                   title: null,
-                  timeUnit: "binnedyearmonth",
+                  timeUnit: "binnedyearmonthdate",
                   field: "WeekStartDate",
                   type: "temporal",
                   axis: { labelAngle: -30 },
