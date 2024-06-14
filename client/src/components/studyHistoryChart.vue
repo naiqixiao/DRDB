@@ -96,7 +96,7 @@ export default {
           layer: [
             {
               selection: { brush: { type: "interval", encodings: ["x"] } },
-              mark: { type: "bar"},
+              mark: { type: "bar", width: 3},
               transform: [
                 { calculate: "datum.Month + ' ' + datum.Year", as: "Time" },
               ],
@@ -107,7 +107,7 @@ export default {
                   field: "WeekStartDate",
                   type: "temporal",
                   axis: { labelAngle: -30 },
-                  scale: { zero: false },
+                  // scale: { zero: false },
                 },
                 y: {
                   title: "N of participants",
