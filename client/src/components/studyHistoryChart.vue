@@ -46,34 +46,47 @@ export default {
         },
         width: 700,
         config: {
-          title: { fontSize: 24, offset: 20 },
-          axis: { domain: false, labelFontSize: 12, titleFontSize: 14 },
+          title: { fontSize: 24, offset: 40 },
+          axis: {
+            domain: false,
+            labelFontSize: 18,
+            titleFontSize: 24,
+          },
           headerFacet: { titleFontSize: 14, labelFontSize: 14 },
           text: { fontSize: 18 },
-          legend: {
-            titleFontSize: 24,
-            labelFontSize: 18,
-            offset: 40,
-            orient: "bottom",
-            layout: { bottom: { anchor: "middle" } },
-          },
+          //   legend: {
+          //     titleFontSize: 24,
+          //     labelFontSize: 18,
+          //     offset: 40,
+          //     orient: "bottom",
+          //     layout: { bottom: { anchor: "middle" } },
+          //   },
         },
         title: "Number of participants recruited per week",
         facet: {
           field: "Status",
+          legend: null,
           type: "nominal",
           title: "",
           header: {
             titleColor: "black",
             titleFontSize: 24,
             titleAnchor: "start",
-            labelColor: "steelblue",
+            labelColor: "balck",
             labelFontSize: 24,
             labelAnchor: "start",
             labelAlign: "left",
-            labelPadding: 20,
+            labelPadding: 0,
+            labelFontWeight: "bold",
           },
-          sort: ["Confirmed", "TBD", "Rescheduling", "No Show", "Cancelled", "Rejected"],
+          sort: [
+            "Confirmed",
+            "TBD",
+            "Rescheduling",
+            "No Show",
+            "Cancelled",
+            "Rejected",
+          ],
         },
         spacing: 40,
         columns: 2,
@@ -84,7 +97,9 @@ export default {
             {
               selection: { brush: { type: "interval", encodings: ["x"] } },
               mark: { type: "bar", width: { band: 0.15 } },
-              transform: [{ calculate: "datum.Month + ' ' + datum.Year", as: "Time" }],
+              transform: [
+                { calculate: "datum.Month + ' ' + datum.Year", as: "Time" },
+              ],
               encoding: {
                 x: {
                   title: null,
@@ -92,11 +107,13 @@ export default {
                   field: "WeekStartDate",
                   type: "temporal",
                   axis: { labelAngle: -30 },
+                  scale: { zero: false },
                 },
                 y: {
                   title: "N of participants",
                   field: "NumberOfParticipants",
                   type: "quantitative",
+                  scale: { zero: false },
                 },
                 tooltip: [
                   { field: "WeekStartDate", type: "temporal" },
@@ -118,6 +135,7 @@ export default {
                     "Cancelled",
                     "Rejected",
                   ],
+                  "legend": null
                 },
                 opacity: {
                   condition: { selection: "brush", value: 1 },
@@ -131,7 +149,7 @@ export default {
                 {
                   aggregate: [
                     {
-                      op: "sum",
+                      op: "mean",
                       field: "NumberOfParticipants",
                       as: "total_value",
                     },
@@ -165,7 +183,7 @@ export default {
                 {
                   aggregate: [
                     {
-                      op: "sum",
+                      op: "mean",
                       field: "NumberOfParticipants",
                       as: "total_value",
                     },
@@ -173,17 +191,20 @@ export default {
                   groupby: ["YearMonth"],
                 },
                 {
-                  aggregate: [{ op: "mean", field: "total_value", as: "mean_value" }],
+                  aggregate: [
+                    { op: "mean", field: "total_value", as: "mean_value" },
+                  ],
                 },
                 {
-                  calculate: "'Mean N per month: ' + format(datum.mean_value, '.0f')",
+                  calculate:
+                    "'Mean N per month: ' + format(datum.mean_value, '.0f')",
                   as: "mean_label",
                 },
               ],
               mark: {
                 type: "text",
-                x: 80,
-                y: 20,
+                x: 480,
+                y: -20,
                 xOffset: 0,
                 yOffset: 0,
                 color: "black",

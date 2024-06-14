@@ -52,7 +52,7 @@ export default {
                 "config": {
                     "title": {
                         "fontSize": 24,
-                        "offset": 20,
+                        "offset": 40,
                     },
                     "axis": {
                         "domain": false,
@@ -68,8 +68,8 @@ export default {
                     },
                     "legend": {
                         "titleFontSize": 24,
-                        "labelFontSize": 18,
-                        "offset": 40,
+                        "labelFontSize": 24,
+                        "offset": 80,
                         "orient": "bottom", "layout": { "bottom": { "anchor": "middle" } }
                     }
                 },

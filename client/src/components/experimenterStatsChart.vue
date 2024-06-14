@@ -42,7 +42,7 @@ export default {
 
             const spec = {
                 "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-                "width": 700,
+                "width": 500,
                 "height": 300,
                 "background": null,
                 // "description": "Pie chart of participants' statuses for the study 'EmotionConsistency'.",
@@ -52,7 +52,7 @@ export default {
                 "config": {
                     "title": {
                         "fontSize": 24,
-                        "offset": 20,
+                        "offset": 40,
                     },
                     "axis": {
                         "domain": false,
@@ -70,16 +70,16 @@ export default {
                         "titleFontSize": 24,
                         "labelFontSize": 18,
                         "offset": 40,
-                        "orient": "bottom", "layout": { "bottom": { "anchor": "middle" } }
+                        "orient": "right", "layout": { "right": { "anchor": "middle" } }
                     }
                 },
                 "title": "Experimenter Stats",
                 "mark": { "type": "bar", "width": 250, "tooltip": true },
                 "encoding": {
-                    "x": { "aggregate": "sum", "field": "NumberOfParticipants", "title": "N of participants", "scale": { "domain": [0, 50] } },
+                    "x": { "aggregate": "sum", "field": "NumberOfParticipants", "title": "N of participants", "scale": {"zero": false} },
                     "y": { "field": "Experimenter", "type": "nominal" },
                     "color": {
-                        "field": "ROLE", "type": "nominal",
+                        "field": "ROLE", "type": "nominal", "title": "Role", "sort": "descending",
                         "scale": {"range": ["#cccc00", "#ae2c21", "#4daf4a"]}
                     }
                 }

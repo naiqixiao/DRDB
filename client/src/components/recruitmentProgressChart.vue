@@ -59,7 +59,8 @@ export default {
                     },
                     "headerFacet": {
                         "titleFontSize": 14,
-                        "labelFontSize": 14
+                        "labelFontSize": 14,
+                        
                     },
                     "text": {
                         "fontSize": 18,
@@ -68,7 +69,7 @@ export default {
                         "titleFontSize": 24,
                         "labelFontSize": 18,
                         "offset": 40,
-                        "orient": "bottom", "layout": { "bottom": { "anchor": "middle" } }
+                        "orient": "right", "layout": { "right": { "anchor": "middle" } }
                     },
                     
                 },
@@ -80,22 +81,24 @@ export default {
                         "titleColor": "black",
                         "titleFontSize": 24,
                         "titleAnchor": "start",
-                        "labelColor": "steelblue",
+                        "labelColor": "black",
                         "labelFontSize": 24,
                         "labelAnchor": "start",
                         "labelAlign": "left",
-                        "labelPadding": 20,
+                        "labelPadding": 40,
+                        labelFontWeight: "bold",
+                        titleOffset: 40,
                     }
                 },
-                "spacing": 80,
+                "spacing": 120,
                 "columns": 4,
                 "spec": {
                     "layer": [
                         {
                             "mark": {
                                 "type": "arc",
-                                "outerRadius": 120,
-                                "innerRadius": 60,
+                                "outerRadius": 160,
+                                "innerRadius": 100,
                                 "tooltip": true
                             },
                             "encoding": {
@@ -124,7 +127,7 @@ export default {
                         {
                             "mark": {
                                 "type": "text",
-                                "radius": 45,
+                                "radius": 60,
                                 "color": "black"
                             },
                             "encoding": {
