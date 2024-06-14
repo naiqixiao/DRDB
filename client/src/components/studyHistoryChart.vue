@@ -96,18 +96,15 @@ export default {
           layer: [
             {
               selection: { brush: { type: "interval", encodings: ["x"] } },
-              mark: { type: "bar", width: 3},
-              transform: [
-                { calculate: "datum.Month + ' ' + datum.Year", as: "Time" },
-              ],
+              mark: { type: "bar", width: 4},
               encoding: {
                 x: {
                   title: null,
-                  timeUnit: "binnedyearmonthdate",
+                  "timeUnit": "binnedyearmonth", 
                   field: "WeekStartDate",
                   type: "temporal",
                   axis: { labelAngle: -30 },
-                  // scale: { zero: false },
+                  scale: { zero: false },
                 },
                 y: {
                   title: "N of participants",
@@ -197,7 +194,7 @@ export default {
                 },
                 {
                   calculate:
-                    "'Mean N per month: ' + format(datum.mean_value, '.0f')",
+                    "'Mean N per week: ' + format(datum.mean_value, '.0f')",
                   as: "mean_label",
                 },
               ],
