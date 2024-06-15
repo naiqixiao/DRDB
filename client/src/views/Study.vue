@@ -313,7 +313,8 @@
                   <v-card-text style="padding-top: 36px">
                     <v-row>
                       <v-col
-                        md="4"
+                        lg="4"
+                        md="12"
                         class="subtitle"
                         justify="start"
                         style="overflow-x: scroll !important"
@@ -326,18 +327,15 @@
                         >
                           Study progress
                         </h2>
-                        <v-col
-                          cols="12"
-                          lg="12"
-                          style="overflow-x: scroll !important"
-                        >
-                          <studyProgressChart
-                            :stats="this.studyStats.totalNperStatus"
-                          ></studyProgressChart>
-                        </v-col>
+
+                        <studyProgressChart
+                          :stats="this.studyStats.totalNperStatus"
+                        ></studyProgressChart>
                       </v-col>
+
                       <v-col
-                        md="8"
+                        lg="8"
+                        md="12"
                         class="subtitle"
                         style="overflow-x: scroll !important"
                       >
@@ -355,7 +353,8 @@
 
                     <v-row>
                       <v-col
-                        md="4"
+                        lg="4"
+                        md="12"
                         class="subtitle"
                         style="overflow-x: scroll !important"
                       >
@@ -372,7 +371,11 @@
                         >
                         </experimenterStatsChart>
                       </v-col>
-                      <v-col col="8" style="overflow-x: scroll !important">
+                      <v-col
+                        lg="8"
+                        md="12"
+                        style="overflow-x: scroll !important"
+                      >
                         <v-divider></v-divider>
                         <h2
                           justify="start"

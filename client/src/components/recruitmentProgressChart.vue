@@ -128,18 +128,35 @@ export default {
                             "mark": {
                                 "type": "text",
                                 "radius": 60,
-                                "color": "black"
+                                "color": "black",
+                                "fontWeight": "bold"
                             },
                             "encoding": {
-                                "text": {
-                                    "field": "NumberOfParticipants",
-                                    "type": "quantitative"
-                                },
                                 "theta": {
                                     "field": "NumberOfParticipants",
                                     "type": "quantitative",
                                     "stack": true
+                                },
+                                "text": {
+                                    "field": "NumberOfParticipants",
+                                    "type": "quantitative"
+                                },
+                                "color": {
+                                    "field": "Status",
+                                    "type": "nominal",
+                                    "scale": {
+                                        "scheme": "tableau10"
+                                    },
+                                    "sort": [
+                                        "Confirmed",
+                                        "TBD",
+                                        "Rescheduling",
+                                        "No Show",
+                                        "Cancelled",
+                                        "Rejected"
+                                    ]
                                 }
+                                
                             }
                         }
                     ]

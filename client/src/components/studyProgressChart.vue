@@ -108,8 +108,9 @@ export default {
                     {
                         "mark": {
                             "type": "text",
-                            "radius": 80,
-                            "color": "black"
+                            "radius": 75,
+                            "color": "black",
+                            "fontWeight": "bold"
                         },
                         "encoding": {
                             "text": {
@@ -120,6 +121,21 @@ export default {
                                 "field": "NumberOfParticipants",
                                 "type": "quantitative",
                                 "stack": true
+                            },
+                            "color": {
+                                "field": "Status",
+                                "type": "nominal",
+                                "scale": {
+                                    "scheme": "tableau10"
+                                },
+                                "sort": [
+                                    "Confirmed",
+                                    "TBD",
+                                    "Rescheduling",
+                                    "No Show",
+                                    "Cancelled",
+                                    "Rejected"
+                                ]
                             }
                         }
                     }
