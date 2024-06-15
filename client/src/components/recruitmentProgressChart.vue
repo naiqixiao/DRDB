@@ -69,7 +69,7 @@ export default {
                         "titleFontSize": 24,
                         "labelFontSize": 18,
                         "offset": 40,
-                        "orient": "right", "layout": { "right": { "anchor": "middle" } }
+                        "orient": "top", "layout": { "top": { "anchor": "middle" } }
                     },
                     
                 },

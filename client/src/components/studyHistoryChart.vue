@@ -44,7 +44,7 @@ export default {
         data: {
           values: this.stats,
         },
-        width: 700,
+        // width: 700,
         config: {
           title: { fontSize: 24, offset: 40 },
           axis: {
@@ -92,21 +92,36 @@ export default {
         columns: 2,
         resolve: { axis: { y: "independent" }, scale: { y: "independent" } },
         spec: {
-          width: 600,
+          width: 500,
           layer: [
             {
               selection: { brush: { type: "interval", encodings: ["x"] } },
-              mark: { type: "bar", width: 4},
+              mark: "bar",
+              transform: [
+                {
+                  calculate:
+                    "datetime(datetime(datum.WeekStartDate) + 7 * 24 * 60 * 60 * 1000)",
+                  as: "NextWeekDate",
+                },
+              ],
               encoding: {
                 x: {
                   title: null,
-                  "timeUnit": "binnedyearmonth", 
+                  binned: true,
+                  timeUnit: "binnedyearweek",
                   field: "WeekStartDate",
                   type: "temporal",
-                  axis: { labelAngle: -30 },
+                  axis: { labelAngle: -30 , "format": "%Y-%b"},
                   scale: { zero: false },
+                  // "bin": {"maxbins": 160},
+                },
+                x2: {
+                  field: "NextWeekDate",
+                  timeUnit: "binnedyearweek",
+                  type: "temporal",
                 },
                 y: {
+                  aggregate: "mean",
                   title: "N of participants",
                   field: "NumberOfParticipants",
                   type: "quantitative",
@@ -132,7 +147,7 @@ export default {
                     "Cancelled",
                     "Rejected",
                   ],
-                  "legend": null
+                  legend: null,
                 },
                 opacity: {
                   condition: { selection: "brush", value: 1 },
@@ -200,8 +215,8 @@ export default {
               ],
               mark: {
                 type: "text",
-                x: 480,
-                y: -20,
+                x: 380,
+                y: 20,
                 xOffset: 0,
                 yOffset: 0,
                 color: "black",
