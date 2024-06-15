@@ -111,7 +111,7 @@ export default {
                   timeUnit: "binnedyearweek",
                   field: "WeekStartDate",
                   type: "temporal",
-                  axis: { labelAngle: -30 , "format": "%Y-%b"},
+                  axis: { labelAngle: -30, format: "%Y-%b" },
                   scale: { zero: false },
                   // "bin": {"maxbins": 160},
                 },
@@ -138,7 +138,24 @@ export default {
                 color: {
                   field: "Status",
                   type: "nominal",
-                  scale: { scheme: "tableau10" },
+                  scale: {
+                    domain: [
+                      "Confirmed",
+                      "TBD",
+                      "Rescheduling",
+                      "No Show",
+                      "Cancelled",
+                      "Rejected",
+                    ],
+                    range: [
+                      "#4E4E4E",
+                      "#FFBF78",
+                      "#ACD793",
+                      "#BC5A94",
+                      "#C80036",
+                      "#EE4E4E",
+                    ],
+                  },
                   sort: [
                     "Confirmed",
                     "TBD",

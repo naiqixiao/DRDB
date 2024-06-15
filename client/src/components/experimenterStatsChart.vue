@@ -66,7 +66,7 @@ export default {
           },
           legend: {
             titleFontSize: 24,
-            labelFontSize: 18,
+            labelFontSize: 24,
             offset: 40,
             orient: "top",
             layout: { top: { anchor: "middle" } },
@@ -92,7 +92,11 @@ export default {
             type: "nominal",
             title: "Role",
             sort: "descending",
-            scale: { range: ["#cccc00", "#ae2c21", "#4daf4a"] },
+            scale: { domain: [
+                      "Primary",
+                      "Assistant"
+                    ],
+                    range: ["#839B97", "#C6B497", "#4daf4a"] },
           },
         },
       };
