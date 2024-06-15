@@ -312,7 +312,12 @@
 
                   <v-card-text style="padding-top: 36px">
                     <v-row>
-                      <v-col md="4" class="subtitle" justify="start">
+                      <v-col
+                        md="4"
+                        class="subtitle"
+                        justify="start"
+                        style="overflow-x: scroll !important"
+                      >
                         <v-divider></v-divider>
                         <h2
                           justify="start"
@@ -321,49 +326,53 @@
                         >
                           Study progress
                         </h2>
-                        <v-col cols="12" lg="12">
-                          <div>
-                            <studyProgressChart
-                              :stats="this.studyStats.totalNperStatus"
-                            ></studyProgressChart>
-                          </div>
+                        <v-col
+                          cols="12"
+                          lg="12"
+                          style="overflow-x: scroll !important"
+                        >
+                          <studyProgressChart
+                            :stats="this.studyStats.totalNperStatus"
+                          ></studyProgressChart>
                         </v-col>
                       </v-col>
-                      <v-col md="8" class="subtitle">
+                      <v-col
+                        md="8"
+                        class="subtitle"
+                        style="overflow-x: scroll !important"
+                      >
                         <v-divider></v-divider>
                         <h2 class="text-left" style="margin-right: 0px">
                           Study history
                         </h2>
-                        <v-row class="align-start">
-                          <v-col>
-                            <studyHistoryChart
-                              :stats="this.studyStats.totalNWeeklyRecrtuiment"
-                            >
-                            </studyHistoryChart>
-                          </v-col>
-                        </v-row>
+
+                        <studyHistoryChart
+                          :stats="this.studyStats.totalNWeeklyRecrtuiment"
+                        >
+                        </studyHistoryChart>
                       </v-col>
                     </v-row>
 
                     <v-row>
-                      <v-col md="4" class="subtitle">
+                      <v-col
+                        md="4"
+                        class="subtitle"
+                        style="overflow-x: scroll !important"
+                      >
                         <v-divider></v-divider>
                         <h2 class="text-left" style="margin-right: 0px">
                           Experimenter stats
                         </h2>
-                        <v-row class="align-start">
-                          <v-col>
-                            <experimenterStatsChart
-                              :stats="[
-                                ...this.studyStats.totalNperPersonnelPriExp,
-                                ...this.studyStats.totalNperPersonnelAssistExp,
-                              ]"
-                            >
-                            </experimenterStatsChart>
-                          </v-col>
-                        </v-row>
+
+                        <experimenterStatsChart
+                          :stats="[
+                            ...this.studyStats.totalNperPersonnelPriExp,
+                            ...this.studyStats.totalNperPersonnelAssistExp,
+                          ]"
+                        >
+                        </experimenterStatsChart>
                       </v-col>
-                      <v-col col="8">
+                      <v-col col="8" style="overflow-x: scroll !important">
                         <v-divider></v-divider>
                         <h2
                           justify="start"
@@ -372,14 +381,11 @@
                         >
                           Recruitment by researcher
                         </h2>
-                        <v-col cols="12" lg="12">
-                          <div>
-                            <recruitmentProgressChart
-                              :stats="this.studyStats.totalNperPersonnelStatus"
-                            >
-                            </recruitmentProgressChart>
-                          </div>
-                        </v-col>
+
+                        <recruitmentProgressChart
+                          :stats="this.studyStats.totalNperPersonnelStatus"
+                        >
+                        </recruitmentProgressChart>
                       </v-col>
                     </v-row>
                   </v-card-text>
