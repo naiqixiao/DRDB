@@ -123,7 +123,7 @@
 import scheduleDialog from '@/components/scheduleDialog.vue';
 import DateDisplay from '@/components/DateDisplay.vue';
 import { childAge } from '@/assets/JS/displayFunctions.js';
-
+import { childStudyAge } from '@/assets/JS/displayFunctions.js';
 
 export default {
     props: {
@@ -240,9 +240,15 @@ export default {
 
             var apptInfo = [];
             item.Appointments.forEach((appointment, index) => {
-                var age = this.childAge(appointment.Child);
                 var appointmentInfo = "<strong>" + (index + 1) + ". </strong> "
-                var childInfo = "<span style='font-size: 20px; font-weight: 700'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
+
+                if (item.AppointmentTime) {
+                    let age = this.childStudyAge(appointment.Child, item.AppointmentTime);
+                } else {
+                    let age = this.childAge(appointment.Child);
+                }
+
+                const childInfo = "<span style='font-size: 20px; font-weight: 700'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
 
                 appointmentInfo = appointmentInfo +
                     childInfo + " <b style='font-size: 20px;'><i>==>  " + appointment.Study.StudyName + "</i></b><br>"
