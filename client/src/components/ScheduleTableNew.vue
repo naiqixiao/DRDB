@@ -242,11 +242,12 @@ export default {
             var apptInfo = [];
             item.Appointments.forEach((appointment, index) => {
                 var appointmentInfo = "<strong>" + (index + 1) + ". </strong> "
-
+                
+                var age = ""
                 if (item.AppointmentTime) {
-                    var age = this.childStudyAge(appointment.Child, item.AppointmentTime);
+                    age = this.childStudyAge(appointment.Child, item.AppointmentTime);
                 } else {
-                    var age = this.childAge(appointment.Child);
+                    age = this.childAge(appointment.Child);
                 }
 
                 const childInfo = "<span style='font-size: 20px; font-weight: 700'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
