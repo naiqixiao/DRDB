@@ -185,6 +185,7 @@ export default {
     methods: {
         // imported functions
         childAge,
+        childStudyAge,
 
         showDialog(item, dialogType) {
             this.currentSchedule = item;
@@ -243,9 +244,9 @@ export default {
                 var appointmentInfo = "<strong>" + (index + 1) + ". </strong> "
 
                 if (item.AppointmentTime) {
-                    let age = this.childStudyAge(appointment.Child, item.AppointmentTime);
+                    var age = this.childStudyAge(appointment.Child, item.AppointmentTime);
                 } else {
-                    let age = this.childAge(appointment.Child);
+                    var age = this.childAge(appointment.Child);
                 }
 
                 const childInfo = "<span style='font-size: 20px; font-weight: 700'>" + appointment.Child.Name + "</span> (" + age + ", " + appointment.Child.Sex + ")";
