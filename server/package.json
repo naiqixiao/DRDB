@@ -28,7 +28,7 @@
     "node-cron": "^2.0.3",
     "nodemon": "^2.0.20",
     "objection": "^2.2.18",
-    "pm2": "^5.2.0",
+    "pm2": "^5.4.3",
     "sequelize": "^5.22.5",
     "sequelize-auto": "^0.5.4",
     "socket.io": "^3.1.2"
