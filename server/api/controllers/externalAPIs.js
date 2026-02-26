@@ -28,11 +28,14 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
     const credentialsPath = "api/google/general/credentials.json";
     // const tokenPath = "api/google/lab" + lab + "/token.json";
 
-    const credentials = fs.readFileSync(credentialsPath, {recursive: true});
+    const credentials = fs.readFileSync(credentialsPath, { recursive: true });
     const { client_secret, client_id, redirect_uris } = JSON.parse(
       credentials
     ).installed;
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    const redirect_uri = redirect_uris.includes("http://localhost:5173/oauth/callback")
+      ? "http://localhost:5173/oauth/callback"
+      : "http://localhost:5173/oauth/callback"; // Hardcode for development
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
@@ -76,7 +79,8 @@ exports.googleToken = asyncHandler(async (req, res) => {
     const { client_secret, client_id, redirect_uris } = JSON.parse(
       credentials
     ).installed;
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    const redirect_uri = "http://localhost:5173/oauth/callback";
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
 
     var token = await oAuth2Client.getToken(code);
 
@@ -136,7 +140,8 @@ exports.adminToken = asyncHandler(async (req, res) => {
     const { client_secret, client_id, redirect_uris } = JSON.parse(
       credentials
     ).installed;
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    const redirect_uri = "http://localhost:5173/oauth/callback";
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
 
     var token = await oAuth2Client.getToken(code);
 
@@ -184,7 +189,8 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       credentials
     ).installed;
 
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    const redirect_uri = "http://localhost:5173/oauth/callback";
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
 
     var sendAsEmail = {};
 
@@ -240,7 +246,8 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       credentials
     ).installed;
 
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
+    const redirect_uri = "http://localhost:5173/oauth/callback";
+    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
 
     const token = fs.readFileSync(tokenPath);
     oAuth2Client.setCredentials(JSON.parse(token));

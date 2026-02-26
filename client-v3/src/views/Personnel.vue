@@ -1,0 +1,513 @@
+<template>
+  <v-container fluid>
+    <!-- Alerts -->
+    <div v-if="!$store.state.labEmailStatus">
+      <v-alert border="start" type="error" color="#c73460" density="compact" class="font-weight-bold mb-2">
+        Lab email is not setup properly. Please set it up in the Settings page.
+      </v-alert>
+    </div>
+    <div v-if="!$store.state.adminEmailStatus">
+      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
+        Admin email is not setup properly. Please set it up in the Settings page.
+      </v-alert>
+    </div>
+    <div v-if="$store.state.trainingMode">
+      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
+        You are running in a training mode.
+      </v-alert>
+    </div>
+
+    <v-row>
+      <!-- Left Column: Personnel List -->
+      <v-col cols="12" md="4">
+        <v-card variant="elevated">
+          <v-card-title class="d-flex align-center py-2">
+            <v-text-field
+              v-model="search"
+              label="Search by Name or Email"
+              class="mx-4"
+              density="compact"
+              variant="underlined"
+              hide-details
+            ></v-text-field>
+            <v-spacer></v-spacer>
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <div v-bind="props">
+                  <v-checkbox
+                    v-model="activeMemberFilter"
+                    label="Active only"
+                    hide-details
+                    density="compact"
+                  ></v-checkbox>
+                </div>
+              </template>
+              <span>Show active members</span>
+            </v-tooltip>
+          </v-card-title>
+          
+          <v-data-table
+            :headers="headerPersonnel"
+            :items="filteredPersonnels"
+            :search="search"
+            fixed-header
+            height="600"
+            hover
+            :class="['elevation-1', 'personnel-table']"
+            @click:row="rowSelected"
+          >
+            <template #item.Active="{ item }">
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <div v-bind="props" @click.stop>
+                    <v-checkbox-btn
+                      :model-value="!!item.Active"
+                      @update:model-value="changePersonnelStatus(item)"
+                      :disabled="!canManageStatus(item)"
+                      density="compact"
+                      color="primary"
+                    ></v-checkbox-btn>
+                  </div>
+                </template>
+                <span>Mark whether this person is available to run studies</span>
+              </v-tooltip>
+            </template>
+          </v-data-table>
+        </v-card>
+      </v-col>
+
+      <!-- Right Column: Personnel Details -->
+      <v-col cols="12" md="8">
+        <v-col md="12" class="subtitle pa-0 mb-4">
+          <v-divider class="mb-2"></v-divider>
+          <h3 class="text-left">Personnel information:</h3>
+        </v-col>
+        
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-container class="pa-0">
+            <v-row>
+              <v-col
+                cols="12"
+                sm="6"
+                :md="item.width"
+                v-for="item in personnelFields"
+                :key="item.label"
+              >
+                <v-text-field
+                  :label="item.label"
+                  :model-value="
+                    item.label === 'Phone'
+                      ? PhoneFormated(currentPersonnel[item.field])
+                      : currentPersonnel[item.field]
+                  "
+                  readonly
+                  hide-details
+                  variant="outlined"
+                  density="compact"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+            
+            <v-row class="mt-4">
+              <v-col cols="12">
+                <v-row>
+                  <v-col cols="auto">
+                    <v-tooltip location="top">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          color="primary"
+                          v-bind="props"
+                          @click.stop="createPersonnel"
+                          :disabled="!canAddPersonnel"
+                          prepend-icon="mdi-account-plus"
+                        >
+                          Add a person
+                        </v-btn>
+                      </template>
+                      <span>Add a new person to the lab</span>
+                    </v-tooltip>
+                  </v-col>
+                  
+                  <v-col cols="auto">
+                    <v-tooltip location="top">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          color="primary"
+                          v-bind="props"
+                          @click.stop="editPersonnel"
+                          :disabled="!canEditPersonnel"
+                          prepend-icon="mdi-pencil"
+                        >
+                          Update info
+                        </v-btn>
+                      </template>
+                      <span>Edit personnel information</span>
+                    </v-tooltip>
+                  </v-col>
+                  
+                  <v-col cols="auto">
+                    <v-tooltip location="top">
+                      <template v-slot:activator="{ props }">
+                        <v-btn
+                          color="error"
+                          v-bind="props"
+                          @click.stop="deletePersonnel"
+                          :disabled="!canDeletePersonnel"
+                          prepend-icon="mdi-delete"
+                        >
+                          Delete
+                        </v-btn>
+                      </template>
+                      <span>Remove this person from the lab</span>
+                    </v-tooltip>
+                  </v-col>
+                </v-row>
+              </v-col>
+              
+              <v-col md="12" class="subtitle mt-6 pa-0">
+                <v-divider class="mb-2"></v-divider>
+                <h3 class="text-left">Assigned studies:</h3>
+              </v-col>
+              
+              <v-col cols="12" md="12" class="pa-0 mt-2">
+                <AssignedStudies
+                  v-if="currentPersonnel.id"
+                  :Studies="currentPersonnel.AssignedStudies || []"
+                  :labStudies="labStudies"
+                  :personnelId="currentPersonnel.id"
+                  :personnelName="currentPersonnel.Name"
+                  @updatedStudies="updatedStudies"
+                ></AssignedStudies>
+                <div v-else class="text-medium-emphasis ms-2">
+                  Select a lab member to view assigned studies.
+                </div>
+              </v-col>
+            </v-row>
+          </v-container>
+
+          <!-- Edit/Add Dialog -->
+          <v-dialog v-model="dialog" max-width="800px" persistent>
+            <v-card>
+              <v-card-title class="text-h6 py-4">
+                Lab member information
+              </v-card-title>
+              <v-card-text>
+                <v-form ref="dialogForm" v-model="validDialog" lazy-validation>
+                  <v-container class="pa-0">
+                    <v-row dense>
+                      <v-col
+                        cols="12"
+                        sm="6"
+                        :md="item.width"
+                        v-for="item in personnelFields"
+                        :key="item.label"
+                      >
+                        <v-select
+                          v-if="item.options === 'role'"
+                          v-model="editedPersonnel[item.field]"
+                          :items="availableRoles"
+                          :label="item.label"
+                          :rules="[v => !!v || 'Required']"
+                          hide-details="auto"
+                          variant="outlined"
+                          density="compact"
+                          class="mb-2"
+                        ></v-select>
+                        
+                        <v-text-field
+                          v-else
+                          v-model="editedPersonnel[item.field]"
+                          :label="item.label"
+                          :rules="getRules(item.rules)"
+                          hide-details="auto"
+                          variant="outlined"
+                          density="compact"
+                          class="mb-2"
+                        ></v-text-field>
+                      </v-col>
+                    </v-row>
+                  </v-container>
+                </v-form>
+              </v-card-text>
+              <v-card-actions class="pa-4">
+                <v-spacer></v-spacer>
+                <v-btn color="primary" variant="text" @click="close">Cancel</v-btn>
+                <v-btn color="primary" variant="text" @click="save" :disabled="!validDialog">Save</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+        </v-form>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script>
+import AssignedStudies from "@/components/AssignedStudies.vue";
+import study from "@/services/study";
+import personnel from "@/services/personnel";
+import login from "@/services/login";
+import store from "@/store";
+
+export default {
+  name: "Personnel",
+  components: {
+    AssignedStudies,
+  },
+  
+  data() {
+    return {
+      search: "",
+      headerPersonnel: [
+        { title: "Name", align: "start", key: "Name", width: "35%" },
+        { title: "Email", align: "start", sortable: false, key: "Email", width: "45%" },
+        { title: "Active?", sortable: false, align: "center", key: "Active", width: "20%" },
+      ],
+      dialog: false,
+      personnelFields: [
+        { label: "Name", field: "Name", width: "6", rules: "name" },
+        { label: "Initials", field: "Initial", width: "6", rules: "required" },
+        { label: "Role", field: "Role", options: "role", width: "6", rules: "required" },
+        { label: "Email", field: "Email", width: "6", rules: "email" },
+        { label: "Calendar ID", field: "Calendar", width: "6", rules: "email" },
+        { label: "Phone", field: "Phone", width: "6", rules: "phone" },
+        { label: "Zoom Link", width: "12", field: "ZoomLink" },
+      ],
+
+      Personnels: [],
+      currentPersonnel: {},
+      editedPersonnel: {},
+      defaultPersonnel: {
+        Name: null,
+        FK_Lab: store.state.lab,
+        Initial: null,
+        Email: null,
+        Calendar: null,
+        Role: null,
+        Active: true,
+      },
+      editedIndex: -1,
+      labStudies: [],
+      valid: true,
+      validDialog: true,
+      activeMemberFilter: true,
+      
+      roleOptions: {
+        fullRoles: ["PostDoc", "PI", "GradStudent", "Undergrad", "RA", "Lab manager", "Staff"],
+        limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"]
+      }
+    };
+  },
+
+  computed: {
+    filteredPersonnels() {
+      if (!this.activeMemberFilter) {
+        return this.Personnels;
+      }
+      return this.Personnels.filter(p => !!p.Active);
+    },
+    
+    availableRoles() {
+      const role = this.$store.state.role;
+      if (role === 'Admin' || role === 'PI' || role === 'Lab manager') {
+        return this.roleOptions.fullRoles;
+      }
+      return this.roleOptions.limitedRoles;
+    },
+
+    canAddPersonnel() {
+      const role = this.$store.state.role;
+      return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(role);
+    },
+
+    canEditPersonnel() {
+      if (!this.currentPersonnel.id) return false;
+      const role = this.$store.state.role;
+      return (
+        this.currentPersonnel.id == this.$store.state.userID ||
+        ['Admin', 'PI', 'Lab manager'].includes(role)
+      );
+    },
+
+    canDeletePersonnel() {
+      if (!this.currentPersonnel.id) return false;
+      const role = this.$store.state.role;
+      return ['Admin', 'PI', 'Lab manager'].includes(role);
+    }
+  },
+
+  methods: {
+    canManageStatus(item) {
+      const role = this.$store.state.role;
+      return (
+        item.id == this.$store.state.userID ||
+        ['Admin', 'PI', 'Lab manager'].includes(role)
+      );
+    },
+
+    getRules(ruleName) {
+      if (ruleName === 'required') return [v => !!v || 'Required'];
+      if (ruleName === 'name') return [
+        v => !v || /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/.test(v) || 'Invalid Name'
+      ];
+      if (ruleName === 'email') return [
+        v => !v || /^[^@]+@[^@]+\.[a-zA-Z]{2,}$/.test(v) || 'Invalid Email'
+      ];
+      if (ruleName === 'phone') return [
+        v => !v || /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(v) || 'Invalid Phone'
+      ];
+      return [];
+    },
+
+    async searchPersonnel() {
+      try {
+        const Result = await personnel.search({ FK_Lab: store.state.lab });
+        this.Personnels = Result.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({ name: "Login" });
+        }
+      }
+    },
+
+    async searchLabStudies() {
+      try {
+        const Result = await study.search({
+          FK_Lab: store.state.lab,
+          includeScheules: false,
+          Completed: 0,
+        });
+        this.labStudies = Result.data;
+      } catch (error) {
+        if (error.response?.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({ name: "Login" });
+        }
+      }
+    },
+
+    async changePersonnelStatus(item) {
+      try {
+        item.Active = !item.Active;
+        await personnel.update(item);
+      } catch (error) {
+        if (error.response?.status === 401) {
+          alert("Authentication failed, please login.");
+          this.$router.push({ name: "Login" });
+        } else {
+          // Revert on error
+          item.Active = !item.Active;
+        }
+      }
+    },
+
+    rowSelected(event, { item }) {
+      this.currentPersonnel = item;
+      this.editedIndex = this.Personnels.findIndex(p => p.id === item.id);
+    },
+
+    editPersonnel() {
+      this.editedPersonnel = { ...this.currentPersonnel };
+      this.editedIndex = this.Personnels.findIndex(p => p.id === this.currentPersonnel.id);
+      this.dialog = true;
+    },
+
+    createPersonnel() {
+      this.editedPersonnel = { ...this.defaultPersonnel };
+      this.editedIndex = -1;
+      this.dialog = true;
+    },
+
+    async save() {
+      // Basic validation
+      if (!this.editedPersonnel.Name || !this.editedPersonnel.Email || !this.editedPersonnel.Role) {
+         alert("Please fill in the required fields (Name, Initials, Role, Email).");
+         return;
+      }
+
+      if (this.editedIndex === -1) {
+        // Create
+        try {
+          const Result = await login.register(this.editedPersonnel);
+          this.editedPersonnel.id = Result.data.id;
+          this.Personnels.push(this.editedPersonnel);
+          alert(Result.data.Email + " has been added to the system!");
+          this.close();
+        } catch (error) {
+          alert(error.response?.data?.message || "Failed to add personnel");
+          console.error(error);
+        }
+      } else {
+        // Update
+        try {
+          await personnel.update(this.editedPersonnel);
+          this.currentPersonnel = { ...this.editedPersonnel };
+          Object.assign(this.Personnels[this.editedIndex], this.editedPersonnel);
+
+          if (this.currentPersonnel.id == this.$store.state.userID) {
+            this.$store.dispatch("setZoomLink", this.currentPersonnel.ZoomLink);
+          }
+          this.close();
+        } catch (error) {
+          if (error.response?.status === 401) {
+            alert("Authentication failed, please login.");
+            this.$router.push({ name: "Login" });
+          } else {
+            console.error(error);
+          }
+        }
+      }
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+      }
+      return Phone;
+    },
+
+    close() {
+      this.dialog = false;
+      setTimeout(() => {
+        this.editedPersonnel = {};
+      }, 300);
+    },
+
+    async deletePersonnel() {
+      if (!confirm(`Are you sure you want to remove ${this.currentPersonnel.Name}?`)) {
+        return;
+      }
+
+      try {
+        await personnel.delete({ id: this.currentPersonnel.id });
+        alert(this.currentPersonnel.Name + " is removed from the system.");
+
+        this.Personnels = this.Personnels.filter(p => p.id !== this.currentPersonnel.id);
+        this.currentPersonnel = { ...this.defaultPersonnel };
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    updatedStudies(updatedStudies) {
+      this.currentPersonnel.AssignedStudies = updatedStudies;
+    },
+  },
+
+  mounted() {
+    this.searchPersonnel();
+    this.searchLabStudies();
+  },
+};
+</script>
+
+<style scoped>
+.personnel-table :deep(tr.v-data-table__selected) {
+  background-color: rgb(var(--v-theme-secondary), 0.1) !important;
+}
+</style>

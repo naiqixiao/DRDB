@@ -75,26 +75,6 @@ exports.create = asyncHandler(async (req, res) => {
     delete newFamilyInfo["id"];
   }
 
-  // if (newFamilyInfo.AutismHistory.value) {
-
-  //   // newFamilyInfo.AutismHistory = newFamilyInfo.AutismHistory.value;
-  //   // switch (newFamilyInfo.AutismHistory) {
-  //   //   case 'Yes':
-  //   //     newFamilyInfo.AutismHistory = 1;
-  //   //     break;
-
-  //   //   case 'No':
-  //   //     newFamilyInfo.AutismHistory = 0;
-  //   //     break;
-
-  //   //   case 'Unknown':
-  //   //     newFamilyInfo.AutismHistory = null;
-  //   //     break;
-
-  //   // }
-
-  // }
-
   try {
     const newFamily = await model.family.create(newFamilyInfo, {
       include: [
@@ -327,7 +307,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
             },
           });
 
-          var filteredSiblings = siblings.filter(function(value) {
+          var filteredSiblings = siblings.filter(function (value) {
             return !containsObject(value, existingSibling);
           });
 
@@ -431,7 +411,7 @@ exports.search = asyncHandler(async (req, res) => {
   var families = await model.family.findAll({
     where: queryString,
     include: [
-      {model: model.conversations, separate: true},
+      { model: model.conversations, separate: true },
       {
         model: model.child,
         separate: true,
@@ -598,31 +578,8 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
   const families = await model.family.findAll({
     where: queryString,
-    // {
-    //   [Op.or]: [{
-    //     '$Schedules.Status$': 'TBD'
-    //   }, {
-    //     '$Schedules.Status$': 'Rescheduling'
-
-    //   }, {
-    //     '$Schedules.Status$': 'No Show'
-    //   }],
-    //   [Op.or]: [
-    //     {
-    //       NextContactDate: {
-    //         [Op.lte]: moment()
-    //           .startOf("day")
-    //           .toDate()
-    //       },
-    //     },
-    //     { NextContactDate: { [Op.eq]: null } },
-    //   ],
-    //   TrainingSet: queryString.TrainingSet
-    //   // AssignedLab: req.query.AssignedLab
-
-    // },
     include: [
-      {model: model.conversations, separate: true},
+      { model: model.conversations, separate: true },
       {
         model: model.child,
         separate: true,
@@ -723,7 +680,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
         order: [[model.schedule, "AppointmentTime", "DESC"]],
       },
     ],
-    order: [[{model: model.schedule}, 'id', 'DESC']],
+    order: [[{ model: model.schedule }, 'id', 'DESC']],
   });
 
   shuffle(families);
@@ -738,26 +695,6 @@ exports.update = asyncHandler(async (req, res) => {
   var updatedFamilyInfo = req.body;
   console.log("Family Information Updated!");
 
-  // if (updatedFamilyInfo.AutismHistory.value) {
-
-  //   updatedFamilyInfo.AutismHistory = updatedFamilyInfo.AutismHistory.value;
-
-  //   // switch (updatedFamilyInfo.AutismHistory.value) {
-  //   //   case 'Yes':
-  //   //     updatedFamilyInfo.AutismHistory = 1;
-  //   //     break;
-
-  //   //   case 'No':
-  //   //     updatedFamilyInfo.AutismHistory = 0;
-  //   //     break;
-
-  //   //   case 'Unknown':
-  //   //     updatedFamilyInfo.AutismHistory = null;
-  //   //     break;
-
-  //   // }
-
-  // }
   try {
     const family = await model.family.update(updatedFamilyInfo, {
       where: { id: ID },
@@ -795,7 +732,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
 
   // 2. The families have been contacted within the past 2 weeks, yet the appointment is tentative. These appointments are regarded as onGoing.
   var queryString2 = {};
-  
+
   // queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show", ];
   queryString2.Completed = 0;
   queryString2.updatedAt = {
@@ -847,7 +784,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
       const updateFamilyInfo = { AssignedLab: null };
 
       queryString = {};
-      queryString.id = {[Op.in]: IDs};
+      queryString.id = { [Op.in]: IDs };
 
       await model.family.update(updateFamilyInfo, {
         where: queryString,
@@ -858,12 +795,12 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
         "Family Lab Assisgnment Release",
         {},
         "Families (" +
-          IDs.join(", ") +
-          ") were no longer assigned to any lab due to schedule completion."
+        IDs.join(", ") +
+        ") were no longer assigned to any lab due to schedule completion."
       );
     }
 
-    if(res){
+    if (res) {
 
       res.status(200).send(IDs);
     }
@@ -894,13 +831,15 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
   try {
     const schedules = await model.schedule.findAll({
       where: queryString,
-      include: [{ model: model.family }, {model: model.appointment, include: [model.study]}],
+      include: [{ model: model.family }, { model: model.appointment, include: [model.study] }],
     });
 
     // release the families.
     IDs = schedules.map((schedule) => {
-      return {familyID: schedule.FK_Family,
-      labID: schedule.Appointments[0].Study.FK_Lab};
+      return {
+        familyID: schedule.FK_Family,
+        labID: schedule.Appointments[0].Study.FK_Lab
+      };
     });
 
     IDs = Array.from(new Set(IDs)); // unique IDs
@@ -909,7 +848,7 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
       const updateFamilyInfo = { AssignedLab: idItem.labID };
 
       await model.family.update(updateFamilyInfo, {
-        where: {id: idItem.familyID},
+        where: { id: idItem.familyID },
       });
 
     })
@@ -935,7 +874,7 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
     //   );
     // }
 
-    if(res){
+    if (res) {
 
       res.status(200).send(IDs);
     }
@@ -1078,8 +1017,8 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
         "Family Lab Assisgnment Release",
         {},
         "Families (" +
-          IDs.join(", ") +
-          ") were no longer assigned to any lab due to study completion"
+        IDs.join(", ") +
+        ") were no longer assigned to any lab due to study completion"
       );
 
       // res.status(200).send(IDs.length + " families released.");

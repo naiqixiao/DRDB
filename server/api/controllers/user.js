@@ -1,6 +1,7 @@
 const model = require("../models/DRDB");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const asyncHandler = require("express-async-handler");
 const { google } = require("googleapis");
 
@@ -11,23 +12,6 @@ const config = require("../../config/general");
 
 const log = require("../controllers/log");
 
-// function generalAuth() {
-//   const credentialsPath = "api/google/general/credentials.json";
-//   const tokenPath = "api/google/general/token.json";
-
-//   const credentials = fs.readFileSync(credentialsPath);
-
-//   const { client_secret, client_id, redirect_uris } = JSON.parse(
-//     credentials
-//   ).installed;
-
-//   const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-
-//   const token = fs.readFileSync(tokenPath);
-//   oAuth2Client.setCredentials(JSON.parse(token));
-
-//   return oAuth2Client;
-// }
 
 function makeBody(to, from, cc, subject, body) {
   var message = [
@@ -119,9 +103,7 @@ exports.signup = asyncHandler(async (req, res) => {
   }
 
   try {
-    const password = Math.random()
-      .toString(36)
-      .substring(2);
+    const password = crypto.randomBytes(12).toString('base64url');
 
     const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -320,18 +302,6 @@ exports.login = asyncHandler(async (req, res) => {
     // log the login information.
 
     await log.createLog("Not Exist", {}, Email + " does not exist (or has been retired)");
-    //   const logFolder = "api/logs";
-    // if (!fs.existsSync(logFolder)) {
-    //   fs.mkdirSync(logFolder)
-    // }
-    //   const logFile = logFolder + "/log.txt";
-    //   var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
-
-    //   if (fs.existsSync(logFile)) {
-    //     fs.appendFileSync(logFile, logInfo)
-    //   } else {
-    //     fs.writeFileSync(logFile, logInfo)
-    //   }
 
     return res.status(401).send({
       error: "The login information was incorrect",

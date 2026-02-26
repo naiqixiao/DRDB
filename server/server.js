@@ -36,11 +36,7 @@ function shutDown() {
   setTimeout(() => connections.forEach(curr => curr.destroy()), 5000);
 }
 
-// to track the list of families that has been contacted.
-var familyList = [];
-var clientList = [];
 
-// Send reminder emails to parents the day before their appointment
 var cron = require('node-cron');
 
 const ReminderController = require("./api/controllers/reminder");
@@ -86,7 +82,6 @@ const ChildController = require("./api/controllers/child");
 cron.schedule('5 0 * * *', async (req, res) => {
 
   ChildController.updateAge();
-  familyList = [];
 
 });
 
@@ -120,52 +115,3 @@ cron.schedule('46 22 * * *', () => {
 
 });
 
-const options = {
-  cors: {
-    origin: config.frontendURL,
-    methods: ["GET", "POST"]
-  }
-};
-
-
-// const io = require("socket.io")(server, options);
-
-// io.on("connection", (socket) => {
-
-//   console.log(socket.id + '  connected!')
-
-//   if (!clientList.includes(socket.id)) {
-//     clientList.push(socket.id)
-//   }
-
-//   socket.emit('familyList update', familyList)
-
-//   socket.on('add family', familyId => {
-
-//     if (!familyList.includes(familyId)) {
-//       familyList.push(familyId)
-//       io.emit('familyList update', familyList)
-//       // console.log(familyList)
-//     }
-//     // console.log('family added!')
-//   })
-
-//   socket.on('remove family', familyId => {
-
-//     if (familyList.includes(familyId)) {
-//       const index = familyList.indexOf(familyId)
-//       familyList.splice(index, 1)
-//       io.emit('familyList update', familyList)
-//     }
-//   })
-
-//   socket.on("disconnect", () => {
-//     console.log(socket.id + "user disconnected");
-//     const index = clientList.indexOf(socket.id)
-//     clientList.splice(index, 1)
-//     if (clientList.length == 0) {
-//       console.log('no body left.')
-//       familyList = [];
-//     }
-//   });
-// });

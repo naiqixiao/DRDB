@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test jest",
     "start": "nodemon server.js"
   },
   "author": "",
@@ -12,28 +12,31 @@
   "dependencies": {
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
-    "dotenv": "^8.6.0",
-    "express": "^4.17.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^4.22.1",
     "express-async-handler": "^1.2.0",
+    "express-validator": "^7.3.1",
     "googleapis": "^61.0.0",
     "http": "0.0.0",
     "jsonexport": "^3.2.0",
-    "jsonwebtoken": "^8.5.1",
-    "knex": "^0.20.15",
+    "jsonwebtoken": "^9.0.3",
     "mariadb": "^2.5.5",
     "moment": "^2.29.2",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
-    "mysql2": "^2.3.3",
+    "mysql2": "^3.18.1",
     "node-cron": "^2.0.3",
     "nodemon": "^2.0.20",
-    "objection": "^2.2.18",
-    "pm2": "^5.2.0",
     "sequelize": "^5.22.5",
     "sequelize-auto": "^0.5.4",
-    "socket.io": "^3.1.2"
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "prettier": "^1.19.1"
+    "cross-env": "^10.1.0",
+    "jest": "^30.2.0",
+    "prettier": "^1.19.1",
+    "supertest": "^7.2.2"
   }
 }

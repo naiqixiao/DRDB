@@ -265,30 +265,6 @@ exports.search = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
-// Update an appointment by the id in the request
-// exports.update = asyncHandler(async (req, res) => {
-//   var updatedAppointmentInfo = req.body;
-
-//   if (updatedAppointmentInfo.id) {
-//     var ID = updatedAppointmentInfo.id;
-//     delete updatedAppointmentInfo["id"];
-//   }
-
-//   try {
-//     const updatedAppointment = await model.appointment.update(
-//       updatedAppointmentInfo,
-//       {
-//         where: { id: ID }
-//       }
-//     );
-
-//     res.status(200).send(updatedAppointment);
-
-//     console.log("Appointment Information Updated.");
-//   } catch (error) {
-//     console.log("Appointment update error:" + error);
-//   }
-// });
 
 exports.update = asyncHandler(async (req, res) => {
   const updatedAppointmentInfo = req.body.updatedExperimenters;
@@ -577,13 +553,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
       });
     }
 
-    // // await model.schedule.update(
-    // //   { Note: Schedule.Note + "" },
-    // //   { where: { id: Schedule.id } }
-    // // );
-
-    // Schedule.dataValues.updatedAt = new Date();
-
     // Log
     const User = req.body.User;
 
@@ -794,7 +763,7 @@ exports.monthYearN = asyncHandler(async (req, res) => {
 
 // Update monthYearN
 exports.monthYearN0 = asyncHandler(async (req, res) => {
-  var queryString =  "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
+  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
 
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
