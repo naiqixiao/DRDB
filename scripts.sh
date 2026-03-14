@@ -1,0 +1,1 @@
+npx repomix@latest --ignore ".vscode/, .agent/, .agents/, .github/, docs/, MySQL/, client/, backups/" 

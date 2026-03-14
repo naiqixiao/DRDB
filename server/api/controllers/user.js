@@ -3,98 +3,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const asyncHandler = require("express-async-handler");
-const { google } = require("googleapis");
-
 const fs = require("fs");
-const { OAuth2 } = google.auth;
 
 const config = require("../../config/general");
-
 const log = require("../controllers/log");
-
-
-function makeBody(to, from, cc, subject, body) {
-  var message = [
-    'Content-Type: text/html; charset="UTF-8"\n',
-    "MIME-Version: 1.0\n",
-    "Content-Transfer-Encoding: 7bit\n",
-    "to: ",
-    to,
-    "\n",
-    "from: ",
-    from,
-    "\n",
-    "cc: ",
-    cc,
-    "\n",
-    "subject: ",
-    subject,
-    "\n\n",
-    body,
-  ].join("");
-
-  var encodedMail = Buffer.from(message)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return encodedMail;
-}
-
-async function sendEmail(emailContent) {
-  const credentialsPath = "api/google/general/credentials.json";
-  const tokenPath = "api/google/general/token.json";
-
-  const credentials = fs.readFileSync(credentialsPath);
-
-  const { client_secret, client_id, redirect_uris } = JSON.parse(
-    credentials
-  ).installed;
-
-  const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-
-  const token = fs.readFileSync(tokenPath);
-  oAuth2Client.setCredentials(JSON.parse(token));
-
-  const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-  const adminSendAs = await adminGmail.users.settings.sendAs.list({
-    userId: "me",
-  });
-
-  var sendAsEmail = {};
-
-  adminSendAs.data.sendAs.forEach((email) => {
-    if (email.isDefault) {
-      sendAsEmail = email;
-    }
-  });
-
-  var adminEmail = sendAsEmail.sendAsEmail;
-
-  emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
-
-  var raw = makeBody(
-    emailContent.to,
-    emailContent.from,
-    emailContent.cc,
-    emailContent.subject,
-    emailContent.body
-  );
-
-  try {
-    const result = await adminGmail.users.messages.send({
-      userId: "me",
-      requestBody: {
-        raw: raw,
-      },
-    });
-
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
+const { sendAdminEmail } = require("../utils/emailUtil");
 
 exports.signup = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
@@ -146,11 +59,10 @@ exports.signup = asyncHandler(async (req, res) => {
 
       }
 
-      var emailContent = {
+      await sendAdminEmail({
         to: newUser.Name + "<" + newUser.Email + ">",
-        subject:
-          "Your user account has been created!",
-        body:
+        subject: "Your user account has been created!",
+        htmlBody:
           "<p>Hello " +
           newUser.Name.split(" ")[0] +
           ",</p> " +
@@ -165,9 +77,7 @@ exports.signup = asyncHandler(async (req, res) => {
           "<p> </p>" +
           "<p>Thank you! <br>" +
           "Developmental Research Management System</p>",
-      };
-
-      await sendEmail(emailContent);
+      });
 
       // log
       await log.createLog("User Created", User, "created " + newUser.Email);
@@ -206,9 +116,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
       } else {
 
-        const password = Math.random()
-          .toString(36)
-          .substring(2);
+        const password = crypto.randomBytes(12).toString('base64url');
 
         const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -231,11 +139,10 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
         }
 
-        var emailContent = {
+        await sendAdminEmail({
           to: newUser.Name + "<" + newUser.Email + ">",
-          subject:
-            "Your user account has been created!",
-          body:
+          subject: "Your user account has been created!",
+          htmlBody:
             "<p>Hello " +
             newUser.Name.split(" ")[0] +
             ",</p> " +
@@ -250,9 +157,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
             "<p> </p>" +
             "<p>Thank you! <br>" +
             "Developmental Research Management System</p>",
-        };
-
-        await sendEmail(emailContent);
+        });
 
         // log
         await log.createLog("User Created", User, "created " + newUser.Email);
@@ -439,11 +344,10 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
 
 
-    var emailContent = {
+    await sendAdminEmail({
       to: personnel.Name + "<" + personnel.Email + ">",
-      subject:
-        "Your login password is updated.",
-      body:
+      subject: "Your login password is updated.",
+      htmlBody:
         "<p>Hello " +
         personnel.Name.split(" ")[0] +
         ",</p> " +
@@ -452,10 +356,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
         "<p> </p>" +
         "<p>Thank you!<br>" +
         "Developmental Research Management System</p>",
-    };
-
-
-    await sendEmail(emailContent);
+    });
 
     // log
     await log.createLog("Change Password", User, "chagned password");
@@ -466,9 +367,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
 });
 
 exports.resetPassword = asyncHandler(async (req, res) => {
-  const password = Math.random()
-    .toString(36)
-    .substring(2);
+  const password = crypto.randomBytes(12).toString('base64url');
 
   const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -505,10 +404,10 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       message: "Password reset!",
     });
 
-    var emailContent = {
+    await sendAdminEmail({
       to: personnel.Name + "<" + personnel.Email + ">",
       subject: "Your password is reset",
-      body:
+      htmlBody:
         "<p>Hello " +
         personnel.Name.split(" ")[0] +
         ",</p> " +
@@ -520,9 +419,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
         "<p> </p>" +
         "<p>Thank you! <br>" +
         "Developmental Research Management System</p>",
-    };
-
-    await sendEmail(emailContent);
+    });
 
   } catch (error) {
     throw error;

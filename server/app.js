@@ -50,6 +50,8 @@ const rtuRoutes = require("./api/routes/RTU");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
 
+const emailTestRoutes = require("./api/routes/emailTest");
+
 const auto = require("./api/routes/auto");
 
 app.use("/api/user", userRoutes);
@@ -80,6 +82,8 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/RTU", rtuRoutes);
 
 app.use("/api/TestingRoom", testingRoomRoutes);
+
+app.use("/api/emailTest", emailTestRoutes);
 
 // Error handling
 app.use((req, res, next) => {

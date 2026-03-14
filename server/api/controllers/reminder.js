@@ -1,10 +1,8 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const { google } = require("googleapis");
-const { OAuth2 } = google.auth;
-const fs = require("fs");
 const log = require("../controllers/log");
+const { sendLabEmail, sendAdminEmail, getLabOAuth2Client } = require("../utils/emailUtil");
 
 const moment = require("moment");
 
@@ -195,117 +193,6 @@ function manualReminderBody(schedule) {
   return emailContent;
 }
 
-function makeBody(to, from, cc, bcc, subject, body) {
-  var message = [
-    'Content-Type: text/html; charset="UTF-8"\n',
-    "MIME-Version: 1.0\n",
-    "Content-Transfer-Encoding: 7bit\n",
-    "to: ",
-    to,
-    "\n",
-    "from: ",
-    from,
-    "\n",
-    "cc: ",
-    cc,
-    "\n",
-    "bcc: ",
-    bcc,
-    "\n",
-    "subject: ",
-    subject,
-    "\n\n",
-    body,
-  ].join("");
-
-  var encodedMail = Buffer.from(message)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return encodedMail;
-}
-
-async function sendEmail(oAuth2Client, emailContent, emailLabels) {
-  const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-  var raw = makeBody(
-    emailContent.to,
-    emailContent.from,
-    emailContent.cc,
-    emailContent.bcc,
-    emailContent.subject,
-    emailContent.body
-  );
-
-  try {
-    if (!emailLabels) {
-      const result = await gmail.users.messages.send({
-        userId: "me",
-        requestBody: {
-          raw: raw,
-        },
-      });
-
-      return result;
-    }
-
-    const labelNames = emailLabels;
-
-    const listLabelsResponse = await gmail.users.labels.list({
-      userId: "me",
-    });
-
-    const labels = listLabelsResponse.data.labels;
-    const labelIds = [];
-
-    for (let i = 0; i < labelNames.length; i++) {
-      const labelName = labelNames[i];
-      const label = labels.find((l) => l.name === labelName);
-      let labelId;
-
-      if (label) {
-        labelId = label.id;
-      } else {
-        const labelData = {
-          userId: "me",
-          resource: {
-            name: labelName,
-            labelListVisibility: "labelShow",
-          },
-        };
-
-        const labelResponse = await gmail.users.labels.create(labelData);
-        labelId = labelResponse.data.id;
-      }
-
-      labelIds.push(labelId);
-    }
-
-    const result = await gmail.users.messages.send({
-      userId: "me",
-      requestBody: {
-        raw: raw,
-        labelIds: labelIds,
-      },
-    });
-
-    const messageId = result.data.id;
-
-    const modifyRequest = {
-      userId: "me",
-      id: messageId,
-      resource: {
-        addLabelIds: labelIds,
-      },
-    };
-    await gmail.users.messages.modify(modifyRequest);
-
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
 
 function formatedBody(emailBody) {
   const k = emailBody.split("</p><p>");
@@ -504,38 +391,15 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
 
       body = body + "</body></html>";
 
-      const emailContent = {
-        from:
-          reminder.scheduleList[0].LabName +
-          "<" +
-          reminder.scheduleList[0].LabEmail +
-          ">",
+      const oAuth2Client = getLabOAuth2Client(reminder.scheduleList[0].LabID);
+
+      await sendLabEmail(oAuth2Client, {
+        from: reminder.scheduleList[0].LabName + "<" + reminder.scheduleList[0].LabEmail + ">",
         to: reminder.experimenterName + "<" + reminder.experimenterEmail + ">",
         subject: "[DRDB] Study confirmation reminder",
-        body: body,
-      };
-
-      // send email to each experimenter
-      const tokenPath =
-        "api/google/labs/lab" + reminder.scheduleList[0].LabID + "/token.json";
-
-      const token = fs.readFileSync(tokenPath);
-
-      const credentialsPath = "api/google/general/credentials.json";
-      const credentials = fs.readFileSync(credentialsPath);
-      const { client_secret, client_id, redirect_uris } = JSON.parse(
-        credentials
-      ).installed;
-
-      const oAuth2Client = new OAuth2(
-        client_id,
-        client_secret,
-        redirect_uris[0]
-      );
-
-      oAuth2Client.setCredentials(JSON.parse(token));
-
-      await sendEmail(oAuth2Client, emailContent, ["Reminder-email"]);
+        htmlBody: body,
+        labelNames: ["Reminder-email"],
+      });
 
       // log
       await log.createLog(
@@ -740,38 +604,15 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
 
       body = body + "</body></html>";
 
-      const emailContent = {
-        from:
-          reminder.scheduleList[0].LabName +
-          "<" +
-          reminder.scheduleList[0].LabEmail +
-          ">",
+      const oAuth2Client = getLabOAuth2Client(reminder.scheduleList[0].LabID);
+
+      await sendLabEmail(oAuth2Client, {
+        from: reminder.scheduleList[0].LabName + "<" + reminder.scheduleList[0].LabEmail + ">",
         to: reminder.researcherName + "<" + reminder.researcherEmail + ">",
         subject: "[DRDB] Study follow-up reminder",
-        body: body,
-      };
-
-      // send email to each experimenter
-      const tokenPath =
-        "api/google/labs/lab" + reminder.scheduleList[0].LabID + "/token.json";
-
-      const token = fs.readFileSync(tokenPath);
-
-      const credentialsPath = "api/google/general/credentials.json";
-      const credentials = fs.readFileSync(credentialsPath);
-      const { client_secret, client_id, redirect_uris } = JSON.parse(
-        credentials
-      ).installed;
-
-      const oAuth2Client = new OAuth2(
-        client_id,
-        client_secret,
-        redirect_uris[0]
-      );
-
-      oAuth2Client.setCredentials(JSON.parse(token));
-
-      await sendEmail(oAuth2Client, emailContent, ["Reminder-email"]);
+        htmlBody: body,
+        labelNames: ["Reminder-email"],
+      });
 
       // log
       await log.createLog(
@@ -889,14 +730,6 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
       ],
     });
 
-    const credentialsPath = "api/google/general/credentials.json";
-    const credentials = fs.readFileSync(credentialsPath);
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
-
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-
     schedules.forEach(async (schedule) => {
       const labels = ["Reminder-email"];
 
@@ -906,18 +739,17 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 
       if (!!schedule.Appointments[0].Study.ReminderTemplate) {
         if (!!schedule.Family.Email) {
-          const tokenPath =
-            "api/google/labs/lab" +
-            schedule.Appointments[0].Study.Lab.id +
-            "/token.json";
-
-          const token = fs.readFileSync(tokenPath);
-
-          oAuth2Client.setCredentials(JSON.parse(token));
+          const oAuth2Client = getLabOAuth2Client(schedule.Appointments[0].Study.Lab.id);
 
           const emailContent = emailBody(schedule);
 
-          await sendEmail(oAuth2Client, emailContent, labels);
+          await sendLabEmail(oAuth2Client, {
+            to: emailContent.to,
+            from: emailContent.from,
+            subject: emailContent.subject,
+            htmlBody: emailContent.body,
+            labelNames: labels,
+          });
 
           // update schedule
           await model.schedule.update(
@@ -938,37 +770,14 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
             "Reminder email is sent to " + schedule.Family.Email
           );
         } else {
-          const tokenPath = "api/google/general/token.json";
-
-          const token = fs.readFileSync(tokenPath);
-
-          oAuth2Client.setCredentials(JSON.parse(token));
-
-          const adminGmail = google.gmail({
-            version: "v1",
-            auth: oAuth2Client,
-          });
-
-          const adminSendAs = await adminGmail.users.settings.sendAs.list({
-            userId: "me",
-          });
-
-          var sendAsEmail = {};
-
-          adminSendAs.data.sendAs.forEach((email) => {
-            if (email.isDefault) {
-              sendAsEmail = email;
-            }
-          });
-
-          var adminEmail = sendAsEmail.sendAsEmail;
-
           var emailContent = manualReminderBody(schedule);
 
-          emailContent.from =
-            "Developmental Research Management System" + "<" + adminEmail + ">";
-
-          await sendEmail(oAuth2Client, emailContent, labels);
+          await sendAdminEmail({
+            to: emailContent.to,
+            subject: emailContent.subject,
+            htmlBody: emailContent.body,
+            labelNames: labels,
+          });
 
           // log
           await log.createLog(
@@ -1176,14 +985,6 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
     });
 
     var experimenterReminderContent = [];
-
-    const credentialsPath = "api/google/general/credentials.json";
-    const credentials = fs.readFileSync(credentialsPath);
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
-
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
     const TH =
       "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
@@ -1408,24 +1209,22 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
       body = body + "Best,<br>" + experimenter.Lab.LabName;
       body = body + "</body></html>";
 
-      const emailContent = {
+      experimenterReminderContent.push({
         from: experimenter.Lab.LabName + "<" + experimenter.Lab.Email + ">",
         to: experimenter.Name + "<" + experimenter.Email + ">",
         subject: "[DRDB] Reminder for upcoming studies",
-        body: body,
-      };
-
-      experimenterReminderContent.push(emailContent);
+      });
 
       // send email
-      const tokenPath =
-        "api/google/labs/lab" + experimenter.Lab.id + "/token.json";
+      const oAuth2Client = getLabOAuth2Client(experimenter.Lab.id);
 
-      const token = fs.readFileSync(tokenPath);
-
-      oAuth2Client.setCredentials(JSON.parse(token));
-
-      await sendEmail(oAuth2Client, emailContent, ["Reminder-email"]);
+      await sendLabEmail(oAuth2Client, {
+        from: experimenter.Lab.LabName + "<" + experimenter.Lab.Email + ">",
+        to: experimenter.Name + "<" + experimenter.Email + ">",
+        subject: "[DRDB] Reminder for upcoming studies",
+        htmlBody: body,
+        labelNames: ["Reminder-email"],
+      });
 
       // log
       await log.createLog(
