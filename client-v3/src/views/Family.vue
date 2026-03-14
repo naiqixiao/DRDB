@@ -2,174 +2,328 @@
   <v-container fluid>
     <AlertBanner :showAdminEmail="true" />
 
-    <v-row justify="space-around">
-      <!-- LEFT COLUMN: Search + Family Info -->
-      <v-col cols="12" md="5">
-        <!-- Search Controls -->
-        <v-row align="center" dense>
-          <v-col cols="12" md="3" style="text-align: start">
-            <v-btn size="small" @click.stop="searchMode" :disabled="searchStatus">
-              <v-icon start>mdi-magnify</v-icon>Search
-            </v-btn>
-          </v-col>
-          <v-col cols="12" md="3" style="text-align: start">
-            <v-btn size="small" @click="followupSearch">
-              <v-icon start>mdi-phone</v-icon>Follow-ups
-            </v-btn>
-          </v-col>
+    <v-card class="ds-card mb-6" variant="flat">
+      <v-toolbar color="transparent" density="compact">
+        <v-btn color="primary" variant="flat" class="mr-2" @click="searchMode" prepend-icon="mdi-magnify">
+          Search
+        </v-btn>
+        <v-btn color="secondary" variant="tonal" class="mr-2" @click="followupSearch" prepend-icon="mdi-phone-clock">
+          Follow-ups
+        </v-btn>
+        <v-btn color="success" variant="tonal" @click="addFamily" prepend-icon="mdi-account-multiple-plus">
+          New Family
+        </v-btn>
 
-          <v-spacer></v-spacer>
-          <v-col cols="12" md="4" class="text-center">
-            <!-- Pagination -->
-            <div class="pagination-container">
-              <v-btn variant="text" icon @click="previousPage" :disabled="page <= 1" size="small">
-                <v-icon>mdi-chevron-left</v-icon>
-              </v-btn>
-              <span class="text-body-1" style="width: 45px; text-align: center">{{ page }}</span>
-              <span class="text-body-1" style="padding: 0 8px">/</span>
-              <span class="text-body-1" style="width: 45px; text-align: left">{{ Families ? Families.length : 0
-              }}</span>
-              <v-btn variant="text" icon @click="nextPage" :disabled="page >= Families.length || page == 0"
-                size="small">
-                <v-icon>mdi-chevron-right</v-icon>
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
 
-        <!-- Contact Information Section -->
-        <SectionHeader title="Contact Information" icon="mdi-card-account-phone-outline" />
-        <v-row justify="space-between" dense>
-          <v-col cols="12" :md="item.width" v-for="item in familyFields.slice(0, 4)" :key="item.label">
-            <div v-if="searchStatus && item.searchable">
-              <v-text-field class="textfield-family" hide-details @keydown.enter="searchFamily()"
-                @update:model-value="getSearchKeys(item.field, $event)" :label="item.label" :model-value="item.label === 'Phone' || item.label === 'Cell Phone'
-                  ? PhoneFormated(currentFamily[item.field])
-                  : currentFamily[item.field]" append-icon="mdi-magnify" placeholder=" " variant="outlined"
-                density="compact"></v-text-field>
-            </div>
-            <InfoField v-else :label="item.label" :value="item.label === 'Phone' || item.label === 'Cell Phone'
-              ? PhoneFormated(currentFamily[item.field])
-              : currentFamily[item.field]"
-              :type="item.rules === 'phone' ? 'phone' : (item.rules === 'email' ? 'email' : null)" />
-          </v-col>
-        </v-row>
 
-        <!-- Family Information Section -->
-        <SectionHeader title="Family Information" icon="mdi-account-group" />
-        <v-row dense>
-          <v-col cols="12" :md="item.width" v-for="item in familyFields.slice(4, 13)" :key="item.label">
-            <div v-if="searchStatus && item.searchable">
-              <v-text-field class="textfield-family" hide-details @keydown.enter="searchFamily"
-                @update:model-value="getSearchKeys(item.field, $event)" :label="item.label"
-                v-model="currentFamily[item.field]" append-icon="mdi-magnify" placeholder=" " variant="outlined"
-                density="compact"></v-text-field>
-            </div>
-            <InfoField v-else :label="item.label" :value="currentFamily[item.field]" />
-          </v-col>
-        </v-row>
+        <v-spacer></v-spacer>
 
-        <!-- Schedule Information Section -->
-        <SectionHeader title="Schedule Information" icon="mdi-calendar-clock" />
-        <div class="info-grid info-grid--3">
-          <InfoField v-for="item in familyFields.slice(13, 16)" :key="item.label" :label="item.label"
-            :value="currentFamily[item.field]" />
+        <v-btn color="primary" variant="outlined" class="mr-2" @click="editFamily" :disabled="!currentFamily.id"
+          prepend-icon="mdi-pencil">
+          Edit Family
+        </v-btn>
+        
+        <v-btn color="primary" variant="flat" class="mr-2" @click="$refs.childInfo.addChild()" :disabled="!currentFamily.id"
+          prepend-icon="mdi-account-child">
+          Add Child
+        </v-btn>
+
+        <v-spacer></v-spacer>
+
+        <div class="d-flex align-center bg-grey-lighten-4 rounded px-2 py-1">
+          <v-btn icon="mdi-chevron-left" variant="text" density="comfortable" @click="previousPage"
+            :disabled="page <= 1"></v-btn>
+          <span class="text-body-2 font-weight-bold mx-3">{{ page }} / {{ Families ? Families.length : 0 }}</span>
+          <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextPage"
+            :disabled="page >= Families.length || page == 0"></v-btn>
         </div>
 
-        <!-- Notes for Next Contact + Action Buttons -->
-        <v-row justify="space-between" align="end" dense>
-          <v-col cols="12" md="7">
-            <v-textarea class="conv-textarea" label="Notes for next contact" variant="outlined" no-resize rows="6"
-              hide-details readonly v-model="currentFamily.NextContactNote"></v-textarea>
-          </v-col>
-          <v-spacer></v-spacer>
+      </v-toolbar>
+    </v-card>
 
-          <v-col cols="12" md="5">
-            <v-row dense>
-              <v-col cols="12" md="6">
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props" icon @click.stop="editFamily" :disabled="!currentFamily.id">
-                      <v-icon>mdi-pencil</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Edit family information</span>
-                </v-tooltip>
+    <v-row justify="space-around" class="mt-4">
+      <!-- LEFT COLUMN: Search + Family Info -->
+      <v-col cols="12" md="5">
+
+        <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden;">
+          
+          <!-- Background Family ID -->
+          <div style="position: absolute; right: 10px; bottom: -10px; font-size: 120px; font-weight: 900; color: rgba(0,0,0,0.08); z-index: 100; line-height: 0.8; pointer-events: none; user-select: none;" v-if="currentFamily.id">
+            {{ currentFamily.id }}
+          </div>
+
+          <v-card-text class="pt-6 flex-grow-1" style="position: relative; z-index: 1;">
+            <v-row>
+              <v-col cols="12" sm="8" class="text-center text-sm-left">
+                <div class="d-flex flex-column align-center flex-sm-row">
+                  <v-avatar color="primary" size="64" class="mb-3 mb-sm-0 mr-sm-4">
+                    <v-icon size="36" color="white">mdi-account-group</v-icon>
+                  </v-avatar>
+                  <div class="text-center text-sm-left">
+                    <h2 class="text-h5 font-weight-bold mb-1" style="font-family: var(--ds-font-family-heading)">
+                      {{ currentFamily.NamePrimary || 'Unknown Family' }}
+                    </h2>
+                    <div class="text-subtitle-2 text-muted">
+                      Family ID: {{ currentFamily.id || '—' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-wrap justify-center justify-sm-start gap-2 mt-4" style="gap: 8px;">
+                  <v-chip size="small" variant="tonal" color="primary" v-if="currentFamily.LanguagePrimary">
+                    {{ currentFamily.LanguagePrimary }} ({{ currentFamily.EnglishPercent || 0 }}% EN)
+                  </v-chip>
+                  <v-chip size="small" variant="tonal" color="secondary" v-if="currentFamily.RacePrimary">
+                    {{ currentFamily.RacePrimary }}
+                  </v-chip>
+                  <v-chip size="small" variant="outlined" color="tertiary" prepend-icon="mdi-hospital-building"
+                    v-if="currentFamily.RecruitmentMethod">
+                    {{ currentFamily.RecruitmentMethod }}
+                  </v-chip>
+                </div>
               </v-col>
 
-              <v-col cols="12" md="6">
-                <v-tooltip location="top">
-                  <template v-slot:activator="{ props }">
-                    <v-btn color="primary" v-bind="props" icon @click.stop="addFamily">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Add a new family</span>
-                </v-tooltip>
+              <v-col cols="12" sm="4" class="d-flex flex-column align-end justify-center"
+                v-if="participationStats.Total > 0">
+                <div class="d-flex flex-column align-end gap-1" style="gap: 4px;">
+                  <v-chip size="x-small" color="primary" variant="flat">Total: {{ participationStats.Total }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Completed', true)" class="text-white" variant="flat"
+                    v-if="participationStats.Completed">Completed: {{ participationStats.Completed }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Confirmed', false)" variant="flat" v-if="participationStats.Confirmed">Confirmed: {{
+                    participationStats.Confirmed }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('No Show', false)" class="text-white" variant="flat" v-if="participationStats['No Show']">No-Show: {{
+                    participationStats['No Show'] }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Cancelled', false)" class="text-white" variant="flat" v-if="participationStats.Cancelled">Cancelled: {{
+                    participationStats.Cancelled }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat" v-if="participationStats.Rejected">Rejected: {{
+                    participationStats.Rejected }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat" v-if="participationStats.TBD">TBD: {{
+                    participationStats.TBD }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white" variant="flat" v-if="participationStats.Rescheduling">Rescheduling: {{
+                    participationStats.Rescheduling }}</v-chip>
+                </div>
               </v-col>
             </v-row>
-          </v-col>
-        </v-row>
+
+            <v-divider class="my-4"></v-divider>
+
+            <div class="d-flex justify-space-between align-center mb-1 px-1">
+              <span class="text-caption font-weight-bold text-uppercase text-muted">Contact Info</span>
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" icon="mdi-information-outline" density="compact" variant="text" size="small" color="primary" @click="detailsDialog = true" :disabled="!currentFamily.id"></v-btn>
+                </template>
+                <span>View Full Details</span>
+              </v-tooltip>
+            </div>
+
+            <v-list density="compact" class="text-left px-0">
+              <v-list-item prepend-icon="mdi-email-outline" :title="currentFamily.Email || 'No email provided'"
+                class="px-0"></v-list-item>
+              <v-list-item prepend-icon="mdi-phone-outline" class="px-0">
+                <v-list-item-title>
+                  <span v-if="currentFamily.Phone">{{ PhoneFormated(currentFamily.Phone) }}</span>
+                  <span v-else class="text-muted">No phone</span>
+                  <span v-if="currentFamily.CellPhone" class="text-muted ml-2">(Cell: {{ PhoneFormated(currentFamily.CellPhone) }})</span>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-map-marker-outline" :title="currentFamily.Address || 'No home address provided'"
+                class="px-0"></v-list-item>
+            </v-list>
+
+            <v-divider class="my-2"></v-divider>
+
+            <v-list density="compact" class="text-left px-0 pb-0">
+              <v-list-item prepend-icon="mdi-calendar-clock" class="px-0">
+                <v-list-item-title class="text-caption text-muted">Next Contact Date</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium">{{ currentFamily.NextContactDate ?
+                  formatDate(currentFamily.NextContactDate) : 'Not set' }}</v-list-item-subtitle>
+              </v-list-item>
+
+              <v-list-item prepend-icon="mdi-message-text-outline" class="px-0 pb-2" v-if="currentFamily.NextContactNote" style="background-color: transparent !important;">
+                <v-list-item-title class="text-caption text-muted">Notes for next contact</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.NextContactNote }}
+                </v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
       </v-col>
 
       <!-- Family Edit/Add Dialog -->
-      <v-dialog v-model="dialog" max-width="1200px" persistent>
+      <v-dialog v-model="dialog" max-width="1000px" persistent scrollable>
         <v-card class="ds-card" variant="flat">
-          <v-card-title>
-            <span class="text-h6">{{ editedIndex === -1 ? 'Add a new family' : 'Edit family information' }}</span>
-            <v-spacer></v-spacer>
-            <span class="text-h6">{{ editedIndex === -1 ? '' : 'Family ID: ' + editedItem.id }}</span>
+          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+            <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+              {{ editedIndex === -1 ? 'Add a new family' : 'Edit family information' }}
+              <span v-if="editedIndex !== -1" class="text-subtitle-1 text-muted ml-2 font-weight-regular">(ID: {{ editedItem.id }})</span>
+            </span>
+            <v-btn icon="mdi-close" variant="text" density="comfortable" @click="dialog = false"></v-btn>
           </v-card-title>
-          <v-card-text>
-            <v-form ref="form" v-model="valid" lazy-validation>
-              <v-row dense style="padding: 8px 8px 4px">
-                <v-col md="12" class="subtitle">
-                  <v-divider></v-divider>
-                  <h4 class="text-left">Family information:</h4>
-                </v-col>
-                <v-col cols="12" :md="item.width" v-for="item in familyBasicInfo" :key="item.label">
-                  <div v-if="item.options">
-                    <v-combobox class="textfield-family" v-model="editedItem[item.field]" :items="Options[item.options]"
-                      variant="outlined" :label="item.label" density="compact"></v-combobox>
-                  </div>
-                  <div v-else>
-                    <v-text-field class="textfield-family" :label="item.label" v-model="editedItem[item.field]"
-                      variant="outlined" hide-details density="compact"></v-text-field>
-                  </div>
-                </v-col>
+          
+          <v-divider></v-divider>
 
-                <v-col md="12" class="subtitle">
-                  <v-divider></v-divider>
-                  <h4 class="text-left">Contact information:</h4>
-                </v-col>
-                <v-col cols="12" :md="item.width" v-for="item in familyContactInfo" :key="item.label">
-                  <v-text-field class="textfield-family" :label="item.label" v-model="editedItem[item.field]"
-                    variant="outlined" hide-details density="compact"></v-text-field>
-                </v-col>
-              </v-row>
+          <v-card-text class="pt-6 pb-2" style="max-height: 70vh;">
+            <v-form ref="form" v-model="valid" lazy-validation>
+              
+              <div class="mb-6">
+                <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Family Information</div>
+                <v-row dense>
+                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyBasicInfo" :key="item.label">
+                    <div v-if="item.options">
+                      <v-combobox class="textfield-family mb-2" v-model="editedItem[item.field]" :items="Options[item.options]"
+                        variant="outlined" :label="item.label" density="compact" hide-details></v-combobox>
+                    </div>
+                    <div v-else>
+                      <v-text-field class="textfield-family mb-2" :label="item.label" v-model="editedItem[item.field]"
+                        variant="outlined" hide-details density="compact"></v-text-field>
+                    </div>
+                  </v-col>
+                </v-row>
+              </div>
+
+              <div class="mb-4">
+                <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Contact Information</div>
+                <v-row dense>
+                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyContactInfo" :key="item.label">
+                    <v-text-field class="textfield-family mb-2" :label="item.label" v-model="editedItem[item.field]"
+                      variant="outlined" hide-details density="compact"></v-text-field>
+                  </v-col>
+                </v-row>
+              </div>
+
             </v-form>
           </v-card-text>
-          <v-card-actions style="padding: 16px">
+          
+          <v-card-actions class="px-6 pb-6 pt-0">
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="dialog = false" variant="text">Cancel</v-btn>
-            <v-btn color="primary" @click="save" variant="text">Save</v-btn>
+            <v-btn color="error" variant="text" @click="dialog = false">Cancel</v-btn>
+            <v-btn color="primary" variant="flat" @click="save" prepend-icon="mdi-content-save">Save Family</v-btn>
           </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Search Dialog -->
+      <v-dialog v-model="searchDialog" max-width="800px">
+        <v-card class="ds-card" variant="flat">
+          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+            <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Search
+              Families</span>
+            <v-btn icon="mdi-close" variant="text" density="comfortable" @click="searchDialog = false"></v-btn>
+          </v-card-title>
+
+          <v-divider></v-divider>
+
+          <v-card-text class="pt-6 pb-2">
+            <div v-for="category in searchFamilyCategories" :key="category.category" class="mb-4">
+              <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">{{ category.category }}</div>
+              <v-row dense>
+                <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in category.fields" :key="item.label">
+                  <div v-if="item.options">
+                    <v-combobox class="textfield-family mb-2" v-model="queryString[item.field]"
+                      :items="Options[item.options]" variant="outlined" :label="item.label" density="compact" hide-details
+                      clearable></v-combobox>
+                  </div>
+                  <div v-else>
+                    <v-text-field class="textfield-family mb-2" :label="item.label" v-model="queryString[item.field]"
+                      variant="outlined" hide-details density="compact" clearable
+                      @keydown.enter="searchFamily"></v-text-field>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card-text>
+
+          <v-card-actions class="px-6 pb-6 pt-0">
+            <v-spacer></v-spacer>
+            <v-btn color="error" variant="text" @click="searchDialog = false">Cancel</v-btn>
+            <v-btn color="primary" variant="flat" @click="searchFamily" prepend-icon="mdi-magnify">
+              Find Families
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Full Details Dialog -->
+      <v-dialog v-model="detailsDialog" max-width="600px" scrollable>
+        <v-card class="ds-card" variant="flat">
+          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+            <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Family Details</span>
+            <v-btn icon="mdi-close" variant="text" density="comfortable" @click="detailsDialog = false"></v-btn>
+          </v-card-title>
+          
+          <v-divider></v-divider>
+          
+          <v-card-text class="pt-2 pb-6 px-4" style="max-height: 70vh;">
+            <v-list density="compact" class="text-left">
+              
+              <!-- Caregivers -->
+              <v-list-item prepend-icon="mdi-account" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Primary Caregiver</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.NamePrimary || 'Not provided' }}
+                </v-list-item-subtitle>
+              </v-list-item>
+              
+              <v-list-item prepend-icon="mdi-account-multiple" class="px-2" v-if="currentFamily.NameSecondary">
+                <v-list-item-title class="text-caption text-muted">Secondary Caregiver</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.NameSecondary }}
+                </v-list-item-subtitle>
+              </v-list-item>
+
+              <v-divider class="my-2"></v-divider>
+
+              <!-- Demographics -->
+              <v-list-item prepend-icon="mdi-translate" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Languages</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  Primary: {{ currentFamily.LanguagePrimary || 'Not specified' }}
+                  <span v-if="currentFamily.LanguageSecondary"> | Secondary: {{ currentFamily.LanguageSecondary }}</span>
+                  <span v-if="currentFamily.EnglishPercent !== null"> | English: {{ currentFamily.EnglishPercent }}%</span>
+                </v-list-item-subtitle>
+              </v-list-item>
+
+              <v-list-item prepend-icon="mdi-earth" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Race / Ethnicity</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  Primary: {{ currentFamily.RacePrimary || 'Not specified' }}
+                  <span v-if="currentFamily.RaceSecondary"> | Secondary: {{ currentFamily.RaceSecondary }}</span>
+                </v-list-item-subtitle>
+              </v-list-item>
+              
+              <v-divider class="my-2"></v-divider>
+
+              <!-- Additional Details -->
+              <v-list-item prepend-icon="mdi-car" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Vehicle Access</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.Vehicle || 'Not specified' }}
+                </v-list-item-subtitle>
+              </v-list-item>
+
+              <v-list-item prepend-icon="mdi-hospital-building" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Recruitment Method</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.RecruitmentMethod || 'Not specified' }}
+                </v-list-item-subtitle>
+              </v-list-item>
+
+              <v-list-item prepend-icon="mdi-brain" class="px-2">
+                <v-list-item-title class="text-caption text-muted">Autism History</v-list-item-title>
+                <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
+                  {{ currentFamily.AutismHistory === 1 ? 'Yes' : (currentFamily.AutismHistory === 0 ? 'No' : 'Unknown') }}
+                </v-list-item-subtitle>
+              </v-list-item>
+              
+            </v-list>
+          </v-card-text>
         </v-card>
       </v-dialog>
 
       <!-- MIDDLE COLUMN: Children -->
       <v-col cols="12" md="4">
-        <v-col cols="12" md="12" class="justify-start">
-          <div v-if="!searchStatus">
-            <h2 class="text-left">Child information</h2>
-          </div>
-          <div v-else>
-            <v-text-field style="height: 48px" hide-details @keydown.enter="searchFamily"
-              @update:model-value="getSearchKeys('childName', $event)" label="Child's Name"
-              :append-icon="searchStatus ? 'mdi-magnify' : undefined" :readonly="!searchStatus" placeholder=" "
-              variant="outlined" density="compact"></v-text-field>
-          </div>
-        </v-col>
         <v-col style="padding: 0px !important; min-height: 500px">
           <ChildInfo ref="childInfo" :Children="currentFamily.Children"
             :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :currentFamily="currentFamily"
@@ -179,13 +333,13 @@
 
       <!-- RIGHT COLUMN: Notes & Conversations -->
       <v-col cols="12" md="3">
-        <!-- Simplified Notes panel (original used NotesConversation component) -->
-        <v-card class="ds-card" variant="flat">
-          <v-card-title class="text-subtitle-1">
+        <!-- Simplified Notes panel -->
+        <v-card class="ds-card h-100 d-flex flex-column" variant="flat">
+          <v-card-title class="text-subtitle-1 pb-0">
             <v-icon start>mdi-note-text</v-icon>Notes
           </v-card-title>
-          <v-card-text>
-            <v-textarea label="Notes about the family" no-resize rows="12" hide-details v-model="familyNotes"
+          <v-card-text class="flex-grow-1 d-flex flex-column pt-2">
+            <v-textarea class="notes-textarea flex-grow-1" label="Notes about the family" hide-details v-model="familyNotes"
               :disabled="!currentFamily.id" @change="saveNotes" variant="outlined"></v-textarea>
           </v-card-text>
         </v-card>
@@ -193,35 +347,79 @@
     </v-row>
 
     <!-- BOTTOM ROW: Schedule Table -->
-    <v-row justify="start" dense
-      v-if="currentFamily.id && currentFamily.Schedules && currentFamily.Schedules.length > 0">
-      <v-col cols="12" md="12">
-        <v-card variant="flat" class="ds-card mt-4">
-          <v-card-title class="text-subtitle-1">
-            <v-icon start>mdi-calendar</v-icon>Schedule History
-          </v-card-title>
-          <v-card-text>
-            <v-table density="compact">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Appointment Time</th>
-                  <th>Status</th>
-                  <th>Completed</th>
-                  <th>Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="schedule in currentFamily.Schedules" :key="schedule.id">
-                  <td>{{ schedule.id }}</td>
-                  <td>{{ schedule.AppointmentTime ? formatDate(schedule.AppointmentTime) : 'N/A' }}</td>
-                  <td>{{ schedule.Status }}</td>
-                  <td>{{ schedule.Completed ? 'Yes' : 'No' }}</td>
-                  <td>{{ schedule.updatedAt ? formatDate(schedule.updatedAt) : '' }}</td>
-                </tr>
-              </tbody>
-            </v-table>
-          </v-card-text>
+    <v-row v-if="currentFamily.id" class="mt-6 mb-12">
+      <v-col cols="12">
+        <v-card class="ds-card" variant="flat">
+
+          <v-tabs v-model="historyTab" color="primary" bg-color="grey-lighten-4" align-tabs="center">
+            <v-tab value="timeline"><v-icon start>mdi-timeline-text-outline</v-icon>Timeline</v-tab>
+            <v-tab value="table"><v-icon start>mdi-table</v-icon>Participation Record</v-tab>
+          </v-tabs>
+
+          <v-divider></v-divider>
+
+          <v-window v-model="historyTab">
+
+            <v-window-item value="timeline" class="pa-6">
+              <div style="overflow-x: auto; padding-bottom: 24px; padding-top: 8px;">
+                <div class="d-flex align-center flex-nowrap position-relative"
+                  style="gap: 48px; min-width: max-content; padding: 0 4px;">
+
+                  <!-- Horizontal Connecting Line -->
+                  <div
+                    style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background-color: #CBD5E1; z-index: 0; transform: translateY(-50%); pointer-events: none;">
+                  </div>
+
+                  <v-card v-for="schedule in reversedSchedules" :key="schedule.id" variant="outlined"
+                    style="min-width: 250px; max-width: 320px; flex-shrink: 0; z-index: 1; background-color: white;"
+                    class="mb-2 bg-white"
+                    :style="{ borderTop: '4px solid ' + getTimelineColor(schedule.Status, schedule.Completed) }">
+                    <v-card-title
+                      class="text-subtitle-1 py-1 bg-grey-lighten-4 d-flex justify-space-between align-center">
+                      <span class="font-weight-bold text-truncate"
+                        style="max-width: 70%; font-family: var(--ds-font-family-body); font-size: 0.9rem;">
+                        {{ schedule.Appointments?.[0]?.Study?.StudyName || 'Unknown Study' }}
+                      </span>
+                      <v-chip size="small" :color="getTimelineColor(schedule.Status, schedule.Completed)"
+                        class="text-white font-weight-bold" variant="flat" style="font-size: 0.70rem; height: 20px;">
+                        {{ schedule.Status === "Confirmed" && schedule.Completed ? "Completed" : schedule.Status }}
+                      </v-chip>
+                    </v-card-title>
+
+                    <v-card-text class="pt-2 px-3 pb-2 text-left">
+                      <div class="d-flex align-center mb-1">
+                        <v-icon size="small" class="mr-2 text-muted">mdi-calendar-clock</v-icon>
+                        <strong style="color: var(--ds-value-color); font-size: 0.85rem;">
+                          {{ schedule.AppointmentTime ? formatDate(schedule.AppointmentTime) : 'TBD' }}
+                        </strong>
+                      </div>
+                      <div class="d-flex align-center mb-1" v-if="schedule.Personnel">
+                        <v-icon size="small" class="mr-2 text-muted">mdi-account</v-icon>
+                        <span class="text-caption">Scheduled by: {{ schedule.Personnel.Name }}</span>
+                      </div>
+
+                      <div v-if="schedule.Note" class="text-caption text-muted mt-2 pt-1"
+                        style="border-top: 1px solid #E2E8F0; line-height: 1.2">
+                        <v-icon size="small" class="mr-1">mdi-message-text-outline</v-icon>
+                        <em>"{{ schedule.Note }}"</em>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                </div>
+              </div>
+
+              <div v-if="!reversedSchedules || reversedSchedules.length === 0"
+                class="text-center text-muted py-8">
+                <v-icon size="large" class="mb-2" color="grey-lighten-1">mdi-clipboard-text-off-outline</v-icon>
+                <div>No participation history available for this family.</div>
+              </div>
+            </v-window-item>
+
+            <v-window-item value="table" class="pa-4">
+              <AppointmentTableBrief :Appointments="flatAppointments" :family="currentFamily" />
+            </v-window-item>
+
+          </v-window>
         </v-card>
       </v-col>
     </v-row>
@@ -234,6 +432,7 @@ import ChildInfo from "@/components/ChildInfo.vue";
 import AlertBanner from "@/components/AlertBanner.vue";
 import InfoField from "@/components/InfoField.vue";
 import SectionHeader from "@/components/SectionHeader.vue";
+import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import family from "@/services/family";
 import store from "@/store";
 import moment from "moment-timezone";
@@ -244,12 +443,15 @@ export default {
     AlertBanner,
     InfoField,
     SectionHeader,
+    AppointmentTableBrief,
   },
   data() {
     return {
       queryString: {},
       page: 0,
       searchStatus: false,
+      searchDialog: false,
+      detailsDialog: false,
       dialog: false,
       valid: true,
       editedIndex: -1,
@@ -278,6 +480,7 @@ export default {
       },
       Families: [],
       familyNotes: "",
+      historyTab: 'timeline',
       // Field definitions (migrated from Vue.prototype.$familyFields)
       familyFields: [
         { label: "Email", field: "Email", rules: "email", width: "4", searchable: true },
@@ -313,6 +516,23 @@ export default {
         { label: "Phone", field: "Phone", rules: "phone", width: "3", searchable: true },
         { label: "Cell Phone", field: "CellPhone", rules: "phone", width: "3", searchable: true },
       ],
+      searchFamilyCategories: [
+        {
+          category: "General Identification",
+          fields: [
+            { label: "Family ID", field: "id", width: "4" },
+            { label: "Caregiver Name", field: "NamePrimary", width: "4" },
+            { label: "Child Name", field: "childName", width: "4" },
+          ]
+        },
+        {
+          category: "Contact Details",
+          fields: [
+            { label: "Phone", field: "Phone", width: "6" },
+            { label: "Email", field: "Email", width: "6" },
+          ]
+        }
+      ],
       Options: {
         autism: [{ title: 'Yes', value: 1 }, { title: 'No', value: 0 }, { title: 'Unknown', value: null }],
         sex: ["F", "M"],
@@ -346,7 +566,7 @@ export default {
     },
 
     searchMode() {
-      this.searchStatus = !this.searchStatus;
+      this.searchDialog = true;
       this.currentFamily = Object.assign({}, this.familyTemplate);
       this.currentFamily.Children = [];
       this.currentFamily.Schedules = [];
@@ -388,6 +608,7 @@ export default {
           alert(Results.data.message || "No families found.");
         }
 
+        this.searchDialog = false;
         this.searchStatus = false;
       } catch (error) {
         if (error.response && error.response.status === 401) {
@@ -522,11 +743,67 @@ export default {
       if (!dateStr) return '';
       return moment(dateStr).format('YYYY-MM-DD HH:mm');
     },
+
+    getTimelineColor(status, completed) {
+      switch (status) {
+        case "Completed": return "#01579B";
+        case "Confirmed": return completed ? "#01579B" : "light-blue-accent-2";
+        case "TBD": return "teal-darken-2";
+        case "Rescheduling": return "lime-darken-3";
+        case "No Show": return "orange-darken-3";
+        case "Cancelled": return "deep-orange-darken-1";
+        case "Rejected": return "blue-grey-darken-4";
+        default: return "grey";
+      }
+    },
   },
 
   computed: {
+    reversedSchedules() {
+      if (!this.currentFamily || !this.currentFamily.Schedules) return [];
+      return [...this.currentFamily.Schedules].sort((a, b) => {
+        const timeA = new Date(a.updatedAt || 0).getTime();
+        const timeB = new Date(b.updatedAt || 0).getTime();
+        if (timeA !== timeB) return timeB - timeA;
+        return (b.id || 0) - (a.id || 0);
+      });
+    },
     TodaysDate() {
       return moment().startOf("day").format("YYYY-MM-DD");
+    },
+    flatAppointments() {
+      let appointments = [];
+      if (this.currentFamily && this.currentFamily.Schedules) {
+        this.currentFamily.Schedules.forEach(schedule => {
+          if (schedule.Appointments) {
+            schedule.Appointments.forEach(app => {
+              let row = Object.assign({}, app);
+              row.Schedule = {
+                AppointmentTime: schedule.AppointmentTime,
+                Status: schedule.Status,
+                Completed: schedule.Completed,
+                updatedAt: schedule.updatedAt,
+              };
+              appointments.push(row);
+            });
+          }
+        });
+      }
+      return appointments;
+    },
+    participationStats() {
+      let stats = { Total: 0, Completed: 0, 'No Show': 0, Cancelled: 0, Rejected: 0, Confirmed: 0, TBD: 0, Rescheduling: 0 };
+      if (this.currentFamily && this.currentFamily.Schedules) {
+        stats.Total = this.currentFamily.Schedules.length;
+        this.currentFamily.Schedules.forEach(s => {
+          let status = s.Status;
+          if (status === 'Confirmed' && s.Completed) status = 'Completed';
+          if (stats[status] !== undefined) {
+            stats[status]++;
+          }
+        });
+      }
+      return stats;
     },
   },
 
@@ -547,5 +824,19 @@ export default {
   text-align: end;
   display: flex;
   align-items: center;
+}
+
+.notes-textarea {
+  height: 100%;
+}
+.notes-textarea :deep(.v-field) {
+  height: 100%;
+}
+.notes-textarea :deep(.v-field__field),
+.notes-textarea :deep(.v-field__input) {
+  height: 100% !important;
+}
+.notes-textarea :deep(textarea) {
+  height: 100% !important;
 }
 </style>

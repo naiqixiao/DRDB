@@ -1,81 +1,63 @@
 <template>
   <v-container>
     <v-row>
-      <v-col
-        cols="12"
-        md="6"
-        lg="4"
-        v-for="(child, index) in Children"
-        :key="index"
-      >
-        <v-card class="elevation-2" variant="flat">
-          <v-toolbar density="compact" color="primary" flat>
-            <v-icon class="mr-2">face</v-icon>
-            <v-toolbar-title class="white--text">
-              {{ child.Name }}
-            </v-toolbar-title>
-            <v-spacer></v-spacer>
+      <v-col cols="12" sm="12" md="6" v-for="(child, index) in sortedChildren" :key="child.id || index">
+        <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden;">
 
-            <v-menu location="bottom">
+          <v-card-title class="d-flex justify-space-between align-center bg-grey-lighten-4 py-3"
+            style="position: relative; z-index: 1;">
+            <div class="d-flex align-center">
+              <v-icon color="primary" class="mr-2">
+                {{ child.Sex === 'M' ? 'mdi-face-man' : (child.Sex === 'F' ? 'mdi-face-woman' : 'mdi-face-recognition')
+                }}
+              </v-icon>
+              <span class="text-h6 font-weight-bold">{{ child.Name ? child.Name.split(' ')[0] : 'Unknown' }}</span>
+            </div>
+            <v-menu location="bottom end">
               <template v-slot:activator="{ props }">
-                <v-btn icon v-bind="props" variant="text">
-                  <v-icon>mdi-dots-vertical</v-icon>
-                </v-btn>
+                <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props"></v-btn>
               </template>
-
               <v-list density="compact">
-                <v-list-item @click="editChild(child, index)" prepend-icon="mdi-pencil">
-                    <v-list-item-title>Edit</v-list-item-title>
-                </v-list-item>
-                <v-list-item @click="deleteChild(child.id, index)" prepend-icon="mdi-delete">
-                    <v-list-item-title>Delete</v-list-item-title>
-                </v-list-item>
+                <v-list-item @click="editChild(child, index)" prepend-icon="mdi-pencil" title="Edit"></v-list-item>
+                <v-list-item @click="deleteChild(child.id, index)" prepend-icon="mdi-delete" base-color="error"
+                  title="Delete"></v-list-item>
               </v-list>
             </v-menu>
-          </v-toolbar>
+          </v-card-title>
 
-          <v-list density="dense">
-            <v-list-item>
-                    <template v-slot:default>
-                         <v-list-item-title>Gender</v-list-item-title>
-                         <v-list-item-subtitle class="text-right">{{ child.Sex }}</v-list-item-subtitle>
-                    </template>
-            </v-list-item>
-            <v-list-item>
-                    <template v-slot:default>
-                         <v-list-item-title>Age</v-list-item-title>
-                         <v-list-item-subtitle class="text-right">{{ childAge(child) }}</v-list-item-subtitle>
-                    </template>
-            </v-list-item>
-            <v-list-item>
-                    <template v-slot:default>
-                         <v-list-item-title>Born</v-list-item-title>
-                         <v-list-item-subtitle class="text-right">{{ child.DoB.split("T")[0] }}</v-list-item-subtitle>
-                    </template>
-            </v-list-item>
-          </v-list>
-
-          <v-card-text>
-              <div v-for="(info, i) in $childInfo" :key="i">
-                  <div v-if="child[info.model]">
-                      <b>{{ info.label }}: </b>{{ child[info.model] }}
-                  </div>
+          <v-card-text class="pt-4 flex-grow-1" style="position: relative; z-index: 1;">
+            <!-- Background IdWithinFamily Letter -->
+            <div
+              style="position: absolute; right: 10px; top: 10px; font-size: 100px; font-weight: 900; color: rgba(0,0,0,0.08); z-index: 0; line-height: 0.8; pointer-events: none; user-select: none;">
+              {{ (child.IdWithinFamily || '') }}
+            </div>
+            <div class="d-flex justify-space-between mb-3">
+              <div>
+                <div class="text-caption text-muted">Age</div>
+                <div class="font-weight-medium text-body-1">{{ childAge(child) }}</div>
               </div>
+              <div class="text-right">
+                <div class="text-caption text-muted">Born</div>
+                <div class="font-weight-medium text-body-1">{{ child.DoB ? child.DoB.split("T")[0] : 'N/A' }}</div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-1 mt-2" style="gap: 4px;">
+              <v-chip size="x-small" color="error" variant="flat" v-if="child.PrematureBirth">Premature</v-chip>
+              <v-chip size="x-small" color="warning" variant="flat" v-if="child.ASD">ASD</v-chip>
+              <v-chip size="x-small" color="warning" variant="flat" v-if="child.HearingLoss">Hearing Deficit</v-chip>
+              <v-chip size="x-small" color="warning" variant="flat" v-if="child.VisionLoss">Vision Deficit</v-chip>
+            </div>
           </v-card-text>
 
-
-          <v-card-actions>
-            <v-btn
-              small
-              variant="outlined"
-              color="primary"
-              :disabled="potentialStudies(child).potentialStudyList.length < 1"
-              @click.stop="Schedule(child, index)"
-            >
-              <v-icon start>mdi-calendar</v-icon>schedule
+          <v-card-actions class="pa-4 pt-0" style="position: relative; z-index: 1;">
+            <v-btn block color="#F59E0B" variant="flat" class="text-white font-weight-bold"
+              :disabled="potentialStudies(child).potentialStudyList.length < 1" @click.stop="Schedule(child, index)"
+              prepend-icon="mdi-calendar-plus">
+              Schedule Study
             </v-btn>
-            <v-spacer></v-spacer>
           </v-card-actions>
+
         </v-card>
       </v-col>
     </v-row>
@@ -83,106 +65,80 @@
     <ConfirmDlg ref="confirmD" />
 
     <!-- Schedule Dialog -->
-    <scheduleDialog
-      ref="scheduleDialog"
-      :dialog="dialogSchedule"
-      :currentSchedule="currentSchedule"
-      :parentResponse="response"
-      :currentFamily="currentFamily"
-      dialogType="schedule"
-      scheduleType="create"
-      @close-dialog="closeSchedule"
-      @newAppointment="addAppointment"
-      @deleteCurrentAppointment="deleteCurrentAppointment"
-      @newSchedule="addSchedule"
-    />
+    <scheduleDialog ref="scheduleDialog" :dialog="dialogSchedule" :currentSchedule="currentSchedule"
+      :parentResponse="response" :currentFamily="currentFamily" dialogType="schedule" scheduleType="create"
+      @close-dialog="closeSchedule" @newAppointment="addAppointment"
+      @deleteCurrentAppointment="deleteCurrentAppointment" @newSchedule="addSchedule" />
 
     <!-- Edit Child Dialog -->
-    <v-dialog v-model="dialogChild" max-width="500px">
-        <v-card>
-            <v-card-title>
-                <span class="headline">{{ formTitle }}</span>
-            </v-card-title>
+    <v-dialog v-model="dialogChild" max-width="800px" persistent scrollable>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+            {{ formTitle }}
+          </span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="close"></v-btn>
+        </v-card-title>
 
-            <v-card-text>
-                <v-container>
-                    <v-row>
-                        <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.Name" label="Name" variant="outlined" density="compact"></v-text-field>
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                            <v-select v-model="editedItem.Sex" :items="['M', 'F']" label="Gender" variant="outlined" density="compact"></v-select>
-                        </v-col>
-                         <v-col cols="12" sm="6" md="4">
-                            <v-text-field
-                                v-model="editedItem.DoB"
-                                label="DOB"
-                                variant="outlined"
-                                density="compact"
-                                type="date"
-                            ></v-text-field>
-                        </v-col>
+        <v-divider></v-divider>
 
-                        <v-col cols="12" sm="6" md="4" v-for="(item, i) in $childInfo" :key="i">
-                             <v-select
-                                v-if="item.type == 'select'"
-                                v-model="editedItem[item.model]"
-                                :items="item.options"
-                                :label="item.label"
-                                variant="outlined"
-                                density="compact"
-                             ></v-select>
-                             <v-checkbox
-                                v-else-if="item.type == 'checkbox'"
-                                v-model="editedItem[item.model]"
-                                :label="item.label"
-                                density="compact"
-                             ></v-checkbox>
-                             <v-text-field
-                                v-else
-                                v-model="editedItem[item.model]"
-                                :label="item.label"
-                                variant="outlined"
-                                density="compact"
-                             ></v-text-field>
-                        </v-col>
-                         <v-col cols="12">
-                             <h4 class="text-left">Sensitive Info</h4>
-                         </v-col>
+        <v-card-text class="pt-6 pb-2" style="max-height: 70vh;">
+          <v-container class="px-0">
+            
+            <div class="mb-6">
+              <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Basic Information</div>
+              <v-row dense>
+                <template v-for="(item, i) in $childInfo" :key="i">
+                  <!-- Render Note as a full-width textarea on its own row -->
+                  <v-col cols="12" v-if="item.field === 'Note'">
+                    <v-textarea v-model="editedItem[item.field]" :label="item.label" variant="outlined" 
+                      density="compact" hide-details class="mb-2" rows="3"></v-textarea>
+                  </v-col>
+                  
+                  <!-- Render other fields normally using their specified widths -->
+                  <v-col v-else cols="12" sm="6" :md="item.width || 4">
+                    <v-select v-if="item.options" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <v-checkbox v-else-if="item.type == 'checkbox'" v-model="editedItem[item.field]" :label="item.label"
+                      density="compact" hide-details class="mb-2" color="primary"></v-checkbox>
+                    <v-text-field v-else v-model="editedItem[item.field]" :label="item.label" variant="outlined"
+                      density="compact" hide-details class="mb-2" :type="item.field === 'DoB' ? 'date' : 'text'"></v-text-field>
+                  </v-col>
+                </template>
+              </v-row>
+            </div>
 
-                         <v-col cols="12" sm="6" md="4" v-for="(item, i) in $childSensitiveInfo" :key="'s' + i">
-                             <v-select
-                                v-if="item.type == 'select'"
-                                v-model="editedItem[item.model]"
-                                :items="item.options"
-                                :label="item.label"
-                                variant="outlined"
-                                density="compact"
-                             ></v-select>
-                             <v-checkbox
-                                v-else-if="item.type == 'checkbox'"
-                                v-model="editedItem[item.model]"
-                                :label="item.label"
-                                density="compact"
-                             ></v-checkbox>
-                             <v-text-field
-                                v-else
-                                v-model="editedItem[item.model]"
-                                :label="item.label"
-                                variant="outlined"
-                                density="compact"
-                             ></v-text-field>
-                        </v-col>
-                    </v-row>
-                </v-container>
-            </v-card-text>
+            <div class="mb-4">
+              <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Sensitive & Medical Info</div>
+              <v-row dense>
+                <template v-for="(item, i) in $childSensitiveInfo" :key="'s' + i">
+                  
+                  <v-col cols="12" v-if="item.field === 'Note'">
+                    <v-textarea v-model="editedItem[item.field]" :label="item.label" variant="outlined" 
+                      density="compact" hide-details class="mb-2" rows="3"></v-textarea>
+                  </v-col>
 
-            <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="blue darken-1" variant="text" @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" variant="text" @click="save">Save</v-btn>
-            </v-card-actions>
-        </v-card>
+                  <v-col v-else cols="12" sm="6" md="4">
+                    <v-select v-if="item.options" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <v-checkbox v-else-if="!item.options && item.type !== 'text'" v-model="editedItem[item.field]" :label="item.label"
+                      density="compact" hide-details class="mb-4" color="primary"></v-checkbox>
+                    <v-text-field v-else v-model="editedItem[item.field]" :label="item.label" variant="outlined"
+                      density="compact" hide-details class="mb-2"></v-text-field>
+                  </v-col>
+                </template>
+              </v-row>
+            </div>
+
+          </v-container>
+        </v-card-text>
+
+        <v-card-actions class="px-6 pb-6 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn color="error" variant="text" @click="close">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" @click="save" prepend-icon="mdi-content-save">Save Child</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-dialog>
 
   </v-container>
@@ -216,59 +172,66 @@ export default {
     editedIndex: -1,
     dialogChild: false,
     editedItem: {
-        Name: "",
-        Sex: "",
-        DoB: "",
-        Age: "",
-        Note: ""
+      Name: "",
+      Sex: "",
+      DoB: "",
+      Age: "",
+      Note: ""
     },
     defaultItem: {
-        Name: "",
-        Sex: "",
-        DoB: "",
-        Age: "",
-        Note: ""
+      Name: "",
+      Sex: "",
+      DoB: "",
+      Age: "",
+      Note: ""
     },
     // Mock global properties (replace with actual global properties or store if needed)
     // Assuming $childInfo and $childSensitiveInfo are available globally or need to be imported/defined.
     // For now I will assume they are available on the instance via app.config.globalProperties or mixin.
     // If not, I should define them here or import them.
     scheduleTemplate: {
-        AppointmentTime: null,
-        Status: "Confirmed",
-        FK_Family: null,
-        Note: "",
-        summary: "",
-        Appointments: [],
-        ScheduledBy: null,
-        location: null,
-        description: "",
-        Reminded: 0
+      AppointmentTime: null,
+      Status: "Confirmed",
+      FK_Family: null,
+      Note: "",
+      summary: "",
+      Appointments: [],
+      ScheduledBy: null,
+      location: null,
+      description: "",
+      Reminded: 0
     }
 
   }),
 
   computed: {
-      formTitle() {
-          return this.editedIndex === -1 ? "New Child" : "Edit Child";
-      }
+    formTitle() {
+      return this.editedIndex === -1 ? "New Child" : "Edit Child";
+    },
+    sortedChildren() {
+      if (!this.Children) return [];
+      return [...this.Children].sort((a, b) => {
+        if (!a.DoB || !b.DoB) return 0;
+        return new Date(a.DoB) - new Date(b.DoB);
+      });
+    }
   },
 
   methods: {
     childAge,
 
     potentialStudies(child) {
-        // Reuse logic from appointmentDetails or share it?
-        // Ideally this logic should be centralized or imported again if duplicated.
-        // For now, simple mock or limited check if store studies are available.
-        // Or if appointmentDetails logic is needed here for the button disable state.
+      // Reuse logic from appointmentDetails or share it?
+      // Ideally this logic should be centralized or imported again if duplicated.
+      // For now, simple mock or limited check if store studies are available.
+      // Or if appointmentDetails logic is needed here for the button disable state.
 
-        if(!this.$store.state.studies) return { potentialStudyList: [] };
+      if (!this.$store.state.studies) return { potentialStudyList: [] };
 
-        // Duplicate logic for potential studies check to enable/disable button.
-        // Ideally refactor this into a utility or store getter.
+      // Duplicate logic for potential studies check to enable/disable button.
+      // Ideally refactor this into a utility or store getter.
 
-        var eligibleStudies = [];
+      var eligibleStudies = [];
 
       this.$store.state.studies.forEach((study) => {
         if (this.studyElegibility(study, child) && !study.Completed) {
@@ -289,7 +252,7 @@ export default {
         (study) => !uniquePreviousStudies.includes(study)
       );
 
-       var potentialStudyList = this.$store.state.studies.filter((study) =>
+      var potentialStudyList = this.$store.state.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 
@@ -300,24 +263,24 @@ export default {
     },
 
     studyElegibility(study, child) {
-         // Same logic as appointmentDetails.vue
-         // TODO: Refactor into shared mixin or utility.
-         if (child.DoB != null) {
-            // calculate age in days roughly or use moment
-             // Here simpler approximation might suffice or use same logic
-              const Age = Math.floor(
-                (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
-              ); // Age in days
+      // Same logic as appointmentDetails.vue
+      // TODO: Refactor into shared mixin or utility.
+      if (child.DoB != null) {
+        // calculate age in days roughly or use moment
+        // Here simpler approximation might suffice or use same logic
+        const Age = Math.floor(
+          (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
+        ); // Age in days
 
-            var age =
-            Age >= study.MinAge * 30.5 - 1 &&
-            Age <= study.MaxAge * 30.5 - 1;
+        var age =
+          Age >= study.MinAge * 30.5 - 1 &&
+          Age <= study.MaxAge * 30.5 - 1;
 
-            // ... other criteria (ASD, Hearing, Vision, Premature, Ill) ...
-            // Simplified for brevity, assume similar logic.
-            // Since this component is just checking eligibility for the button, we can copy logic.
+        // ... other criteria (ASD, Hearing, Vision, Premature, Ill) ...
+        // Simplified for brevity, assume similar logic.
+        // Since this component is just checking eligibility for the button, we can copy logic.
 
-             var asd = false;
+        var asd = false;
         switch (study.ASDParticipant) {
           case "Only":
             child.Family.AutismHistory ? (asd = true) : (asd = false);
@@ -369,7 +332,7 @@ export default {
             break;
         }
 
-         var illness = false;
+        var illness = false;
         switch (study.IllParticipant) {
           case "Only":
             child.Illness ? (illness = true) : (illness = false);
@@ -381,19 +344,25 @@ export default {
             illness = true;
             break;
         }
-            return age && asd && hearing && vision && premature && illness;
+        return age && asd && hearing && vision && premature && illness;
 
-         }
-         return false;
+      }
+      return false;
     },
 
     editChild(item, index) {
       this.editedIndex = index;
       this.editedItem = Object.assign({}, item);
       // format DOB for date input
-      if(this.editedItem.DoB) {
-          this.editedItem.DoB = moment(this.editedItem.DoB).format("YYYY-MM-DD");
+      if (this.editedItem.DoB) {
+        this.editedItem.DoB = moment(this.editedItem.DoB).format("YYYY-MM-DD");
       }
+      this.dialogChild = true;
+    },
+
+    addChild() {
+      this.editedIndex = -1;
+      this.editedItem = Object.assign({}, this.defaultItem);
       this.dialogChild = true;
     },
 
@@ -404,12 +373,12 @@ export default {
           "Are you sure you want to delete this child?"
         )
       ) {
-          try {
-              await child.delete({ id: id });
-              this.Children.splice(index, 1);
-          } catch(error) {
-              console.log(error);
-          }
+        try {
+          await child.delete({ id: id });
+          this.Children.splice(index, 1);
+        } catch (error) {
+          console.log(error);
+        }
       }
     },
 
@@ -422,63 +391,63 @@ export default {
     },
 
     async save() {
-        if (this.editedIndex > -1) {
-            // update
-            Object.assign(this.Children[this.editedIndex], this.editedItem);
-            try {
-                await child.update(this.editedItem);
-            } catch (error) {
-                console.log(error);
-            }
-        } else {
-            // create - handled by Family view generally or add logic here?
-            // The template shows "New Child" title but button to add child is outside this component usually?
-            // Ah, parent passes Children. This component manages display and edit of EXISTING children.
-            // But if there is a way to add child here, it would be needed.
-            // Family.vue handles adding child usually.
-            // But if this dialog handles creation too:
-            // Assuming this component purely lists children, but allows editing/deleting.
-            // Creation might be triggered from parent.
+      if (this.editedIndex > -1) {
+        // update
+        Object.assign(this.Children[this.editedIndex], this.editedItem);
+        try {
+          await child.update(this.editedItem);
+        } catch (error) {
+          console.log(error);
         }
-        this.close();
+      } else {
+        // create - handled by Family view generally or add logic here?
+        // The template shows "New Child" title but button to add child is outside this component usually?
+        // Ah, parent passes Children. This component manages display and edit of EXISTING children.
+        // But if there is a way to add child here, it would be needed.
+        // Family.vue handles adding child usually.
+        // But if this dialog handles creation too:
+        // Assuming this component purely lists children, but allows editing/deleting.
+        // Creation might be triggered from parent.
+      }
+      this.close();
     },
 
     Schedule(child, index) {
-        this.currentChild = child;
-        this.editedIndex = index; // This index is child index in Children array
-        this.dialogSchedule = true;
-        this.response = "Confirmed";
-        this.currentSchedule = Object.assign({}, this.scheduleTemplate);
-        // Initialize basic schedule structure
-        this.currentSchedule.FK_Family = this.familyId;
+      this.currentChild = child;
+      this.editedIndex = index; // This index is child index in Children array
+      this.dialogSchedule = true;
+      this.response = "Confirmed";
+      this.currentSchedule = Object.assign({}, this.scheduleTemplate);
+      // Initialize basic schedule structure
+      this.currentSchedule.FK_Family = this.familyId;
 
-        // Note: appointmentDetails and scheduleDialog expect Appointments array in currentSchedule
-        this.currentSchedule.Appointments = [];
-        this.currentSchedule.Appointments.push({
-            FK_Child: child.id,
-            Child: child,
-            FK_Family: child.FK_Family,
-            status: "Confirmed",
-            PrimaryExperimenter: [],
-            SecondaryExperimenter: []
-        });
+      // Note: appointmentDetails and scheduleDialog expect Appointments array in currentSchedule
+      this.currentSchedule.Appointments = [];
+      this.currentSchedule.Appointments.push({
+        FK_Child: child.id,
+        Child: child,
+        FK_Family: child.FK_Family,
+        status: "Confirmed",
+        PrimaryExperimenter: [],
+        SecondaryExperimenter: []
+      });
     },
 
     closeSchedule() {
-        this.dialogSchedule = false;
+      this.dialogSchedule = false;
     },
 
     addAppointment(appointment) {
-        this.currentSchedule.Appointments.push(appointment);
+      this.currentSchedule.Appointments.push(appointment);
     },
 
     deleteCurrentAppointment(index) {
-        this.currentSchedule.Appointments.splice(index, 1);
+      this.currentSchedule.Appointments.splice(index, 1);
     },
 
     addSchedule(schedule) {
-        this.$emit("newSchedule", schedule);
-        this.closeSchedule();
+      this.$emit("newSchedule", schedule);
+      this.closeSchedule();
     }
   }
 };
