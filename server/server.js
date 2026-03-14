@@ -36,82 +36,9 @@ function shutDown() {
   setTimeout(() => connections.forEach(curr => curr.destroy()), 5000);
 }
 
-
-var cron = require('node-cron');
-
-const ReminderController = require("./api/controllers/reminder");
-
-cron.schedule('0 17 * * *', async (req, res) => {
-
-  ReminderController.reminderEmail();
-
-});
-
-cron.schedule('30 9 * * *', async (req, res) => {
-
-  ReminderController.autoCompletionReminder();
-  console.log(new Date().toLocaleString() + ": autoCompletionReminder ran.");
-
-});
-
-cron.schedule('35 9 * * *', async (req, res) => {
-
-  ReminderController.autoRejectionReminder();
-  console.log(new Date().toLocaleString() + ": autoRejectionReminder ran.");
-
-});
-
-cron.schedule('0 16 * * *', async (req, res) => {
-
-  ReminderController.reminderEmailforExperimenters();
-
-});
-
-
-
-const FamilyController = require("./api/controllers/family");
-
-cron.schedule('0 6 * * *', async (req, res) => {
-
-  FamilyController.releaseFamilyNew();
-
-});
-
-const ChildController = require("./api/controllers/child");
-
-cron.schedule('5 0 * * *', async (req, res) => {
-
-  ChildController.updateAge();
-
-});
-
-const autoCancelController = require("./api/controllers/autoCancellation");
-
-cron.schedule('15 0 * * *', async (req, res) => {
-
-  autoCancelController.autoCompletion();
-
-});
-
-const rtuController = require("./api/controllers/RTU");
-
-cron.schedule('35 0 * * *', () => {
-
-  rtuController.reset();
-
-});
-
-// update study summaries
-
-const AppointmentController = require("./api/controllers/appointment");
-
-const config = require("./config/general");
-
-cron.schedule('46 22 * * *', () => {
-
-  AppointmentController.monthYearN();
-
-  AppointmentController.monthYearWeekN();
-
-});
-
+// ─── Scheduled Jobs ───────────────────────────────────────────────
+// All cron jobs are defined in jobs/scheduler.js.
+// In a clustered environment, wrap this in a primary-worker check
+// to prevent duplicate execution (e.g. cluster.isPrimary).
+const { registerJobs } = require("./jobs/scheduler");
+registerJobs();
