@@ -12,8 +12,8 @@ exports.create = asyncHandler(async (req, res) => {
     );
     res.status(200).send(event);
   } catch (error) {
-    console.log("*****", error);
-    throw error;
+    console.error("Calendar create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -25,7 +25,8 @@ exports.update = asyncHandler(async (req, res) => {
     );
     res.status(200).send(event);
   } catch (error) {
-    throw error;
+    console.error("Calendar update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -86,7 +87,8 @@ exports.delete = asyncHandler(async (req, res) => {
 
     console.log("Calendar event successfully deleted.");
   } catch (error) {
-    throw error;
+    console.error("Calendar delete error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

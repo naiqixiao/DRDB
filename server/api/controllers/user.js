@@ -31,7 +31,7 @@ exports.signup = asyncHandler(async (req, res) => {
     const personnel = await model.personnel.findOne({
       where: {
         Email: req.body.Email,
-      }
+      },
     });
 
     if (personnel && personnel.Retired === false) {
@@ -68,8 +68,9 @@ exports.signup = asyncHandler(async (req, res) => {
 
     }
   } catch (error) {
-    throw error;
-  }
+      console.error("Signup error:", error);
+      res.status(500).json({ error: error.message });
+    }
 });
 
 exports.signupBatch = asyncHandler(async (req, res) => {
@@ -129,10 +130,11 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         // log
         await log.createLog("User Created", User, "created " + newUser.Email);
 
+        }
+      } catch (error) {
+        console.error("Signup batch error:", error);
+        res.status(500).json({ error: error.message });
       }
-    } catch (error) {
-      throw error;
-    }
 
   }
 
@@ -318,7 +320,8 @@ exports.changePassword = asyncHandler(async (req, res) => {
     await log.createLog("Change Password", User, "chagned password");
 
   } catch (error) {
-    throw error;
+    console.error("Change password error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -364,7 +367,8 @@ exports.resetPassword = asyncHandler(async (req, res) => {
     await sendAdminEmail(resetEmail);
 
   } catch (error) {
-    throw error;
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

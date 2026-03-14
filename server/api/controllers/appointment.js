@@ -158,7 +158,7 @@ exports.create = asyncHandler(async (req, res) => {
         });
       }
     } catch (error) {
-      throw error;
+      console.error("Calendar update error:", error);
     }
 
     // Update Schedule updatedAt
@@ -417,7 +417,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     console.log("Appointment Information Updated.");
   } catch (error) {
-    console.log("Appointment update error:" + error);
+    console.error("Appointment update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -566,7 +567,8 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
 
     console.log("Experimenters updated!");
   } catch (error) {
-    console.log("Experimenters update error:" + error);
+    console.error("Experimenters update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -757,7 +759,7 @@ exports.monthYearN = asyncHandler(async (req, res) => {
       res.status(200).send("File has been written successfully.");
     }
   } catch (err) {
-    console.error('Error writing file:', err);
+    console.error("Monthly stats write error:", err);
   }
 });
 
@@ -773,7 +775,8 @@ exports.monthYearN0 = asyncHandler(async (req, res) => {
 
     res.status(200).send(monthYearN);
   } catch (err) {
-    console.error('Error getting file:', err);
+    console.error("Monthly stats query error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 

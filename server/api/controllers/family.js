@@ -96,7 +96,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     res.status(200).send(newFamily);
   } catch (error) {
-    throw error;
+    console.error("Family create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -151,7 +152,8 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 
     res.status(200).send(newFamily);
   } catch (error) {
-    throw error;
+    console.error("Family batch create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -161,7 +163,8 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
     const result = await familyService.batchImportFamilies(req.body);
     res.status(200).send(result);
   } catch (error) {
-    throw error;
+    console.error("Family batch import error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -351,7 +354,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(family);
   } catch (error) {
-    throw error;
+    console.error("Family update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -438,7 +442,8 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
     }
 
   } catch (error) {
-    throw error;
+    console.error("Family search error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -512,7 +517,8 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
     }
 
   } catch (error) {
-    throw error;
+    console.error("Family release error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -659,7 +665,8 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
     //   res.status(200).send("no family needs to be released.");
     // }
   } catch (error) {
-    throw error;
+    console.error("Family assign lab error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

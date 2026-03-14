@@ -24,8 +24,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    throw error;
-    // res.status(500).send(error);
+    console.error("Study create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -82,7 +82,8 @@ exports.search = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    throw error;
+    console.error("Study search error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -130,7 +131,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    throw error;
+    console.error("Study update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -152,7 +154,8 @@ exports.delete = asyncHandler(async (req, res) => {
 
     res.status(200).json(study);
   } catch (error) {
-    throw error;
+    console.error("Study delete error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -199,7 +202,8 @@ exports.studyStats = asyncHandler(async (req, res) => {
     const results = { totalNperStatus: totalNperStatus[0], totalNperPersonnelStatus: totalNperPersonnelStatus[0], totalNperPersonnelPriExp: totalNperPersonnelPriExp[0], totalNperPersonnelAssistExp: totalNperPersonnelAssistExp[0], totalNWeeklyRecrtuiment: totalNWeeklyRecrtuiment[0] };
 
     res.status(200).send(results);
-  } catch (err) {
-    console.error('Error getting file:', err);
+  } catch (error) {
+    console.error("Study stats error:", error);
+    res.status(500).json({ error: error.message });
   }
 });

@@ -65,7 +65,7 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    throw error;
+    console.error("Reminder email error:", error);
   }
 });
 
@@ -109,7 +109,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    throw error;
+    console.error("Experimenter reminder error:", error);
   }
 });
 
@@ -181,7 +181,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
       }
     });
   } catch (error) {
-    throw error;
+    console.error("Auto-completion reminder error:", error);
   }
 });
 
@@ -211,6 +211,6 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
       );
     }
   } catch (error) {
-    throw error;
-  }
+      console.error("Auto-rejection reminder error:", error);
+    }
 });

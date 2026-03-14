@@ -174,7 +174,8 @@ exports.create = asyncHandler(async (req, res) => {
     res.status(200).send(fullSchedule[0]);
     console.log("schedule created!");
   } catch (error) {
-    console.log( error);
+    console.error("Schedule creation error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -252,13 +253,8 @@ exports.search = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  try {
-    const schedule = await searchScheudles(queryString);
-    res.status(200).send(schedule);
-    console.log("Search successful!");
-  } catch (error) {
-    throw error;
-  }
+  const schedule = await searchScheudles(queryString);
+  res.status(200).send(schedule);
 });
 
 exports.searchFollowUps = asyncHandler(async (req, res) => {
@@ -290,14 +286,8 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  try {
-    const schedule = await searchScheudles(queryString);
-
-    res.status(200).send(schedule);
-    console.log("Follow up search successful!");
-  } catch (error) {
-    throw error;
-  }
+  const schedule = await searchScheudles(queryString);
+  res.status(200).send(schedule);
 });
 
 // Retrieve today's appointments from the database.
@@ -326,14 +316,8 @@ exports.today = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  try {
-    const schedule = await searchScheudles(queryString);
-
-    res.status(200).send(schedule);
-    console.log("Search successful!");
-  } catch (error) {
-    throw error;
-  }
+  const schedule = await searchScheudles(queryString);
+  res.status(200).send(schedule);
 });
 
 exports.tomorrow = asyncHandler(async (req, res) => {
@@ -379,14 +363,8 @@ exports.tomorrow = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  try {
-    const schedule = await searchScheudles(queryString);
-
-    res.status(200).send(schedule);
-    console.log("Search successful!");
-  } catch (error) {
-    throw error;
-  }
+  const schedule = await searchScheudles(queryString);
+  res.status(200).send(schedule);
 });
 
 // Retrieve this week's appointments from the database.
@@ -416,14 +394,8 @@ exports.week = asyncHandler(async (req, res) => {
     queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   }
 
-  try {
-    const schedule = await searchScheudles(queryString);
-
-    res.status(200).send(schedule);
-    console.log("Search successful!");
-  } catch (error) {
-    throw error;
-  }
+  const schedule = await searchScheudles(queryString);
+  res.status(200).send(schedule);
 });
 
 // ////////////////////////////////////////////
@@ -547,8 +519,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     console.log("Appointment Information Updated.");
   } catch (error) {
-    console.log("Appointment update error: " + error);
-    throw error;
+    console.error("Appointment update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -581,8 +553,8 @@ exports.remind = asyncHandler(async (req, res) => {
 
     console.log("Appointment Reminder Updated.");
   } catch (error) {
-    console.log("Appointment update error: " + error);
-    throw error;
+    console.error("Appointment remind error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -612,8 +584,8 @@ exports.tyEmail = asyncHandler(async (req, res) => {
 
     console.log("Thank you email sent.");
   } catch (error) {
-    console.log("Thank you email error: " + error);
-    throw error;
+    console.error("Thank you email error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -650,8 +622,8 @@ exports.complete = asyncHandler(async (req, res) => {
 
     console.log("Appointment Information Updated.");
   } catch (error) {
-    console.log("Appointment update error: " + error);
-    throw error;
+    console.error("Appointment complete error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -688,7 +660,8 @@ exports.delete = asyncHandler(async (req, res) => {
 
     res.status(200).send("schedule deleted.");
   } catch (error) {
-    throw error;
+    console.error("Schedule delete error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -718,7 +691,8 @@ exports.special = asyncHandler(async (req, res) => {
     res.status(200).send(schedules);
     console.log("Search successful!");
   } catch (error) {
-    throw error;
+    console.error("Schedule special error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

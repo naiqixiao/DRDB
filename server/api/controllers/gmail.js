@@ -17,6 +17,7 @@ exports.send = asyncHandler(async (req, res) => {
 
     res.status(200).send(result);
   } catch (error) {
-    throw error;
+    console.error("Gmail send error:", error);
+    res.status(500).json({ error: error.message });
   }
 });

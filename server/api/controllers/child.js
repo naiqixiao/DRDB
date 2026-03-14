@@ -78,7 +78,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     console.log("Child is created and siblings are updated!");
   } catch (error) {
-    throw error;
+    console.error("Child create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -127,7 +128,8 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 
     res.status(200).send(newChildren);
   } catch (error) {
-    throw error;
+    console.error("Child batch create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -362,11 +364,6 @@ exports.updateAge = asyncHandler(async (req, res) => {
     "UPDATE ${{DBName}}.Child Set Age = DATEDIFF(CURDATE(), DoB);";
   queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
 
-  try {
-    await model.sequelize.query(queryString);
-
-    await log.createLog("Age Updated", {}, "Children's age is updated");
-  } catch (error) {
-    throw error;
-  }
+  await model.sequelize.query(queryString);
+  await log.createLog("Age Updated", {}, "Children's age is updated");
 });
