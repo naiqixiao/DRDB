@@ -1,13 +1,7 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
-const { google } = require("googleapis");
-
-google.options({
-  params: {
-      sendUpdates: 'all'
-  }
-});
+const calendarService = require("../services/googleCalendarService");
 
 const moment = require("moment");
 // const fs = require("fs");
@@ -668,16 +662,15 @@ exports.delete = asyncHandler(async (req, res) => {
       where: { id: req.query.id },
     });
 
-    const calendar = google.calendar({ version: "v3", auth: req.oAuth2Client });
+    const calendarService = require("../services/googleCalendarService");
 
     // remove calendar event, if it exists.
     if (schedule.calendarEventId) {
-      await calendar.events.delete({
-        calendarId: "primary",
-        eventId: schedule.calendarEventId,
-        sendUpdates: "all",
-        sendNotifications: true,
-      });
+      await calendarService.deleteEvent(
+        req.oAuth2Client,
+        "primary",
+        schedule.calendarEventId
+      );
     }
 
     await model.schedule.destroy({

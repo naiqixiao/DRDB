@@ -8,6 +8,7 @@ const fs = require("fs");
 const config = require("../../config/general");
 const log = require("../controllers/log");
 const { sendAdminEmail } = require("../utils/emailUtil");
+const { buildWelcomeEmail, buildPasswordChangedEmail, buildPasswordResetEmail } = require("../utils/userTemplates");
 
 exports.signup = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
@@ -59,25 +60,8 @@ exports.signup = asyncHandler(async (req, res) => {
 
       }
 
-      await sendAdminEmail({
-        to: newUser.Name + "<" + newUser.Email + ">",
-        subject: "Your user account has been created!",
-        htmlBody:
-          "<p>Hello " +
-          newUser.Name.split(" ")[0] +
-          ",</p> " +
-          "<p>Welcome to the developmental research management system!<br>" +
-          "Your role is <b>" +
-          newUser.Role +
-          "</b>, and your temporary password is <b><em>" +
-          password +
-          "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-          "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-          "<p> </p>" +
-          "<p>Thank you! <br>" +
-          "Developmental Research Management System</p>",
-      });
+      const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
+      await sendAdminEmail(welcomeEmail);
 
       // log
       await log.createLog("User Created", User, "created " + newUser.Email);
@@ -139,25 +123,8 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
         }
 
-        await sendAdminEmail({
-          to: newUser.Name + "<" + newUser.Email + ">",
-          subject: "Your user account has been created!",
-          htmlBody:
-            "<p>Hello " +
-            newUser.Name.split(" ")[0] +
-            ",</p> " +
-            "<p>Welcome to the developmental research management system!<br>" +
-            "Your role is <b>" +
-            newUser.Role +
-            "</b>, and your temporary password is <b><em>" +
-            password +
-            "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-            "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-            "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-            "<p> </p>" +
-            "<p>Thank you! <br>" +
-            "Developmental Research Management System</p>",
-        });
+        const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
+        await sendAdminEmail(welcomeEmail);
 
         // log
         await log.createLog("User Created", User, "created " + newUser.Email);
@@ -344,19 +311,8 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
 
 
-    await sendAdminEmail({
-      to: personnel.Name + "<" + personnel.Email + ">",
-      subject: "Your login password is updated.",
-      htmlBody:
-        "<p>Hello " +
-        personnel.Name.split(" ")[0] +
-        ",</p> " +
-        "<p>Your login password has recently been changed. <br>" +
-        "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
-        "<p> </p>" +
-        "<p>Thank you!<br>" +
-        "Developmental Research Management System</p>",
-    });
+    const pwChangedEmail = buildPasswordChangedEmail(personnel.Name, personnel.Email);
+    await sendAdminEmail(pwChangedEmail);
 
     // log
     await log.createLog("Change Password", User, "chagned password");
@@ -404,22 +360,8 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       message: "Password reset!",
     });
 
-    await sendAdminEmail({
-      to: personnel.Name + "<" + personnel.Email + ">",
-      subject: "Your password is reset",
-      htmlBody:
-        "<p>Hello " +
-        personnel.Name.split(" ")[0] +
-        ",</p> " +
-        "<p>You login password is reset, and the temporary passwor is: <b>" +
-        password +
-        "</b></p> <p>Please login to change your password.<br> " +
-        "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-        "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-        "<p> </p>" +
-        "<p>Thank you! <br>" +
-        "Developmental Research Management System</p>",
-    });
+    const resetEmail = buildPasswordResetEmail(personnel.Name, personnel.Email, password);
+    await sendAdminEmail(resetEmail);
 
   } catch (error) {
     throw error;

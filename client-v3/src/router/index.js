@@ -11,6 +11,7 @@ const Study = () => import('@/views/Study.vue')
 const Settings = () => import('@/views/Settings.vue')
 const OAuthCallback = () => import('@/views/OAuthCallback.vue')
 const EmailTest = () => import('@/views/EmailTest.vue')
+const CalendarTest = () => import('@/views/CalendarTest.vue')
 
 const routes = [
     {
@@ -57,6 +58,11 @@ const routes = [
         path: '/email-test',
         name: 'Email Test',
         component: EmailTest
+    },
+    {
+        path: '/calendar-test',
+        name: 'Calendar Test',
+        component: CalendarTest
     },
     {
         path: '/oauth/callback',

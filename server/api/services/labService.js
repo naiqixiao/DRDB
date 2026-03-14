@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const fs = require("fs");
 const { sendAdminEmail } = require("../utils/emailUtil");
-const config = require("../../config/general");
+const { buildWelcomeEmail } = require("../utils/userTemplates");
 
 /**
  * Create a new lab with associated personnel, a sample study,
@@ -64,30 +64,8 @@ exports.createLab = async (labData) => {
 
   // 5. Send welcome email to the first personnel (lab admin)
   const admin = labData.Personnels[0];
-  await sendAdminEmail({
-    to: `${admin.Name} <${admin.Email}>`,
-    subject: "Your user account has been created!",
-    htmlBody:
-      "<p>Hello " +
-      admin.Name.split(" ")[0] +
-      ",</p> " +
-      "<p>Welcome to the developmental research management system!</p>" +
-      "<p>Your role is <b>" +
-      admin.Role +
-      "</b>, and your temporary password is <b><em>" +
-      admin.unencryptedPassword +
-      "</em></b>. Please login with your email and temporary password at <a href=" +
-      config.URL +
-      ">" +
-      config.URL +
-      "</a> to set your password" +
-      config.otherRequirement +
-      ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-      "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a></p>" +
-      "<p><a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-      "<p>Thank you!<br>" +
-      "Developmental Research Management System</p>",
-  });
+  const welcomeEmail = buildWelcomeEmail(admin.Name, admin.Email, admin.Role, admin.unencryptedPassword);
+  await sendAdminEmail(welcomeEmail);
 
   // 6. Create lab filesystem directory
   const labFolderPath = "api/google/labs/lab" + lab.id;

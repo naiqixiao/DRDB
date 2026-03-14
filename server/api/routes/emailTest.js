@@ -182,99 +182,70 @@ function mockExperimenter() {
 }
 
 /**
- * Build mock for account-level emails (signup, password change, password reset).
+ * Build mock for account-level emails using the REAL template builders.
  */
 function mockAccountEmail(type) {
-  const firstName = MOCK.experimenterName.split(" ")[0];
-  const to = `${MOCK.experimenterName} <${MOCK.experimenterEmail}>`;
-
-  const manualLink =
-    "<a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a>";
-  const googleLink =
-    "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a>";
+  const {
+    buildWelcomeEmail,
+    buildPasswordChangedEmail,
+    buildPasswordResetEmail,
+    buildFeedbackEmail,
+  } = require("../utils/userTemplates");
 
   switch (type) {
     case "lab-welcome":
-      return {
-        to,
-        subject: "Your user account has been created!",
-        htmlBody:
-          "<p>Hello " + firstName + ",</p> " +
-          "<p>Welcome to the developmental research management system!</p>" +
-          "<p>Your role is <b>" + MOCK.role + "</b>, and your temporary password is <b><em>" + MOCK.password + "</em></b>. " +
-          "Please login with your email and temporary password at <a href=\"" + MOCK.appUrl + "\">" + MOCK.appUrl + "</a> to set your password." +
-          "<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-          "<p>" + manualLink + "</p>" +
-          "<p>" + googleLink + "</p>" +
-          "<p>Thank you!<br>Developmental Research Management System</p>",
-        description:
-          "Rendered by labService.createLab() — sent when a new lab is created.",
-      };
+    case "user-signup": {
+      const email = buildWelcomeEmail(
+        MOCK.experimenterName,
+        MOCK.experimenterEmail,
+        MOCK.role,
+        MOCK.password
+      );
+      email.description =
+        type === "lab-welcome"
+          ? "Rendered by userTemplates.buildWelcomeEmail() — used by labService.createLab()."
+          : "Rendered by userTemplates.buildWelcomeEmail() — used by user.js signup/signupBatch.";
+      return email;
+    }
 
-    case "user-signup":
-      return {
-        to,
-        subject: "Your user account has been created!",
-        htmlBody:
-          "<p>Hello " + firstName + ",</p> " +
-          "<p>Welcome to the developmental research management system!<br>" +
-          "Your role is <b>" + MOCK.role + "</b>, and your temporary password is <b><em>" + MOCK.password + "</em></b>. " +
-          "Please login with your email and temporary password at <a href=\"" + MOCK.appUrl + "\">" + MOCK.appUrl + "</a> to set your password." +
-          "<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-          "<p>" + manualLink + "<br>" + googleLink + "</p>" +
-          "<p> </p>" +
-          "<p>Thank you! <br>Developmental Research Management System</p>",
-        description:
-          "Rendered by user.js signup — sent when a new user account is created.",
-      };
+    case "password-changed": {
+      const email = buildPasswordChangedEmail(
+        MOCK.experimenterName,
+        MOCK.experimenterEmail
+      );
+      email.description =
+        "Rendered by userTemplates.buildPasswordChangedEmail() — used by user.js changePassword.";
+      return email;
+    }
 
-    case "password-changed":
-      return {
-        to,
-        subject: "Your login password is updated.",
-        htmlBody:
-          "<p>Hello " + firstName + ",</p> " +
-          "<p>Your login password has recently been changed. <br>" +
-          "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
-          "<p> </p>" +
-          "<p>Thank you!<br>Developmental Research Management System</p>",
-        description:
-          "Rendered by user.js changePassword — sent after a password change.",
-      };
+    case "password-reset": {
+      const email = buildPasswordResetEmail(
+        MOCK.experimenterName,
+        MOCK.experimenterEmail,
+        MOCK.password
+      );
+      email.description =
+        "Rendered by userTemplates.buildPasswordResetEmail() — used by user.js resetPassword.";
+      return email;
+    }
 
-    case "password-reset":
-      return {
-        to,
-        subject: "Your password is reset",
-        htmlBody:
-          "<p>Hello " + firstName + ",</p> " +
-          "<p>You login password is reset, and the temporary passwor is: <b>" + MOCK.password + "</b></p> " +
-          "<p>Please login to change your password.<br> " +
-          "<p>" + manualLink + "<br>" + googleLink + "</p>" +
-          "<p> </p>" +
-          "<p>Thank you! <br>Developmental Research Management System</p>",
-        description:
-          "Rendered by user.js resetPassword — sent when an admin resets a password.",
-      };
-
-    case "feedback":
-      return {
-        to: "babylab@mcmaster.ca",
-        cc: MOCK.experimenterEmail,
-        subject: "[DRDB feedback] Calendar button not working on Firefox",
-        htmlBody:
-          "<p> from " + MOCK.experimenterEmail + "<p>" +
-          "<p> on Schedule Page<p>" +
-          "<p>====================<p>" +
-          "<p>When I click the 'Add to Calendar' button on the Schedule page using Firefox 120, nothing happens.</p>",
-        description:
-          "Rendered by feedback.js — sent when a user submits feedback.",
-      };
+    case "feedback": {
+      const email = buildFeedbackEmail(
+        MOCK.experimenterEmail,
+        "Schedule",
+        "Calendar button not working on Firefox",
+        "<p>When I click the 'Add to Calendar' button on the Schedule page using Firefox 120, nothing happens.</p>"
+      );
+      email.description =
+        "Rendered by userTemplates.buildFeedbackEmail() — used by feedback.js.";
+      return email;
+    }
 
     default:
       return null;
   }
 }
+
 
 // ─── Template catalog ─────────────────────────────────────────────
 const TEMPLATE_CATALOG = [

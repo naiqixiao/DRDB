@@ -1,6 +1,7 @@
 const model = require("../models/DRDB");
 const asyncHandler = require("express-async-handler");
 const { sendAdminEmail } = require("../utils/emailUtil");
+const { buildFeedbackEmail } = require("../utils/userTemplates");
 
 exports.create = asyncHandler(async (req, res) => {
   var newFeedback = req.body;
@@ -8,20 +9,13 @@ exports.create = asyncHandler(async (req, res) => {
   try {
     const feedback = await model.feedback.create(newFeedback);
 
-    await sendAdminEmail({
-      to: "babylab@mcmaster.ca",
-      cc: newFeedback.Email,
-      subject: "[DRDB feedback] " + newFeedback.Title,
-      htmlBody:
-        "<p> from " +
-        newFeedback.Email +
-        "<p>" +
-        "<p> on " +
-        newFeedback.CurrentPage +
-        " Page<p>" +
-        "<p>====================<p>" +
-        newFeedback.Content,
-    });
+    const feedbackEmail = buildFeedbackEmail(
+      newFeedback.Email,
+      newFeedback.CurrentPage,
+      newFeedback.Title,
+      newFeedback.Content
+    );
+    await sendAdminEmail(feedbackEmail);
 
     res.status(200).send(feedback);
     console.log("feedback created " + feedback.id);
