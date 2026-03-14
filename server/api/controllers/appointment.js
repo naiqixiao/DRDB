@@ -13,7 +13,18 @@ google.options({
 });
 
 const fs = require("fs");
+const path = require("path");
 const log = require("../controllers/log");
+
+// Helper to determine where to save JSON outputs
+// Defaults to a 'stats' folder in the root of the server directory
+const getStatsDir = () => {
+  const dir = process.env.STATS_OUTPUT_PATH || path.join(__dirname, '../../../stats');
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return dir;
+};
 // {
 //             "FK_Schedule": 35,
 //             "FK_Study": 3,
@@ -736,43 +747,66 @@ exports.delete0 = asyncHandler(async (req, res) => {
 
 // Update monthYearN
 exports.monthYearN = asyncHandler(async (req, res) => {
-  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed'     AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearN = await model.sequelize.query(queryString);
-
-  const jsonString = JSON.stringify(monthYearN[0], null, 2);
-
-  // Specify the file path
-  if (!fs.existsSync("./stats/")) {
-    fs.mkdirSync("./stats/");
-  }
-  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearN.json';
-
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth, 
+      Study.StudyType AS StudyType, 
+      COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND Lab.id = 2 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0 
+    GROUP BY YearMonth, Year, Month, StudyType 
+    ORDER BY Year, Month;
+  `;
 
   try {
-    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
-      // Write the JSON string to the file
-      fs.writeFileSync(filePath, jsonString);
-      console.log('File has been written successfully.');
-      res.status(200).send("File has been written successfully.");
-    }
+    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const jsonString = JSON.stringify(monthYearN, null, 2);
+
+    const filePath = path.join(getStatsDir(), 'monthYearN.json');
+    fs.writeFileSync(filePath, jsonString);
+    
+    console.log('monthYearN.json has been written successfully.');
+    res.status(200).send("File has been written successfully.");
   } catch (err) {
     console.error("Monthly stats write error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Update monthYearN
+// Update monthYearN0
 exports.monthYearN0 = asyncHandler(async (req, res) => {
-  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearN = await model.sequelize.query(queryString);
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth, 
+      Study.StudyType AS StudyType, 
+      COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0 
+    GROUP BY YearMonth, Year, Month, StudyType 
+    ORDER BY Year, Month;
+  `;
 
   try {
-
+    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
     res.status(200).send(monthYearN);
   } catch (err) {
     console.error("Monthly stats query error:", err);
@@ -782,30 +816,37 @@ exports.monthYearN0 = asyncHandler(async (req, res) => {
 
 // Update monthYearWeekN
 exports.monthYearWeekN = asyncHandler(async (req, res) => {
-  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%a') AS weekday,     COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed'     AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0  GROUP BY     weekday,     Year,     Month ORDER BY     Year,     Month,     weekday;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearWeekN = await model.sequelize.query(queryString);
-
-  const jsonString = JSON.stringify(monthYearWeekN[0], null, 2);
-
-  // Specify the file path
-  if (!fs.existsSync("./stats/")) {
-    fs.mkdirSync("./stats/");
-  }
-  // const filePath = './stats/monthYearWeekN.json';
-  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearWeekN.json';
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%a') AS weekday, 
+      COUNT(Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND Lab.id = 2 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0  
+    GROUP BY weekday, Year, Month 
+    ORDER BY Year, Month, weekday;
+  `;
 
   try {
-    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
+    const monthYearWeekN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const jsonString = JSON.stringify(monthYearWeekN, null, 2);
 
-      // Write the JSON string to the file
-      fs.writeFileSync(filePath, jsonString);
-      console.log('File has been written successfully.');
-      res.status(200).send("File has been written successfully.");
-    }
+    const filePath = path.join(getStatsDir(), 'monthYearWeekN.json');
+    fs.writeFileSync(filePath, jsonString);
+    
+    console.log('monthYearWeekN.json has been written successfully.');
+    res.status(200).send("File has been written successfully.");
   } catch (err) {
     console.error('Error writing file:', err);
+    res.status(500).json({ error: err.message });
   }
 });

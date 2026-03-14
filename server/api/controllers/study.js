@@ -1,5 +1,6 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
+const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 
@@ -162,46 +163,122 @@ exports.delete = asyncHandler(async (req, res) => {
 
 // Retrieve study progress infomation from the database.
 exports.studyStats = asyncHandler(async (req, res) => {
-
-  var studyID = req.query.studyID;
+  const studyID = req.query.studyID;
 
   try {
-    var queryStringN = "SELECT     ${{DBName}}.Study.StudyName,     ${{DBName}}.Schedule.Status,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Personnel ON ${{DBName}}.Schedule.ScheduledBy = ${{DBName}}.Personnel.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY ${{DBName}}.Schedule.Status;";
+    const queryStringN = `
+      SELECT 
+        Study.StudyName, 
+        Schedule.Status, 
+        COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+      FROM Appointment 
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
+      INNER JOIN Study ON Appointment.FK_Study = Study.id 
+      INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+      INNER JOIN Family ON Schedule.FK_Family = Family.id 
+      WHERE Study.id = :studyID 
+        AND Family.TrainingSet = 0 
+      GROUP BY Schedule.Status;
+    `;
 
-    queryStringN = queryStringN.replace(/\${{DBName}}/g, config.DBName);
-    queryStringN = queryStringN.replace(/\${{studyID}}/g, studyID);
+    const queryStringNperPersonnel = `
+      SELECT 
+        Study.StudyName, 
+        Personnel.Name as RecruitedBy, 
+        Schedule.Status, 
+        COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+      FROM Appointment 
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
+      INNER JOIN Study ON Appointment.FK_Study = Study.id 
+      INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+      INNER JOIN Family ON Schedule.FK_Family = Family.id 
+      WHERE Study.id = :studyID 
+        AND Family.TrainingSet = 0 
+      GROUP BY ScheduledBy, Schedule.Status 
+      ORDER BY Personnel.id;
+    `;
 
-    var queryStringNperPersonnel = "SELECT     ${{DBName}}.Study.StudyName,     ${{DBName}}.Personnel.Name as RecruitedBy,     ${{DBName}}.Schedule.Status,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Personnel ON ${{DBName}}.Schedule.ScheduledBy = ${{DBName}}.Personnel.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY ScheduledBy,     ${{DBName}}.Schedule.Status ORDER BY ${{DBName}}.Personnel.id;";
+    const queryStringNPriExp = `
+      SELECT 
+        Study.StudyName, 
+        Experimenter.Name as Experimenter, 
+        'Primary' as ROLE,  
+        COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+      FROM Appointment 
+      JOIN ExperimenterAssignment ON Appointment.id = ExperimenterAssignment.FK_Appointment 
+      JOIN Personnel AS Experimenter ON ExperimenterAssignment.FK_Experimenter = Experimenter.id 
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
+      INNER JOIN Study ON Appointment.FK_Study = Study.id 
+      INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+      INNER JOIN Family ON Schedule.FK_Family = Family.id 
+      WHERE Study.id = :studyID 
+        AND Family.TrainingSet = 0 
+        AND Schedule.Status = 'Confirmed'  
+      GROUP BY Experimenter.Name, Experimenter.id, Schedule.Status 
+      ORDER BY Experimenter.id;
+    `;
 
-    queryStringNperPersonnel = queryStringNperPersonnel.replace(/\${{DBName}}/g, config.DBName);
-    queryStringNperPersonnel = queryStringNperPersonnel.replace(/\${{studyID}}/g, studyID);
+    const queryStringNAssistExp = `
+      SELECT 
+        Study.StudyName, 
+        Experimenter.Name as Experimenter,  
+        'Assistant' as ROLE,   
+        COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+      FROM Appointment 
+      INNER JOIN ExperimenterAssignment ON Appointment.id = ExperimenterAssignment.FK_Appointment 
+      INNER JOIN Personnel AS PrimaryExperimenter ON ExperimenterAssignment.FK_Experimenter = PrimaryExperimenter.id 
+      INNER JOIN SecondExperimenterAssignment ON Appointment.id = SecondExperimenterAssignment.FK_Appointment 
+      INNER JOIN Personnel AS Experimenter ON SecondExperimenterAssignment.FK_Experimenter = Experimenter.id 
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
+      INNER JOIN Study ON Appointment.FK_Study = Study.id 
+      INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+      INNER JOIN Family ON Schedule.FK_Family = Family.id 
+      WHERE Study.id = :studyID 
+        AND Family.TrainingSet = 0 
+        AND Schedule.Status = 'Confirmed'  
+      GROUP BY Experimenter.id, Experimenter.Name, Schedule.Status 
+      ORDER BY Experimenter.id;
+    `;
 
-    var queryStringNPriExp = "SELECT     ${{DBName}}.Study.StudyName,     Experimenter.Name as Experimenter,   'Primary' as ROLE,  COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     JOIN ${{DBName}}.ExperimenterAssignment ON ${{DBName}}.Appointment.id = ${{DBName}}.ExperimenterAssignment.FK_Appointment     JOIN ${{DBName}}.Personnel AS Experimenter ON ${{DBName}}.ExperimenterAssignment.FK_Experimenter = Experimenter.id     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Personnel ON ${{DBName}}.Schedule.ScheduledBy = ${{DBName}}.Personnel.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0     AND ${{DBName}}.Schedule.Status = 'Confirmed'  GROUP BY     Experimenter.Name,  Experimenter.id,   ${{DBName}}.Schedule.Status ORDER BY Experimenter.id;";
+    const queryStringNWeeklyRecrtuiment = `
+      SELECT 
+        YEAR(Schedule.updatedAt) AS Year, 
+        Schedule.Status AS Status, 
+        COUNT(DISTINCT Appointment.id) AS NumberOfParticipants, 
+        DATE_FORMAT(DATE_SUB(Schedule.updatedAt, INTERVAL WEEKDAY(Schedule.updatedAt) DAY), '%Y-%m-%d') AS WeekStartDate 
+      FROM Appointment 
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+      INNER JOIN Study ON Appointment.FK_Study = Study.id 
+      INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+      INNER JOIN Family ON Schedule.FK_Family = Family.id 
+      WHERE Schedule.createdAt > '2021-01-01' 
+        AND Study.id = :studyID 
+        AND Family.TrainingSet = 0 
+      GROUP BY Year, WeekStartDate, Status 
+      ORDER BY Year, WeekStartDate;
+    `;
 
-    queryStringNPriExp = queryStringNPriExp.replace(/\${{DBName}}/g, config.DBName);
-    queryStringNPriExp = queryStringNPriExp.replace(/\${{studyID}}/g, studyID);
+    // Safely execute queries with parameter binding
+    const options = { replacements: { studyID }, type: QueryTypes.SELECT };
 
-    var queryStringNAssistExp = "SELECT     ${{DBName}}.Study.StudyName,     Experimenter.Name as Experimenter,  'Assistant' as ROLE,   COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.ExperimenterAssignment ON ${{DBName}}.Appointment.id = ${{DBName}}.ExperimenterAssignment.FK_Appointment     INNER JOIN ${{DBName}}.Personnel AS PrimaryExperimenter ON ${{DBName}}.ExperimenterAssignment.FK_Experimenter = PrimaryExperimenter.id     INNER JOIN ${{DBName}}.SecondExperimenterAssignment ON ${{DBName}}.Appointment.id = ${{DBName}}.SecondExperimenterAssignment.FK_Appointment     INNER JOIN ${{DBName}}.Personnel AS Experimenter ON ${{DBName}}.SecondExperimenterAssignment.FK_Experimenter = Experimenter.id     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Personnel ON ${{DBName}}.Schedule.ScheduledBy = ${{DBName}}.Personnel.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0     AND ${{DBName}}.Schedule.Status = 'Confirmed'  GROUP BY   Experimenter.id,  Experimenter.Name,     ${{DBName}}.Schedule.Status ORDER BY Experimenter.id;";
+    const totalNperStatus = await model.sequelize.query(queryStringN, options);
+    const totalNperPersonnelStatus = await model.sequelize.query(queryStringNperPersonnel, options);
+    const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp, options);
+    const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp, options);
+    const totalNWeeklyRecrtuiment = await model.sequelize.query(queryStringNWeeklyRecrtuiment, options);
 
-    queryStringNAssistExp = queryStringNAssistExp.replace(/\${{DBName}}/g, config.DBName);
-    queryStringNAssistExp = queryStringNAssistExp.replace(/\${{studyID}}/g, studyID);
-
-
-    var queryStringNWeeklyRecrtuiment = "SELECT     YEAR(${{DBName}}.Schedule.updatedAt) AS Year,     ${{DBName}}.Schedule.Status AS Status,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants,     DATE_FORMAT( DATE_SUB( ${{DBName}}.Schedule.updatedAt,  interval WEEKDAY(${{DBName}}.Schedule.updatedAt) DAY  ), '%Y-%m-%d' ) AS WeekStartDate FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Study.id = ${{studyID}}     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY     Year,  WeekStartDate,   Status, WeekStartDate ORDER BY     Year,  WeekStartDate ;";
-
-    queryStringNWeeklyRecrtuiment = queryStringNWeeklyRecrtuiment.replace(/\${{DBName}}/g, config.DBName);
-    queryStringNWeeklyRecrtuiment = queryStringNWeeklyRecrtuiment.replace(/\${{studyID}}/g, studyID);
-
-
-    const totalNperStatus = await model.sequelize.query(queryStringN);
-    const totalNperPersonnelStatus = await model.sequelize.query(queryStringNperPersonnel);
-    const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp);
-    const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp);
-    const totalNWeeklyRecrtuiment = await model.sequelize.query(queryStringNWeeklyRecrtuiment);
-
-    const results = { totalNperStatus: totalNperStatus[0], totalNperPersonnelStatus: totalNperPersonnelStatus[0], totalNperPersonnelPriExp: totalNperPersonnelPriExp[0], totalNperPersonnelAssistExp: totalNperPersonnelAssistExp[0], totalNWeeklyRecrtuiment: totalNWeeklyRecrtuiment[0] };
-
-    res.status(200).send(results);
+    // QueryTypes.SELECT returns data directly without the metadata wrapper
+    res.status(200).send({ 
+      totalNperStatus, 
+      totalNperPersonnelStatus, 
+      totalNperPersonnelPriExp, 
+      totalNperPersonnelAssistExp, 
+      totalNWeeklyRecrtuiment 
+    });
   } catch (error) {
     console.error("Study stats error:", error);
     res.status(500).json({ error: error.message });
