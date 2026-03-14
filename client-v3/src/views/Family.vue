@@ -1,21 +1,6 @@
 <template>
   <v-container fluid>
-    <!-- Alerts -->
-    <div v-if="!$store.state.labEmailStatus">
-      <v-alert border="start" type="error" color="#c73460" density="compact" style="font-weight: 600">
-        Lab email is not set up properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="!$store.state.adminEmailStatus">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
-        Admin email is not set up properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="$store.state.trainingMode">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
-        You are running in a training mode.
-      </v-alert>
-    </div>
+    <AlertBanner :showAdminEmail="true" />
 
     <v-row justify="space-around">
       <!-- LEFT COLUMN: Search + Family Info -->
@@ -42,8 +27,10 @@
               </v-btn>
               <span class="text-body-1" style="width: 45px; text-align: center">{{ page }}</span>
               <span class="text-body-1" style="padding: 0 8px">/</span>
-              <span class="text-body-1" style="width: 45px; text-align: left">{{ Families ? Families.length : 0 }}</span>
-              <v-btn variant="text" icon @click="nextPage" :disabled="page >= Families.length || page == 0" size="small">
+              <span class="text-body-1" style="width: 45px; text-align: left">{{ Families ? Families.length : 0
+              }}</span>
+              <v-btn variant="text" icon @click="nextPage" :disabled="page >= Families.length || page == 0"
+                size="small">
                 <v-icon>mdi-chevron-right</v-icon>
               </v-btn>
             </div>
@@ -51,142 +38,83 @@
         </v-row>
 
         <!-- Contact Information Section -->
+        <SectionHeader title="Contact Information" icon="mdi-card-account-phone-outline" />
         <v-row justify="space-between" dense>
-          <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Contact information:</h4>
-          </v-col>
           <v-col cols="12" :md="item.width" v-for="item in familyFields.slice(0, 4)" :key="item.label">
-            <div v-if="item.searchable">
-              <v-text-field
-                class="textfield-family"
-                hide-details
-                @keydown.enter="searchFamily()"
-                @update:model-value="getSearchKeys(item.field, $event)"
-                :label="item.label"
-                :model-value="item.label === 'Phone' || item.label === 'Cell Phone'
+            <div v-if="searchStatus && item.searchable">
+              <v-text-field class="textfield-family" hide-details @keydown.enter="searchFamily()"
+                @update:model-value="getSearchKeys(item.field, $event)" :label="item.label" :model-value="item.label === 'Phone' || item.label === 'Cell Phone'
                   ? PhoneFormated(currentFamily[item.field])
-                  : currentFamily[item.field]"
-                :append-icon="searchStatus ? 'mdi-magnify' : undefined"
-                :readonly="!searchStatus"
-                placeholder=" "
-                variant="outlined"
-                density="compact"
-              ></v-text-field>
+                  : currentFamily[item.field]" append-icon="mdi-magnify" placeholder=" " variant="outlined"
+                density="compact"></v-text-field>
             </div>
+            <InfoField v-else :label="item.label" :value="item.label === 'Phone' || item.label === 'Cell Phone'
+              ? PhoneFormated(currentFamily[item.field])
+              : currentFamily[item.field]"
+              :type="item.rules === 'phone' ? 'phone' : (item.rules === 'email' ? 'email' : null)" />
           </v-col>
+        </v-row>
 
-          <!-- Family Information Section -->
-          <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Family information:</h4>
-          </v-col>
+        <!-- Family Information Section -->
+        <SectionHeader title="Family Information" icon="mdi-account-group" />
+        <v-row dense>
           <v-col cols="12" :md="item.width" v-for="item in familyFields.slice(4, 13)" :key="item.label">
-            <div v-if="item.searchable">
-              <v-text-field
-                class="textfield-family"
-                hide-details
-                @keydown.enter="searchFamily"
-                @update:model-value="getSearchKeys(item.field, $event)"
-                :label="item.label"
-                v-model="currentFamily[item.field]"
-                :append-icon="searchStatus ? 'mdi-magnify' : undefined"
-                :readonly="!searchStatus"
-                placeholder=" "
-                variant="outlined"
-                density="compact"
-              ></v-text-field>
+            <div v-if="searchStatus && item.searchable">
+              <v-text-field class="textfield-family" hide-details @keydown.enter="searchFamily"
+                @update:model-value="getSearchKeys(item.field, $event)" :label="item.label"
+                v-model="currentFamily[item.field]" append-icon="mdi-magnify" placeholder=" " variant="outlined"
+                density="compact"></v-text-field>
             </div>
-            <div v-else>
-              <v-text-field
-                class="textfield-family"
-                hide-details
-                :label="item.label"
-                v-model="currentFamily[item.field]"
-                readonly
-                density="compact"
-                placeholder=" "
-                variant="outlined"
-              ></v-text-field>
-            </div>
+            <InfoField v-else :label="item.label" :value="currentFamily[item.field]" />
           </v-col>
+        </v-row>
 
-          <!-- Schedule Information Section -->
-          <v-col md="12" class="subtitle">
-            <v-divider></v-divider>
-            <h4 class="text-left">Schedule information:</h4>
+        <!-- Schedule Information Section -->
+        <SectionHeader title="Schedule Information" icon="mdi-calendar-clock" />
+        <div class="info-grid info-grid--3">
+          <InfoField v-for="item in familyFields.slice(13, 16)" :key="item.label" :label="item.label"
+            :value="currentFamily[item.field]" />
+        </div>
+
+        <!-- Notes for Next Contact + Action Buttons -->
+        <v-row justify="space-between" align="end" dense>
+          <v-col cols="12" md="7">
+            <v-textarea class="conv-textarea" label="Notes for next contact" variant="outlined" no-resize rows="6"
+              hide-details readonly v-model="currentFamily.NextContactNote"></v-textarea>
           </v-col>
-          <v-col cols="12" :md="item.width" v-for="item in familyFields.slice(13, 16)" :key="item.label">
-            <v-text-field
-              class="textfield-family"
-              hide-details
-              :label="item.label"
-              v-model="currentFamily[item.field]"
-              readonly
-              density="compact"
-              placeholder=" "
-              variant="outlined"
-            ></v-text-field>
+          <v-spacer></v-spacer>
+
+          <v-col cols="12" md="5">
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <v-tooltip location="top">
+                  <template v-slot:activator="{ props }">
+                    <v-btn v-bind="props" icon @click.stop="editFamily" :disabled="!currentFamily.id">
+                      <v-icon>mdi-pencil</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Edit family information</span>
+                </v-tooltip>
+              </v-col>
+
+              <v-col cols="12" md="6">
+                <v-tooltip location="top">
+                  <template v-slot:activator="{ props }">
+                    <v-btn color="primary" v-bind="props" icon @click.stop="addFamily">
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Add a new family</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
           </v-col>
-
-          <!-- Notes for Next Contact + Action Buttons -->
-          <v-row justify="space-between" align="end" dense>
-            <v-col cols="12" md="7">
-              <v-textarea
-                class="conv-textarea"
-                label="Notes for next contact"
-                variant="outlined"
-                no-resize
-                rows="6"
-                hide-details
-                readonly
-                v-model="currentFamily.NextContactNote"
-              ></v-textarea>
-            </v-col>
-            <v-spacer></v-spacer>
-
-            <v-col cols="12" md="5">
-              <v-row dense>
-                <v-col cols="12" md="6">
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        v-bind="props"
-                        icon
-                        @click.stop="editFamily"
-                        :disabled="!currentFamily.id"
-                      >
-                        <v-icon>mdi-pencil</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Edit family information</span>
-                  </v-tooltip>
-                </v-col>
-
-                <v-col cols="12" md="6">
-                  <v-tooltip location="top">
-                    <template v-slot:activator="{ props }">
-                      <v-btn
-                        color="primary"
-                        v-bind="props"
-                        icon
-                        @click.stop="addFamily"
-                      >
-                        <v-icon>mdi-plus</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Add a new family</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-            </v-col>
-          </v-row>
         </v-row>
       </v-col>
 
       <!-- Family Edit/Add Dialog -->
       <v-dialog v-model="dialog" max-width="1200px" persistent>
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title>
             <span class="text-h6">{{ editedIndex === -1 ? 'Add a new family' : 'Edit family information' }}</span>
             <v-spacer></v-spacer>
@@ -201,24 +129,12 @@
                 </v-col>
                 <v-col cols="12" :md="item.width" v-for="item in familyBasicInfo" :key="item.label">
                   <div v-if="item.options">
-                    <v-combobox
-                      class="textfield-family"
-                      v-model="editedItem[item.field]"
-                      :items="Options[item.options]"
-                      variant="outlined"
-                      :label="item.label"
-                      density="compact"
-                    ></v-combobox>
+                    <v-combobox class="textfield-family" v-model="editedItem[item.field]" :items="Options[item.options]"
+                      variant="outlined" :label="item.label" density="compact"></v-combobox>
                   </div>
                   <div v-else>
-                    <v-text-field
-                      class="textfield-family"
-                      :label="item.label"
-                      v-model="editedItem[item.field]"
-                      variant="outlined"
-                      hide-details
-                      density="compact"
-                    ></v-text-field>
+                    <v-text-field class="textfield-family" :label="item.label" v-model="editedItem[item.field]"
+                      variant="outlined" hide-details density="compact"></v-text-field>
                   </div>
                 </v-col>
 
@@ -227,14 +143,8 @@
                   <h4 class="text-left">Contact information:</h4>
                 </v-col>
                 <v-col cols="12" :md="item.width" v-for="item in familyContactInfo" :key="item.label">
-                  <v-text-field
-                    class="textfield-family"
-                    :label="item.label"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    hide-details
-                    density="compact"
-                  ></v-text-field>
+                  <v-text-field class="textfield-family" :label="item.label" v-model="editedItem[item.field]"
+                    variant="outlined" hide-details density="compact"></v-text-field>
                 </v-col>
               </v-row>
             </v-form>
@@ -254,58 +164,39 @@
             <h2 class="text-left">Child information</h2>
           </div>
           <div v-else>
-            <v-text-field
-              style="height: 48px"
-              hide-details
-              @keydown.enter="searchFamily"
-              @update:model-value="getSearchKeys('childName', $event)"
-              label="Child's Name"
-              :append-icon="searchStatus ? 'mdi-magnify' : undefined"
-              :readonly="!searchStatus"
-              placeholder=" "
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
+            <v-text-field style="height: 48px" hide-details @keydown.enter="searchFamily"
+              @update:model-value="getSearchKeys('childName', $event)" label="Child's Name"
+              :append-icon="searchStatus ? 'mdi-magnify' : undefined" :readonly="!searchStatus" placeholder=" "
+              variant="outlined" density="compact"></v-text-field>
           </div>
         </v-col>
         <v-col style="padding: 0px !important; min-height: 500px">
-          <ChildInfo
-            ref="childInfo"
-            :Children="currentFamily.Children"
-            :familyId="currentFamily.id ? parseInt(currentFamily.id) : null"
-            :currentFamily="currentFamily"
-            @newSchedule="updateFamilyAppointment"
-          ></ChildInfo>
+          <ChildInfo ref="childInfo" :Children="currentFamily.Children"
+            :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :currentFamily="currentFamily"
+            @newSchedule="updateFamilyAppointment"></ChildInfo>
         </v-col>
       </v-col>
 
       <!-- RIGHT COLUMN: Notes & Conversations -->
       <v-col cols="12" md="3">
         <!-- Simplified Notes panel (original used NotesConversation component) -->
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="text-subtitle-1">
             <v-icon start>mdi-note-text</v-icon>Notes
           </v-card-title>
           <v-card-text>
-            <v-textarea
-              label="Notes about the family"
-              no-resize
-              rows="12"
-              hide-details
-              v-model="familyNotes"
-              :disabled="!currentFamily.id"
-              @change="saveNotes"
-              variant="outlined"
-            ></v-textarea>
+            <v-textarea label="Notes about the family" no-resize rows="12" hide-details v-model="familyNotes"
+              :disabled="!currentFamily.id" @change="saveNotes" variant="outlined"></v-textarea>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <!-- BOTTOM ROW: Schedule Table -->
-    <v-row justify="start" dense v-if="currentFamily.id && currentFamily.Schedules && currentFamily.Schedules.length > 0">
+    <v-row justify="start" dense
+      v-if="currentFamily.id && currentFamily.Schedules && currentFamily.Schedules.length > 0">
       <v-col cols="12" md="12">
-        <v-card variant="outlined" class="mt-4">
+        <v-card variant="flat" class="ds-card mt-4">
           <v-card-title class="text-subtitle-1">
             <v-icon start>mdi-calendar</v-icon>Schedule History
           </v-card-title>
@@ -340,6 +231,9 @@
 
 <script>
 import ChildInfo from "@/components/ChildInfo.vue";
+import AlertBanner from "@/components/AlertBanner.vue";
+import InfoField from "@/components/InfoField.vue";
+import SectionHeader from "@/components/SectionHeader.vue";
 import family from "@/services/family";
 import store from "@/store";
 import moment from "moment-timezone";
@@ -347,6 +241,9 @@ import moment from "moment-timezone";
 export default {
   components: {
     ChildInfo,
+    AlertBanner,
+    InfoField,
+    SectionHeader,
   },
   data() {
     return {
@@ -645,6 +542,7 @@ export default {
 .subtitle {
   padding: 4px 0px 0px 8px !important;
 }
+
 .pagination-container {
   text-align: end;
   display: flex;

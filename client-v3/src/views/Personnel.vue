@@ -1,72 +1,34 @@
 <template>
   <v-container fluid>
-    <!-- Alerts -->
-    <div v-if="!$store.state.labEmailStatus">
-      <v-alert border="start" type="error" color="#c73460" density="compact" class="font-weight-bold mb-2">
-        Lab email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="!$store.state.adminEmailStatus">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
-        Admin email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="$store.state.trainingMode">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
-        You are running in a training mode.
-      </v-alert>
-    </div>
+    <AlertBanner :showAdminEmail="true" />
 
     <v-row>
       <!-- Left Column: Personnel List -->
       <v-col cols="12" md="4">
-        <v-card variant="elevated">
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="d-flex align-center py-2">
-            <v-text-field
-              v-model="search"
-              label="Search by Name or Email"
-              class="mx-4"
-              density="compact"
-              variant="underlined"
-              hide-details
-            ></v-text-field>
+            <v-text-field v-model="search" label="Search by Name or Email" class="mx-4" density="compact"
+              variant="underlined" hide-details></v-text-field>
             <v-spacer></v-spacer>
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
                 <div v-bind="props">
-                  <v-checkbox
-                    v-model="activeMemberFilter"
-                    label="Active only"
-                    hide-details
-                    density="compact"
-                  ></v-checkbox>
+                  <v-checkbox v-model="activeMemberFilter" label="Active only" hide-details
+                    density="compact"></v-checkbox>
                 </div>
               </template>
               <span>Show active members</span>
             </v-tooltip>
           </v-card-title>
-          
-          <v-data-table
-            :headers="headerPersonnel"
-            :items="filteredPersonnels"
-            :search="search"
-            fixed-header
-            height="600"
-            hover
-            :class="['elevation-1', 'personnel-table']"
-            @click:row="rowSelected"
-          >
+
+          <v-data-table :headers="headerPersonnel" :items="filteredPersonnels" :search="search" fixed-header
+            height="600" hover :class="['elevation-1', 'personnel-table']" @click:row="rowSelected">
             <template #item.Active="{ item }">
               <v-tooltip location="top">
                 <template v-slot:activator="{ props }">
                   <div v-bind="props" @click.stop>
-                    <v-checkbox-btn
-                      :model-value="!!item.Active"
-                      @update:model-value="changePersonnelStatus(item)"
-                      :disabled="!canManageStatus(item)"
-                      density="compact"
-                      color="primary"
-                    ></v-checkbox-btn>
+                    <v-checkbox-btn :model-value="!!item.Active" @update:model-value="changePersonnelStatus(item)"
+                      :disabled="!canManageStatus(item)" density="compact" color="primary"></v-checkbox-btn>
                   </div>
                 </template>
                 <span>Mark whether this person is available to run studies</span>
@@ -78,83 +40,48 @@
 
       <!-- Right Column: Personnel Details -->
       <v-col cols="12" md="8">
-        <v-col md="12" class="subtitle pa-0 mb-4">
-          <v-divider class="mb-2"></v-divider>
-          <h3 class="text-left">Personnel information:</h3>
-        </v-col>
-        
+        <SectionHeader title="Personnel Information" icon="mdi-account-details" />
+
         <v-form ref="form" v-model="valid" lazy-validation>
           <v-container class="pa-0">
-            <v-row>
-              <v-col
-                cols="12"
-                sm="6"
-                :md="item.width"
-                v-for="item in personnelFields"
-                :key="item.label"
-              >
-                <v-text-field
-                  :label="item.label"
-                  :model-value="
-                    item.label === 'Phone'
-                      ? PhoneFormated(currentPersonnel[item.field])
-                      : currentPersonnel[item.field]
-                  "
-                  readonly
-                  hide-details
-                  variant="outlined"
-                  density="compact"
-                ></v-text-field>
-              </v-col>
-            </v-row>
-            
+            <div class="info-grid info-grid--3">
+              <InfoField v-for="item in personnelFields" :key="item.label" :label="item.label"
+                :value="currentPersonnel[item.field]"
+                :type="item.rules === 'phone' ? 'phone' : (item.rules === 'email' ? 'email' : null)" />
+            </div>
+
             <v-row class="mt-4">
               <v-col cols="12">
                 <v-row>
                   <v-col cols="auto">
                     <v-tooltip location="top">
                       <template v-slot:activator="{ props }">
-                        <v-btn
-                          color="primary"
-                          v-bind="props"
-                          @click.stop="createPersonnel"
-                          :disabled="!canAddPersonnel"
-                          prepend-icon="mdi-account-plus"
-                        >
+                        <v-btn color="primary" v-bind="props" @click.stop="createPersonnel" :disabled="!canAddPersonnel"
+                          prepend-icon="mdi-account-plus">
                           Add a person
                         </v-btn>
                       </template>
                       <span>Add a new person to the lab</span>
                     </v-tooltip>
                   </v-col>
-                  
+
                   <v-col cols="auto">
                     <v-tooltip location="top">
                       <template v-slot:activator="{ props }">
-                        <v-btn
-                          color="primary"
-                          v-bind="props"
-                          @click.stop="editPersonnel"
-                          :disabled="!canEditPersonnel"
-                          prepend-icon="mdi-pencil"
-                        >
+                        <v-btn color="primary" v-bind="props" @click.stop="editPersonnel" :disabled="!canEditPersonnel"
+                          prepend-icon="mdi-pencil">
                           Update info
                         </v-btn>
                       </template>
                       <span>Edit personnel information</span>
                     </v-tooltip>
                   </v-col>
-                  
+
                   <v-col cols="auto">
                     <v-tooltip location="top">
                       <template v-slot:activator="{ props }">
-                        <v-btn
-                          color="error"
-                          v-bind="props"
-                          @click.stop="deletePersonnel"
-                          :disabled="!canDeletePersonnel"
-                          prepend-icon="mdi-delete"
-                        >
+                        <v-btn color="error" v-bind="props" @click.stop="deletePersonnel"
+                          :disabled="!canDeletePersonnel" prepend-icon="mdi-delete">
                           Delete
                         </v-btn>
                       </template>
@@ -163,21 +90,13 @@
                   </v-col>
                 </v-row>
               </v-col>
-              
-              <v-col md="12" class="subtitle mt-6 pa-0">
-                <v-divider class="mb-2"></v-divider>
-                <h3 class="text-left">Assigned studies:</h3>
-              </v-col>
-              
+
+              <SectionHeader title="Assigned Studies" icon="mdi-book-multiple" />
+
               <v-col cols="12" md="12" class="pa-0 mt-2">
-                <AssignedStudies
-                  v-if="currentPersonnel.id"
-                  :Studies="currentPersonnel.AssignedStudies || []"
-                  :labStudies="labStudies"
-                  :personnelId="currentPersonnel.id"
-                  :personnelName="currentPersonnel.Name"
-                  @updatedStudies="updatedStudies"
-                ></AssignedStudies>
+                <AssignedStudies v-if="currentPersonnel.id" :Studies="currentPersonnel.AssignedStudies || []"
+                  :labStudies="labStudies" :personnelId="currentPersonnel.id" :personnelName="currentPersonnel.Name"
+                  @updatedStudies="updatedStudies"></AssignedStudies>
                 <div v-else class="text-medium-emphasis ms-2">
                   Select a lab member to view assigned studies.
                 </div>
@@ -187,7 +106,7 @@
 
           <!-- Edit/Add Dialog -->
           <v-dialog v-model="dialog" max-width="800px" persistent>
-            <v-card>
+            <v-card class="ds-card" variant="flat">
               <v-card-title class="text-h6 py-4">
                 Lab member information
               </v-card-title>
@@ -195,35 +114,14 @@
                 <v-form ref="dialogForm" v-model="validDialog" lazy-validation>
                   <v-container class="pa-0">
                     <v-row dense>
-                      <v-col
-                        cols="12"
-                        sm="6"
-                        :md="item.width"
-                        v-for="item in personnelFields"
-                        :key="item.label"
-                      >
-                        <v-select
-                          v-if="item.options === 'role'"
-                          v-model="editedPersonnel[item.field]"
-                          :items="availableRoles"
-                          :label="item.label"
-                          :rules="[v => !!v || 'Required']"
-                          hide-details="auto"
-                          variant="outlined"
-                          density="compact"
-                          class="mb-2"
-                        ></v-select>
-                        
-                        <v-text-field
-                          v-else
-                          v-model="editedPersonnel[item.field]"
-                          :label="item.label"
-                          :rules="getRules(item.rules)"
-                          hide-details="auto"
-                          variant="outlined"
-                          density="compact"
-                          class="mb-2"
-                        ></v-text-field>
+                      <v-col cols="12" sm="6" :md="item.width" v-for="item in personnelFields" :key="item.label">
+                        <v-select v-if="item.options === 'role'" v-model="editedPersonnel[item.field]"
+                          :items="availableRoles" :label="item.label" :rules="[v => !!v || 'Required']"
+                          hide-details="auto" variant="outlined" density="compact" class="mb-2"></v-select>
+
+                        <v-text-field v-else v-model="editedPersonnel[item.field]" :label="item.label"
+                          :rules="getRules(item.rules)" hide-details="auto" variant="outlined" density="compact"
+                          class="mb-2"></v-text-field>
                       </v-col>
                     </v-row>
                   </v-container>
@@ -239,11 +137,16 @@
         </v-form>
       </v-col>
     </v-row>
+    <ConfirmDialog ref="confirmDialog"></ConfirmDialog>
   </v-container>
 </template>
 
 <script>
 import AssignedStudies from "@/components/AssignedStudies.vue";
+import AlertBanner from "@/components/AlertBanner.vue";
+import InfoField from "@/components/InfoField.vue";
+import SectionHeader from "@/components/SectionHeader.vue";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import study from "@/services/study";
 import personnel from "@/services/personnel";
 import login from "@/services/login";
@@ -253,8 +156,12 @@ export default {
   name: "Personnel",
   components: {
     AssignedStudies,
+    AlertBanner,
+    InfoField,
+    SectionHeader,
+    ConfirmDialog,
   },
-  
+
   data() {
     return {
       search: "",
@@ -291,7 +198,7 @@ export default {
       valid: true,
       validDialog: true,
       activeMemberFilter: true,
-      
+
       roleOptions: {
         fullRoles: ["PostDoc", "PI", "GradStudent", "Undergrad", "RA", "Lab manager", "Staff"],
         limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"]
@@ -306,7 +213,7 @@ export default {
       }
       return this.Personnels.filter(p => !!p.Active);
     },
-    
+
     availableRoles() {
       const role = this.$store.state.role;
       if (role === 'Admin' || role === 'PI' || role === 'Lab manager') {
@@ -365,7 +272,7 @@ export default {
         this.Personnels = Result.data;
       } catch (error) {
         if (error.response?.status === 401) {
-          alert("Authentication failed, please login.");
+          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
           this.$router.push({ name: "Login" });
         }
       }
@@ -381,7 +288,7 @@ export default {
         this.labStudies = Result.data;
       } catch (error) {
         if (error.response?.status === 401) {
-          alert("Authentication failed, please login.");
+          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
           this.$router.push({ name: "Login" });
         }
       }
@@ -393,7 +300,7 @@ export default {
         await personnel.update(item);
       } catch (error) {
         if (error.response?.status === 401) {
-          alert("Authentication failed, please login.");
+          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
           this.$router.push({ name: "Login" });
         } else {
           // Revert on error
@@ -422,8 +329,8 @@ export default {
     async save() {
       // Basic validation
       if (!this.editedPersonnel.Name || !this.editedPersonnel.Email || !this.editedPersonnel.Role) {
-         alert("Please fill in the required fields (Name, Initials, Role, Email).");
-         return;
+        await this.$refs.confirmDialog.open("Missing Details", "Please fill in the required fields (Name, Initials, Role, Email).", { color: "warning", noconfirm: true });
+        return;
       }
 
       if (this.editedIndex === -1) {
@@ -432,10 +339,10 @@ export default {
           const Result = await login.register(this.editedPersonnel);
           this.editedPersonnel.id = Result.data.id;
           this.Personnels.push(this.editedPersonnel);
-          alert(Result.data.Email + " has been added to the system!");
+          await this.$refs.confirmDialog.open("Success", `${Result.data.Email} has been added to the system!`, { color: "success", noconfirm: true });
           this.close();
         } catch (error) {
-          alert(error.response?.data?.message || "Failed to add personnel");
+          await this.$refs.confirmDialog.open("Error", error.response?.data?.message || "Failed to add personnel", { color: "error", noconfirm: true });
           console.error(error);
         }
       } else {
@@ -451,7 +358,7 @@ export default {
           this.close();
         } catch (error) {
           if (error.response?.status === 401) {
-            alert("Authentication failed, please login.");
+            await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
             this.$router.push({ name: "Login" });
           } else {
             console.error(error);
@@ -479,13 +386,16 @@ export default {
     },
 
     async deletePersonnel() {
-      if (!confirm(`Are you sure you want to remove ${this.currentPersonnel.Name}?`)) {
-        return;
-      }
+      const confirmed = await this.$refs.confirmDialog.open(
+        "Delete Personnel",
+        `Are you sure you want to remove <strong>${this.currentPersonnel.Name}</strong>?`,
+        { color: "error" }
+      );
+      if (!confirmed) return;
 
       try {
         await personnel.delete({ id: this.currentPersonnel.id });
-        alert(this.currentPersonnel.Name + " is removed from the system.");
+        await this.$refs.confirmDialog.open("Success", `<strong>${this.currentPersonnel.Name}</strong> is removed from the system.`, { color: "success", noconfirm: true });
 
         this.Personnels = this.Personnels.filter(p => p.id !== this.currentPersonnel.id);
         this.currentPersonnel = { ...this.defaultPersonnel };

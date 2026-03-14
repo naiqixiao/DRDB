@@ -43,7 +43,7 @@ const routes = [
         component: Personnel
     },
     {
-        path: '/study',
+        path: '/study/:id?',
         name: 'Study management',
         component: Study
     },

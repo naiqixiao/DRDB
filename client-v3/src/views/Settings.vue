@@ -29,7 +29,7 @@
 
         <!-- Change Password Dialog -->
         <v-dialog v-model="dialog" max-width="600px" persistent>
-          <v-card>
+          <v-card class="ds-card" variant="flat">
             <v-card-title class="text-h6">Change password</v-card-title>
             <v-form ref="form" v-model="valid" lazy-validation>
               <v-row justify="center">
@@ -93,7 +93,7 @@
 
       <!-- Batch Import Results Dialog -->
       <v-dialog v-model="dialogImport" max-width="800px" persistent>
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="text-h6">Batch import results</v-card-title>
           <v-card-text>
             <div align="start" v-html="importReport"></div>
@@ -146,7 +146,7 @@
 
       <!-- Google Sign-In Code Dialog -->
       <v-dialog v-model="dialogGoogle" max-width="600px" persistent>
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="text-h6">Paste Google sign in code</v-card-title>
           <v-card-text>
             <v-row justify="center">
@@ -210,7 +210,7 @@
 
       <!-- Create New Lab Dialog -->
       <v-dialog v-model="dialogNewLab" max-width="800px" persistent>
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="text-h6">Lab and PI/Manager information</v-card-title>
           <v-form ref="formNewLab" v-model="valid" lazy-validation>
             <v-row style="padding: 16px">
@@ -258,7 +258,7 @@
 
       <!-- Edit Lab Info Dialog (fullscreen) -->
       <v-dialog fullscreen v-model="dialogEditLab">
-        <v-card>
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="text-h6">Lab information</v-card-title>
           <v-card-text>
             <v-form ref="formEdit" v-model="valid" lazy-validation>

@@ -1,73 +1,36 @@
 <template>
   <v-container fluid>
-    <!-- Alerts -->
-    <div v-if="!$store.state.labEmailStatus">
-      <v-alert border="start" type="error" color="#c73460" density="compact" class="font-weight-bold mb-2">
-        Lab email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="!$store.state.adminEmailStatus">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
-        Admin email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="$store.state.trainingMode">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" class="font-weight-bold mb-2">
-        You are running in a training mode.
-      </v-alert>
-    </div>
+    <AlertBanner :showAdminEmail="true" />
 
     <!-- Need to implement ConfirmDlg equivalent if needed, for simplicity using window.confirm for now -->
 
     <v-row>
       <!-- Left Column: Study List -->
       <v-col cols="12" md="4">
-        <v-card variant="elevated">
+        <v-card class="ds-card" variant="flat">
           <v-card-title class="d-flex align-center py-2">
-            <v-text-field
-              v-model="search"
-              label="Search by Study Name"
-              class="mx-4"
-              density="compact"
-              variant="underlined"
-              hide-details
-            ></v-text-field>
+            <v-text-field v-model="search" label="Search by Study Name" class="mx-4" density="compact"
+              variant="underlined" hide-details></v-text-field>
             <v-spacer></v-spacer>
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
                 <div v-bind="props">
-                  <v-checkbox
-                    v-model="inProgressStudyFilter"
-                    label="In progress"
-                    hide-details
-                    density="compact"
-                  ></v-checkbox>
+                  <v-checkbox v-model="inProgressStudyFilter" label="In progress" hide-details
+                    density="compact"></v-checkbox>
                 </div>
               </template>
               <span>Show on-going studies</span>
             </v-tooltip>
           </v-card-title>
-          
-          <v-data-table
-            :headers="headersStudy"
-            :items="filteredStudies"
-            fixed-header
-            height="600"
-            hover
-            :class="['elevation-1', 'study-table']"
-            @click:row="rowSelected"
-          >
+
+          <v-data-table v-model="selectedStudies" :headers="headersStudy" :items="filteredStudies" fixed-header height="600" hover
+            :class="['elevation-1', 'study-table']" @click:row="rowSelected" item-value="id" select-strategy="single" return-object>
             <template #item.Completed="{ item }">
               <v-tooltip location="top">
                 <template v-slot:activator="{ props }">
                   <div v-bind="props" @click.stop>
-                    <v-checkbox-btn
-                      :model-value="!!item.Completed"
-                      @update:model-value="changeStudyStatus(item)"
-                      :disabled="!canManageStudyStatus(item)"
-                      density="compact"
-                      color="primary"
-                    ></v-checkbox-btn>
+                    <v-checkbox-btn :model-value="!!item.Completed" @update:model-value="changeStudyStatus(item)"
+                      :disabled="!canManageStudyStatus(item)" density="compact" color="primary"></v-checkbox-btn>
                   </div>
                 </template>
                 <span>Mark whether this study is still on going</span>
@@ -75,19 +38,13 @@
             </template>
           </v-data-table>
         </v-card>
-        
+
         <v-row dense justify="end" class="mt-4">
           <v-col cols="auto">
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
-                <v-btn
-                  color="primary"
-                  icon="mdi-plus"
-                  size="large"
-                  v-bind="props"
-                  @click.stop="createStudy"
-                  :disabled="!canCreateStudy"
-                ></v-btn>
+                <v-btn color="primary" icon="mdi-plus" size="large" v-bind="props" @click.stop="createStudy"
+                  :disabled="!canCreateStudy"></v-btn>
               </template>
               <span>Add a new study</span>
             </v-tooltip>
@@ -97,158 +54,64 @@
 
       <!-- Right Column: Study Details -->
       <v-col cols="12" md="8">
+        <SectionHeader title="Study Information" icon="mdi-book-open-variant" />
+        <div class="info-grid info-grid--2 mb-4">
+          <InfoField label="Study Name" :value="currentStudy.StudyName" icon="mdi-clipboard-text" highlight />
+          <InfoField label="Study Type" :value="currentStudy.StudyType" icon="mdi-flask" />
+        </div>
+
         <v-row>
-          <v-col md="12" class="pa-0 mb-4">
-            <v-divider class="mb-2"></v-divider>
-            <h2 class="text-left font-weight-medium">Study information:</h2>
+          <v-col md="6" class="py-1">
+            <v-textarea label="Study summary" variant="outlined" no-resize rows="8"
+              :model-value="currentStudy.Description" readonly hide-details></v-textarea>
           </v-col>
-          
-          <v-col cols="12" sm="6" md="5" class="py-1">
-            <v-text-field
-              label="Study Name"
-              :model-value="currentStudy.StudyName"
-              readonly
-              hide-details
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="5" class="py-1">
-            <v-text-field
-              label="Study Type"
-              :model-value="currentStudy.StudyType"
-              readonly
-              hide-details
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
-          </v-col>
-          
-          <v-col md="6" class="py-1 mt-2">
-            <v-textarea
-              label="Study summary"
-              variant="outlined"
-              no-resize
-              rows="8"
-              :model-value="currentStudy.Description"
-              readonly
-              hide-details
-            ></v-textarea>
-          </v-col>
-          <v-col md="6" class="py-1 mt-2">
-            <v-textarea
-              label="Phone Script"
-              variant="outlined"
-              no-resize
-              rows="8"
-              :model-value="currentStudy.PhoneScript"
-              readonly
-              hide-details
-            ></v-textarea>
+          <v-col md="6" class="py-1">
+            <v-textarea label="Phone Script" variant="outlined" no-resize rows="8"
+              :model-value="currentStudy.PhoneScript" readonly hide-details></v-textarea>
           </v-col>
         </v-row>
 
-        <v-row class="mt-6">
-          <v-col md="12" class="pa-0 mb-2">
-            <v-divider class="mb-2"></v-divider>
-            <h2 class="text-left font-weight-medium">Point of contact:</h2>
-          </v-col>
-          
-          <v-col cols="12" sm="4" class="py-1">
-            <v-text-field
-              label="Name"
-              :model-value="currentStudy.PointofContact?.Name"
-              readonly
-              hide-details
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="4" class="py-1">
-            <v-text-field
-              label="Email"
-              :model-value="currentStudy.PointofContact?.Email"
-              readonly
-              hide-details
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="4" class="py-1">
-            <v-text-field
-              label="Phone"
-              :model-value="PhoneFormated(currentStudy.PointofContact?.Phone)"
-              readonly
-              hide-details
-              variant="outlined"
-              density="compact"
-            ></v-text-field>
-          </v-col>
-        </v-row>
+        <SectionHeader title="Point of Contact" icon="mdi-account-star" />
+        <div class="info-grid info-grid--3">
+          <InfoField label="Name" :value="currentStudy.PointofContact?.Name" icon="mdi-account" />
+          <InfoField label="Email" :value="currentStudy.PointofContact?.Email" type="email" icon="mdi-email-outline" />
+          <InfoField label="Phone" :value="currentStudy.PointofContact?.Phone" type="phone" icon="mdi-phone-outline" />
+        </div>
 
-        <v-row class="mt-6">
-          <v-col md="12" class="pa-0 mb-2">
-            <v-divider class="mb-2"></v-divider>
-            <h2 class="text-left font-weight-medium">Recruitment criteria:</h2>
-          </v-col>
-
-           <v-col cols="12" sm="6" md="4" class="py-1">
-            <v-text-field label="Min Age" :model-value="AgeFormated(currentStudy.MinAge)" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="4" class="py-1">
-            <v-text-field label="Max Age" :model-value="AgeFormated(currentStudy.MaxAge)" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="3" class="py-1">
-            <v-text-field label="ASD Participants" :model-value="currentStudy.ASDParticipant" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="3" class="py-1">
-            <v-text-field label="Premature Participants" :model-value="currentStudy.PrematureParticipant" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="3" class="py-1">
-            <v-text-field label="Ill Participants" :model-value="currentStudy.IllParticipant" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="3" class="py-1">
-            <v-text-field label="Vision Loss Participants" :model-value="currentStudy.VisionLossParticipant" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-          <v-col cols="12" sm="6" md="3" class="py-1">
-            <v-text-field label="Hearing Loss Participants" :model-value="currentStudy.HearingLossParticipant" readonly hide-details variant="outlined" density="compact"></v-text-field>
-          </v-col>
-        </v-row>
+        <SectionHeader title="Recruitment Criteria" icon="mdi-filter-variant" />
+        <div class="info-grid info-grid--4">
+          <InfoField label="Min Age" :value="AgeFormated(currentStudy.MinAge)" />
+          <InfoField label="Max Age" :value="AgeFormated(currentStudy.MaxAge)" />
+          <InfoField label="ASD" :value="currentStudy.ASDParticipant" />
+          <InfoField label="Premature" :value="currentStudy.PrematureParticipant" />
+          <InfoField label="Ill" :value="currentStudy.IllParticipant" />
+          <InfoField label="Vision Loss" :value="currentStudy.VisionLossParticipant" />
+          <InfoField label="Hearing Loss" :value="currentStudy.HearingLossParticipant" />
+        </div>
 
         <v-row align="center" class="mt-6">
-           <v-col md="12" class="pa-0 mb-2">
+          <v-col md="12" class="pa-0 mb-2">
             <v-divider class="mb-2"></v-divider>
-            <h2 class="text-left font-weight-medium" :class="{'text-error': !currentStudy.FK_TestingRoom}">
+            <h2 class="text-left font-weight-medium" :class="{ 'text-error': !currentStudy.FK_TestingRoom }">
               {{ currentStudy.FK_TestingRoom ? 'Testing room:' : 'Testing room has not been assigned to this study.' }}
             </h2>
           </v-col>
 
           <v-col md="4" class="py-1">
-            <v-select
-              variant="outlined"
-              density="compact"
-              :items="currentTestingRooms"
-              v-model="selectedRoomId"
-              item-value="id"
-              :item-title="(item) => `${item.name} =>> ${item.location}`"
-              @update:model-value="optionChangedTestingRoom"
-              hide-details
-            ></v-select>
+            <v-select variant="outlined" density="compact" :items="currentTestingRooms" v-model="selectedRoomId"
+              item-value="id" :item-title="(item) => `${item.name} =>> ${item.location}`"
+              @update:model-value="optionChangedTestingRoom" hide-details></v-select>
           </v-col>
 
           <v-col md="4" class="py-1">
-            <v-btn
-              color="primary"
-              variant="elevated"
-              @click.stop="dialogStudyProgress = true"
-              :disabled="!canViewProgress"
-            >
+            <v-btn color="primary" variant="elevated" @click.stop="dialogStudyProgress = true"
+              :disabled="!canViewProgress">
               Study progress
             </v-btn>
-            
+
             <!-- Study Progress Dialog -->
             <v-dialog fullscreen v-model="dialogStudyProgress" transition="dialog-bottom-transition">
-              <v-card>
+              <v-card class="ds-card" variant="flat">
                 <v-toolbar color="primary" dark>
                   <v-btn icon @click="dialogStudyProgress = false">
                     <v-icon>mdi-close</v-icon>
@@ -271,12 +134,13 @@
                   <v-row class="mt-6">
                     <v-col lg="4" md="12" style="overflow-x: auto;">
                       <h2 class="text-h6 mb-4">Experimenter stats</h2>
-                      <experimenterStatsChart v-if="dialogStudyProgress" 
+                      <experimenterStatsChart v-if="dialogStudyProgress"
                         :stats="[...(studyStats.totalNperPersonnelPriExp || []), ...(studyStats.totalNperPersonnelAssistExp || [])]" />
                     </v-col>
                     <v-col lg="8" md="12" style="overflow-x: auto;">
                       <h2 class="text-h6 mb-4">Recruitment by researcher</h2>
-                      <recruitmentProgressChart v-if="dialogStudyProgress" :stats="studyStats.totalNperPersonnelStatus" />
+                      <recruitmentProgressChart v-if="dialogStudyProgress"
+                        :stats="studyStats.totalNperPersonnelStatus" />
                     </v-col>
                   </v-row>
                 </v-card-text>
@@ -290,13 +154,8 @@
           <v-col cols="auto">
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
-                <v-btn
-                  color="primary"
-                  v-bind="props"
-                  @click.stop="editStudy"
-                  :disabled="!canEditStudy"
-                  prepend-icon="mdi-pencil"
-                >
+                <v-btn color="primary" v-bind="props" @click.stop="editStudy" :disabled="!canEditStudy"
+                  prepend-icon="mdi-pencil">
                   Edit study info
                 </v-btn>
               </template>
@@ -304,15 +163,10 @@
             </v-tooltip>
           </v-col>
           <v-col cols="auto">
-             <v-tooltip location="top">
+            <v-tooltip location="top">
               <template v-slot:activator="{ props }">
-                <v-btn
-                  color="primary"
-                  v-bind="props"
-                  @click.stop="dialogShowEmailPreviews = true"
-                  :disabled="!currentStudy.id"
-                  prepend-icon="mdi-email"
-                >
+                <v-btn color="primary" v-bind="props" @click.stop="dialogShowEmailPreviews = true"
+                  :disabled="!currentStudy.id" prepend-icon="mdi-email">
                   Preview emails
                 </v-btn>
               </template>
@@ -322,13 +176,8 @@
           <v-col cols="auto">
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
-                <v-btn
-                  color="error"
-                  v-bind="props"
-                  @click.stop="deleteStudy"
-                  :disabled="!canEditStudy"
-                  prepend-icon="mdi-delete"
-                >
+                <v-btn color="error" v-bind="props" @click.stop="deleteStudy" :disabled="!canEditStudy"
+                  prepend-icon="mdi-delete">
                   Delete
                 </v-btn>
               </template>
@@ -337,55 +186,45 @@
           </v-col>
         </v-row>
 
-       <v-row class="mt-6">
+        <v-row class="mt-6">
           <v-col class="pa-0">
             <v-divider class="mb-2"></v-divider>
             <h2 class="text-left font-weight-medium">Experimenters:</h2>
-            <AssignedExperimenters
-              v-if="currentStudy.id"
-              :Experimenters="currentStudy.Experimenters"
-              :labMembers="labMembers"
-              :studyId="currentStudy.id"
-              :PointofContactId="currentStudy.PointofContact?.id"
-              @updatedExperimenters="updateExperimenters"
-            ></AssignedExperimenters>
+            <AssignedExperimenters v-if="currentStudy.id" :Experimenters="currentStudy.Experimenters"
+              :labMembers="labMembers" :studyId="currentStudy.id" :PointofContactId="currentStudy.PointofContact?.id"
+              @updatedExperimenters="updateExperimenters"></AssignedExperimenters>
           </v-col>
         </v-row>
 
         <!-- Edit/Add Study Dialog -->
         <v-dialog v-model="dialog" fullscreen transition="dialog-bottom-transition">
-          <v-card>
+          <v-card class="ds-card" variant="flat">
             <v-toolbar color="primary" dark>
-               <v-btn icon @click="close">
-                 <v-icon>mdi-close</v-icon>
-               </v-btn>
-               <v-toolbar-title>Study information</v-toolbar-title>
-               <v-spacer></v-spacer>
-               <v-btn variant="text" @click="save">Save</v-btn>
+              <v-btn icon @click="close">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+              <v-toolbar-title>Study information</v-toolbar-title>
+              <v-spacer></v-spacer>
+              <v-btn variant="text" @click="save">Save</v-btn>
             </v-toolbar>
-            
+
             <v-card-text class="pt-6">
               <v-form ref="form" v-model="valid" lazy-validation>
                 <!-- Basic Info -->
                 <h2 class="text-h6 mb-4">Basic information:</h2>
                 <v-row dense>
                   <v-col cols="12" sm="3" md="2">
-                    <v-text-field v-model="editedStudy.StudyName" label="Study Name" variant="outlined" density="compact" :rules="[v => !!v || 'Required']"></v-text-field>
+                    <v-text-field v-model="editedStudy.StudyName" label="Study Name" variant="outlined"
+                      density="compact" :rules="[v => !!v || 'Required']"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="3" md="2">
-                    <v-select v-model="editedStudy.StudyType" :items="['Behavioural', 'EEG/ERP', 'EyeTracking', 'fNIRS', 'Online']" label="Study Type" variant="outlined" density="compact"></v-select>
+                    <v-select v-model="editedStudy.StudyType"
+                      :items="['Behavioural', 'EEG/ERP', 'EyeTracking', 'fNIRS', 'Online']" label="Study Type"
+                      variant="outlined" density="compact"></v-select>
                   </v-col>
                   <v-col cols="12" sm="3" md="3">
-                    <v-select
-                      v-model="PointofContact"
-                      :items="labMembers"
-                      item-title="Name"
-                      item-value="id"
-                      return-object
-                      label="Point of Contact"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
+                    <v-select v-model="PointofContact" :items="labMembers" item-title="Name" item-value="id"
+                      return-object label="Point of Contact" variant="outlined" density="compact"></v-select>
                   </v-col>
                 </v-row>
 
@@ -393,13 +232,22 @@
                 <v-divider class="my-4"></v-divider>
                 <h2 class="text-h6 mb-4">Recruitment criteria:</h2>
                 <v-row dense>
-                   <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MinAge" label="Min Age (months)" variant="outlined" density="compact"></v-text-field></v-col>
-                   <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MaxAge" label="Max Age (months)" variant="outlined" density="compact"></v-text-field></v-col>
-                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.ASDParticipant" :items="inclusionOptions" label="ASD Participants" variant="outlined" density="compact"></v-select></v-col>
-                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.PrematureParticipant" :items="inclusionOptions" label="Premature Participants" variant="outlined" density="compact"></v-select></v-col>
-                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.IllParticipant" :items="inclusionOptions" label="Ill Participants" variant="outlined" density="compact"></v-select></v-col>
-                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.VisionLossParticipant" :items="inclusionOptions" label="Vision Loss Participants" variant="outlined" density="compact"></v-select></v-col>
-                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.HearingLossParticipant" :items="inclusionOptions" label="Hearing Loss Participants" variant="outlined" density="compact"></v-select></v-col>
+                  <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MinAge" label="Min Age (months)"
+                      variant="outlined" density="compact"></v-text-field></v-col>
+                  <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MaxAge" label="Max Age (months)"
+                      variant="outlined" density="compact"></v-text-field></v-col>
+                  <v-col cols="12" sm="2"><v-select v-model="editedStudy.ASDParticipant" :items="inclusionOptions"
+                      label="ASD Participants" variant="outlined" density="compact"></v-select></v-col>
+                  <v-col cols="12" sm="2"><v-select v-model="editedStudy.PrematureParticipant" :items="inclusionOptions"
+                      label="Premature Participants" variant="outlined" density="compact"></v-select></v-col>
+                  <v-col cols="12" sm="2"><v-select v-model="editedStudy.IllParticipant" :items="inclusionOptions"
+                      label="Ill Participants" variant="outlined" density="compact"></v-select></v-col>
+                  <v-col cols="12" sm="2"><v-select v-model="editedStudy.VisionLossParticipant"
+                      :items="inclusionOptions" label="Vision Loss Participants" variant="outlined"
+                      density="compact"></v-select></v-col>
+                  <v-col cols="12" sm="2"><v-select v-model="editedStudy.HearingLossParticipant"
+                      :items="inclusionOptions" label="Hearing Loss Participants" variant="outlined"
+                      density="compact"></v-select></v-col>
                 </v-row>
 
                 <!-- Summaries -->
@@ -407,10 +255,12 @@
                 <h2 class="text-h6 mb-4">Study summary & Phone script:</h2>
                 <v-row dense>
                   <v-col cols="12" md="6">
-                    <v-textarea v-model="editedStudy.Description" label="Study summary" variant="outlined" rows="6"></v-textarea>
+                    <v-textarea v-model="editedStudy.Description" label="Study summary" variant="outlined"
+                      rows="6"></v-textarea>
                   </v-col>
                   <v-col cols="12" md="6">
-                    <v-textarea v-model="editedStudy.PhoneScript" label="Phone Script" variant="outlined" rows="6"></v-textarea>
+                    <v-textarea v-model="editedStudy.PhoneScript" label="Phone Script" variant="outlined"
+                      rows="6"></v-textarea>
                   </v-col>
                 </v-row>
 
@@ -434,7 +284,8 @@
                   </v-window-item>
                   <v-window-item value="three">
                     <h3 class="mb-2">Follow up email snippet:</h3>
-                    <ckeditor :editor="editor" v-model="editedStudy.FollowUPEmailSnippet" :config="editorConfig"></ckeditor>
+                    <ckeditor :editor="editor" v-model="editedStudy.FollowUPEmailSnippet" :config="editorConfig">
+                    </ckeditor>
                   </v-window-item>
                 </v-window>
               </v-form>
@@ -444,7 +295,7 @@
 
         <!-- Email Previews Dialog -->
         <v-dialog v-model="dialogShowEmailPreviews" fullscreen transition="dialog-bottom-transition">
-          <v-card>
+          <v-card class="ds-card" variant="flat">
             <v-toolbar color="primary" dark>
               <v-btn icon @click="dialogShowEmailPreviews = false">
                 <v-icon>mdi-close</v-icon>
@@ -452,21 +303,24 @@
               <v-toolbar-title>Study email previews</v-toolbar-title>
             </v-toolbar>
 
-             <v-card-text class="pt-6">
-                <!-- Confirmation -->
-                <h3 class="mb-2">Schedule confirmation email preview:</h3>
-                <div class="template-preview pa-4 rounded border" v-html="confirmationPreview" style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
+            <v-card-text class="pt-6">
+              <!-- Confirmation -->
+              <h3 class="mb-2">Schedule confirmation email preview:</h3>
+              <div class="template-preview pa-4 rounded border" v-html="confirmationPreview"
+                style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
 
-                <!-- Reminder -->
-                <v-divider class="my-6"></v-divider>
-                <h3 class="mb-2">Reminder email preview:</h3>
-                <div class="template-preview pa-4 rounded border" v-html="reminderPreview" style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
+              <!-- Reminder -->
+              <v-divider class="my-6"></v-divider>
+              <h3 class="mb-2">Reminder email preview:</h3>
+              <div class="template-preview pa-4 rounded border" v-html="reminderPreview"
+                style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
 
-                <!-- Followup -->
-                <v-divider class="my-6"></v-divider>
-                <h3 class="mb-2">Follow-up email preview:</h3>
-                <div class="template-preview pa-4 rounded border" v-html="followupPreview" style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
-             </v-card-text>
+              <!-- Followup -->
+              <v-divider class="my-6"></v-divider>
+              <h3 class="mb-2">Follow-up email preview:</h3>
+              <div class="template-preview pa-4 rounded border" v-html="followupPreview"
+                style="max-height: 350px; overflow-y: auto; background-color: #f5f5f5;"></div>
+            </v-card-text>
           </v-card>
         </v-dialog>
       </v-col>
@@ -480,6 +334,9 @@ import { Ckeditor as ckeditor } from '@ckeditor/ckeditor5-vue';
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 import AssignedExperimenters from "@/components/AssignedExperimenters.vue";
+import AlertBanner from "@/components/AlertBanner.vue";
+import InfoField from "@/components/InfoField.vue";
+import SectionHeader from "@/components/SectionHeader.vue";
 import studyProgressChart from "@/components/studyProgressChart.vue";
 import recruitmentProgressChart from "@/components/recruitmentProgressChart.vue";
 import experimenterStatsChart from "@/components/experimenterStatsChart.vue";
@@ -493,13 +350,16 @@ export default {
   name: "Study",
   components: {
     AssignedExperimenters,
+    AlertBanner,
+    InfoField,
+    SectionHeader,
     ckeditor,
     studyProgressChart,
     recruitmentProgressChart,
     experimenterStatsChart,
     studyHistoryChart,
   },
-  
+
   data() {
     return {
       search: "",
@@ -509,6 +369,7 @@ export default {
         { title: "Completed?", align: "center", key: "Completed", sortable: false, width: "30%" }
       ],
       Studies: [],
+      selectedStudies: [],
       currentStudy: {
         StudyName: null,
         Completed: false,
@@ -533,7 +394,7 @@ export default {
         totalNperPersonnelAssistExp: []
       },
       inclusionOptions: ["Include", "Exclude", "Only"],
-      
+
       editor: ClassicEditor,
       editorConfig: {
         toolbar: {
@@ -557,7 +418,7 @@ export default {
       }
       if (this.search) {
         const lowerSearch = this.search.toLowerCase();
-        result = result.filter(s => 
+        result = result.filter(s =>
           s.StudyName && s.StudyName.toLowerCase().includes(lowerSearch)
         );
       }
@@ -621,7 +482,7 @@ export default {
     },
 
     async optionChangedTestingRoom() {
-      if(!this.currentStudy.id) return;
+      if (!this.currentStudy.id) return;
       try {
         await studyApi.update({ id: this.currentStudy.id, FK_TestingRoom: this.selectedRoomId });
         this.currentStudy.FK_TestingRoom = this.selectedRoomId;
@@ -634,6 +495,19 @@ export default {
       try {
         const Result = await studyApi.search({ FK_Lab: this.$store.state.lab, includeScheules: false });
         this.Studies = Result.data || [];
+
+        // Check if there's a pre-selected study ID in the route on initial load
+        if (this.$route.params.id) {
+          const targetStudy = this.Studies.find(s => s.id == this.$route.params.id);
+          if (targetStudy) {
+            this.selectedStudies = [targetStudy.id];
+            this.rowSelected(null, { item: targetStudy });
+          }
+        } else if (this.Studies.length > 0) {
+          // Default selection if no route param
+          this.selectedStudies = [this.Studies[0].id];
+          this.rowSelected(null, { item: this.Studies[0] });
+        }
       } catch (error) {
         console.error(error);
       }
@@ -656,7 +530,7 @@ export default {
         Object.assign(this.Studies[this.editedIndex], item);
         this.$store.dispatch("setStudies", this.Studies);
       } catch (error) {
-         if (error.response?.status === 401) {
+        if (error.response?.status === 401) {
           alert("Authentication failed, please login.");
           this.$router.push({ name: "Login" });
         } else {
@@ -667,8 +541,14 @@ export default {
 
     rowSelected(event, { item }) {
       this.currentStudy = item;
+      this.selectedStudies = [item.id];
       this.editedIndex = this.Studies.findIndex(s => s.id === item.id);
       this.selectedRoomId = this.currentStudy.FK_TestingRoom || null;
+      
+      // Update the URL without reloading to reflect the active study
+      if (this.$route.params.id != item.id) {
+          this.$router.replace({ name: 'Study management', params: { id: item.id } });
+      }
     },
 
     editStudy() {
@@ -682,10 +562,10 @@ export default {
         const testingRooms = await testingRoomApi.search(this.$store.state.lab);
         this.$store.dispatch("setTestingRooms", testingRooms.data);
         this.currentTestingRooms = testingRooms.data;
-      } catch(e) { console.error(e) }
-      
-      this.editedStudy = { 
-        FK_Lab: this.$store.state.lab, 
+      } catch (e) { console.error(e) }
+
+      this.editedStudy = {
+        FK_Lab: this.$store.state.lab,
         StudyType: 'Behavioural',
         Completed: false
       };
@@ -695,12 +575,12 @@ export default {
     },
 
     async save() {
-      if(!this.PointofContact) {
+      if (!this.PointofContact) {
         alert("Please select a Point of Contact.");
         return;
       }
       this.editedStudy.FK_Personnel = this.PointofContact.id;
-      
+
       if (this.editedIndex === -1) {
         // Create
         try {
@@ -744,8 +624,8 @@ export default {
 
     updateExperimenters(updatedExperimenters) {
       this.currentStudy.Experimenters = updatedExperimenters;
-      if(this.editedIndex !== -1) {
-         Object.assign(this.Studies[this.editedIndex], this.currentStudy);
+      if (this.editedIndex !== -1) {
+        Object.assign(this.Studies[this.editedIndex], this.currentStudy);
       }
     },
 
@@ -779,13 +659,25 @@ export default {
           totalNperPersonnelAssistExp: []
         };
       }
+    },
+    '$route.params.id': {
+      immediate: true,
+      handler(newId) {
+        if (newId && this.Studies.length > 0) {
+          const targetStudy = this.Studies.find(s => s.id == newId);
+          if (targetStudy) {
+            this.selectedStudies = [targetStudy.id];
+            this.rowSelected(null, { item: targetStudy });
+          }
+        }
+      }
     }
   },
 
   mounted() {
-    this.searchStudies();
     this.searchLabMembers();
     this.currentTestingRooms = this.$store.state.testingRooms || [];
+    this.searchStudies();
   },
 };
 </script>

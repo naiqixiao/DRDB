@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar v-if="$route.name !== 'Login'" color="primary" density="default">
+    <v-app-bar v-if="$route.name !== 'Login'" color="primary" density="default" class="elevation-1">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="title-text">
@@ -39,7 +39,7 @@
 
     <!-- Feedback Dialog -->
     <v-dialog v-model="feedbackDialog" max-width="800px" :retain-focus="false" persistent>
-      <v-card variant="outlined">
+      <v-card class="ds-card" variant="flat">
         <v-card-title>
           <span class="text-h5">Send us your questions and suggestions!</span>
         </v-card-title>
@@ -85,7 +85,7 @@
       </template>
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main style="background-color: var(--ds-field-bg);">
       <router-view :training="$store.state.trainingMode" />
     </v-main>
   </v-app>
@@ -196,11 +196,18 @@ export default {
 
 <style>
 .title-text {
-  color: rgb(var(--v-theme-secondary)) !important;
+  color: var(--v-theme-secondary) !important;
+  font-family: var(--ds-font-family-heading) !important;
+  font-weight: 600;
+}
+
+.title-text h2 {
+  font-family: var(--ds-font-family-heading) !important;
 }
 
 .training-switch .v-label {
-  color: rgb(var(--v-theme-secondary)) !important;
+  color: var(--v-theme-secondary) !important;
+  font-family: var(--ds-font-family-body) !important;
   font-size: 0.85rem;
 }
 </style>

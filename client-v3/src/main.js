@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
+import './design-system.css'
 import App from './App.vue'
 
 // Vuetify
@@ -20,13 +21,13 @@ const vuetify = createVuetify({
         themes: {
             light: {
                 colors: {
-                    primary: '#344955',
-                    secondary: '#F9AA33',
-                    tertiary: '#4A6572',
-                    quaternary: '#4A6572',
-                    background: '#B2B2B2',
-                    textbackground: '#f4f4f4',
-                    warning: '#cc3300',
+                    primary: '#1E40AF',
+                    secondary: '#3B82F6',
+                    tertiary: '#607D8B',
+                    quaternary: '#607D8B',
+                    background: '#F8FAFC',
+                    textbackground: '#FFFFFF',
+                    warning: '#F59E0B',
                 },
             },
         },

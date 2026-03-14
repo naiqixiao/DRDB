@@ -1,68 +1,39 @@
 <template>
   <div>
-    <v-row justify="start" dense>
-      <v-col cols="12" md="12" class="text-start">
-        <span class="text-h6">Family information</span>
-      </v-col>
-      <v-col
-        cols="12"
-        md="6"
-        v-for="item in searchingFields"
-        :key="item.label"
-      >
-        <v-text-field
-          :label="item.label"
-          :value="item.label === 'Phone' ? PhoneFormated(currentFamily?.[item.field]) : currentFamily?.[item.field]"
-          readonly
-          bg-color="textbackground"
-          hide-details
-          placeholder="  "
-          variant="outlined"
-          density="compact"
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row justify="space-between" align="end" dense>
-      <v-col cols="12" md="12">
-        <v-textarea
-          class="conv-textarea"
-          label="Notes for next contact"
-          variant="outlined"
-          no-resize
-          rows="6"
-          hide-details
-          readonly
-          :model-value="currentFamily?.NextContactNote"
-        ></v-textarea>
-      </v-col>
-    </v-row>
+    <SectionHeader title="Family Information" icon="mdi-account-group" />
 
-    <v-row justify="end" class="mt-4">
-      <v-col cols="12" md="3" class="d-flex justify-end">
+    <div class="info-grid info-grid--2">
+      <InfoField label="Family ID" :value="currentFamily?.id" icon="mdi-identifier" highlight />
+      <InfoField label="Email" :value="currentFamily?.Email" type="email" icon="mdi-email-outline" />
+      <InfoField label="Phone" :value="currentFamily?.Phone" type="phone" icon="mdi-phone-outline" />
+      <InfoField label="Postal Code" :value="currentFamily?.Address" icon="mdi-map-marker-outline" />
+      <InfoField label="Primary Caregiver" :value="currentFamily?.NamePrimary" icon="mdi-account" />
+      <InfoField label="Secondary Caregiver" :value="currentFamily?.NameSecondary" icon="mdi-account-outline" />
+    </div>
+
+    <div v-if="currentFamily?.NextContactNote" class="mt-3">
+      <v-textarea class="conv-textarea" label="Notes for next contact" variant="outlined" no-resize rows="4"
+        hide-details readonly :model-value="currentFamily?.NextContactNote"></v-textarea>
+    </div>
+
+    <v-row justify="end" class="mt-3">
+      <v-col cols="auto">
         <v-tooltip location="top">
           <template v-slot:activator="{ props }">
             <div v-bind="props">
-              <v-btn
-                color="primary"
-                icon="mdi-pencil"
-                @click.stop="editFamily"
-                :disabled="!currentFamily?.id"
-              ></v-btn>
+              <v-btn color="primary" icon="mdi-pencil" size="small" @click.stop="editFamily"
+                :disabled="!currentFamily?.id"></v-btn>
             </div>
           </template>
           <span>Edit family information</span>
         </v-tooltip>
       </v-col>
-      <v-col cols="12" md="12">
-        <NotesConversation
-          v-if="currentFamily?.id"
-          :Conversation="currentFamily.Conversations"
-          :familyId="parseInt(currentFamily.id)"
-          :notes="currentFamily.Note"
-          @updateNotes="saveNotes"
-        ></NotesConversation>
-      </v-col>
     </v-row>
+
+    <div class="mt-2">
+      <NotesConversation v-if="currentFamily?.id" :Conversation="currentFamily.Conversations"
+        :familyId="parseInt(currentFamily.id)" :notes="currentFamily.Note" @updateNotes="saveNotes"></NotesConversation>
+    </div>
 
     <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
       <v-card variant="outlined">
@@ -78,51 +49,24 @@
                 <v-divider></v-divider>
                 <h4 class="text-left mt-2">Family information:</h4>
               </v-col>
-              <v-col
-                cols="12"
-                :md="item.width"
-                v-for="item in $familyBasicInfo"
-                :key="item.label"
-              >
+              <v-col cols="12" :md="item.width" v-for="item in $familyBasicInfo" :key="item.label">
                 <div v-if="!!item.options">
                   <div v-if="item.field !== 'AutismHistory'">
-                    <v-combobox
-                      justify="start"
-                      v-model="editedItem[item.field]"
-                      :items="$Options[item.options]"
-                      variant="outlined"
-                      :label="item.label"
-                      density="compact"
-                    ></v-combobox>
+                    <v-combobox justify="start" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                      variant="outlined" :label="item.label" density="compact"></v-combobox>
                   </div>
                   <div v-else>
-                    <v-select
-                      :items="$Options[item.options]"
-                      v-model="editedItem[item.field]"
-                      :label="item.label"
-                      variant="outlined"
-                      density="compact"
-                    ></v-select>
+                    <v-select :items="$Options[item.options]" v-model="editedItem[item.field]" :label="item.label"
+                      variant="outlined" density="compact"></v-select>
                   </div>
                 </div>
                 <div v-else-if="item.rules">
-                  <v-text-field
-                    :label="item.label"
-                    :rules="$rules[item.rules]"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    hide-details
-                    density="compact"
-                  ></v-text-field>
+                  <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
+                    variant="outlined" hide-details density="compact"></v-text-field>
                 </div>
                 <div v-else>
-                  <v-text-field
-                    :label="item.label"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    hide-details
-                    density="compact"
-                  ></v-text-field>
+                  <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details
+                    density="compact"></v-text-field>
                 </div>
               </v-col>
 
@@ -130,40 +74,18 @@
                 <v-divider></v-divider>
                 <h4 class="text-left mt-2">Contact information:</h4>
               </v-col>
-              <v-col
-                cols="12"
-                :md="item.width"
-                v-for="item in $familyContactInfo"
-                :key="item.label"
-              >
+              <v-col cols="12" :md="item.width" v-for="item in $familyContactInfo" :key="item.label">
                 <div v-if="item.options">
-                  <v-combobox
-                    justify="start"
-                    :items="$Options[item.options]"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    :label="item.label"
-                    density="compact"
-                  ></v-combobox>
+                  <v-combobox justify="start" :items="$Options[item.options]" v-model="editedItem[item.field]"
+                    variant="outlined" :label="item.label" density="compact"></v-combobox>
                 </div>
                 <div v-else-if="item.rules">
-                  <v-text-field
-                    :label="item.label"
-                    :rules="$rules[item.rules]"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    hide-details
-                    density="compact"
-                  ></v-text-field>
+                  <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
+                    variant="outlined" hide-details density="compact"></v-text-field>
                 </div>
                 <div v-else>
-                  <v-text-field
-                    :label="item.label"
-                    v-model="editedItem[item.field]"
-                    variant="outlined"
-                    hide-details
-                    density="compact"
-                  ></v-text-field>
+                  <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details
+                    density="compact"></v-text-field>
                 </div>
               </v-col>
             </v-row>
@@ -189,11 +111,15 @@
 <script>
 import family from "@/services/family";
 import NotesConversation from "@/components/NotesConversation.vue";
+import InfoField from "@/components/InfoField.vue";
+import SectionHeader from "@/components/SectionHeader.vue";
 
 export default {
   name: "FamilyInfo",
   components: {
     NotesConversation,
+    InfoField,
+    SectionHeader,
   },
   props: {
     currentFamily: {
@@ -336,5 +262,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

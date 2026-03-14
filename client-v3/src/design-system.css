@@ -1,0 +1,322 @@
+/* ============================================
+   DRDB Design System
+   Global CSS variables, typography, and utility
+   classes for a unified UI.
+   ============================================ */
+
+/* --- CSS Custom Properties --- */
+:root {
+  /* Spacing scale */
+  --ds-space-xs: 4px;
+  --ds-space-sm: 8px;
+  --ds-space-md: 16px;
+  --ds-space-lg: 24px;
+  --ds-space-xl: 32px;
+  --ds-space-2xl: 48px;
+
+  /* Border radius */
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 8px;
+  --ds-radius-lg: 12px;
+
+  /* Shadows */
+  --ds-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --ds-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --ds-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --ds-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Typography */
+  --ds-font-family-heading: 'Fira Code', monospace;
+  --ds-font-family-body: 'Fira Sans', sans-serif;
+  --ds-font-label: 0.75rem;
+  --ds-font-value: 0.875rem;
+  --ds-font-body: 1rem;
+
+  /* Info field colors */
+  --ds-label-color: #475569;
+  --ds-value-color: #1E3A8A;
+  --ds-field-bg: #FFFFFF;
+  --ds-field-border: #E2E8F0;
+
+  /* Accent / highlight (Amber) */
+  --ds-highlight-bg: rgba(245, 158, 11, 0.08);
+  --ds-highlight-border: rgba(245, 158, 11, 0.35);
+
+  /* Status colors */
+  --ds-success: #10B981;
+  --ds-warning: #F59E0B;
+  --ds-error: #EF4444;
+  --ds-info: #3B82F6;
+}
+
+body {
+  font-family: var(--ds-font-family-body);
+  color: #1E3A8A;
+  background-color: #F8FAFC;
+}
+
+h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6 {
+  font-family: var(--ds-font-family-heading) !important;
+}
+
+/* --- Info Field: compact label/value display --- */
+.info-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--ds-space-sm) var(--ds-space-md);
+  background: var(--ds-field-bg);
+  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-field-border);
+  min-height: 44px;
+  transition: background-color 0.15s ease;
+}
+
+.info-field:hover {
+  background: #f0f2f3;
+}
+
+.info-field__label {
+  font-size: var(--ds-font-label);
+  font-weight: 500;
+  color: var(--ds-label-color);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.info-field__value {
+  font-size: var(--ds-font-value);
+  font-weight: 500;
+  color: var(--ds-value-color);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.info-field__value--empty {
+  color: #b0bec5;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.info-field__value a {
+  color: #37474F;
+  text-decoration: none;
+  border-bottom: 1px dashed #90a4ae;
+  transition: border-color 0.15s ease;
+}
+
+.info-field__value a:hover {
+  border-bottom-color: #3B82F6;
+  color: #1E3A8A;
+}
+
+/* Highlighted variant for important fields */
+.info-field--highlight {
+  background: var(--ds-highlight-bg);
+  border-color: var(--ds-highlight-border);
+}
+
+/* Icon variant */
+.info-field--with-icon {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--ds-space-sm);
+}
+
+.info-field--with-icon .info-field__icon {
+  color: var(--ds-label-color);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.info-field--with-icon .info-field__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* --- Info Grid: responsive layout for info fields --- */
+.info-grid {
+  display: grid;
+  gap: var(--ds-space-sm);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+
+.info-grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.info-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.info-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 960px) {
+  .info-grid--3,
+  .info-grid--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .info-grid,
+  .info-grid--2,
+  .info-grid--3,
+  .info-grid--4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Allow spanning full width */
+.info-grid__full {
+  grid-column: 1 / -1;
+}
+
+/* --- Section Header --- */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-sm);
+  padding: var(--ds-space-sm) 0;
+  margin-top: var(--ds-space-lg);
+  margin-bottom: var(--ds-space-sm);
+  border-bottom: 2px solid #37474F;
+}
+
+.section-header:first-child {
+  margin-top: 0;
+}
+
+.section-header__icon {
+  color: #3B82F6;
+  font-size: 20px;
+}
+
+.section-header__title {
+  font-family: var(--ds-font-family-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1E40AF;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* --- Status Badge --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.status-badge--success {
+  background: #e8f5e9;
+  color: var(--ds-success);
+}
+
+.status-badge--warning {
+  background: #fff3e0;
+  color: var(--ds-warning);
+}
+
+.status-badge--error {
+  background: #ffebee;
+  color: var(--ds-error);
+}
+
+.status-badge--info {
+  background: #e1f5fe;
+  color: var(--ds-info);
+}
+
+.status-badge--neutral {
+  background: #eceff1;
+  color: #546e7a;
+}
+
+/* --- Utility Classes --- */
+.text-muted {
+  color: var(--ds-label-color) !important;
+}
+
+.text-label {
+  font-size: var(--ds-font-label);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--ds-label-color);
+}
+
+.ds-card {
+  border-radius: var(--ds-radius-md) !important;
+  box-shadow: var(--ds-shadow-sm) !important;
+  border: 1px solid var(--ds-field-border) !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Consistent transition for interactive elements */
+.ds-interactive {
+  transition: all 0.2s ease;
+}
+
+.ds-interactive:hover {
+  box-shadow: var(--ds-shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Base button and input overrides for modern feel */
+.btn-primary {
+  background: #F59E0B;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 200ms ease;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #1E40AF;
+  border: 2px solid #1E40AF;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.input {
+  padding: 12px 16px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 200ms ease;
+}
+
+.input:focus {
+  border-color: #1E40AF;
+  outline: none;
+  box-shadow: 0 0 0 3px #1E40AF20;
+}
