@@ -266,8 +266,16 @@ const TEMPLATE_CATALOG = [
 // ─── Routes ───────────────────────────────────────────────────────
 
 /**
- * GET /api/emailTest/templates
- * Returns the list of available template IDs, labels, and icons.
+ * @swagger
+ * /api/emailTest/templates:
+ *   get:
+ *     summary: Get list of available email template IDs
+ *     tags: [Email Test]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Template catalog returned
  */
 router.get(
   "/templates",
@@ -278,9 +286,25 @@ router.get(
 );
 
 /**
- * GET /api/emailTest/render/:templateId
- * Renders a template using the ACTUAL backend builders with mock data.
- * Returns { to, cc?, from?, subject, htmlBody, description }.
+ * @swagger
+ * /api/emailTest/render/{templateId}:
+ *   get:
+ *     summary: Render a specific email template with mock data
+ *     tags: [Email Test]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: templateId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Template ID (e.g., family-reminder, user-signup)
+ *     responses:
+ *       200:
+ *         description: Rendered email HTML returned
+ *       404:
+ *         description: Unknown template ID
  */
 router.get(
   "/render/:templateId",
@@ -393,9 +417,39 @@ router.get(
 );
 
 /**
- * POST /api/emailTest/send
- * Send a test email via the admin Gmail account.
- * Body: { to, cc?, bcc?, subject, htmlBody }
+ * @swagger
+ * /api/emailTest/send:
+ *   post:
+ *     summary: Send a test email via the admin Gmail account
+ *     tags: [Email Test]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - to
+ *               - subject
+ *               - htmlBody
+ *             properties:
+ *               to:
+ *                 type: string
+ *               cc:
+ *                 type: string
+ *               bcc:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               htmlBody:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Test email sent
+ *       400:
+ *         description: Missing required fields
  */
 router.post(
   "/send",

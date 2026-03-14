@@ -4,6 +4,17 @@ const router = express.Router();
 
 const ReminderController = require("../controllers/autoCancellation");
 
+/**
+ * @swagger
+ * /api/auto/autoCompletion:
+ *   post:
+ *     summary: Auto-cancel stale appointments (cron job endpoint)
+ *     tags: [Automation]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Auto-cancellation complete
+ */
 
 router.post("/autoCompletion", ReminderController.autoCompletion);
 

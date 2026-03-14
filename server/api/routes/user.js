@@ -34,16 +34,161 @@ const signupValidation = [
         .isLength({ max: 10 }).withMessage("Phone must not exceed 10 characters"),
 ];
 
+/**
+ * @swagger
+ * /api/user/signup:
+ *   post:
+ *     summary: Create a new user account
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - Name
+ *               - Email
+ *               - Initial
+ *               - Role
+ *               - Calendar
+ *             properties:
+ *               Name:
+ *                 type: string
+ *                 example: "John Smith"
+ *               Email:
+ *                 type: string
+ *                 example: "john@example.com"
+ *               Initial:
+ *                 type: string
+ *                 example: "JS"
+ *               Role:
+ *                 type: string
+ *                 enum: [Admin, PostDoc, PI, GradStudent, Undergrad, RA, Lab manager, Staff]
+ *               Calendar:
+ *                 type: string
+ *               FK_Lab:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: User created with temporary password
+ *       400:
+ *         description: User already exists
+ */
 router.post("/signup", checkAuth, oAuth2, signupValidation, validate, UserController.signup);
 
+/**
+ * @swagger
+ * /api/user/signupBatch:
+ *   post:
+ *     summary: Batch create multiple user accounts
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Users created
+ */
 router.post("/signupBatch", checkAuth, oAuth2, UserController.signupBatch);
 
+/**
+ * @swagger
+ * /api/user/resetPassword:
+ *   post:
+ *     summary: Reset a user's password (sends new password via email)
+ *     tags: [User]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - Email
+ *             properties:
+ *               Email:
+ *                 type: string
+ *                 example: "user@example.com"
+ *     responses:
+ *       200:
+ *         description: Password reset email sent
+ *       401:
+ *         description: User not found
+ */
 router.post("/resetPassword", UserController.resetPassword);
 
+/**
+ * @swagger
+ * /api/user/checklogin:
+ *   post:
+ *     summary: Verify current JWT token is still valid
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       401:
+ *         description: Token expired or invalid
+ */
 router.post("/checklogin", checkAuth, UserController.loginChecked);
 
+/**
+ * @swagger
+ * /api/user/logout:
+ *   post:
+ *     summary: Log out of the system
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
 router.post("/logout", checkAuth, UserController.logout);
 
+/**
+ * @swagger
+ * /api/user/changePassword:
+ *   post:
+ *     summary: Change user's password
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - Email
+ *               - Password
+ *               - newPassword
+ *             properties:
+ *               Email:
+ *                 type: string
+ *               Password:
+ *                 type: string
+ *                 description: Current password
+ *               newPassword:
+ *                 type: string
+ *                 description: New password
+ *     responses:
+ *       200:
+ *         description: Password changed
+ *       401:
+ *         description: Current password incorrect
+ */
 router.post("/changePassword", checkAuth, UserController.changePassword);
 
 /**

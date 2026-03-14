@@ -21,9 +21,29 @@ const MOCK = {
 };
 
 /**
- * POST /api/calendarTest/create
- * Creates a real test event on Google Calendar.
- * Body: { lab, dateTime?, summary?, description? }
+ * @swagger
+ * /api/calendarTest/create:
+ *   post:
+ *     summary: Create a test Google Calendar event
+ *     tags: [Calendar Test]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               dateTime:
+ *                 type: string
+ *                 format: date-time
+ *               summary:
+ *                 type: string
+ *               calendarId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Test event created
  */
 router.post(
   "/create",
@@ -62,9 +82,36 @@ router.post(
 );
 
 /**
- * PATCH /api/calendarTest/update
- * Updates an existing calendar event.
- * Body: { lab, eventId, calendarId?, dateTime?, summary?, description? }
+ * @swagger
+ * /api/calendarTest/update:
+ *   patch:
+ *     summary: Update a test Google Calendar event
+ *     tags: [Calendar Test]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - eventId
+ *             properties:
+ *               eventId:
+ *                 type: string
+ *               calendarId:
+ *                 type: string
+ *               dateTime:
+ *                 type: string
+ *                 format: date-time
+ *               summary:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Test event updated
+ *       400:
+ *         description: eventId is required
  */
 router.patch(
   "/update",
@@ -110,9 +157,28 @@ router.patch(
 );
 
 /**
- * DELETE /api/calendarTest/delete
- * Deletes a calendar event by eventId.
- * Query: ?lab=1&eventId=xxx&calendarId=primary
+ * @swagger
+ * /api/calendarTest/delete:
+ *   delete:
+ *     summary: Delete a test Google Calendar event
+ *     tags: [Calendar Test]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: calendarId
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Test event deleted
+ *       400:
+ *         description: eventId is required
  */
 router.delete(
   "/delete",
