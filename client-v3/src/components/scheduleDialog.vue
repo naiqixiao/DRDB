@@ -5,7 +5,7 @@
         <v-stepper-header>
           <v-stepper-item title="Schedule a visit" value="1" editable :complete="stepperPage > 1"></v-stepper-item>
           <v-divider></v-divider>
-          <v-stepper-item title="Email" value="2" :editable="stepperPage >= 2 || (stepperPage === '3' || stepperPage === '1' && createdScheduleInSession)" :complete="stepperPage > 2"></v-stepper-item>
+          <v-stepper-item title="Email" value="2" :editable="stepperPage >= 2 || stepperPage === '3' || (stepperPage === '1' && !!createdScheduleInSession)" :complete="stepperPage > 2"></v-stepper-item>
           <v-divider></v-divider>
           <v-stepper-item title="Next Contact" value="3" :editable="stepperPage >= 3 || (stepperPage === '1' || stepperPage === '2' && isFinalized)" :complete="stepperPage > 3"></v-stepper-item>
         </v-stepper-header>
@@ -62,8 +62,18 @@
               </v-container>
 
               <!-- action buttons -->
-              <v-card-actions>
-                <v-container class="d-flex align-center flex-wrap justify-end" style="gap: 60px">
+              <v-card-actions class="px-4 py-2 d-flex align-center">
+                <!-- Compact action log -->
+                <div v-if="actionLogs.length" style="flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; margin-right: 16px">
+                  <div v-for="(entry, i) in actionLogs" :key="i" style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                    <v-icon :color="entry.success ? 'success' : 'error'" size="14">{{ entry.success ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}</v-icon>
+                    <span style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; color: #555">{{ entry.action }}</span>
+                    <span style="font-size: 0.65rem; white-space: nowrap; color: #999">{{ entry.time }}</span>
+                    <v-chip size="x-small" :color="entry.success ? 'success' : 'error'" variant="flat" label style="min-width: 36px; justify-content: center">{{ entry.success ? 'OK' : 'FAIL' }}</v-chip>
+                  </div>
+                </div>
+                <v-spacer></v-spacer>
+                <div class="d-flex align-center" style="gap: 12px; flex-shrink: 0">
                   <v-btn 
                     variant="tonal"
                     color="primary"
@@ -75,7 +85,7 @@
                     {{ scheduleButtonText }}
                   </v-btn>
                   <v-btn variant="elevated" color="primary" @click="step12" :disabled="disableStep12">Next</v-btn>
-                </v-container>
+                </div>
               </v-card-actions>
             </v-card>
           </v-stepper-window-item>
@@ -112,8 +122,18 @@
                   />
                 </v-card-text>
               </v-container>
-              <v-card-actions>
-                <v-container class="d-flex align-center flex-wrap justify-end" style="gap: 60px">
+              <v-card-actions class="px-4 py-2 d-flex align-center">
+                <!-- Compact action log -->
+                <div v-if="actionLogs.length" style="flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; margin-right: 16px">
+                  <div v-for="(entry, i) in actionLogs" :key="i" style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                    <v-icon :color="entry.success ? 'success' : 'error'" size="14">{{ entry.success ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}</v-icon>
+                    <span style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; color: #555">{{ entry.action }}</span>
+                    <span style="font-size: 0.65rem; white-space: nowrap; color: #999">{{ entry.time }}</span>
+                    <v-chip size="x-small" :color="entry.success ? 'success' : 'error'" variant="flat" label style="min-width: 36px; justify-content: center">{{ entry.success ? 'OK' : 'FAIL' }}</v-chip>
+                  </div>
+                </div>
+                <v-spacer></v-spacer>
+                <div class="d-flex align-center flex-wrap" style="gap: 12px; flex-shrink: 0">
                   <v-tooltip location="top">
                     <template v-slot:activator="{ props }">
                       <div v-bind="props">
@@ -129,8 +149,6 @@
                     </template>
                     <span>Check this box to skip emailing to parents.</span>
                   </v-tooltip>
-                  <v-spacer></v-spacer>
-
                   <v-btn 
                     variant="tonal"
                     color="primary"
@@ -140,11 +158,10 @@
                     <v-icon start v-show="emailButtonIconShow">mdi-checkbox-marked-circle-outline</v-icon>
                     {{ emailButtonText }}
                   </v-btn>
-
                   <v-btn variant="elevated" color="primary" @click="step23" :disabled="disableStep23 && !skipConfirmationEmailStatus">
                     {{ step23ButtonText }}
                   </v-btn>
-                </v-container>
+                </div>
               </v-card-actions>
             </v-card>
           </v-stepper-window-item>
@@ -195,63 +212,24 @@
                   </v-container>
                 </v-card-text>
               </v-container>
-              <v-card-actions>
-                <v-container class="d-flex align-baseline flex-wrap justify-end pa-0" style="gap: 40px">
+              <v-card-actions class="px-4 py-2 d-flex align-center">
+                <!-- Compact action log -->
+                <div v-if="actionLogs.length" style="flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; margin-right: 16px">
+                  <div v-for="(entry, i) in actionLogs" :key="i" style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                    <v-icon :color="entry.success ? 'success' : 'error'" size="14">{{ entry.success ? 'mdi-check-circle-outline' : 'mdi-alert-circle-outline' }}</v-icon>
+                    <span style="font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; color: #555">{{ entry.action }}</span>
+                    <span style="font-size: 0.65rem; white-space: nowrap; color: #999">{{ entry.time }}</span>
+                    <v-chip size="x-small" :color="entry.success ? 'success' : 'error'" variant="flat" label style="min-width: 36px; justify-content: center">{{ entry.success ? 'OK' : 'FAIL' }}</v-chip>
+                  </div>
+                </div>
+                <v-spacer></v-spacer>
+                <div class="d-flex align-center" style="gap: 12px; flex-shrink: 0">
                   <v-btn variant="elevated" color="primary" @click="finalizeSchedule">Complete</v-btn>
-                </v-container>
+                </div>
               </v-card-actions>
             </v-card>
           </v-stepper-window-item>
         </v-stepper-window>
-
-        <!-- Status Action Logs -->
-        <v-card
-          v-if="actionLogs.length > 0"
-          class="ds-card mx-6 mb-6 mt-2"
-          variant="flat"
-          style="padding: 16px; background-color: #f8fafc"
-        >
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
-            <p class="text-label" style="margin: 0">Action Log</p>
-            <v-btn
-              variant="text"
-              size="small"
-              color="error"
-              @click="actionLogs = []"
-              prepend-icon="mdi-delete-sweep"
-            >
-              Clear
-            </v-btn>
-          </div>
-
-          <v-timeline density="compact" side="end">
-            <v-timeline-item
-              v-for="(entry, i) in actionLogs"
-              :key="i"
-              :dot-color="entry.success ? 'success' : 'error'"
-              size="small"
-            >
-              <v-card variant="tonal" :color="entry.success ? 'success' : 'error'" style="padding: 12px; max-width: 500px">
-                <div style="display: flex; justify-content: space-between; align-items: start">
-                  <div>
-                    <strong>{{ entry.action }}</strong>
-                    <span class="text-muted" style="margin-left: 8px; font-size: 0.75rem">
-                      {{ entry.time }}
-                    </span>
-                  </div>
-                  <v-chip
-                    :color="entry.success ? 'success' : 'error'"
-                    size="x-small"
-                    variant="flat"
-                  >
-                    {{ entry.success ? 'OK' : 'FAIL' }}
-                  </v-chip>
-                </div>
-                <p style="margin-top: 6px; font-size: 0.85rem">{{ entry.message }}</p>
-              </v-card>
-            </v-timeline-item>
-          </v-timeline>
-        </v-card>
 
       </v-stepper>
 
@@ -383,7 +361,7 @@ export default {
       }
       this.datePicker = false;
     },
-    addAppointment(app) {
+    addAppointment(app) { 
       this.$emit("newAppointment", app);
     },
     readyToCreateSchedule() {
@@ -411,143 +389,148 @@ export default {
       }
 
       this.loadingStatus = true;
-      const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
-      this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
+      try {
+        const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
+        this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
 
-      let newSchedule = {};
-      let updatedSchedule = {};
+        let newSchedule = {};
+        let updatedSchedule = {};
 
-      if (newAppointments.newAppointments.length > 0) {
-        try {
-          newSchedule = await this.newSchedule(newAppointments.newAppointments);
-          this.createdScheduleInSession = newSchedule;
-          this.scheduleButtonText = "Update Schedule Event";
-          this.addLog("Create Calendar Event", true, "Successfully created calendar event.");
-          this.$emit("newSchedule", newSchedule);
-        } catch (error) {
-          console.error(error);
-          this.addLog("Create Calendar Event", false, "Failed to create calendar event.");
+        if (newAppointments.newAppointments.length > 0) {
+          try {
+            newSchedule = await this.newSchedule(newAppointments.newAppointments);
+            this.createdScheduleInSession = newSchedule;
+            this.scheduleButtonText = "Update Schedule Event";
+            this.addLog("Create Calendar Event", true, "Successfully created calendar event.");
+            this.$emit("newSchedule", newSchedule);
+          } catch (error) {
+            console.error(error);
+            this.addLog("Create Calendar Event", false, "Failed to create calendar event.");
+          }
         }
-      }
 
-      if (newAppointments.updatedAppointments.length > 0) {
-        try {
-          // Normal update path (parent schedule update)
-          updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments, this.currentSchedule);
-          this.scheduleButtonText = "Appointment updated!";
-          this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
-          this.$emit("updatedSchedule", updatedSchedule);
-        } catch (error) {
-          console.error(error);
-          this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
+        if (newAppointments.updatedAppointments.length > 0) {
+          try {
+            // Normal update path (parent schedule update)
+            updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments, this.currentSchedule);
+            this.scheduleButtonText = "Appointment updated!";
+            this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
+            this.$emit("updatedSchedule", updatedSchedule);
+          } catch (error) {
+            console.error(error);
+            this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
+          }
         }
-      }
 
-      if (newAppointments.completedAppointments.length > 0) {
-        await schedule.complete({
-          id: newAppointments.completedAppointments[0].FK_Schedule,
-          FK_Family: newAppointments.completedAppointments[0].FK_Family,
-          Completed: 1
+        if (newAppointments.completedAppointments.length > 0) {
+          await schedule.complete({
+            id: newAppointments.completedAppointments[0].FK_Schedule,
+            FK_Family: newAppointments.completedAppointments[0].FK_Family,
+            Completed: 1
+          });
+          this.$emit("completedSchedule", {
+            id: newAppointments.completedAppointments[0].FK_Schedule,
+            FK_Family: newAppointments.completedAppointments[0].FK_Family,
+            Completed: 1
+          });
+        }
+
+        if (newAppointments.deletedAppointments.length > 0) {
+          for (const app of newAppointments.deletedAppointments) {
+            await appointment.delete({ id: app });
+          }
+        }
+
+        this.scheduleButtonIconShow = true;
+
+        const statusArray = ['Confirmed', 'Left a message', 'Interested', 'Update appointment time', 'Reschedule (need to follow-up)', 'No Show', 'Cancelled'];
+        this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updatedAppointments).filter(app => {
+          return statusArray.includes(app.status);
         });
-        this.$emit("completedSchedule", {
-          id: newAppointments.completedAppointments[0].FK_Schedule,
-          FK_Family: newAppointments.completedAppointments[0].FK_Family,
-          Completed: 1
-        });
-      }
 
-      if (newAppointments.deletedAppointments.length > 0) {
-        for (const app of newAppointments.deletedAppointments) {
-          await appointment.delete({ id: app });
+        if (this.emailAppointments.length === 0) {
+          this.skipEmail = true;
         }
-      }
 
-      this.loadingStatus = false;
-      this.scheduleButtonIconShow = true;
-
-      const statusArray = ['Confirmed', 'Left a message', 'Interested', 'Update appointment time', 'Reschedule (need to follow-up)', 'No Show', 'Cancelled'];
-      this.emailAppointments = newAppointments.newAppointments.concat(newAppointments.updatedAppointments).filter(app => {
-        return statusArray.includes(app.status);
-      });
-
-      if (this.emailAppointments.length === 0) {
-        this.skipEmail = true;
-      }
-
-      if (newAppointments.completedAppointments.length > 0) {
-        this.contactType = "Completed";
-      }
-
-      if (newAppointments.newAppointments.length > 0) {
-        switch (newSchedule.Status) {
-          case 'Confirmed':
-            this.contactType = "nextStudy";
-            break;
-          case "TBD":
-            this.contactType = "followUP";
-            break;
-          case 'Rejected':
-            this.contactType = "rejectAndFutureStudy";
-            break;
+        if (newAppointments.completedAppointments.length > 0) {
+          this.contactType = "Completed";
         }
-      }
 
-      if (newAppointments.updatedAppointments.length > 0) {
-        switch (updatedSchedule.Status) {
-          case 'Confirmed':
-            this.contactType = "nextStudy";
-            break;
-          case "Rescheduling":
-            this.contactType = "followUP";
-            break;
-          case 'Cancelled':
-            this.contactType = "followUpforCancelledAppointment";
-            break;
-          case 'No Show':
-            this.contactType = "followUpforNoShow";
-            break;
-          case 'Rejected':
-            this.contactType = "rejectAndFutureStudy";
-            break;
+        if (newAppointments.newAppointments.length > 0) {
+          switch (newSchedule.Status) {
+            case 'Confirmed':
+              this.contactType = "nextStudy";
+              break;
+            case "TBD":
+              this.contactType = "followUP";
+              break;
+            case 'Rejected':
+              this.contactType = "rejectAndFutureStudy";
+              break;
+          }
         }
-      }
 
-      this.disableStep12 = false;
+        if (newAppointments.updatedAppointments.length > 0) {
+          switch (updatedSchedule.Status) {
+            case 'Confirmed':
+              this.contactType = "nextStudy";
+              break;
+            case "Rescheduling":
+              this.contactType = "followUP";
+              break;
+            case 'Cancelled':
+              this.contactType = "followUpforCancelledAppointment";
+              break;
+            case 'No Show':
+              this.contactType = "followUpforNoShow";
+              break;
+            case 'Rejected':
+              this.contactType = "rejectAndFutureStudy";
+              break;
+          }
+        }
+
+        this.disableStep12 = false;
+      } finally {
+        this.loadingStatus = false;
+      }
     },
 
     async proceedUpdateSchedule() {
       this.confirmUpdateDialog = false;
       this.loadingStatus = true;
-      
-      const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
-      this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
+      try {
+        const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
+        this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
 
-      if (newAppointments.newAppointments.length > 0) {
-        // Map created schedule IDs to the new appointments so it executes as an update
-        const updatedAppointmentsList = newAppointments.newAppointments.map((app, index) => {
-          if (this.createdScheduleInSession.Appointments && this.createdScheduleInSession.Appointments[index]) {
-            app.id = this.createdScheduleInSession.Appointments[index].id;
-            app.calendarEventId = this.createdScheduleInSession.Appointments[index].calendarEventId;
-            app.eventURL = this.createdScheduleInSession.Appointments[index].eventURL;
+        if (newAppointments.newAppointments.length > 0) {
+          // Map created schedule IDs to the new appointments so it executes as an update
+          const updatedAppointmentsList = newAppointments.newAppointments.map((app, index) => {
+            if (this.createdScheduleInSession.Appointments && this.createdScheduleInSession.Appointments[index]) {
+              app.id = this.createdScheduleInSession.Appointments[index].id;
+              app.calendarEventId = this.createdScheduleInSession.Appointments[index].calendarEventId;
+              app.eventURL = this.createdScheduleInSession.Appointments[index].eventURL;
+            }
+            app.FK_Schedule = this.createdScheduleInSession.id;
+            return app;
+          });
+          
+          try {
+            // Use createdScheduleInSession as the target schedule for the update
+            const updatedSchedule = await this.updateSchedule(updatedAppointmentsList, this.createdScheduleInSession);
+            this.createdScheduleInSession = updatedSchedule;
+            this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
+            this.$emit("updatedSchedule", updatedSchedule);
+          } catch (error) {
+            console.error(error);
+            this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
           }
-          app.FK_Schedule = this.createdScheduleInSession.id;
-          return app;
-        });
-        
-        try {
-          // Use createdScheduleInSession as the target schedule for the update
-          const updatedSchedule = await this.updateSchedule(updatedAppointmentsList, this.createdScheduleInSession);
-          this.createdScheduleInSession = updatedSchedule;
-          this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
-          this.$emit("updatedSchedule", updatedSchedule);
-        } catch (error) {
-          console.error(error);
-          this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
         }
-      }
 
-      this.loadingStatus = false;
-      this.scheduleButtonIconShow = true;
+        this.scheduleButtonIconShow = true;
+      } finally {
+        this.loadingStatus = false;
+      }
     },
 
     async newSchedule(newAppointments) {
@@ -633,8 +616,23 @@ export default {
         app.Experimenters_2nd = app.SecondaryExperimenter.map(exp => exp.id);
       });
 
-      const createdSchedule = await this.createScheduleBackend(newSchedule);
-      return createdSchedule;
+      const createdScheduleData = await this.createScheduleBackend(newSchedule);
+
+      // Merge backend-assigned IDs back into the rich appointment objects
+      // (createScheduleBackend returns only bare DB columns; newSchedule has Study/Child/Experimenters)
+      newSchedule.id = createdScheduleData.id;
+      newSchedule.createdAt = createdScheduleData.createdAt;
+      newSchedule.updatedAt = createdScheduleData.updatedAt;
+      newSchedule.Completed = createdScheduleData.Completed || 0;
+      if (createdScheduleData.Appointments) {
+        newSchedule.Appointments.forEach((app, index) => {
+          if (createdScheduleData.Appointments[index]) {
+            app.id = createdScheduleData.Appointments[index].id;
+            app.FK_Schedule = createdScheduleData.id;
+          }
+        });
+      }
+      return newSchedule;
     },
 
     async updateSchedule(updateAppointments) {

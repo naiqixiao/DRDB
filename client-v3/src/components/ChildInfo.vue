@@ -100,7 +100,7 @@
             <div class="mb-6">
               <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Basic Information</div>
               <v-row dense>
-                <template v-for="(item, i) in $childInfo" :key="i">
+                <template v-for="(item, i) in $childInfo" :key="item.field">
                   <!-- Render Note as a full-width textarea on its own row -->
                   <v-col cols="12" v-if="item.field === 'Note'">
                     <v-textarea v-model="editedItem[item.field]" :label="item.label" variant="outlined" 
@@ -123,7 +123,7 @@
             <div class="mb-4">
               <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Sensitive & Medical Info</div>
               <v-row dense>
-                <template v-for="(item, i) in $childSensitiveInfo" :key="'s' + i">
+                <template v-for="(item, i) in $childSensitiveInfo" :key="item.field">
                   
                   <v-col cols="12" v-if="item.field === 'Note'">
                     <v-textarea v-model="editedItem[item.field]" :label="item.label" variant="outlined" 

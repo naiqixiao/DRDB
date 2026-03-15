@@ -1,5 +1,5 @@
 <template>
-  <div class="upcoming-section" v-if="!loading || upcomingSchedules.length > 0">
+  <div class="upcoming-section">
     <div class="upcoming-header">
       <v-icon class="mr-2" color="primary">mdi-calendar-clock</v-icon>
       <span class="upcoming-title">Upcoming Appointments</span>
@@ -13,8 +13,7 @@
       ></v-btn>
     </div>
 
-    <div v-if="upcomingSchedules.length === 0 && !loading" class="no-upcoming">
-      <v-icon size="20" class="mr-1" color="grey">mdi-calendar-remove-outline</v-icon>
+    <div v-if="upcomingSchedules.length === 0 && !loading" class="no-upcoming">      <v-icon size="20" class="mr-1" color="grey">mdi-calendar-remove-outline</v-icon>
       No upcoming confirmed appointments found.
     </div>
 

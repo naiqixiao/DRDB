@@ -3,7 +3,7 @@
 
     <!-- Background Study Type Watermark -->
     <div v-if="selectedStudy?.StudyType"
-      style="position: absolute; right: 10px; bottom: -10px; font-size: 80px; font-weight: 900; color: rgba(0,0,0,0.06); z-index: 0; line-height: 0.8; pointer-events: none; user-select: none;">
+      style="position: absolute; right: 10px; top: 10px; font-size: 60px; font-weight: 900; color: rgba(0,0,0,0.06); z-index: 0; line-height: 0.8; pointer-events: none; user-select: none;">
       {{ selectedStudy.StudyType }}
     </div>
 
@@ -56,7 +56,39 @@
         </v-chip>
       </div>
 
+      <!-- Prerequisites & Exclusions in two columns -->
+      <div class="mb-3 d-flex" style="gap: 12px;"
+        v-if="(selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0) || (selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0)">
+        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0">
+          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Prerequisites</div>
+          <div class="d-flex flex-wrap" style="gap: 4px;">
+            <v-chip
+              v-for="prereq in selectedStudy.Prerequisites"
+              :key="prereq.id"
+              size="x-small"
+              variant="tonal"
+              color="success"
+              prepend-icon="mdi-check-circle-outline"
+            >{{ prereq.StudyName }}</v-chip>
+          </div>
+        </div>
+        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0">
+          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Exclusions</div>
+          <div class="d-flex flex-wrap" style="gap: 4px;">
+            <v-chip
+              v-for="excl in selectedStudy.Exclusions"
+              :key="excl.id"
+              size="x-small"
+              variant="tonal"
+              color="error"
+              prepend-icon="mdi-close-circle-outline"
+            >{{ excl.StudyName }}</v-chip>
+          </div>
+        </div>
+      </div>
+
       <!-- Exclusion / Inclusion Criteria -->
+      <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Criteria</div>
       <div class="d-flex flex-wrap mb-4" style="gap: 6px;" v-if="hasCriteriaChips">
         <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.ASDParticipant)"
           v-if="selectedStudy?.ASDParticipant && selectedStudy?.ASDParticipant !== 'Include'">
@@ -81,26 +113,24 @@
       </div>
 
       <!-- Point of Contact -->
-      <div v-if="selectedStudy?.PointofContact?.Name" class="mb-3">
-        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Point of Contact</div>
-        <v-list density="compact" class="text-left px-0 py-0" style="background: transparent;">
-          <v-list-item prepend-icon="mdi-account-star" :title="selectedStudy.PointofContact.Name"
-            class="px-0" density="compact"></v-list-item>
-          <v-list-item v-if="selectedStudy.PointofContact.Email" prepend-icon="mdi-email-outline"
-            class="px-0" density="compact">
-            <v-list-item-title class="d-flex align-center">
-              <a :href="'mailto:' + selectedStudy.PointofContact.Email" class="text-primary">{{ selectedStudy.PointofContact.Email }}</a>
-              <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(selectedStudy.PointofContact.Email)"></v-btn>
-            </v-list-item-title>
-          </v-list-item>
-          <v-list-item v-if="selectedStudy.PointofContact.Phone" prepend-icon="mdi-phone-outline"
-            class="px-0" density="compact">
-            <v-list-item-title class="d-flex align-center">
-              {{ PhoneFormated(selectedStudy.PointofContact.Phone) }}
-              <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(selectedStudy.PointofContact.Phone)"></v-btn>
-            </v-list-item-title>
-          </v-list-item>
-        </v-list>
+      <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Point of Contact</div>
+      <div v-if="selectedStudy?.PointofContact?.Name" class="mb-3 d-flex align-center flex-wrap" style="gap: 6px;">
+        <v-chip size="small" variant="tonal" color="primary" prepend-icon="mdi-account-star">
+          {{ selectedStudy.PointofContact.Name }}
+        </v-chip>
+        <v-chip v-if="selectedStudy.PointofContact.Email" size="small" variant="tonal" color="primary"
+          prepend-icon="mdi-email-outline" :href="'mailto:' + selectedStudy.PointofContact.Email"
+          link class="text-truncate" style="max-width: 220px;">
+          {{ selectedStudy.PointofContact.Email }}
+          <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-1"
+            @click.prevent="copyToClipboard(selectedStudy.PointofContact.Email)"></v-btn>
+        </v-chip>
+        <v-chip v-if="selectedStudy.PointofContact.Phone" size="small" variant="tonal" color="primary"
+          prepend-icon="mdi-phone-outline">
+          {{ PhoneFormated(selectedStudy.PointofContact.Phone) }}
+          <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-1"
+            @click.prevent="copyToClipboard(selectedStudy.PointofContact.Phone)"></v-btn>
+        </v-chip>
       </div>
 
       <v-divider class="my-3"></v-divider>

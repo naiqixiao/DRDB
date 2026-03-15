@@ -104,6 +104,10 @@
                     v-if="participationStats.Cancelled">Cancelled: {{ participationStats.Cancelled }}</v-chip>
                   <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat"
                     v-if="participationStats.Rejected">Rejected: {{ participationStats.Rejected }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat"
+                    v-if="participationStats.TBD">TBD: {{ participationStats.TBD }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white" variant="flat"
+                    v-if="participationStats.Rescheduling">Rescheduling: {{ participationStats.Rescheduling }}</v-chip>
                 </div>
               </v-col>
               <v-col cols="12" sm="4" class="d-flex align-center justify-end">
@@ -276,6 +280,23 @@
       </v-col>
     </v-row>
 
+    <!-- Delete Timeline Schedule Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="text-h6 font-weight-bold bg-error text-white py-3">
+          Delete Schedule?
+        </v-card-title>
+        <v-card-text class="pt-6 pb-2">
+          Are you sure you want to delete this schedule and its associated Google Calendar event? This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteDialog = false" :disabled="isDeletingTimelineSchedule">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="isDeletingTimelineSchedule" @click="deleteTimelineSchedule" prepend-icon="mdi-delete">Yes, Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- FULL WIDTH ROW: Participation History Timeline / Table -->
     <v-row class="mt-4" v-if="currentFamily.id">
       <v-col cols="12">
@@ -289,7 +310,13 @@
 
           <v-window v-model="historyTab">
             <v-window-item value="timeline" class="pa-6">
-              <div v-if="reversedSchedules && reversedSchedules.length > 0" style="overflow-x: auto; padding-bottom: 16px; padding-top: 4px;">
+
+              <div v-if="reversedSchedules && reversedSchedules.length > 0" class="d-flex align-center text-caption text-muted mb-2">
+                <v-icon size="small" class="mr-1" color="grey">mdi-information-outline</v-icon>
+                <span>Only schedules updated within the last 7 days can be deleted.</span>
+              </div>
+
+              <div style="overflow-x: auto; padding-bottom: 24px; padding-top: 8px;">
                 <div class="d-flex align-center flex-nowrap position-relative"
                   style="gap: 48px; min-width: max-content; padding: 0 4px;">
 
@@ -299,11 +326,14 @@
                   </div>
 
                   <TimelineCard v-for="schedule in reversedSchedules" :key="schedule.id"
-                    :schedule="schedule" />
+                    :schedule="schedule"
+                    :deletable="isScheduleDeletable(schedule)"
+                    @delete="confirmDeleteTimelineSchedule" />
                 </div>
               </div>
 
-              <div v-else class="text-center text-muted py-6">
+              <div v-if="!reversedSchedules || reversedSchedules.length === 0"
+                class="text-center text-muted py-8">
                 <v-icon size="large" class="mb-2" color="grey-lighten-1">mdi-clipboard-text-off-outline</v-icon>
                 <div>No participation history available.</div>
               </div>
@@ -497,6 +527,8 @@
 import child from "@/services/child";
 import study from "@/services/study";
 import family from "@/services/family";
+import scheduleService from "@/services/schedule";
+import calendar from "@/services/calendar";
 import RTU from "@/services/realtimeUpdate";
 import moment from "moment-timezone";
 
@@ -577,6 +609,9 @@ export default {
       currentVisitedFamilies: [],
       contactedByOthers: false,
       loadingStatus: false,
+      deleteDialog: false,
+      isDeletingTimelineSchedule: false,
+      scheduleToDelete: null,
       defaultAppointment: {
         index: "", FK_Family: "", FK_Child: "", FK_Study: "", FK_Schedule: "",
         PrimaryExperimenter: [], SecondaryExperimenter: [],
@@ -672,6 +707,53 @@ export default {
   },
 
   methods: {
+    confirmDeleteTimelineSchedule(schedule) {
+      this.scheduleToDelete = schedule;
+      this.deleteDialog = true;
+    },
+
+    async deleteTimelineSchedule() {
+      if (!this.scheduleToDelete) return;
+      this.isDeletingTimelineSchedule = true;
+      try {
+        if (this.scheduleToDelete.Appointments) {
+          for (const app of this.scheduleToDelete.Appointments) {
+            if (app.calendarEventId) {
+              await calendar.delete({
+                id: app.id,
+                eventId: app.calendarEventId,
+                FK_Schedule: this.scheduleToDelete.id,
+                lab: this.$store.state.lab
+              });
+            }
+          }
+        }
+        await scheduleService.delete({ id: this.scheduleToDelete.id });
+        // Remove appointments belonging to this schedule from the local cache
+        if (this.currentChild && this.currentChild.Family && this.currentChild.Family.Appointments) {
+          this.currentChild.Family.Appointments = this.currentChild.Family.Appointments.filter(
+            a => a.FK_Schedule !== this.scheduleToDelete.id
+          );
+        }
+        this.deleteDialog = false;
+        this.scheduleToDelete = null;
+        alert("Schedule and calendar event successfully deleted.");
+      } catch (error) {
+        console.error(error);
+        alert("Failed to delete the schedule.");
+      } finally {
+        this.isDeletingTimelineSchedule = false;
+      }
+    },
+
+    isScheduleDeletable(schedule) {
+      if (!schedule.updatedAt) return false;
+      const updatedDate = moment(schedule.updatedAt).startOf("day");
+      const today = moment().startOf("day");
+      const daysDifference = moment.duration(today.diff(updatedDate)).asDays();
+      return daysDifference <= 7;
+    },
+
     getTimelineColor(status, completed) {
       switch (status) {
         case "Completed": return "#01579B";
@@ -763,17 +845,34 @@ export default {
       try {
         let eligible = (await child.search(queryString)).data || [];
 
-        // Client-side prerequisite / exclusion post-filter
-        const prereqs = this.selectedStudy.Prerequisites || [];
-        const exclusions = this.selectedStudy.Exclusions || [];
-        if (prereqs.length > 0 || exclusions.length > 0) {
-          eligible = eligible.filter(c => {
-            const pastIds = (c.Appointments || []).map(a => a.FK_Study);
-            if (prereqs.length > 0 && !prereqs.every(p => pastIds.includes(p.id))) return false;
-            if (exclusions.length > 0 && exclusions.some(e => pastIds.includes(e.id))) return false;
-            return true;
-          });
-        }
+        // Client-side strict filter: age gaps + prerequisites + exclusions
+        eligible = eligible.filter(c => {
+          // 1. Strict Age Group check (fixes "age gap" bug where backend returns 10m for 6-8m OR 12-14m study)
+          if (!c.DoB) return false;
+          const ageInDays = Math.floor((new Date() - new Date(c.DoB)) / (24 * 3600 * 1000));
+
+          let ageEligible = true;
+          if (this.selectedStudy.AgeGroups && this.selectedStudy.AgeGroups.length > 0) {
+            if (this.activeAgeGroup) {
+              ageEligible = ageInDays >= this.activeAgeGroup.MinAge * 30.5 - 1 &&
+                            ageInDays <= this.activeAgeGroup.MaxAge * 30.5 - 1;
+            } else {
+              ageEligible = this.selectedStudy.AgeGroups.some(group =>
+                ageInDays >= group.MinAge * 30.5 - 1 && ageInDays <= group.MaxAge * 30.5 - 1
+              );
+            }
+          }
+          if (!ageEligible) return false;
+
+          // 2. Prerequisite / Exclusion check
+          const pastIds = (c.Appointments || []).map(a => a.FK_Study);
+          const prereqs = this.selectedStudy.Prerequisites || [];
+          const exclusions = this.selectedStudy.Exclusions || [];
+          if (prereqs.length > 0 && !prereqs.every(p => pastIds.includes(p.id))) return false;
+          if (exclusions.length > 0 && exclusions.some(e => pastIds.includes(e.id))) return false;
+
+          return true;
+        });
 
         const Results = { data: eligible };
 

@@ -233,8 +233,6 @@ export default {
         ];
 
         app.config.globalProperties.$studyCriteriaFields = [
-            { label: "Min Age", field: "MinAge", width: "4" },
-            { label: "Max Age", field: "MaxAge", width: "4" },
             { label: "ASD Participants", field: "ASDParticipant", options: "inclusion", width: "3" },
             { label: "Premature Participants", field: "PrematureParticipant", options: "inclusion", width: "3" },
             { label: "Ill Participants", field: "IllParticipant", options: "inclusion", width: "3" },
