@@ -332,7 +332,7 @@ h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-
 .v-data-table thead tr {
   background:
     url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='15' cy='15' r='3' fill='rgba(255,255,255,0.07)'/%3E%3Ccircle cx='45' cy='10' r='2' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='30' cy='40' r='4' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='8' cy='48' r='2.5' fill='rgba(255,255,255,0.04)'/%3E%3Ccircle cx='52' cy='35' r='1.5' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='38' cy='55' r='2' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='22' cy='28' r='1' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, #1E40AF 0%, #B71C1C 45%, #263238 100%) !important;
+    linear-gradient(135deg, #01579B 0%, #7A003C 45%, #263238 100%) !important;
 }
 
 .v-data-table thead tr th,
@@ -368,7 +368,7 @@ h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-
 .ds-header-gradient {
   background:
     url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='15' cy='15' r='3' fill='rgba(255,255,255,0.07)'/%3E%3Ccircle cx='45' cy='10' r='2' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='30' cy='40' r='4' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='8' cy='48' r='2.5' fill='rgba(255,255,255,0.04)'/%3E%3Ccircle cx='52' cy='35' r='1.5' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='38' cy='55' r='2' fill='rgba(255,255,255,0.05)'/%3E%3Ccircle cx='22' cy='28' r='1' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E"),
-    linear-gradient(135deg, #1E40AF 0%, #B71C1C 45%, #263238 100%) !important;
+    linear-gradient(135deg, #01579B 0%, #7A003C 45%, #263238 100%) !important;
   color: white !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(30, 64, 175, 0.3);
