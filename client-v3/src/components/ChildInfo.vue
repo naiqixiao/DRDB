@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-row class="justify-center mx-0 mt-2">
-      <v-col cols="11" v-for="(child, index) in sortedChildren" :key="child.id || index">
-        <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden;">
+      <v-col cols="11" v-for="(child, index) in sortedChildren" :key="child.id || index" style="padding-top: 4px;">
+        <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden">
 
           <v-card-title class="d-flex justify-space-between align-center ds-header-gradient py-3"
             style="position: relative; z-index: 1;">

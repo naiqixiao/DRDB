@@ -80,7 +80,7 @@
                     v-if="currentFamily.RecruitmentMethod">
                     {{ currentFamily.RecruitmentMethod }}
                   </v-chip>
-                  <v-chip size="small" variant="tonal" color="amber-darken-2" prepend-icon="mdi-human-male-child"
+                  <v-chip size="small" variant="tonal" color="indigo-darken-4" prepend-icon="mdi-human-male-child"
                     v-if="currentFamily.Children && currentFamily.Children.length > 0">
                     {{ currentFamily.Children.length }} {{ currentFamily.Children.length === 1 ? 'Child' : 'Children' }}
                   </v-chip>
@@ -335,16 +335,13 @@
 
       <!-- RIGHT COLUMN: Notes & Conversations -->
       <v-col cols="12" md="3">
-        <!-- Simplified Notes panel -->
-        <v-card class="ds-card h-100 d-flex flex-column" variant="flat">
-          <v-card-title class="text-subtitle-1 pb-0">
-            <v-icon start>mdi-note-text</v-icon>Notes
-          </v-card-title>
-          <v-card-text class="flex-grow-1 d-flex flex-column pt-2">
-            <v-textarea class="notes-textarea flex-grow-1" label="Notes about the family" hide-details v-model="familyNotes"
-              :disabled="!currentFamily.id" @change="saveNotes" variant="outlined"></v-textarea>
-          </v-card-text>
-        </v-card>
+        <NotesConversation
+          class="h-100"
+          :Conversation="currentFamily.Conversations || []"
+          :familyId="currentFamily.id ? parseInt(currentFamily.id) : null"
+          :notes="familyNotes"
+          @updateNotes="saveNotes"
+        />
       </v-col>
     </v-row>
 
@@ -366,7 +363,7 @@
     </v-dialog>
 
     <!-- BOTTOM ROW: Schedule Table -->
-    <v-row v-if="currentFamily.id" class="mt-6 mb-12">
+    <v-row class="mt-6 mb-12">
       <v-col cols="12">
         <v-card class="ds-card" variant="flat">
 
@@ -428,6 +425,7 @@ import InfoField from "@/components/InfoField.vue";
 import SectionHeader from "@/components/SectionHeader.vue";
 import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import TimelineCard from "@/components/TimelineCard.vue";
+import NotesConversation from "@/components/NotesConversation.vue";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
 import calendar from "@/services/calendar";
@@ -442,6 +440,7 @@ export default {
     SectionHeader,
     AppointmentTableBrief,
     TimelineCard,
+    NotesConversation,
   },
   data() {
     return {
@@ -708,9 +707,10 @@ export default {
       }, 300);
     },
 
-    async saveNotes() {
+    async saveNotes(newNotes) {
       if (this.currentFamily.id) {
-        this.currentFamily.Note = this.familyNotes;
+        this.familyNotes = newNotes; // Update local state
+        this.currentFamily.Note = newNotes;
         this.currentFamily.UpdatedBy = store.state.userID;
         await family.update(this.currentFamily);
         Object.assign(this.Families[this.page - 1], this.currentFamily);

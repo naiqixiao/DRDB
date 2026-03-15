@@ -1,47 +1,42 @@
 <template>
-  <v-card variant="outlined">
-    <v-tabs v-model="tab" color="secondary" bg-color="primary" align-tabs="center">
+  <v-card class="ds-card h-100 d-flex flex-column" variant="flat">
+    <v-tabs v-model="tab" color="primary" bg-color="grey-lighten-4" align-tabs="center">
       <v-tab value="notes">
-        <v-icon class="pe-1">mdi-format-list-bulleted</v-icon>
+        <v-icon start>mdi-format-list-bulleted</v-icon>
         Notes
       </v-tab>
       <v-tab value="conv">
-        <v-icon class="pe-1">mdi-forum</v-icon>
+        <v-icon start>mdi-forum</v-icon>
         Conv.
       </v-tab>
     </v-tabs>
 
-    <v-window v-model="tab" class="tabs-items">
-      <v-window-item value="notes">
-        <v-container>
-          <v-row dense>
-            <v-col class="pa-2">
-              <v-textarea 
-                class="conv-textarea" 
-                label="Notes about the family." 
-                variant="outlined"
-                no-resize 
-                rows="21" 
-                hide-details
-                v-model="newNotes" 
-                :disabled="!familyId" 
-                @update:model-value="saveNotes"
-              ></v-textarea>
-            </v-col>
-          </v-row>
+    <v-window v-model="tab" class="tabs-items flex-grow-1 h-100">
+      <v-window-item value="notes" class="h-100">
+        <v-container class="h-100 pa-2 d-flex flex-column">
+          <v-textarea 
+            class="conv-textarea flex-grow-1 d-flex flex-column h-100" 
+            label="Notes about the family." 
+            variant="outlined"
+            no-resize 
+            hide-details
+            v-model="newNotes" 
+            :disabled="!familyId" 
+            @update:model-value="saveNotes"
+          ></v-textarea>
         </v-container>
       </v-window-item>
 
-      <v-window-item value="conv">
-        <v-container style="height: 600px; display: flex; flex-direction: column;" class="pa-2">
-          <v-row dense class="flex-grow-1">
-            <v-col cols="12">
+      <v-window-item value="conv" class="h-100">
+        <v-container class="h-100 pa-2 d-flex flex-column">
+          <div class="flex-grow-1" style="position: relative; min-height: 0;">
+            <div style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
               <v-data-table 
                 :headers="headers" 
                 :items="Conversation" 
-                class="elevation-1"
-                height="450px"
+                class="elevation-1 h-100 d-flex flex-column"
                 fixed-header
+                height="100%"
                 items-per-page="-1"
                 hide-default-footer
                 no-data-text="No conversation is stored."
@@ -59,24 +54,24 @@
                   <v-btn icon="mdi-delete" variant="text" size="small" @click="deleteItem(item)"></v-btn>
                 </template>
               </v-data-table>
-            </v-col>
-          </v-row>
-          <v-row dense>
-            <v-col cols="12">
-              <v-textarea 
-                class="conv-textarea" 
-                label="Conversation with parents" 
-                variant="outlined" 
-                no-resize 
-                rows="4" 
-                hide-details
-                v-model="conv" 
-                :disabled="!familyId" 
-                append-inner-icon="mdi-send" 
-                @click:append-inner="submitConversation"
-              ></v-textarea>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
+          
+          <div class="flex-shrink-0 mt-2">
+            <v-textarea 
+              class="conv-textarea-small" 
+              label="Conversation with parents" 
+              variant="outlined" 
+              no-resize 
+              rows="3" 
+              hide-details
+              v-model="conv" 
+              :disabled="!familyId" 
+              append-inner-icon="mdi-send" 
+              @click:append-inner="submitConversation"
+              @keydown.enter.prevent="submitConversation"
+            ></v-textarea>
+          </div>
         </v-container>
       </v-window-item>
     </v-window>
@@ -169,7 +164,18 @@ export default {
 </script>
 
 <style scoped>
-.tabs-items {
-  background-color: transparent;
+:deep(.v-window__container) {
+  height: 100%;
+}
+:deep(.v-window-item) {
+  height: 100%;
+}
+:deep(.conv-textarea .v-input__control) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+:deep(.conv-textarea .v-field) {
+  height: 100%;
 }
 </style>
