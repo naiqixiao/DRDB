@@ -31,9 +31,28 @@
       </div>
 
       <!-- Age Range -->
-      <div class="mb-3" v-if="selectedStudy?.MinAge || selectedStudy?.MaxAge">
-        <v-chip size="small" variant="tonal" color="primary" prepend-icon="mdi-human-child">
-          {{ AgeFormated2(selectedStudy?.MinAge) }} — {{ AgeFormated2(selectedStudy?.MaxAge) }}
+      <div class="mb-3" v-if="selectedStudy?.AgeGroups && selectedStudy.AgeGroups.length > 0">
+        <!-- "All ages" chip only shown when multiple groups exist -->
+        <v-chip
+          v-if="selectedStudy.AgeGroups.length > 1"
+          size="small"
+          :variant="selectedAgeGroupIndex === null ? 'flat' : 'tonal'"
+          :color="selectedAgeGroupIndex === null ? 'primary' : 'default'"
+          prepend-icon="mdi-human-child"
+          class="mr-1 mb-1"
+          @click="selectAgeGroup(null)"
+        >All ages</v-chip>
+        <v-chip
+          v-for="(group, i) in selectedStudy.AgeGroups"
+          :key="i"
+          size="small"
+          :variant="isGroupSelected(i) ? 'flat' : 'tonal'"
+          :color="isGroupSelected(i) ? 'primary' : 'default'"
+          prepend-icon="mdi-human-child"
+          class="mr-1 mb-1"
+          @click="selectedStudy.AgeGroups.length > 1 && selectAgeGroup(i)"
+        >
+          {{ AgeFormated2(group.MinAge) }} — {{ AgeFormated2(group.MaxAge) }}
         </v-chip>
       </div>
 
@@ -118,11 +137,18 @@ export default {
       default: () => ({})
     },
   },
+  emits: ['ageGroupFilter'],
   data() {
     return {
       showPhoneScript: true,
       showDescription: false,
+      selectedAgeGroupIndex: null,
     };
+  },
+  watch: {
+    selectedStudy() {
+      this.selectedAgeGroupIndex = null;
+    },
   },
   computed: {
     hasCriteriaChips() {
@@ -133,6 +159,15 @@ export default {
     },
   },
   methods: {
+    isGroupSelected(i) {
+      if (!this.selectedStudy || this.selectedStudy.AgeGroups.length === 1) return true;
+      return this.selectedAgeGroupIndex === i;
+    },
+    selectAgeGroup(index) {
+      this.selectedAgeGroupIndex = index;
+      const group = index !== null ? this.selectedStudy.AgeGroups[index] : null;
+      this.$emit('ageGroupFilter', group);
+    },
     AgeFormated2(Age) {
       let formated = "N/A";
       if (Age > 0) {

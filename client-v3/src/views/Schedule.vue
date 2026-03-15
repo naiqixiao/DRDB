@@ -34,7 +34,7 @@
               v-model="selectedStudy" 
               return-object 
               label="Studies" 
-              @update:model-value="searchChild"
+              @update:model-value="onStudyChange"
               bg-color="textbackground" 
               hide-details 
               variant="outlined" 
@@ -45,7 +45,7 @@
 
         <v-row class="mt-4" style="flex: 1;">
           <v-col cols="12" md="12" class="d-flex">
-            <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1"></StudySummary>
+            <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
           </v-col>
         </v-row>
       </v-col>
@@ -532,11 +532,11 @@ export default {
       validAddChild: true,
       historyTab: 'timeline',
       studies: [],
+      activeAgeGroup: null,
       selectedStudy: {
         StudyName: null,
         FK_Lab: this.$store.state.lab,
-        MinAge: null,
-        MaxAge: null,
+        AgeGroups: [],
         Description: "",
         Completed: false,
         StudyType: null,
@@ -709,6 +709,16 @@ export default {
       }
     },
 
+    onStudyChange() {
+      this.activeAgeGroup = null;
+      this.searchChild();
+    },
+
+    onAgeGroupFilter(group) {
+      this.activeAgeGroup = group;
+      this.searchChild();
+    },
+
     async searchChild() {
       this.$store.dispatch("setLoadingStatus", true);
 
@@ -717,9 +727,20 @@ export default {
         this.currentVisitedFamilies = results.data;
       }
 
+      // Compute age range: use actively selected group or overall min/max across all groups
+      const groups = this.selectedStudy.AgeGroups || [];
+      let minAge, maxAge;
+      if (this.activeAgeGroup) {
+        minAge = this.activeAgeGroup.MinAge;
+        maxAge = this.activeAgeGroup.MaxAge;
+      } else if (groups.length > 0) {
+        minAge = Math.min(...groups.map(g => g.MinAge));
+        maxAge = Math.max(...groups.map(g => g.MaxAge));
+      }
+
       const queryString = {
-        minAge: this.selectedStudy.MinAge,
-        maxAge: this.selectedStudy.MaxAge,
+        minAge,
+        maxAge,
         studyID: this.selectedStudy.id,
         trainingMode: this.$store.state.trainingMode
       };
@@ -740,7 +761,21 @@ export default {
       else if (this.selectedStudy.HearingLossParticipant === "Only") queryString.HearingLossParticipant = 1;
 
       try {
-        const Results = await child.search(queryString);
+        let eligible = (await child.search(queryString)).data || [];
+
+        // Client-side prerequisite / exclusion post-filter
+        const prereqs = this.selectedStudy.Prerequisites || [];
+        const exclusions = this.selectedStudy.Exclusions || [];
+        if (prereqs.length > 0 || exclusions.length > 0) {
+          eligible = eligible.filter(c => {
+            const pastIds = (c.Appointments || []).map(a => a.FK_Study);
+            if (prereqs.length > 0 && !prereqs.every(p => pastIds.includes(p.id))) return false;
+            if (exclusions.length > 0 && exclusions.some(e => pastIds.includes(e.id))) return false;
+            return true;
+          });
+        }
+
+        const Results = { data: eligible };
 
         if (Results.data && Results.data.length > 0) {
           this.page = 1;
