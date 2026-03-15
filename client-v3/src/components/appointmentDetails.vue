@@ -464,7 +464,7 @@ export default {
 
       this.readyToCreateSchedule();
       this._skipWatcherReset = true;
-      this.$emit("newAppointment", newAppointment);
+      this.$emit("newAppointment", JSON.parse(JSON.stringify(newAppointment)));
     },
 
     deleteCurrentAppointment(index) {

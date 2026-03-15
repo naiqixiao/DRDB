@@ -26,7 +26,7 @@
                     <v-icon size="18" class="mr-2" color="primary">mdi-clock-outline</v-icon>
                     <span class="text-caption font-weight-bold text-uppercase">Study Date & Time</span>
                     <v-chip v-if="!section1Open && $refs.dateTimePickerComp?.studyDateTimeValue" size="small" variant="tonal" color="primary" class="ml-3">
-                      {{ $refs.dateTimePickerComp.studyDateTimeValue.replace('T', '  ') }}
+                      {{ $refs.dateTimePickerComp.studyDateTimeValue }}
                     </v-chip>
                     <v-spacer></v-spacer>
                     <v-icon size="18">{{ section1Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
