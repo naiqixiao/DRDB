@@ -209,49 +209,90 @@
           <!-- Step 3 -->
           <v-stepper-window-item value="3">
             <v-card elevation="0">
-              <v-card-title class="d-flex justify-space-between align-center" style="white-space: normal;">
-                Set up next contact date. This family can be contacted after this date.
-                <v-btn icon="mdi-close" variant="text" @click="close"></v-btn>
-              </v-card-title>
+              <!-- Header toolbar (matches Step 2 pattern) -->
+              <div class="d-flex align-center px-4 pt-3 pb-1" style="gap: 12px;">
+                <v-icon size="20" color="primary">mdi-calendar-clock-outline</v-icon>
+                <span class="text-subtitle-2 font-weight-bold" style="color: rgb(var(--v-theme-primary))">Next Contact</span>
+                <v-chip v-if="contactDate" size="small" variant="tonal" color="primary" class="ml-1">
+                  {{ contactDate }}
+                </v-chip>
+                <v-spacer></v-spacer>
+                <v-btn icon="mdi-close" variant="text" size="small" @click="close"></v-btn>
+              </div>
 
-              <v-container>
-                <v-card-text>
-                  <v-divider class="mb-5"></v-divider>
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1 mt-2">Next contact after:</div>
-                  <v-container class="d-flex flex-wrap justify-start align-center pa-0 pt-2" style="gap: 40px">
-                    <v-text-field 
-                      variant="outlined" 
-                      density="compact" 
-                      ref="contactDateRef" 
-                      label="Date (YYYY-MM-DD)"
-                      style="max-width: 250px" 
-                      v-model="contactDate" 
-                      :rules="$rules.dob" 
-                      hide-details
-                      prepend-inner-icon="mdi-calendar" 
-                      @click:prepend-inner="datePicker = true"
-                      @click="datePicker = true"
-                    ></v-text-field>
+              <v-container class="pa-0">
+                <v-card-text class="pa-2">
+                  <!-- Instructional hint -->
+                  <div class="text-caption text-muted px-1 mb-2" style="line-height: 1.4">
+                    Set up the next contact date. This family can be contacted after this date.
+                  </div>
 
-                    <h3 class="ma-0">{{ daysLate }}</h3>
+                  <!-- Section 1: Contact Date (collapsible) -->
+                  <div class="section-header" @click="step3Section1Open = !step3Section1Open">
+                    <v-icon size="18" class="mr-2" color="primary">mdi-calendar-edit</v-icon>
+                    <span class="text-caption font-weight-bold text-uppercase">Contact Date</span>
+                    <v-chip v-if="!step3Section1Open && contactDate" size="small" variant="tonal" color="primary" class="ml-3">
+                      {{ contactDate }}
+                    </v-chip>
+                    <v-chip v-if="!step3Section1Open && daysLate" size="x-small" variant="tonal" color="grey" class="ml-2">
+                      {{ daysLate }}
+                    </v-chip>
                     <v-spacer></v-spacer>
-                  </v-container>
+                    <v-icon size="18">{{ step3Section1Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </div>
+                  <v-expand-transition>
+                    <div v-show="step3Section1Open" class="section-body">
+                      <div class="d-flex flex-wrap align-center" style="gap: 16px">
+                        <v-text-field 
+                          variant="outlined" 
+                          density="compact" 
+                          ref="contactDateRef" 
+                          label="Date (YYYY-MM-DD)"
+                          style="max-width: 250px" 
+                          v-model="contactDate" 
+                          :rules="$rules.dob" 
+                          hide-details
+                          prepend-inner-icon="mdi-calendar" 
+                          @click:prepend-inner="datePicker = true"
+                          @click="datePicker = true"
+                        ></v-text-field>
+                        <v-chip v-if="daysLate" variant="tonal" color="primary" size="small">
+                          <v-icon start size="16">mdi-clock-outline</v-icon>
+                          {{ daysLate }}
+                        </v-chip>
+                      </div>
+                    </div>
+                  </v-expand-transition>
 
-                  <v-divider class="my-5"></v-divider>
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1 mt-6">Note for future contact:</div>
-                  <v-container class="pa-0 pt-2 d-flex flex-wrap justify-start align-center">
-                    <v-textarea 
-                      variant="outlined" 
-                      class="conv-textarea" 
-                      label="" 
-                      no-resize 
-                      rows="3"
-                      hide-details 
-                      v-model="nextContactNote"
-                    ></v-textarea>
-                  </v-container>
+                  <v-divider class="my-1"></v-divider>
+
+                  <!-- Section 2: Note (collapsible) -->
+                  <div class="section-header" @click="step3Section2Open = !step3Section2Open">
+                    <v-icon size="18" class="mr-2" color="primary">mdi-note-text-outline</v-icon>
+                    <span class="text-caption font-weight-bold text-uppercase">Note for Future Contact</span>
+                    <v-chip v-if="!step3Section2Open && nextContactNote" size="x-small" variant="tonal" color="grey" class="ml-2">has note</v-chip>
+                    <v-spacer></v-spacer>
+                    <v-icon size="18">{{ step3Section2Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </div>
+                  <v-expand-transition>
+                    <div v-show="step3Section2Open" class="section-body">
+                      <v-textarea 
+                        variant="outlined" 
+                        class="conv-textarea" 
+                        label="" 
+                        no-resize 
+                        rows="3"
+                        hide-details 
+                        v-model="nextContactNote"
+                        placeholder="Add notes for the next contact..."
+                        density="compact"
+                      ></v-textarea>
+                    </div>
+                  </v-expand-transition>
                 </v-card-text>
               </v-container>
+
+              <!-- Action bar (same pattern as Steps 1 & 2) -->
               <v-card-actions class="px-4 py-2 d-flex align-center">
                 <!-- Compact action log -->
                 <div v-if="actionLogs.length" style="flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; margin-right: 16px">
@@ -382,6 +423,8 @@ export default {
     section2Open: true,
     section3Open: false,
     hasRecruitableChildrenFlag: false,
+    step3Section1Open: true,
+    step3Section2Open: true,
   }),
   methods: {
     addLog(action, success, message) {
@@ -852,6 +895,8 @@ export default {
       this.section2Open = true;
       this.section3Open = false;
       this.hasRecruitableChildrenFlag = false;
+      this.step3Section1Open = true;
+      this.step3Section2Open = true;
     },
 
     initiateVariables(dialogType) {

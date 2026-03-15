@@ -3,9 +3,9 @@
     <v-btn class="ma-0" variant="text" icon="mdi-chevron-left" size="large" @click="previousPage" :disabled="page <= 1">
     </v-btn>
 
-    <div class="text-h6" style="width:45px">{{ page }}</div>
-    <div class="text-h6 px-2">{{ " / " }}</div>
-    <div class="text-h6 text-left" style="width:45px">{{ NofPages }}</div>
+    <span class="text-h6" style="min-width: 20px; text-align: right">{{ page }}</span>
+    <span class="text-h6 mx-1" style="opacity: 0.5">/</span>
+    <span class="text-h6" style="min-width: 20px; text-align: left">{{ NofPages }}</span>
 
     <v-btn class="ma-0" variant="text" icon="mdi-chevron-right" size="large" @click="nextPage"
       :disabled="page >= NofPages || page === 0">

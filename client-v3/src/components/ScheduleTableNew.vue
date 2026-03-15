@@ -22,9 +22,6 @@
         <v-container class="d-flex align-center flex-wrap pa-0">
           <div class="text-start" v-html="apptInfo(item)"></div>
           <v-spacer></v-spacer>
-          <v-btn variant="outlined" size="small" @click.stop="toggleExpand(item)">
-            details...
-          </v-btn>
           <v-divider class="my-2" style="flex: 0 0 100%;"></v-divider>
 
           <div class="text-start" v-html="parentContact(item.Family)"></div>

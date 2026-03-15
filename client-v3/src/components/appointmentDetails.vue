@@ -463,6 +463,7 @@ export default {
       this.editedAppointments.push(newAppointment);
 
       this.readyToCreateSchedule();
+      this._skipWatcherReset = true;
       this.$emit("newAppointment", newAppointment);
     },
 
@@ -476,6 +477,7 @@ export default {
       this.selectedExperimenters_2nd.splice(index, 1);
       this.optionsE1.splice(index, 1);
       this.optionsE2.splice(index, 1);
+      this._skipWatcherReset = true;
       this.$emit("deleteCurrentAppointment", index);
       this.readyToCreateSchedule();
     },
@@ -666,6 +668,10 @@ export default {
     Appointments: {
       deep: true,
       handler(newVal) {
+        if (this._skipWatcherReset) {
+          this._skipWatcherReset = false;
+          return;
+        }
         if (newVal) {
           this.resetVariables();
         }
