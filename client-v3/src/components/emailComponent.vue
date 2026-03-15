@@ -1,31 +1,48 @@
 <template>
-  <v-container class="d-flex flex-column justify-end" style="gap: 20px;">
-    <v-alert v-if="!familyInfo.Email" border="start" type="error" color="#c73460" density="compact" class="font-weight-bold">
+  <div class="email-compose">
+    <ConfirmDlg ref="confirmD" />
+    <!-- Error alert -->
+    <v-alert v-if="!familyInfo.Email" type="error" variant="tonal" density="compact" class="mb-4" border="start">
+      <template v-slot:prepend>
+        <v-icon>mdi-email-off-outline</v-icon>
+      </template>
       Participant email is not available.
     </v-alert>
 
-    <v-text-field 
-      style="width: 60%" 
-      hide-details 
-      prefix="TO: " 
-      v-model="emailAddress" 
-      :rules="$rules.email"
-      @update:model-value="checkEmail"
-      variant="outlined"
-      density="compact"
-    ></v-text-field>
-    
-    <v-text-field 
-      style="width: 60%; margin-bottom: 20px;" 
-      hide-details 
-      prefix="SUBJECT: "
-      v-model="emailSubject"
-      variant="outlined"
-      density="compact"
-    ></v-text-field>
+    <!-- Recipient & Subject (compact header) -->
+    <div class="email-header">
+      <div class="email-field">
+        <span class="email-field-label">TO</span>
+        <v-text-field
+          hide-details
+          v-model="emailAddress"
+          :rules="$rules.email"
+          @update:model-value="checkEmail"
+          variant="plain"
+          density="compact"
+          class="email-field-input"
+          placeholder="recipient@email.com"
+        ></v-text-field>
+      </div>
+      <v-divider></v-divider>
+      <div class="email-field">
+        <span class="email-field-label">SUBJECT</span>
+        <v-text-field
+          hide-details
+          v-model="emailSubject"
+          variant="plain"
+          density="compact"
+          class="email-field-input"
+          placeholder="Email subject..."
+        ></v-text-field>
+      </div>
+    </div>
 
-    <ckeditor ref="emailBodyRef" :editor="editor" v-model="emailBody" :config="editorConfig"></ckeditor>
-  </v-container>
+    <!-- Email body editor -->
+    <div class="email-body-wrapper">
+      <ckeditor ref="emailBodyRef" :editor="editor" v-model="emailBody" :config="editorConfig"></ckeditor>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -34,11 +51,13 @@ import family from "@/services/family";
 import moment from "moment";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
   name: "emailComponent",
   components: {
-    ckeditor: Ckeditor
+    ckeditor: Ckeditor,
+    ConfirmDlg
   },
   props: {
     emailType: String,
@@ -205,7 +224,7 @@ export default {
             opening = "<p>Dear " + parentName + ",</p><p>This is " + this.$store.state.labName + ". We hope this email finds you well!</p><p>We are writing to follow up with our previous email regarding inviting " + this.childNames() + " to participate in our study.</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>";
             break;
           case "ThankYou":
-            opening = "<p>Dear " + parentName + ",</p><p>Thank you so much for participating in our study with " + this.childNames() + "! We had a wonderful time with you both! :-) </p>";
+            opening = "<p>Dear " + parentName + ",</p><p>Thank you so much for participating in our study with " + this.childNames() + "! We had a wonderful time with you both! :-) </p>";
             break;
           case "Reminder":
             let dateLabel = "";
@@ -390,7 +409,7 @@ export default {
         return true; // Used by parent to know it succeeded
       } catch (error) {
         console.error(error);
-        alert("Email was not sent successfully. Please send it again manually!");
+        this.$refs.confirmD.open('Email Error', 'Email was not sent successfully. Please send it again manually!', { color: 'error', noconfirm: true });
         return false;
       }
     },
@@ -451,12 +470,83 @@ export default {
 </script>
 
 <style>
-.ck-editor__editable_inline:not(.ck-comment__input *) {
-  height: 500px !important;
-  overflow-y: auto;
+/* Email compose container */
+.email-compose {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
-.v-field__prefix {
-  font-weight: 600;
-  font-size: 16px;
+
+/* Header section (TO / SUBJECT) */
+.email-header {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border-radius: 8px 8px 0 0;
+  background: rgba(var(--v-theme-surface), 1);
+  overflow: hidden;
+}
+
+.email-field {
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  min-height: 44px;
+}
+
+.email-field-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(var(--v-theme-on-surface), 0.45);
+  min-width: 64px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.email-field-input {
+  flex: 1;
+}
+
+.email-field-input .v-field__input {
+  font-size: 0.875rem;
+  padding: 4px 0 !important;
+  min-height: 32px !important;
+}
+
+/* Editor wrapper */
+.email-body-wrapper {
+  border: 1px solid rgba(var(--v-border-color), 0.12);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+/* CKEditor overrides */
+.email-body-wrapper .ck.ck-editor {
+  border: none !important;
+}
+
+.email-body-wrapper .ck.ck-toolbar {
+  border: none !important;
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.08) !important;
+  background: rgba(var(--v-theme-surface), 0.6) !important;
+  padding: 2px 8px !important;
+}
+
+.email-body-wrapper .ck.ck-editor__main > .ck-editor__editable {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.ck-editor__editable_inline:not(.ck-comment__input *) {
+  height: 400px !important;
+  overflow-y: auto;
+  padding: 20px 24px !important;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+/* Prefix styling override */
+.email-field .v-field__prepend-inner {
+  display: none;
 }
 </style>

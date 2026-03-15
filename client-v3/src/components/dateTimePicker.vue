@@ -1,11 +1,9 @@
 <template>
   <v-form ref="validScheduleDateTime" v-model="validScheduleDateTime" lazy-validation>
     <v-container
-      class="pa-0 d-flex flex-wrap justify-start align-center"
-      style="gap: 16px; min-height: 80px"
+      class="pa-0 d-flex align-center"
+      style="gap: 16px;"
     >
-      <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1" style="width: 100%">STUDY DATE & TIME</div>
-
       <v-text-field
         ref="studyDateTimeInput"
         label="Date & Time"
@@ -16,13 +14,11 @@
         hide-details
         variant="outlined"
         density="compact"
-        style="max-width: 250px;"
+        style="max-width: 250px; flex-shrink: 0;"
       ></v-text-field>
 
-      <v-spacer></v-spacer>
+      <span v-html="dateTimeNotice" style="flex: 1;"></span>
     </v-container>
-
-    <div class="text-center mt-2" v-html="dateTimeNotice"></div>
   </v-form>
 </template>
 

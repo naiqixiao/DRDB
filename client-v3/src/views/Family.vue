@@ -1,6 +1,7 @@
 <template>
   <v-container fluid>
     <AlertBanner :showAdminEmail="true" />
+    <ConfirmDlg ref="confirmD" />
 
     <v-card class="ds-card mb-6" variant="flat">
       <v-toolbar color="transparent" density="compact">
@@ -432,6 +433,7 @@ import SectionHeader from "@/components/SectionHeader.vue";
 import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import TimelineCard from "@/components/TimelineCard.vue";
 import NotesConversation from "@/components/NotesConversation.vue";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
 import calendar from "@/services/calendar";
@@ -447,6 +449,7 @@ export default {
     AppointmentTableBrief,
     TimelineCard,
     NotesConversation,
+    ConfirmDlg,
   },
   data() {
     return {
@@ -565,7 +568,7 @@ export default {
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({ name: "Login" });
         }
       }
@@ -611,14 +614,14 @@ export default {
           this.currentFamily.id = "";
           this.familyNotes = "";
 
-          alert(Results.data.message || "No families found.");
+          this.$refs.confirmD.open('No Results', Results.data.message || 'No families found.', { color: 'warning', noconfirm: true });
         }
 
         this.searchDialog = false;
         this.searchStatus = false;
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({ name: "Login" });
         }
       }
@@ -640,7 +643,7 @@ export default {
           this.currentFamily = this.Families[this.page - 1];
           this.familyNotes = this.currentFamily.Note || "";
         } else {
-          alert("No family needs to be followed up.");
+          this.$refs.confirmD.open('No Results', 'No family needs to be followed up.', { color: 'warning', noconfirm: true });
           this.page = 0;
           this.currentFamily = Object.assign({}, this.familyTemplate);
           this.currentFamily.Children = [];
@@ -649,7 +652,7 @@ export default {
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({ name: "Login" });
         }
       }
@@ -659,7 +662,7 @@ export default {
 
     addFamily() {
       if (this.$store.state.trainingMode) {
-        alert("You are currently in Training mode.\n\nAny family created under Training mode will only be accessible for training purpose.\n\nIf you want to create a record for a real family, please turn off the Training mode first.");
+        this.$refs.confirmD.open('Training Mode', 'You are currently in Training mode.<br><br>Any family created under Training mode will only be accessible for training purpose.<br><br>If you want to create a record for a real family, please turn off the Training mode first.', { color: 'warning', noconfirm: true });
       }
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.familyTemplate);
@@ -784,10 +787,10 @@ export default {
         
         this.deleteDialog = false;
         this.scheduleToDelete = null;
-        alert("Schedule and calendar event successfully deleted.");
+        this.$refs.confirmD.open('Deleted', 'Schedule and calendar event successfully deleted.', { color: 'success', noconfirm: true });
       } catch (error) {
         console.error(error);
-        alert("Failed to delete the schedule.");
+        this.$refs.confirmD.open('Error', 'Failed to delete the schedule.', { color: 'error', noconfirm: true });
       } finally {
         this.isDeletingTimelineSchedule = false;
       }

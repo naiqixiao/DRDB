@@ -31,6 +31,14 @@
           <v-spacer></v-spacer>
 
           <div class="text-start" v-html="familyID(item.Family)"></div>
+
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-account-details-outline" variant="text" size="small" density="compact"
+                color="primary" class="ml-2" @click.stop="$emit('showFamily', item.Family)"></v-btn>
+            </template>
+            <span>View Family Details</span>
+          </v-tooltip>
         </v-container>
       </template>
 
@@ -140,7 +148,7 @@ export default {
       default: 10
     }
   },
-  emits: ["rowSelected", "updatedSchedule"],
+  emits: ["rowSelected", "updatedSchedule", "showFamily"],
   data: () => ({
     dialog: false,
     dialogType: null,

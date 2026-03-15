@@ -1,5 +1,6 @@
 <template>
     <v-container>
+        <ConfirmDlg ref="confirmD" />
         <v-row style="overflow-x: auto; align-items: stretch">
             <v-col cols="12" md="3">
                 <v-card class="d-flex justify-center align-center"
@@ -60,8 +61,12 @@
 <script>
 import calendar from "@/services/calendar";
 import testingRoom from "@/services/testingRoom";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
+    components: {
+        ConfirmDlg
+    },
     props: {
         testingRooms: Array,
         labId: Number,
@@ -100,14 +105,12 @@ export default {
         },
 
         async deleteTestingRoom(room, index) {
-            if (!confirm(`Are you sure you want to delete Testing Room: ${room.name}?`)) {
+            if (!(await this.$refs.confirmD.open('Confirm Delete', `Are you sure you want to delete Testing Room: ${room.name}?`))) {
                 return;
             }
             try {
                 await testingRoom.delete({ id: room.id, name: room.name });
-                alert(
-                    "Testing Room: " + room.name + " has been deleted.\nBut the associated Google Calendar has not been deleted."
-                );
+                this.$refs.confirmD.open('Deleted', 'Testing Room: ' + room.name + ' has been deleted. Note: the associated Google Calendar has not been deleted.', { color: 'success', noconfirm: true });
                 this.testingRooms.splice(index, 1);
                 this.$emit("testingRoomsUpdated", this.testingRooms);
             } catch (error) {

@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <ConfirmDlg ref="confirmD" />
     <v-row justify="center" align="center" style="padding: 40px">
       <v-col cols="12" md="3">
         <v-form ref="formLogin" v-model="validLogin" lazy-validation style="padding: 20px">
@@ -100,10 +101,12 @@ import login from "@/services/login";
 import testingRoom from "@/services/testingRoom";
 import externalAPIs from "@/services/externalAPIs";
 import HistogramChart from '@/components/HistogramChart.vue';
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
   components: {
-    HistogramChart
+    HistogramChart,
+    ConfirmDlg
   },
   data() {
     return {
@@ -188,9 +191,7 @@ export default {
           this.error = error.response ? error.response.data.error : error.message;
 
           if (error.response && (error.response.status === 500 || error.response.status === 502)) {
-            alert(
-              "Calm down....\n\nThe backend server is not running properly.\n\nAsk the administrator to fix this issue."
-            );
+            this.$refs.confirmD.open('Server Error', 'Calm down....<br><br>The backend server is not running properly.<br><br>Ask the administrator to fix this issue.', { color: 'error', noconfirm: true });
           }
         }
 
@@ -206,11 +207,7 @@ export default {
           });
 
           this.error = null;
-          alert(
-            "Your password is reset, please find the temporary password in your email (" +
-            this.email +
-            ") inbox."
-          );
+          this.$refs.confirmD.open('Password Reset', 'Your password is reset, please find the temporary password in your email (' + this.email + ') inbox.', { color: 'success', noconfirm: true });
           this.email = null;
           this.password = null;
           this.error = null;
@@ -218,7 +215,7 @@ export default {
           this.error = error.response ? error.response.data.error : error.message;
         }
       } else {
-        alert("enter your email to reset password.");
+        this.$refs.confirmD.open('Validation', 'Please enter your email to reset your password.', { color: 'warning', noconfirm: true });
       }
     },
 
@@ -271,7 +268,7 @@ export default {
 
         this.changeTemporaryPassword = false;
 
-        alert("Your password is set! \nWelcome!");
+        await this.$refs.confirmD.open('Welcome!', 'Your password is set! Welcome!', { color: 'success', noconfirm: true });
 
         this.close();
 

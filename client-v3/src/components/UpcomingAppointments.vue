@@ -1,19 +1,7 @@
 <template>
   <div class="upcoming-section">
-    <div class="upcoming-header">
-      <v-icon class="mr-2" color="primary">mdi-calendar-clock</v-icon>
-      <span class="upcoming-title">Upcoming Appointments</span>
-      <v-btn
-        icon="mdi-refresh"
-        variant="text"
-        size="small"
-        @click="fetchUpcoming"
-        :loading="loading"
-        class="ml-2"
-      ></v-btn>
-    </div>
-
-    <div v-if="upcomingSchedules.length === 0 && !loading" class="no-upcoming">      <v-icon size="20" class="mr-1" color="grey">mdi-calendar-remove-outline</v-icon>
+    <div v-if="upcomingSchedules.length === 0 && !loading" class="no-upcoming">
+      <v-icon size="20" class="mr-1" color="grey">mdi-calendar-remove-outline</v-icon>
       No upcoming confirmed appointments found.
     </div>
 
@@ -31,6 +19,15 @@
           <span class="card-time">{{ formatTime(schedule.AppointmentTime) }}</span>
           <span class="card-date">{{ formatDate(schedule.AppointmentTime) }}</span>
           <span class="card-relative">{{ relativeTime(schedule.AppointmentTime) }}</span>
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" icon="mdi-autorenew" variant="text" size="x-small" density="compact"
+                class="ml-1" style="color: white; opacity: 0.9;"
+                :disabled="schedule.Status === 'Confirmed' && schedule.Completed === true"
+                @click.stop="$emit('updateSchedule', schedule)"></v-btn>
+            </template>
+            <span>Update this appointment</span>
+          </v-tooltip>
         </div>
 
         <v-card-text class="card-body">
@@ -58,6 +55,14 @@
             <v-icon size="13" class="mr-1">mdi-account-group-outline</v-icon>
             {{ schedule.Family.NamePrimary }}
             <span v-if="schedule.Family.Phone" class="family-detail"> · {{ formatPhone(schedule.Family.Phone) }}</span>
+            <v-spacer></v-spacer>
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn v-bind="props" icon="mdi-account-details-outline" variant="text" size="x-small" density="compact"
+                  color="primary" @click.stop="$emit('showFamily', schedule.Family)"></v-btn>
+              </template>
+              <span>View Family Details</span>
+            </v-tooltip>
           </div>
         </v-card-text>
       </v-card>
@@ -71,7 +76,7 @@ import moment from "moment-timezone";
 
 export default {
   name: "UpcomingAppointments",
-  emits: ["selectSchedule"],
+  emits: ["selectSchedule", "showFamily", "updateSchedule"],
   data() {
     return {
       upcomingSchedules: [],

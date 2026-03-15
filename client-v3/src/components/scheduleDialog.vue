@@ -1,13 +1,13 @@
 <template>
-  <v-dialog persistent :model-value="dialog" @update:model-value="onDialogClose" transition="dialog-bottom-transition" max-width="1200px">
+  <v-dialog persistent :model-value="dialog" @update:model-value="onDialogClose" transition="dialog-bottom-transition" max-width="1200px" content-class="schedule-dialog-overlay">
     <v-card class="ds-card pb-2" variant="flat">
       <v-stepper v-model="stepperPage" elevation="0">
         <v-stepper-header>
           <v-stepper-item title="Schedule a visit" value="1" editable :complete="stepperPage > 1"></v-stepper-item>
           <v-divider></v-divider>
-          <v-stepper-item title="Email" value="2" :editable="stepperPage >= 2 || stepperPage === '3' || (stepperPage === '1' && !!createdScheduleInSession)" :complete="stepperPage > 2"></v-stepper-item>
+          <v-stepper-item title="Email" value="2" :editable="step2Editable" :complete="stepperPage > 2"></v-stepper-item>
           <v-divider></v-divider>
-          <v-stepper-item title="Next Contact" value="3" :editable="stepperPage >= 3 || (stepperPage === '1' || stepperPage === '2' && isFinalized)" :complete="stepperPage > 3"></v-stepper-item>
+          <v-stepper-item title="Next Contact" value="3" :editable="step3Editable" :complete="stepperPage > 3"></v-stepper-item>
         </v-stepper-header>
 
         <v-stepper-window>
@@ -19,45 +19,81 @@
                 <v-btn icon="mdi-close" variant="text" @click="close"></v-btn>
               </v-card-title>
 
-              <v-container>
-                <v-card-text>
-                  <!-- Schedule date and time -->
-                  <v-divider class="mb-5"></v-divider>
-                  <dateTimePicker 
-                    ref="dateTimePickerComp" 
-                    :dateTimePickerDisable="dateTimePickerDisable"
-                    :appointmentTime="currentSchedule?.AppointmentTime"
-                    @readyToCreateSchedule="readyToCreateSchedule" 
-                  />
+              <v-container class="pa-0">
+                <v-card-text class="pa-2">
+                  <!-- Section 1: Schedule Date & Time (collapsible) -->
+                  <div class="section-header" @click="section1Open = !section1Open">
+                    <v-icon size="18" class="mr-2" color="primary">mdi-clock-outline</v-icon>
+                    <span class="text-caption font-weight-bold text-uppercase">Study Date & Time</span>
+                    <v-chip v-if="!section1Open && $refs.dateTimePickerComp?.studyDateTimeValue" size="small" variant="tonal" color="primary" class="ml-3">
+                      {{ $refs.dateTimePickerComp.studyDateTimeValue.replace('T', '  ') }}
+                    </v-chip>
+                    <v-spacer></v-spacer>
+                    <v-icon size="18">{{ section1Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </div>
+                  <v-expand-transition>
+                    <div v-show="section1Open" class="section-body">
+                      <dateTimePicker 
+                        ref="dateTimePickerComp" 
+                        :dateTimePickerDisable="dateTimePickerDisable"
+                        :appointmentTime="currentSchedule?.AppointmentTime"
+                        @readyToCreateSchedule="readyToCreateSchedule" 
+                      />
+                    </div>
+                  </v-expand-transition>
 
-                  <!-- Appointment Data Table -->
-                  <v-divider class="my-5"></v-divider>
-                  <appointmentDetails 
-                    ref="appointmentDetailsRef" 
-                    :Appointments="currentSchedule?.Appointments"
-                    :Children="currentFamily?.Children" 
-                    :scheduleType="scheduleType"
-                    :parentResponse="parentResponse"
-                    @dateTimePickerDisableUpdate="dateTimePickerDisableUpdate"
-                    @newAppointment="addAppointment" 
-                    @deleteCurrentAppointment="deleteCurrentAppointment"
-                    @readyToCreateSchedule="readyToCreateSchedule"
-                  />
+                  <v-divider class="my-1"></v-divider>
 
-                  <!-- Notes for this schedule -->
-                  <v-divider class="my-5"></v-divider>
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">Notes for this schedule:</div>
-                  <v-container class="pa-0">
-                    <v-textarea 
-                      variant="outlined" 
-                      class="conv-textarea" 
-                      label="" 
-                      no-resize 
-                      rows="3"
-                      hide-details 
-                      v-model="Note"
-                    ></v-textarea>
-                  </v-container>
+                  <!-- Section 2: Appointment Details (collapsible) -->
+                  <div class="section-header" @click="section2Open = !section2Open">
+                    <v-icon size="18" class="mr-2" color="primary">mdi-clipboard-list-outline</v-icon>
+                    <span class="text-caption font-weight-bold text-uppercase">Appointment Details</span>
+                    <v-spacer></v-spacer>
+                    <v-icon size="18">{{ section2Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </div>
+                  <v-expand-transition>
+                    <div v-show="section2Open" class="section-body">
+                      <appointmentDetails 
+                        ref="appointmentDetailsRef" 
+                        :Appointments="currentSchedule?.Appointments"
+                        :Children="currentFamily?.Children" 
+                        :scheduleType="scheduleType"
+                        :parentResponse="parentResponse"
+                        :showAdditionalAppointments="scheduleEnable && hasRecruitableChildrenFlag"
+                        @dateTimePickerDisableUpdate="dateTimePickerDisableUpdate"
+                        @newAppointment="addAppointment" 
+                        @deleteCurrentAppointment="deleteCurrentAppointment"
+                        @readyToCreateSchedule="readyToCreateSchedule"
+                        @hasRecruitableChildren="hasRecruitableChildrenFlag = $event"
+                      />
+                    </div>
+                  </v-expand-transition>
+
+                  <v-divider class="my-1"></v-divider>
+
+                  <!-- Section 3: Notes (collapsible) -->
+                  <div class="section-header" @click="section3Open = !section3Open">
+                    <v-icon size="18" class="mr-2" color="primary">mdi-note-text-outline</v-icon>
+                    <span class="text-caption font-weight-bold text-uppercase">Notes</span>
+                    <v-chip v-if="!section3Open && Note" size="x-small" variant="tonal" color="grey" class="ml-2">has note</v-chip>
+                    <v-spacer></v-spacer>
+                    <v-icon size="18">{{ section3Open ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  </div>
+                  <v-expand-transition>
+                    <div v-show="section3Open" class="section-body">
+                      <v-textarea 
+                        variant="outlined" 
+                        class="conv-textarea" 
+                        label="" 
+                        no-resize 
+                        rows="2"
+                        hide-details 
+                        v-model="Note"
+                        placeholder="Add notes for this schedule..."
+                        density="compact"
+                      ></v-textarea>
+                    </div>
+                  </v-expand-transition>
                 </v-card-text>
               </v-container>
 
@@ -93,7 +129,10 @@
           <!-- Step 2 -->
           <v-stepper-window-item value="2">
             <v-card elevation="0">
-              <v-card-title class="d-flex justify-space-between align-center">
+              <!-- Header toolbar -->
+              <div class="d-flex align-center px-4 pt-3 pb-1" style="gap: 12px;">
+                <v-icon size="20" color="primary">mdi-email-edit-outline</v-icon>
+                <span class="text-subtitle-2 font-weight-bold" style="color: rgb(var(--v-theme-primary))">Compose Email</span>
                 <v-spacer></v-spacer>
                 <v-select 
                   v-show="emailSelectionShow" 
@@ -102,26 +141,26 @@
                   density="compact" 
                   :items="emailOptions" 
                   v-model="emailType"
-                  label="Choose the type of email you want to send"
+                  label="Email template"
                   @update:model-value="emailTypeChange($event)"
-                  style="max-width: 400px;"
+                  style="max-width: 280px;"
                 ></v-select>
-                <v-spacer></v-spacer>
-                <v-btn icon="mdi-close" variant="text" @click="close"></v-btn>
-              </v-card-title>
+                <v-btn icon="mdi-close" variant="text" size="small" @click="close"></v-btn>
+              </div>
 
-              <v-container>
-                <v-card-text>
-                  <emailComponent 
-                    ref="emailComponentRef" 
-                    :dialog="emailDialog" 
-                    :emailType="emailType"
-                    :appointments="emailAppointments" 
-                    :appointmentTime="studyDateTime"
-                    :familyInfo="currentFamily"
-                  />
-                </v-card-text>
-              </v-container>
+              <!-- Email component -->
+              <v-card-text class="pt-2 pb-2">
+                <emailComponent 
+                  ref="emailComponentRef" 
+                  :dialog="emailDialog" 
+                  :emailType="emailType"
+                  :appointments="emailAppointments" 
+                  :appointmentTime="studyDateTime"
+                  :familyInfo="currentFamily"
+                />
+              </v-card-text>
+
+              <!-- Action bar -->
               <v-card-actions class="px-4 py-2 d-flex align-center">
                 <!-- Compact action log -->
                 <div v-if="actionLogs.length" style="flex: 1; display: flex; flex-direction: column; gap: 2px; overflow: hidden; min-width: 0; margin-right: 16px">
@@ -154,6 +193,7 @@
                     color="primary"
                     @click="sendEmail" 
                     :loading="loadingStatus"
+                    prepend-icon="mdi-send"
                   >
                     <v-icon start v-show="emailButtonIconShow">mdi-checkbox-marked-circle-outline</v-icon>
                     {{ emailButtonText }}
@@ -338,6 +378,10 @@ export default {
     confirmCancelDialog: false,
     confirmUpdateDialog: false,
     actionLogs: [],
+    section1Open: true,
+    section2Open: true,
+    section3Open: false,
+    hasRecruitableChildrenFlag: false,
   }),
   methods: {
     addLog(action, success, message) {
@@ -635,7 +679,8 @@ export default {
       return newSchedule;
     },
 
-    async updateSchedule(updateAppointments) {
+    async updateSchedule(updateAppointments, targetSchedule = null) {
+      const scheduleRef = targetSchedule || this.currentSchedule;
       let statusValues = [...new Set(updateAppointments.map(appointment => appointment.status))];
       let status = "";
 
@@ -652,10 +697,10 @@ export default {
       }
 
       let updatedSchedule = {
-        id: this.currentSchedule.id,
+        id: scheduleRef.id,
         AppointmentTime: this.studyDateTime,
         Status: status,
-        FK_Family: this.currentSchedule.FK_Family,
+        FK_Family: scheduleRef.FK_Family,
         Note: this.Note,
         summary: status.toUpperCase() + " - " + this.calendarSummary(updateAppointments),
         Appointments: updateAppointments,
@@ -802,12 +847,21 @@ export default {
       this.confirmCancelDialog = false;
       this.confirmUpdateDialog = false;
       this.actionLogs = [];
+
+      this.section1Open = true;
+      this.section2Open = true;
+      this.section3Open = false;
+      this.hasRecruitableChildrenFlag = false;
     },
 
     initiateVariables(dialogType) {
       switch (dialogType) {
         case "schedule":
           this.stepperPage = "1";
+          // If updating an existing schedule, pre-enable the date/time picker
+          if (this.scheduleType === 'update') {
+            this.dateTimePickerDisable = false;
+          }
           break;
         case "email":
           this.stepperPage = "2";
@@ -976,6 +1030,18 @@ export default {
     },
   },
   computed: {
+    step2Editable() {
+      if (Number(this.stepperPage) >= 2) return true;
+      if (this.stepperPage === '3') return true;
+      if (this.stepperPage === '1' && this.createdScheduleInSession) return true;
+      return false;
+    },
+    step3Editable() {
+      if (Number(this.stepperPage) >= 3) return true;
+      if (this.stepperPage === '1') return false;
+      if (this.stepperPage === '2' && this.isFinalized) return true;
+      return false;
+    },
     daysLate() {
       if (this.contactDate) {
         let differentDays = moment.duration(moment(this.contactDate).startOf("day").diff(moment().startOf("day"))).asDays();
@@ -1038,5 +1104,29 @@ export default {
 .v-card__text,
 .v-card__title {
   padding: 4px 16px;
+}
+</style>
+
+<style>
+.schedule-dialog-overlay {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+}
+</style>
+
+<style scoped>
+.section-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 4px;
+  cursor: pointer;
+  border-radius: 4px;
+  user-select: none;
+}
+.section-header:hover {
+  background-color: rgba(var(--v-theme-primary), 0.04);
+}
+.section-body {
+  padding: 4px 0 8px 0;
 }
 </style>

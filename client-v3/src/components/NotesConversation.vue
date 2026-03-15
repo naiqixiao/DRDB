@@ -1,5 +1,6 @@
 <template>
   <v-card class="ds-card h-100 d-flex flex-column" variant="flat">
+    <ConfirmDlg ref="confirmD" />
     <v-tabs v-model="tab" color="primary" bg-color="grey-lighten-4" align-tabs="center">
       <v-tab value="notes">
         <v-icon start>mdi-format-list-bulleted</v-icon>
@@ -81,11 +82,13 @@
 <script>
 import DateDisplay from "@/components/DateDisplay.vue";
 import conversation from "@/services/conversation";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
   name: "NotesConversation",
   components: {
     DateDisplay,
+    ConfirmDlg
   },
   props: {
     Conversation: {
@@ -135,14 +138,15 @@ export default {
 
     async deleteItem(item) {
       const index = this.Conversation.indexOf(item);
-      if (confirm("Are you sure you want to delete this conversation record?")) {
-        try {
-          await conversation.delete({ id: item.id });
-          this.Conversation.splice(index, 1);
-          console.log("conversation deleted.");
-        } catch (error) {
-          console.error(error);
-        }
+      if (!(await this.$refs.confirmD.open('Confirm Delete', 'Are you sure you want to delete this conversation record?'))) {
+        return;
+      }
+      try {
+        await conversation.delete({ id: item.id });
+        this.Conversation.splice(index, 1);
+        console.log("conversation deleted.");
+      } catch (error) {
+        console.error(error);
       }
     },
   },

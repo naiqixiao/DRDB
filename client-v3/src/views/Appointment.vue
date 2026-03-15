@@ -1,25 +1,57 @@
 <template>
   <v-container fluid>
-    <div v-if="!$store.state.labEmailStatus" class="mb-4">
-      <v-alert border="start" type="error" color="#c73460" density="compact" style="font-weight: 600">
-        Lab email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="!$store.state.adminEmailStatus" class="mb-4">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
-        Admin email is not setup properly. Please set it up in the Settings page.
-      </v-alert>
-    </div>
-    <div v-if="$store.state.trainingMode" class="mb-4">
-      <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
-        You are running in a training mode.
-      </v-alert>
-    </div>
+    <AlertBanner :showAdminEmail="true" />
+    <ConfirmDlg ref="confirmD" />
 
-    <v-row dense>
-      <v-col cols="12" md="9">
-        <UpcomingAppointments class="mb-4" @selectSchedule="onSelectUpcoming" />
-        <v-row justify="start">
+    <!-- SECTION 1: Upcoming Appointments (Collapsible) -->
+    <v-card class="ds-card mb-6" variant="flat">
+      <v-toolbar color="transparent" density="compact" class="px-2" style="cursor: pointer" @click="upcomingExpanded = true">
+        <v-icon class="mr-2" color="primary">mdi-calendar-clock</v-icon>
+        <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+          Upcoming Appointments
+        </span>
+        <v-btn
+          icon="mdi-refresh"
+          variant="text"
+          size="small"
+          @click.stop="upcomingExpanded = true; refreshUpcoming()"
+          class="ml-1"
+        ></v-btn>
+        <v-spacer></v-spacer>
+        <v-btn
+          :icon="upcomingExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          variant="text"
+          size="small"
+          @click="upcomingExpanded = !upcomingExpanded"
+        ></v-btn>
+      </v-toolbar>
+      <v-expand-transition>
+        <div v-show="upcomingExpanded">
+          <v-divider></v-divider>
+          <v-card-text class="pt-3 pb-4">
+            <UpcomingAppointments
+              ref="upcomingRef"
+              @selectSchedule="onSelectUpcoming"
+              @showFamily="openFamilyDialog"
+              @updateSchedule="openScheduleDialog"
+            />
+          </v-card-text>
+        </div>
+      </v-expand-transition>
+    </v-card>
+
+    <!-- SECTION 2: Search Appointments -->
+    <v-card class="ds-card mb-6" variant="flat" @focusin="upcomingExpanded = false">
+      <v-toolbar color="transparent" density="compact" class="px-2">
+        <v-icon class="mr-2" color="primary">mdi-magnify</v-icon>
+        <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+          Search Appointments
+        </span>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-card-text class="pt-4">
+        <!-- Text search fields -->
+        <v-row justify="start" dense>
           <v-col cols="12" v-for="item in searchingFields" :md="item.width" :key="item.label">
             <v-text-field 
               @keydown.enter="searchSchedule" 
@@ -34,7 +66,9 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row justify="start">
+
+        <!-- Select and date fields -->
+        <v-row justify="start" dense class="mt-2">
           <v-col cols="12" md="3">
             <v-select 
               @update:model-value="getSearchKeys('StudyName', $event)" 
@@ -75,9 +109,8 @@
               @keydown.enter="searchSchedule" 
               ref="textfieldAfter"
               label="After" 
+              type="date"
               v-model="queryString.AppointmentTimeAfter" 
-              append-inner-icon="mdi-calendar"
-              @click:append-inner="dialogPickerAfter = true" 
               bg-color="textbackground" 
               hide-details
               variant="outlined" 
@@ -90,9 +123,8 @@
               @update:model-value="getSearchKeys('AppointmentTimeBefore', $event)" 
               ref="textfieldBefore"
               label="Before" 
+              type="date"
               v-model="queryString.AppointmentTimeBefore" 
-              append-inner-icon="mdi-calendar"
-              @click:append-inner="dialogPickerBefore = true" 
               bg-color="textbackground" 
               hide-details
               variant="outlined" 
@@ -100,106 +132,113 @@
             ></v-text-field>
           </v-col>
         </v-row>
-        <v-row justify="space-around">
-          <v-col cols="12" md="10">
-            <div class="text-center" v-html="searchNotice"></div>
-          </v-col>
-        </v-row>
-        <v-row justify="space-around" class="align-center">
-          <h2 class="ma-0">Short-cuts:</h2>
-          <v-col cols="12" md="3">
-            <v-btn-toggle>
-              <v-tooltip location="bottom">
-                <template v-slot:activator="{ props }">
-                  <div v-bind="props">
-                    <v-btn 
-                      rounded="0"
-                      size="large" 
-                      @click="studiesInaPeriod('today')"
-                      style="color: rgb(var(--v-theme-secondary)); background-color: rgb(var(--v-theme-primary)) !important;"
-                    >
-                      <v-icon>mdi-calendar-today</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-                <span>Today's studies.</span>
-              </v-tooltip>
-              <v-tooltip location="bottom">
-                <template v-slot:activator="{ props }">
-                  <div v-bind="props">
-                    <v-btn 
-                      rounded="0"
-                      size="large" 
-                      @click="studiesInaPeriod('tomorrow')"
-                      style="color: rgb(var(--v-theme-secondary)); background-color: rgb(var(--v-theme-primary)) !important;"
-                    >
-                      <v-icon>mdi-calendar-arrow-right</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-                <span>Tomorrow's studies</span>
-              </v-tooltip>
-              <v-tooltip location="bottom">
-                <template v-slot:activator="{ props }">
-                  <div v-bind="props">
-                    <v-btn 
-                      rounded="0"
-                      size="large" 
-                      @click="studiesInaPeriod('thisWeek')"
-                      style="color: rgb(var(--v-theme-secondary)); background-color: rgb(var(--v-theme-primary)) !important;"
-                    >
-                      <v-icon>mdi-calendar-range</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-                <span>Studies within this week</span>
-              </v-tooltip>
-            </v-btn-toggle>
-          </v-col>
 
-          <v-col cols="12" md="3" class="text-center">
-            <v-btn size="large" @click="followupSearch">
-              <v-icon start>mdi-phone</v-icon>Follow-ups
-            </v-btn>
-          </v-col>
+        <!-- Tip notice -->
+        <v-alert type="info" variant="tonal" density="compact" class="mt-4 mb-2" border="start" closable>
+          Enter <strong>multiple</strong> search criteria (e.g., Study Name, Status, Appointment Time) before clicking Search. You can also use the shortcuts below.
+        </v-alert>
 
-          <v-col cols="12" md="2" class="text-center">
-            <v-btn 
-              size="large" 
-              @click="searchSchedule" 
-              :disabled="!(
-                queryString.Email ||
-                queryString.AppointmentTimeAfter ||
-                queryString.AppointmentTimeBefore ||
-                queryString.Status.length > 0 ||
-                queryString.StudyName.length > 0 ||
-                queryString.Phone ||
-                queryString.NamePrimary ||
-                queryString.NameSecondary ||
-                queryString.FamilyId
-              )"
-            >
-              <v-icon start>mdi-magnify</v-icon>Search
-            </v-btn>
-          </v-col>
-        </v-row>
+        <!-- Shortcut buttons row -->
+        <div class="d-flex flex-wrap align-center mt-3" style="gap: 10px;">
+          <span class="text-caption font-weight-bold text-uppercase text-muted mr-1">Quick search:</span>
 
-        <v-row justify="center" style="padding-top: 28px">
-          <v-col>
-            <ScheduleTable 
-              :Schedules="Schedules" 
-              @rowSelected="updateFamily" 
-              nofItems="6"
-              @updatedSchedule="updatedSchedule"
-            ></ScheduleTable>
-          </v-col>
-        </v-row>
-      </v-col>
-      <v-col cols="12" md="3">
-        <FamilyInfo :currentFamily="currentFamily" @updateFamily="updateCurrentFamily"></FamilyInfo>
-      </v-col>
-    </v-row>
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" variant="tonal" color="primary" size="small" prepend-icon="mdi-calendar-today" @click="studiesInaPeriod('today')">
+                Today
+              </v-btn>
+            </template>
+            <span>Today's studies</span>
+          </v-tooltip>
 
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" variant="tonal" color="primary" size="small" prepend-icon="mdi-calendar-arrow-right" @click="studiesInaPeriod('tomorrow')">
+                Tomorrow
+              </v-btn>
+            </template>
+            <span>Tomorrow's studies</span>
+          </v-tooltip>
+
+          <v-tooltip location="bottom">
+            <template v-slot:activator="{ props }">
+              <v-btn v-bind="props" variant="tonal" color="primary" size="small" prepend-icon="mdi-calendar-range" @click="studiesInaPeriod('thisWeek')">
+                This Week
+              </v-btn>
+            </template>
+            <span>Studies within this week</span>
+          </v-tooltip>
+
+          <v-btn variant="tonal" color="secondary" size="small" prepend-icon="mdi-phone-clock" @click="followupSearch">
+            Follow-ups
+          </v-btn>
+
+          <v-spacer></v-spacer>
+
+          <v-btn 
+            color="primary" 
+            variant="flat" 
+            prepend-icon="mdi-magnify" 
+            @click="searchSchedule" 
+            :disabled="!(
+              queryString.Email ||
+              queryString.AppointmentTimeAfter ||
+              queryString.AppointmentTimeBefore ||
+              queryString.Status.length > 0 ||
+              queryString.StudyName.length > 0 ||
+              queryString.Phone ||
+              queryString.NamePrimary ||
+              queryString.NameSecondary ||
+              queryString.FamilyId
+            )"
+          >
+            Search
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
+
+    <!-- RESULTS TABLE -->
+    <v-card class="ds-card mb-6" variant="flat" v-if="Schedules.length > 0">
+      <v-toolbar color="transparent" density="compact" class="px-2">
+        <v-icon class="mr-2" color="primary">mdi-table</v-icon>
+        <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+          Results
+        </span>
+        <v-chip class="ml-3" size="small" variant="tonal" color="primary">{{ Schedules.length }} found</v-chip>
+      </v-toolbar>
+      <v-divider></v-divider>
+      <v-card-text class="pa-0">
+        <ScheduleTable 
+          :Schedules="Schedules" 
+          @rowSelected="updateFamily" 
+          nofItems="6"
+          @updatedSchedule="updatedSchedule"
+          @showFamily="openFamilyDialog"
+        ></ScheduleTable>
+      </v-card-text>
+    </v-card>
+
+    <!-- Family Details Dialog -->
+    <FamilyDetailsDialog v-model="familyDialogVisible" :family="familyDialogData" />
+
+    <!-- Schedule Update Dialog (for upcoming cards) -->
+    <scheduleDialog 
+      ref="upcomingScheduleDialog" 
+      :dialog="scheduleDialogVisible" 
+      :currentSchedule="scheduleDialogData"
+      :dialogType="'schedule'" 
+      :currentFamily="scheduleDialogData.Family" 
+      scheduleType="update"
+      @close-dialog="scheduleDialogVisible = false"
+      @newAppointment="onNewAppointment" 
+      @deleteCurrentAppointment="onDeleteAppointment" 
+      @newSchedule="updatedSchedule"
+      @updatedSchedule="updatedSchedule" 
+      @completedSchedule="updatedSchedule" 
+    />
+
+    <!-- Date Picker Dialogs -->
     <v-dialog v-model="dialogPickerBefore" max-width="360px">
       <v-card variant="outlined">
         <v-date-picker 
@@ -224,8 +263,11 @@
 
 <script>
 import ScheduleTable from "@/components/ScheduleTableNew.vue";
-import FamilyInfo from "@/components/FamilyInfo.vue";
 import UpcomingAppointments from "@/components/UpcomingAppointments.vue";
+import AlertBanner from "@/components/AlertBanner.vue";
+import FamilyDetailsDialog from "@/components/FamilyDetailsDialog.vue";
+import scheduleDialog from "@/components/scheduleDialog.vue";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import schedule from "@/services/schedule";
 import moment from "moment";
 
@@ -233,20 +275,36 @@ export default {
   name: "Appointment",
   components: {
     ScheduleTable,
-    FamilyInfo,
     UpcomingAppointments,
+    AlertBanner,
+    FamilyDetailsDialog,
+    scheduleDialog,
+    ConfirmDlg,
   },
   props: {
     training: Boolean,
   },
   data() {
     return {
-      searchNotice: "<p style='color: #ff0000; font-weight: 600; font-size: 16px; margin: 0px;''>To facilitate your search, you could enter <i>MULTIPLE</i> search criteria (e.g., Study Name, Status, Appointment Time) before clicking Search button.<br>You could also use the short-cuts below to search for studies in a period of time.</p>",
+      upcomingExpanded: true,
+      familyDialogVisible: false,
+      familyDialogData: {},
+      scheduleDialogVisible: false,
+      scheduleDialogData: {
+        FK_Family: 1,
+        Family: { NamePrimary: "" },
+        Note: "",
+        Appointments: [{
+          FK_Family: 1,
+          Study: { EmailTemplate: "", Lab: { PI: "" } },
+          Family: { NamePrimary: "" },
+          Child: { Name: "" },
+        }],
+      },
       dialogPickerBefore: false,
       dialogPickerAfter: false,
       beforeDateObj: null,
       afterDateObj: null,
-      currentFamily: {},
       queryString: {
         FamilyId: null,
         Email: null,
@@ -291,6 +349,42 @@ export default {
   },
 
   methods: {
+    openFamilyDialog(family) {
+      if (family) {
+        this.familyDialogData = family;
+        this.familyDialogVisible = true;
+      }
+    },
+
+    refreshUpcoming() {
+      if (this.$refs.upcomingRef) {
+        this.$refs.upcomingRef.fetchUpcoming();
+      }
+    },
+
+    openScheduleDialog(scheduleItem) {
+      this.scheduleDialogData = scheduleItem;
+      this.scheduleDialogVisible = true;
+
+      this.$nextTick(() => {
+        if (this.$refs.upcomingScheduleDialog) {
+          this.$refs.upcomingScheduleDialog.initiateVariables('schedule');
+        }
+      });
+    },
+
+    onNewAppointment(appointment) {
+      if (this.scheduleDialogData.Appointments) {
+        this.scheduleDialogData.Appointments.push(appointment);
+      }
+    },
+
+    onDeleteAppointment(index) {
+      if (this.scheduleDialogData.Appointments) {
+        this.scheduleDialogData.Appointments.splice(index, 1);
+      }
+    },
+
     getSearchKeys(field, value) {
       if (value !== null && value !== undefined && field) {
         this.queryString[field] = value;
@@ -305,15 +399,12 @@ export default {
         const Result = await schedule.search(this.queryString);
         this.Schedules = Result.data;
 
-        if (this.Schedules && this.Schedules.length > 0) {
-          this.currentFamily = this.Schedules[0].Family;
-        } else {
-          this.currentFamily = {};
-          alert("No study appointment can be found. Sorry~");
+        if (!this.Schedules || this.Schedules.length === 0) {
+          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({
             name: "Login",
           });
@@ -323,6 +414,8 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.queryString.Status = [];
+      this.queryString.StudyName = [];
       this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
@@ -335,15 +428,12 @@ export default {
         const Result = await schedule.searchFollowUps(this.queryString);
         this.Schedules = Result.data;
 
-        if (this.Schedules && this.Schedules.length > 0) {
-          this.currentFamily = this.Schedules[0].Family;
-        } else {
-          this.currentFamily = {};
-          alert("No study appointment can be found. Sorry~");
+        if (!this.Schedules || this.Schedules.length === 0) {
+          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({
             name: "Login",
           });
@@ -351,6 +441,8 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.queryString.Status = [];
+      this.queryString.StudyName = [];
       this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
@@ -375,15 +467,12 @@ export default {
         
         this.Schedules = Result.data;
 
-        if (this.Schedules && this.Schedules.length > 0) {
-          this.currentFamily = this.Schedules[0].Family;
-        } else {
-          this.currentFamily = {};
-          alert("No study appointment can be found. Sorry~");
+        if (!this.Schedules || this.Schedules.length === 0) {
+          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({
             name: "Login",
           });
@@ -393,6 +482,8 @@ export default {
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
+      this.queryString.Status = [];
+      this.queryString.StudyName = [];
       this.index = -1;
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
     },
@@ -400,37 +491,26 @@ export default {
     updatedSchedule(schedule) {
       let index = this.Schedules.findIndex((item) => item.id === schedule.id);
 
-      if (index < 0) {
-        if (this.index >= 0) {
-          this.Schedules.splice(this.index, 0, schedule);
-        } else {
-          this.Schedules.push(schedule);
-        }
-      } else {
+      if (index >= 0) {
         if (schedule.Completed === 1) {
           this.Schedules[index].Completed = 1;
         } else {
-          this.Schedules[index] = Object.assign(this.Schedules[index], schedule);
+          Object.assign(this.Schedules[index], schedule);
         }
+      }
+
+      // Refresh upcoming appointments if the component is available
+      if (this.$refs.upcomingRef) {
+        this.$refs.upcomingRef.fetchUpcoming();
       }
     },
 
     updateFamily(family, index) {
       this.index = index;
-      this.currentFamily = family;
     },
 
     onSelectUpcoming(schedule) {
-      if (schedule && schedule.Family) {
-        this.currentFamily = schedule.Family;
-      }
-    },
-
-    updateCurrentFamily(editedFamily) {
-      this.currentFamily = Object.assign({}, editedFamily);
-      if (this.index >= 0 && this.Schedules[this.index]) {
-        this.Schedules[this.index].Family = Object.assign({}, editedFamily);
-      }
+      // No-op since FamilyInfo sidebar is removed; family details are via dialog
     },
 
     beforeDatePick(val) {
@@ -451,7 +531,6 @@ export default {
   watch: {
     training() {
       this.Schedules = [];
-      this.currentFamily = {};
     },
   },
 };

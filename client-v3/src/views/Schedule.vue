@@ -19,13 +19,16 @@
     <ConfirmDlg ref="confirmD" />
 
     <v-row justify="space-around">
-      <!-- LEFT COLUMN: Study Selection + Study Card -->
-      <v-col cols="12" md="4">
-        <v-row dense>
-          <v-col cols="12" md="12">
-            <h1 class="text-left">Choose a study</h1>
-          </v-col>
-          <v-col cols="12" md="12">
+      <!-- LEFT COLUMN: Study Summary -->
+      <v-col cols="12" md="5">
+        <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
+      </v-col>
+
+      <!-- CENTER COLUMN: Choose Study + Family & Child Info -->
+      <v-col cols="12" md="4" class="d-flex flex-column">
+        <!-- Row 1: Study select + Warning + Page numbers -->
+        <v-row dense align="center" class="mb-2">
+          <v-col>
             <v-select 
               class="selection" 
               :items="studies" 
@@ -41,29 +44,15 @@
               density="compact"
             ></v-select>
           </v-col>
-        </v-row>
-
-        <v-row class="mt-4" style="flex: 1;">
-          <v-col cols="12" md="12" class="d-flex">
-            <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
-          </v-col>
-        </v-row>
-      </v-col>
-
-      <!-- CENTER COLUMN: Family & Child Info Card -->
-      <v-col cols="12" md="5" class="d-flex flex-column">
-        <!-- Pagination + Warning -->
-        <v-row justify="space-around" class="mb-2">
-          <v-col cols="12" md="9">
-            <h2 v-show="contactedByOthers" style="color: red">
+          <v-col cols="auto" class="d-flex align-center" style="gap: 8px;">
+            <h2 v-show="contactedByOthers" style="color: red; font-size: 14px; white-space: nowrap;">
               You're late. Someone just called this family...
             </h2>
-          </v-col>
-          <v-spacer></v-spacer>
-          <v-col cols="12" md="3" style="text-align: end">
             <Page :page="page" :NofPages="Children ? Children.length : 0" @nextPage="nextPage" @previousPage="previousPage"></Page>
           </v-col>
         </v-row>
+
+        <v-spacer></v-spacer>
 
         <v-card class="ds-card d-flex flex-column flex-grow-1" variant="flat" style="position: relative; overflow: hidden;">
           
@@ -205,7 +194,7 @@
           <v-card-text v-else class="text-center py-12 flex-grow-1 d-flex flex-column align-center justify-center">
             <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-account-search-outline</v-icon>
             <div class="text-h6 text-muted">Select a study to load families</div>
-            <div class="text-caption text-muted">Choose a study from the left panel to begin</div>
+            <div class="text-caption text-muted">Choose a study from the dropdown above to begin</div>
           </v-card-text>
         </v-card>
 
@@ -737,10 +726,10 @@ export default {
         }
         this.deleteDialog = false;
         this.scheduleToDelete = null;
-        alert("Schedule and calendar event successfully deleted.");
+        this.$refs.confirmD.open('Deleted', 'Schedule and calendar event successfully deleted.', { color: 'success', noconfirm: true });
       } catch (error) {
         console.error(error);
-        alert("Failed to delete the schedule.");
+        this.$refs.confirmD.open('Error', 'Failed to delete the schedule.', { color: 'error', noconfirm: true });
       } finally {
         this.isDeletingTimelineSchedule = false;
       }
@@ -782,7 +771,9 @@ export default {
 
       try {
         const Result = await study.search(queryString);
-        this.studies = Result.data;
+        this.studies = (Result.data || []).sort((a, b) =>
+          new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+        );
       } catch (error) {
         if (error.status === 401 || (error.response && error.response.status === 401)) {
           this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });

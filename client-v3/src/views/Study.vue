@@ -1,8 +1,7 @@
 <template>
   <v-container fluid>
     <AlertBanner :showAdminEmail="true" />
-
-    <!-- Need to implement ConfirmDlg equivalent if needed, for simplicity using window.confirm for now -->
+    <ConfirmDlg ref="confirmD" />
 
     <v-row>
       <!-- Left Column: Study List -->
@@ -425,6 +424,7 @@ import studyHistoryChart from "@/components/studyHistoryChart.vue";
 import studyApi from "@/services/study";
 import personnelApi from "@/services/personnel";
 import testingRoomApi from "@/services/testingRoom";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
   name: "Study",
@@ -438,6 +438,7 @@ export default {
     recruitmentProgressChart,
     experimenterStatsChart,
     studyHistoryChart,
+    ConfirmDlg,
   },
 
   data() {
@@ -611,7 +612,7 @@ export default {
         this.$store.dispatch("setStudies", this.Studies);
       } catch (error) {
         if (error.response?.status === 401) {
-          alert("Authentication failed, please login.");
+          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
           this.$router.push({ name: "Login" });
         } else {
           item.Completed = !item.Completed; // revert
@@ -664,7 +665,7 @@ export default {
 
     async save() {
       if (!this.PointofContact) {
-        alert("Please select a Point of Contact.");
+        this.$refs.confirmD.open('Validation Error', 'Please select a Point of Contact.', { color: 'warning', noconfirm: true });
         return;
       }
       this.editedStudy.FK_Personnel = this.PointofContact.id;
@@ -695,15 +696,16 @@ export default {
     },
 
     async deleteStudy() {
-      if (confirm("Are you sure you want to delete this study? The deletion will also remove all related study appointments.")) {
-        try {
-          await studyApi.delete({ id: this.currentStudy.id });
-          this.Studies = this.Studies.filter(s => s.id !== this.currentStudy.id);
-          this.$store.dispatch("setStudies", this.Studies);
-          this.currentStudy = { StudyName: null, PointofContact: {} };
-        } catch (error) {
-          console.error(error);
-        }
+      if (!(await this.$refs.confirmD.open('Confirm Delete', 'Are you sure you want to delete this study? The deletion will also remove all related study appointments.'))) {
+        return;
+      }
+      try {
+        await studyApi.delete({ id: this.currentStudy.id });
+        this.Studies = this.Studies.filter(s => s.id !== this.currentStudy.id);
+        this.$store.dispatch("setStudies", this.Studies);
+        this.currentStudy = { StudyName: null, PointofContact: {} };
+      } catch (error) {
+        console.error(error);
       }
     },
 

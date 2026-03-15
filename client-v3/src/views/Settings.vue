@@ -1,5 +1,6 @@
 <template>
   <v-container fluid>
+    <ConfirmDlg ref="confirmD" />
     <!-- Alerts -->
     <div v-if="!$store.state.labEmailStatus">
       <v-alert border="start" type="error" color="#c73460" density="compact" style="font-weight: 600">
@@ -315,11 +316,13 @@ import lab from "@/services/lab";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import TestingRooms from "@/components/TestingRooms.vue";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
 
 export default {
   components: {
     TestingRooms,
+    ConfirmDlg,
   },
   data() {
     return {
@@ -409,10 +412,10 @@ export default {
         this.$store.dispatch("setLab", response.data.lab);
         this.$store.dispatch("setStudies", response.data.studies);
 
-        alert("Your password is successfully changed!");
+        this.$refs.confirmD.open('Success', 'Your password is successfully changed!', { color: 'success', noconfirm: true });
       } catch (error) {
         console.log(error.response || error);
-        alert("Failed to change password. Please check your current password.");
+        this.$refs.confirmD.open('Error', 'Failed to change password. Please check your current password.', { color: 'error', noconfirm: true });
       }
     },
 
@@ -444,7 +447,7 @@ export default {
       try {
         this.currentLab.PI = this.currentLab.Personnels[0].Initial;
         await lab.create(this.currentLab);
-        alert("A new lab is created!\nPI's account is created!\nA sample study is created!");
+        this.$refs.confirmD.open('Lab Created', 'A new lab is created!<br>PI\'s account is created!<br>A sample study is created!', { color: 'success', noconfirm: true });
       } catch (error) {
         console.log(error.response || error);
       }
@@ -464,7 +467,7 @@ export default {
         this.$store.dispatch("setTransportationInstructions", this.editedLab.TransportationInstructions);
         this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
 
-        alert("Lab information is updated!");
+        this.$refs.confirmD.open('Updated', 'Lab information is updated!', { color: 'success', noconfirm: true });
       } catch (error) {
         console.log(error.response || error);
       }
@@ -511,7 +514,7 @@ export default {
         this.labEmail = response.data.Email;
         this.$store.dispatch("setLabEmailStatus", true);
         this.$store.dispatch("setLabEmail", this.labEmail);
-        alert("Lab email account is successfully setup!");
+        this.$refs.confirmD.open('Success', 'Lab email account is successfully setup!', { color: 'success', noconfirm: true });
       } catch (error) {
         this.$store.dispatch("setLabEmailStatus", false);
         console.log(error);
@@ -523,7 +526,7 @@ export default {
       try {
         const response = await externalAPIs.setAdminToken(this.signInCode);
         this.adminEmail = response.data.Email;
-        alert("Admin email account is successfully setup!");
+        this.$refs.confirmD.open('Success', 'Admin email account is successfully setup!', { color: 'success', noconfirm: true });
         this.$store.dispatch("setAdminEmailStatus", true);
       } catch (error) {
         this.$store.dispatch("setAdminEmailStatus", false);
@@ -574,7 +577,7 @@ export default {
             this.uploadFile = newParticipants;
           } catch (err) {
             console.error("Error parsing file:", err);
-            alert("Error parsing the file. Please ensure it is a valid .xlsx or .csv file.");
+            this.$refs.confirmD.open('Error', 'Error parsing the file. Please ensure it is a valid .xlsx or .csv file.', { color: 'error', noconfirm: true });
           }
         };
         reader.readAsArrayBuffer(file);
@@ -590,7 +593,7 @@ export default {
           this.dialogImport = true;
         } catch (error) {
           console.log(error);
-          alert("Batch import failed. Please check the file format.");
+          this.$refs.confirmD.open('Error', 'Batch import failed. Please check the file format.', { color: 'error', noconfirm: true });
         }
         this.uploadFile = null;
       }

@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-0 d-flex flex-column">
-    <div class="text-caption font-weight-bold text-uppercase text-muted mb-3">Appointment details:</div>
+    <!-- <div class="text-caption font-weight-bold text-uppercase text-muted mb-3">Appointment details:</div> -->
 
     <!-- Appointment Data Table -->
     <v-container>
@@ -112,6 +112,7 @@
     </v-container>
 
     <!-- additional possible appointments -->
+    <template v-if="showAdditionalAppointments">
     <v-divider class="mb-5"></v-divider>
 
     <v-row dense align="baseline" justify="start" style="height: 80px">
@@ -143,6 +144,7 @@
         </v-tooltip>
       </v-col>
     </v-row>
+    </template>
   </v-container>
 </template>
 
@@ -157,9 +159,13 @@ export default {
     Children: Array,
     targetChild: Object,
     scheduleType: String,
-    parentResponse: String
+    parentResponse: String,
+    showAdditionalAppointments: {
+      type: Boolean,
+      default: true,
+    },
   },
-  emits: ["dateTimePickerDisableUpdate", "newAppointment", "deleteCurrentAppointment", "readyToCreateSchedule"],
+  emits: ["dateTimePickerDisableUpdate", "newAppointment", "deleteCurrentAppointment", "readyToCreateSchedule", "hasRecruitableChildren"],
   data() {
     return {
       appointmentDetailReady: false,
@@ -672,6 +678,7 @@ export default {
           this.nSelectableStudies = this.Children.map(child => {
             return this.potentialStudies(child).selectableStudies.length;
           });
+          this.$emit("hasRecruitableChildren", this.nSelectableStudies.some(n => n > 0));
         }
       }
     }
