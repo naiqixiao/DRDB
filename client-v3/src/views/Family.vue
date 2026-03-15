@@ -346,6 +346,23 @@
       </v-col>
     </v-row>
 
+    <!-- Delete Timeline Schedule Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="text-h6 font-weight-bold bg-error text-white py-3">
+          Delete Schedule?
+        </v-card-title>
+        <v-card-text class="pt-6 pb-2">
+          Are you sure you want to delete this schedule and its associated Google Calendar event? This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteDialog = false" :disabled="isDeletingTimelineSchedule">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="isDeletingTimelineSchedule" @click="deleteTimelineSchedule" prepend-icon="mdi-delete">Yes, Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- BOTTOM ROW: Schedule Table -->
     <v-row v-if="currentFamily.id" class="mt-6 mb-12">
       <v-col cols="12">
@@ -377,13 +394,27 @@
                     <v-card-title
                       class="text-subtitle-1 py-1 bg-grey-lighten-4 d-flex justify-space-between align-center">
                       <span class="font-weight-bold text-truncate"
-                        style="max-width: 70%; font-family: var(--ds-font-family-body); font-size: 0.9rem;">
+                        style="max-width: 60%; font-family: var(--ds-font-family-body); font-size: 0.9rem;">
                         {{ schedule.Appointments?.[0]?.Study?.StudyName || 'Unknown Study' }}
                       </span>
-                      <v-chip size="small" :color="getTimelineColor(schedule.Status, schedule.Completed)"
-                        class="text-white font-weight-bold" variant="flat" style="font-size: 0.70rem; height: 20px;">
-                        {{ schedule.Status === "Confirmed" && schedule.Completed ? "Completed" : schedule.Status }}
-                      </v-chip>
+                      <div class="d-flex align-center" style="gap: 4px;">
+                        <v-chip size="small" :color="getTimelineColor(schedule.Status, schedule.Completed)"
+                          class="text-white font-weight-bold" variant="flat" style="font-size: 0.70rem; height: 20px;">
+                          {{ schedule.Status === "Confirmed" && schedule.Completed ? "Completed" : schedule.Status }}
+                        </v-chip>
+                        <template v-if="isScheduleDeletable(schedule)">
+                          <v-btn icon="mdi-delete-outline" variant="text" density="compact" size="small" color="error"
+                            @click.stop="confirmDeleteTimelineSchedule(schedule)" title="Delete Schedule"></v-btn>
+                        </template>
+                        <template v-else>
+                          <v-tooltip location="top" max-width="250">
+                            <template v-slot:activator="{ props }">
+                              <v-btn v-bind="props" icon="mdi-delete-outline" variant="text" density="compact" size="small" color="grey" disabled></v-btn>
+                            </template>
+                            <span>Only schedules updated within the last 7 days can be deleted.</span>
+                          </v-tooltip>
+                        </template>
+                      </div>
                     </v-card-title>
 
                     <v-card-text class="pt-2 px-3 pb-2 text-left">
@@ -434,6 +465,8 @@ import InfoField from "@/components/InfoField.vue";
 import SectionHeader from "@/components/SectionHeader.vue";
 import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import family from "@/services/family";
+import scheduleService from "@/services/schedule";
+import calendar from "@/services/calendar";
 import store from "@/store";
 import moment from "moment-timezone";
 
@@ -452,6 +485,9 @@ export default {
       searchStatus: false,
       searchDialog: false,
       detailsDialog: false,
+      deleteDialog: false,
+      scheduleToDelete: null,
+      isDeletingTimelineSchedule: false,
       dialog: false,
       valid: true,
       editedIndex: -1,
@@ -622,6 +658,7 @@ export default {
 
     async followupSearch() {
       this.$store.dispatch("setLoadingStatus", true);
+      this.queryString = {}; // Fix: reset leftover query params before searching followups
       this.queryString.AssignedLab = this.$store.state.lab;
       this.queryString.trainingMode = this.$store.state.trainingMode;
 
@@ -742,6 +779,55 @@ export default {
     formatDate(dateStr) {
       if (!dateStr) return '';
       return moment(dateStr).format('YYYY-MM-DD HH:mm');
+    },
+
+    confirmDeleteTimelineSchedule(schedule) {
+      this.scheduleToDelete = schedule;
+      this.deleteDialog = true;
+    },
+
+    async deleteTimelineSchedule() {
+      if (!this.scheduleToDelete) return;
+      this.isDeletingTimelineSchedule = true;
+      try {
+        if (this.scheduleToDelete.Appointments) {
+          for (const app of this.scheduleToDelete.Appointments) {
+            if (app.calendarEventId) {
+              await calendar.delete({ 
+                id: app.id,
+                eventId: app.calendarEventId, 
+                FK_Schedule: this.scheduleToDelete.id,
+                lab: this.$store.state.lab 
+              });
+            }
+          }
+        }
+
+        await scheduleService.delete({ id: this.scheduleToDelete.id });
+        
+        // Remove from UI cache and enforce reactivity
+        if (this.currentFamily && this.currentFamily.Schedules) {
+          this.currentFamily.Schedules = this.currentFamily.Schedules.filter(s => s.id !== this.scheduleToDelete.id);
+          Object.assign(this.Families[this.page - 1], this.currentFamily);
+        }
+        
+        this.deleteDialog = false;
+        this.scheduleToDelete = null;
+        alert("Schedule and calendar event successfully deleted.");
+      } catch (error) {
+        console.error(error);
+        alert("Failed to delete the schedule.");
+      } finally {
+        this.isDeletingTimelineSchedule = false;
+      }
+    },
+
+    isScheduleDeletable(schedule) {
+      if (!schedule.updatedAt) return false;
+      const updatedDate = moment(schedule.updatedAt).startOf("day");
+      const today = moment().startOf("day");
+      const daysDifference = moment.duration(today.diff(updatedDate)).asDays();
+      return daysDifference <= 7;
     },
 
     getTimelineColor(status, completed) {

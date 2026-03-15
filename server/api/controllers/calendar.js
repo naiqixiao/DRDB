@@ -36,22 +36,44 @@ exports.delete = asyncHandler(async (req, res) => {
       where: { id: req.query.FK_Schedule },
     });
 
-    if (Schedule.eventId) {
+    if (Schedule.calendarEventId) {
       await calendarService.deleteEvent(
         req.oAuth2Client,
         "primary",
-        Schedule.eventId
+        Schedule.calendarEventId
       );
       await model.schedule.update(
-        { eventURL: null, eventId: null },
+        { eventURL: null, calendarEventId: null },
         { where: { id: req.query.FK_Schedule } }
       );
       return;
     }
 
-    const Appointment = await model.appointment.findOne({
-      where: { id: req.query.id },
-    });
+    let Appointment;
+    if (!req.query.id || req.query.id === "undefined" || req.query.id === "null") {
+      // Find one of the appointments belonging to this schedule
+      Appointment = await model.appointment.findOne({
+        where: { FK_Schedule: req.query.FK_Schedule },
+      });
+    } else {
+      Appointment = await model.appointment.findOne({
+        where: { id: req.query.id },
+      });
+    }
+
+    if (!Appointment) {
+      // If we completely fail to find the appointment, safely attempt primary calendar
+      if (req.query.eventId) {
+        try {
+          await calendarService.deleteEvent(
+            req.oAuth2Client,
+            "primary",
+            req.query.eventId
+          );
+        } catch(e) { /* ignore */ }
+      }
+      return res.status(200).send("Calendar event deleted (or ignored due to missing Appointment)");
+    }
 
     const TestingRooms = await model.testingRoom.findAll({
       where: { FK_Lab: req.query.lab },
@@ -72,20 +94,21 @@ exports.delete = asyncHandler(async (req, res) => {
       calId = "primary";
     }
 
-    if (Appointment.eventId) {
+    if (Appointment.calendarEventId) {
       await calendarService.deleteEvent(
         req.oAuth2Client,
         calId,
-        Appointment.eventId
+        Appointment.calendarEventId
       );
     }
 
     await model.appointment.update(
-      { eventURL: null, eventId: null },
+      { eventURL: null, calendarEventId: null },
       { where: { id: req.query.id } }
     );
 
     console.log("Calendar event successfully deleted.");
+    res.status(200).send("Calendar event successfully deleted.");
   } catch (error) {
     console.error("Calendar delete error:", error);
     res.status(500).json({ error: error.message });

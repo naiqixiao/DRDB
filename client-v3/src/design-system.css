@@ -320,3 +320,32 @@ h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-
   outline: none;
   box-shadow: 0 0 0 3px #1E40AF20;
 }
+
+/* --- Global Data Table Styling --- */
+.v-data-table {
+  font-size: 14px;
+}
+
+/* Header Row Styling */
+.v-data-table thead tr th,
+.v-data-table th.v-data-table__th {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Alternating Row Colors */
+.v-data-table tbody tr:nth-of-type(even) {
+  background-color: #f8fafc;
+}
+.v-data-table tbody tr:nth-of-type(odd) {
+  background-color: #ffffff;
+}
+
+/* Hover State Enhancement */
+.v-data-table tbody tr:hover {
+  background-color: #e2e8f0 !important;
+  transition: background-color 0.2s ease;
+}

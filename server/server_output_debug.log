@@ -1,0 +1,131 @@
+
+> DRDB@1.0.0 start
+> nodemon server.js
+
+[33m[nodemon] 2.0.22[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🤖 agentic secret storage: https://dotenvx.com/as2
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+[Jobs] Registering scheduled tasks...
+[Jobs] All 8 scheduled tasks registered.
+Listening to port 3000
+Database connection has been established successfully.
+[0mDELETE /api/schedule/?id=dummy&User={"id":1,"Name":"Test"} [33m401[0m 1.384 ms - 36[0m
+[0mPOST /api/cal/ [32m200[0m 613.631 ms - 825[0m
+schedule created!
+[0mPOST /api/schedule/add [32m200[0m 31.146 ms - 15118[0m
+[0mGET /api/family/?id=7264&trainingMode=false [32m200[0m 15.714 ms - 16611[0m
+Calendar event successfully deleted.
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+[Jobs] Registering scheduled tasks...
+[Jobs] All 8 scheduled tasks registered.
+Listening to port 3000
+Database connection has been established successfully.
+[0mPOST /api/cal/ [32m200[0m 790.933 ms - 825[0m
+schedule created!
+[0mPOST /api/schedule/add [32m200[0m 28.954 ms - 15150[0m
+[0mGET /api/family/?id=7264&trainingMode=false [32m200[0m 13.660 ms - 31964[0m
+Calendar delete error: Error: WHERE parameter "id" has invalid "undefined" value
+    at MySQLQueryGenerator.whereItemQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2184:13)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2173:25
+    at Array.forEach (<anonymous>)
+    at MySQLQueryGenerator.whereItemsQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2171:35)
+    at MySQLQueryGenerator.getWhereConditions (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2583:19)
+    at MySQLQueryGenerator.selectQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:1315:28)
+    at QueryInterface.select (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/query-interface.js:1127:27)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/model.js:1759:34
+    at tryCatcher (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/util.js:16:23)
+    at Promise._settlePromiseFromHandler (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:547:31)
+    at Promise._settlePromise (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:604:18)
+    at Promise._settlePromise0 (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:649:10)
+    at Promise._settlePromises (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:729:18)
+    at _drainQueueStep (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:93:12)
+    at _drainQueue (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:86:9)
+    at Async._drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:102:5)
+    at Async.drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:15:14)
+    at process.processImmediate (node:internal/timers:504:21)
+[0mDELETE /api/cal/?eventId=ie24h4179rv68aqcj1d508bbtg&FK_Schedule=5451&lab=2 [31m500[0m 8.521 ms - 66[0m
+[0mGET /api/family/?id=7264&trainingMode=false [36m304[0m 22.720 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[Jobs] Registering scheduled tasks...
+[Jobs] All 8 scheduled tasks registered.
+Listening to port 3000
+Database connection has been established successfully.
+[0mPOST /api/user/checklogin [32m200[0m 2.786 ms - 27[0m
+Search successful!
+[0mGET /api/family/followup?AssignedLab=2&trainingMode=false [36m304[0m 13.985 ms - -[0m
+[0mGET /api/family/?NamePrimary=e&trainingMode=false [32m200[0m 95.268 ms - 1128565[0m
+[0mGET /api/family/?id=7264&trainingMode=false [36m304[0m 20.517 ms - -[0m
+[0mDELETE /api/schedule/?id=5450&User%5BName%5D=Naiqi+Xiao&User%5BEmail%5D=nx%40kangleelab.com&User%5BLabName%5D=McMaster+Baby+Lab&lab=2 [32m200[0m 6.066 ms - 17[0m
+[0mGET /api/family/?id=7264&trainingMode=false [32m200[0m 11.322 ms - 16611[0m
+[0mDELETE /api/schedule/?id=5451&User%5BName%5D=Naiqi+Xiao&User%5BEmail%5D=nx%40kangleelab.com&User%5BLabName%5D=McMaster+Baby+Lab&lab=2 [32m200[0m 5.326 ms - 17[0m
+[0mGET /api/family/?id=7264&trainingMode=false [32m200[0m 14.280 ms - 1160[0m
+[0mGET /api/family/?id=16963&trainingMode=false [32m200[0m 25.120 ms - 32415[0m
+Calendar delete error: Error: WHERE parameter "id" has invalid "undefined" value
+    at MySQLQueryGenerator.whereItemQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2184:13)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2173:25
+    at Array.forEach (<anonymous>)
+    at MySQLQueryGenerator.whereItemsQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2171:35)
+    at MySQLQueryGenerator.getWhereConditions (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2583:19)
+    at MySQLQueryGenerator.selectQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:1315:28)
+    at QueryInterface.select (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/query-interface.js:1127:27)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/model.js:1759:34
+    at tryCatcher (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/util.js:16:23)
+    at Promise._settlePromiseFromHandler (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:547:31)
+    at Promise._settlePromise (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:604:18)
+    at Promise._settlePromise0 (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:649:10)
+    at Promise._settlePromises (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:729:18)
+    at _drainQueueStep (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:93:12)
+    at _drainQueue (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:86:9)
+    at Async._drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:102:5)
+    at Async.drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:15:14)
+    at process.processImmediate (node:internal/timers:504:21)
+[0mDELETE /api/cal/?eventId=mqfrbfvl09m9551pg35d6jg16o&FK_Schedule=5446&lab=2 [31m500[0m 7.828 ms - 66[0m
+Calendar delete error: Error: WHERE parameter "id" has invalid "undefined" value
+    at MySQLQueryGenerator.whereItemQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2184:13)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2173:25
+    at Array.forEach (<anonymous>)
+    at MySQLQueryGenerator.whereItemsQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2171:35)
+    at MySQLQueryGenerator.getWhereConditions (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:2583:19)
+    at MySQLQueryGenerator.selectQuery (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/dialects/abstract/query-generator.js:1315:28)
+    at QueryInterface.select (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/query-interface.js:1127:27)
+    at /Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/sequelize/lib/model.js:1759:34
+    at tryCatcher (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/util.js:16:23)
+    at Promise._settlePromiseFromHandler (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:547:31)
+    at Promise._settlePromise (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:604:18)
+    at Promise._settlePromise0 (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:649:10)
+    at Promise._settlePromises (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/promise.js:729:18)
+    at _drainQueueStep (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:93:12)
+    at _drainQueue (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:86:9)
+    at Async._drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:102:5)
+    at Async.drainQueues (/Users/naiqixiao/Documents/GitHub/DRDB/server/node_modules/bluebird/js/release/async.js:15:14)
+    at process.processImmediate (node:internal/timers:504:21)
+[0mDELETE /api/cal/?eventId=a49ffjdasdbibjcef484h51oik&FK_Schedule=5447&lab=2 [31m500[0m 1.516 ms - 66[0m
+[0mGET /api/family/?id=7264&trainingMode=false [33m401[0m 0.189 ms - 36[0m
+[0mGET /api/family/?id=16963&trainingMode=false [36m304[0m 15.666 ms - -[0m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node server.js`[39m
+[dotenv@17.3.1] injecting env (0) from .env -- tip: 🛡️ auth for agents: https://vestauth.com
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[Jobs] Registering scheduled tasks...
+[Jobs] All 8 scheduled tasks registered.
+Listening to port 3000
+Database connection has been established successfully.
+[0mDELETE /api/cal/?eventId=testEventId&FK_Schedule=5446&lab=2&id=undefined [32m200[0m 382.734 ms - 53[0m
+Calendar event successfully deleted.
+Calendar event successfully deleted.
+[0mDELETE /api/cal/?id=5278&eventId=mqfrbfvl09m9551pg35d6jg16o&FK_Schedule=5446&lab=2 [0m-[0m - ms - -[0m
+[0mPOST /api/user/checklogin [32m200[0m 1.323 ms - 27[0m
+[0mGET /api/family/?id=16963&trainingMode=false [32m200[0m 40.844 ms - 32227[0m
+Calendar event successfully deleted.
+Calendar event successfully deleted.
+Calendar event successfully deleted.

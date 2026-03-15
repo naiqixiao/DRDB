@@ -96,6 +96,7 @@ async function deleteEvent(oAuth2Client, calendarId, eventId) {
   await calendar.events.delete({
     calendarId,
     eventId,
+    sendUpdates: "all",
   });
 
   console.log("Calendar event successfully deleted.");

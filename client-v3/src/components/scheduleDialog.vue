@@ -1,13 +1,13 @@
 <template>
-  <v-dialog :model-value="dialog" @update:model-value="onDialogClose" transition="dialog-bottom-transition" max-width="900px">
-    <v-card>
+  <v-dialog persistent :model-value="dialog" @update:model-value="onDialogClose" transition="dialog-bottom-transition" max-width="1200px">
+    <v-card class="ds-card pb-2" variant="flat">
       <v-stepper v-model="stepperPage" elevation="0">
         <v-stepper-header>
-          <v-stepper-item title="Schedule a visit" value="1" :complete="stepperPage > 1"></v-stepper-item>
+          <v-stepper-item title="Schedule a visit" value="1" editable :complete="stepperPage > 1"></v-stepper-item>
           <v-divider></v-divider>
-          <v-stepper-item title="Email" value="2" :complete="stepperPage > 2"></v-stepper-item>
+          <v-stepper-item title="Email" value="2" :editable="stepperPage >= 2 || (stepperPage === '3' || stepperPage === '1' && createdScheduleInSession)" :complete="stepperPage > 2"></v-stepper-item>
           <v-divider></v-divider>
-          <v-stepper-item title="Next Contact" value="3" :complete="stepperPage > 3"></v-stepper-item>
+          <v-stepper-item title="Next Contact" value="3" :editable="stepperPage >= 3 || (stepperPage === '1' || stepperPage === '2' && isFinalized)" :complete="stepperPage > 3"></v-stepper-item>
         </v-stepper-header>
 
         <v-stepper-window>
@@ -46,10 +46,10 @@
 
                   <!-- Notes for this schedule -->
                   <v-divider class="my-5"></v-divider>
-                  <h2 class="text-left py-2 ma-0">Notes for this schedule:</h2>
+                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">Notes for this schedule:</div>
                   <v-container class="pa-0">
                     <v-textarea 
-                      variant="filled" 
+                      variant="outlined" 
                       class="conv-textarea" 
                       label="" 
                       no-resize 
@@ -88,7 +88,7 @@
                 <v-select 
                   v-show="emailSelectionShow" 
                   hide-details 
-                  variant="filled" 
+                  variant="outlined" 
                   density="compact" 
                   :items="emailOptions" 
                   v-model="emailType"
@@ -160,10 +160,10 @@
               <v-container>
                 <v-card-text>
                   <v-divider class="mb-5"></v-divider>
-                  <h2 class="text-left ma-0">Next contact after:</h2>
-                  <v-container class="d-flex flex-wrap justify-start align-center pa-0 pt-4" style="gap: 40px">
+                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1 mt-2">Next contact after:</div>
+                  <v-container class="d-flex flex-wrap justify-start align-center pa-0 pt-2" style="gap: 40px">
                     <v-text-field 
-                      variant="filled" 
+                      variant="outlined" 
                       density="compact" 
                       ref="contactDateRef" 
                       label="Date (YYYY-MM-DD)"
@@ -181,10 +181,10 @@
                   </v-container>
 
                   <v-divider class="my-5"></v-divider>
-                  <h2 class="text-left ma-0">Note for future contact:</h2>
-                  <v-container class="pa-0 pt-4 d-flex flex-wrap justify-start align-center">
+                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1 mt-6">Note for future contact:</div>
+                  <v-container class="pa-0 pt-2 d-flex flex-wrap justify-start align-center">
                     <v-textarea 
-                      variant="filled" 
+                      variant="outlined" 
                       class="conv-textarea" 
                       label="" 
                       no-resize 
@@ -203,6 +203,56 @@
             </v-card>
           </v-stepper-window-item>
         </v-stepper-window>
+
+        <!-- Status Action Logs -->
+        <v-card
+          v-if="actionLogs.length > 0"
+          class="ds-card mx-6 mb-6 mt-2"
+          variant="flat"
+          style="padding: 16px; background-color: #f8fafc"
+        >
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px">
+            <p class="text-label" style="margin: 0">Action Log</p>
+            <v-btn
+              variant="text"
+              size="small"
+              color="error"
+              @click="actionLogs = []"
+              prepend-icon="mdi-delete-sweep"
+            >
+              Clear
+            </v-btn>
+          </div>
+
+          <v-timeline density="compact" side="end">
+            <v-timeline-item
+              v-for="(entry, i) in actionLogs"
+              :key="i"
+              :dot-color="entry.success ? 'success' : 'error'"
+              size="small"
+            >
+              <v-card variant="tonal" :color="entry.success ? 'success' : 'error'" style="padding: 12px; max-width: 500px">
+                <div style="display: flex; justify-content: space-between; align-items: start">
+                  <div>
+                    <strong>{{ entry.action }}</strong>
+                    <span class="text-muted" style="margin-left: 8px; font-size: 0.75rem">
+                      {{ entry.time }}
+                    </span>
+                  </div>
+                  <v-chip
+                    :color="entry.success ? 'success' : 'error'"
+                    size="x-small"
+                    variant="flat"
+                  >
+                    {{ entry.success ? 'OK' : 'FAIL' }}
+                  </v-chip>
+                </div>
+                <p style="margin-top: 6px; font-size: 0.85rem">{{ entry.message }}</p>
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
+        </v-card>
+
       </v-stepper>
 
       <v-dialog v-model="datePicker" max-width="360px">
@@ -212,6 +262,36 @@
             show-current 
             @update:model-value="datePick"
           ></v-date-picker>
+        </v-card>
+      </v-dialog>
+
+      <!-- Cancel Confirmation -->
+      <v-dialog v-model="confirmCancelDialog" max-width="400px" persistent>
+        <v-card>
+          <v-card-title class="text-h6">Cancel schedule?</v-card-title>
+          <v-card-text>
+            You have created a schedule but haven't finished the rest of the steps. Do you want to delete the created schedule and Google Calendar event(s)?
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="grey" variant="text" @click="confirmCancelDialog = false">No, continue steps</v-btn>
+            <v-btn color="error" variant="text" @click="cancelSchedule">Yes, cancel & delete</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <!-- Update Confirmation -->
+      <v-dialog v-model="confirmUpdateDialog" max-width="400px" persistent>
+        <v-card>
+          <v-card-title class="text-h6">Update existing schedule?</v-card-title>
+          <v-card-text>
+            You have already created a schedule. Do you want to update it with the new time and information? This will update the existing Google Calendar event(s).
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="grey" variant="text" @click="confirmUpdateDialog = false">Cancel</v-btn>
+            <v-btn color="primary" variant="text" @click="proceedUpdateSchedule">Yes, update</v-btn>
+          </v-card-actions>
         </v-card>
       </v-dialog>
 
@@ -275,8 +355,22 @@ export default {
     emailButtonIconShow: false,
     emailButtonText: "Send email",
     step23ButtonText: "Next",
+    createdScheduleInSession: null,
+    isFinalized: false,
+    confirmCancelDialog: false,
+    confirmUpdateDialog: false,
+    actionLogs: [],
   }),
   methods: {
+    addLog(action, success, message) {
+      this.actionLogs.unshift({
+        action,
+        success,
+        message,
+        time: new Date().toLocaleTimeString(),
+      });
+    },
+
     deleteCurrentAppointment(index) {
       this.$emit("deleteCurrentAppointment", index);
     },
@@ -295,12 +389,27 @@ export default {
     readyToCreateSchedule() {
       if (this.$refs.appointmentDetailsRef?.appointmentDetailReady && this.$refs.dateTimePickerComp?.studyDateTimeReady) {
         this.scheduleEnable = true;
+        if (this.createdScheduleInSession) {
+          this.scheduleButtonText = "Update Schedule Event";
+        } else {
+          this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Schedule" : "Update Schedule";
+        }
       } else {
         this.scheduleEnable = false;
+        if (this.createdScheduleInSession) {
+          this.scheduleButtonText = "Update Schedule Event";
+        } else {
+          this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Schedule" : "Update Schedule";
+        }
       }
     },
 
     async createSchedule() {
+      if (this.createdScheduleInSession) {
+        this.confirmUpdateDialog = true;
+        return;
+      }
+
       this.loadingStatus = true;
       const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
       this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
@@ -309,15 +418,29 @@ export default {
       let updatedSchedule = {};
 
       if (newAppointments.newAppointments.length > 0) {
-        newSchedule = await this.newSchedule(newAppointments.newAppointments);
-        this.scheduleButtonText = "Appointment created!";
-        this.$emit("newSchedule", newSchedule);
+        try {
+          newSchedule = await this.newSchedule(newAppointments.newAppointments);
+          this.createdScheduleInSession = newSchedule;
+          this.scheduleButtonText = "Update Schedule Event";
+          this.addLog("Create Calendar Event", true, "Successfully created calendar event.");
+          this.$emit("newSchedule", newSchedule);
+        } catch (error) {
+          console.error(error);
+          this.addLog("Create Calendar Event", false, "Failed to create calendar event.");
+        }
       }
 
       if (newAppointments.updatedAppointments.length > 0) {
-        updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments);
-        this.scheduleButtonText = "Appointment updated!";
-        this.$emit("updatedSchedule", updatedSchedule);
+        try {
+          // Normal update path (parent schedule update)
+          updatedSchedule = await this.updateSchedule(newAppointments.updatedAppointments, this.currentSchedule);
+          this.scheduleButtonText = "Appointment updated!";
+          this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
+          this.$emit("updatedSchedule", updatedSchedule);
+        } catch (error) {
+          console.error(error);
+          this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
+        }
       }
 
       if (newAppointments.completedAppointments.length > 0) {
@@ -392,6 +515,41 @@ export default {
       this.disableStep12 = false;
     },
 
+    async proceedUpdateSchedule() {
+      this.confirmUpdateDialog = false;
+      this.loadingStatus = true;
+      
+      const newAppointments = this.$refs.appointmentDetailsRef.generateAppointments();
+      this.studyDateTime = this.$refs.dateTimePickerComp.studyDateTime();
+
+      if (newAppointments.newAppointments.length > 0) {
+        // Map created schedule IDs to the new appointments so it executes as an update
+        const updatedAppointmentsList = newAppointments.newAppointments.map((app, index) => {
+          if (this.createdScheduleInSession.Appointments && this.createdScheduleInSession.Appointments[index]) {
+            app.id = this.createdScheduleInSession.Appointments[index].id;
+            app.calendarEventId = this.createdScheduleInSession.Appointments[index].calendarEventId;
+            app.eventURL = this.createdScheduleInSession.Appointments[index].eventURL;
+          }
+          app.FK_Schedule = this.createdScheduleInSession.id;
+          return app;
+        });
+        
+        try {
+          // Use createdScheduleInSession as the target schedule for the update
+          const updatedSchedule = await this.updateSchedule(updatedAppointmentsList, this.createdScheduleInSession);
+          this.createdScheduleInSession = updatedSchedule;
+          this.addLog("Update Calendar Event", true, "Successfully updated calendar event.");
+          this.$emit("updatedSchedule", updatedSchedule);
+        } catch (error) {
+          console.error(error);
+          this.addLog("Update Calendar Event", false, "Failed to update calendar event.");
+        }
+      }
+
+      this.loadingStatus = false;
+      this.scheduleButtonIconShow = true;
+    },
+
     async newSchedule(newAppointments) {
       let statusValues = [...new Set(newAppointments.map(appointment => appointment.status))];
       let status = "";
@@ -447,8 +605,10 @@ export default {
         if (event.eventId) {
           try {
             await calendar.update(event);
+            this.addLog("Update Google Calendar Event", true, `Updated event: ${event.summary}`);
           } catch (error) {
             console.error(error);
+            this.addLog("Update Google Calendar Event", false, `Failed to update event: ${error.message}`);
           }
         } else {
           if (newSchedule.Status === 'Confirmed') {
@@ -456,8 +616,10 @@ export default {
               const createdEvent = await calendar.create(event);
               event.eventURL = createdEvent.data.eventURL;
               event.eventId = createdEvent.data.eventId;
+              this.addLog("Create Google Calendar Event", true, `Created event: ${event.summary}`);
             } catch (error) {
               console.error(error);
+              this.addLog("Create Google Calendar Event", false, `Failed to create event: ${error.message}`);
             }
           }
         }
@@ -527,8 +689,10 @@ export default {
         if (event.eventId) {
           try {
             await calendar.update(event);
+            this.addLog("Update Google Calendar Event", true, `Updated event: ${event.summary}`);
           } catch (error) {
             console.error(error);
+            this.addLog("Update Google Calendar Event", false, `Failed to update event: ${error.message}`);
           }
         } else {
           if (updatedSchedule.Status === 'Confirmed') {
@@ -536,8 +700,10 @@ export default {
               const createdEvent = await calendar.create(event);
               event.eventURL = createdEvent.data.eventURL;
               event.eventId = createdEvent.data.eventId;
+              this.addLog("Create Google Calendar Event", true, `Created event: ${event.summary}`);
             } catch (error) {
               console.error(error);
+              this.addLog("Create Google Calendar Event", false, `Failed to create event: ${error.message}`);
             }
           }
         }
@@ -632,6 +798,12 @@ export default {
       this.emailButtonText = "Send email";
       this.scheduleButtonIconShow = false;
       this.step23ButtonText = "Next";
+
+      this.createdScheduleInSession = null;
+      this.isFinalized = false;
+      this.confirmCancelDialog = false;
+      this.confirmUpdateDialog = false;
+      this.actionLogs = [];
     },
 
     initiateVariables(dialogType) {
@@ -668,16 +840,62 @@ export default {
     },
 
     close() {
+      if (this.createdScheduleInSession && !this.isFinalized) {
+        this.confirmCancelDialog = true;
+      } else {
+        this.$emit('close-dialog');
+      }
+    },
+
+    async cancelSchedule() {
+      this.loadingStatus = true;
+      if (this.createdScheduleInSession) {
+        try {
+          // Delete Google Calendar Events
+          if (this.createdScheduleInSession.Appointments) {
+            for (const app of this.createdScheduleInSession.Appointments) {
+              if (app.calendarEventId) {
+                await calendar.delete({ 
+                  id: app.id,
+                  eventId: app.calendarEventId, 
+                  FK_Schedule: this.createdScheduleInSession.id,
+                  lab: this.$store.state.lab 
+                });
+              }
+            }
+          }
+
+          // Delete Schedule
+          await schedule.delete({ 
+            id: this.createdScheduleInSession.id
+          });
+          this.addLog("Cancel Schedule", true, "Successfully cancelled schedule and deleted calendar events.");
+        } catch (error) {
+          console.error(error);
+          this.addLog("Cancel Schedule", false, "Failed to cancel schedule.");
+        }
+      }
+      this.loadingStatus = false;
+      this.confirmCancelDialog = false;
       this.$emit('close-dialog');
     },
 
     async sendEmail() {
       this.loadingStatus = true;
-      const success = await this.$refs.emailComponentRef.sendEmail();
+      let success = false;
+      try {
+        success = await this.$refs.emailComponentRef.sendEmail();
+      } catch (error) {
+        console.error(error);
+      }
+
       if (success) {
         this.emailButtonText = "Email sent!";
         this.emailButtonIconShow = true;
         this.disableStep23 = false;
+        this.addLog("Send Email", true, "Successfully sent email.");
+      } else {
+        this.addLog("Send Email", false, "Failed to send email.");
       }
       this.loadingStatus = false;
     },
@@ -712,8 +930,8 @@ export default {
 
     step12() {
       if (this.skipEmail) {
-        this.emailDialog = false;
         this.stepperPage = "3";
+        this.emailDialog = false;
       } else {
         for (const appointment of this.emailAppointments) {
           switch (appointment.status) {
@@ -752,6 +970,7 @@ export default {
           LastContactDate: moment().tz(this.$store.state.timeZone).startOf("day").format("YYYY-MM-DD"),
           NextContactNote: this.nextContactNote,
         });
+        this.isFinalized = true;
         this.close();
       } catch (error) {
         console.error(error);

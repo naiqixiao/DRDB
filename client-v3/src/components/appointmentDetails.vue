@@ -1,6 +1,6 @@
 <template>
   <v-container class="pa-0 d-flex flex-column">
-    <h2 class="text-left ma-0 pe-4">Appointment details:</h2>
+    <div class="text-caption font-weight-bold text-uppercase text-muted mb-3">Appointment details:</div>
 
     <!-- Appointment Data Table -->
     <v-container>
@@ -21,7 +21,7 @@
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template #item.studyName="{ item, index }">
           <v-select 
-            variant="filled" 
+            variant="outlined" 
             density="compact" 
             :items="potentialStudies(item.Child, item.FK_Study).potentialStudyList" 
             item-value="id"
@@ -39,7 +39,7 @@
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template #item.experimenter1="{ index }">
           <v-select 
-            variant="filled" 
+            variant="outlined" 
             density="compact" 
             :items="optionsE1[index]" 
             item-value="id" 
@@ -56,7 +56,7 @@
         <!-- eslint-disable-next-line vue/valid-v-slot -->
         <template #item.experimenter2="{ index }">
           <v-select 
-            variant="filled" 
+            variant="outlined" 
             density="compact" 
             :items="optionsE2[index]" 
             item-value="id" 
@@ -75,7 +75,7 @@
           <v-container class="d-flex pa-2 align-center justify-center">
             <!-- select appointment status -->
             <v-select 
-              variant="filled" 
+              variant="outlined" 
               density="compact" 
               :items="statusOptions" 
               label="Appointment status"
@@ -115,24 +115,25 @@
     <v-divider class="mb-5"></v-divider>
 
     <v-row dense align="baseline" justify="start" style="height: 80px">
-      <h2 class="text-left me-4 ma-0">Additional appointment(s) for:</h2>
+      <v-col cols="12" class="pb-0">
+        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1">Additional appointment(s) for:</div>
+      </v-col>
       <v-col cols="12" md="2" class="centerCol" v-for="(child, index) in Children" :key="child.id">
         <v-tooltip location="bottom">
           <template v-slot:activator="{ props }">
             <div v-bind="props" class="align-self-end">
               <v-btn 
                 class="text-capitalize" 
-                size="large" 
                 rounded="pill" 
                 color="primary" 
                 @click="newAppointment(child)"
                 :disabled="nSelectableStudies[index] < 1 || parentResponse === 'Rejected' || additionalStudyButtonDisable"
               >
                 {{ child.Name ? child.Name.split(" ")[0] : "Name is missing" }}
-                <v-icon size="28px" class="ms-2" v-if="nSelectableStudies[index] < 10">
+                <v-icon size="24px" class="ms-2" v-if="nSelectableStudies[index] < 10">
                   {{ "mdi-numeric-" + nSelectableStudies[index] + "-circle-outline" }}
                 </v-icon>
-                <v-icon size="28px" class="ms-2" v-else>
+                <v-icon size="24px" class="ms-2" v-else>
                   mdi-numeric-9-plus-circle-outline
                 </v-icon>
               </v-btn>
@@ -164,11 +165,11 @@ export default {
       appointmentDetailReady: false,
       editedAppointments: [],
       apptHeaders: [
-        { title: "Child", align: "center", key: "Child.Name", width: "10%", sortable: false },
-        { title: "Study", align: "center", key: "studyName", width: "10%", sortable: false },
-        { title: "Experimenter", align: "center", key: "experimenter1", sortable: false, width: "15%" },
-        { title: "Asst. Experimenter", align: "center", key: "experimenter2", sortable: false, width: "15%" },
-        { title: "Actions", align: "center", key: "actions", sortable: false, width: "25%" }
+        { title: "Child", align: "center", key: "Child.Name", width: "12%", sortable: false },
+        { title: "Study", align: "center", key: "studyName", width: "18%", sortable: false },
+        { title: "Experimenter (E1)", align: "center", key: "experimenter1", sortable: false, width: "20%" },
+        { title: "Asst. Experimenter (E2)", align: "center", key: "experimenter2", sortable: false, width: "20%" },
+        { title: "Actions", align: "center", key: "actions", sortable: false, width: "30%" }
       ],
       selectedExperimenters: [],
       selectedExperimenters_2nd: [],
@@ -416,8 +417,11 @@ export default {
         newAppointment.status = null;
       }
 
-      this.selectedExperimenters.push({});
+      this.selectedStudies.push(null);
+      this.selectedExperimenters.push(null);
       this.selectedExperimenters_2nd.push([]);
+      this.optionsE1.push([]);
+      this.optionsE2.push([]);
 
       this.editedAppointments.push(newAppointment);
 
@@ -542,8 +546,8 @@ export default {
       if (!this.Appointments) return;
       this.editedAppointments = JSON.parse(JSON.stringify(this.Appointments));
       this.editedAppointments.forEach((appointment, index) => {
-        this.selectedStudies[index] = Object.assign({}, appointment.Study);
-        this.selectedExperimenters[index] = appointment.PrimaryExperimenter && appointment.PrimaryExperimenter.length > 0 ? Object.assign({}, appointment.PrimaryExperimenter[0]) : {};
+        this.selectedStudies[index] = appointment.Study ? Object.assign({}, appointment.Study) : null;
+        this.selectedExperimenters[index] = appointment.PrimaryExperimenter && appointment.PrimaryExperimenter.length > 0 ? Object.assign({}, appointment.PrimaryExperimenter[0]) : null;
         this.selectedExperimenters_2nd[index] = appointment.SecondaryExperimenter || [];
 
         if (this.selectedStudies[index] && Object.keys(this.selectedStudies[index]).length > 0 && this.selectedStudies[index].Experimenters) {
@@ -649,7 +653,4 @@ export default {
 </script>
 
 <style scoped>
-.v-data-table {
-  font-size: 14px;
-}
 </style>

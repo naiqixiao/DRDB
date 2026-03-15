@@ -17,7 +17,7 @@
     "express": "^4.22.1",
     "express-async-handler": "^1.2.0",
     "express-validator": "^7.3.1",
-    "googleapis": "^61.0.0",
+    "googleapis": "^171.4.0",
     "http": "0.0.0",
     "jsonexport": "^3.2.0",
     "jsonwebtoken": "^9.0.3",

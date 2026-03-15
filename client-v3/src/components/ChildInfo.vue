@@ -447,7 +447,6 @@ export default {
 
     addSchedule(schedule) {
       this.$emit("newSchedule", schedule);
-      this.closeSchedule();
     }
   }
 };

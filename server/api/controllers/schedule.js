@@ -650,7 +650,16 @@ exports.delete = asyncHandler(async (req, res) => {
     });
 
     // Log
-    const User = JSON.parse(req.query.User);
+    let User;
+    if (typeof req.query.User === 'string') {
+      try {
+        User = JSON.parse(req.query.User);
+      } catch (e) {
+        User = req.query.User;
+      }
+    } else {
+      User = req.query.User;
+    }
 
     await log.createLog(
       "Appointment Delete",
