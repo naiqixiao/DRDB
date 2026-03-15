@@ -12,14 +12,6 @@ module.exports = function (sequelize, DataTypes) {
 			type: DataTypes.STRING(45),
 			allowNull: false
 		},
-		MinAge: {
-			type: DataTypes.DECIMAL,
-			allowNull: false
-		},
-		MaxAge: {
-			type: DataTypes.DECIMAL,
-			allowNull: false
-		},
 		Description: {
 			type: DataTypes.TEXT,
 			allowNull: false

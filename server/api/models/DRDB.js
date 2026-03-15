@@ -54,6 +54,7 @@ Child.belongsToMany(Child, {
 const Lab = sequelize.import("../models/SequelizeAuto/Lab");
 const Personnel = sequelize.import("../models/SequelizeAuto/Personnel");
 const Study = sequelize.import("../models/SequelizeAuto/Study");
+const StudyAgeGroup = sequelize.import("../models/SequelizeAuto/StudyAgeGroup");
 const Experimenter = sequelize.import("../models/SequelizeAuto/Experimenter");
 const TestingRoom = sequelize.import("../models/SequelizeAuto/TestingRoom");
 
@@ -105,6 +106,26 @@ Study.belongsToMany(Personnel, {
   foreignKey: "FK_Study",
   otherKey: "FK_Experimenter",
   as: "Experimenters",
+});
+
+// Age Groups (One-to-Many)
+Study.hasMany(StudyAgeGroup, { foreignKey: "FK_Study", as: "AgeGroups" });
+StudyAgeGroup.belongsTo(Study, { foreignKey: "FK_Study" });
+
+// Prerequisites (Many-to-Many self-referencing)
+Study.belongsToMany(Study, {
+  as: "Prerequisites",
+  through: "StudyPrerequisites",
+  foreignKey: "StudyId",
+  otherKey: "RequirementId",
+});
+
+// Exclusions (Many-to-Many self-referencing)
+Study.belongsToMany(Study, {
+  as: "Exclusions",
+  through: "StudyExclusions",
+  foreignKey: "StudyId",
+  otherKey: "ExcludedId",
 });
 
 Family.belongsTo(Personnel, {
@@ -210,6 +231,7 @@ exports.family = Family;
 exports.child = Child;
 exports.conversations = Conversations;
 exports.study = Study;
+exports.studyAgeGroup = StudyAgeGroup;
 exports.appointment = Appointment;
 exports.schedule = Schedule;
 exports.lab = Lab;

@@ -79,9 +79,45 @@
         </div>
 
         <SectionHeader title="Recruitment Criteria" icon="mdi-filter-variant" />
+        <div class="mb-3">
+          <div class="text-caption text-medium-emphasis mb-1">Age Groups</div>
+          <div v-if="currentStudy.AgeGroups && currentStudy.AgeGroups.length > 0">
+            <v-chip
+              v-for="(group, i) in currentStudy.AgeGroups"
+              :key="i"
+              class="mr-1 mb-1"
+              size="small"
+              color="primary"
+              variant="tonal"
+            >
+              {{ AgeFormated(group.MinAge) }} – {{ AgeFormated(group.MaxAge) }}
+            </v-chip>
+          </div>
+          <span v-else class="text-body-2 text-medium-emphasis">—</span>
+        </div>
+        <div v-if="currentStudy.Prerequisites && currentStudy.Prerequisites.length > 0" class="mb-3">
+          <div class="text-caption text-medium-emphasis mb-1">Prerequisites</div>
+          <v-chip
+            v-for="p in currentStudy.Prerequisites"
+            :key="p.id"
+            class="mr-1 mb-1"
+            size="small"
+            color="success"
+            variant="tonal"
+          >{{ p.StudyName }}</v-chip>
+        </div>
+        <div v-if="currentStudy.Exclusions && currentStudy.Exclusions.length > 0" class="mb-3">
+          <div class="text-caption text-medium-emphasis mb-1">Exclusions</div>
+          <v-chip
+            v-for="e in currentStudy.Exclusions"
+            :key="e.id"
+            class="mr-1 mb-1"
+            size="small"
+            color="error"
+            variant="tonal"
+          >{{ e.StudyName }}</v-chip>
+        </div>
         <div class="info-grid info-grid--4">
-          <InfoField label="Min Age" :value="AgeFormated(currentStudy.MinAge)" />
-          <InfoField label="Max Age" :value="AgeFormated(currentStudy.MaxAge)" />
           <InfoField label="ASD" :value="currentStudy.ASDParticipant" />
           <InfoField label="Premature" :value="currentStudy.PrematureParticipant" />
           <InfoField label="Ill" :value="currentStudy.IllParticipant" />
@@ -230,12 +266,56 @@
 
                 <!-- Criteria -->
                 <v-divider class="my-4"></v-divider>
-                <h2 class="text-h6 mb-4">Recruitment criteria:</h2>
+                <h2 class="text-h6 mb-4">Age Groups:</h2>
+                <v-row v-for="(group, index) in editedStudy.AgeGroups" :key="index" dense align="center">
+                  <v-col cols="5">
+                    <v-text-field v-model.number="group.MinAge" label="Min Age (months)" type="number" variant="outlined" density="compact"></v-text-field>
+                  </v-col>
+                  <v-col cols="5">
+                    <v-text-field v-model.number="group.MaxAge" label="Max Age (months)" type="number" variant="outlined" density="compact"></v-text-field>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-btn icon="mdi-delete" color="error" variant="text" @click="editedStudy.AgeGroups.splice(index, 1)"></v-btn>
+                  </v-col>
+                </v-row>
+                <v-btn variant="tonal" color="primary" prepend-icon="mdi-plus" @click="editedStudy.AgeGroups.push({ MinAge: null, MaxAge: null })">
+                  Add Age Group
+                </v-btn>
+
+                <v-divider class="my-4"></v-divider>
+                <h2 class="text-h6 mb-4">Study Requirements:</h2>
                 <v-row dense>
-                  <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MinAge" label="Min Age (months)"
-                      variant="outlined" density="compact"></v-text-field></v-col>
-                  <v-col cols="12" sm="2"><v-text-field v-model="editedStudy.MaxAge" label="Max Age (months)"
-                      variant="outlined" density="compact"></v-text-field></v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="editedStudy.PrerequisiteIds"
+                      :items="Studies.filter(s => s.id !== editedStudy.id)"
+                      item-title="StudyName"
+                      item-value="id"
+                      label="Prerequisite Studies (Must have completed)"
+                      multiple
+                      chips
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-select
+                      v-model="editedStudy.ExclusionIds"
+                      :items="Studies.filter(s => s.id !== editedStudy.id)"
+                      item-title="StudyName"
+                      item-value="id"
+                      label="Excluded Studies (Must NOT have participated)"
+                      multiple
+                      chips
+                      variant="outlined"
+                      density="compact"
+                    ></v-select>
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4"></v-divider>
+                <h2 class="text-h6 mb-4">Participant criteria:</h2>
+                <v-row dense>
                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.ASDParticipant" :items="inclusionOptions"
                       label="ASD Participants" variant="outlined" density="compact"></v-select></v-col>
                   <v-col cols="12" sm="2"><v-select v-model="editedStudy.PrematureParticipant" :items="inclusionOptions"
@@ -552,7 +632,12 @@ export default {
     },
 
     editStudy() {
-      this.editedStudy = { ...this.currentStudy };
+      this.editedStudy = {
+        ...this.currentStudy,
+        AgeGroups: (this.currentStudy.AgeGroups || []).map(g => ({ MinAge: g.MinAge, MaxAge: g.MaxAge })),
+        PrerequisiteIds: (this.currentStudy.Prerequisites || []).map(p => p.id),
+        ExclusionIds: (this.currentStudy.Exclusions || []).map(e => e.id),
+      };
       this.PointofContact = this.currentStudy.PointofContact;
       this.dialog = true;
     },
@@ -567,7 +652,10 @@ export default {
       this.editedStudy = {
         FK_Lab: this.$store.state.lab,
         StudyType: 'Behavioural',
-        Completed: false
+        Completed: false,
+        AgeGroups: [],
+        PrerequisiteIds: [],
+        ExclusionIds: [],
       };
       this.PointofContact = null;
       this.editedIndex = -1;
@@ -585,21 +673,18 @@ export default {
         // Create
         try {
           const Result = await studyApi.create(this.editedStudy);
-          this.editedStudy.id = Result.data.id;
-          this.editedStudy.PointofContact = this.PointofContact;
-          this.Studies.push(this.editedStudy);
+          this.Studies.push(Result.data);
           this.$store.dispatch("setStudies", this.Studies);
-          this.currentStudy = this.editedStudy;
+          this.currentStudy = Result.data;
           this.close();
         } catch (error) { console.error(error); }
       } else {
         // Update
         try {
-          await studyApi.update(this.editedStudy);
-          this.editedStudy.PointofContact = this.PointofContact;
-          this.currentStudy = { ...this.editedStudy };
-          Object.assign(this.Studies[this.editedIndex], this.editedStudy);
+          const Result = await studyApi.update(this.editedStudy);
+          Object.assign(this.Studies[this.editedIndex], Result.data);
           this.$store.dispatch("setStudies", this.Studies);
+          this.currentStudy = { ...Result.data };
           this.close();
         } catch (error) { console.error(error); }
       }

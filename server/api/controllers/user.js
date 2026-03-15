@@ -166,6 +166,9 @@ exports.login = asyncHandler(async (req, res) => {
                 model: model.experimenter,
               },
             },
+            { model: model.studyAgeGroup, as: 'AgeGroups' },
+            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
+            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
           ]
         }],
       },
@@ -252,7 +255,20 @@ exports.changePassword = asyncHandler(async (req, res) => {
     include: [
       {
         model: model.lab,
-        include: [{ model: model.study }],
+        include: [{
+          model: model.study,
+          include: [
+            { model: model.personnel, as: 'PointofContact' },
+            {
+              model: model.personnel,
+              as: 'Experimenters',
+              through: { model: model.experimenter },
+            },
+            { model: model.studyAgeGroup, as: 'AgeGroups' },
+            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
+            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
+          ],
+        }],
       },
     ],
   });

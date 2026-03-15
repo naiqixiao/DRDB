@@ -249,14 +249,13 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.study,
         attributes: [
           "StudyName",
-          "MinAge",
-          "MaxAge",
           "StudyType",
           "FK_Lab",
           "EmailTemplate",
           "ReminderTemplate",
           "FollowUPEmailSnippet",
         ],
+        include: [{ model: model.studyAgeGroup, as: 'AgeGroups' }],
       },
       {
         model: model.personnel,

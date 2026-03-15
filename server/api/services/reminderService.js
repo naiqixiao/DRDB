@@ -272,15 +272,16 @@ async function getFamilyReminderSchedules() {
             model: model.study,
             attributes: [
               "StudyName",
-              "MinAge",
-              "MaxAge",
               "EmailTemplate",
               "ReminderTemplate",
               "FollowUPEmailSnippet",
               "StudyType",
               "FK_Lab",
             ],
-            include: [{ model: model.lab }],
+            include: [
+              { model: model.lab },
+              { model: model.studyAgeGroup, as: 'AgeGroups' },
+            ],
           },
           {
             model: model.personnel,

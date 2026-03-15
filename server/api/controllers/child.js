@@ -263,8 +263,6 @@ exports.search = asyncHandler(async (req, res) => {
                 model: model.study,
                 attributes: [
                   "StudyName",
-                  "MinAge",
-                  "MaxAge",
                   "EmailTemplate",
                   "ReminderTemplate",
                   "FollowUPEmailSnippet",

@@ -291,91 +291,109 @@ export default {
     },
 
     studyElegibility(study, child) {
-      // Same logic as appointmentDetails.vue
-      // TODO: Refactor into shared mixin or utility.
-      if (child.DoB != null) {
-        // calculate age in days roughly or use moment
-        // Here simpler approximation might suffice or use same logic
-        const Age = Math.floor(
-          (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
-        ); // Age in days
+      if (!child.DoB) return false;
 
-        var age =
-          Age >= study.MinAge * 30.5 - 1 &&
-          Age <= study.MaxAge * 30.5 - 1;
+      const Age = Math.floor(
+        (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
+      );
 
-        // ... other criteria (ASD, Hearing, Vision, Premature, Ill) ...
-        // Simplified for brevity, assume similar logic.
-        // Since this component is just checking eligibility for the button, we can copy logic.
-
-        var asd = false;
-        switch (study.ASDParticipant) {
-          case "Only":
-            child.Family.AutismHistory ? (asd = true) : (asd = false);
-            break;
-          case "Exclude":
-            child.Family.AutismHistory ? (asd = false) : (asd = true);
-            break;
-          case "Include":
-            asd = true;
-            break;
-        }
-
-        var hearing = false;
-        switch (study.HearingLossParticipant) {
-          case "Only":
-            child.HearingLoss ? (hearing = true) : (hearing = false);
-            break;
-          case "Exclude":
-            child.HearingLoss ? (hearing = false) : (hearing = true);
-            break;
-          case "Include":
-            hearing = true;
-            break;
-        }
-
-        var vision = false;
-        switch (study.VisionLossParticipant) {
-          case "Only":
-            child.VisionLoss ? (vision = true) : (vision = false);
-            break;
-          case "Exclude":
-            child.VisionLoss ? (vision = false) : (vision = true);
-            break;
-          case "Include":
-            vision = true;
-            break;
-        }
-
-        var premature = false;
-        switch (study.PrematureParticipant) {
-          case "Only":
-            child.PrematureBirth ? (premature = true) : (premature = false);
-            break;
-          case "Exclude":
-            child.PrematureBirth ? (premature = false) : (premature = true);
-            break;
-          case "Include":
-            premature = true;
-            break;
-        }
-
-        var illness = false;
-        switch (study.IllParticipant) {
-          case "Only":
-            child.Illness ? (illness = true) : (illness = false);
-            break;
-          case "Exclude":
-            child.Illness ? (illness = false) : (illness = true);
-            break;
-          case "Include":
-            illness = true;
-            break;
-        }
-        return age && asd && hearing && vision && premature && illness;
-
+      // 1. Age Group Check (child must fit into AT LEAST ONE age group)
+      let ageEligible = false;
+      if (study.AgeGroups && study.AgeGroups.length > 0) {
+        ageEligible = study.AgeGroups.some(
+          (group) => Age >= group.MinAge * 30.5 - 1 && Age <= group.MaxAge * 30.5 - 1
+        );
+      } else {
+        ageEligible = true; // fallback if no age groups defined
       }
-      return false;
+
+      // Past participated study IDs
+      const pastStudyIds = child.Appointments
+        ? child.Appointments.map((app) => app.FK_Study)
+        : [];
+
+      // 2. Prerequisite Check (child MUST HAVE participated in ALL prerequisites)
+      let meetsPrereqs = true;
+      if (study.Prerequisites && study.Prerequisites.length > 0) {
+        meetsPrereqs = study.Prerequisites.every((prereq) =>
+          pastStudyIds.includes(prereq.id)
+        );
+      }
+
+      // 3. Exclusion Check (child MUST NOT have participated in ANY exclusions)
+      let meetsExclusions = true;
+      if (study.Exclusions && study.Exclusions.length > 0) {
+        meetsExclusions = !study.Exclusions.some((excl) =>
+          pastStudyIds.includes(excl.id)
+        );
+      }
+
+      var asd = false;
+      switch (study.ASDParticipant) {
+        case "Only":
+          child.Family.AutismHistory ? (asd = true) : (asd = false);
+          break;
+        case "Exclude":
+          child.Family.AutismHistory ? (asd = false) : (asd = true);
+          break;
+        case "Include":
+          asd = true;
+          break;
+      }
+
+      var hearing = false;
+      switch (study.HearingLossParticipant) {
+        case "Only":
+          child.HearingLoss ? (hearing = true) : (hearing = false);
+          break;
+        case "Exclude":
+          child.HearingLoss ? (hearing = false) : (hearing = true);
+          break;
+        case "Include":
+          hearing = true;
+          break;
+      }
+
+      var vision = false;
+      switch (study.VisionLossParticipant) {
+        case "Only":
+          child.VisionLoss ? (vision = true) : (vision = false);
+          break;
+        case "Exclude":
+          child.VisionLoss ? (vision = false) : (vision = true);
+          break;
+        case "Include":
+          vision = true;
+          break;
+      }
+
+      var premature = false;
+      switch (study.PrematureParticipant) {
+        case "Only":
+          child.PrematureBirth ? (premature = true) : (premature = false);
+          break;
+        case "Exclude":
+          child.PrematureBirth ? (premature = false) : (premature = true);
+          break;
+        case "Include":
+          premature = true;
+          break;
+      }
+
+      var illness = false;
+      switch (study.IllParticipant) {
+        case "Only":
+          child.Illness ? (illness = true) : (illness = false);
+          break;
+        case "Exclude":
+          child.Illness ? (illness = false) : (illness = true);
+          break;
+        case "Include":
+          illness = true;
+          break;
+      }
+
+      return ageEligible && meetsPrereqs && meetsExclusions && asd && hearing && vision && premature && illness;
     },
 
     editChild(item, index) {

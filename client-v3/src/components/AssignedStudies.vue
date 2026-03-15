@@ -10,7 +10,12 @@
           </v-card-title>
 
           <v-card-text class="py-2 text-body-2 text-primary">
-            Age range: {{ AgeFormated(study.MinAge) }} to {{ AgeFormated(study.MaxAge) }}
+            <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
+              <span v-for="(group, i) in study.AgeGroups" :key="i">
+                {{ AgeFormated(group.MinAge) }} to {{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1"> &middot; </span>
+              </span>
+            </template>
+            <template v-else>Age range not set</template>
           </v-card-text>
           
           <v-card-text class="py-2 text-body-2 font-weight-medium text-error text-right">

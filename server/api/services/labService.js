@@ -37,11 +37,9 @@ exports.createLab = async (labData) => {
     include: [model.personnel],
   });
 
-  // 4. Create a sample study
-  await model.study.create({
+  // 4. Create a sample study with an age group entry
+  const sampleStudy = await model.study.create({
     StudyName: "Sample study for " + lab.LabName,
-    MinAge: "8.00",
-    MaxAge: "24.00",
     PhoneScript: "hello there",
     Description:
       "Study description should be a short summary of a study. So RAs can read it to parents during recruitment.",
@@ -60,6 +58,13 @@ exports.createLab = async (labData) => {
     FK_Personnel: lab.Personnels[0].id,
     FK_Lab: lab.id,
     FK_TestingRoom: 1,
+  });
+
+  // Create the default age group for the sample study
+  await model.studyAgeGroup.create({
+    FK_Study: sampleStudy.id,
+    MinAge: 8,
+    MaxAge: 24,
   });
 
   // 5. Send welcome email to the first personnel (lab admin)

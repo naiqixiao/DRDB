@@ -9,13 +9,36 @@ const config = require("../../config/general");
 
 // Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
-  var newStudyInfo = req.body;
+  const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...newStudyInfo } = req.body;
 
   try {
-    const study = await model.study.create(newStudyInfo);
+    const created = await model.study.create(
+      { ...newStudyInfo, AgeGroups: AgeGroups || [] },
+      { include: [{ model: model.studyAgeGroup, as: "AgeGroups" }] }
+    );
 
-    // Log
-    const User = req.body.User;
+    if (PrerequisiteIds && PrerequisiteIds.length > 0) {
+      await created.setPrerequisites(PrerequisiteIds);
+    }
+    if (ExclusionIds && ExclusionIds.length > 0) {
+      await created.setExclusions(ExclusionIds);
+    }
+
+    const study = await model.study.findOne({
+      where: { id: created.id },
+      include: [
+        { model: model.studyAgeGroup, as: "AgeGroups" },
+        { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
+        { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
+        model.lab,
+        { model: model.personnel, as: "PointofContact" },
+        {
+          model: model.personnel,
+          as: "Experimenters",
+          through: { model: model.experimenter },
+        },
+      ],
+    });
 
     await log.createLog(
       "Study Created",
@@ -40,42 +63,31 @@ exports.search = asyncHandler(async (req, res) => {
   try {
     let study = [];
 
+    const commonIncludes = [
+      { model: model.studyAgeGroup, as: "AgeGroups", separate: true },
+      { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
+      { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
+      model.lab,
+      { model: model.personnel, as: "PointofContact" },
+      {
+        model: model.personnel,
+        as: "Experimenters",
+        through: { model: model.experimenter },
+      },
+    ];
+
     if (includeScheules === "true") {
       study = await model.study.findAll({
         where: queryString,
         include: [
           { model: model.appointment, separate: true },
-          model.lab,
-          {
-            model: model.personnel,
-            as: "PointofContact",
-          },
-          {
-            model: model.personnel,
-            as: "Experimenters",
-            through: {
-              model: model.experimenter,
-            },
-          },
+          ...commonIncludes,
         ],
       });
     } else {
       study = await model.study.findAll({
         where: queryString,
-        include: [
-          model.lab,
-          {
-            model: model.personnel,
-            as: "PointofContact",
-          },
-          {
-            model: model.personnel,
-            as: "Experimenters",
-            through: {
-              model: model.experimenter,
-            },
-          },
-        ],
+        include: commonIncludes,
       });
     }
 
@@ -90,39 +102,47 @@ exports.search = asyncHandler(async (req, res) => {
 
 // Update a Tutorial by the id in the request
 exports.update = asyncHandler(async (req, res) => {
-  var ID = req.body.id;
-  var updatedStudyInfo = req.body;
-
-  if (updatedStudyInfo.id) {
-    delete updatedStudyInfo["id"];
-  }
+  const ID = req.body.id;
+  const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...updatedStudyInfo } = req.body;
 
   try {
     await model.study.update(updatedStudyInfo, {
       where: { id: ID },
     });
 
+    // Sync age groups: replace existing with the new set
+    await model.studyAgeGroup.destroy({ where: { FK_Study: ID } });
+    if (AgeGroups && AgeGroups.length > 0) {
+      await model.studyAgeGroup.bulkCreate(
+        AgeGroups.map((g) => ({ MinAge: g.MinAge, MaxAge: g.MaxAge, FK_Study: ID }))
+      );
+    }
+
+    // Sync prerequisites and exclusions via Sequelize mixins
+    const studyInstance = await model.study.findOne({ where: { id: ID } });
+    if (PrerequisiteIds !== undefined) {
+      await studyInstance.setPrerequisites(PrerequisiteIds || []);
+    }
+    if (ExclusionIds !== undefined) {
+      await studyInstance.setExclusions(ExclusionIds || []);
+    }
+
     const study = await model.study.findOne({
       where: { id: ID },
       include: [
+        { model: model.studyAgeGroup, as: "AgeGroups" },
+        { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
+        { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
         model.appointment,
         model.lab,
-        {
-          model: model.personnel,
-          as: "PointofContact",
-        },
+        { model: model.personnel, as: "PointofContact" },
         {
           model: model.personnel,
           as: "Experimenters",
-          through: {
-            model: model.experimenter,
-          },
+          through: { model: model.experimenter },
         },
       ],
     });
-
-    // Log
-    const User = req.body.User;
 
     await log.createLog(
       "Study Updated",
