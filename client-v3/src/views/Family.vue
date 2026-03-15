@@ -80,6 +80,10 @@
                     v-if="currentFamily.RecruitmentMethod">
                     {{ currentFamily.RecruitmentMethod }}
                   </v-chip>
+                  <v-chip size="small" variant="tonal" color="amber-darken-2" prepend-icon="mdi-human-male-child"
+                    v-if="currentFamily.Children && currentFamily.Children.length > 0">
+                    {{ currentFamily.Children.length }} {{ currentFamily.Children.length === 1 ? 'Child' : 'Children' }}
+                  </v-chip>
                 </div>
               </v-col>
 
@@ -154,7 +158,7 @@
       <!-- Family Edit/Add Dialog -->
       <v-dialog v-model="dialog" max-width="1000px" persistent scrollable>
         <v-card class="ds-card" variant="flat">
-          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+          <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
             <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
               {{ editedIndex === -1 ? 'Add a new family' : 'Edit family information' }}
               <span v-if="editedIndex !== -1" class="text-subtitle-1 text-muted ml-2 font-weight-regular">(ID: {{ editedItem.id }})</span>
@@ -207,7 +211,7 @@
       <!-- Search Dialog -->
       <v-dialog v-model="searchDialog" max-width="800px">
         <v-card class="ds-card" variant="flat">
-          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+          <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
             <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Search
               Families</span>
             <v-btn icon="mdi-close" variant="text" density="comfortable" @click="searchDialog = false"></v-btn>
@@ -248,7 +252,7 @@
       <!-- Full Details Dialog -->
       <v-dialog v-model="detailsDialog" max-width="600px" scrollable>
         <v-card class="ds-card" variant="flat">
-          <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+          <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
             <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Family Details</span>
             <v-btn icon="mdi-close" variant="text" density="comfortable" @click="detailsDialog = false"></v-btn>
           </v-card-title>
@@ -323,12 +327,10 @@
       </v-dialog>
 
       <!-- MIDDLE COLUMN: Children -->
-      <v-col cols="12" md="4">
-        <v-col style="padding: 0px !important; min-height: 500px">
+      <v-col cols="12" md="4" style="height: 500px; overflow-y: auto; padding: 0px;">
           <ChildInfo ref="childInfo" :Children="currentFamily.Children"
             :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :currentFamily="currentFamily"
             @newSchedule="updateFamilyAppointment"></ChildInfo>
-        </v-col>
       </v-col>
 
       <!-- RIGHT COLUMN: Notes & Conversations -->
@@ -378,6 +380,12 @@
           <v-window v-model="historyTab">
 
             <v-window-item value="timeline" class="pa-6">
+              
+              <div v-if="reversedSchedules && reversedSchedules.length > 0" class="d-flex align-center text-caption text-muted mb-2">
+                <v-icon size="small" class="mr-1" color="grey">mdi-information-outline</v-icon>
+                <span>Only schedules updated within the last 7 days can be deleted.</span>
+              </div>
+
               <div style="overflow-x: auto; padding-bottom: 24px; padding-top: 8px;">
                 <div class="d-flex align-center flex-nowrap position-relative"
                   style="gap: 48px; min-width: max-content; padding: 0 4px;">
@@ -387,55 +395,10 @@
                     style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background-color: #CBD5E1; z-index: 0; transform: translateY(-50%); pointer-events: none;">
                   </div>
 
-                  <v-card v-for="schedule in reversedSchedules" :key="schedule.id" variant="outlined"
-                    style="min-width: 250px; max-width: 320px; flex-shrink: 0; z-index: 1; background-color: white;"
-                    class="mb-2 bg-white"
-                    :style="{ borderTop: '4px solid ' + getTimelineColor(schedule.Status, schedule.Completed) }">
-                    <v-card-title
-                      class="text-subtitle-1 py-1 bg-grey-lighten-4 d-flex justify-space-between align-center">
-                      <span class="font-weight-bold text-truncate"
-                        style="max-width: 60%; font-family: var(--ds-font-family-body); font-size: 0.9rem;">
-                        {{ schedule.Appointments?.[0]?.Study?.StudyName || 'Unknown Study' }}
-                      </span>
-                      <div class="d-flex align-center" style="gap: 4px;">
-                        <v-chip size="small" :color="getTimelineColor(schedule.Status, schedule.Completed)"
-                          class="text-white font-weight-bold" variant="flat" style="font-size: 0.70rem; height: 20px;">
-                          {{ schedule.Status === "Confirmed" && schedule.Completed ? "Completed" : schedule.Status }}
-                        </v-chip>
-                        <template v-if="isScheduleDeletable(schedule)">
-                          <v-btn icon="mdi-delete-outline" variant="text" density="compact" size="small" color="error"
-                            @click.stop="confirmDeleteTimelineSchedule(schedule)" title="Delete Schedule"></v-btn>
-                        </template>
-                        <template v-else>
-                          <v-tooltip location="top" max-width="250">
-                            <template v-slot:activator="{ props }">
-                              <v-btn v-bind="props" icon="mdi-delete-outline" variant="text" density="compact" size="small" color="grey" disabled></v-btn>
-                            </template>
-                            <span>Only schedules updated within the last 7 days can be deleted.</span>
-                          </v-tooltip>
-                        </template>
-                      </div>
-                    </v-card-title>
-
-                    <v-card-text class="pt-2 px-3 pb-2 text-left">
-                      <div class="d-flex align-center mb-1">
-                        <v-icon size="small" class="mr-2 text-muted">mdi-calendar-clock</v-icon>
-                        <strong style="color: var(--ds-value-color); font-size: 0.85rem;">
-                          {{ schedule.AppointmentTime ? formatDate(schedule.AppointmentTime) : 'TBD' }}
-                        </strong>
-                      </div>
-                      <div class="d-flex align-center mb-1" v-if="schedule.Personnel">
-                        <v-icon size="small" class="mr-2 text-muted">mdi-account</v-icon>
-                        <span class="text-caption">Scheduled by: {{ schedule.Personnel.Name }}</span>
-                      </div>
-
-                      <div v-if="schedule.Note" class="text-caption text-muted mt-2 pt-1"
-                        style="border-top: 1px solid #E2E8F0; line-height: 1.2">
-                        <v-icon size="small" class="mr-1">mdi-message-text-outline</v-icon>
-                        <em>"{{ schedule.Note }}"</em>
-                      </div>
-                    </v-card-text>
-                  </v-card>
+                  <TimelineCard v-for="schedule in reversedSchedules" :key="schedule.id"
+                    :schedule="schedule"
+                    :deletable="isScheduleDeletable(schedule)"
+                    @delete="confirmDeleteTimelineSchedule" />
                 </div>
               </div>
 
@@ -464,6 +427,7 @@ import AlertBanner from "@/components/AlertBanner.vue";
 import InfoField from "@/components/InfoField.vue";
 import SectionHeader from "@/components/SectionHeader.vue";
 import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
+import TimelineCard from "@/components/TimelineCard.vue";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
 import calendar from "@/services/calendar";
@@ -477,6 +441,7 @@ export default {
     InfoField,
     SectionHeader,
     AppointmentTableBrief,
+    TimelineCard,
   },
   data() {
     return {

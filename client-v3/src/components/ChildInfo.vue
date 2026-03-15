@@ -1,10 +1,10 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12" sm="12" md="6" v-for="(child, index) in sortedChildren" :key="child.id || index">
+  <div>
+    <v-row class="justify-center mx-0 mt-2">
+      <v-col cols="11" v-for="(child, index) in sortedChildren" :key="child.id || index">
         <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden;">
 
-          <v-card-title class="d-flex justify-space-between align-center bg-grey-lighten-4 py-3"
+          <v-card-title class="d-flex justify-space-between align-center ds-header-gradient py-3"
             style="position: relative; z-index: 1;">
             <div class="d-flex align-center">
               <v-icon color="primary" class="mr-2">
@@ -48,6 +48,18 @@
               <v-chip size="x-small" color="warning" variant="flat" v-if="child.HearingLoss">Hearing Deficit</v-chip>
               <v-chip size="x-small" color="warning" variant="flat" v-if="child.VisionLoss">Vision Deficit</v-chip>
             </div>
+
+            <!-- Participation Stats -->
+            <div class="mt-3 pt-2" style="border-top: 1px solid #E2E8F0;">
+              <v-chip v-if="childStats(child) > 0" size="x-small" variant="flat" color="#01579B" class="text-white font-weight-bold">
+                <v-icon start size="x-small">mdi-check-circle</v-icon>
+                {{ childStats(child) }} Completed
+              </v-chip>
+              <span v-else class="text-caption text-muted">
+                <v-icon size="x-small" class="mr-1">mdi-information-outline</v-icon>
+                No participation history
+              </span>
+            </div>
           </v-card-text>
 
           <v-card-actions class="pa-4 pt-0" style="position: relative; z-index: 1;">
@@ -73,7 +85,7 @@
     <!-- Edit Child Dialog -->
     <v-dialog v-model="dialogChild" max-width="800px" persistent scrollable>
       <v-card class="ds-card" variant="flat">
-        <v-card-title class="d-flex justify-space-between align-center py-4 bg-grey-lighten-4">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
           <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
             {{ formTitle }}
           </span>
@@ -141,7 +153,7 @@
       </v-card>
     </v-dialog>
 
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -219,6 +231,22 @@ export default {
 
   methods: {
     childAge,
+
+    childStats(child) {
+      let completed = 0;
+      if (!child.id || !this.currentFamily || !this.currentFamily.Schedules) return completed;
+
+      this.currentFamily.Schedules.forEach(schedule => {
+        if (!schedule.Appointments) return;
+        if (schedule.Status === 'Confirmed' && schedule.Completed) {
+          schedule.Appointments.forEach(app => {
+            if (app.FK_Child === child.id) completed++;
+          });
+        }
+      });
+
+      return completed;
+    },
 
     potentialStudies(child) {
       // Reuse logic from appointmentDetails or share it?

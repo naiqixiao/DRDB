@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar v-if="$route.name !== 'Login'" color="primary" density="default" class="elevation-1">
+    <v-app-bar v-if="$route.name !== 'Login'" class="ds-header-gradient elevation-1" density="default">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="title-text">
