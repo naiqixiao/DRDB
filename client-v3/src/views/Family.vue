@@ -122,13 +122,19 @@
             </div>
 
             <v-list density="compact" class="text-left px-0">
-              <v-list-item prepend-icon="mdi-email-outline" :title="currentFamily.Email || 'No email provided'"
-                class="px-0"></v-list-item>
+              <v-list-item prepend-icon="mdi-email-outline" class="px-0">
+                <v-list-item-title class="d-flex align-center">
+                  <span>{{ currentFamily.Email || 'No email provided' }}</span>
+                  <v-btn v-if="currentFamily.Email" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Email)"></v-btn>
+                </v-list-item-title>
+              </v-list-item>
               <v-list-item prepend-icon="mdi-phone-outline" class="px-0">
-                <v-list-item-title>
+                <v-list-item-title class="d-flex align-center">
                   <span v-if="currentFamily.Phone">{{ PhoneFormated(currentFamily.Phone) }}</span>
                   <span v-else class="text-muted">No phone</span>
+                  <v-btn v-if="currentFamily.Phone" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Phone)"></v-btn>
                   <span v-if="currentFamily.CellPhone" class="text-muted ml-2">(Cell: {{ PhoneFormated(currentFamily.CellPhone) }})</span>
+                  <v-btn v-if="currentFamily.CellPhone" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.CellPhone)"></v-btn>
                 </v-list-item-title>
               </v-list-item>
               <v-list-item prepend-icon="mdi-map-marker-outline" :title="currentFamily.Address || 'No home address provided'"

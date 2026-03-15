@@ -398,6 +398,74 @@ exports.week = asyncHandler(async (req, res) => {
   res.status(200).send(schedule);
 });
 
+// Retrieve the next N upcoming confirmed appointments
+exports.upcoming = asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit) || 3;
+
+  var queryString = {};
+
+  queryString.AppointmentTime = {
+    [Op.gte]: moment().toDate(),
+  };
+
+  queryString.Status = "Confirmed";
+  queryString.Completed = false;
+
+  if (req.query.trainingMode === "true") {
+    queryString["$Family.TrainingSet$"] = true;
+  } else {
+    queryString["$Family.TrainingSet$"] = false;
+  }
+
+  if (req.query.lab) {
+    queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
+  }
+
+  const schedule = await model.schedule.findAll({
+    where: queryString,
+    include: [
+      {
+        model: model.appointment,
+        separate: false,
+        include: [
+          {
+            model: model.child,
+            attributes: [
+              "id",
+              "Name",
+              "DoB",
+              "Age",
+              "Sex",
+              "FK_Family",
+              "IdWithinFamily",
+            ],
+          },
+          {
+            model: model.study,
+            include: [
+              { model: model.lab },
+            ],
+          },
+          {
+            model: model.personnel,
+            as: "PrimaryExperimenter",
+            through: { model: model.experimenterAssignment },
+            attributes: ["id", "Name", "Initial"],
+          },
+        ],
+      },
+      {
+        model: model.family,
+      },
+    ],
+    order: [["AppointmentTime", "ASC"]],
+    limit: limit,
+    subQuery: false,
+  });
+
+  res.status(200).send(schedule);
+});
+
 // ////////////////////////////////////////////
 // update an schedule.
 exports.update = asyncHandler(async (req, res) => {

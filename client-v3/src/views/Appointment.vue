@@ -18,6 +18,7 @@
 
     <v-row dense>
       <v-col cols="12" md="9">
+        <UpcomingAppointments class="mb-4" @selectSchedule="onSelectUpcoming" />
         <v-row justify="start">
           <v-col cols="12" v-for="item in searchingFields" :md="item.width" :key="item.label">
             <v-text-field 
@@ -224,6 +225,7 @@
 <script>
 import ScheduleTable from "@/components/ScheduleTableNew.vue";
 import FamilyInfo from "@/components/FamilyInfo.vue";
+import UpcomingAppointments from "@/components/UpcomingAppointments.vue";
 import schedule from "@/services/schedule";
 import moment from "moment";
 
@@ -232,6 +234,7 @@ export default {
   components: {
     ScheduleTable,
     FamilyInfo,
+    UpcomingAppointments,
   },
   props: {
     training: Boolean,
@@ -415,6 +418,12 @@ export default {
     updateFamily(family, index) {
       this.index = index;
       this.currentFamily = family;
+    },
+
+    onSelectUpcoming(schedule) {
+      if (schedule && schedule.Family) {
+        this.currentFamily = schedule.Family;
+      }
     },
 
     updateCurrentFamily(editedFamily) {

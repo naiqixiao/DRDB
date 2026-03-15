@@ -125,6 +125,26 @@ router.get("/week", checkAuth, ScheduleController.week);
 
 /**
  * @swagger
+ * /api/schedule/upcoming:
+ *   get:
+ *     summary: Get the next N upcoming confirmed appointments
+ *     tags: [Schedule]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 3
+ *     responses:
+ *       200:
+ *         description: Upcoming schedules
+ */
+router.get("/upcoming", checkAuth, ScheduleController.upcoming);
+
+/**
+ * @swagger
  * /api/schedule:
  *   post:
  *     summary: Update an existing schedule

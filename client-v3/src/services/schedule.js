@@ -42,6 +42,14 @@ export default {
       params: schedule,
     });
   },
+  upcoming() {
+    return api().get("schedule/upcoming", {
+      params: {
+        lab: store.state.lab,
+        trainingMode: store.state.trainingMode,
+      },
+    });
+  },
   update(schedule) {
     schedule.User = {
       
