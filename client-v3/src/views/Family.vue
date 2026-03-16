@@ -567,10 +567,7 @@ export default {
           this.currentFamily = this.Families[this.page - 1];
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 
@@ -620,10 +617,7 @@ export default {
         this.searchDialog = false;
         this.searchStatus = false;
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
@@ -651,10 +645,7 @@ export default {
           this.familyNotes = "";
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);

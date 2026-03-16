@@ -775,10 +775,7 @@ export default {
           new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
         );
       } catch (error) {
-        if (error.status === 401 || (error.response && error.response.status === 401)) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 
@@ -887,12 +884,7 @@ export default {
           this.currentChild = Object.assign({}, this.defaultItem);
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        } else {
-          console.error(error);
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       this.response = null;
@@ -1031,15 +1023,7 @@ export default {
 
         this.dialogSchedule = true;
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$store.dispatch("setToken", null);
-          this.$store.dispatch("setUser", null);
-          this.$store.dispatch("setUserID", null);
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          if (this.$route.name !== "Login") {
-            this.$router.push({ name: "Login" });
-          }
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 

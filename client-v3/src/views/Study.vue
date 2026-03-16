@@ -611,12 +611,8 @@ export default {
         Object.assign(this.Studies[this.editedIndex], item);
         this.$store.dispatch("setStudies", this.Studies);
       } catch (error) {
-        if (error.response?.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({ name: "Login" });
-        } else {
-          item.Completed = !item.Completed; // revert
-        }
+        item.Completed = !item.Completed;
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 

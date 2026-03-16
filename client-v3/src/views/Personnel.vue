@@ -271,10 +271,7 @@ export default {
         const Result = await personnel.search({ FK_Lab: store.state.lab });
         this.Personnels = Result.data;
       } catch (error) {
-        if (error.response?.status === 401) {
-          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 
@@ -287,10 +284,7 @@ export default {
         });
         this.labStudies = Result.data;
       } catch (error) {
-        if (error.response?.status === 401) {
-          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
-          this.$router.push({ name: "Login" });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 
@@ -299,13 +293,8 @@ export default {
         item.Active = !item.Active;
         await personnel.update(item);
       } catch (error) {
-        if (error.response?.status === 401) {
-          await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
-          this.$router.push({ name: "Login" });
-        } else {
-          // Revert on error
-          item.Active = !item.Active;
-        }
+        item.Active = !item.Active;
+        if (error.response?.status !== 401) console.error(error);
       }
     },
 
@@ -357,12 +346,7 @@ export default {
           }
           this.close();
         } catch (error) {
-          if (error.response?.status === 401) {
-            await this.$refs.confirmDialog.open("Session Expired", "Authentication failed, please login.", { color: "warning", noconfirm: true });
-            this.$router.push({ name: "Login" });
-          } else {
-            console.error(error);
-          }
+          if (error.response?.status !== 401) console.error(error);
         }
       }
     },

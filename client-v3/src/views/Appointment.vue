@@ -403,14 +403,7 @@ export default {
           this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({
-            name: "Login",
-          });
-        } else {
-          console.error(error);
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
@@ -432,12 +425,7 @@ export default {
           this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({
-            name: "Login",
-          });
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
@@ -471,14 +459,7 @@ export default {
           this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
         }
       } catch (error) {
-        if (error.response && error.response.status === 401) {
-          this.$refs.confirmD.open('Authentication Error', 'Authentication failed, please login.', { color: 'error', noconfirm: true });
-          this.$router.push({
-            name: "Login",
-          });
-        } else {
-          console.error(error);
-        }
+        if (error.response?.status !== 401) console.error(error);
       }
 
       this.queryString = Object.assign({}, this.defaultQueryString);
