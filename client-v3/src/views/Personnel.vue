@@ -150,7 +150,7 @@ import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import study from "@/services/study";
 import personnel from "@/services/personnel";
 import login from "@/services/login";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "Personnel",
@@ -160,6 +160,10 @@ export default {
     InfoField,
     SectionHeader,
     ConfirmDialog,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
 
   data() {
@@ -215,7 +219,7 @@ export default {
     },
 
     availableRoles() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       if (role === 'Admin' || role === 'PI' || role === 'Lab manager') {
         return this.roleOptions.fullRoles;
       }
@@ -223,31 +227,31 @@ export default {
     },
 
     canAddPersonnel() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(role);
     },
 
     canEditPersonnel() {
       if (!this.currentPersonnel.id) return false;
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        this.currentPersonnel.id == this.$store.state.userID ||
+        this.currentPersonnel.id == this.store.userID ||
         ['Admin', 'PI', 'Lab manager'].includes(role)
       );
     },
 
     canDeletePersonnel() {
       if (!this.currentPersonnel.id) return false;
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return ['Admin', 'PI', 'Lab manager'].includes(role);
     }
   },
 
   methods: {
     canManageStatus(item) {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        item.id == this.$store.state.userID ||
+        item.id == this.store.userID ||
         ['Admin', 'PI', 'Lab manager'].includes(role)
       );
     },
@@ -268,7 +272,7 @@ export default {
 
     async searchPersonnel() {
       try {
-        const Result = await personnel.search({ FK_Lab: store.state.lab });
+        const Result = await personnel.search({ FK_Lab: store.lab });
         this.Personnels = Result.data;
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
@@ -278,7 +282,7 @@ export default {
     async searchLabStudies() {
       try {
         const Result = await study.search({
-          FK_Lab: store.state.lab,
+          FK_Lab: store.lab,
           includeScheules: false,
           Completed: 0,
         });
@@ -341,8 +345,8 @@ export default {
           this.currentPersonnel = { ...this.editedPersonnel };
           Object.assign(this.Personnels[this.editedIndex], this.editedPersonnel);
 
-          if (this.currentPersonnel.id == this.$store.state.userID) {
-            this.$store.dispatch("setZoomLink", this.currentPersonnel.ZoomLink);
+          if (this.currentPersonnel.id == this.store.userID) {
+            this.store.setZoomLink(this.currentPersonnel.ZoomLink);
           }
           this.close();
         } catch (error) {

@@ -74,7 +74,7 @@
               @update:model-value="getSearchKeys('StudyName', $event)" 
               v-model="queryString.StudyName"
               @keydown.enter="searchSchedule" 
-              :items="$store.state.studies" 
+              :items="store.studies" 
               item-value="id" 
               item-title="StudyName"
               label="Study Name" 
@@ -270,6 +270,7 @@ import scheduleDialog from "@/components/scheduleDialog.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import schedule from "@/services/schedule";
 import moment from "moment";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "Appointment",
@@ -280,6 +281,10 @@ export default {
     FamilyDetailsDialog,
     scheduleDialog,
     ConfirmDlg,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
   props: {
     training: Boolean,
@@ -392,8 +397,8 @@ export default {
     },
 
     async searchSchedule() {
-      this.$store.dispatch("setLoadingStatus", true);
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.store.setLoadingStatus(true);
+      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
         const Result = await schedule.search(this.queryString);
@@ -410,12 +415,12 @@ export default {
       this.queryString.Status = [];
       this.queryString.StudyName = [];
       this.index = -1;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     async followupSearch() {
-      this.$store.dispatch("setLoadingStatus", true);
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.store.setLoadingStatus(true);
+      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
         const Result = await schedule.searchFollowUps(this.queryString);
@@ -432,12 +437,12 @@ export default {
       this.queryString.Status = [];
       this.queryString.StudyName = [];
       this.index = -1;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     async studiesInaPeriod(serchRange) {
-      this.$store.dispatch("setLoadingStatus", true);
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.store.setLoadingStatus(true);
+      this.queryString.trainingMode = this.store.trainingMode;
       let Result = [];
       
       try {
@@ -466,7 +471,7 @@ export default {
       this.queryString.Status = [];
       this.queryString.StudyName = [];
       this.index = -1;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     updatedSchedule(schedule) {

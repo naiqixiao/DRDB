@@ -102,11 +102,16 @@ import testingRoom from "@/services/testingRoom";
 import externalAPIs from "@/services/externalAPIs";
 import HistogramChart from '@/components/HistogramChart.vue';
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   components: {
     HistogramChart,
     ConfirmDlg
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
   data() {
     return {
@@ -126,7 +131,7 @@ export default {
       const { valid } = await this.$refs.formLogin.validate();
 
       if (valid) {
-        this.$store.dispatch("setLoadingStatus", true);
+        this.store.setLoadingStatus(true);
         try {
           const response = await login.login({
             Email: this.email,
@@ -135,30 +140,29 @@ export default {
 
           this.error = null;
 
-          this.$store.dispatch("setToken", response.data.token);
-          this.$store.dispatch("setUser", response.data.user);
-          this.$store.dispatch("setName", response.data.name);
-          this.$store.dispatch("setUserID", response.data.userID);
-          this.$store.dispatch("setLab", response.data.lab);
-          this.$store.dispatch("setStudies", response.data.studies);
-          this.$store.dispatch("setRole", response.data.role);
-          this.$store.dispatch("setLabEmail", response.data.labEmail);
-          this.$store.dispatch("setLabName", response.data.labName);
-          this.$store.dispatch("setTimeZone", response.data.timeZone);
-          this.$store.dispatch("setZoomLink", response.data.ZoomLink);
+          this.store.setToken(response.data.token);
+          this.store.setUser(response.data.user);
+          this.store.setName(response.data.name);
+          this.store.setUserID(response.data.userID);
+          this.store.setLab(response.data.lab);
+          this.store.setStudies(response.data.studies);
+          this.store.setRole(response.data.role);
+          this.store.setLabEmail(response.data.labEmail);
+          this.store.setLabName(response.data.labName);
+          this.store.setTimeZone(response.data.timeZone);
+          this.store.setZoomLink(response.data.ZoomLink);
 
-          this.$store.dispatch("setEmailOpening", response.data.emailOpening);
-          this.$store.dispatch("setEmailClosing", response.data.emailClosing);
-          this.$store.dispatch("setTYEmailClosing", response.data.TYEmail);
-          this.$store.dispatch("setLocation", response.data.location);
-          this.$store.dispatch(
-            "setTransportationInstructions",
+          this.store.setEmailOpening(response.data.emailOpening);
+          this.store.setEmailClosing(response.data.emailClosing);
+          this.store.setTYEmailClosing(response.data.TYEmail);
+          this.store.setLocation(response.data.location);
+          this.store.setTransportationInstructions(
             response.data.transportationInstructions
           );
           
           try {
-            const testingRooms = await testingRoom.search(this.$store.state.lab);
-            this.$store.dispatch("setTestingRooms", testingRooms.data);
+            const testingRooms = await testingRoom.search(this.store.lab);
+            this.store.setTestingRooms(testingRooms.data);
           } catch(e) {
             console.log("Could not load testing rooms", e);
           }
@@ -172,10 +176,10 @@ export default {
 
               if (profile && profile.data) {
                 if (profile.data.labEmail) {
-                  this.$store.dispatch("setLabEmailStatus", true);
+                  this.store.setLabEmailStatus(true);
                 }
                 if (profile.data.adminEmail) {
-                  this.$store.dispatch("setAdminEmailStatus", true);
+                  this.store.setAdminEmailStatus(true);
                 }
               }
             } catch(e) {
@@ -195,7 +199,7 @@ export default {
           }
         }
 
-        this.$store.dispatch("setLoadingStatus", false);
+        this.store.setLoadingStatus(false);
       }
     },
 
@@ -229,37 +233,36 @@ export default {
 
         this.error = null;
 
-        this.$store.dispatch("setToken", response.data.token);
-        this.$store.dispatch("setUser", response.data.user);
-        this.$store.dispatch("setName", response.data.name);
-        this.$store.dispatch("setUserID", response.data.userID);
-        this.$store.dispatch("setLab", response.data.lab);
-        this.$store.dispatch("setStudies", response.data.studies);
-        this.$store.dispatch("setRole", response.data.role);
-        this.$store.dispatch("setLabEmail", response.data.labEmail);
-        this.$store.dispatch("setLabName", response.data.labName);
-        this.$store.dispatch("setTimeZone", response.data.timeZone);
-        this.$store.dispatch("setTrainingMode", false);
+        this.store.setToken(response.data.token);
+        this.store.setUser(response.data.user);
+        this.store.setName(response.data.name);
+        this.store.setUserID(response.data.userID);
+        this.store.setLab(response.data.lab);
+        this.store.setStudies(response.data.studies);
+        this.store.setRole(response.data.role);
+        this.store.setLabEmail(response.data.labEmail);
+        this.store.setLabName(response.data.labName);
+        this.store.setTimeZone(response.data.timeZone);
+        this.store.setTrainingMode(false);
 
-        this.$store.dispatch("setEmailOpening", response.data.emailOpening);
-        this.$store.dispatch("setEmailClosing", response.data.emailClosing);
-        this.$store.dispatch("setTYEmailClosing", response.data.TYEmail);
-        this.$store.dispatch("setLocation", response.data.location);
-        this.$store.dispatch(
-          "setTransportationInstructions",
+        this.store.setEmailOpening(response.data.emailOpening);
+        this.store.setEmailClosing(response.data.emailClosing);
+        this.store.setTYEmailClosing(response.data.TYEmail);
+        this.store.setLocation(response.data.location);
+        this.store.setTransportationInstructions(
           response.data.transportationInstructions
         );
-        this.$store.dispatch("setZoomLink", response.data.ZoomLink);
+        this.store.setZoomLink(response.data.ZoomLink);
 
         try {
           const profile = await externalAPIs.googleGetEmailAddress();
 
           if (profile && profile.data) {
             if (profile.data.labEmail) {
-              this.$store.dispatch("setLabEmailStatus", true);
+              this.store.setLabEmailStatus(true);
             }
             if (profile.data.adminEmail) {
-              this.$store.dispatch("setAdminEmailStatus", true);
+              this.store.setAdminEmailStatus(true);
             }
           }
         } catch(e) {

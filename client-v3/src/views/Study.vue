@@ -425,6 +425,7 @@ import studyApi from "@/services/study";
 import personnelApi from "@/services/personnel";
 import testingRoomApi from "@/services/testingRoom";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "Study",
@@ -439,6 +440,10 @@ export default {
     experimenterStatsChart,
     studyHistoryChart,
     ConfirmDlg,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
 
   data() {
@@ -507,21 +512,21 @@ export default {
     },
 
     canCreateStudy() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(role);
     },
 
     canEditStudy() {
       if (!this.currentStudy.id || !this.currentStudy.PointofContact) return false;
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        this.currentStudy.PointofContact.id == this.$store.state.userID ||
+        this.currentStudy.PointofContact.id == this.store.userID ||
         ['Admin', 'PI', 'Lab manager'].includes(role)
       );
     },
 
     canViewProgress() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(role);
     },
 
@@ -546,9 +551,9 @@ export default {
   methods: {
     canManageStudyStatus(item) {
       if (!item.PointofContact) return false;
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        item.PointofContact.id == this.$store.state.userID ||
+        item.PointofContact.id == this.store.userID ||
         ['Admin', 'PI', 'Lab manager'].includes(role)
       );
     },
@@ -574,7 +579,7 @@ export default {
 
     async searchStudies() {
       try {
-        const Result = await studyApi.search({ FK_Lab: this.$store.state.lab, includeScheules: false });
+        const Result = await studyApi.search({ FK_Lab: this.store.lab, includeScheules: false });
         this.Studies = Result.data || [];
 
         // Check if there's a pre-selected study ID in the route on initial load
@@ -596,7 +601,7 @@ export default {
 
     async searchLabMembers() {
       try {
-        const Result = await personnelApi.search({ FK_Lab: this.$store.state.lab, Active: 1 });
+        const Result = await personnelApi.search({ FK_Lab: this.store.lab, Active: 1 });
         this.labMembers = Result.data || [];
       } catch (error) {
         console.error(error);
@@ -609,7 +614,7 @@ export default {
         item.Completed = !item.Completed;
         await studyApi.update(item);
         Object.assign(this.Studies[this.editedIndex], item);
-        this.$store.dispatch("setStudies", this.Studies);
+        this.store.setStudies(this.Studies);
       } catch (error) {
         item.Completed = !item.Completed;
         if (error.response?.status !== 401) console.error(error);
@@ -641,13 +646,13 @@ export default {
 
     async createStudy() {
       try {
-        const testingRooms = await testingRoomApi.search(this.$store.state.lab);
-        this.$store.dispatch("setTestingRooms", testingRooms.data);
+        const testingRooms = await testingRoomApi.search(this.store.lab);
+        this.store.setTestingRooms(testingRooms.data);
         this.currentTestingRooms = testingRooms.data;
       } catch (e) { console.error(e) }
 
       this.editedStudy = {
-        FK_Lab: this.$store.state.lab,
+        FK_Lab: this.store.lab,
         StudyType: 'Behavioural',
         Completed: false,
         AgeGroups: [],
@@ -671,7 +676,7 @@ export default {
         try {
           const Result = await studyApi.create(this.editedStudy);
           this.Studies.push(Result.data);
-          this.$store.dispatch("setStudies", this.Studies);
+          this.store.setStudies(this.Studies);
           this.currentStudy = Result.data;
           this.close();
         } catch (error) { console.error(error); }
@@ -680,7 +685,7 @@ export default {
         try {
           const Result = await studyApi.update(this.editedStudy);
           Object.assign(this.Studies[this.editedIndex], Result.data);
-          this.$store.dispatch("setStudies", this.Studies);
+          this.store.setStudies(this.Studies);
           this.currentStudy = { ...Result.data };
           this.close();
         } catch (error) { console.error(error); }
@@ -698,7 +703,7 @@ export default {
       try {
         await studyApi.delete({ id: this.currentStudy.id });
         this.Studies = this.Studies.filter(s => s.id !== this.currentStudy.id);
-        this.$store.dispatch("setStudies", this.Studies);
+        this.store.setStudies(this.Studies);
         this.currentStudy = { StudyName: null, PointofContact: {} };
       } catch (error) {
         console.error(error);
@@ -759,7 +764,7 @@ export default {
 
   mounted() {
     this.searchLabMembers();
-    this.currentTestingRooms = this.$store.state.testingRooms || [];
+    this.currentTestingRooms = this.store.testingRooms || [];
     this.searchStudies();
   },
 };

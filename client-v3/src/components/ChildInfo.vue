@@ -166,7 +166,13 @@ import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import scheduleDialog from '@/components/scheduleDialog.vue';
 import { childAge } from "@/assets/JS/displayFunctions.js";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   components: {
     ConfirmDlg,
     scheduleDialog
@@ -254,14 +260,14 @@ export default {
       // For now, simple mock or limited check if store studies are available.
       // Or if appointmentDetails logic is needed here for the button disable state.
 
-      if (!this.$store.state.studies) return { potentialStudyList: [] };
+      if (!this.store.studies) return { potentialStudyList: [] };
 
       // Duplicate logic for potential studies check to enable/disable button.
       // Ideally refactor this into a utility or store getter.
 
       var eligibleStudies = [];
 
-      this.$store.state.studies.forEach((study) => {
+      this.store.studies.forEach((study) => {
         if (this.studyElegibility(study, child) && !study.Completed) {
           eligibleStudies.push(study.id);
         }
@@ -280,7 +286,7 @@ export default {
         (study) => !uniquePreviousStudies.includes(study)
       );
 
-      var potentialStudyList = this.$store.state.studies.filter((study) =>
+      var potentialStudyList = this.store.studies.filter((study) =>
         potentialStudies.includes(study.id)
       );
 

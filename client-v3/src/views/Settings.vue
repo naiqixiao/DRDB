@@ -1,17 +1,17 @@
 <template>
   <v-container fluid>
     <!-- Alerts -->
-    <div v-if="!$store.state.labEmailStatus" class="mb-4">
+    <div v-if="!store.labEmailStatus" class="mb-4">
       <v-alert border="start" type="error" color="#c73460" density="compact" style="font-weight: 600">
         Lab email is not set up properly. Please set it up in the Settings page.
       </v-alert>
     </div>
-    <div v-if="!$store.state.adminEmailStatus" class="mb-4">
+    <div v-if="!store.adminEmailStatus" class="mb-4">
       <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
         Admin email is not set up properly. Please set it up in the Settings page.
       </v-alert>
     </div>
-    <div v-if="$store.state.trainingMode" class="mb-4">
+    <div v-if="store.trainingMode" class="mb-4">
       <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
         You are running in a training mode.
       </v-alert>
@@ -47,7 +47,7 @@
               Admin Email
             </span>
             <v-spacer></v-spacer>
-            <v-chip v-if="$store.state.adminEmailStatus" size="x-small" variant="tonal" color="success">
+            <v-chip v-if="store.adminEmailStatus" size="x-small" variant="tonal" color="success">
               <v-icon start size="12">mdi-check-circle</v-icon>Connected
             </v-chip>
             <v-chip v-else size="x-small" variant="tonal" color="error">Not set up</v-chip>
@@ -62,7 +62,7 @@
                 <template v-slot:activator="{ props }">
                   <v-btn v-bind="props" color="primary" variant="tonal" size="small"
                     @click.stop="googleCredentialsURL('admin')"
-                    :disabled="$store.state.role != 'Admin'" prepend-icon="mdi-google">Setup Admin Account</v-btn>
+                    :disabled="store.role != 'Admin'" prepend-icon="mdi-google">Setup Admin Account</v-btn>
                 </template>
                 <span>Only the Administrator can change the administration email.</span>
               </v-tooltip>
@@ -70,7 +70,7 @@
                 <template v-slot:activator="{ props }">
                   <v-btn v-bind="props" color="primary" variant="tonal" size="small"
                     @click.stop="createNewLab"
-                    :disabled="$store.state.role != 'Admin' || !$store.state.adminEmailStatus"
+                    :disabled="store.role != 'Admin' || !store.adminEmailStatus"
                     prepend-icon="mdi-plus-circle-outline">Create a Lab</v-btn>
                 </template>
                 <span>Only the Administrator can create a new lab.</span>
@@ -104,7 +104,7 @@
             <v-file-input ref="fileSelect" accept=".xlsx, .csv" label="Click here to select import file"
               @update:model-value="selectFile" v-model="inputFile" variant="outlined" density="compact"
               prepend-icon="mdi-file-excel-outline"
-              :disabled="$store.state.role != 'Admin' && $store.state.role != 'PI' && $store.state.role != 'Lab manager'">
+              :disabled="store.role != 'Admin' && store.role != 'PI' && store.role != 'Lab manager'">
             </v-file-input>
             <div class="d-flex justify-end">
               <v-btn color="primary" variant="tonal" @click.stop="batchImport()" :disabled="!inputFile"
@@ -121,7 +121,7 @@
               Lab Email Account
             </span>
             <v-spacer></v-spacer>
-            <v-chip v-if="$store.state.labEmailStatus" size="x-small" variant="tonal" color="success">
+            <v-chip v-if="store.labEmailStatus" size="x-small" variant="tonal" color="success">
               <v-icon start size="12">mdi-check-circle</v-icon>Connected
             </v-chip>
             <v-chip v-else size="x-small" variant="tonal" color="error">Not set up</v-chip>
@@ -159,7 +159,7 @@
         </v-card>
 
         <!-- Testing Rooms -->
-        <v-card class="ds-card mb-6" variant="flat" v-show="$store.state.labEmailStatus">
+        <v-card class="ds-card mb-6" variant="flat" v-show="store.labEmailStatus">
           <v-toolbar color="transparent" density="compact" class="px-2" style="cursor: pointer" @click="testingRoomsOpen = !testingRoomsOpen">
             <v-icon class="mr-2" color="primary">mdi-door-open</v-icon>
             <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
@@ -180,7 +180,7 @@
             <div v-show="testingRoomsOpen">
               <v-divider></v-divider>
               <v-card-text>
-                <TestingRooms :testingRooms="currentTestingRooms" :labId="$store.state.lab"
+                <TestingRooms :testingRooms="currentTestingRooms" :labId="store.lab"
                   @testingRoomsUpdated="testingRoomsUpdated" />
               </v-card-text>
             </div>
@@ -373,11 +373,16 @@ import externalAPIs from "@/services/externalAPIs";
 import TestingRooms from "@/components/TestingRooms.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   components: {
     TestingRooms,
     ConfirmDlg,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
   data() {
     return {
@@ -446,7 +451,7 @@ export default {
       return this.newPassword !== this.password || "New password must be different from the current one.";
     },
     canManageLab() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(role);
     },
   },
@@ -455,18 +460,18 @@ export default {
     async changePassword() {
       try {
         const response = await login.changePassword({
-          Email: this.$store.state.user,
+          Email: this.store.user,
           Password: this.password,
           newPassword: this.newPassword,
         });
 
         this.close();
 
-        this.$store.dispatch("setToken", response.data.token);
-        this.$store.dispatch("setUser", response.data.user);
-        this.$store.dispatch("setUserID", response.data.userID);
-        this.$store.dispatch("setLab", response.data.lab);
-        this.$store.dispatch("setStudies", response.data.studies);
+        this.store.setToken(response.data.token);
+        this.store.setUser(response.data.user);
+        this.store.setUserID(response.data.userID);
+        this.store.setLab(response.data.lab);
+        this.store.setStudies(response.data.studies);
 
         this.$refs.confirmD.open('Success', 'Your password is successfully changed!', { color: 'success', noconfirm: true });
       } catch (error) {
@@ -489,13 +494,13 @@ export default {
     },
 
     async editLabInfo() {
-      this.editedLab.LabName = this.$store.state.labName;
-      this.editedLab.EmailOpening = this.$store.state.emailOpening;
-      this.editedLab.EmailClosing = this.$store.state.emailClosing;
-      this.editedLab.TYEmail = this.$store.state.tyEmailClosing;
-      this.editedLab.TransportationInstructions = this.$store.state.transportationInstructions;
-      this.editedLab.Location = this.$store.state.location;
-      this.editedLab.ZoomLink = this.$store.state.ZoomLink;
+      this.editedLab.LabName = this.store.labName;
+      this.editedLab.EmailOpening = this.store.emailOpening;
+      this.editedLab.EmailClosing = this.store.emailClosing;
+      this.editedLab.TYEmail = this.store.tyEmailClosing;
+      this.editedLab.TransportationInstructions = this.store.transportationInstructions;
+      this.editedLab.Location = this.store.location;
+      this.editedLab.ZoomLink = this.store.ZoomLink;
       this.dialogEditLab = true;
     },
 
@@ -515,13 +520,13 @@ export default {
       try {
         await lab.update(this.editedLab);
 
-        this.$store.dispatch("setLabName", this.editedLab.LabName);
-        this.$store.dispatch("setEmailOpening", this.editedLab.EmailOpening);
-        this.$store.dispatch("setEmailClosing", this.editedLab.EmailClosing);
-        this.$store.dispatch("setTYEmailClosing", this.editedLab.TYEmail);
-        this.$store.dispatch("setLocation", this.editedLab.Location);
-        this.$store.dispatch("setTransportationInstructions", this.editedLab.TransportationInstructions);
-        this.$store.dispatch("setZoomLink", this.editedLab.ZoomLink);
+        this.store.setLabName(this.editedLab.LabName);
+        this.store.setEmailOpening(this.editedLab.EmailOpening);
+        this.store.setEmailClosing(this.editedLab.EmailClosing);
+        this.store.setTYEmailClosing(this.editedLab.TYEmail);
+        this.store.setLocation(this.editedLab.Location);
+        this.store.setTransportationInstructions(this.editedLab.TransportationInstructions);
+        this.store.setZoomLink(this.editedLab.ZoomLink);
 
         this.$refs.confirmD.open('Updated', 'Lab information is updated!', { color: 'success', noconfirm: true });
       } catch (error) {
@@ -568,11 +573,11 @@ export default {
       try {
         const response = await externalAPIs.setLabToken(this.signInCode);
         this.labEmail = response.data.Email;
-        this.$store.dispatch("setLabEmailStatus", true);
-        this.$store.dispatch("setLabEmail", this.labEmail);
+        this.store.setLabEmailStatus(true);
+        this.store.setLabEmail(this.labEmail);
         this.$refs.confirmD.open('Success', 'Lab email account is successfully setup!', { color: 'success', noconfirm: true });
       } catch (error) {
-        this.$store.dispatch("setLabEmailStatus", false);
+        this.store.setLabEmailStatus(false);
         console.log(error);
       }
       this.closeExtAPIs();
@@ -583,9 +588,9 @@ export default {
         const response = await externalAPIs.setAdminToken(this.signInCode);
         this.adminEmail = response.data.Email;
         this.$refs.confirmD.open('Success', 'Admin email account is successfully setup!', { color: 'success', noconfirm: true });
-        this.$store.dispatch("setAdminEmailStatus", true);
+        this.store.setAdminEmailStatus(true);
       } catch (error) {
-        this.$store.dispatch("setAdminEmailStatus", false);
+        this.store.setAdminEmailStatus(false);
         console.log(error);
       }
       this.closeExtAPIs();
@@ -709,7 +714,7 @@ export default {
   async mounted() {
     window.addEventListener('message', this.handleOAuthMessage);
 
-    this.currentTestingRooms = this.$store.state.testingRooms || [];
+    this.currentTestingRooms = this.store.testingRooms || [];
 
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
@@ -719,14 +724,14 @@ export default {
         this.adminEmail = profile.data.adminEmail || "Admin email is not set up yet.";
 
         if (profile.data.labEmail) {
-          this.$store.dispatch("setLabEmailStatus", true);
+          this.store.setLabEmailStatus(true);
         } else {
-          this.$store.dispatch("setLabEmailStatus", false);
+          this.store.setLabEmailStatus(false);
         }
         if (profile.data.adminEmail) {
-          this.$store.dispatch("setAdminEmailStatus", true);
+          this.store.setAdminEmailStatus(true);
         } else {
-          this.$store.dispatch("setAdminEmailStatus", false);
+          this.store.setAdminEmailStatus(false);
         }
       }
     } catch (error) {

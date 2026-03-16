@@ -1,16 +1,16 @@
 <template>
   <v-container fluid>
-    <div v-if="!$store.state.labEmailStatus" class="mb-4">
+    <div v-if="!store.labEmailStatus" class="mb-4">
       <v-alert border="start" type="error" color="#c73460" density="compact" style="font-weight: 600">
         Lab email is not setup properly. Please set it up in the Settings page.
       </v-alert>
     </div>
-    <div v-if="!$store.state.adminEmailStatus" class="mb-4">
+    <div v-if="!store.adminEmailStatus" class="mb-4">
       <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
         Admin email is not setup properly. Please set it up in the Settings page.
       </v-alert>
     </div>
-    <div v-if="$store.state.trainingMode" class="mb-4">
+    <div v-if="store.trainingMode" class="mb-4">
       <v-alert border="start" type="warning" color="#c7792c" density="compact" style="font-weight: 600">
         You are running in a training mode.
       </v-alert>
@@ -231,7 +231,7 @@
               : 'Parents\' response'" 
               :disabled="!currentChild.id ||
               currentChild.scheduled ||
-              !$store.state.labEmailStatus ||
+              !store.labEmailStatus ||
               contactedByOthers" 
               class="mb-3" 
               bg-color="textbackground" 
@@ -529,6 +529,7 @@ import TimelineCard from "@/components/TimelineCard.vue";
 import Page from "@/components/Page.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import login from "@/services/login";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "Schedule",
@@ -540,6 +541,10 @@ export default {
     AppointmentTableBrief,
     TimelineCard,
     ConfirmDlg,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
   props: {
     training: Boolean,
@@ -556,7 +561,7 @@ export default {
       activeAgeGroup: null,
       selectedStudy: {
         StudyName: null,
-        FK_Lab: this.$store.state.lab,
+        FK_Lab: this.store.lab,
         AgeGroups: [],
         Description: "",
         Completed: false,
@@ -712,7 +717,7 @@ export default {
                 id: app.id,
                 eventId: app.calendarEventId,
                 FK_Schedule: this.scheduleToDelete.id,
-                lab: this.$store.state.lab
+                lab: this.store.lab
               });
             }
           }
@@ -764,7 +769,7 @@ export default {
     },
     async searchStudies() {
       const queryString = {
-        FK_Lab: this.$store.state.lab,
+        FK_Lab: this.store.lab,
         includeScheules: false,
         Completed: 0,
       };
@@ -790,7 +795,7 @@ export default {
     },
 
     async searchChild() {
-      this.$store.dispatch("setLoadingStatus", true);
+      this.store.setLoadingStatus(true);
 
       if (!this.currentChild.scheduled && this.currentChild.FK_Family) {
         const results = await RTU.remove(this.currentChild.FK_Family);
@@ -812,7 +817,7 @@ export default {
         minAge,
         maxAge,
         studyID: this.selectedStudy.id,
-        trainingMode: this.$store.state.trainingMode
+        trainingMode: this.store.trainingMode
       };
 
       if (this.selectedStudy.ASDParticipant === "Exclude") queryString.ASDParticipant = 0;
@@ -888,7 +893,7 @@ export default {
       }
 
       this.response = null;
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 500);
+      setTimeout(() => this.store.setLoadingStatus(false), 500);
     },
 
     editFamilyAndChild() {
@@ -922,7 +927,7 @@ export default {
       if (validationResults) {
         try {
           // Save family
-          this.editedFamily.UpdatedBy = this.$store.state.userID;
+          this.editedFamily.UpdatedBy = this.store.userID;
           await family.update(this.editedFamily);
           this.currentChild.Family = this.editedFamily;
 
@@ -957,7 +962,7 @@ export default {
         try {
           this.newChildData.FK_Family = this.currentFamily.id;
           this.newChildData.Age = Math.floor((new Date() - new Date(this.newChildData.DoB)) / (24 * 3600 * 1000));
-          this.newChildData.CreatedBy = this.$store.state.userID;
+          this.newChildData.CreatedBy = this.store.userID;
           
           const result = await child.create(this.newChildData);
           if (result && result.data) {
@@ -1018,7 +1023,7 @@ export default {
           FK_Family: this.currentChild.FK_Family,
           Appointments: this.appointments,
           Note: null,
-          ScheduledBy: this.$store.state.userID,
+          ScheduledBy: this.store.userID,
         };
 
         this.dialogSchedule = true;
@@ -1116,7 +1121,7 @@ export default {
         const updatedFamilyInfo = {
           id: this.currentFamily.id,
           NextContactNote: "Parents asked to be removed from the database.",
-          LastContactDate: moment().startOf("day").tz(this.$store.state.timeZone).format("YYYY-MM-DD"),
+          LastContactDate: moment().startOf("day").tz(this.store.timeZone).format("YYYY-MM-DD"),
           NoMoreContact: true,
         };
         try {
@@ -1133,7 +1138,7 @@ export default {
     async saveNotes(newNotes) {
       if (!this.currentFamily?.id) return;
       this.currentFamily.Note = newNotes;
-      this.currentFamily.UpdatedBy = this.$store.state.userID;
+      this.currentFamily.UpdatedBy = this.store.userID;
       await family.update(this.currentFamily);
       this.currentChild.Family = this.currentFamily;
       if (this.page > 0) Object.assign(this.Children[this.page - 1], this.currentChild);

@@ -261,9 +261,14 @@
 
 <script>
 import api from "@/services/api";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "CalendarTest",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   data() {
     return {
       calendarId: "primary",
@@ -296,10 +301,10 @@ export default {
 
   computed: {
     lab() {
-      return this.$store.state.lab;
+      return this.store.lab;
     },
     labName() {
-      return this.$store.state.labName;
+      return this.store.labName;
     },
   },
 

@@ -73,9 +73,14 @@
 <script>
 import schedule from "@/services/schedule";
 import moment from "moment-timezone";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "UpcomingAppointments",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   emits: ["selectSchedule", "showFamily", "updateSchedule"],
   data() {
     return {
@@ -149,7 +154,7 @@ export default {
   },
 
   watch: {
-    "$store.state.trainingMode"() {
+    "store.trainingMode"() {
       this.fetchUpcoming();
     },
   },

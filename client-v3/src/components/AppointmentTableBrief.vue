@@ -111,8 +111,7 @@ export default {
   },
   computed: {
     $headersAppointmentsBrief() {
-      // Assuming it's in global properties, but providing a default if not found
-      return this.$store?.state?.$headersAppointmentsBrief || [
+      return [
         { title: "Study Time", key: "Schedule.AppointmentTime", width: "15%" },
         { title: "Study", key: "Study.StudyName", width: "40%" },
         { title: "Child", key: "Child.Name", width: "15%" },

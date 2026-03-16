@@ -1,11 +1,11 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(event) {
     const calendarInfo = {
       event: event,
-      lab: store.state.lab,
+      lab: useMainStore().lab,
     };
     return api().post("cal/", calendarInfo);
   },
@@ -13,7 +13,7 @@ export default {
   update(event) {
     const calendarInfo = {
       event: event,
-      lab: store.state.lab,
+      lab: useMainStore().lab,
     };
 
     return api().patch("cal/", calendarInfo);

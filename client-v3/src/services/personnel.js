@@ -1,13 +1,13 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   // create(personnelInfo) {
   //   personnelInfo.User = {
   //     
-  //     Name: store.state.name,
-  //     Email: store.state.user,
-  //     LabName: store.state.labName
+  //     Name: useMainStore().name,
+  //     Email: useMainStore().user,
+  //     LabName: useMainStore().labName
   //   }
   //   return api().post("personnel/add", personnelInfo);
   // },
@@ -19,9 +19,9 @@ export default {
   update(personnelInfo) {
     personnelInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("personnel/", personnelInfo);
   },
@@ -29,9 +29,9 @@ export default {
     
     personnelInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().delete("personnel/", {
       params: personnelInfo

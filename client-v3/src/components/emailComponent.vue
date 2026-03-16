@@ -53,7 +53,13 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "emailComponent",
   components: {
     ckeditor: Ckeditor,
@@ -152,27 +158,27 @@ export default {
 
     generateEmailBody() {
       const opening = this.emailOpening();
-      const location = this.$store.state.transportationInstructions;
-      const name = this.$store.state.name;
-      const role = this.$store.state.role;
+      const location = this.store.transportationInstructions;
+      const name = this.store.name;
+      const role = this.store.role;
 
       const closing =
-        (this.$store.state.emailClosing || "") +
+        (this.store.emailClosing || "") +
         "<p>Best,<br>" +
         name +
         "<br>" +
         role +
         "<br>" +
-        this.$store.state.labName + "</p>";
+        this.store.labName + "</p>";
 
       const TYclosing =
-        (this.$store.state.tyEmailClosing || "") +
+        (this.store.tyEmailClosing || "") +
         "<p>Best,<br>" +
         name +
         "<br>" +
         role +
         "<br>" +
-        this.$store.state.labName + "</p>";
+        this.store.labName + "</p>";
 
       const studyInfo = this.emailStudyInfo();
       let emailObj = "";
@@ -209,7 +215,7 @@ export default {
             opening = "<p>Dear " + parentName + ",</p><p>This is an update on your visit with <strong>" + this.childNames() + moment(this.appointmentTime).format(" [on] dddd [(]MMM Do[)] [at] h:mma") + "</strong>.</p>";
             break;
           case "Introduction":
-            opening = "<p>Dear " + parentName + ",</p><p>We are " + this.$store.state.labName + ". We would love to have you and " + this.childNames() + " to participate in our study.</p>Here is the information about the study:</p>";
+            opening = "<p>Dear " + parentName + ",</p><p>We are " + this.store.labName + ". We would love to have you and " + this.childNames() + " to participate in our study.</p>Here is the information about the study:</p>";
             break;
           case "Reschedule":
             opening = "<p>Dear " + parentName + ",</p><p>I'm happy to schedule another visit for you and " + this.childNames() + ".</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you.</p>";
@@ -221,7 +227,7 @@ export default {
             opening = "<p>Dear " + parentName + ",</p><p>We missed you and " + this.childNames() + " today. We hope everything is okay.</p><p>We understand that life can get busy and unpredictable sometimes. We're happy to reschedule your child's visit our lab, if you're still interested in participation.</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>";
             break;
           case "Follow-up":
-            opening = "<p>Dear " + parentName + ",</p><p>This is " + this.$store.state.labName + ". We hope this email finds you well!</p><p>We are writing to follow up with our previous email regarding inviting " + this.childNames() + " to participate in our study.</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>";
+            opening = "<p>Dear " + parentName + ",</p><p>This is " + this.store.labName + ". We hope this email finds you well!</p><p>We are writing to follow up with our previous email regarding inviting " + this.childNames() + " to participate in our study.</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you and " + this.childNames() + ".</p>";
             break;
           case "ThankYou":
             opening = "<p>Dear " + parentName + ",</p><p>Thank you so much for participating in our study with " + this.childNames() + "! We had a wonderful time with you both! :-) </p>";
@@ -237,9 +243,9 @@ export default {
             }
 
             if (this.appointments[0].Study.StudyType !== "Online") {
-              opening = "<p>Dear " + parentName + ",</p><p>Hope you are doing great! This is a reminder for your visit to " + this.$store.state.labName + " with <strong>" + this.childNames() + dateLabel + moment(this.appointmentTime).format(" [at] h:mma") + "</strong>.</p>" + (this.$store.state.transportationInstructions || "");
+              opening = "<p>Dear " + parentName + ",</p><p>Hope you are doing great! This is a reminder for your visit to " + this.store.labName + " with <strong>" + this.childNames() + dateLabel + moment(this.appointmentTime).format(" [at] h:mma") + "</strong>.</p>" + (this.store.transportationInstructions || "");
             } else {
-              opening = "<p>Dear " + parentName + ",</p><p>Hope you are doing great! This is " + this.$store.state.labName + ". Just a reminder that you and <strong>" + this.childNames() + " will participate in our in our online study" + dateLabel + moment(this.appointmentTime).format(" [at] h:mma") + "</strong>.</p>";
+              opening = "<p>Dear " + parentName + ",</p><p>Hope you are doing great! This is " + this.store.labName + ". Just a reminder that you and <strong>" + this.childNames() + " will participate in our in our online study" + dateLabel + moment(this.appointmentTime).format(" [at] h:mma") + "</strong>.</p>";
             }
             break;
         }
@@ -401,7 +407,7 @@ export default {
 
         if (this.emailUpdate) {
           let editedFamilyInfo = JSON.parse(JSON.stringify(this.familyInfo));
-          editedFamilyInfo.UpdatedBy = this.$store.state.userID;
+          editedFamilyInfo.UpdatedBy = this.store.userID;
           await family.update(editedFamilyInfo);
           this.emailUpdate = false;
         }

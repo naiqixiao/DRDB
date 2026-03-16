@@ -1,9 +1,9 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   send(emailInfo) {
-    emailInfo.lab = store.state.lab;
+    emailInfo.lab = useMainStore().lab;
     return api().post("gmail/send", emailInfo);
   },
 };

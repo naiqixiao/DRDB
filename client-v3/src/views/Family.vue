@@ -437,7 +437,7 @@ import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
 import calendar from "@/services/calendar";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 import moment from "moment-timezone";
 
 export default {
@@ -450,6 +450,10 @@ export default {
     TimelineCard,
     NotesConversation,
     ConfirmDlg,
+  },
+  setup() {
+    const store = useMainStore();
+    return { store };
   },
   data() {
     return {
@@ -558,7 +562,7 @@ export default {
       try {
         var queryString = {};
         queryString = { id: this.currentFamily.id };
-        queryString.trainingMode = this.$store.state.trainingMode;
+        queryString.trainingMode = this.store.trainingMode;
 
         var updatedFamily = await family.search(queryString);
         if (updatedFamily.data.families && updatedFamily.data.families.length > 0) {
@@ -590,8 +594,8 @@ export default {
     },
 
     async searchFamily() {
-      this.$store.dispatch("setLoadingStatus", true);
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.store.setLoadingStatus(true);
+      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
         const Results = await family.search(this.queryString);
@@ -620,14 +624,14 @@ export default {
         if (error.response?.status !== 401) console.error(error);
       }
 
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     async followupSearch() {
-      this.$store.dispatch("setLoadingStatus", true);
+      this.store.setLoadingStatus(true);
       this.queryString = {}; // Fix: reset leftover query params before searching followups
-      this.queryString.AssignedLab = this.$store.state.lab;
-      this.queryString.trainingMode = this.$store.state.trainingMode;
+      this.queryString.AssignedLab = this.store.lab;
+      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
         const Results = await family.followupSearch(this.queryString);
@@ -648,11 +652,11 @@ export default {
         if (error.response?.status !== 401) console.error(error);
       }
 
-      setTimeout(() => this.$store.dispatch("setLoadingStatus", false), 1000);
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     addFamily() {
-      if (this.$store.state.trainingMode) {
+      if (this.store.trainingMode) {
         this.$refs.confirmD.open('Training Mode', 'You are currently in Training mode.<br><br>Any family created under Training mode will only be accessible for training purpose.<br><br>If you want to create a record for a real family, please turn off the Training mode first.', { color: 'warning', noconfirm: true });
       }
       this.editedIndex = -1;
@@ -669,7 +673,7 @@ export default {
     async save() {
       try {
         if (this.editedIndex > -1) {
-          this.editedItem.UpdatedBy = store.state.userID;
+          this.editedItem.UpdatedBy = this.store.userID;
           delete this.editedItem.Schedules;
           delete this.editedItem.Children;
           delete this.editedItem.Conversations;
@@ -680,9 +684,9 @@ export default {
         } else {
           this.editedItem.LastContactDate = new Date();
           this.editedItem.NextContactDate = new Date();
-          this.editedItem.UpdatedBy = store.state.userID;
-          this.editedItem.CreatedBy = store.state.userID;
-          this.editedItem.TrainingSet = this.$store.state.trainingMode;
+          this.editedItem.UpdatedBy = this.store.userID;
+          this.editedItem.CreatedBy = this.store.userID;
+          this.editedItem.TrainingSet = this.store.trainingMode;
 
           const newfamilyId = await family.create(this.editedItem);
           this.editedItem.id = newfamilyId.data.id;
@@ -711,7 +715,7 @@ export default {
       if (this.currentFamily.id) {
         this.familyNotes = newNotes; // Update local state
         this.currentFamily.Note = newNotes;
-        this.currentFamily.UpdatedBy = store.state.userID;
+        this.currentFamily.UpdatedBy = store.userID;
         await family.update(this.currentFamily);
         Object.assign(this.Families[this.page - 1], this.currentFamily);
       }
@@ -762,7 +766,7 @@ export default {
                 id: app.id,
                 eventId: app.calendarEventId, 
                 FK_Schedule: this.scheduleToDelete.id,
-                lab: this.$store.state.lab 
+                lab: this.store.lab 
               });
             }
           }

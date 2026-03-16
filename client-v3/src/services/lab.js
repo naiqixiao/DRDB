@@ -1,13 +1,13 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(labInfo) {
     labInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("lab/add", labInfo);
   },
@@ -17,21 +17,21 @@ export default {
     });
   },
   update(labInfo) {
-    labInfo.lab = store.state.lab
+    labInfo.lab = useMainStore().lab
     labInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("lab/", labInfo);
   },
   delete(labInfo) {
     labInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().delete("lab/", {
       params: labInfo,

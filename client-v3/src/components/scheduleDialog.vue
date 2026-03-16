@@ -369,7 +369,13 @@ import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
 import appointment from "@/services/appointment";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "scheduleDialog",
   components: {
     dateTimePicker,
@@ -647,15 +653,15 @@ export default {
         Note: this.Note,
         summary: status.toUpperCase() + " - " + this.calendarSummary(newAppointments),
         Appointments: newAppointments,
-        ScheduledBy: this.$store.state.userID,
-        location: this.$store.state.location,
+        ScheduledBy: this.store.userID,
+        location: this.store.location,
         description: this.calendarDescription(newAppointments, this.Note),
         Reminded: 0
       };
 
       let calendarEvents = [];
       newSchedule.Appointments.forEach((app) => {
-        const testingRoom = this.$store.state.testingRooms.find(room => room.id === app.Study.FK_TestingRoom);
+        const testingRoom = this.store.testingRooms.find(room => room.id === app.Study.FK_TestingRoom);
         let calendarId = testingRoom ? testingRoom.calendarId : 'primary';
         app.calendarId = calendarId;
 
@@ -747,15 +753,15 @@ export default {
         Note: this.Note,
         summary: status.toUpperCase() + " - " + this.calendarSummary(updateAppointments),
         Appointments: updateAppointments,
-        ScheduledBy: this.$store.state.userID,
-        location: this.$store.state.location,
+        ScheduledBy: this.store.userID,
+        location: this.store.location,
         description: this.calendarDescription(updateAppointments, this.Note),
         Reminded: 0,
       };
 
       let updatedCalendarEvents = [];
       updatedSchedule.Appointments.forEach((app) => {
-        const testingRoom = this.$store.state.testingRooms.find(room => room.id === app.Study.FK_TestingRoom);
+        const testingRoom = this.store.testingRooms.find(room => room.id === app.Study.FK_TestingRoom);
         let calendarId = testingRoom ? testingRoom.calendarId : 'primary';
         app.calendarId = calendarId;
 
@@ -849,8 +855,8 @@ export default {
           break;
         case "Follow-up":
           this.step23ButtonText = "Next";
-          this.contactDate = moment().tz(this.$store.state.timeZone).startOf("day").add(2, "days").format("YYYY-MM-DD");
-          this.nextContactNote = "Sent a follow-up email on " + moment().tz(this.$store.state.timeZone).startOf("day").format("YYYY-MM-DD") + ", follow up in 2 days to confirm the participation.";
+          this.contactDate = moment().tz(this.store.timeZone).startOf("day").add(2, "days").format("YYYY-MM-DD");
+          this.nextContactNote = "Sent a follow-up email on " + moment().tz(this.store.timeZone).startOf("day").format("YYYY-MM-DD") + ", follow up in 2 days to confirm the participation.";
           break;
       }
     },
@@ -956,7 +962,7 @@ export default {
                   id: app.id,
                   eventId: app.calendarEventId, 
                   FK_Schedule: this.createdScheduleInSession.id,
-                  lab: this.$store.state.lab 
+                  lab: this.store.lab 
                 });
               }
             }
@@ -1002,7 +1008,7 @@ export default {
     },
 
     generateNextContactNote() {
-      const tz = this.$store.state.timeZone;
+      const tz = this.store.timeZone;
       switch (this.contactType) {
         case "nextStudy":
           this.contactDate = moment(this.studyDateTime).tz(tz).add(7, "days").format("YYYY-MM-DD");
@@ -1064,7 +1070,7 @@ export default {
         await family.update({
           id: this.currentFamily?.id,
           NextContactDate: this.contactDate,
-          LastContactDate: moment().tz(this.$store.state.timeZone).startOf("day").format("YYYY-MM-DD"),
+          LastContactDate: moment().tz(this.store.timeZone).startOf("day").format("YYYY-MM-DD"),
           NextContactNote: this.nextContactNote,
         });
         this.isFinalized = true;

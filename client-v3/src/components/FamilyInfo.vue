@@ -114,7 +114,13 @@ import NotesConversation from "@/components/NotesConversation.vue";
 import InfoField from "@/components/InfoField.vue";
 import SectionHeader from "@/components/SectionHeader.vue";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "FamilyInfo",
   components: {
     NotesConversation,
@@ -217,7 +223,7 @@ export default {
 
       if (validationResults) {
         try {
-          this.editedItem.UpdatedBy = this.$store.state.userID;
+          this.editedItem.UpdatedBy = this.store.userID;
           await family.update(this.editedItem);
           this.$emit("updateFamily", this.editedItem);
           console.log("Family information updated!");
@@ -243,7 +249,7 @@ export default {
     async saveNotes(newNotes) {
       if (!this.currentFamily) return;
       this.currentFamily.Note = newNotes;
-      this.currentFamily.UpdatedBy = this.$store.state.userID;
+      this.currentFamily.UpdatedBy = this.store.userID;
       await family.update(this.currentFamily);
     },
 

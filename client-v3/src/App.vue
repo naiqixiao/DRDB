@@ -9,14 +9,14 @@
 
       <v-spacer></v-spacer>
 
-      <template v-if="$store.state.user != null">
+      <template v-if="store.user != null">
         <span class="title-text text-body-2 mr-4">
           {{
-            $store.state.labName +
+            store.labName +
             ": " +
-            $store.state.name +
+            store.name +
             " (" +
-            $store.state.role +
+            store.role +
             ")"
           }}
         </span>
@@ -28,12 +28,12 @@
           </template>
           <span>Send us your questions, issues, requests, and suggestions!</span>
         </v-tooltip>
-        <v-switch :model-value="!!$store.state.trainingMode" color="white" inset
-          :label="$store.state.trainingMode ? 'Training Mode' : 'Working Mode'" hide-details
+        <v-switch :model-value="!!store.trainingMode" color="white" inset
+          :label="store.trainingMode ? 'Training Mode' : 'Working Mode'" hide-details
           @update:model-value="changeTrainingMode" class="training-switch ml-4 mr-2" density="compact"></v-switch>
       </template>
 
-      <v-progress-linear :active="$store.state.loadingStatus" :indeterminate="$store.state.loadingStatus" height="5"
+      <v-progress-linear :active="store.loadingStatus" :indeterminate="store.loadingStatus" height="5"
         absolute location="bottom" color="secondary"></v-progress-linear>
     </v-app-bar>
 
@@ -80,13 +80,13 @@
 
       <template v-slot:append>
         <div class="pa-2">
-          <v-btn block @click="logout" :disabled="!$store.state.userID">Logout</v-btn>
+          <v-btn block @click="logout" :disabled="!store.userID">Logout</v-btn>
         </div>
       </template>
     </v-navigation-drawer>
 
     <v-main style="background-color: var(--ds-field-bg);">
-      <router-view :training="$store.state.trainingMode" />
+      <router-view :training="store.trainingMode" />
     </v-main>
   </v-app>
 </template>
@@ -94,9 +94,14 @@
 <script>
 import feedback from "@/services/feedback";
 import login from "@/services/login";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "App",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   data() {
     return {
       drawer: false,
@@ -123,18 +128,7 @@ export default {
   methods: {
     logout() {
       console.log("log out complete!");
-      this.$store.dispatch("setToken", null);
-      this.$store.dispatch("setUser", null);
-      this.$store.dispatch("setName", null);
-      this.$store.dispatch("setUserID", null);
-      this.$store.dispatch("setStudies", null);
-      this.$store.dispatch("setLoadingStatus", false);
-      this.$store.dispatch("setEmailOpening", null);
-      this.$store.dispatch("setEmailClosing", null);
-      this.$store.dispatch("setTYEmailClosing", null);
-      this.$store.dispatch("setLocation", null);
-      this.$store.dispatch("setTransportationInstructions", null);
-      this.$store.dispatch("setZoomLink", null);
+      this.store.clearAll();
 
       if (this.$route.name !== "Login") {
         this.$router.push({ name: "Login" });
@@ -142,9 +136,9 @@ export default {
     },
 
     async createFeedback() {
-      this.currentFeedback.CreatedBy = this.$store.state.userID;
+      this.currentFeedback.CreatedBy = this.store.userID;
       this.currentFeedback.CurrentPage = this.$route.name;
-      this.currentFeedback.Email = this.$store.state.user;
+      this.currentFeedback.Email = this.store.user;
 
       try {
         await feedback.create(this.currentFeedback);
@@ -166,7 +160,7 @@ export default {
     },
 
     changeTrainingMode() {
-      this.$store.dispatch("setTrainingMode", !this.$store.state.trainingMode);
+      this.store.setTrainingMode(!this.store.trainingMode);
     },
   },
 
@@ -181,9 +175,7 @@ export default {
       await login.check_login();
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        this.$store.dispatch("setToken", null);
-        this.$store.dispatch("setUser", null);
-        this.$store.dispatch("setUserID", null);
+        this.store.clearAll();
 
         if (this.$route.name !== "Login") {
           this.$router.push({ name: "Login" });

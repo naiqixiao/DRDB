@@ -83,7 +83,13 @@
 <script>
 import api from "@/services/api";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "AssignedStudies",
   props: {
     Studies: {
@@ -113,9 +119,9 @@ export default {
 
   computed: {
     canManageStudies() {
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        this.personnelId == this.$store.state.userID ||
+        this.personnelId == this.store.userID ||
         role === 'Admin' ||
         role === 'PI' ||
         role === 'Lab manager'

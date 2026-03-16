@@ -76,7 +76,13 @@
 <script>
 import experimenterApi from "@/services/experimenter";
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "AssignedExperimenters",
   props: {
     Experimenters: {
@@ -107,9 +113,9 @@ export default {
   computed: {
     canManageExperimenters() {
       if (!this.studyId) return false;
-      const role = this.$store.state.role;
+      const role = this.store.role;
       return (
-        this.PointofContactId == this.$store.state.userID ||
+        this.PointofContactId == this.store.userID ||
         role === 'Admin' ||
         role === 'PI' ||
         role === 'Lab manager'

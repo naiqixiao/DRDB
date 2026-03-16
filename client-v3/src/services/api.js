@@ -1,12 +1,12 @@
 import axios from "axios";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default () => {
     return axios.create({
         baseURL: '/api/',
         timeout: 30000,
         headers: {
-            Authorization: `Bearer ${store.state.token}`,
+            Authorization: `Bearer ${useMainStore().token}`,
         },
     });
 };

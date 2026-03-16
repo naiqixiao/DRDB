@@ -34,12 +34,18 @@ const vuetify = createVuetify({
     },
 })
 
-import router from './router'
-import store from './store'
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-createApp(App)
-    .use(vuetify)
-    .use(router)
-    .use(store)
-    .use(parameters)
-    .mount('#app')
+import router from './router'
+
+const app = createApp(App)
+
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+app.use(vuetify)
+app.use(router)
+app.use(pinia)
+app.use(parameters)
+app.mount('#app')

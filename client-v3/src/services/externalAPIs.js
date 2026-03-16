@@ -1,5 +1,5 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   googleCredentialsURL() {
@@ -8,7 +8,7 @@ export default {
 
   setLabToken(signInCode) {
     const code = {
-      lab: store.state.lab,
+      lab: useMainStore().lab,
       signInCode: signInCode,
     };
 
@@ -24,7 +24,7 @@ export default {
   },
 
   googleGetEmailAddress() {
-    const lab = { lab: store.state.lab };
+    const lab = { lab: useMainStore().lab };
     
     return api().post("extAPIs/email", lab);
   },

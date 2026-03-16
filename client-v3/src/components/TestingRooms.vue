@@ -96,7 +96,13 @@ const ROOM_COLORS = [
     '#2C3E50', '#16A085', '#8E44AD', '#D4AC0D', '#2980B9'
 ];
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
     components: {
         ConfirmDlg
     },
@@ -124,7 +130,7 @@ export default {
         },
 
         getStudyCount(room) {
-            return (this.$store.state.studies || []).filter(
+            return (this.store.studies || []).filter(
                 (s) => s.FK_TestingRoom === room.id
             ).length;
         },
@@ -168,12 +174,12 @@ export default {
             if (valid) {
                 try {
                     if (this.dialogTitle === "Create Testing Room") {
-                        this.currentTestingRoom.createdBy = this.$store.state.userID;
+                        this.currentTestingRoom.createdBy = this.store.userID;
                         this.currentTestingRoom.calendar = this.currentTestingRoom.name;
 
                         if (!this.currentTestingRoom.calendarId) {
                             const newCal = await calendar.createSecondaryCalendar({
-                                lab: this.$store.state.lab,
+                                lab: this.store.lab,
                                 calendarName: this.currentTestingRoom.name,
                             });
                             this.currentTestingRoom.calendarId = newCal.data.calendarId;
@@ -187,7 +193,7 @@ export default {
                             name: this.currentTestingRoom.name,
                             location: this.currentTestingRoom.location,
                             calendarId: this.currentTestingRoom.calendarId,
-                            createdBy: this.$store.state.userID,
+                            createdBy: this.store.userID,
                             calendar: this.currentTestingRoom.name,
                         };
 

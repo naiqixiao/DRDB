@@ -152,7 +152,13 @@
 import moment from "moment";
 import { childAge } from '@/assets/JS/displayFunctions.js';
 
+import { useMainStore } from "@/stores/mainStore";
+
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   name: "appointmentDetails",
   props: {
     Appointments: Array,
@@ -195,7 +201,7 @@ export default {
       
       let eligibleStudies = [];
 
-      this.$store.state.studies.forEach((study) => {
+      this.store.studies.forEach((study) => {
         if (this.studyElegibility(study, child) && !study.Completed) {
           eligibleStudies.push(study.id);
         }
@@ -228,7 +234,7 @@ export default {
         (study) => !currentSelectedStudies.includes(study)
       );
 
-      let potentialStudyList = this.$store.state.studies.filter((study) =>
+      let potentialStudyList = this.store.studies.filter((study) =>
         potentialStudiesIds.includes(study.id)
       );
 

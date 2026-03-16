@@ -1,13 +1,13 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   register(credentials) {
-    credentials.lab = store.state.lab;
+    credentials.lab = useMainStore().lab;
     credentials.User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
 
     return api().post("user/signup", credentials);
@@ -20,27 +20,27 @@ export default {
   },
   logout() {
     const User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("user/logout", User);
   },
   changePassword(credentials) {
-    credentials.lab = store.state.lab;
+    credentials.lab = useMainStore().lab;
     credentials.User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
 
     }
     return api().post("user/changePassword", credentials);
   },
   resetPassword(credentials) {
     credentials.User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("user/resetPassword", credentials);
   },
