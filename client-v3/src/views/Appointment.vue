@@ -180,17 +180,7 @@
             variant="flat" 
             prepend-icon="mdi-magnify" 
             @click="searchSchedule" 
-            :disabled="!(
-              queryString.Email ||
-              queryString.AppointmentTimeAfter ||
-              queryString.AppointmentTimeBefore ||
-              queryString.Status.length > 0 ||
-              queryString.StudyName.length > 0 ||
-              queryString.Phone ||
-              queryString.NamePrimary ||
-              queryString.NameSecondary ||
-              queryString.FamilyId
-            )"
+            :disabled="isSearchDisabled"
           >
             Search
           </v-btn>
@@ -237,27 +227,6 @@
       @updatedSchedule="updatedSchedule" 
       @completedSchedule="updatedSchedule" 
     />
-
-    <!-- Date Picker Dialogs -->
-    <v-dialog v-model="dialogPickerBefore" max-width="360px">
-      <v-card variant="outlined">
-        <v-date-picker 
-          v-model="beforeDateObj" 
-          show-current 
-          @update:model-value="beforeDatePick"
-        ></v-date-picker>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="dialogPickerAfter" max-width="360px">
-      <v-card variant="outlined">
-        <v-date-picker 
-          v-model="afterDateObj" 
-          show-current 
-          @update:model-value="afterDatePick"
-        ></v-date-picker>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
@@ -306,10 +275,7 @@ export default {
           Child: { Name: "" },
         }],
       },
-      dialogPickerBefore: false,
-      dialogPickerAfter: false,
-      beforeDateObj: null,
-      afterDateObj: null,
+
       queryString: {
         FamilyId: null,
         Email: null,
@@ -499,18 +465,17 @@ export default {
       // No-op since FamilyInfo sidebar is removed; family details are via dialog
     },
 
-    beforeDatePick(val) {
-      if (val) {
-        this.queryString.AppointmentTimeBefore = moment(val).format("YYYY-MM-DD");
-      }
-      this.dialogPickerBefore = false;
-    },
 
-    afterDatePick(val) {
-      if (val) {
-        this.queryString.AppointmentTimeAfter = moment(val).format("YYYY-MM-DD");
-      }
-      this.dialogPickerAfter = false;
+  },
+
+  computed: {
+    isSearchDisabled() {
+      const q = this.queryString;
+      return !(
+        q.Email || q.AppointmentTimeAfter || q.AppointmentTimeBefore ||
+        q.Status.length > 0 || q.StudyName.length > 0 || q.Phone ||
+        q.NamePrimary || q.NameSecondary || q.FamilyId
+      );
     },
   },
 
