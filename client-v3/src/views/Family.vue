@@ -715,7 +715,7 @@ export default {
       if (this.currentFamily.id) {
         this.familyNotes = newNotes; // Update local state
         this.currentFamily.Note = newNotes;
-        this.currentFamily.UpdatedBy = store.userID;
+        this.currentFamily.UpdatedBy = this.store.userID;
         await family.update(this.currentFamily);
         Object.assign(this.Families[this.page - 1], this.currentFamily);
       }

@@ -190,7 +190,7 @@ export default {
       editedPersonnel: {},
       defaultPersonnel: {
         Name: null,
-        FK_Lab: store.state.lab,
+        FK_Lab: this.store.lab,
         Initial: null,
         Email: null,
         Calendar: null,
@@ -272,7 +272,7 @@ export default {
 
     async searchPersonnel() {
       try {
-        const Result = await personnel.search({ FK_Lab: store.lab });
+        const Result = await personnel.search({ FK_Lab: this.store.lab });
         this.Personnels = Result.data;
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
@@ -282,7 +282,7 @@ export default {
     async searchLabStudies() {
       try {
         const Result = await study.search({
-          FK_Lab: store.lab,
+          FK_Lab: this.store.lab,
           includeScheules: false,
           Completed: 0,
         });
