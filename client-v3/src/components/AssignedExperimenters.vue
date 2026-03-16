@@ -3,16 +3,24 @@
     <div>
       <v-row dense>
         <v-col cols="12" md="6" v-for="experimenter in Experimenters" :key="experimenter.id" class="mb-2">
-          <v-card class="d-flex flex-column h-100" variant="outlined">
-            <v-card-title class="d-flex align-center py-2 text-subtitle-1 font-weight-bold">
-              {{ experimenter.Name }} ({{ experimenter.Initial }})
-              <v-spacer></v-spacer>
-              <span class="text-body-2 text-medium-emphasis">{{ experimenter.Role }}</span>
-            </v-card-title>
-
-            <v-card-text class="py-2 text-body-2 text-primary">
-              Email: {{ experimenter.Email }}
-            </v-card-text>
+          <v-card class="experimenter-card pa-4 h-100" variant="outlined" style="border-color: #E2E8F0 !important; transition: all 0.2s ease;">
+            <div class="d-flex align-center">
+              <v-avatar color="primary" variant="tonal" size="44" class="mr-3 font-weight-bold">
+                {{ experimenter.Name ? experimenter.Name.charAt(0) : '?' }}
+              </v-avatar>
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex align-center justify-space-between">
+                  <div class="text-subtitle-1 font-weight-bold text-truncate" style="color: var(--color-primary);">
+                    {{ experimenter.Name }} ({{ experimenter.Initial }})
+                  </div>
+                  <v-chip size="x-small" variant="tonal" color="secondary" class="ml-2 font-weight-bold flex-shrink-0">{{ experimenter.Role }}</v-chip>
+                </div>
+                <div class="d-flex align-center mt-1 text-body-2 text-medium-emphasis">
+                  <v-icon size="14" class="mr-1">mdi-email-outline</v-icon>
+                  {{ experimenter.Email }}
+                </div>
+              </div>
+            </div>
           </v-card>
         </v-col>
       </v-row>

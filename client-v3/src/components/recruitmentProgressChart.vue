@@ -75,13 +75,13 @@ export default {
         }
       },
       statusColors: {
-        'Completed': '#10B981', 
-        'Confirmed': '#3B82F6', 
-        'TBD': '#94A3B8',       
-        'Rescheduling': '#F59E0B',
-        'No Show': '#F97316',   
-        'Cancelled': '#EF4444', 
-        'Rejected': '#475569'   
+        'Completed': '#34D399', 
+        'Confirmed': '#60A5FA', 
+        'TBD': '#A78BFA',       
+        'Rescheduling': '#FBBF24',
+        'No Show': '#FB923C',   
+        'Cancelled': '#F87171', 
+        'Rejected': '#94A3B8'   
       }
     };
   },

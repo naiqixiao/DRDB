@@ -11,12 +11,6 @@
     </div>
     <v-row justify="center" style="height: 500px">
       <v-col cols="12" md="11">
-        <!-- <vue-editor
-          style="height: 450px"
-          ref="emailBody"
-          v-model="emailBody"
-          :editor-toolbar="customToolbar"
-        ></vue-editor> -->
         <div>
           <ckeditor ref="emailBody" :editor="editor" v-model="emailBody" :config="editorConfig">
           </ckeditor>

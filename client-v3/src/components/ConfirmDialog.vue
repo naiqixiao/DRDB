@@ -48,7 +48,7 @@ export default {
       options: {
         color: "grey lighten-3",
         width: 500,
-        zIndex: 200,
+        zIndex: 3000,
         noconfirm: false,
       },
     };

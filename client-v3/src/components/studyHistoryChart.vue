@@ -76,13 +76,13 @@ export default {
         }
       },
       statusColors: {
-        'Completed': '#10B981', 
-        'Confirmed': '#3B82F6', 
-        'TBD': '#94A3B8',       
-        'Rescheduling': '#F59E0B',
-        'No Show': '#F97316',   
-        'Cancelled': '#EF4444', 
-        'Rejected': '#475569'   
+        'Completed': '#34D399', // Bright mint green
+        'Confirmed': '#60A5FA', // Bright sky blue
+        'TBD': '#A78BFA',       // Vibrant violet
+        'Rescheduling': '#FBBF24',// Bright amber/yellow
+        'No Show': '#FB923C',   // Vibrant orange
+        'Cancelled': '#F87171', // Bright soft red
+        'Rejected': '#94A3B8'   // Muted slate (kept for contrast)
       }
     };
   },

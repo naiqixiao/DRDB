@@ -76,8 +76,8 @@ export default {
         }
       },
       roleColors: {
-        'Primary': '#3B82F6',   // Primary Blue
-        'Assistant': '#94A3B8'  // Slate Grey
+        'Primary': '#60A5FA',   // Bright Sky Blue
+        'Assistant': '#A78BFA'  // Vibrant Violet
       }
     };
   },

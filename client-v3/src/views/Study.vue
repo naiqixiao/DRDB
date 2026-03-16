@@ -48,43 +48,42 @@
           <v-card class="ds-card ds-interactive h-100 d-flex flex-column" variant="flat" @click="rowSelected(null, { item: study })">
             
             <v-card-title class="d-flex justify-space-between align-start pt-4" style="white-space: normal; line-height: 1.3;">
-              <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary)">
+              <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); font-size: 1.15rem;">
                 {{ study.StudyName }}
               </span>
             </v-card-title>
             
             <v-card-subtitle class="pb-3 mt-1">
-              <v-chip size="x-small" variant="tonal" color="primary" class="mr-2">{{ study.StudyType }}</v-chip>
-              <v-chip size="x-small" :color="study.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
+              <v-chip size="small" variant="tonal" color="primary" class="mr-2">{{ study.StudyType }}</v-chip>
+              <v-chip size="small" :color="study.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
                 {{ study.Completed ? 'Completed' : 'In Progress' }}
               </v-chip>
             </v-card-subtitle>
 
             <v-card-text class="flex-grow-1 pt-2">
               <div class="d-flex align-center mb-2">
-                <v-icon size="small" class="mr-3" color="grey">mdi-account-star</v-icon>
-                <span class="text-body-2 font-weight-medium">{{ study.PointofContact?.Name || 'No Contact Set' }}</span>
+                <v-icon size="18" class="mr-3" color="grey">mdi-account-star</v-icon>
+                <span class="text-body-1 font-weight-medium">{{ study.PointofContact?.Name || 'No Contact Set' }}</span>
               </div>
               <div class="d-flex align-center mb-2">
-                <v-icon size="small" class="mr-3" color="grey">mdi-human-child</v-icon>
-                <span class="text-body-2 text-muted">
+                <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
+                <span class="text-body-1 text-muted">
                   <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
-                    {{ AgeFormated(study.AgeGroups[0].MinAge) }} — {{ AgeFormated(study.AgeGroups[0].MaxAge) }}
-                    <span v-if="study.AgeGroups.length > 1" class="font-weight-bold ml-1">(+{{ study.AgeGroups.length - 1 }})</span>
+                    <span v-for="(group, i) in study.AgeGroups" :key="i">{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1">, </span></span>
                   </template>
                   <template v-else>Age range not set</template>
                 </span>
               </div>
               <div class="d-flex align-center">
-                <v-icon size="small" class="mr-3" color="grey">mdi-door-open</v-icon>
-                <span class="text-body-2 text-muted text-truncate">{{ getRoomName(study.FK_TestingRoom) }}</span>
+                <v-icon size="18" class="mr-3" color="grey">mdi-door-open</v-icon>
+                <span class="text-body-1 text-muted text-truncate">{{ getRoomName(study.FK_TestingRoom) }}</span>
               </div>
             </v-card-text>
 
             <v-divider></v-divider>
             
             <v-card-actions class="pa-3 bg-grey-lighten-4 d-flex justify-space-between align-center">
-              <span class="text-caption text-muted font-weight-bold">ID: {{ study.id }}</span>
+              <span class="text-body-2 text-muted font-weight-bold">ID: {{ study.id }}</span>
               <v-btn size="small" color="primary" variant="text" append-icon="mdi-arrow-right" class="text-none">Manage</v-btn>
             </v-card-actions>
           </v-card>
@@ -103,57 +102,72 @@
     <!-- ============================================ -->
     <!-- STATE 2: Full-Width Detail View (study selected) -->
     <!-- ============================================ -->
-    <!-- ============================================ -->
-    <!-- STATE 2: Full-Width Detail View (study selected) -->
-    <!-- ============================================ -->
     <div v-else>
-      <v-toolbar color="transparent" density="compact" class="mb-4 px-0">
-        <v-btn variant="text" prepend-icon="mdi-arrow-left" class="text-none font-weight-bold text-muted mr-4" @click="clearSelection">
-          Back to Studies
-        </v-btn>
-        <v-divider vertical class="my-3 mr-4"></v-divider>
-        <h2 class="text-h5 font-weight-bold text-truncate" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); max-width: 400px;">
-          {{ currentStudy.StudyName }}
-        </h2>
-        <v-chip class="ml-4" size="small" variant="tonal" color="primary">{{ currentStudy.StudyType }}</v-chip>
-        <v-chip class="ml-2 text-white font-weight-bold" size="small" :color="currentStudy.Completed ? 'success' : 'warning'" variant="flat">
-          {{ currentStudy.Completed ? 'Completed' : 'In Progress' }}
-        </v-chip>
-        
-        <v-spacer></v-spacer>
-        
-        <v-btn 
-          :color="currentStudy.Completed ? 'warning' : 'success'" 
-          variant="outlined" 
-          :prepend-icon="currentStudy.Completed ? 'mdi-restore' : 'mdi-check-all'" 
-          class="mr-2" 
-          @click.stop="changeStudyStatus(currentStudy)" 
-          :disabled="!canManageStudyStatus(currentStudy)"
-        >
-          {{ currentStudy.Completed ? 'Mark In Progress' : 'Mark Completed' }}
-        </v-btn>
-        
-        <v-btn 
-          color="secondary" 
-          variant="outlined" 
-          prepend-icon="mdi-content-copy" 
-          class="mr-2" 
-          @click.stop="duplicateStudy" 
-          :disabled="!canDuplicateStudy"
-        >
-          Duplicate
-        </v-btn>
+      <!-- Back navigation -->
+      <v-btn variant="text" prepend-icon="mdi-arrow-left" class="text-none font-weight-bold text-muted mb-3" @click="clearSelection">
+        Back to Studies
+      </v-btn>
 
-        <v-btn color="error" variant="text" prepend-icon="mdi-delete" class="mr-2" @click.stop="deleteStudy" :disabled="!canEditStudy">
-          Delete
-        </v-btn>
-        <v-btn color="primary" variant="outlined" prepend-icon="mdi-pencil" @click.stop="editStudy" :disabled="!canEditStudy">
-          Edit Settings
-        </v-btn>
-      </v-toolbar>
+      <!-- Study Hero Header -->
+      <v-card class="ds-card mb-6 study-hero-header" variant="flat" style="overflow: hidden;">
+        <div class="study-hero-bg">
+          <div class="d-flex align-center justify-space-between flex-wrap pa-5" style="position: relative; z-index: 1;">
+            <!-- Left: Study identity -->
+            <div class="d-flex align-center flex-wrap" style="gap: 12px;">
+              <v-avatar :color="currentStudy.Completed ? 'success' : 'primary'" size="52" class="study-hero-avatar">
+                <v-icon size="28" color="white">mdi-flask-outline</v-icon>
+              </v-avatar>
+              <div>
+                <h2 class="text-h5 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); line-height: 1.3;">
+                  {{ currentStudy.StudyName }}
+                </h2>
+                <div class="d-flex align-center mt-1" style="gap: 8px;">
+                  <v-chip size="small" variant="tonal" color="primary" class="font-weight-bold">{{ currentStudy.StudyType }}</v-chip>
+                  <v-chip size="small" :color="currentStudy.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
+                    <v-icon start size="14">{{ currentStudy.Completed ? 'mdi-check-circle' : 'mdi-progress-clock' }}</v-icon>
+                    {{ currentStudy.Completed ? 'Completed' : 'In Progress' }}
+                  </v-chip>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Right: Action buttons -->
+            <div class="d-flex align-center flex-wrap" style="gap: 8px;">
+              <v-btn 
+                :color="currentStudy.Completed ? 'warning' : 'success'" 
+                variant="tonal" 
+                :prepend-icon="currentStudy.Completed ? 'mdi-restore' : 'mdi-check-all'" 
+                class="text-none font-weight-bold"
+                @click.stop="changeStudyStatus(currentStudy)" 
+                :disabled="!canManageStudyStatus(currentStudy)"
+              >
+                {{ currentStudy.Completed ? 'Mark In Progress' : 'Mark Completed' }}
+              </v-btn>
+              
+              <v-btn 
+                color="secondary" 
+                variant="tonal" 
+                prepend-icon="mdi-content-copy" 
+                class="text-none font-weight-bold"
+                @click.stop="duplicateStudy" 
+                :disabled="!canDuplicateStudy"
+              >
+                Duplicate
+              </v-btn>
 
-      <v-card class="ds-card" variant="flat">
-        <v-tabs v-model="studyTab" color="primary" bg-color="grey-lighten-4" align-tabs="start">
+              <v-btn color="error" variant="tonal" prepend-icon="mdi-delete" class="text-none font-weight-bold" @click.stop="deleteStudy" :disabled="!canEditStudy">
+                Delete
+              </v-btn>
+              <v-btn color="primary" variant="flat" prepend-icon="mdi-pencil" class="text-none font-weight-bold" @click.stop="editStudy" :disabled="!canEditStudy">
+                Edit Study
+              </v-btn>
+            </div>
+          </div>
+        </div>
+      </v-card>
+
+      <v-card class="ds-card d-flex flex-column" variant="flat" style="height: calc(100vh - 280px); overflow: hidden;">
+        <v-tabs v-model="studyTab" color="primary" bg-color="grey-lighten-4" align-tabs="start" class="flex-shrink-0">
           <v-tab value="overview"><v-icon start>mdi-text-box-search-outline</v-icon>Overview</v-tab>
           <v-tab value="analytics"><v-icon start>mdi-chart-line</v-icon>Analytics</v-tab>
           <v-tab value="logistics"><v-icon start>mdi-account-group-outline</v-icon>Team & Logistics</v-tab>
@@ -161,7 +175,7 @@
         </v-tabs>
         <v-divider></v-divider>
 
-        <v-window v-model="studyTab">
+        <v-window v-model="studyTab" class="flex-grow-1" style="overflow-y: auto;">
           <v-window-item value="overview" class="pa-6">
             <v-row>
               <v-col cols="12" md="8">
@@ -175,42 +189,42 @@
                 <SectionHeader title="Recruitment Criteria" icon="mdi-filter-variant" class="mt-0" />
                 
                 <div class="mb-6">
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">Age Groups</div>
-                  <div v-if="currentStudy.AgeGroups && currentStudy.AgeGroups.length > 0" class="d-flex flex-wrap gap-2">
-                    <v-chip v-for="(group, i) in currentStudy.AgeGroups" :key="i" size="small" color="primary" variant="tonal">
-                      <v-icon start size="14">mdi-human-child</v-icon>
+                  <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-2">Age Groups</div>
+                  <div v-if="currentStudy.AgeGroups && currentStudy.AgeGroups.length > 0" class="d-flex flex-wrap gap-2" style="gap: 8px;">
+                    <v-chip v-for="(group, i) in currentStudy.AgeGroups" :key="i" color="primary" variant="tonal">
+                      <v-icon start size="16">mdi-human-child</v-icon>
                       {{ AgeFormated(group.MinAge) }} – {{ AgeFormated(group.MaxAge) }}
                     </v-chip>
                   </div>
-                  <span v-else class="text-body-2 text-muted">—</span>
+                  <span v-else class="text-body-1 text-muted">—</span>
                 </div>
 
                 <div v-if="currentStudy.Prerequisites && currentStudy.Prerequisites.length > 0" class="mb-6">
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">Prerequisites</div>
-                  <div class="d-flex flex-wrap gap-2">
-                    <v-chip v-for="p in currentStudy.Prerequisites" :key="p.id" size="small" color="success" variant="tonal">
-                      <v-icon start size="14">mdi-check-circle-outline</v-icon>{{ p.StudyName }}
+                  <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-2">Prerequisites</div>
+                  <div class="d-flex flex-wrap gap-2" style="gap: 8px;">
+                    <v-chip v-for="p in currentStudy.Prerequisites" :key="p.id" color="success" variant="tonal">
+                      <v-icon start size="16">mdi-check-circle-outline</v-icon>{{ p.StudyName }}
                     </v-chip>
                   </div>
                 </div>
                 
                 <div v-if="currentStudy.Exclusions && currentStudy.Exclusions.length > 0" class="mb-6">
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">Exclusions</div>
-                  <div class="d-flex flex-wrap gap-2">
-                    <v-chip v-for="e in currentStudy.Exclusions" :key="e.id" size="small" color="error" variant="tonal">
-                      <v-icon start size="14">mdi-close-circle-outline</v-icon>{{ e.StudyName }}
+                  <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-2">Exclusions</div>
+                  <div class="d-flex flex-wrap gap-2" style="gap: 8px;">
+                    <v-chip v-for="e in currentStudy.Exclusions" :key="e.id" color="error" variant="tonal">
+                      <v-icon start size="16">mdi-close-circle-outline</v-icon>{{ e.StudyName }}
                     </v-chip>
                   </div>
                 </div>
 
                 <div>
-                  <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">Participant Health Criteria</div>
+                  <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-2">Participant Health Criteria</div>
                   <div class="d-flex flex-wrap gap-2" style="gap: 8px;">
-                    <v-chip size="x-small" variant="tonal" :color="criteriaColor(currentStudy.ASDParticipant)">ASD: {{ currentStudy.ASDParticipant }}</v-chip>
-                    <v-chip size="x-small" variant="tonal" :color="criteriaColor(currentStudy.PrematureParticipant)">Premature: {{ currentStudy.PrematureParticipant }}</v-chip>
-                    <v-chip size="x-small" variant="tonal" :color="criteriaColor(currentStudy.IllParticipant)">Illness: {{ currentStudy.IllParticipant }}</v-chip>
-                    <v-chip size="x-small" variant="tonal" :color="criteriaColor(currentStudy.VisionLossParticipant)">Vision: {{ currentStudy.VisionLossParticipant }}</v-chip>
-                    <v-chip size="x-small" variant="tonal" :color="criteriaColor(currentStudy.HearingLossParticipant)">Hearing: {{ currentStudy.HearingLossParticipant }}</v-chip>
+                    <v-chip variant="tonal" :color="criteriaColor(currentStudy.ASDParticipant)">ASD: {{ currentStudy.ASDParticipant }}</v-chip>
+                    <v-chip variant="tonal" :color="criteriaColor(currentStudy.PrematureParticipant)">Premature: {{ currentStudy.PrematureParticipant }}</v-chip>
+                    <v-chip variant="tonal" :color="criteriaColor(currentStudy.IllParticipant)">Illness: {{ currentStudy.IllParticipant }}</v-chip>
+                    <v-chip variant="tonal" :color="criteriaColor(currentStudy.VisionLossParticipant)">Vision: {{ currentStudy.VisionLossParticipant }}</v-chip>
+                    <v-chip variant="tonal" :color="criteriaColor(currentStudy.HearingLossParticipant)">Hearing: {{ currentStudy.HearingLossParticipant }}</v-chip>
                   </div>
                 </div>
               </v-col>
@@ -350,63 +364,137 @@
           </v-window-item>
 
           <v-window-item value="communications" class="pa-6">
-            <v-row>
-              <v-col cols="12" md="6">
-                <div class="d-flex justify-space-between align-center mb-3">
-                  <SectionHeader title="Scripts & Templates" icon="mdi-email-edit-outline" class="mt-0 mb-0" />
-                  <v-btn size="small" color="primary" variant="flat" prepend-icon="mdi-content-save" @click="saveEmailTemplates" :loading="savingTemplates">Quick Save</v-btn>
-                </div>
-                
-                <v-card variant="outlined" class="pa-4 mb-4" style="border-color: #E2E8F0 !important;">
-                  <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Phone Recruitment Script</div>
-                  <v-textarea v-model="currentStudy.PhoneScript" variant="outlined" rows="4" hide-details density="compact"></v-textarea>
-                </v-card>
+            <!-- Header with Save button -->
+            <div class="d-flex justify-space-between align-center mb-4">
+              <SectionHeader title="Email Templates & Scripts" icon="mdi-email-edit-outline" class="mt-0 mb-0" />
+              <v-btn size="small" color="primary" variant="flat" prepend-icon="mdi-content-save" @click="saveEmailTemplates" :loading="savingTemplates" class="text-none font-weight-bold">
+                Save All Changes
+              </v-btn>
+            </div>
 
-                <v-card variant="outlined" class="pa-4 mb-4" style="border-color: #E2E8F0 !important;">
-                  <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Confirmation Email Snippet</div>
-                  <RichTextEditor v-model="currentStudy.EmailTemplate" />
-                </v-card>
+            <!-- Sub-tabs for each template type -->
+            <v-card variant="outlined" style="border-color: #E2E8F0 !important; overflow: hidden;">
+              <v-tabs v-model="commTab" color="primary" density="compact" class="comm-subtabs" style="border-bottom: 1px solid #E2E8F0;">
+                <v-tab value="phone" class="text-none" style="font-size: 0.95rem;">
+                  <v-icon start size="18">mdi-phone-outline</v-icon>Phone Script
+                </v-tab>
+                <v-tab value="confirm" class="text-none" style="font-size: 0.95rem;">
+                  <v-icon start size="18">mdi-email-check-outline</v-icon>Confirmation
+                </v-tab>
+                <v-tab value="remind" class="text-none" style="font-size: 0.95rem;">
+                  <v-icon start size="18">mdi-bell-outline</v-icon>Reminder
+                </v-tab>
+                <v-tab value="follow" class="text-none" style="font-size: 0.95rem;">
+                  <v-icon start size="18">mdi-email-fast-outline</v-icon>Follow-up
+                </v-tab>
+              </v-tabs>
 
-                <v-card variant="outlined" class="pa-4 mb-4" style="border-color: #E2E8F0 !important;">
-                  <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Reminder Email Snippet</div>
-                  <RichTextEditor v-model="currentStudy.ReminderTemplate" />
-                </v-card>
+              <v-window v-model="commTab">
+                <!-- Phone Script (no preview needed) -->
+                <v-window-item value="phone">
+                  <div class="pa-5">
+                    <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-3">
+                      <v-icon size="18" class="mr-1">mdi-script-text-outline</v-icon>
+                      Script used when calling families for recruitment
+                    </div>
+                    <v-textarea v-model="currentStudy.PhoneScript" variant="outlined" rows="20" hide-details density="compact" placeholder="Enter phone recruitment script..." style="font-size: 0.95rem;"></v-textarea>
+                  </div>
+                </v-window-item>
 
-                <v-card variant="outlined" class="pa-4" style="border-color: #E2E8F0 !important;">
-                  <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Follow-up Email Snippet</div>
-                  <RichTextEditor v-model="currentStudy.FollowUPEmailSnippet" />
-                </v-card>
-              </v-col>
+                <!-- Confirmation Email -->
+                <v-window-item value="confirm">
+                  <v-row no-gutters>
+                    <v-col cols="12" md="6" class="pa-5" style="border-right: 1px solid #E2E8F0;">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="primary" class="mr-2">mdi-pencil</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Edit Snippet</span>
+                      </div>
+                      <div class="text-body-2 text-muted mb-3">Sent when an appointment is booked.</div>
+                      <v-alert variant="tonal" color="secondary" density="compact" class="mb-3" style="font-size: 0.8rem;">
+                        <div class="font-weight-bold mb-1">Available Keywords</div>
+                        <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                          <span><code>${{childName}}</code> — Child's first name</span>
+                          <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                          <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                          <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                          <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                        </div>
+                      </v-alert>
+                      <RichTextEditor v-model="currentStudy.EmailTemplate" />
+                    </v-col>
+                    <v-col cols="12" md="6" class="pa-5 bg-grey-lighten-4">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="success" class="mr-2">mdi-eye-outline</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Live Preview</span>
+                      </div>
+                      <div class="template-preview pa-4 rounded bg-white" v-html="confirmationPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0; font-size: 1rem; line-height: 1.6;"></div>
+                    </v-col>
+                  </v-row>
+                </v-window-item>
 
-              <v-col cols="12" md="6" style="border-left: 1px solid #E2E8F0;">
-                <SectionHeader title="Live Previews" icon="mdi-eye-outline" class="mt-0 mb-3" />
-                
-                <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-                  Changes made on the left will update here instantly. Don't forget to click <strong>Quick Save</strong>!
-                </v-alert>
+                <!-- Reminder Email -->
+                <v-window-item value="remind">
+                  <v-row no-gutters>
+                    <v-col cols="12" md="6" class="pa-5" style="border-right: 1px solid #E2E8F0;">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="primary" class="mr-2">mdi-pencil</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Edit Snippet</span>
+                      </div>
+                      <div class="text-body-2 text-muted mb-3">Sent automatically the day before the study.</div>
+                      <v-alert variant="tonal" color="secondary" density="compact" class="mb-3" style="font-size: 0.8rem;">
+                        <div class="font-weight-bold mb-1">Available Keywords</div>
+                        <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                          <span><code>${{childName}}</code> — Child's first name</span>
+                          <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                          <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                          <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                          <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                        </div>
+                      </v-alert>
+                      <RichTextEditor v-model="currentStudy.ReminderTemplate" />
+                    </v-col>
+                    <v-col cols="12" md="6" class="pa-5 bg-grey-lighten-4">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="success" class="mr-2">mdi-eye-outline</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Live Preview</span>
+                      </div>
+                      <div class="template-preview pa-4 rounded bg-white" v-html="reminderPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0; font-size: 1rem; line-height: 1.6;"></div>
+                    </v-col>
+                  </v-row>
+                </v-window-item>
 
-                <v-expansion-panels variant="accordion" v-model="previewPanel">
-                  <v-expansion-panel value="confirm">
-                    <v-expansion-panel-title class="font-weight-bold text-primary">Confirmation Preview</v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <div class="template-preview pa-4 rounded bg-grey-lighten-4 mt-2" v-html="confirmationPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0;"></div>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-                  <v-expansion-panel value="remind">
-                    <v-expansion-panel-title class="font-weight-bold text-primary">Reminder Preview</v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <div class="template-preview pa-4 rounded bg-grey-lighten-4 mt-2" v-html="reminderPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0;"></div>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-                  <v-expansion-panel value="follow">
-                    <v-expansion-panel-title class="font-weight-bold text-primary">Follow-up Preview</v-expansion-panel-title>
-                    <v-expansion-panel-text>
-                      <div class="template-preview pa-4 rounded bg-grey-lighten-4 mt-2" v-html="followupPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0;"></div>
-                    </v-expansion-panel-text>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </v-col>
-            </v-row>
+                <!-- Follow-up Email -->
+                <v-window-item value="follow">
+                  <v-row no-gutters>
+                    <v-col cols="12" md="6" class="pa-5" style="border-right: 1px solid #E2E8F0;">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="primary" class="mr-2">mdi-pencil</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Edit Snippet</span>
+                      </div>
+                      <div class="text-body-2 text-muted mb-3">Appended to the generic "Thank You" email sent after study completion.</div>
+                      <v-alert variant="tonal" color="secondary" density="compact" class="mb-3" style="font-size: 0.8rem;">
+                        <div class="font-weight-bold mb-1">Available Keywords</div>
+                        <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                          <span><code>${{childName}}</code> — Child's first name</span>
+                          <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                          <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                          <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                          <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                        </div>
+                      </v-alert>
+                      <RichTextEditor v-model="currentStudy.FollowUPEmailSnippet" />
+                    </v-col>
+                    <v-col cols="12" md="6" class="pa-5 bg-grey-lighten-4">
+                      <div class="d-flex align-center mb-3">
+                        <v-icon size="18" color="success" class="mr-2">mdi-eye-outline</v-icon>
+                        <span class="text-body-2 font-weight-bold text-uppercase text-muted">Live Preview</span>
+                      </div>
+                      <div class="template-preview pa-4 rounded bg-white" v-html="followupPreview" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0; font-size: 1rem; line-height: 1.6;"></div>
+                    </v-col>
+                  </v-row>
+                </v-window-item>
+              </v-window>
+            </v-card>
           </v-window-item>
         </v-window>
       </v-card>
@@ -563,19 +651,49 @@
 
                       <v-window-item value="confirm">
                         <h3 class="text-h6 mb-2">Confirmation Email Snippet</h3>
-                        <p class="text-caption text-muted mb-4">Sent when an appointment is booked. <br><strong>Variables:</strong> <code>${{childName}}</code>, <code>${{he/she}}</code>, <code>${{ZoomLink}}</code></p>
+                        <p class="text-caption text-muted mb-2">Sent when an appointment is booked.</p>
+                        <v-alert variant="tonal" color="secondary" density="compact" class="mb-4" style="font-size: 0.75rem;">
+                          <div class="font-weight-bold mb-1">Available Keywords</div>
+                          <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                            <span><code>${{childName}}</code> — Child's first name</span>
+                            <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                            <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                            <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                            <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                          </div>
+                        </v-alert>
                         <RichTextEditor v-model="editedStudy.EmailTemplate" />
                       </v-window-item>
 
                       <v-window-item value="remind">
                         <h3 class="text-h6 mb-2">Reminder Email Snippet</h3>
-                        <p class="text-caption text-muted mb-4">Sent automatically the day before the study.</p>
+                        <p class="text-caption text-muted mb-2">Sent automatically the day before the study.</p>
+                        <v-alert variant="tonal" color="secondary" density="compact" class="mb-4" style="font-size: 0.75rem;">
+                          <div class="font-weight-bold mb-1">Available Keywords</div>
+                          <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                            <span><code>${{childName}}</code> — Child's first name</span>
+                            <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                            <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                            <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                            <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                          </div>
+                        </v-alert>
                         <RichTextEditor v-model="editedStudy.ReminderTemplate" />
                       </v-window-item>
 
                       <v-window-item value="follow">
                         <h3 class="text-h6 mb-2">Follow-up Email Snippet (Thank You)</h3>
-                        <p class="text-caption text-muted mb-4">Appended to the generic "Thank You" email sent after completion.</p>
+                        <p class="text-caption text-muted mb-2">Appended to the generic "Thank You" email sent after completion.</p>
+                        <v-alert variant="tonal" color="secondary" density="compact" class="mb-4" style="font-size: 0.75rem;">
+                          <div class="font-weight-bold mb-1">Available Keywords</div>
+                          <div v-pre class="d-flex flex-wrap" style="gap: 4px 12px;">
+                            <span><code>${{childName}}</code> — Child's first name</span>
+                            <span><code>${{he/she}}</code> — Pronoun (subject)</span>
+                            <span><code>${{him/her}}</code> — Pronoun (object)</span>
+                            <span><code>${{his/her}}</code> — Pronoun (possessive)</span>
+                            <span><code>${{ZoomLink}}</code> — Experimenter's Zoom link</span>
+                          </div>
+                        </v-alert>
                         <RichTextEditor v-model="editedStudy.FollowUPEmailSnippet" />
                       </v-window-item>
 
@@ -661,7 +779,7 @@ export default {
       currentTestingRooms: [],
       selectedRoomId: null,
       studyTab: 'overview',
-      previewPanel: 'confirm',
+      commTab: 'confirm',
       studyStepper: 1,
       emailTemplateTab: 'phone',
       studyStatsLoaded: false,
@@ -739,25 +857,33 @@ export default {
       return Math.round((dropoffs / this.kpiTotalRecruited) * 100);
     },
 
-    // Mock preview logic (identical text manipulation as vue2)
+    // Highlight replaced keywords with bold + color so they stand out
     confirmationPreview() {
       if (!this.currentStudy.EmailTemplate) return "<p>Email template not set.</p>";
-      let email = this.currentStudy.EmailTemplate.replace(/\${{childName}}/g, "Emma");
-      return `<p>Dear Lisa,</p><div>${email}</div>`;
+      return this.highlightKeywords(this.currentStudy.EmailTemplate);
     },
     reminderPreview() {
       if (!this.currentStudy.ReminderTemplate) return "<p>Reminder template not set.</p>";
-      let email = this.currentStudy.ReminderTemplate.replace(/\${{childName}}/g, "Emma");
-      return `<p>Dear Lisa,</p><div>${email}</div>`;
+      return this.highlightKeywords(this.currentStudy.ReminderTemplate);
     },
     followupPreview() {
       if (!this.currentStudy.FollowUPEmailSnippet) return "<p>Followup snippet not set.</p>";
-      let email = this.currentStudy.FollowUPEmailSnippet.replace(/\${{childName}}/g, "Emma");
-      return `<p>Dear Lisa,</p><div>${email}</div>`;
+      return this.highlightKeywords(this.currentStudy.FollowUPEmailSnippet);
     }
   },
 
   methods: {
+    highlightKeywords(template) {
+      const hl = (text) => `<span style="font-weight:700;color:#0D9488">${text}</span>`;
+      let email = template;
+      email = email.replace(/\${{childName}}/g, hl('Emma'));
+      email = email.replace(/\${{he\/she}}/g, hl('she'));
+      email = email.replace(/\${{him\/her}}/g, hl('her'));
+      email = email.replace(/\${{his\/her}}/g, hl('her'));
+      email = email.replace(/\${{ZoomLink}}/g, '<a href="#" style="font-weight:700;color:#0D9488">Zoom Link</a>');
+      return `<p>Dear Lisa,</p><div>${email}</div>`;
+    },
+
     getRoomName(roomId) {
       if (!roomId) return 'Unassigned Room';
       const room = this.currentTestingRooms.find(r => r.id === roomId);
@@ -1028,7 +1154,7 @@ export default {
       if (!Age || Age <= 0) return "Not applicable";
       const years = Math.floor(Age / 12);
       const months = Age % 12;
-      return `${years > 0 ? years + 'y ' : ''}${months}m`.trim();
+      return `${years > 0 ? years + 'y' : ''}${months > 0 ? ' ' + months + 'm' : ''}`.trim() || '0m';
     },
 
     PhoneFormated(Phone) {
@@ -1087,7 +1213,32 @@ export default {
   background-color: rgb(var(--v-theme-secondary), 0.1) !important;
 }
 
-.ck-editor__editable_inline {
-  min-height: 300px !important;
+/* Study Hero Header */
+.study-hero-header {
+  border: none !important;
+}
+
+.study-hero-bg {
+  background: linear-gradient(135deg, rgba(30, 64, 175, 0.04) 0%, rgba(59, 130, 246, 0.06) 50%, rgba(245, 158, 11, 0.03) 100%);
+  border-bottom: 2px solid rgba(30, 64, 175, 0.12);
+}
+
+.study-hero-avatar {
+  box-shadow: 0 4px 14px rgba(30, 64, 175, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.study-hero-header:hover .study-hero-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.35);
+}
+
+/* Restore paragraph spacing in email previews (Vuetify resets <p> margins to 0) */
+.template-preview :deep(p) {
+  margin-bottom: 0.75em;
+  min-height: 1em; /* ensure empty <p> tags (blank lines) are visible */
+}
+.template-preview :deep(p:last-child) {
+  margin-bottom: 0;
 }
 </style>
