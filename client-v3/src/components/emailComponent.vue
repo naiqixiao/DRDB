@@ -40,7 +40,7 @@
 
     <!-- Email body editor -->
     <div class="email-body-wrapper">
-      <ckeditor ref="emailBodyRef" :editor="editor" v-model="emailBody" :config="editorConfig"></ckeditor>
+      <RichTextEditor v-model="emailBody" />
     </div>
   </div>
 </template>
@@ -49,8 +49,7 @@
 import email from "@/services/email";
 import family from "@/services/family";
 import moment from "moment";
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import RichTextEditor from "@/components/RichTextEditor.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 import { useMainStore } from "@/stores/mainStore";
@@ -62,7 +61,7 @@ export default {
   },
   name: "emailComponent",
   components: {
-    ckeditor: Ckeditor,
+    RichTextEditor,
     ConfirmDlg
   },
   props: {
@@ -84,20 +83,7 @@ export default {
       emailUpdate: false,
       emailBody: "",
       emailSubject: "",
-      editor: ClassicEditor,
-      editorConfig: {
-        allowedContent: true,
-        extraAllowedContent: 'style',
-        toolbar: {
-          items: [
-            'undo', 'redo',
-            '|', 'heading',
-            '|', 'bold', 'italic',
-            '|', 'link', 'insertImage', 'insertTable', 'mediaEmbed', 'blockQuote',
-            '|', 'bulletedList', 'numberedList', 'outdent', 'indent'
-          ]
-        }
-      },
+
     };
   },
   methods: {
@@ -526,29 +512,18 @@ export default {
   overflow: hidden;
 }
 
-/* CKEditor overrides */
-.email-body-wrapper .ck.ck-editor {
+/* RichTextEditor overrides for email compose */
+.email-body-wrapper .rich-text-editor {
   border: none !important;
+  border-radius: 0 0 8px 8px !important;
 }
 
-.email-body-wrapper .ck.ck-toolbar {
-  border: none !important;
-  border-bottom: 1px solid rgba(var(--v-border-color), 0.08) !important;
-  background: rgba(var(--v-theme-surface), 0.6) !important;
-  padding: 2px 8px !important;
+.email-body-wrapper .editor-toolbar {
+  border-top: 1px solid rgba(var(--v-border-color), 0.08);
 }
 
-.email-body-wrapper .ck.ck-editor__main > .ck-editor__editable {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.ck-editor__editable_inline:not(.ck-comment__input *) {
-  height: 400px !important;
-  overflow-y: auto;
-  padding: 20px 24px !important;
-  font-size: 0.9rem;
-  line-height: 1.65;
+.email-body-wrapper .editor-content .tiptap {
+  min-height: 350px;
 }
 
 /* Prefix styling override */

@@ -116,7 +116,7 @@
           {{ currentStudy.StudyName }}
         </h2>
         <v-chip class="ml-4" size="small" variant="tonal" color="primary">{{ currentStudy.StudyType }}</v-chip>
-        <v-chip class="ml-2" size="small" :color="currentStudy.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
+        <v-chip class="ml-2 text-white font-weight-bold" size="small" :color="currentStudy.Completed ? 'success' : 'warning'" variant="flat">
           {{ currentStudy.Completed ? 'Completed' : 'In Progress' }}
         </v-chip>
         
@@ -364,17 +364,17 @@
 
                 <v-card variant="outlined" class="pa-4 mb-4" style="border-color: #E2E8F0 !important;">
                   <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Confirmation Email Snippet</div>
-                  <ckeditor :editor="editor" v-model="currentStudy.EmailTemplate" :config="editorConfig"></ckeditor>
+                  <RichTextEditor v-model="currentStudy.EmailTemplate" />
                 </v-card>
 
                 <v-card variant="outlined" class="pa-4 mb-4" style="border-color: #E2E8F0 !important;">
                   <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Reminder Email Snippet</div>
-                  <ckeditor :editor="editor" v-model="currentStudy.ReminderTemplate" :config="editorConfig"></ckeditor>
+                  <RichTextEditor v-model="currentStudy.ReminderTemplate" />
                 </v-card>
 
                 <v-card variant="outlined" class="pa-4" style="border-color: #E2E8F0 !important;">
                   <div class="text-subtitle-2 font-weight-bold text-primary mb-2">Follow-up Email Snippet</div>
-                  <ckeditor :editor="editor" v-model="currentStudy.FollowUPEmailSnippet" :config="editorConfig"></ckeditor>
+                  <RichTextEditor v-model="currentStudy.FollowUPEmailSnippet" />
                 </v-card>
               </v-col>
 
@@ -564,19 +564,19 @@
                       <v-window-item value="confirm">
                         <h3 class="text-h6 mb-2">Confirmation Email Snippet</h3>
                         <p class="text-caption text-muted mb-4">Sent when an appointment is booked. <br><strong>Variables:</strong> <code>${{childName}}</code>, <code>${{he/she}}</code>, <code>${{ZoomLink}}</code></p>
-                        <ckeditor :editor="editor" v-model="editedStudy.EmailTemplate" :config="editorConfig"></ckeditor>
+                        <RichTextEditor v-model="editedStudy.EmailTemplate" />
                       </v-window-item>
 
                       <v-window-item value="remind">
                         <h3 class="text-h6 mb-2">Reminder Email Snippet</h3>
                         <p class="text-caption text-muted mb-4">Sent automatically the day before the study.</p>
-                        <ckeditor :editor="editor" v-model="editedStudy.ReminderTemplate" :config="editorConfig"></ckeditor>
+                        <RichTextEditor v-model="editedStudy.ReminderTemplate" />
                       </v-window-item>
 
                       <v-window-item value="follow">
                         <h3 class="text-h6 mb-2">Follow-up Email Snippet (Thank You)</h3>
                         <p class="text-caption text-muted mb-4">Appended to the generic "Thank You" email sent after completion.</p>
-                        <ckeditor :editor="editor" v-model="editedStudy.FollowUPEmailSnippet" :config="editorConfig"></ckeditor>
+                        <RichTextEditor v-model="editedStudy.FollowUPEmailSnippet" />
                       </v-window-item>
 
                     </v-window>
@@ -599,8 +599,7 @@
 
 <script>
 import moment from "moment";
-import { Ckeditor as ckeditor } from '@ckeditor/ckeditor5-vue';
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import RichTextEditor from "@/components/RichTextEditor.vue";
 
 import AssignedExperimenters from "@/components/AssignedExperimenters.vue";
 import AlertBanner from "@/components/AlertBanner.vue";
@@ -624,7 +623,7 @@ export default {
     AlertBanner,
     InfoField,
     SectionHeader,
-    ckeditor,
+    RichTextEditor,
     studyProgressChart,
     recruitmentProgressChart,
     experimenterStatsChart,
@@ -677,18 +676,7 @@ export default {
       },
       inclusionOptions: ["Include", "Exclude", "Only"],
 
-      editor: ClassicEditor,
-      editorConfig: {
-        toolbar: {
-          items: [
-            "undo", "redo", "|",
-            "heading", "|",
-            "bold", "italic", "|",
-            "link", "insertTable", "|",
-            "bulletedList", "numberedList", "outdent", "indent",
-          ],
-        },
-      }
+
     };
   },
 

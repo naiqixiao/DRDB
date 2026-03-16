@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div style="overflow-y: auto !important; max-height: 400px;">
+    <div>
       <v-row dense>
         <v-col cols="12" md="6" v-for="experimenter in Experimenters" :key="experimenter.id" class="mb-2">
-          <v-card class="d-flex flex-column h-100" variant="elevated">
+          <v-card class="d-flex flex-column h-100" variant="outlined">
             <v-card-title class="d-flex align-center py-2 text-subtitle-1 font-weight-bold">
               {{ experimenter.Name }} ({{ experimenter.Initial }})
               <v-spacer></v-spacer>

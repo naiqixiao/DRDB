@@ -9,9 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
-    "@ckeditor/ckeditor5-vue": "^7.3.0",
     "@mdi/font": "^7.4.47",
+    "@tiptap/extension-link": "^2.27.2",
+    "@tiptap/extension-table": "^2.27.2",
+    "@tiptap/extension-table-cell": "^2.27.2",
+    "@tiptap/extension-table-header": "^2.27.2",
+    "@tiptap/extension-table-row": "^2.27.2",
+    "@tiptap/extension-underline": "^2.27.2",
+    "@tiptap/pm": "^2.27.2",
+    "@tiptap/starter-kit": "^2.27.2",
+    "@tiptap/vue-3": "^2.27.2",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",
     "moment": "^2.30.1",
