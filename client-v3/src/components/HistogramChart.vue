@@ -143,9 +143,8 @@ export default {
       this.loading = true;
       try {
         const response = await appointment.monthYearN();
-        // Depending on your API, response.data might be an array of arrays or just the array.
-        // Assuming it's wrapped based on your previous Vega implementation:
-        this.rawData = response.data[0] || response.data; 
+        // FIX: Safely check if the first item is an array wrapper, otherwise use the data directly
+        this.rawData = Array.isArray(response.data[0]) ? response.data[0] : response.data; 
       } catch (error) {
         console.error("Failed to fetch histogram data", error);
       } finally {
