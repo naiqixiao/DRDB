@@ -227,6 +227,54 @@ router.post("/assignLabtoFamilies", checkAuth, FamilyController.assignLabtoFamil
 
 /**
  * @swagger
+ * /api/family/duplicates:
+ *   get:
+ *     summary: Find suspicious duplicated family records
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of duplicated family groups
+ *       401:
+ *         description: Authentication failed
+ */
+router.get("/duplicates", checkAuth, FamilyController.getDuplicates);
+
+/**
+ * @swagger
+ * /api/family/merge:
+ *   post:
+ *     summary: Merge duplicate family records
+ *     tags: [Family]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - primaryId
+ *               - secondaryIds
+ *             properties:
+ *               primaryId:
+ *                 type: integer
+ *               secondaryIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *     responses:
+ *       200:
+ *         description: Families successfully merged
+ *       401:
+ *         description: Authentication failed
+ */
+router.post("/merge", checkAuth, FamilyController.merge);
+
+/**
+ * @swagger
  * /api/family:
  *   post:
  *     summary: Update an existing family

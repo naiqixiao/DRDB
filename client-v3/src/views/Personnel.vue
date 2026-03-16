@@ -1,151 +1,305 @@
 <template>
-  <v-container fluid>
+  <v-container fluid style="max-width: 1440px;">
     <AlertBanner :showAdminEmail="true" />
+    <ConfirmDialog ref="confirmDialog"></ConfirmDialog>
 
     <v-row>
-      <!-- Left Column: Personnel List -->
-      <v-col cols="12" md="4">
-        <v-card class="ds-card" variant="flat">
-          <v-card-title class="d-flex align-center py-2">
-            <v-text-field v-model="search" label="Search by Name or Email" class="mx-4" density="compact"
-              variant="underlined" hide-details></v-text-field>
-            <v-spacer></v-spacer>
-            <v-tooltip location="top">
-              <template v-slot:activator="{ props }">
-                <div v-bind="props">
-                  <v-checkbox v-model="activeMemberFilter" label="Active only" hide-details
-                    density="compact"></v-checkbox>
-                </div>
-              </template>
-              <span>Show active members</span>
-            </v-tooltip>
-          </v-card-title>
+      <v-col cols="12" md="4" lg="3" class="d-flex flex-column" style="height: calc(100vh - 120px);">
+        <v-card class="ds-card d-flex flex-column h-100" variant="flat">
+          
+          <div class="pa-4 pb-2" style="border-bottom: 1px solid #E2E8F0; background-color: #F8FAFC;">
+            <div class="d-flex justify-space-between align-center mb-3">
+              <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary)">
+                Team Directory
+              </span>
+              <v-btn color="primary" size="small" variant="flat" @click="createPersonnel" :disabled="!canAddPersonnel" prepend-icon="mdi-account-plus">
+                Add Member
+              </v-btn>
+            </div>
+            
+            <v-text-field 
+              v-model="search" 
+              placeholder="Search directory..." 
+              density="compact"
+              variant="outlined" 
+              hide-details 
+              prepend-inner-icon="mdi-magnify"
+              bg-color="white"
+              class="mb-3"
+            ></v-text-field>
 
-          <v-data-table :headers="headerPersonnel" :items="filteredPersonnels" :search="search" fixed-header
-            height="600" hover :class="['elevation-1', 'personnel-table']" @click:row="rowSelected">
-            <template #item.Active="{ item }">
-              <v-tooltip location="top">
-                <template v-slot:activator="{ props }">
-                  <div v-bind="props" @click.stop>
-                    <v-checkbox-btn :model-value="!!item.Active" @update:model-value="changePersonnelStatus(item)"
-                      :disabled="!canManageStatus(item)" density="compact" color="primary"></v-checkbox-btn>
-                  </div>
-                </template>
-                <span>Mark whether this person is available to run studies</span>
-              </v-tooltip>
-            </template>
-          </v-data-table>
+            <v-switch 
+              v-model="activeMemberFilter" 
+              label="Show Active Only" 
+              color="primary"
+              hide-details 
+              density="compact"
+              class="mt-n2"
+            ></v-switch>
+          </div>
+
+          <v-list class="flex-grow-1" style="overflow-y: auto; background: transparent;" lines="two">
+            <v-list-item
+              v-for="person in filteredPersonnels"
+              :key="person.id"
+              :value="person.id"
+              :active="currentPersonnel.id === person.id"
+              @click="rowSelected(person)"
+              class="py-3 ds-interactive"
+              style="border-bottom: 1px solid rgba(0,0,0,0.03);"
+              color="primary"
+            >
+              <template v-slot:prepend>
+                <v-badge
+                  :color="person.Active ? 'success' : 'grey-lighten-1'"
+                  dot
+                  location="bottom right"
+                  offset-x="3"
+                  offset-y="3"
+                >
+                  <v-avatar :color="getRoleColor(person.Role)" variant="tonal" class="font-weight-bold">
+                    {{ person.Initial || person.Name.charAt(0) }}
+                  </v-avatar>
+                </v-badge>
+              </template>
+
+              <v-list-item-title class="font-weight-bold text-body-1" style="color: var(--color-text)">
+                {{ person.Name }}
+              </v-list-item-title>
+              
+              <v-list-item-subtitle class="mt-1 d-flex align-center">
+                <v-chip size="x-small" :color="getRoleColor(person.Role)" variant="flat" class="text-white font-weight-bold px-2 mr-2">
+                  {{ person.Role }}
+                </v-chip>
+                <span class="text-truncate" style="max-width: 120px;">{{ person.Email }}</span>
+              </v-list-item-subtitle>
+            </v-list-item>
+
+            <div v-if="filteredPersonnels.length === 0" class="text-center pa-6 text-muted">
+              <v-icon size="48" color="grey-lighten-2" class="mb-2">mdi-account-search-outline</v-icon>
+              <div>No team members found</div>
+            </div>
+          </v-list>
         </v-card>
       </v-col>
 
-      <!-- Right Column: Personnel Details -->
-      <v-col cols="12" md="8">
-        <SectionHeader title="Personnel Information" icon="mdi-account-details" />
+      <v-col cols="12" md="8" lg="9" style="height: calc(100vh - 120px); overflow-y: auto;">
+        <div v-if="currentPersonnel.id">
+          
+          <v-card class="ds-card mb-6" variant="flat">
+            <v-toolbar color="transparent" density="compact" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
+              <v-spacer></v-spacer>
+              <v-btn 
+                :color="currentPersonnel.Active ? 'warning' : 'success'" 
+                variant="outlined" 
+                size="small"
+                :prepend-icon="currentPersonnel.Active ? 'mdi-account-off' : 'mdi-account-check'" 
+                class="mr-2" 
+                @click.stop="changePersonnelStatus(currentPersonnel)" 
+                :disabled="!canManageStatus(currentPersonnel)"
+              >
+                {{ currentPersonnel.Active ? 'Deactivate Account' : 'Activate Account' }}
+              </v-btn>
+              <v-btn color="error" variant="text" size="small" prepend-icon="mdi-delete" class="mr-2" @click.stop="deletePersonnel" :disabled="!canDeletePersonnel">
+                Delete
+              </v-btn>
+              <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-pencil" @click.stop="editPersonnel" :disabled="!canEditPersonnel">
+                Edit Profile
+              </v-btn>
+            </v-toolbar>
 
-        <v-form ref="form" v-model="valid" lazy-validation>
-          <v-container class="pa-0">
-            <div class="info-grid info-grid--3">
-              <InfoField v-for="item in personnelFields" :key="item.label" :label="item.label"
-                :value="currentPersonnel[item.field]"
-                :type="item.rules === 'phone' ? 'phone' : (item.rules === 'email' ? 'email' : null)" />
-            </div>
+            <v-card-text class="pa-6">
+              <v-row>
+                <v-col cols="12" sm="auto" class="text-center pr-sm-6">
+                  <v-avatar :color="getRoleColor(currentPersonnel.Role)" size="96" class="text-white font-weight-bold text-h3 mb-2 elevation-2">
+                    {{ currentPersonnel.Initial || currentPersonnel.Name.charAt(0) }}
+                  </v-avatar>
+                  <div>
+                    <v-chip :color="currentPersonnel.Active ? 'success' : 'grey'" size="small" variant="tonal" class="font-weight-bold mt-1">
+                      <v-icon start size="14">{{ currentPersonnel.Active ? 'mdi-check-circle' : 'mdi-minus-circle' }}</v-icon>
+                      {{ currentPersonnel.Active ? 'Active' : 'Inactive' }}
+                    </v-chip>
+                  </div>
+                </v-col>
+                
+                <v-col cols="12" sm="8">
+                  <h1 class="text-h4 font-weight-bold mb-1" style="color: var(--color-primary); font-family: var(--ds-font-family-heading);">
+                    {{ currentPersonnel.Name }}
+                  </h1>
+                  <div class="text-subtitle-1 text-muted font-weight-medium mb-4">
+                    {{ currentPersonnel.Role }}
+                  </div>
 
-            <v-row class="mt-4">
-              <v-col cols="12">
-                <v-row>
-                  <v-col cols="auto">
-                    <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
-                        <v-btn color="primary" v-bind="props" @click.stop="createPersonnel" :disabled="!canAddPersonnel"
-                          prepend-icon="mdi-account-plus">
-                          Add a person
-                        </v-btn>
-                      </template>
-                      <span>Add a new person to the lab</span>
-                    </v-tooltip>
-                  </v-col>
+                  <v-list density="compact" class="pa-0 bg-transparent">
+                    <v-list-item prepend-icon="mdi-email-outline" class="px-0 mb-1" density="compact">
+                      <v-list-item-title class="d-flex align-center font-weight-medium">
+                        {{ currentPersonnel.Email }}
+                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2" @click="copyToClipboard(currentPersonnel.Email)"></v-btn>
+                      </v-list-item-title>
+                    </v-list-item>
 
-                  <v-col cols="auto">
-                    <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
-                        <v-btn color="primary" v-bind="props" @click.stop="editPersonnel" :disabled="!canEditPersonnel"
-                          prepend-icon="mdi-pencil">
-                          Update info
-                        </v-btn>
-                      </template>
-                      <span>Edit personnel information</span>
-                    </v-tooltip>
-                  </v-col>
+                    <v-list-item prepend-icon="mdi-phone-outline" class="px-0 mb-1" density="compact">
+                      <v-list-item-title class="d-flex align-center font-weight-medium text-muted">
+                        {{ PhoneFormated(currentPersonnel.Phone) || 'No phone provided' }}
+                      </v-list-item-title>
+                    </v-list-item>
 
-                  <v-col cols="auto">
-                    <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
-                        <v-btn color="error" v-bind="props" @click.stop="deletePersonnel"
-                          :disabled="!canDeletePersonnel" prepend-icon="mdi-delete">
-                          Delete
-                        </v-btn>
-                      </template>
-                      <span>Remove this person from the lab</span>
-                    </v-tooltip>
-                  </v-col>
-                </v-row>
-              </v-col>
+                    <v-list-item prepend-icon="mdi-calendar-blank-outline" class="px-0 mb-1" density="compact">
+                      <v-list-item-title class="d-flex align-center text-muted">
+                        <span class="mr-2">Calendar ID:</span> {{ currentPersonnel.Calendar || 'Not linked' }}
+                      </v-list-item-title>
+                    </v-list-item>
 
-              <SectionHeader title="Assigned Studies" icon="mdi-book-multiple" />
+                    <v-list-item prepend-icon="mdi-video-outline" class="px-0" density="compact" v-if="currentPersonnel.ZoomLink">
+                      <v-list-item-title class="d-flex align-center font-weight-medium">
+                        <a :href="currentPersonnel.ZoomLink" target="_blank" class="text-decoration-none text-primary">Personal Zoom Room ↗</a>
+                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2" @click="copyToClipboard(currentPersonnel.ZoomLink)"></v-btn>
+                      </v-list-item-title>
+                    </v-list-item>
+                  </v-list>
 
-              <v-col cols="12" md="12" class="pa-0 mt-2">
-                <AssignedStudies v-if="currentPersonnel.id" :Studies="currentPersonnel.AssignedStudies || []"
-                  :labStudies="labStudies" :personnelId="currentPersonnel.id" :personnelName="currentPersonnel.Name"
-                  @updatedStudies="updatedStudies"></AssignedStudies>
-                <div v-else class="text-medium-emphasis ms-2">
-                  Select a lab member to view assigned studies.
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
+                  <div v-if="currentPersonnel.StudyinCharge && currentPersonnel.StudyinCharge.length > 0" class="mt-4 mb-2">
+                    <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">Project Leadership</div>
+                    <div class="d-flex flex-wrap gap-2" style="gap: 8px;">
+                      <v-chip 
+                        v-for="study in currentPersonnel.StudyinCharge" 
+                        :key="study.id"
+                        size="small" 
+                        variant="tonal" 
+                        color="success" 
+                        prepend-icon="mdi-star-circle-outline"
+                      >
+                        {{ study.StudyName }} (PoC)
+                      </v-chip>
+                    </div>
+                  </div>
 
-          <!-- Edit/Add Dialog -->
-          <v-dialog v-model="dialog" max-width="800px" persistent>
-            <v-card class="ds-card" variant="flat">
-              <v-card-title class="text-h6 py-4">
-                Lab member information
-              </v-card-title>
-              <v-card-text>
-                <v-form ref="dialogForm" v-model="validDialog" lazy-validation>
-                  <v-container class="pa-0">
+                  <div v-if="canViewStats" class="mt-6">
+                    <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">All-Time Performance</div>
                     <v-row dense>
-                      <v-col cols="12" sm="6" :md="item.width" v-for="item in personnelFields" :key="item.label">
-                        <v-select v-if="item.options === 'role'" v-model="editedPersonnel[item.field]"
-                          :items="availableRoles" :label="item.label" :rules="[v => !!v || 'Required']"
-                          hide-details="auto" variant="outlined" density="compact" class="mb-2"></v-select>
-
-                        <v-text-field v-else v-model="editedPersonnel[item.field]" :label="item.label"
-                          :rules="getRules(item.rules)" hide-details="auto" variant="outlined" density="compact"
-                          class="mb-2"></v-text-field>
+                      <v-col cols="4">
+                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                          <div class="text-h5 font-weight-bold text-primary">{{ personnelStats.e1Count || 0 }}</div>
+                          <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Sessions (E1)</div>
+                        </v-card>
+                      </v-col>
+                      <v-col cols="4">
+                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                          <div class="text-h5 font-weight-bold text-primary">{{ personnelStats.e2Count || 0 }}</div>
+                          <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Sessions (E2)</div>
+                        </v-card>
+                      </v-col>
+                      <v-col cols="4">
+                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                          <div class="text-h5 font-weight-bold text-success">{{ personnelStats.scheduledCount || 0 }}</div>
+                          <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Recruited</div>
+                        </v-card>
                       </v-col>
                     </v-row>
-                  </v-container>
-                </v-form>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="primary" variant="text" @click="close">Cancel</v-btn>
-                <v-btn color="primary" variant="text" @click="save" :disabled="!validDialog">Save</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
-        </v-form>
+                  </div>
+
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-card>
+
+          <v-card class="ds-card" variant="flat">
+            <v-toolbar color="transparent" density="compact" class="px-4 pt-2">
+              <v-icon class="mr-2" color="primary">mdi-book-multiple-outline</v-icon>
+              <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+                Assigned Studies
+              </span>
+              <v-chip class="ml-3" size="small" variant="tonal" color="primary">
+                {{ currentPersonnel.AssignedStudies?.length || 0 }} Active
+              </v-chip>
+            </v-toolbar>
+            <v-divider class="mt-2"></v-divider>
+            
+            <v-card-text class="pa-6 bg-grey-lighten-4" style="min-height: 200px;">
+              <AssignedStudies 
+                v-if="currentPersonnel.id" 
+                :Studies="currentPersonnel.AssignedStudies || []"
+                :labStudies="labStudies" 
+                :personnelId="currentPersonnel.id" 
+                :personnelName="currentPersonnel.Name"
+                @updatedStudies="updatedStudies"
+              />
+            </v-card-text>
+          </v-card>
+        </div>
+
+        <div v-else class="h-100 d-flex flex-column align-center justify-center text-center pa-6">
+          <v-avatar color="grey-lighten-3" size="120" class="mb-4">
+            <v-icon size="64" color="grey-lighten-1">mdi-badge-account-outline</v-icon>
+          </v-avatar>
+          <h2 class="text-h5 font-weight-bold text-muted mb-2">Member Profile</h2>
+          <p class="text-body-1 text-muted" style="max-width: 400px;">Select a team member from the directory on the left to view their contact information, edit their profile, and manage their assigned studies.</p>
+        </div>
       </v-col>
     </v-row>
-    <ConfirmDialog ref="confirmDialog"></ConfirmDialog>
+
+    <v-dialog v-model="dialog" max-width="700px" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+            {{ editedIndex === -1 ? 'Add New Team Member' : 'Edit Member Profile' }}
+          </span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="close"></v-btn>
+        </v-card-title>
+        
+        <v-card-text class="pt-6">
+          <v-form ref="dialogForm" v-model="validDialog" lazy-validation>
+            
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Identity & Role</div>
+            <v-row dense class="mb-4">
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedPersonnel.Name" label="Full Name *" :rules="getRules('name')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="getRules('required')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="3">
+                <v-select v-model="editedPersonnel.Role" :items="availableRoles" label="Role *" :rules="[v => !!v || 'Required']" variant="outlined" density="compact" bg-color="white"></v-select>
+              </v-col>
+            </v-row>
+
+            <v-divider class="mb-4"></v-divider>
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Contact & Integrations</div>
+            
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedPersonnel.Email" label="Email Address *" :rules="getRules('email')" prepend-inner-icon="mdi-email-outline" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedPersonnel.Phone" label="Phone Number" :rules="getRules('phone')" prepend-inner-icon="mdi-phone-outline" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedPersonnel.Calendar" label="Google Calendar ID *" prepend-inner-icon="mdi-calendar-blank-outline" placeholder="username@mcmaster.ca" :rules="getRules('email')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedPersonnel.ZoomLink" label="Personal Zoom Link" prepend-inner-icon="mdi-video-outline" placeholder="https://zoom.us/j/..." variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+            </v-row>
+
+          </v-form>
+        </v-card-text>
+        
+        <v-card-actions class="px-6 pb-6 pt-0 d-flex justify-space-between">
+          <span class="text-caption text-muted">* Required fields</span>
+          <div>
+            <v-btn color="error" variant="text" @click="close" class="mr-2">Cancel</v-btn>
+            <v-btn color="primary" variant="flat" @click="save" :disabled="!validDialog" prepend-icon="mdi-content-save">Save Profile</v-btn>
+          </div>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
 <script>
 import AssignedStudies from "@/components/AssignedStudies.vue";
 import AlertBanner from "@/components/AlertBanner.vue";
-import InfoField from "@/components/InfoField.vue";
-import SectionHeader from "@/components/SectionHeader.vue";
 import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import study from "@/services/study";
 import personnel from "@/services/personnel";
@@ -157,8 +311,6 @@ export default {
   components: {
     AssignedStudies,
     AlertBanner,
-    InfoField,
-    SectionHeader,
     ConfirmDialog,
   },
   setup() {
@@ -169,23 +321,13 @@ export default {
   data() {
     return {
       search: "",
-      headerPersonnel: [
-        { title: "Name", align: "start", key: "Name", width: "35%" },
-        { title: "Email", align: "start", sortable: false, key: "Email", width: "45%" },
-        { title: "Active?", sortable: false, align: "center", key: "Active", width: "20%" },
-      ],
       dialog: false,
-      personnelFields: [
-        { label: "Name", field: "Name", width: "6", rules: "name" },
-        { label: "Initials", field: "Initial", width: "6", rules: "required" },
-        { label: "Role", field: "Role", options: "role", width: "6", rules: "required" },
-        { label: "Email", field: "Email", width: "6", rules: "email" },
-        { label: "Calendar ID", field: "Calendar", width: "6", rules: "email" },
-        { label: "Phone", field: "Phone", width: "6", rules: "phone" },
-        { label: "Zoom Link", width: "12", field: "ZoomLink" },
-      ],
-
       Personnels: [],
+      personnelStats: {
+        e1Count: 0,
+        e2Count: 0,
+        scheduledCount: 0
+      },
       currentPersonnel: {},
       editedPersonnel: {},
       defaultPersonnel: {
@@ -199,7 +341,6 @@ export default {
       },
       editedIndex: -1,
       labStudies: [],
-      valid: true,
       validDialog: true,
       activeMemberFilter: true,
 
@@ -212,10 +353,24 @@ export default {
 
   computed: {
     filteredPersonnels() {
-      if (!this.activeMemberFilter) {
-        return this.Personnels;
+      let result = this.Personnels;
+      
+      // Filter by Active status
+      if (this.activeMemberFilter) {
+        result = result.filter(p => !!p.Active);
       }
-      return this.Personnels.filter(p => !!p.Active);
+      
+      // Filter by Search text
+      if (this.search) {
+        const lowerSearch = this.search.toLowerCase();
+        result = result.filter(p => 
+          (p.Name && p.Name.toLowerCase().includes(lowerSearch)) || 
+          (p.Email && p.Email.toLowerCase().includes(lowerSearch))
+        );
+      }
+
+      // Sort Alphabetically
+      return result.sort((a, b) => (a.Name || '').localeCompare(b.Name || ''));
     },
 
     availableRoles() {
@@ -244,10 +399,33 @@ export default {
       if (!this.currentPersonnel.id) return false;
       const role = this.store.role;
       return ['Admin', 'PI', 'Lab manager'].includes(role);
+    },
+
+    canViewStats() {
+      // 1. Can always view your own stats
+      if (this.currentPersonnel.id == this.store.userID) return true;
+      
+      // 2. Managers can view everyone's stats
+      const role = this.store.role;
+      return ['Admin', 'PI', 'Lab manager'].includes(role);
     }
   },
 
   methods: {
+    getRoleColor(role) {
+      const colors = {
+        'PI': '#8B5CF6',           // Purple
+        'Admin': '#EF4444',        // Red
+        'Lab manager': '#F59E0B',  // Amber
+        'PostDoc': '#3B82F6',      // Blue
+        'GradStudent': '#10B981',  // Green
+        'Undergrad': '#14B8A6',    // Teal
+        'RA': '#06B6D4',           // Cyan
+        'Staff': '#64748B'         // Slate
+      };
+      return colors[role] || '#94A3B8';
+    },
+
     canManageStatus(item) {
       const role = this.store.role;
       return (
@@ -268,6 +446,26 @@ export default {
         v => !v || /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/.test(v) || 'Invalid Phone'
       ];
       return [];
+    },
+
+    copyToClipboard(text) {
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        console.log('Copied to clipboard:', text);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    },
+
+    PhoneFormated(Phone) {
+      if (Phone) {
+        var cleaned = ("" + Phone).replace(/\D/g, "");
+        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+          return "(" + match[1] + ") " + match[2] + "-" + match[3];
+        }
+      }
+      return Phone;
     },
 
     async searchPersonnel() {
@@ -296,15 +494,30 @@ export default {
       try {
         item.Active = !item.Active;
         await personnel.update(item);
+        this.$refs.confirmDialog.open("Status Updated", `User is now marked as ${item.Active ? 'Active' : 'Inactive'}.`, { color: "success", noconfirm: true });
       } catch (error) {
         item.Active = !item.Active;
         if (error.response?.status !== 401) console.error(error);
       }
     },
 
-    rowSelected(event, { item }) {
-      this.currentPersonnel = item;
-      this.editedIndex = this.Personnels.findIndex(p => p.id === item.id);
+    async rowSelected(person) {
+      // 1. Set the active person
+      this.currentPersonnel = person;
+      this.editedIndex = this.Personnels.findIndex(p => p.id === person.id);
+      
+      // 2. Reset the stats initially so old data doesn't linger
+      this.personnelStats = { e1Count: 0, e2Count: 0, scheduledCount: 0 };
+
+      // 3. Fetch new stats if the user has permission to see them
+      if (this.canViewStats) {
+        try {
+          const statsResponse = await personnel.getStats(person.id);
+          this.personnelStats = statsResponse.data;
+        } catch (error) {
+          console.error("Failed to load personnel stats:", error);
+        }
+      }
     },
 
     editPersonnel() {
@@ -320,9 +533,8 @@ export default {
     },
 
     async save() {
-      // Basic validation
       if (!this.editedPersonnel.Name || !this.editedPersonnel.Email || !this.editedPersonnel.Role) {
-        await this.$refs.confirmDialog.open("Missing Details", "Please fill in the required fields (Name, Initials, Role, Email).", { color: "warning", noconfirm: true });
+        await this.$refs.confirmDialog.open("Missing Details", "Please fill in the required fields.", { color: "warning", noconfirm: true });
         return;
       }
 
@@ -333,6 +545,9 @@ export default {
           this.editedPersonnel.id = Result.data.id;
           this.Personnels.push(this.editedPersonnel);
           await this.$refs.confirmDialog.open("Success", `${Result.data.Email} has been added to the system!`, { color: "success", noconfirm: true });
+          
+          // Auto-select the newly created person
+          this.rowSelected(this.editedPersonnel);
           this.close();
         } catch (error) {
           await this.$refs.confirmDialog.open("Error", error.response?.data?.message || "Failed to add personnel", { color: "error", noconfirm: true });
@@ -355,17 +570,6 @@ export default {
       }
     },
 
-    PhoneFormated(Phone) {
-      if (Phone) {
-        var cleaned = ("" + Phone).replace(/\D/g, "");
-        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-        if (match) {
-          return "(" + match[1] + ") " + match[2] + "-" + match[3];
-        }
-      }
-      return Phone;
-    },
-
     close() {
       this.dialog = false;
       setTimeout(() => {
@@ -386,7 +590,7 @@ export default {
         await this.$refs.confirmDialog.open("Success", `<strong>${this.currentPersonnel.Name}</strong> is removed from the system.`, { color: "success", noconfirm: true });
 
         this.Personnels = this.Personnels.filter(p => p.id !== this.currentPersonnel.id);
-        this.currentPersonnel = { ...this.defaultPersonnel };
+        this.currentPersonnel = {};
       } catch (error) {
         console.error(error);
       }
@@ -405,7 +609,16 @@ export default {
 </script>
 
 <style scoped>
-.personnel-table :deep(tr.v-data-table__selected) {
-  background-color: rgb(var(--v-theme-secondary), 0.1) !important;
+/* Scoped styling to ensure the v-list scroll area works properly */
+.v-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.2) transparent;
+}
+.v-list::-webkit-scrollbar {
+  width: 6px;
+}
+.v-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 4px;
 }
 </style>

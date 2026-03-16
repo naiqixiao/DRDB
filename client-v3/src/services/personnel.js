@@ -16,6 +16,12 @@ export default {
       params: personnelInfo
     });
   },
+  
+  getStats(id) {
+    return api().get("personnel/stats", {
+      params: { id }
+    });
+  },
   update(personnelInfo) {
     personnelInfo.User = {
       

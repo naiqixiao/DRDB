@@ -40,6 +40,26 @@ router.get("/", checkAuth, PersonnelController.search);
 
 /**
  * @swagger
+ * /api/personnel/stats:
+ *   get:
+ *     summary: Get all-time performance stats for a lab member
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Personnel stats returned
+ */
+router.get("/stats", checkAuth, PersonnelController.getStats);
+
+/**
+ * @swagger
  * /api/personnel:
  *   post:
  *     summary: Update a personnel record

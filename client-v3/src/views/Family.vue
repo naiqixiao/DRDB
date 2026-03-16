@@ -11,11 +11,13 @@
         <v-btn color="secondary" variant="tonal" class="mr-2" @click="followupSearch" prepend-icon="mdi-phone-clock">
           Follow-ups
         </v-btn>
-        <v-btn color="success" variant="tonal" @click="addFamily" prepend-icon="mdi-account-multiple-plus">
+        <v-btn color="success" variant="tonal" class="mr-2" @click="addFamily" prepend-icon="mdi-account-multiple-plus">
           New Family
         </v-btn>
-
-
+        
+        <v-btn color="warning" variant="tonal" @click="openDuplicateDialog" prepend-icon="mdi-account-search" :disabled="['RA', 'Undergrad'].includes(store.role)">
+          Find Duplicates
+        </v-btn>
 
         <v-spacer></v-spacer>
 
@@ -422,6 +424,76 @@
       </v-col>
     </v-row>
 
+    <v-dialog v-model="duplicateDialog" max-width="900px" scrollable persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+            Resolve Duplicated Families
+          </span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="duplicateDialog = false"></v-btn>
+        </v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-text class="pt-6 pb-2 bg-grey-lighten-4" style="max-height: 70vh;">
+          <div v-if="loadingDuplicates" class="text-center py-12">
+            <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
+            <div class="mt-4 text-muted">Scanning database for matching emails or phones...</div>
+          </div>
+          
+          <div v-else-if="duplicateGroups.length === 0" class="text-center py-12">
+            <v-icon size="64" color="success">mdi-check-decagram</v-icon>
+            <h3 class="text-h6 mt-4 text-success">Database is clean!</h3>
+            <div class="text-muted">No suspicious duplicate families found.</div>
+          </div>
+
+          <v-expansion-panels v-else variant="accordion">
+            <v-expansion-panel v-for="(group, index) in duplicateGroups" :key="index" class="mb-4 rounded">
+              <v-expansion-panel-title class="font-weight-bold text-primary">
+                {{ group.matchReason }} 
+                <v-chip size="x-small" color="error" class="ml-3">{{ group.families.length }} Records Found</v-chip>
+              </v-expansion-panel-title>
+              
+              <v-expansion-panel-text class="bg-white pt-4">
+                <v-alert type="info" variant="tonal" density="compact" class="mb-4">
+                  Select the <strong>Master Record</strong> you want to keep. The other records will be deleted, but their children and study histories will be moved into the Master Record.
+                </v-alert>
+
+                <v-radio-group v-model="selectedPrimaryIds[index]">
+                  <v-card v-for="fam in group.families" :key="fam.id" variant="outlined" class="mb-3 pa-3" :style="selectedPrimaryIds[index] === fam.id ? 'border-color: var(--color-primary) !important; background-color: rgba(30, 64, 175, 0.05);' : ''">
+                    <div class="d-flex align-start">
+                      <v-radio :value="fam.id" color="primary" class="mt-n1"></v-radio>
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-space-between">
+                          <strong class="text-subtitle-1">{{ fam.NamePrimary || 'Unknown Parent' }}</strong>
+                          <span class="text-caption text-muted">ID: {{ fam.id }}</span>
+                        </div>
+                        <div class="text-body-2 text-muted">
+                          Email: {{ fam.Email || '—' }} | Phone: {{ fam.Phone || '—' }}
+                        </div>
+                        <div class="mt-2 text-caption font-weight-bold text-primary" v-if="fam.Children && fam.Children.length > 0">
+                          <v-icon size="14" start>mdi-human-child</v-icon>
+                          {{ fam.Children.length }} Children: {{ fam.Children.map(c => c.Name.split(' ')[0]).join(', ') }}
+                        </div>
+                        <div class="mt-2 text-caption text-muted" v-else>
+                          No children recorded
+                        </div>
+                      </div>
+                    </div>
+                  </v-card>
+                </v-radio-group>
+
+                <div class="d-flex justify-end mt-4">
+                  <v-btn variant="text" color="grey" class="mr-2" @click="dismissGroup(index)">Dismiss (Not Duplicates)</v-btn>
+                  <v-btn color="warning" variant="flat" :disabled="!selectedPrimaryIds[index]" @click="mergeGroup(index, group)">Merge & Clean</v-btn>
+                </div>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -457,6 +529,10 @@ export default {
   },
   data() {
     return {
+      duplicateDialog: false,
+      loadingDuplicates: false,
+      duplicateGroups: [],
+      selectedPrimaryIds: {},
       queryString: {},
       page: 0,
       searchStatus: false,
@@ -558,6 +634,56 @@ export default {
   },
 
   methods: {
+    async openDuplicateDialog() {
+      this.duplicateDialog = true;
+      this.loadingDuplicates = true;
+      this.duplicateGroups = [];
+      this.selectedPrimaryIds = {};
+      
+      try {
+        const response = await family.getDuplicates();
+        this.duplicateGroups = response.data;
+      } catch (error) {
+        console.error("Failed to load duplicates", error);
+        this.$refs.confirmD.open('Error', 'Failed to scan for duplicates.', { color: 'error', noconfirm: true });
+      }
+      this.loadingDuplicates = false;
+    },
+
+    dismissGroup(index) {
+      // Remove it from the list if the user decides it's not a true duplicate
+      this.duplicateGroups.splice(index, 1);
+    },
+
+    async mergeGroup(index, group) {
+      const primaryId = this.selectedPrimaryIds[index];
+      const secondaryIds = group.families.map(f => f.id).filter(id => id !== primaryId);
+
+      const confirmMsg = `Are you sure you want to merge ${secondaryIds.length} record(s) into Master ID: ${primaryId}? This cannot be undone.`;
+      
+      if (await this.$refs.confirmD.open("Confirm Merge", confirmMsg, { color: "warning" })) {
+        this.store.setLoadingStatus(true);
+        try {
+          await family.merge({ primaryId, secondaryIds });
+          
+          this.$refs.confirmD.open('Success', 'Records successfully merged and cleaned.', { color: 'success', noconfirm: true });
+          
+          // Remove the resolved group from the UI
+          this.duplicateGroups.splice(index, 1);
+          
+          // Refresh the family list if the merged records were currently visible
+          if (this.currentFamily.id === primaryId || secondaryIds.includes(this.currentFamily.id)) {
+            this.searchFamily(); // Reload the search to get the fresh children data
+          }
+          
+        } catch (error) {
+          console.error("Merge failed", error);
+          this.$refs.confirmD.open('Error', 'Failed to merge families.', { color: 'error', noconfirm: true });
+        }
+        this.store.setLoadingStatus(false);
+      }
+    },
+
     async updateFamilyAppointment() {
       try {
         var queryString = {};

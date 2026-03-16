@@ -793,3 +793,95 @@ exports.changeTrainingFamilyEmail = asyncHandler(async (req, res) => {
 
   res.status(200);
 });
+
+// ─── DATA INTEGRITY: FIND DUPLICATES ────────────────────────────────────
+exports.getDuplicates = asyncHandler(async (req, res) => {
+  // 1. Find emails that appear more than once
+  const emailDups = await model.family.findAll({
+    attributes: ['Email'],
+    where: { Email: { [Op.ne]: null, [Op.ne]: '' }, TrainingSet: false },
+    group: ['Email'],
+    having: model.sequelize.literal('count(Email) > 1')
+  });
+  
+  // 2. Find phones that appear more than once
+  const phoneDups = await model.family.findAll({
+    attributes: ['Phone'],
+    where: { Phone: { [Op.ne]: null, [Op.ne]: '' }, TrainingSet: false },
+    group: ['Phone'],
+    having: model.sequelize.literal('count(Phone) > 1')
+  });
+
+  const emails = emailDups.map(e => e.Email);
+  const phones = phoneDups.map(p => p.Phone);
+
+  if (emails.length === 0 && phones.length === 0) {
+    return res.status(200).json([]); // No duplicates found
+  }
+
+  // 3. Fetch full records for the suspicious families
+  const duplicateFamilies = await model.family.findAll({
+    where: {
+      [Op.or]: [
+        { Email: { [Op.in]: emails } },
+        { Phone: { [Op.in]: phones } }
+      ],
+      TrainingSet: false
+    },
+    include: [model.child] // Include children to help user decide
+  });
+
+  // 4. Group them for the frontend
+  let groups = [];
+  const processedIds = new Set();
+
+  duplicateFamilies.forEach(fam => {
+    if (processedIds.has(fam.id)) return;
+    
+    const related = duplicateFamilies.filter(f => 
+      (f.Email && fam.Email && f.Email.toLowerCase() === fam.Email.toLowerCase()) || 
+      (f.Phone && fam.Phone && f.Phone === fam.Phone)
+    );
+
+    if (related.length > 1) {
+      groups.push({
+        matchReason: (fam.Email === related[1].Email) ? `Matched Email: ${fam.Email}` : `Matched Phone: ${fam.Phone}`,
+        families: related
+      });
+      related.forEach(r => processedIds.add(r.id));
+    }
+  });
+
+  res.status(200).json(groups);
+});
+
+// ─── DATA INTEGRITY: MERGE RECORDS ──────────────────────────────────────
+exports.merge = asyncHandler(async (req, res) => {
+  const { primaryId, secondaryIds, User } = req.body;
+
+  if (!primaryId || !secondaryIds || secondaryIds.length === 0) {
+    return res.status(400).json({ error: "Missing primaryId or secondaryIds." });
+  }
+
+  // 1. Move all relational data to the Primary Family
+  await model.child.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
+  await model.schedule.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
+  await model.appointment.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
+  await model.conversations.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
+
+  // 2. Re-letter the children (A, B, C) for the primary family to prevent duplicate letters
+  const alphabet = "abcdefghijk".split("");
+  const children = await model.child.findAll({ where: { FK_Family: primaryId }, order: [['DoB', 'ASC']] });
+  
+  for (let i = 0; i < children.length; i++) {
+    await model.child.update({ IdWithinFamily: alphabet[i] }, { where: { id: children[i].id }});
+  }
+
+  // 3. Delete the empty secondary families
+  await model.family.destroy({ where: { id: { [Op.in]: secondaryIds } } });
+
+  // 4. Log the action
+  await log.createLog("Family Merged", User, `Merged families [${secondaryIds.join(', ')}] into Master Family (${primaryId})`);
+
+  res.status(200).json({ message: "Families successfully merged!" });
+});

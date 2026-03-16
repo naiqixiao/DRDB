@@ -51,5 +51,18 @@ export default {
     return api().delete("family/", {
       params: familyInfo
     });
+  },
+  
+  getDuplicates() {
+    return api().get("family/duplicates");
+  },
+  
+  merge(mergeData) {
+    mergeData.User = {
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
+    }
+    return api().post("family/merge", mergeData);
   }
 };

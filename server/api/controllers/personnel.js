@@ -134,3 +134,40 @@ exports.delete = asyncHandler(async (req, res) => {
   res.status(200).json(personnel);
   console.log(personnel.id + " deleted.");
 });
+
+// ─── GET PERSONNEL STATS ─────────────────────────────────────────────
+// Retrieve all-time KPI stats (E1, E2, and Recruiting totals) for a specific user
+exports.getStats = asyncHandler(async (req, res) => {
+  const personnelId = req.query.id;
+
+  if (!personnelId) {
+    return res.status(400).json({ error: "Personnel ID is required." });
+  }
+
+  try {
+    // 1. Count how many times they were E1
+    const e1Count = await model.experimenterAssignment.count({
+      where: { FK_Experimenter: personnelId }
+    });
+
+    // 2. Count how many times they were E2
+    const e2Count = await model.experimenterAssignment_2nd.count({
+      where: { FK_Experimenter: personnelId }
+    });
+
+    // 3. Count how many schedules they created (Recruited)
+    const scheduledCount = await model.schedule.count({
+      where: { ScheduledBy: personnelId }
+    });
+
+    res.status(200).json({
+      e1Count,
+      e2Count,
+      scheduledCount
+    });
+  } catch (error) {
+    console.error("Failed to fetch personnel stats:", error);
+    res.status(500).json({ error: "Failed to fetch personnel stats." });
+  }
+});
+
