@@ -73,7 +73,7 @@
 
     <!-- Navigation Drawer -->
     <v-navigation-drawer v-if="$route.name !== 'Login'" v-model="drawer" temporary width="300">
-      <v-list density="compact" nav>
+      <v-list density="default" nav class="nav-list">
         <v-list-item v-for="nav in navs" :key="nav.label" :to="nav.address" :prepend-icon="nav.icon" :title="nav.label"
           @click="drawer = false"></v-list-item>
       </v-list>
@@ -209,5 +209,11 @@ export default {
   color: var(--v-theme-secondary) !important;
   font-family: var(--ds-font-family-body) !important;
   font-size: 0.85rem;
+}
+
+.nav-list .v-list-item-title {
+  font-size: 1rem !important;
+  font-weight: 500;
+  font-family: var(--ds-font-family-body) !important;
 }
 </style>

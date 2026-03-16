@@ -1,57 +1,85 @@
 <template>
-    <v-container>
+    <v-container class="pa-0">
         <ConfirmDlg ref="confirmD" />
-        <v-row style="overflow-x: auto; align-items: stretch">
-            <v-col cols="12" md="3">
-                <v-card class="d-flex justify-center align-center"
-                    style="height: 176px; border: 2px dashed rgb(var(--v-theme-primary), 0.4); background-color: rgb(var(--v-theme-textbackground))"
-                    variant="flat">
-                    <v-tooltip location="top">
-                        <template v-slot:activator="{ props }">
-                            <div v-bind="props">
-                                <v-btn icon size="x-large" variant="outlined" color="primary"
-                                    style="border-width: 2px; border-style: dashed" @click.stop="createTestingRoom"
-                                    :disabled="!labId">
-                                    <v-icon>mdi-plus</v-icon>
-                                </v-btn>
-                            </div>
-                        </template>
-                        <span>Add a testing room to this lab</span>
-                    </v-tooltip>
-                </v-card>
-            </v-col>
 
-            <v-col cols="12" md="3" v-for="(room, index) in testingRooms" :key="room.id">
-                <v-card style="height: 176px; border: 1px solid rgb(var(--v-theme-primary))" variant="flat">
-                    <v-card-title class="text-truncate">{{ room.name }}</v-card-title>
-                    <v-card-text style="height: 100px" v-html="testingRoomInfo(room)"></v-card-text>
-                    <v-card-actions class="d-flex justify-space-around">
-                        <v-btn size="small" color="primary" variant="outlined"
-                            @click="editTestingRoom(room, index)">Edit</v-btn>
-                        <v-btn size="small" color="warning" variant="outlined"
-                            @click="deleteTestingRoom(room, index)">Delete</v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-col>
-        </v-row>
+        <div class="d-flex flex-wrap" style="gap: 16px;">
+            <!-- Add New Room Card -->
+            <div class="room-card room-card-add" @click="createTestingRoom" :class="{ disabled: !labId }">
+                <div class="room-card-add-inner">
+                    <v-icon size="32" color="primary" style="opacity: 0.4">mdi-plus-circle-outline</v-icon>
+                    <span class="text-caption text-muted mt-2">Add Room</span>
+                </div>
+            </div>
+
+            <!-- Room Cards -->
+            <div class="room-card" v-for="(room, index) in testingRooms" :key="room.id">
+                <!-- Color accent bar -->
+                <div class="room-accent" :style="{ background: roomColor(index) }"></div>
+
+                <!-- Room content -->
+                <div class="room-content">
+                    <!-- Header: icon + name -->
+                    <div class="d-flex align-center mb-2">
+                        <v-avatar size="32" :color="roomColor(index)" class="mr-2" style="opacity: 0.15">
+                            <v-icon size="18" :color="roomColor(index)" style="opacity: 1">mdi-door-open</v-icon>
+                        </v-avatar>
+                        <span class="text-subtitle-2 font-weight-bold text-truncate" style="flex: 1;">{{ room.name }}</span>
+                    </div>
+
+                    <!-- Meta rows -->
+                    <div class="room-meta">
+                        <div class="room-meta-row">
+                            <v-icon size="14" class="mr-1" color="grey">mdi-map-marker-outline</v-icon>
+                            <span class="text-caption">{{ room.location || '—' }}</span>
+                        </div>
+                        <div class="room-meta-row">
+                            <v-icon size="14" class="mr-1" color="grey">mdi-flask-outline</v-icon>
+                            <span class="text-caption">{{ getStudyCount(room) }} {{ getStudyCount(room) === 1 ? 'study' : 'studies' }}</span>
+                        </div>
+                        <div v-if="room.calendarId" class="room-meta-row">
+                            <v-icon size="14" class="mr-1" color="grey">mdi-calendar-check-outline</v-icon>
+                            <span class="text-caption" style="opacity: 0.6">Calendar linked</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions footer -->
+                <div class="room-actions">
+                    <v-btn variant="text" size="small" color="primary" density="compact"
+                        prepend-icon="mdi-pencil-outline" @click="editTestingRoom(room, index)">Edit</v-btn>
+                    <v-btn variant="text" size="small" color="error" density="compact"
+                        prepend-icon="mdi-delete-outline" @click="deleteTestingRoom(room, index)">Delete</v-btn>
+                </div>
+            </div>
+        </div>
 
         <!-- Create/Edit Dialog -->
-        <v-dialog v-model="dialogVisible" max-width="500px">
-            <v-card>
-                <v-card-title>{{ dialogTitle }}</v-card-title>
+        <v-dialog v-model="dialogVisible" max-width="480px">
+            <v-card class="ds-card" variant="flat">
+                <v-toolbar color="transparent" density="compact" class="px-2">
+                    <v-icon class="mr-2" color="primary">mdi-door-open</v-icon>
+                    <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+                        {{ dialogTitle }}
+                    </span>
+                </v-toolbar>
+                <v-divider></v-divider>
                 <v-card-text>
                     <v-form ref="formTestRoom" v-model="validTestRoom">
                         <v-text-field hide-details :rules="$rules.required" v-model="currentTestingRoom.name"
-                            label="Testing Room Name" variant="outlined" density="compact" class="mb-3"></v-text-field>
+                            label="Room Name" variant="outlined" density="compact" class="mb-3"
+                            prepend-inner-icon="mdi-tag-outline"></v-text-field>
                         <v-text-field hide-details :rules="$rules.required" v-model="currentTestingRoom.location"
-                            label="Location" variant="outlined" density="compact" class="mb-3"></v-text-field>
+                            label="Location" variant="outlined" density="compact" class="mb-3"
+                            prepend-inner-icon="mdi-map-marker-outline"></v-text-field>
                         <v-text-field hide-details v-model="currentTestingRoom.calendarId"
-                            label="Google Calendar ID (optional)" variant="outlined" density="compact"></v-text-field>
+                            label="Google Calendar ID (optional)" variant="outlined" density="compact"
+                            prepend-inner-icon="mdi-calendar-outline"></v-text-field>
                     </v-form>
                 </v-card-text>
-                <v-card-actions class="d-flex justify-space-around">
-                    <v-btn color="primary" variant="outlined" @click="confirmChanges">Confirm</v-btn>
-                    <v-btn color="warning" variant="outlined" @click="cancelChanges">Cancel</v-btn>
+                <v-card-actions class="px-4 pb-4">
+                    <v-spacer></v-spacer>
+                    <v-btn color="grey" variant="text" @click="cancelChanges">Cancel</v-btn>
+                    <v-btn color="primary" variant="tonal" @click="confirmChanges">Save</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>
@@ -62,6 +90,11 @@
 import calendar from "@/services/calendar";
 import testingRoom from "@/services/testingRoom";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+
+const ROOM_COLORS = [
+    '#4A90D9', '#7B61C4', '#E67E22', '#27AE60', '#E74C3C',
+    '#2C3E50', '#16A085', '#8E44AD', '#D4AC0D', '#2980B9'
+];
 
 export default {
     components: {
@@ -86,7 +119,18 @@ export default {
         };
     },
     methods: {
+        roomColor(index) {
+            return ROOM_COLORS[index % ROOM_COLORS.length];
+        },
+
+        getStudyCount(room) {
+            return (this.$store.state.studies || []).filter(
+                (s) => s.FK_TestingRoom === room.id
+            ).length;
+        },
+
         createTestingRoom() {
+            if (!this.labId) return;
             this.dialogTitle = "Create Testing Room";
             this.currentTestingRoom = {
                 name: "",
@@ -168,18 +212,77 @@ export default {
             };
             this.dialogVisible = false;
         },
-
-        testingRoomInfo(room) {
-            const studies = (this.$store.state.studies || []).filter(
-                (s) => s.FK_TestingRoom === room.id
-            );
-            return `
-        <div>
-          <div><strong>Location: </strong>${room.location}</div>
-          <div><strong>Number of studies: </strong>${studies.length}</div>
-        </div>
-      `;
-        },
     },
 };
 </script>
+
+<style scoped>
+.room-card {
+    width: 200px;
+    border-radius: 10px;
+    background: rgb(var(--v-theme-surface));
+    border: 1px solid rgba(var(--v-border-color), 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.room-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.room-card-add {
+    cursor: pointer;
+    border: 2px dashed rgba(var(--v-theme-primary), 0.3);
+    background: rgba(var(--v-theme-primary), 0.02);
+}
+
+.room-card-add:hover {
+    border-color: rgba(var(--v-theme-primary), 0.6);
+    background: rgba(var(--v-theme-primary), 0.05);
+}
+
+.room-card-add.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.room-card-add-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.room-accent {
+    height: 4px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.room-content {
+    padding: 12px 14px 8px;
+    flex: 1;
+}
+
+.room-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.room-meta-row {
+    display: flex;
+    align-items: center;
+}
+
+.room-actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 8px 8px;
+    border-top: 1px solid rgba(var(--v-border-color), 0.08);
+}
+</style>
