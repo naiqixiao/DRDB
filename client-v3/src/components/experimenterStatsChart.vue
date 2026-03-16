@@ -1,127 +1,117 @@
 <template>
-  <div ref="chart" class="barChart"></div>
+  <div style="position: relative; height: 300px; width: 100%">
+    <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
+    <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
+      <v-icon class="mr-2">mdi-account-hard-hat</v-icon>
+      No experimenter data available
+    </div>
+  </div>
 </template>
 
 <script>
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
+import { Bar } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 export default {
-  name: "ProgressChart",
+  name: "experimenterStatsChart",
+  components: { Bar },
   props: {
-    stats: Array,
+    stats: {
+      type: Array,
+      default: () => []
+    },
   },
-
-  async mounted() {
-    try {
-      await loadScript("https://cdn.jsdelivr.net/npm/vega@5.25.0");
-      await loadScript("https://cdn.jsdelivr.net/npm/vega-lite@5.16.3");
-      await loadScript("https://cdn.jsdelivr.net/npm/vega-embed@6.22.2");
-      this.renderChart();
-    } catch (error) {
-      console.error("Failed to load Vega scripts", error);
-    }
-  },
-
-  methods: {
-    renderChart() {
-      if (typeof window.vegaEmbed === "undefined") {
-        console.error("vegaEmbed is not loaded");
-        return;
-      }
-
-      const spec = {
-        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        width: 450,
-        "height": {"step": 40},
-        background: null,
-        // "description": "Pie chart of participants' statuses for the study 'EmotionConsistency'.",
-        data: {
-          values: this.stats,
-        },
-        config: {
-          title: {
-            fontSize: 24,
-            offset: 40,
-          },
-          axis: {
-            domain: false,
-            labelFontSize: 18,
-            titleFontSize: 24,
-          },
-          headerFacet: {
-            titleFontSize: 14,
-            labelFontSize: 14,
-          },
-          text: {
-            fontSize: 18,
-          },
-          legend: {
-            titleFontSize: 24,
-            labelFontSize: 24,
-            offset: 40,
-            orient: "top",
-            layout: { top: { anchor: "middle" } },
-          },
-        },
-        title: "Experimenter Stats",
-        mark: { type: "bar", "height": 25, tooltip: true },
-        encoding: {
+  data() {
+    return {
+      chartOptions: {
+        indexAxis: 'y', // This makes the bar chart horizontal
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
           x: {
-            aggregate: "sum",
-            field: "NumberOfParticipants",
-            title: "N of participants",
-            scale: { zero: false },
+            stacked: true,
+            beginAtZero: true,
+            ticks: { precision: 0, font: { family: "'Fira Sans', sans-serif" } },
+            border: { dash: [4, 4] },
+            grid: { color: '#E2E8F0', drawBorder: false }
           },
           y: {
-            field: "Experimenter",
-            type: "nominal",
-            title: null,
-            scale: { zero: false },
-          },
-          color: {
-            field: "ROLE",
-            type: "nominal",
-            title: "Role",
-            sort: "descending",
-            scale: { domain: [
-                      "Primary",
-                      "Assistant"
-                    ],
-                    range: ["#839B97", "#C6B497", "#4daf4a"] },
-          },
+            stacked: true,
+            grid: { display: false },
+            ticks: { font: { family: "'Fira Sans', sans-serif" } }
+          }
         },
-      };
-
-      window
-        .vegaEmbed(this.$refs.chart, spec, { actions: false })
-        .then((result) => {
-          // You can access the Vega view instance via result.view
-          console.log("Vega view instance", result.view);
-        })
-        .catch((error) => console.error(error));
-    },
-  },
-  watch: {
-    stats(newVal) {
-      if (newVal) {
-        this.renderChart();
+        plugins: {
+          legend: {
+            position: 'top',
+            align: 'end',
+            labels: { usePointStyle: true, boxWidth: 8, font: { family: "'Fira Sans', sans-serif" } }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(30, 58, 138, 0.9)',
+            titleFont: { family: "'Fira Sans', sans-serif" },
+            bodyFont: { family: "'Fira Sans', sans-serif" },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                if (context.parsed.x !== null) {
+                  const value = context.parsed.x;
+                  // Calculate total of the horizontal stacked bar
+                  const total = context.chart._metasets[context.datasetIndex].total || 
+                                context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? Math.round((value / total) * 100) + '%' : '0%';
+                  label += `${value} (${percentage})`;
+                }
+                return label;
+              }
+            }
+          }
+        }
+      },
+      roleColors: {
+        'Primary': '#3B82F6',   // Primary Blue
+        'Assistant': '#94A3B8'  // Slate Grey
       }
-    },
+    };
   },
+  computed: {
+    hasData() {
+      return this.stats && this.stats.length > 0;
+    },
+    chartData() {
+      if (!this.hasData) return { labels: [], datasets: [] };
+
+      // 1. Extract all unique experimenters for the Y-axis
+      const experimenters = [...new Set(this.stats.map(s => s.Experimenter))].filter(Boolean);
+      
+      // 2. Extract unique roles (usually 'Primary' and 'Assistant')
+      const uniqueRoles = [...new Set(this.stats.map(s => s.ROLE))];
+
+      // 3. Build a dataset for each role
+      const datasets = uniqueRoles.map(role => {
+        const dataForRole = experimenters.map(exp => {
+          const record = this.stats.find(s => s.Experimenter === exp && s.ROLE === role);
+          return record ? record.NumberOfParticipants : 0;
+        });
+
+        return {
+          label: role,
+          data: dataForRole,
+          backgroundColor: this.roleColors[role] || '#CBD5E1',
+          borderRadius: 4,
+          borderSkipped: false
+        };
+      });
+
+      return { labels: experimenters, datasets };
+    }
+  }
 };
 </script>
-
-<style scoped>
-.barChart {
-  padding: 20px;
-}
-</style>
