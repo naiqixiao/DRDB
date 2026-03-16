@@ -501,21 +501,22 @@
     </div>
 
     <v-dialog v-model="dialog" fullscreen transition="dialog-bottom-transition">
-      <v-card class="ds-card" variant="flat" style="background-color: var(--ds-field-bg);">
+      <v-card class="bg-grey-lighten-4" variant="flat">
         
-        <v-toolbar color="primary" dark class="elevation-1">
-          <v-btn icon @click="close"><v-icon>mdi-close</v-icon></v-btn>
-          <v-toolbar-title class="font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+        <v-toolbar color="white" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
+          <v-btn icon color="muted" @click="close" variant="text"><v-icon>mdi-close</v-icon></v-btn>
+          <v-icon color="primary" class="mr-3 ml-2">mdi-flask-edit-outline</v-icon>
+          <v-toolbar-title class="font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary)">
             {{ editedIndex === -1 ? 'Create New Study' : 'Edit Study Information' }}
           </v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn variant="text" @click="save" prepend-icon="mdi-content-save-check" class="font-weight-bold">
+          <v-btn color="primary" variant="flat" @click="save" prepend-icon="mdi-content-save-check" class="font-weight-bold text-none mr-2">
             Save & Exit
           </v-btn>
         </v-toolbar>
 
         <v-stepper v-model="studyStepper" class="elevation-0 h-100 d-flex flex-column bg-transparent" hide-actions>
-          <v-stepper-header class="bg-white elevation-1">
+          <v-stepper-header class="bg-white elevation-0" style="border-bottom: 1px solid #E2E8F0;">
             <v-stepper-item title="Core Identity" :value="1" :complete="studyStepper > 1" editable></v-stepper-item>
             <v-divider></v-divider>
             <v-stepper-item title="Eligibility Rules" :value="2" :complete="studyStepper > 2" editable></v-stepper-item>
@@ -555,7 +556,7 @@
                 <v-container style="max-width: 800px;" class="mt-4">
                   <h2 class="text-h5 font-weight-bold text-primary mb-6" style="font-family: var(--ds-font-family-heading)">Eligibility Rules</h2>
                   
-                  <v-card variant="outlined" class="bg-white pa-6 mb-6">
+                  <v-card class="ds-card pa-6 mb-6" variant="flat">
                     <h3 class="text-h6 mb-4">Age Groups</h3>
                     <v-row v-for="(group, index) in editedStudy.AgeGroups" :key="index" dense align="center">
                       <v-col cols="5">
@@ -573,7 +574,7 @@
                     </v-btn>
                   </v-card>
 
-                  <v-card variant="outlined" class="bg-white pa-6 mb-6">
+                  <v-card class="ds-card pa-6 mb-6" variant="flat">
                     <h3 class="text-h6 mb-4">Study Requirements</h3>
                     <v-row dense>
                       <v-col cols="12" md="6">
@@ -587,7 +588,7 @@
                     </v-row>
                   </v-card>
 
-                  <v-card variant="outlined" class="bg-white pa-6">
+                  <v-card class="ds-card pa-6" variant="flat">
                     <h3 class="text-h6 mb-4">Participant Health Criteria</h3>
                     <v-row dense>
                       <v-col cols="12" sm="4"><v-select v-model="editedStudy.ASDParticipant" :items="inclusionOptions" label="ASD" variant="outlined" density="compact"></v-select></v-col>
@@ -609,7 +610,7 @@
                 <v-container style="max-width: 800px;" class="mt-4">
                   <h2 class="text-h5 font-weight-bold text-primary mb-6" style="font-family: var(--ds-font-family-heading)">Logistics & Team</h2>
                   
-                  <v-card variant="outlined" class="bg-white pa-6 mb-6">
+                  <v-card class="ds-card pa-6 mb-6" variant="flat">
                     <div class="d-flex align-start mb-4">
                       <v-icon color="primary" size="32" class="mr-3 mt-1">mdi-account-star-outline</v-icon>
                       <div>
@@ -631,7 +632,7 @@
                 <v-container style="max-width: 900px;" class="mt-4">
                   <h2 class="text-h5 font-weight-bold text-primary mb-6" style="font-family: var(--ds-font-family-heading)">Scripts & Email Templates</h2>
                   
-                  <v-card variant="outlined" class="bg-white">
+                  <v-card class="ds-card" variant="flat" style="overflow: hidden;">
                     <v-tabs v-model="emailTemplateTab" color="primary" bg-color="grey-lighten-4">
                       <v-tab value="phone"><v-icon start>mdi-phone-outline</v-icon>Phone Script</v-tab>
                       <v-tab value="confirm"><v-icon start>mdi-email-check-outline</v-icon>Confirmation</v-tab>
