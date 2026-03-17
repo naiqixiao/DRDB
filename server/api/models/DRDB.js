@@ -113,17 +113,21 @@ Study.hasMany(StudyAgeGroup, { foreignKey: "FK_Study", as: "AgeGroups" });
 StudyAgeGroup.belongsTo(Study, { foreignKey: "FK_Study" });
 
 // Prerequisites (Many-to-Many self-referencing)
+const StudyPrerequisites = sequelize.define('StudyPrerequisites', {}, { timestamps: false, tableName: 'StudyPrerequisites' });
+
 Study.belongsToMany(Study, {
   as: "Prerequisites",
-  through: "StudyPrerequisites",
+  through: StudyPrerequisites,
   foreignKey: "StudyId",
   otherKey: "RequirementId",
 });
 
 // Exclusions (Many-to-Many self-referencing)
+const StudyExclusions = sequelize.define('StudyExclusions', {}, { timestamps: false, tableName: 'StudyExclusions' });
+
 Study.belongsToMany(Study, {
   as: "Exclusions",
-  through: "StudyExclusions",
+  through: StudyExclusions,
   foreignKey: "StudyId",
   otherKey: "ExcludedId",
 });
