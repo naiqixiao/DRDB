@@ -15,73 +15,53 @@ const autoCancelController = require("../api/controllers/autoCancellation");
 const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
 
-function registerJobs() {
-  console.log("[Jobs] Registering scheduled tasks...");
+const TIMEZONE = process.env.TIMEZONE || "America/Toronto";
 
+const SCHEDULED_JOBS = [
   // ─── Reminder Emails ────────────────────────────────────────────
-
-  // 5:00 PM — Send reminder emails to families
-  cron.schedule("0 17 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": reminderEmail ran.");
-    ReminderController.reminderEmail();
-  });
-
-  // 4:00 PM — Send reminder emails to experimenters
-  cron.schedule("0 16 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": reminderEmailforExperimenters ran.");
-    ReminderController.reminderEmailforExperimenters();
-  });
+  { name: "Family Reminders",       cron: "0 17 * * *",  task: () => ReminderController.reminderEmail() },
+  { name: "Experimenter Reminders", cron: "0 16 * * *",  task: () => ReminderController.reminderEmailforExperimenters() },
 
   // ─── Auto Status Updates ────────────────────────────────────────
-
-  // 9:30 AM — Auto-completion reminders
-  cron.schedule("30 9 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": autoCompletionReminder ran.");
-    ReminderController.autoCompletionReminder();
-  });
-
-  // 9:35 AM — Auto-rejection reminders
-  cron.schedule("35 9 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": autoRejectionReminder ran.");
-    ReminderController.autoRejectionReminder();
-  });
+  { name: "Auto Completion Prompt", cron: "30 9 * * *",  task: () => ReminderController.autoCompletionReminder() },
+  { name: "Auto Rejection Prompt",  cron: "35 9 * * *",  task: () => ReminderController.autoRejectionReminder() },
 
   // ─── Nightly Maintenance ────────────────────────────────────────
+  { name: "Update Child Ages",      cron: "5 0 * * *",   task: () => ChildController.updateAge() },
+  { name: "Past Appt Completion",   cron: "15 0 * * *",  task: () => autoCancelController.autoCompletion() },
+  { name: "Reset RTU Counters",     cron: "35 0 * * *",  task: () => rtuController.reset() },
+  { name: "Release Old Families",   cron: "0 6 * * *",   task: () => FamilyController.releaseFamilyNew() },
 
-  // 12:05 AM — Update child ages
-  cron.schedule("5 0 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": updateAge ran.");
-    ChildController.updateAge();
+  // ─── Study Summaries ────────────────────────────────────────────
+  {
+    name: "Update Study Summaries",
+    cron: "46 22 * * *",
+    task: () => {
+      AppointmentController.monthYearN();
+      AppointmentController.monthYearWeekN();
+    }
+  }
+];
+
+function registerJobs() {
+  console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Timezone: ${TIMEZONE})...`);
+
+  SCHEDULED_JOBS.forEach((job) => {
+    cron.schedule(
+      job.cron,
+      async () => {
+        console.log(`${new Date().toLocaleString()}: [CRON] Executing ${job.name}.`);
+        try {
+          await job.task();
+        } catch (error) {
+          console.error(`[CRON] Error executing ${job.name}:`, error);
+        }
+      },
+      { scheduled: true, timezone: TIMEZONE }
+    );
   });
 
-  // 12:15 AM — Auto-completion of past appointments
-  cron.schedule("15 0 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": autoCompletion ran.");
-    autoCancelController.autoCompletion();
-  });
-
-  // 12:35 AM — Reset RTU counters
-  cron.schedule("35 0 * * *", () => {
-    console.log(new Date().toLocaleString() + ": RTU reset ran.");
-    rtuController.reset();
-  });
-
-  // 6:00 AM — Release families whose studies are complete
-  cron.schedule("0 6 * * *", async () => {
-    console.log(new Date().toLocaleString() + ": releaseFamilyNew ran.");
-    FamilyController.releaseFamilyNew();
-  });
-
-  // ─── Study Summaries ───────────────────────────────────────────
-
-  // 10:46 PM — Update study appointment summaries
-  cron.schedule("46 22 * * *", () => {
-    console.log(new Date().toLocaleString() + ": study summaries ran.");
-    AppointmentController.monthYearN();
-    AppointmentController.monthYearWeekN();
-  });
-
-  console.log("[Jobs] All 8 scheduled tasks registered.");
+  console.log("[Jobs] All scheduled tasks registered.");
 }
 
 module.exports = { registerJobs };
