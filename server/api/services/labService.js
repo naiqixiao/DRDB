@@ -1,5 +1,5 @@
 const model = require("../models/DRDB");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const fs = require("fs");
 const { sendAdminEmail } = require("../utils/emailUtil");

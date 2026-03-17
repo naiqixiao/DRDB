@@ -1,4 +1,6 @@
 -- ============================================================
+USE `DRDB`; -- IMPORTANT: Change this to your actual database name if different
+
 -- Migration: Flat MinAge/MaxAge  →  StudyAgeGroup table
 --
 -- Run this BEFORE deploying the updated application code.
