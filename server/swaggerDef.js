@@ -10,7 +10,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3001',
+        url: 'http://localhost:3000',
         description: 'Development server',
       },
     ],
@@ -30,7 +30,7 @@ const options = {
     ],
   },
   // Path to the files containing the JSDoc comments
-  apis: ['./api/routes/*.js'], 
+  apis: ['./api/routes/*.js'],
 };
 
 module.exports = swaggerJsdoc(options);

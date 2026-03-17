@@ -55,3 +55,4 @@ server/api/realtimeUpdate
 server/stats/*.json
 client-v3/.shared/
 server/server_output_debug.log
+.agent/skills/ui-ux-pro-max/scripts/__pycache__/
