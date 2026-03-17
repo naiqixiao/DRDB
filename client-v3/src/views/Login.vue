@@ -9,7 +9,7 @@
           <div class="text-center mb-8">
             <img src="@/assets/logo.png" alt="DRDB Logo" height="180" class="mb-4" />
             <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">DRDB</h1>
-            <p class="text-body-1 text-muted">Developmental Research Database</p>
+            <p class="text-body-1 text-muted">Developmental Research Database System</p>
           </div>
 
           <v-alert v-if="error" type="error" variant="tonal" density="compact" class="mb-6" border="start" closable>
@@ -144,6 +144,7 @@ import externalAPIs from "@/services/externalAPIs";
 import HistogramChart from '@/components/HistogramChart.vue';
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import { useMainStore } from "@/stores/mainStore";
+import { marked } from "marked";
 
 export default {
   components: { HistogramChart, ConfirmDlg },
@@ -162,7 +163,22 @@ export default {
       changeTemporaryPassword: false,
       valid: true,
       validLogin: false,
+      releaseNote: "Loading release notes...",
     };
+  },
+  async mounted() {
+    try {
+      const response = await fetch('/CHANGELOG.md');
+      if (response.ok) {
+        const text = await response.text();
+        this.releaseNote = marked.parse(text);
+      } else {
+        this.releaseNote = "Failed to load release notes.";
+      }
+    } catch (e) {
+      this.releaseNote = "Failed to load release notes.";
+      console.error(e);
+    }
   },
   methods: {
     async login() {
@@ -275,23 +291,6 @@ export default {
   },
   computed: {
     passwordConfirmationRule() { return this.newPassword === this.newPasswordVerify || "Password must match"; },
-    releaseNote() {
-      return `
-        <div style="font-family: Arial, sans-serif; padding-right: 16px;">
-          <h3 style="color: #1E40AF; margin-bottom: 8px;">Release V1.2.20240610</h3>
-          <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: #475569;">
-            <li>Recruitment history stats are available</li>
-          </ul>
-          <h3 style="color: #1E40AF; margin-bottom: 8px;">Release V1.2.20240122</h3>
-          <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: #475569;">
-            <li><strong>Partial Update Feature:</strong> Modify individual appointments within a schedule.</li>
-            <li><strong>Testing Rooms Feature:</strong> Create testing rooms linked to independent Google Calendars.</li>
-            <li><strong>Email Tags & Templates:</strong> Organize emails by study name automatically.</li>
-            <li><strong>Daily Database Updates:</strong> Automatic study completion tagging.</li>
-          </ul>
-        </div>
-      `;
-    },
   },
   watch: { dialog(val) { val || this.close(); } }
 };
@@ -304,5 +303,25 @@ export default {
 .release-notes-container {
   max-height: 300px;
   overflow-y: auto;
+  font-family: var(--ds-font-family-body), sans-serif;
+  padding-right: 16px;
+}
+.release-notes-container :deep(h3) {
+  color: var(--color-primary);
+  margin-bottom: 8px;
+  margin-top: 16px;
+  font-family: var(--ds-font-family-heading);
+}
+.release-notes-container :deep(h3):first-child {
+  margin-top: 0;
+}
+.release-notes-container :deep(ul) {
+  padding-left: 20px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #475569;
+}
+.release-notes-container :deep(li) {
+  margin-bottom: 4px;
 }
 </style>

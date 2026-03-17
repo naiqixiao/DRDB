@@ -6,44 +6,23 @@ You will find some demo videos to illustrate how we use the system to help our r
 
 Please check installation instruction and detailed introductions here: https://drdb.readthedocs.io
 
-# Recent update
-- Organize emails with labels (in gmail). Whenever an email is sent out, the email will be labelled with study name. It would be very easy to tell which study an email belongs to.
+# Recent Updates (V3.0.0 & Beyond)
+- **V3.0.0 Major UI & Platform Upgrade:** The client has been completely rebuilt using Vue 3, Vite, and a professional, cohesive UI framework (`ui-ux-pro-max`).
+- **Testing Rooms Integration:** Create dedicated testing rooms (e.g., Eye Tracking, fNIRS) linked to independent Google Calendars for streamlined logistics.
+- **Advanced Study Logistics:** Studies now support complex prerequisites, exclusions, multiple age groups, and condition-specific health criteria (ASD, Premature, Vision/Hearing loss).
+- **Automated Email Management:** Email templates (Confirmation, Reminder, Follow-up) are now generated natively per study and organized via tags in Google Workspace.
 
-# Future features
+# Tech Stack Structure
 
-As we are moving back to in-person research, we realize the current system lacks a few key functions to reflect the complexity of our in-person studies. To bridge the gaps, we aim to improve the system in the following areas over the summer of 2023.
+- **Backend (`server/`)**: Express.js REST API with Sequelize ORM (MySQL). Interacts heavily with Google APIs (Calendar, Email) for seamless daily logistics.
+- **Frontend (`client-v3/`)**: A modern Single Page Application built with Vue 3 (Composition API), Vite, Pinia for state management, and Tailwind CSS (utility classes) for rapid UI styling. 
 
-## Study relations
-The eligible participants for a study may depend on whether a child participated in other studies. For a longitudinal study, participants have to finish the 1st task before doing the second one. Alternatively, participants are not be eligible for participation because their prior participation in other studies.
-how studies are related, such as longitudinal studies?
-- we will need to update the mySQL database to present the relations between studies.
-- set up interval between studies, e.g., 3 months after the 1st participation
-
-## Testing rooms (within a lab)
-Each lab usually has multiple testing rooms. These rooms typically are used for specific research projects, such as eye tracking, neuroimaging, and obsrvational studies. To better organize study assignment (which room is used at the specific time), we need to include testing rooms under each lab. Here are few related functions:
-- in MySQL, create a table of test rooms associate with lab table (many to one relation).
-- each testing room includes the following columns:
-    - name
-    - description
-    - Google calendar URL (each testing room will has its own Google Calendar, so study schecudules for each room is easy to see). This would change where Google Calendar URL is stored: currently is in with Lab table.
-- each study needs to be assigned to a specific testing room (having a dropdown menu in Lab information creation/editing pop out window).
-
-## Multiple age groups
-- studies can have multiple age groups, set up with a list of minAge and maxAge
-- when scheduling, researchers can choose one or multiple age groups
-
-## Local resident identifier
-- need to identify whether families live close to campus
-- filter out families who don't live close
-
-## Family info correction
-- button to show the families/children need to be updated
-- icon to indicate there are families needed to be updated
-
-## Misc.
-- selecting participants based on their borned year, instead of age.
-- randomized the order of available studies when booking additional studies.
-- set target sample size for each study, and show the completion percentage during booking (e.g., next to study button).
+To start the development server for the new client:
+```bash
+cd client-v3
+npm install
+npm run dev
+```
 
 # Periodic Automated Processes Schedule
 The following task can be customized in **server/server.js**.
