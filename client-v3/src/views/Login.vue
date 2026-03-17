@@ -113,24 +113,24 @@
           <v-form ref="form" v-model="valid" lazy-validation>
             <div v-if="!changeTemporaryPassword" class="mb-4">
               <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Current Password</div>
-              <v-text-field v-model="password" type="password" hide-details density="compact" variant="outlined"></v-text-field>
+              <v-text-field v-model="password" type="password" hide-details density="compact" variant="outlined" placeholder="Enter current password"></v-text-field>
             </div>
             
             <div class="mb-4">
               <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">New Password</div>
-              <v-text-field v-model="newPassword" type="password" hide-details variant="outlined" density="compact"></v-text-field>
+              <v-text-field v-model="newPassword" type="password" hide-details variant="outlined" density="compact" placeholder="Create new password"></v-text-field>
             </div>
 
             <div class="mb-2">
               <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Confirm Password</div>
-              <v-text-field v-model="newPasswordVerify" type="password" :rules="[passwordConfirmationRule]" variant="outlined" density="compact"></v-text-field>
+              <v-text-field v-model="newPasswordVerify" type="password" :rules="[passwordConfirmationRule]" variant="outlined" density="compact" placeholder="Confirm new password"></v-text-field>
             </div>
           </v-form>
         </v-card-text>
         <v-card-actions class="px-6 pb-6">
           <v-spacer></v-spacer>
-          <v-btn color="grey-darken-1" variant="text" @click="dialog = false">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" :disabled="passwordConfirmationRule !== true || !newPassword" @click="changePassword">Confirm</v-btn>
+          <v-btn color="grey-darken-1" variant="text" class="text-none" @click="dialog = false">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" class="text-none font-weight-bold" :disabled="passwordConfirmationRule !== true || !newPassword" :loading="store.loadingStatus" @click="changePassword">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -247,6 +247,7 @@ export default {
       }
     },
     async changePassword() {
+      this.store.setLoadingStatus(true);
       try {
         const response = await login.changePassword({
           Email: this.email, Password: this.password, newPassword: this.newPassword,
@@ -282,6 +283,8 @@ export default {
         this.$router.push({ name: "Family information" });
       } catch (error) {
         this.error = error.response ? error.response.data.error : error.message;
+      } finally {
+        this.store.setLoadingStatus(false);
       }
     },
     close() {

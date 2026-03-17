@@ -21,12 +21,14 @@
           v-if="!options.noconfirm"
           color="grey-darken-1"
           variant="text"
+          class="text-none"
           @click="cancel"
           >Cancel</v-btn
         >
         <v-btn
           :color="options.color || 'primary'"
           variant="elevated"
+          class="text-none font-weight-bold"
           @click="agree"
           >Confirm</v-btn
         >
