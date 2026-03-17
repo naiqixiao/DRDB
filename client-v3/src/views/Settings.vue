@@ -255,45 +255,49 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog fullscreen v-model="dialogEditLab" transition="dialog-bottom-transition">
+    <v-dialog v-model="dialogEditLab" max-width="1200px" persistent scrollable>
       <v-card class="ds-card" variant="flat">
-        <v-toolbar color="primary" dark>
-          <v-btn icon @click="closeEditLab" :disabled="requestInProgress"><v-icon>mdi-close</v-icon></v-btn>
-          <v-toolbar-title>Update Lab Profile</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="saveEditLab" :loading="requestInProgress">Save Changes</v-btn>
-        </v-toolbar>
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Update Lab Profile</span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="closeEditLab" :disabled="requestInProgress"></v-btn>
+        </v-card-title>
         
-        <v-card-text class="pt-6" style="background-color: var(--ds-field-bg);">
-          <v-container style="max-width: 1000px;">
-            <v-form ref="formEdit" v-model="valid" lazy-validation>
-              <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Global Information</div>
-              <v-row>
-                <v-col cols="12" md="4">
-                  <v-text-field label="Lab Name" v-model="editedLab.LabName" variant="outlined" density="compact" bg-color="white"></v-text-field>
-                </v-col>
-                <v-col cols="12" md="8">
-                  <v-text-field label="Physical Location" v-model="editedLab.Location" variant="outlined" density="compact" bg-color="white"></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field label="Default Zoom Link (Online Studies)" v-model="editedLab.ZoomLink" variant="outlined" density="compact" bg-color="white"></v-text-field>
-                </v-col>
-              </v-row>
+        <v-divider></v-divider>
 
-              <v-divider class="my-6"></v-divider>
-              <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Email Templates</div>
-              
-              <v-row>
-                <v-col cols="12" md="6" v-for="item in labEmailTemplate" :key="item.label">
-                  <v-card variant="outlined" class="bg-white pa-4 h-100">
-                    <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2">{{ item.label }}</h3>
-                    <v-textarea :placeholder="item.placeholder" variant="outlined" no-resize rows="5" v-model="editedLab[item.field]" hide-details density="compact"></v-textarea>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-form>
-          </v-container>
+        <v-card-text class="pt-6 pb-2" style="max-height: 70vh; background-color: var(--ds-field-bg);">
+          <v-form ref="formEdit" v-model="valid" lazy-validation>
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Global Information</div>
+            <v-row>
+              <v-col cols="12" md="4">
+                <v-text-field label="Lab Name" v-model="editedLab.LabName" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12" md="8">
+                <v-text-field label="Physical Location" v-model="editedLab.Location" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field label="Default Zoom Link (Online Studies)" v-model="editedLab.ZoomLink" variant="outlined" density="compact" bg-color="white"></v-text-field>
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-6"></v-divider>
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Email Templates</div>
+            
+            <v-row>
+              <v-col cols="12" md="6" v-for="item in labEmailTemplate" :key="item.label">
+                <v-card variant="outlined" class="bg-white pa-4 h-100" style="border-color: var(--ds-field-border);">
+                  <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2" style="font-family: var(--ds-font-family-heading);">{{ item.label }}</h3>
+                  <v-textarea :placeholder="item.placeholder" variant="outlined" no-resize rows="5" v-model="editedLab[item.field]" hide-details density="compact"></v-textarea>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-form>
         </v-card-text>
+
+        <v-card-actions class="px-6 pb-6 pt-0" style="background-color: var(--ds-field-bg);">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="closeEditLab" :disabled="requestInProgress">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" @click="saveEditLab" :loading="requestInProgress" prepend-icon="mdi-content-save">Save Changes</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-container>

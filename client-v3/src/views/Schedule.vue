@@ -30,18 +30,18 @@
         <v-row dense align="center" class="mb-2">
           <v-col>
             <v-select 
-              class="selection" 
+              class="selection font-weight-bold text-primary elevation-1 rounded" 
               :items="studies" 
               item-value="id" 
               item-title="StudyName"
               v-model="selectedStudy" 
               return-object 
-              label="Studies" 
+              label="Select Study Active in View" 
               @update:model-value="onStudyChange"
-              bg-color="textbackground" 
+              bg-color="white" 
               hide-details 
               variant="outlined" 
-              density="compact"
+              density="comfortable"
             ></v-select>
           </v-col>
           <v-col cols="auto" class="d-flex align-center" style="gap: 8px;">
@@ -219,9 +219,13 @@
       <!-- RIGHT COLUMN: Schedule Action + Notes + No More Contact -->
       <v-col cols="12" md="3" class="d-flex flex-column">
         <!-- Schedule a study section -->
-        <v-card class="ds-card mb-4" variant="flat">
+        <!-- Schedule a study section -->
+        <v-card class="ds-card mb-4 elevation-2 border-primary border-opacity-10" :style="!currentChild.id ? 'opacity: 0.6;' : ''">
+          <v-card-title class="d-flex justify-space-between align-center py-3 bg-grey-lighten-4 border-bottom">
+            <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">Schedule a Study</span>
+            <v-icon color="primary" size="small">mdi-calendar-clock</v-icon>
+          </v-card-title>
           <v-card-text class="pt-4">
-            <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Schedule a Study</div>
             
             <v-select 
               :items="Responses" 

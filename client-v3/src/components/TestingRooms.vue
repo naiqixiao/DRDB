@@ -54,32 +54,40 @@
         </div>
 
         <!-- Create/Edit Dialog -->
-        <v-dialog v-model="dialogVisible" max-width="480px">
+        <v-dialog v-model="dialogVisible" max-width="480px" persistent>
             <v-card class="ds-card" variant="flat">
-                <v-toolbar color="transparent" density="compact" class="px-2">
-                    <v-icon class="mr-2" color="primary">mdi-door-open</v-icon>
-                    <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+                <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+                    <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
                         {{ dialogTitle }}
                     </span>
-                </v-toolbar>
+                    <v-btn icon="mdi-close" variant="text" density="comfortable" @click="cancelChanges"></v-btn>
+                </v-card-title>
+                
                 <v-divider></v-divider>
-                <v-card-text>
+                
+                <v-card-text class="pt-6" style="background-color: var(--ds-field-bg);">
                     <v-form ref="formTestRoom" v-model="validTestRoom">
+                        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Room Name</div>
                         <v-text-field hide-details :rules="$rules.required" v-model="currentTestingRoom.name"
-                            label="Room Name" variant="outlined" density="compact" class="mb-3"
+                            placeholder="e.g. Eye Tracking Room" variant="outlined" density="compact" class="mb-4"
                             prepend-inner-icon="mdi-tag-outline"></v-text-field>
+
+                        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Location</div>
                         <v-text-field hide-details :rules="$rules.required" v-model="currentTestingRoom.location"
-                            label="Location" variant="outlined" density="compact" class="mb-3"
+                            placeholder="e.g. PC-104" variant="outlined" density="compact" class="mb-4"
                             prepend-inner-icon="mdi-map-marker-outline"></v-text-field>
+
+                        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Google Calendar ID</div>
                         <v-text-field hide-details v-model="currentTestingRoom.calendarId"
-                            label="Google Calendar ID (optional)" variant="outlined" density="compact"
+                            placeholder="Leave blank to auto-create" variant="outlined" density="compact"
                             prepend-inner-icon="mdi-calendar-outline"></v-text-field>
                     </v-form>
                 </v-card-text>
-                <v-card-actions class="px-4 pb-4">
+
+                <v-card-actions class="px-6 pb-6 pt-0" style="background-color: var(--ds-field-bg);">
                     <v-spacer></v-spacer>
-                    <v-btn color="grey" variant="text" @click="cancelChanges">Cancel</v-btn>
-                    <v-btn color="primary" variant="tonal" @click="confirmChanges">Save</v-btn>
+                    <v-btn color="grey-darken-1" variant="text" @click="cancelChanges">Cancel</v-btn>
+                    <v-btn color="primary" variant="flat" @click="confirmChanges" prepend-icon="mdi-content-save">Save Room</v-btn>
                 </v-card-actions>
             </v-card>
         </v-dialog>

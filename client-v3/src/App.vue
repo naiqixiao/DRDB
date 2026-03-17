@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :style="{ '--dynamic-bg': pageBackgroundColor }">
     <v-app-bar v-if="$route.name !== 'Login'" class="ds-header-gradient elevation-1" density="default">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
@@ -85,7 +85,7 @@
       </template>
     </v-navigation-drawer>
 
-    <v-main style="background-color: var(--ds-field-bg);">
+    <v-main>
       <router-view :training="store.trainingMode" />
     </v-main>
   </v-app>
@@ -162,6 +162,29 @@ export default {
     changeTrainingMode() {
       this.store.setTrainingMode(!this.store.trainingMode);
     },
+  },
+
+  computed: {
+    pageBackgroundColor() {
+      switch (this.$route.name) {
+        case 'Family information':
+          return '#F0F9FF'; // Very pale blue
+        case 'Schedule studies':
+          return '#FFFBEB'; // Very pale amber
+        case 'Study appointments':
+          return '#F0FDF4'; // Very pale emerald
+        case 'Study management':
+          return '#F5F3FF'; // Very pale violet
+        case 'Personnel management':
+          return '#FFF1F2'; // Very pale rose
+        case 'Settings':
+          return '#F8FAFC'; // Very pale slate
+        case 'Home':
+        case 'Login':
+        default:
+          return 'var(--ds-field-bg)'; // Default pale gray
+      }
+    }
   },
 
   watch: {
