@@ -64,20 +64,20 @@
       </template>
 
       <template #item.Status="{ item }">
-        <v-chip :color="getColor(item.Status, item.Completed)" class="text-white font-weight-bold" size="small">
+        <v-chip :color="getColor(item.Status, item.Completed)" class="text-white font-weight-bold" size="default" label>
           {{ item.Status === "Confirmed" && item.Completed ? "Completed" : item.Status }}
         </v-chip>
       </template>
 
       <template #item.actions="{ item }">
-        <div class="d-flex align-center justify-center gap-2">
+        <div class="d-flex align-center justify-center">
           <v-tooltip location="top">
             <template v-slot:activator="{ props }">
               <v-btn 
                 v-bind="props"
                 variant="outlined" 
                 icon="mdi-autorenew"
-                size="small"
+                size="default"
                 color="primary"
                 @click.stop="showDialog(item, 'schedule')" 
                 :disabled="item.Status === 'Confirmed' && item.Completed === true"
@@ -86,13 +86,15 @@
             <span>Update the current appointment</span>
           </v-tooltip>
 
+          <v-divider vertical class="mx-3" style="height: 28px; align-self: center;"></v-divider>
+
           <v-tooltip location="top">
             <template v-slot:activator="{ props }">
               <v-btn 
                 v-bind="props"
                 variant="outlined" 
                 icon="mdi-email"
-                size="small"
+                size="default"
                 color="secondary"
                 @click.stop="showDialog(item, 'email')"
                 :disabled="item.Status === 'Confirmed' && item.Completed === true"
@@ -174,10 +176,10 @@ export default {
       Appointments: [{ FK_Family: 1, Study: { EmailTemplate: "", Lab: { PI: "" } }, Family: { NamePrimary: "" }, Child: { Name: "" } }],
     },
     headers: [
-      { title: "Study Time", align: "center", key: "AppointmentTime", width: "13%" },
-      { title: "Participant Info", align: "start", key: "participantInfo", width: "45%" },
-      { title: "Status", align: "center", key: "Status", width: "10%" },
-      { title: "Actions", align: "center", key: "actions", sortable: false, width: "15%" },
+      { title: "Study Time", align: "center", key: "AppointmentTime", width: "18%" },
+      { title: "Participant Info", align: "start", key: "participantInfo", width: "42%" },
+      { title: "Status", align: "center", key: "Status", width: "14%" },
+      { title: "Actions", align: "center", key: "actions", sortable: false, width: "18%" },
     ]
   }),
   methods: {
@@ -211,13 +213,13 @@ export default {
     getColor(status, completed) {
       switch (status) {
         case "Completed": return "#01579B";
-        case "Confirmed": return completed ? "#01579B" : "light-blue-accent-2";
-        case "TBD": return "teal-darken-2";
-        case "Rescheduling": return "lime-darken-3";
-        case "No Show": return "orange-darken-3";
-        case "Cancelled": return "deep-orange-darken-1";
-        case "Rejected": return "blue-grey-darken-4";
-        default: return "grey";
+        case "Confirmed": return completed ? "#01579B" : "#0277BD";
+        case "TBD":        return "#00695C";
+        case "Rescheduling": return "#827717";
+        case "No Show":    return "#E65100";
+        case "Cancelled":  return "#BF360C";
+        case "Rejected":   return "#37474F";
+        default: return "#616161";
       }
     },
 

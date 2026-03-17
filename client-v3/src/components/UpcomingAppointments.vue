@@ -188,7 +188,7 @@ export default {
 
 .cards-row {
   display: flex;
-  gap: 14px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
