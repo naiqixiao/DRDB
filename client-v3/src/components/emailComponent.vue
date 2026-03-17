@@ -179,8 +179,7 @@ export default {
         }
       }
 
-      emailObj = emailObj.replace(/\/p><p/g, "/p><p></p><p");
-      emailObj = emailObj.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px;'>");
+      emailObj = emailObj.replace(/<p>/g, "<p style='margin: 0 0 1em 0; padding: 0;'>");
 
       return emailObj;
     },
@@ -375,7 +374,7 @@ export default {
 
     async sendEmail() {
       let formattedEmail = this.emailBody;
-      formattedEmail = formattedEmail.replace(/<p>/g, "<p style='margin: 0px !important; padding: 0px; font-size: 12pt;'>");
+      formattedEmail = formattedEmail.replace(/<p>/g, "<p style='margin: 0 0 1em 0; padding: 0; font-size: 12pt;'>");
 
       const [studyLabel, gmailLabels] = this.studyLabels(this.appointments);
 

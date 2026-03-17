@@ -200,13 +200,13 @@ export default {
   max-height: 400px;
   overflow-y: auto;
   outline: none;
-  font-size: 0.9rem;
-  line-height: 1.65;
+  font-size: 12pt;
+  line-height: 1.5;
   color: #1E293B;
 }
 
 .editor-content .tiptap p {
-  margin: 0 0 0.5em 0;
+  margin: 0 0 1em 0;
 }
 
 .editor-content .tiptap h3 {
