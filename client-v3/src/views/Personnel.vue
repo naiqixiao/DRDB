@@ -7,9 +7,9 @@
       <v-col cols="12" md="4" lg="3" class="d-flex flex-column" style="height: calc(100vh - 120px);">
         <v-card class="ds-card d-flex flex-column h-100" variant="flat">
           
-          <div class="pa-4 pb-2" style="border-bottom: 1px solid #E2E8F0; background-color: #F8FAFC;">
+          <div class="pa-4 pb-2 bg-slate-50 border-b border-slate-200">
             <div class="d-flex justify-space-between align-center mb-3">
-              <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary)">
+              <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
                 Team Directory
               </span>
               <v-btn color="primary" size="small" variant="flat" @click="createPersonnel" :disabled="!canAddPersonnel" prepend-icon="mdi-account-plus">
@@ -25,7 +25,8 @@
               hide-details 
               prepend-inner-icon="mdi-magnify"
               bg-color="white"
-              class="mb-3"
+              class="mb-3 transition-colors duration-200"
+              color="primary"
             ></v-text-field>
 
             <v-switch 
@@ -45,8 +46,7 @@
               :value="person.id"
               :active="currentPersonnel.id === person.id"
               @click="rowSelected(person)"
-              class="py-3 ds-interactive"
-              style="border-bottom: 1px solid rgba(0,0,0,0.03);"
+              class="py-3 ds-interactive border-b border-slate-100 transition-all duration-200"
               color="primary"
             >
               <template v-slot:prepend>
@@ -68,10 +68,10 @@
               </v-list-item-title>
               
               <v-list-item-subtitle class="mt-1 d-flex align-center">
-                <v-chip size="x-small" :color="getRoleColor(person.Role)" variant="flat" class="text-white font-weight-bold px-2 mr-2">
+                <v-chip size="x-small" :color="getRoleColor(person.Role)" variant="flat" class="text-white font-weight-bold px-2 mr-2 transition-all duration-200">
                   {{ person.Role }}
                 </v-chip>
-                <span class="text-truncate" style="max-width: 120px;">{{ person.Email }}</span>
+                <span class="text-truncate" style="max-width: 120px; transition: color 0.2s;">{{ person.Email }}</span>
               </v-list-item-subtitle>
             </v-list-item>
 
@@ -87,23 +87,22 @@
         <div v-if="currentPersonnel.id">
           
           <v-card class="ds-card mb-6" variant="flat">
-            <v-toolbar color="transparent" density="compact" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
+            <v-toolbar color="transparent" class="px-4 border-b border-slate-200">
               <v-spacer></v-spacer>
               <v-btn 
                 :color="currentPersonnel.Active ? 'warning' : 'success'" 
                 variant="outlined" 
-                size="small"
                 :prepend-icon="currentPersonnel.Active ? 'mdi-account-off' : 'mdi-account-check'" 
-                class="mr-2" 
+                class="mr-3 text-none font-weight-bold" 
                 @click.stop="changePersonnelStatus(currentPersonnel)" 
                 :disabled="!canManageStatus(currentPersonnel)"
               >
                 {{ currentPersonnel.Active ? 'Deactivate Account' : 'Activate Account' }}
               </v-btn>
-              <v-btn color="error" variant="text" size="small" prepend-icon="mdi-delete" class="mr-2" @click.stop="deletePersonnel" :disabled="!canDeletePersonnel">
-                Delete
+              <v-btn color="error" variant="outlined" prepend-icon="mdi-archive-outline" class="mr-3 text-none font-weight-bold" @click.stop="deletePersonnel" :disabled="!canDeletePersonnel">
+                Retire
               </v-btn>
-              <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-pencil" @click.stop="editPersonnel" :disabled="!canEditPersonnel">
+              <v-btn color="primary" variant="flat" prepend-icon="mdi-pencil" class="text-none font-weight-bold" @click.stop="editPersonnel" :disabled="!canEditPersonnel">
                 Edit Profile
               </v-btn>
             </v-toolbar>
@@ -134,7 +133,7 @@
                     <v-list-item prepend-icon="mdi-email-outline" class="px-0 mb-1" density="compact">
                       <v-list-item-title class="d-flex align-center font-weight-medium">
                         {{ currentPersonnel.Email }}
-                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2" @click="copyToClipboard(currentPersonnel.Email)"></v-btn>
+                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2 transition-transform duration-200 hover-scale" @click="copyToClipboard(currentPersonnel.Email)"></v-btn>
                       </v-list-item-title>
                     </v-list-item>
 
@@ -152,8 +151,8 @@
 
                     <v-list-item prepend-icon="mdi-video-outline" class="px-0" density="compact" v-if="currentPersonnel.ZoomLink">
                       <v-list-item-title class="d-flex align-center font-weight-medium">
-                        <a :href="currentPersonnel.ZoomLink" target="_blank" class="text-decoration-none text-primary">Personal Zoom Room ↗</a>
-                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2" @click="copyToClipboard(currentPersonnel.ZoomLink)"></v-btn>
+                        <a :href="currentPersonnel.ZoomLink" target="_blank" class="text-decoration-none text-primary transition-opacity duration-200 hover:opacity-80">Personal Zoom Room ↗</a>
+                        <v-btn icon="mdi-content-copy" variant="text" size="x-small" color="grey" class="ml-2 transition-transform duration-200 hover-scale" @click="copyToClipboard(currentPersonnel.ZoomLink)"></v-btn>
                       </v-list-item-title>
                     </v-list-item>
                   </v-list>
@@ -178,19 +177,19 @@
                     <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">All-Time Performance</div>
                     <v-row dense>
                       <v-col cols="4">
-                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                        <v-card class="ds-card pa-3 text-center transition-all duration-200 border-slate-200 hover:border-primary cursor-pointer hover:-translate-y-1 hover:shadow-sm" variant="outlined">
                           <div class="text-h5 font-weight-bold text-primary">{{ personnelStats.e1Count || 0 }}</div>
                           <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Sessions (E1)</div>
                         </v-card>
                       </v-col>
                       <v-col cols="4">
-                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                        <v-card class="ds-card pa-3 text-center transition-all duration-200 border-slate-200 hover:border-primary cursor-pointer hover:-translate-y-1 hover:shadow-sm" variant="outlined">
                           <div class="text-h5 font-weight-bold text-primary">{{ personnelStats.e2Count || 0 }}</div>
                           <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Sessions (E2)</div>
                         </v-card>
                       </v-col>
                       <v-col cols="4">
-                        <v-card class="ds-card pa-3 text-center" variant="outlined" style="border-color: #E2E8F0 !important;">
+                        <v-card class="ds-card pa-3 text-center transition-all duration-200 border-slate-200 hover:border-success cursor-pointer hover:-translate-y-1 hover:shadow-sm" variant="outlined">
                           <div class="text-h5 font-weight-bold text-success">{{ personnelStats.scheduledCount || 0 }}</div>
                           <div class="text-caption text-muted font-weight-bold text-uppercase" style="font-size: 0.65rem !important;">Recruited</div>
                         </v-card>
@@ -215,7 +214,7 @@
             </v-toolbar>
             <v-divider class="mt-2"></v-divider>
             
-            <v-card-text class="pa-6 bg-grey-lighten-4" style="min-height: 200px;">
+            <v-card-text class="pa-6 bg-white" style="min-height: 200px;">
               <AssignedStudies 
                 v-if="currentPersonnel.id" 
                 :Studies="currentPersonnel.AssignedStudies || []"
@@ -253,13 +252,13 @@
             <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Identity & Role</div>
             <v-row dense class="mb-4">
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Name" label="Full Name *" :rules="getRules('name')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.Name" label="Full Name *" :rules="getRules('name')" variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="3">
-                <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="getRules('required')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="getRules('required')" variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="3">
-                <v-select v-model="editedPersonnel.Role" :items="availableRoles" label="Role *" :rules="[v => !!v || 'Required']" variant="outlined" density="compact" bg-color="white"></v-select>
+                <v-select v-model="editedPersonnel.Role" :items="availableRoles" label="Role *" :rules="[v => !!v || 'Required']" variant="outlined" density="compact" bg-color="white" color="primary"></v-select>
               </v-col>
             </v-row>
 
@@ -268,16 +267,16 @@
             
             <v-row dense>
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Email" label="Email Address *" :rules="getRules('email')" prepend-inner-icon="mdi-email-outline" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.Email" label="Email Address *" :rules="getRules('email')" prepend-inner-icon="mdi-email-outline" variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Phone" label="Phone Number" :rules="getRules('phone')" prepend-inner-icon="mdi-phone-outline" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.Phone" label="Phone Number" :rules="getRules('phone')" prepend-inner-icon="mdi-phone-outline" variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Calendar" label="Google Calendar ID *" prepend-inner-icon="mdi-calendar-blank-outline" placeholder="username@mcmaster.ca" :rules="getRules('email')" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.Calendar" label="Google Calendar ID *" prepend-inner-icon="mdi-calendar-blank-outline" placeholder="username@mcmaster.ca" :rules="getRules('email')" variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.ZoomLink" label="Personal Zoom Link" prepend-inner-icon="mdi-video-outline" placeholder="https://zoom.us/j/..." variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field v-model="editedPersonnel.ZoomLink" label="Personal Zoom Link" prepend-inner-icon="mdi-video-outline" placeholder="https://zoom.us/j/..." variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
             </v-row>
 
@@ -369,8 +368,28 @@ export default {
         );
       }
 
-      // Sort Alphabetically
-      return result.sort((a, b) => (a.Name || '').localeCompare(b.Name || ''));
+      // Role Sorting Hierarchy
+      const roleOrder = {
+        'Admin': 1,
+        'PI': 2,
+        'Lab manager': 3,
+        'PostDoc': 4,
+        'GradStudent': 5,
+        'Undergrad': 6,
+        'RA': 7,
+        'Staff': 8
+      };
+
+      // Sort by Role first, then Alphabetically
+      return result.sort((a, b) => {
+        const roleA = roleOrder[a.Role] || 99;
+        const roleB = roleOrder[b.Role] || 99;
+        
+        if (roleA !== roleB) {
+          return roleA - roleB;
+        }
+        return (a.Name || '').localeCompare(b.Name || '');
+      });
     },
 
     availableRoles() {
@@ -419,7 +438,7 @@ export default {
         'Lab manager': '#F59E0B',  // Amber
         'PostDoc': '#3B82F6',      // Blue
         'GradStudent': '#10B981',  // Green
-        'Undergrad': '#14B8A6',    // Teal
+        'Undergrad': '#EC4899',    // Pink
         'RA': '#06B6D4',           // Cyan
         'Staff': '#64748B'         // Slate
       };
@@ -472,6 +491,15 @@ export default {
       try {
         const Result = await personnel.search({ FK_Lab: this.store.lab });
         this.Personnels = Result.data;
+        
+        // Default select the logged-in user, or the first person in the list
+        if (this.Personnels.length > 0) {
+          const currentUser = this.Personnels.find(p => p.id === this.store.userID);
+          const defaultUser = currentUser || this.filteredPersonnels[0];
+          if (defaultUser) {
+            this.rowSelected(defaultUser);
+          }
+        }
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
@@ -482,7 +510,6 @@ export default {
         const Result = await study.search({
           FK_Lab: this.store.lab,
           includeScheules: false,
-          Completed: 0,
         });
         this.labStudies = Result.data;
       } catch (error) {

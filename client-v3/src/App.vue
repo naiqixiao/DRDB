@@ -4,13 +4,13 @@
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="title-text">
-        <h2 class="text-h6 ma-2">{{ $route.name }}</h2>
+        <h2 class="text-h5 font-weight-bold ma-2">{{ $route.name }}</h2>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
 
       <template v-if="store.user != null">
-        <span class="title-text text-body-2 mr-4">
+        <span class="title-text text-subtitle-1 font-weight-medium mr-4">
           {{
             store.labName +
             ": " +
@@ -200,7 +200,7 @@ export default {
 .training-switch .v-label {
   color: var(--v-theme-secondary) !important;
   font-family: var(--ds-font-family-body) !important;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .nav-list .v-list-item-title {

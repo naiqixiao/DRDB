@@ -7,9 +7,9 @@
         <div style="width: 100%; max-width: 400px;" class="px-6">
           
           <div class="text-center mb-8">
-            <v-icon size="64" color="primary" class="mb-4">mdi-flask-outline</v-icon>
+            <img src="@/assets/logo.png" alt="DRDB Logo" height="180" class="mb-4" />
             <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">DRDB</h1>
-            <p class="text-body-1 text-muted">Developmental Research Management</p>
+            <p class="text-body-1 text-muted">Developmental Research Database</p>
           </div>
 
           <v-alert v-if="error" type="error" variant="tonal" density="compact" class="mb-6" border="start" closable>
