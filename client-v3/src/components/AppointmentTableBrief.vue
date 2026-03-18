@@ -21,9 +21,10 @@
 
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.Status="{ item }">
-      <v-chip v-if="item.Schedule" :color="getColor(item.Schedule.Status, item.Schedule.Completed)" class="text-white">
+      <v-chip v-if="item.Schedule" :color="getColor(item.Schedule.Status, item.Schedule.Completed)" variant="outlined"
+        class="font-weight-bold" size="default">
         {{
-          item.Schedule.Status === "Confirmed" && item.Schedule.Completed
+          item.Schedule.Status === "Confirmed" && (item.Schedule.Completed === true || item.Schedule.Completed === 1)
             ? "Completed"
             : item.Schedule.Status
         }}

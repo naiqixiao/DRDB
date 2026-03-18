@@ -824,7 +824,7 @@ export default {
       const role = this.store.role;
       return (
         this.currentStudy.PointofContact.id == this.store.userID ||
-        ['Admin', 'PI', 'Lab manager'].includes(role)
+        ['Admin', 'PI', 'Lab manager', 'PostDoc', 'GradStudent'].includes(role)
       );
     },
 
@@ -836,7 +836,7 @@ export default {
     canDuplicateStudy() {
       if (!this.currentStudy || !this.currentStudy.id) return false;
       const role = this.store.role;
-      return ['Admin', 'PI', 'Lab manager', 'GradStudent'].includes(role);
+      return ['Admin', 'PI', 'Lab manager', 'GradStudent', 'PostDoc'].includes(role);
     },
 
     kpiTotalRecruited() {

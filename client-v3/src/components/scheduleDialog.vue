@@ -925,7 +925,7 @@ export default {
           this.emailOptions = ['Reminder', 'Follow-up', 'ThankYou'];
 
           this.emailType = "Reminder";
-          if (this.currentSchedule.Status === "Confirmed" && this.currentSchedule.Completed === 1) {
+          if (this.currentSchedule.Status === "Confirmed" && (this.currentSchedule.Completed === 1 || this.currentSchedule.Completed === true)) {
             this.emailType = "ThankYou";
           }
 
