@@ -459,10 +459,13 @@ export default {
 
     updateFamily(family, index) {
       this.index = index;
+      this.openFamilyDialog(family);
     },
 
     onSelectUpcoming(schedule) {
-      // No-op since FamilyInfo sidebar is removed; family details are via dialog
+      if (schedule && schedule.Family) {
+        this.openFamilyDialog(schedule.Family);
+      }
     },
 
 

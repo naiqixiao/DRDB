@@ -35,5 +35,16 @@ export default {
     return api().delete("child/", {
       params: childInfo
     });
+  },
+  mergeChildren(primaryChildId, secondaryChildIds) {
+    return api().post("child/merge", {
+      primaryChildId,
+      secondaryChildIds,
+      User: {
+        Name: useMainStore().name,
+        Email: useMainStore().user,
+        LabName: useMainStore().labName
+      }
+    });
   }
 };

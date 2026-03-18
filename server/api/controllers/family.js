@@ -797,17 +797,24 @@ exports.changeTrainingFamilyEmail = asyncHandler(async (req, res) => {
 // ─── DATA INTEGRITY: FIND DUPLICATES ────────────────────────────────────
 exports.getDuplicates = asyncHandler(async (req, res) => {
   // 1. Find emails that appear more than once
+  //    Use Op.and to avoid the JS duplicate-key collision when checking null + empty string
   const emailDups = await model.family.findAll({
     attributes: ['Email'],
-    where: { Email: { [Op.ne]: null, [Op.ne]: '' }, TrainingSet: false },
+    where: {
+      Email: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] },
+      TrainingSet: false
+    },
     group: ['Email'],
     having: model.sequelize.literal('count(Email) > 1')
   });
-  
+
   // 2. Find phones that appear more than once
   const phoneDups = await model.family.findAll({
     attributes: ['Phone'],
-    where: { Phone: { [Op.ne]: null, [Op.ne]: '' }, TrainingSet: false },
+    where: {
+      Phone: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] },
+      TrainingSet: false
+    },
     group: ['Phone'],
     having: model.sequelize.literal('count(Phone) > 1')
   });
@@ -828,7 +835,11 @@ exports.getDuplicates = asyncHandler(async (req, res) => {
       ],
       TrainingSet: false
     },
-    include: [model.child] // Include children to help user decide
+    include: [
+      // Only fetch the fields the frontend actually needs (reduces payload)
+      { model: model.child, attributes: ['id', 'Name', 'DoB', 'Sex'] },
+      { model: model.schedule, attributes: ['id'] }
+    ]
   });
 
   // 4. Group them for the frontend
@@ -857,31 +868,58 @@ exports.getDuplicates = asyncHandler(async (req, res) => {
 
 // ─── DATA INTEGRITY: MERGE RECORDS ──────────────────────────────────────
 exports.merge = asyncHandler(async (req, res) => {
-  const { primaryId, secondaryIds, User } = req.body;
+  const { primaryId, secondaryIds, mergeChildren, User } = req.body;
 
   if (!primaryId || !secondaryIds || secondaryIds.length === 0) {
     return res.status(400).json({ error: "Missing primaryId or secondaryIds." });
   }
 
-  // 1. Move all relational data to the Primary Family
-  await model.child.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
-  await model.schedule.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
-  await model.appointment.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
-  await model.conversations.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } } });
+  // Wrap all mutations in a transaction so a mid-merge failure leaves no partial state
+  await model.sequelize.transaction(async (t) => {
+    const opts = { transaction: t };
 
-  // 2. Re-letter the children (A, B, C) for the primary family to prevent duplicate letters
-  const alphabet = "abcdefghijk".split("");
-  const children = await model.child.findAll({ where: { FK_Family: primaryId }, order: [['DoB', 'ASC']] });
-  
-  for (let i = 0; i < children.length; i++) {
-    await model.child.update({ IdWithinFamily: alphabet[i] }, { where: { id: children[i].id }});
+    // 1. Always move schedules, appointments, and conversations to the Primary Family
+    await model.schedule.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+    await model.appointment.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+    await model.conversations.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+
+    // 2. ALWAYS move children to the primary family to prevent FK cascade deletion.
+    await model.child.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+
+    // 3. If mergeChildren: re-letter IdWithinFamily and rebuild sibling table.
+    if (mergeChildren !== false) {
+      const alphabet = "abcdefghijk".split("");
+      const children = await model.child.findAll({ where: { FK_Family: primaryId }, order: [['DoB', 'ASC']], ...opts });
+
+      for (let i = 0; i < children.length; i++) {
+        await model.child.update({ IdWithinFamily: alphabet[i] }, { where: { id: children[i].id }, ...opts });
+      }
+
+      const childIds = children.map(c => c.id);
+      await model.sibling.destroy({ where: { FK_Child: { [Op.in]: childIds } }, ...opts });
+      await model.sibling.destroy({ where: { Sibling: { [Op.in]: childIds } }, ...opts });
+
+      const siblingRows = [];
+      for (let i = 0; i < children.length; i++) {
+        for (let j = 0; j < children.length; j++) {
+          if (i !== j) siblingRows.push({ FK_Child: children[i].id, Sibling: children[j].id });
+        }
+      }
+      if (siblingRows.length > 0) {
+        await model.sibling.bulkCreate(siblingRows, { ignoreDuplicates: true, ...opts });
+      }
+    }
+
+    // 4. Delete the now-empty secondary families
+    await model.family.destroy({ where: { id: { [Op.in]: secondaryIds } }, ...opts });
+  });
+
+  // 5. Log outside the transaction (non-blocking; log failure must not roll back the merge)
+  try {
+    await log.createLog("Family Merged", User, `Merged families [${secondaryIds.join(', ')}] into Master Family (${primaryId}). Children merged: ${mergeChildren !== false}`);
+  } catch (logErr) {
+    console.error("Merge log failed (merge itself succeeded):", logErr.message);
   }
-
-  // 3. Delete the empty secondary families
-  await model.family.destroy({ where: { id: { [Op.in]: secondaryIds } } });
-
-  // 4. Log the action
-  await log.createLog("Family Merged", User, `Merged families [${secondaryIds.join(', ')}] into Master Family (${primaryId})`);
 
   res.status(200).json({ message: "Families successfully merged!" });
 });

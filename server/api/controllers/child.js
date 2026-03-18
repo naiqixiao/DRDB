@@ -365,3 +365,87 @@ exports.updateAge = asyncHandler(async (req, res) => {
   await model.sequelize.query(queryString);
   await log.createLog("Age Updated", {}, "Children's age is updated");
 });
+
+// ─── Merge duplicate child records within a family ───────────────────────
+// primaryChildId: the child record to keep
+// secondaryChildIds: child records to merge into primary, then delete
+exports.mergeChildren = asyncHandler(async (req, res) => {
+  const { primaryChildId, secondaryChildIds, User } = req.body;
+
+  if (!primaryChildId || !secondaryChildIds || secondaryChildIds.length === 0) {
+    return res.status(400).json({ error: "Missing primaryChildId or secondaryChildIds." });
+  }
+
+  // 1. Validate: primary child must exist
+  const primaryChild = await model.child.findOne({ where: { id: primaryChildId } });
+  if (!primaryChild) {
+    return res.status(404).json({ error: "Primary child not found." });
+  }
+  const familyId = primaryChild.FK_Family;
+
+  // 2. Guard against cross-family merge: all secondary children must belong to the same family
+  const secondaryChildren = await model.child.findAll({
+    where: { id: { [Op.in]: secondaryChildIds } },
+    attributes: ['id', 'FK_Family']
+  });
+  const crossFamily = secondaryChildren.some(c => c.FK_Family !== familyId);
+  if (crossFamily) {
+    return res.status(400).json({ error: "All children must belong to the same family." });
+  }
+
+  // 3. Wrap all mutations in a transaction
+  await model.sequelize.transaction(async (t) => {
+    const opts = { transaction: t };
+
+    // Move all appointments from secondary children to the primary child
+    await model.appointment.update(
+      { FK_Child: primaryChildId },
+      { where: { FK_Child: { [Op.in]: secondaryChildIds } }, ...opts }
+    );
+
+    // Delete the secondary child records (appointments already moved out)
+    await model.child.destroy({ where: { id: { [Op.in]: secondaryChildIds } }, ...opts });
+
+    // Re-letter all remaining children in the family by DoB (a, b, c…)
+    const alphabet = "abcdefghijk".split("");
+    const remainingChildren = await model.child.findAll({
+      where: { FK_Family: familyId },
+      order: [["DoB", "ASC"]],
+      ...opts
+    });
+    for (let i = 0; i < remainingChildren.length; i++) {
+      await model.child.update(
+        { IdWithinFamily: alphabet[i] },
+        { where: { id: remainingChildren[i].id }, ...opts }
+      );
+    }
+
+    // Rebuild sibling table
+    const childIds = remainingChildren.map((c) => c.id);
+    await model.sibling.destroy({ where: { FK_Child: { [Op.in]: childIds } }, ...opts });
+    await model.sibling.destroy({ where: { Sibling: { [Op.in]: childIds } }, ...opts });
+
+    const siblingRows = [];
+    for (let i = 0; i < childIds.length; i++) {
+      for (let j = 0; j < childIds.length; j++) {
+        if (i !== j) siblingRows.push({ FK_Child: childIds[i], Sibling: childIds[j] });
+      }
+    }
+    if (siblingRows.length > 0) {
+      await model.sibling.bulkCreate(siblingRows, { ignoreDuplicates: true, ...opts });
+    }
+  });
+
+  // 4. Log outside transaction (non-blocking)
+  try {
+    await log.createLog(
+      "Child Merged",
+      User,
+      `Merged children [${secondaryChildIds.join(", ")}] into Child (${primaryChildId}) in Family (${familyId})`
+    );
+  } catch (logErr) {
+    console.error("Child merge log failed:", logErr.message);
+  }
+
+  res.status(200).json({ message: "Children successfully merged!", familyId });
+});

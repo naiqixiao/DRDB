@@ -114,6 +114,31 @@
 
             <v-divider class="my-4"></v-divider>
 
+            <!-- Duplicate Children Warning -->
+            <v-alert
+              v-if="duplicateChildren.length > 0"
+              type="warning"
+              variant="tonal"
+              density="compact"
+              class="mb-3"
+              icon="mdi-account-alert"
+            >
+              <div class="d-flex align-center justify-space-between">
+                <span class="text-body-2">
+                  <strong>{{ duplicateChildren.length }} possible duplicate {{ duplicateChildren.length === 1 ? 'child' : 'children' }}</strong> detected in this family.
+                </span>
+                <v-btn
+                  size="small"
+                  variant="flat"
+                  color="warning"
+                  class="ml-3 text-none"
+                  @click="childMergeCandidates = duplicateChildren; childMergeDialog = true; selectedMasterChildIds = duplicateChildren.map(() => null)"
+                >
+                  Merge Duplicate Children
+                </v-btn>
+              </div>
+            </v-alert>
+
             <div class="d-flex justify-space-between align-center mb-1 px-1">
               <span class="text-caption font-weight-bold text-uppercase text-muted">Contact Info</span>
               <v-tooltip location="top">
@@ -456,7 +481,7 @@
               
               <v-expansion-panel-text class="bg-white pt-4">
                 <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-                  Select the <strong>Master Record</strong> you want to keep. The other records will be deleted, but their children and study histories will be moved into the Master Record.
+                  Select the <strong>Master Record</strong> you want to keep. Study histories will always be moved into the Master Record. Children can optionally be merged too.
                 </v-alert>
 
                 <v-radio-group v-model="selectedPrimaryIds[index]">
@@ -464,26 +489,52 @@
                     <div class="d-flex align-start">
                       <v-radio :value="fam.id" color="primary" class="mt-n1"></v-radio>
                       <div class="flex-grow-1">
-                        <div class="d-flex justify-space-between">
+                        <div class="d-flex justify-space-between align-center">
                           <strong class="text-subtitle-1">{{ fam.NamePrimary || 'Unknown Parent' }}</strong>
                           <span class="text-caption text-muted">ID: {{ fam.id }}</span>
                         </div>
-                        <div class="text-body-2 text-muted">
+                        <div class="text-body-2 text-muted mb-2">
                           Email: {{ fam.Email || '—' }} | Phone: {{ fam.Phone || '—' }}
                         </div>
-                        <div class="mt-2 text-caption font-weight-bold text-primary" v-if="fam.Children && fam.Children.length > 0">
-                          <v-icon size="14" start>mdi-human-child</v-icon>
-                          {{ fam.Children.length }} Children: {{ fam.Children.map(c => c.Name.split(' ')[0]).join(', ') }}
-                        </div>
-                        <div class="mt-2 text-caption text-muted" v-else>
-                          No children recorded
+                        <div class="d-flex align-center" style="gap: 8px; flex-wrap: wrap;">
+                          <!-- Children chip -->
+                          <v-chip size="small" :color="fam.Children && fam.Children.length > 0 ? 'primary' : 'grey'" variant="tonal" prepend-icon="mdi-human-child">
+                            {{ fam.Children?.length || 0 }} {{ fam.Children?.length === 1 ? 'Child' : 'Children' }}
+                            <span v-if="fam.Children && fam.Children.length > 0" class="ml-1">
+                              ({{ fam.Children.map(c => c.Name.split(' ')[0]).join(', ') }})
+                            </span>
+                          </v-chip>
+                          <!-- Studies chip -->
+                          <v-chip size="small" :color="fam.Schedules && fam.Schedules.length > 0 ? 'teal' : 'grey'" variant="tonal" prepend-icon="mdi-flask-outline">
+                            {{ fam.Schedules?.length || 0 }} {{ fam.Schedules?.length === 1 ? 'Study' : 'Studies' }}
+                          </v-chip>
                         </div>
                       </div>
                     </div>
                   </v-card>
                 </v-radio-group>
 
-                <div class="d-flex justify-end mt-4">
+                <!-- Children merge decision -->
+                <v-card variant="tonal" color="blue-grey" class="pa-4 mt-2 mb-4 rounded">
+                  <div class="d-flex align-center justify-space-between">
+                    <div>
+                      <div class="text-body-2 font-weight-bold">Merge Children into Master Record?</div>
+                      <div class="text-caption text-muted mt-1">
+                        <span v-if="mergeChildrenFlags[index]">Children from all records will be <strong>combined</strong> under the Master Record.</span>
+                        <span v-else>Children will <strong>stay</strong> in their original family records (only study histories are merged).</span>
+                      </div>
+                    </div>
+                    <v-switch
+                      v-model="mergeChildrenFlags[index]"
+                      color="primary"
+                      hide-details
+                      density="compact"
+                      class="ml-4 flex-shrink-0"
+                    ></v-switch>
+                  </div>
+                </v-card>
+
+                <div class="d-flex justify-end mt-2">
                   <v-btn variant="text" color="grey" class="mr-2" @click="dismissGroup(index)">Dismiss (Not Duplicates)</v-btn>
                   <v-btn color="warning" variant="flat" :disabled="!selectedPrimaryIds[index]" @click="mergeGroup(index, group)">Merge & Clean</v-btn>
                 </div>
@@ -491,6 +542,57 @@
             </v-expansion-panel>
           </v-expansion-panels>
         </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Child Duplicate Merge Dialog -->
+    <v-dialog v-model="childMergeDialog" max-width="600px" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Merge Duplicate Children</span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="childMergeDialog = false"></v-btn>
+        </v-card-title>
+        <v-divider></v-divider>
+        <v-card-text class="pt-4">
+          <v-alert type="info" variant="tonal" density="compact" class="mb-4">
+            Select the <strong>Master Record</strong> to keep. The other record's appointments will be moved into it, then deleted.
+          </v-alert>
+
+          <div v-for="(pair, pi) in childMergeCandidates" :key="pi" class="mb-6">
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-2">
+              Possible duplicate pair {{ pi + 1 }}
+            </div>
+            <v-radio-group v-model="selectedMasterChildIds[pi]">
+              <v-card
+                v-for="c in [pair.a, pair.b]"
+                :key="c.id"
+                variant="outlined"
+                class="mb-2 pa-3"
+                :style="selectedMasterChildIds[pi] === c.id ? 'border-color: var(--color-primary) !important; background: rgba(30,64,175,0.05)' : ''"
+              >
+                <div class="d-flex align-center">
+                  <v-radio :value="c.id" color="primary"></v-radio>
+                  <div class="ml-2">
+                    <div class="font-weight-bold">{{ c.Name }}</div>
+                    <div class="text-caption text-muted">
+                      DoB: {{ c.DoB ? c.DoB.slice(0, 10) : '—' }} &nbsp;·&nbsp;
+                      Sex: {{ c.Sex || '—' }} &nbsp;·&nbsp;
+                      ID: {{ c.id }}
+                    </div>
+                  </div>
+                </div>
+              </v-card>
+            </v-radio-group>
+          </div>
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0 d-flex justify-end">
+          <v-btn color="grey" variant="text" class="mr-2" @click="childMergeDialog = false">Cancel</v-btn>
+          <v-btn color="warning" variant="flat"
+            :disabled="childMergeCandidates.some((_, pi) => !selectedMasterChildIds[pi])"
+            @click="mergeChildPair">
+            Merge & Keep Masters
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -506,6 +608,7 @@ import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import TimelineCard from "@/components/TimelineCard.vue";
 import NotesConversation from "@/components/NotesConversation.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import child from "@/services/child";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
 import calendar from "@/services/calendar";
@@ -533,6 +636,11 @@ export default {
       loadingDuplicates: false,
       duplicateGroups: [],
       selectedPrimaryIds: {},
+      mergeChildrenFlags: {}, // per-group toggle: whether to merge children
+      // Child merge dialog
+      childMergeDialog: false,
+      childMergeCandidates: [],  // [{a: child, b: child}, ...]
+      selectedMasterChildIds: [], // per-pair selection (array indexed by pair)
       queryString: {},
       page: 0,
       searchStatus: false,
@@ -639,10 +747,15 @@ export default {
       this.loadingDuplicates = true;
       this.duplicateGroups = [];
       this.selectedPrimaryIds = {};
+      this.mergeChildrenFlags = {};
       
       try {
         const response = await family.getDuplicates();
         this.duplicateGroups = response.data;
+        // Pre-populate mergeChildrenFlags reactively so Vue tracks every key
+        const flags = {};
+        this.duplicateGroups.forEach((_, i) => { flags[i] = true; });
+        this.mergeChildrenFlags = flags;
       } catch (error) {
         console.error("Failed to load duplicates", error);
         this.$refs.confirmD.open('Error', 'Failed to scan for duplicates.', { color: 'error', noconfirm: true });
@@ -651,37 +764,105 @@ export default {
     },
 
     dismissGroup(index) {
-      // Remove it from the list if the user decides it's not a true duplicate
+      // Remove the group and rebuild index maps to prevent stale index references
       this.duplicateGroups.splice(index, 1);
+      const newSelected = {};
+      const newMergeFlags = {};
+      this.duplicateGroups.forEach((_, i) => {
+        // Shift down: old index i+1 (if > removed) becomes i
+        const oldIdx = i >= index ? i + 1 : i;
+        if (this.selectedPrimaryIds[oldIdx] !== undefined)
+          newSelected[i] = this.selectedPrimaryIds[oldIdx];
+        newMergeFlags[i] = this.mergeChildrenFlags[oldIdx] !== undefined
+          ? this.mergeChildrenFlags[oldIdx] : true;
+      });
+      this.selectedPrimaryIds = newSelected;
+      this.mergeChildrenFlags = newMergeFlags;
     },
 
     async mergeGroup(index, group) {
       const primaryId = this.selectedPrimaryIds[index];
       const secondaryIds = group.families.map(f => f.id).filter(id => id !== primaryId);
+      const mergeChildren = this.mergeChildrenFlags[index] !== false;
 
-      const confirmMsg = `Are you sure you want to merge ${secondaryIds.length} record(s) into Master ID: ${primaryId}? This cannot be undone.`;
-      
+      // Show the primary family's name in the confirm dialog, not just its ID
+      const primaryFamily = group.families.find(f => f.id === primaryId);
+      const primaryLabel = primaryFamily?.NamePrimary
+        ? `"${primaryFamily.NamePrimary}" (ID: ${primaryId})`
+        : `ID: ${primaryId}`;
+
+      const childNote = mergeChildren ? 'Children from all records will be combined.' : 'Children will stay in their own records.';
+      const confirmMsg = `Merge ${secondaryIds.length} record(s) into Master Record ${primaryLabel}?\n\n${childNote}\n\nThis cannot be undone.`;
+
       if (await this.$refs.confirmD.open("Confirm Merge", confirmMsg, { color: "warning" })) {
         this.store.setLoadingStatus(true);
         try {
-          await family.merge({ primaryId, secondaryIds });
-          
+          await family.merge({ primaryId, secondaryIds }, mergeChildren);
+
           this.$refs.confirmD.open('Success', 'Records successfully merged and cleaned.', { color: 'success', noconfirm: true });
-          
-          // Remove the resolved group from the UI
+
+          // Remove the resolved group and rebuild index maps (same as dismissGroup)
           this.duplicateGroups.splice(index, 1);
-          
+          const newSelected = {};
+          const newMergeFlags = {};
+          this.duplicateGroups.forEach((_, i) => {
+            const oldIdx = i >= index ? i + 1 : i;
+            if (this.selectedPrimaryIds[oldIdx] !== undefined)
+              newSelected[i] = this.selectedPrimaryIds[oldIdx];
+            newMergeFlags[i] = this.mergeChildrenFlags[oldIdx] !== undefined
+              ? this.mergeChildrenFlags[oldIdx] : true;
+          });
+          this.selectedPrimaryIds = newSelected;
+          this.mergeChildrenFlags = newMergeFlags;
+
           // Refresh the family list if the merged records were currently visible
           if (this.currentFamily.id === primaryId || secondaryIds.includes(this.currentFamily.id)) {
-            this.searchFamily(); // Reload the search to get the fresh children data
+            this.searchFamily();
           }
-          
+
         } catch (error) {
           console.error("Merge failed", error);
           this.$refs.confirmD.open('Error', 'Failed to merge families.', { color: 'error', noconfirm: true });
         }
         this.store.setLoadingStatus(false);
       }
+    },
+
+    async mergeChildPair() {
+      // Build one flat list of all secondaryIds across all pairs
+      const secondarySummary = this.childMergeCandidates.map((pair, pi) => {
+        const masterId = this.selectedMasterChildIds[pi];
+        const otherId = [pair.a.id, pair.b.id].find(id => id !== masterId);
+        const masterName = [pair.a, pair.b].find(c => c.id === masterId)?.Name || masterId;
+        return { masterId, otherId, masterName };
+      });
+
+      const confirmLines = secondarySummary.map(s =>
+        `Keep "${s.masterName}" (ID: ${s.masterId}), remove ID: ${s.otherId}`
+      ).join('\n');
+
+      const confirmed = await this.$refs.confirmD.open(
+        "Confirm Child Merge",
+        `${confirmLines}\n\nThis cannot be undone.`,
+        { color: "warning" }
+      );
+      if (!confirmed) return;
+
+      this.store.setLoadingStatus(true);
+      try {
+        // Merge each pair sequentially (they all belong to the same family)
+        for (const { masterId, otherId } of secondarySummary) {
+          await child.mergeChildren(masterId, [otherId]);
+        }
+        this.$refs.confirmD.open('Success', 'Children successfully merged.', { color: 'success', noconfirm: true });
+        this.childMergeDialog = false;
+        // Reload the current family to get fresh children data
+        await this.updateFamilyAppointment();
+      } catch (error) {
+        console.error("Child merge failed", error);
+        this.$refs.confirmD.open('Error', 'Failed to merge children.', { color: 'error', noconfirm: true });
+      }
+      this.store.setLoadingStatus(false);
     },
 
     async updateFamilyAppointment() {
@@ -948,6 +1129,31 @@ export default {
         if (timeA !== timeB) return timeB - timeA;
         return (b.id || 0) - (a.id || 0);
       });
+    },
+
+    // Detect children within the current family that might be the same person
+    // (same name, same DoB, or same name+sex). Returns pairs to highlight.
+    duplicateChildren() {
+      const kids = this.currentFamily?.Children || [];
+      if (kids.length < 2) return [];
+      const pairs = [];
+      const seen = new Set();
+      for (let i = 0; i < kids.length; i++) {
+        for (let j = i + 1; j < kids.length; j++) {
+          const a = kids[i], b = kids[j];
+          const key = [a.id, b.id].sort().join('-');
+          if (seen.has(key)) continue;
+          const sameName = a.Name && b.Name &&
+            a.Name.trim().toLowerCase() === b.Name.trim().toLowerCase();
+          const sameDoB = a.DoB && b.DoB &&
+            a.DoB.slice(0, 10) === b.DoB.slice(0, 10);
+          if (sameName || sameDoB) {
+            pairs.push({ a, b });
+            seen.add(key);
+          }
+        }
+      }
+      return pairs;
     },
     TodaysDate() {
       return moment().startOf("day").format("YYYY-MM-DD");

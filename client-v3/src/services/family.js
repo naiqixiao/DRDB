@@ -57,12 +57,13 @@ export default {
     return api().get("family/duplicates");
   },
   
-  merge(mergeData) {
+  merge(mergeData, mergeChildren) {
     mergeData.User = {
       Name: useMainStore().name,
       Email: useMainStore().user,
       LabName: useMainStore().labName
     }
+    mergeData.mergeChildren = mergeChildren;
     return api().post("family/merge", mergeData);
   }
 };

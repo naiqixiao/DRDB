@@ -64,7 +64,7 @@
       </template>
 
       <template #item.Status="{ item }">
-        <v-chip :color="getColor(item.Status, item.Completed)" class="text-white font-weight-bold" size="default" label>
+        <v-chip :color="getColor(item.Status, item.Completed)" variant="outlined" class="font-weight-bold" size="default">
           {{ item.Status === "Confirmed" && item.Completed ? "Completed" : item.Status }}
         </v-chip>
       </template>
@@ -212,14 +212,22 @@ export default {
 
     getColor(status, completed) {
       switch (status) {
-        case "Completed": return "#01579B";
-        case "Confirmed": return completed ? "#01579B" : "#0277BD";
-        case "TBD":        return "#00695C";
-        case "Rescheduling": return "#827717";
-        case "No Show":    return "#E65100";
-        case "Cancelled":  return "#BF360C";
-        case "Rejected":   return "#37474F";
-        default: return "#616161";
+        case "Completed":
+          return "#002B4D"; // very dark blue
+        case "Confirmed":
+          return completed ? "#002B4D" : "#004D8C"; // dark blue
+        case "TBD":
+          return "#003D33"; // dark teal
+        case "Rescheduling":
+          return "#424900"; // dark olive
+        case "No Show":
+          return "#8C2900"; // dark burnt orange
+        case "Cancelled":
+          return "#941F00"; // dark rust red
+        case "Rejected":
+          return "#1C272C"; // очень dark grey-blue
+        default:
+          return "#263238"; // dark grey fallback
       }
     },
 

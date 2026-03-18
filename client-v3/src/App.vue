@@ -176,7 +176,7 @@ export default {
         case 'Study management':
           return '#F5F3FF'; // Very pale violet
         case 'Personnel management':
-          return '#FFF1F2'; // Very pale rose
+          return '#F8FAFC'; // Very light slate blue-grey
         case 'Settings':
           return '#F8FAFC'; // Very pale slate
         case 'Home':

@@ -1,32 +1,17 @@
 <template>
-  <v-data-table
-    hide-default-footer
-    items-per-page="-1"
-    fixed-header
+  <v-data-table hide-default-footer items-per-page="-1" fixed-header
     no-data-text="The family hasn't participated in any study or no family is selected."
-    :headers="$headersAppointmentsBrief"
-    :items="Appointments || []"
-    class="elevation-1"
-    height="450px"
-  >
+    :headers="$headersAppointmentsBrief" :items="Appointments || []" class="elevation-1" height="450px">
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.AppointmentTime="{ item }">
-      <DateDisplay
-        v-if="item.Schedule && item.Schedule.AppointmentTime"
-        :date="item.Schedule.AppointmentTime"
-        format="long"
-        :status="item.Schedule?.Status"
-      />
+      <DateDisplay v-if="item.Schedule && item.Schedule.AppointmentTime" :date="item.Schedule.AppointmentTime"
+        format="long" :status="item.Schedule?.Status" />
     </template>
-    
+
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.updatedAt="{ item }">
-      <DateDisplay
-        v-if="item.Schedule && item.Schedule.updatedAt"
-        :date="item.Schedule.updatedAt"
-        format="short"
-        :status="item.Schedule?.Status"
-      />
+      <DateDisplay v-if="item.Schedule && item.Schedule.updatedAt" :date="item.Schedule.updatedAt" format="short"
+        :status="item.Schedule?.Status" />
     </template>
 
     <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -36,11 +21,7 @@
 
     <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.Status="{ item }">
-      <v-chip
-        v-if="item.Schedule"
-        :color="getColor(item.Schedule.Status, item.Schedule.Completed)"
-        class="text-white"
-      >
+      <v-chip v-if="item.Schedule" :color="getColor(item.Schedule.Status, item.Schedule.Completed)" class="text-white">
         {{
           item.Schedule.Status === "Confirmed" && item.Schedule.Completed
             ? "Completed"
@@ -78,35 +59,24 @@ export default {
   },
   methods: {
     getColor(status, completed) {
-      let color = "";
       switch (status) {
         case "Completed":
-          color = "#01579B";
-          break;
+          return "#002B4D"; // very dark blue
         case "Confirmed":
-          if (completed) {
-            color = "#01579B";
-          } else {
-            color = "light-blue-accent-2";
-          }
-          break;
+          return completed ? "#002B4D" : "#004D8C"; // dark blue
         case "TBD":
-          color = "teal-darken-2";
-          break;
+          return "#003D33"; // dark teal
         case "Rescheduling":
-          color = "lime-darken-3";
-          break;
+          return "#424900"; // dark olive
         case "No Show":
-          color = "orange-darken-3";
-          break;
+          return "#8C2900"; // dark burnt orange
         case "Cancelled":
-          color = "deep-orange-darken-1";
-          break;
+          return "#941F00"; // dark rust red
         case "Rejected":
-          color = "blue-grey-darken-4";
-          break;
+          return "#1C272C"; // очень dark grey-blue
+        default:
+          return "#263238"; // dark grey fallback
       }
-      return color;
     },
   },
   computed: {

@@ -158,6 +158,8 @@ router.post("/", checkAuth, ChildController.update);
  */
 router.post("/updateAge", checkAuth, ChildController.updateAge);
 
+router.post("/merge", checkAuth, ChildController.mergeChildren);
+
 /**
  * @swagger
  * /api/child:
