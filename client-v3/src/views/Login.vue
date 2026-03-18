@@ -68,6 +68,18 @@
               Read the Handbook
             </v-btn>
           </div>
+
+          <div class="text-center mt-8" style="opacity: 0.8;">
+            <p class="text-caption text-muted mb-1" style="font-size: 0.75rem !important;">
+              Developed by Dr. <a href="https://experts.mcmaster.ca/people/xiaon8" target="_blank">Gabriel (Naiqi) Xiao</a>. 
+            </p>
+            <p class="text-caption text-muted mb-1" style="font-size: 0.75rem !important;">
+              Supported by the Canada Foundation for Innovation (CFI), Natural Sciences and Engineering Research Council of Canada (NSERC), Social Sciences and Humanities Research Council (SSHRC), and McMaster University
+            </p>
+            <p class="text-caption text-muted" style="font-size: 0.75rem !important;">
+              Version 3.0.0
+            </p>
+          </div>
         </div>
       </v-col>
 
