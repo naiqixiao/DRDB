@@ -1,30 +1,35 @@
-### Release V3.0.0 (Major UI & Platform Upgrade)
+### Release v3.0.0
 
-Welcome to the all-new DRDB! We've completely rebuilt the application from the ground up using Vue 3 and a modern, professional design system. 
+DRDB v3 is a complete rewrite. We migrated the frontend to Vue 3 and built a new component library to fix the inconsistent UI issues from v2.
 
-#### 🎨 Design & User Experience
-* **Professional UI Overhaul:** Every page has been redesigned with a clean, cohesive visual language (the `ds-card` system) for a premium, lightweight feel.
-* **Modernized Navigation:** Larger, clearer sidebar menus and refined, sticky headers across major views.
-* **Micro-Interactions:** Added smooth hover effects, shadow transitions, and improved button feedback across the entire application interface.
-* **Responsive Layouts:** Improved spacing, typography, and contrast on all screen sizes.
+#### New Features
+* **Multi-Age Group Criteria:** You can now set multiple age brackets for a single study, and filter participant searches by these specific ranges.
+* **Study Prerequisites:** You can now require or block participants based on which studies they've already completed.
+* **Duplicate Merging:** The Family page now detects duplicate family or child records and lets you merge them into a single master record.
+* **Stats:** We added dashboards for overall study progress and individual researcher workloads.
 
-#### 👥 Personnel & Team Management
-* **Role-Based Visuals:** Team members and assigned experimenters now have distinct, color-coded badges (e.g., Red for Admin, Green for Grad Students, Pink for Undergrads) for instant recognition.
-* **Smart Sorting:** The personnel directory is now automatically sorted by lab hierarchy (Admin > PI > Manager > PostDoc > Students > Staff).
-* **Profile Defaulting:** Your own personal profile is now instantly selected when opening the Team Directory.
-* **Assigned Studies Overhaul:** Study assignment cards now feature direct shortcuts to the Study Management page and properly format child age ranges.
+#### Design
+* **UI Rewrite:** We replaced the old ad-hoc styling with a unified component system to fix spacing and contrast issues.
+* **Navigation:** The sidebar is wider and main pages now have sticky headers.
+* **Interactions:** Added standard hover states and click feedback to buttons.
 
-#### 📅 Scheduling & Logistics
-* **Streamlined Calendars:** Extracted complex scheduling logic into a dedicated service layer, improving performance and reliability when syncing with Google Calendar.
-* **Timeline Refresh:** Refreshed the family timeline cards and medical condition chips for easier scanning.
-* **Quick-Copy Contacts:** Added one-click copy buttons for participant emails and phone numbers on the Schedule page.
-* **Upcoming Appointments:** Added a dedicated dashboard widget to instantly see the next three upcoming study appointments.
+#### Teams
+* **Role Badges:** Staff names now show color-coded tags based on their role (Admin, Grad Student, Undergrad).
+* **Directory Sorting:** The staff list defaults to grouping people by their lab hierarchy.
+* **Quick Profile:** Opening the Team page automatically pulls up your own info.
+* **Assigned Studies:** Added direct links to the study management page and fixed how child age ranges are formatted.
 
-#### 🧪 Study Management
-* **Enhanced Analytics Views:** Refined the display of recruitment metrics, drop-off rates, and experimenter workload charts.
-* **Smarter Dialogs:** Upgraded all creation and assignment dialogs—including "Assign Experimenters"—to use consistent gradient headers, prominent action buttons, and clear typography.
+#### Scheduling
+* **Calendar Sync:** Rewrote the Google Calendar integration as a background service to fix syncing reliability.
+* **Timeline UI:** Cleaned up the family history cards and medical condition tags.
+* **Copy Contacts:** Added clipboard buttons next to emails and phone numbers.
+* **Upcoming Appointments:** The dashboard now shows your next three scheduled visits.
 
-#### ⚙️ Technical Improvements
-* **Vue 3 Migration:** Upgraded the core framework to Vue 3 (Composition API) and Vite for lightning-fast loading speeds and better long-term maintainability.
-* **Backend Refactoring:** Moved scheduling and chron-jobs into dedicated service modules, significantly improving code organization and testability.
-* **API Documentation:** Integrated Swagger documentation across multiple backend routes.
+#### Studies
+* **Analytics:** Cleaned up the charts for recruitment metrics, drop-off rates, and workload.
+* **Dialogs:** Standardized all modal windows so they share the same layout and button placements.
+
+#### Architecture
+* **Vue 3:** Migrated the entire frontend to Vue 3 (Composition API) and Vite.
+* **Backend Cleanup:** Extracted scheduling and cron jobs out of the controllers and into their own background services.
+* **API Docs:** Added Swagger for backend routes.
