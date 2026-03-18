@@ -398,8 +398,11 @@ export default {
 
     availableRoles() {
       const role = this.store.role;
-      if (role === 'Admin' || role === 'PI' || role === 'Lab manager') {
+      if (['Admin', 'PI', 'Lab manager'].includes(role)) {
         return this.roleOptions.fullRoles;
+      }
+      if (['PostDoc', 'GradStudent'].includes(role)) {
+        return ["RA", "Staff", "Undergrad"];
       }
       return this.roleOptions.limitedRoles;
     },
@@ -412,25 +415,26 @@ export default {
     canEditPersonnel() {
       if (!this.currentPersonnel.id) return false;
       const role = this.store.role;
-      return (
-        this.currentPersonnel.id == this.store.userID ||
-        ['Admin', 'PI', 'Lab manager'].includes(role)
-      );
+      if (this.currentPersonnel.id == this.store.userID) return true;
+      if (['Admin', 'PI', 'Lab manager'].includes(role)) return true;
+      if (['PostDoc', 'GradStudent'].includes(role) && ['RA', 'Staff', 'Undergrad'].includes(this.currentPersonnel.Role)) return true;
+      return false;
     },
 
     canDeletePersonnel() {
       if (!this.currentPersonnel.id) return false;
       const role = this.store.role;
-      return ['Admin', 'PI', 'Lab manager'].includes(role);
+      if (['Admin', 'PI', 'Lab manager'].includes(role)) return true;
+      if (['PostDoc', 'GradStudent'].includes(role) && ['RA', 'Staff', 'Undergrad'].includes(this.currentPersonnel.Role)) return true;
+      return false;
     },
 
     canViewStats() {
-      // 1. Can always view your own stats
       if (this.currentPersonnel.id == this.store.userID) return true;
-
-      // 2. Managers can view everyone's stats
       const role = this.store.role;
-      return ['Admin', 'PI', 'Lab manager'].includes(role);
+      if (['Admin', 'PI', 'Lab manager'].includes(role)) return true;
+      if (['PostDoc', 'GradStudent'].includes(role) && ['Lab manager', 'RA', 'Staff', 'Undergrad'].includes(this.currentPersonnel.Role)) return true;
+      return false;
     }
   },
 
@@ -451,10 +455,10 @@ export default {
 
     canManageStatus(item) {
       const role = this.store.role;
-      return (
-        item.id == this.store.userID ||
-        ['Admin', 'PI', 'Lab manager'].includes(role)
-      );
+      if (item.id == this.store.userID) return true;
+      if (['Admin', 'PI', 'Lab manager'].includes(role)) return true;
+      if (['PostDoc', 'GradStudent'].includes(role) && ['RA', 'Staff', 'Undergrad'].includes(item.Role)) return true;
+      return false;
     },
 
     getRules(ruleName) {
