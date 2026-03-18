@@ -13,7 +13,7 @@ exports.create = asyncHandler(async (req, res) => {
     res.status(200).send(event);
   } catch (error) {
     console.error("Calendar create error:", error);
-    res.status(500).json({ error: error.message });
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -26,7 +26,7 @@ exports.update = asyncHandler(async (req, res) => {
     res.status(200).send(event);
   } catch (error) {
     console.error("Calendar update error:", error);
-    res.status(500).json({ error: error.message });
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 

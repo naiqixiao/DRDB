@@ -55,7 +55,7 @@
             {{ currentFamily.id }}
           </div>
 
-          <v-card-text class="pt-6 flex-grow-1" style="position: relative; z-index: 1;">
+          <v-card-text v-if="currentFamily.id" class="pt-6 flex-grow-1" style="position: relative; z-index: 1;">
             <v-row>
               <v-col cols="12" sm="8" class="text-center text-sm-left">
                 <div class="d-flex flex-column align-center flex-sm-row">
@@ -185,6 +185,18 @@
                 </v-list-item-subtitle>
               </v-list-item>
             </v-list>
+          </v-card-text>
+
+          <!-- Empty State Container -->
+          <v-card-text v-else class="text-center py-12 flex-grow-1 d-flex flex-column align-center justify-center">
+            <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-home-search-outline</v-icon>
+            <div class="text-h6 text-muted font-weight-bold mb-2">No Family Selected</div>
+            <div class="text-body-2 text-muted px-4">
+              Click "Search" above to find a family, or use the navigation arrows if you have already searched.
+            </div>
+            <v-btn color="primary" variant="tonal" class="mt-6" @click="searchMode" prepend-icon="mdi-magnify">
+              Search Families
+            </v-btn>
           </v-card-text>
         </v-card>
       </v-col>
@@ -362,20 +374,38 @@
 
       <!-- MIDDLE COLUMN: Children -->
       <v-col cols="12" md="4" style="height: 500px; overflow-y: auto; padding: 0px;">
+        <div v-if="currentFamily.id" class="h-100">
           <ChildInfo ref="childInfo" :Children="currentFamily.Children"
             :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :currentFamily="currentFamily"
             @newSchedule="updateFamilyAppointment"></ChildInfo>
+        </div>
+        <v-card v-else class="ds-card h-100 d-flex flex-column align-center justify-center" variant="flat">
+          <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-human-male-child</v-icon>
+          <div class="text-h6 text-muted font-weight-bold">Child Information</div>
+          <div class="text-body-2 text-muted px-4 text-center mt-2">
+            Children associated with the family will appear here.
+          </div>
+        </v-card>
       </v-col>
 
       <!-- RIGHT COLUMN: Notes & Conversations -->
       <v-col cols="12" md="3">
-        <NotesConversation
-          class="h-100"
-          :Conversation="currentFamily.Conversations || []"
-          :familyId="currentFamily.id ? parseInt(currentFamily.id) : null"
-          :notes="familyNotes"
-          @updateNotes="saveNotes"
-        />
+        <div v-if="currentFamily.id" class="h-100">
+          <NotesConversation
+            class="h-100"
+            :Conversation="currentFamily.Conversations || []"
+            :familyId="currentFamily.id ? parseInt(currentFamily.id) : null"
+            :notes="familyNotes"
+            @updateNotes="saveNotes"
+          />
+        </div>
+        <v-card v-else class="ds-card h-100 d-flex flex-column align-center justify-center" variant="flat">
+          <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-forum-outline</v-icon>
+          <div class="text-h6 text-muted font-weight-bold">Notes & Conversations</div>
+          <div class="text-body-2 text-muted px-4 text-center mt-2">
+            Select a family to view their communication history.
+          </div>
+        </v-card>
       </v-col>
     </v-row>
 
@@ -397,7 +427,7 @@
     </v-dialog>
 
     <!-- BOTTOM ROW: Schedule Table -->
-    <v-row class="mt-6 mb-12">
+    <v-row class="mt-6 mb-12" v-if="currentFamily.id">
       <v-col cols="12">
         <v-card class="ds-card" variant="flat">
 

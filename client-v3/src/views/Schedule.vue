@@ -99,12 +99,12 @@
                     v-if="participationStats.Rescheduling">Rescheduling: {{ participationStats.Rescheduling }}</v-chip>
                 </div>
               </v-col>
-              <v-col cols="12" sm="4" class="d-flex align-center justify-end">
-                <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-pencil" class="mr-2"
+              <v-col cols="12" sm="4" class="d-flex flex-column align-end justify-center" style="gap: 8px;">
+                <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-pencil" width="130"
                   @click.stop="editFamilyAndChild" :disabled="!currentChild.id">
                   Edit Info
                 </v-btn>
-                <v-btn color="success" variant="tonal" size="small" prepend-icon="mdi-account-child"
+                <v-btn color="success" variant="tonal" size="small" prepend-icon="mdi-account-child" width="130"
                   @click.stop="addNewChild" :disabled="!currentFamily.id">
                   Add Child
                 </v-btn>
@@ -218,57 +218,68 @@
 
       <!-- RIGHT COLUMN: Schedule Action + Notes + No More Contact -->
       <v-col cols="12" md="3" class="d-flex flex-column">
-        <!-- Schedule a study section -->
-        <!-- Schedule a study section -->
-        <v-card class="ds-card mb-4 elevation-2 border-primary border-opacity-10" :style="!currentChild.id ? 'opacity: 0.6;' : ''">
-          <v-card-title class="d-flex justify-space-between align-center py-3 bg-grey-lighten-4 border-bottom">
-            <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">Schedule a Study</span>
-            <v-icon color="primary" size="small">mdi-calendar-clock</v-icon>
-          </v-card-title>
-          <v-card-text class="pt-4">
-            
-            <v-select 
-              :items="Responses" 
-              v-model="response" 
-              :label="currentChild.scheduled || contactedByOthers
-              ? 'Already scheduled'
-              : 'Parents\' response'" 
-              :disabled="!currentChild.id ||
-              currentChild.scheduled ||
-              !store.labEmailStatus ||
-              contactedByOthers" 
-              class="mb-3" 
-              bg-color="textbackground" 
-              hide-details 
-              variant="outlined" 
-              density="compact"
-            ></v-select>
+        <template v-if="currentChild.id">
+          <!-- Schedule a study section -->
+          <v-card class="ds-card mb-4 elevation-2 border-primary border-opacity-10">
+            <v-card-title class="d-flex justify-space-between align-center py-3 bg-grey-lighten-4 border-bottom">
+              <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">Schedule a Study</span>
+              <v-icon color="primary" size="small">mdi-calendar-clock</v-icon>
+            </v-card-title>
+            <v-card-text class="pt-4">
+              
+              <v-select 
+                :items="Responses" 
+                v-model="response" 
+                :label="currentChild.scheduled || contactedByOthers
+                ? 'Already scheduled'
+                : 'Parents\' response'" 
+                :disabled="!currentChild.id ||
+                currentChild.scheduled ||
+                !store.labEmailStatus ||
+                contactedByOthers" 
+                class="mb-3" 
+                bg-color="textbackground" 
+                hide-details 
+                variant="outlined" 
+                density="compact"
+              ></v-select>
 
-            <v-tooltip location="top">
-              <template v-slot:activator="{ props }">
-                <div v-bind="props">
-                  <v-btn color="#F59E0B" variant="flat" class="text-white font-weight-bold" block size="large"
-                    @click.stop="scheduleChild" :disabled="response == null">
-                    {{ response === "Rejected" ? "¯\\\\_(ツ)_/¯" : "" }}
-                    <v-icon start v-if="scheduleButtonIcon">{{ scheduleButtonIcon }}</v-icon>
-                  </v-btn>
-                </div>
-              </template>
-              <span>{{ scheduleButtonTooltip }}</span>
-            </v-tooltip>
-          </v-card-text>
-        </v-card>
+              <v-tooltip location="top">
+                <template v-slot:activator="{ props }">
+                  <div v-bind="props">
+                    <v-btn color="#F59E0B" variant="flat" class="text-white font-weight-bold" block size="large"
+                      @click.stop="scheduleChild" :disabled="response == null">
+                      {{ response === "Rejected" ? "¯\\\\_(ツ)_/¯" : "" }}
+                      <v-icon start v-if="scheduleButtonIcon">{{ scheduleButtonIcon }}</v-icon>
+                    </v-btn>
+                  </div>
+                </template>
+                <span>{{ scheduleButtonTooltip }}</span>
+              </v-tooltip>
+            </v-card-text>
+          </v-card>
 
-        <!-- Notes & Conversations -->
-        <div class="flex-grow-1 d-flex flex-column" style="min-height: 200px;">
-          <NotesConversation 
-            :Conversation="currentFamily.Conversations" 
-            :familyId="parseInt(currentFamily.id)"
-            :notes="currentFamily.Note" 
-            @updateNotes="saveNotes"
-            class="flex-grow-1"
-          ></NotesConversation>
-        </div>
+          <!-- Notes & Conversations -->
+          <div class="flex-grow-1 d-flex flex-column" style="min-height: 200px;">
+            <NotesConversation 
+              :Conversation="currentFamily.Conversations" 
+              :familyId="parseInt(currentFamily.id)"
+              :notes="currentFamily.Note" 
+              @updateNotes="saveNotes"
+              class="flex-grow-1"
+            ></NotesConversation>
+          </div>
+        </template>
+        
+        <template v-else>
+          <v-card class="ds-card h-100 d-flex flex-column align-center justify-center" variant="flat">
+            <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-calendar-question</v-icon>
+            <div class="text-h6 text-muted font-weight-bold">Actions & Notes</div>
+            <div class="text-body-2 text-muted px-4 text-center mt-2">
+              Select a study and a child to schedule appointments and view conversations.
+            </div>
+          </v-card>
+        </template>
 
       </v-col>
     </v-row>

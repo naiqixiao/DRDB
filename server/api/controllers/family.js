@@ -443,7 +443,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
 
   } catch (error) {
     console.error("Family search error:", error);
-    res.status(500).json({ error: error.message });
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 

@@ -428,7 +428,7 @@ exports.update = asyncHandler(async (req, res) => {
     console.log("Appointment Information Updated.");
   } catch (error) {
     console.error("Appointment update error:", error);
-    res.status(500).json({ error: error.message });
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -578,7 +578,7 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
     console.log("Experimenters updated!");
   } catch (error) {
     console.error("Experimenters update error:", error);
-    res.status(500).json({ error: error.message });
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -642,10 +642,10 @@ exports.monthYearN = asyncHandler(async (req, res) => {
     fs.writeFileSync(filePath, jsonString);
     
     console.log('monthYearN.json has been written successfully.');
-    res.status(200).send("File has been written successfully.");
+    if (res) res.status(200).send("File has been written successfully.");
   } catch (err) {
     console.error("Monthly stats write error:", err);
-    res.status(500).json({ error: err.message });
+    if (res) res.status(500).json({ error: err.message });
   }
 });
 
@@ -710,9 +710,9 @@ exports.monthYearWeekN = asyncHandler(async (req, res) => {
     fs.writeFileSync(filePath, jsonString);
     
     console.log('monthYearWeekN.json has been written successfully.');
-    res.status(200).send("File has been written successfully.");
+    if (res) res.status(200).send("File has been written successfully.");
   } catch (err) {
     console.error('Error writing file:', err);
-    res.status(500).json({ error: err.message });
+    if (res) res.status(500).json({ error: err.message });
   }
 });
