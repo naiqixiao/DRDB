@@ -48,15 +48,23 @@ exports.search = asyncHandler(async (req, res) => {
   delete queryString.AppointmentTimeAfter;
   delete queryString.trainingMode;
   
-  if (queryString.Email) { queryString["$Family.Email$"] = { [Op.like]: `${queryString.Email}%` }; delete queryString.Email; }
-  if (queryString.NamePrimary) { queryString["$Family.NamePrimary$"] = { [Op.like]: `${queryString.NamePrimary}%` }; delete queryString.NamePrimary; }
-  if (queryString.NameSecondary) { queryString["$Family.NameSecondary$"] = { [Op.like]: `${queryString.NameSecondary}%` }; delete queryString.NameSecondary; }
-  if (queryString.Phone) { queryString["$Family.Phone$"] = { [Op.like]: `${queryString.Phone}%` }; delete queryString.Phone; }
-  if (queryString.StudyName) { queryString["$Appointments.FK_Study$"] = queryString.StudyName; delete queryString.StudyName; }
-  if (queryString.StudyId) { queryString["$Appointments.FK_Study$"] = queryString.StudyId; delete queryString.StudyId; }
-  if (queryString.lab) { queryString["$Appointments.Study.FK_Lab$"] = queryString.lab; delete queryString.lab; }
+  if (queryString.Email) { queryString["$Family.Email$"] = { [Op.like]: `${queryString.Email}%` }; }
+  delete queryString.Email;
+  if (queryString.NamePrimary) { queryString["$Family.NamePrimary$"] = { [Op.like]: `${queryString.NamePrimary}%` }; }
+  delete queryString.NamePrimary;
+  if (queryString.NameSecondary) { queryString["$Family.NameSecondary$"] = { [Op.like]: `${queryString.NameSecondary}%` }; }
+  delete queryString.NameSecondary;
+  if (queryString.Phone) { queryString["$Family.Phone$"] = { [Op.like]: `${queryString.Phone}%` }; }
+  delete queryString.Phone;
+  if (queryString.StudyName) { queryString["$Appointments.FK_Study$"] = queryString.StudyName; }
+  delete queryString.StudyName;
+  if (queryString.StudyId) { queryString["$Appointments.FK_Study$"] = queryString.StudyId; }
+  delete queryString.StudyId;
+  if (queryString.lab) { queryString["$Appointments.Study.FK_Lab$"] = queryString.lab; }
+  delete queryString.lab;
 
-  if (queryString.FamilyId) { queryString.FK_Family = queryString.FamilyId; delete queryString.FamilyId; }
+  if (queryString.FamilyId) { queryString.FK_Family = queryString.FamilyId; }
+  delete queryString.FamilyId;
 
   const schedules = await scheduleService.searchSchedules(queryString);
   res.status(200).send(schedules);
