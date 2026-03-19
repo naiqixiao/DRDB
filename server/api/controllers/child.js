@@ -232,44 +232,49 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.id = { [Op.notIn]: pastParticipants };
   }
 
+  const isSlim = req.query.slim === 'true';
+
   const children = await model.child.findAll({
     where: queryString,
-    include: [
+    include: isSlim ? [
+      // Slim mode: only what's needed for Schedule page list + client-side filtering
+      {
+        model: model.appointment,
+        separate: true,
+        attributes: ["id", "FK_Study", "FK_Schedule"],
+      },
+      {
+        model: model.family,
+        attributes: ["id", "NamePrimary", "NameSecondary", "Phone", "CellPhone", "Email",
+                     "AutismHistory", "NextContactDate", "NoMoreContact", "Note",
+                     "LanguagePrimary", "Address", "TrainingSet"],
+      },
+    ] : [
+      // Full mode: all nested data (used by Family page and other callers)
       { model: model.appointment, separate: true, include: [model.schedule] },
       {
         model: model.family,
         include: [
-          {
-            model: model.conversations, separate: true, 
-          },
+          { model: model.conversations, separate: true },
           {
             model: model.child,
-            separate: true, 
+            separate: true,
             include: [
               { model: model.appointment, attributes: ["FK_Study"] },
-              {
-                model: model.family,
-                attributes: ["AutismHistory"],
-              },
+              { model: model.family, attributes: ["AutismHistory"] },
             ],
           },
           {
             model: model.appointment,
             order: [["id", "DESC"]],
-            separate: true, 
+            separate: true,
             include: [
               { model: model.child, attributes: ["Name", "DoB"] },
               {
                 model: model.study,
-                attributes: [
-                  "StudyName",
-                  "EmailTemplate",
-                  "ReminderTemplate",
-                  "FollowUPEmailSnippet",
-                  "StudyType",
-                  "FK_Lab",
-                ],
-                include: [model.lab]
+                attributes: ["StudyName", "EmailTemplate", "ReminderTemplate",
+                             "FollowUPEmailSnippet", "StudyType", "FK_Lab"],
+                include: [model.lab],
               },
               { model: model.schedule },
             ],
@@ -279,18 +284,13 @@ exports.search = asyncHandler(async (req, res) => {
       {
         model: model.child,
         as: "sibling",
-        through: {
-          model: model.sibling,
-        },
+        through: { model: model.sibling },
         include: [
-          { model: model.appointment, 
-            separate: true, 
-            include: [model.schedule] },
+          { model: model.appointment, separate: true, include: [model.schedule] },
           { model: model.family },
         ],
       },
     ],
-    // order: [[model.family, model.appointment, "id", "DESC"]],
   });
 
   shuffle(children);

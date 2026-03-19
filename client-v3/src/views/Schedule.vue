@@ -834,7 +834,8 @@ export default {
         minAge,
         maxAge,
         studyID: this.selectedStudy.id,
-        trainingMode: this.store.trainingMode
+        trainingMode: this.store.trainingMode,
+        slim: true,  // fetch minimal data for the list; full data loaded on selection
       };
 
       if (this.selectedStudy.ASDParticipant === "Exclude") queryString.ASDParticipant = 0;
@@ -890,6 +891,9 @@ export default {
           this.page = 1;
           this.Children = Results.data;
           this.currentChild = this.Children[0];
+
+          // Lazy-load full family data for the first child
+          await this.loadFullChild(this.currentChild);
 
           if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
             this.currentChild.scheduled = true;
@@ -1094,6 +1098,19 @@ export default {
       return null;
     },
 
+    // Lazy-load full child+family data when a child is selected
+    async loadFullChild(targetChild) {
+      try {
+        const result = await child.search({ id: targetChild.id, trainingMode: this.store.trainingMode });
+        if (result.data && result.data.length > 0) {
+          const fullChild = result.data[0];
+          Object.assign(targetChild, fullChild);
+        }
+      } catch (e) {
+        console.error('Failed to load full child data:', e);
+      }
+    },
+
     async nextPage() {
       if (this.Children.length === 0 || this.page >= this.Children.length) return;
       if (!this.currentChild.scheduled && !this.contactedByOthers && this.currentChild.FK_Family) {
@@ -1103,6 +1120,11 @@ export default {
       this.page += 1;
       this.currentChild = this.Children[this.page - 1];
       this.response = null;
+
+      // Lazy-load full data if not already loaded
+      if (!this.currentChild.Family?.Appointments) {
+        await this.loadFullChild(this.currentChild);
+      }
 
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
@@ -1122,6 +1144,11 @@ export default {
       this.page -= 1;
       this.currentChild = this.Children[this.page - 1];
       this.response = null;
+
+      // Lazy-load full data if not already loaded
+      if (!this.currentChild.Family?.Appointments) {
+        await this.loadFullChild(this.currentChild);
+      }
 
       if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
         this.contactedByOthers = true;
