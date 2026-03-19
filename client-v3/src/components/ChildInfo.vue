@@ -114,7 +114,8 @@
                     <v-checkbox v-else-if="item.type == 'checkbox'" v-model="editedItem[item.field]" :label="item.label"
                       density="compact" hide-details class="mb-2" color="primary"></v-checkbox>
                     <v-text-field v-else v-model="editedItem[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" :type="item.field === 'DoB' ? 'date' : 'text'"></v-text-field>
+                      density="compact" hide-details class="mb-2" 
+                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -427,7 +428,11 @@ export default {
       ) {
         try {
           await child.delete({ id: id });
-          this.Children.splice(index, 1);
+          // Find by id, not sorted index, since template iterates sortedChildren
+          const realIndex = this.Children.findIndex(c => c.id === id);
+          if (realIndex > -1) {
+            this.Children.splice(realIndex, 1);
+          }
         } catch (error) {
           console.log(error);
         }
@@ -443,23 +448,39 @@ export default {
     },
 
     async save() {
+      // Sanitize: convert empty DoB/Age to null so the DB doesn't receive "Invalid date"
+      if (!this.editedItem.DoB || this.editedItem.DoB === '') {
+        this.editedItem.DoB = null;
+      }
+      if (!this.editedItem.Age || this.editedItem.Age === '') {
+        this.editedItem.Age = null;
+      }
+
       if (this.editedIndex > -1) {
-        // update
-        Object.assign(this.Children[this.editedIndex], this.editedItem);
+        // update — find child by id, NOT by editedIndex, because the template
+        // iterates over sortedChildren (sorted by DoB) whose indices don't
+        // match the original Children array.
+        const realIndex = this.Children.findIndex(c => c.id === this.editedItem.id);
+        if (realIndex > -1) {
+          Object.assign(this.Children[realIndex], this.editedItem);
+        }
         try {
           await child.update(this.editedItem);
         } catch (error) {
           console.log(error);
         }
       } else {
-        // create - handled by Family view generally or add logic here?
-        // The template shows "New Child" title but button to add child is outside this component usually?
-        // Ah, parent passes Children. This component manages display and edit of EXISTING children.
-        // But if there is a way to add child here, it would be needed.
-        // Family.vue handles adding child usually.
-        // But if this dialog handles creation too:
-        // Assuming this component purely lists children, but allows editing/deleting.
-        // Creation might be triggered from parent.
+        // create new child
+        try {
+          const newChildInfo = Object.assign({}, this.editedItem);
+          newChildInfo.FK_Family = this.familyId;
+
+          await child.create(newChildInfo);
+          // Tell parent to refresh family data so the new child appears with full server data
+          this.$emit('childAdded');
+        } catch (error) {
+          console.log(error);
+        }
       }
       this.close();
     },

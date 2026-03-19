@@ -377,7 +377,7 @@
         <div v-if="currentFamily.id" class="h-100">
           <ChildInfo ref="childInfo" :Children="currentFamily.Children"
             :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :currentFamily="currentFamily"
-            @newSchedule="updateFamilyAppointment"></ChildInfo>
+            @newSchedule="updateFamilyAppointment" @childAdded="updateFamilyAppointment"></ChildInfo>
         </div>
         <v-card v-else class="ds-card h-100 d-flex flex-column align-center justify-center" variant="flat">
           <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-human-male-child</v-icon>

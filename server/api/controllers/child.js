@@ -329,8 +329,9 @@ exports.delete = asyncHandler(async (req, res) => {
     where: { id: req.query.id },
   });
 
-  // Log
-  const User = JSON.parse(req.query.User);
+  // req.query.User is already parsed by Express's qs parser into an object
+  // when sent as User[Name]=...&User[Email]=..., so no JSON.parse needed
+  const User = typeof req.query.User === 'string' ? JSON.parse(req.query.User) : req.query.User;
 
   await log.createLog(
     "Child Deleted",

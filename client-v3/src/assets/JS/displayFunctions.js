@@ -1,4 +1,6 @@
 export function childAge(child) {
+    if (!child.DoB) return 'N/A';
+
     const Age = Math.floor(
         (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
     );

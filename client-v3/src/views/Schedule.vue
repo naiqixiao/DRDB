@@ -430,7 +430,8 @@
                     <v-select v-if="item.options" v-model="editedChild[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
                     <v-text-field v-else v-model="editedChild[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" :type="item.field === 'DoB' ? 'date' : 'text'"></v-text-field>
+                      density="compact" hide-details class="mb-2" 
+                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -484,7 +485,8 @@
                     <v-select v-if="item.options" v-model="newChildData[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
                     <v-text-field v-else v-model="newChildData[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" :type="item.field === 'DoB' ? 'date' : 'text'"></v-text-field>
+                      density="compact" hide-details class="mb-2" 
+                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
