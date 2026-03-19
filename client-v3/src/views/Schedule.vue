@@ -18,10 +18,10 @@
 
     <ConfirmDlg ref="confirmD" />
 
-    <v-row justify="space-around">
+    <v-row justify="space-around" align="stretch">
       <!-- LEFT COLUMN: Study Summary -->
-      <v-col cols="12" md="5">
-        <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
+      <v-col cols="12" md="5" class="d-flex flex-column">
+        <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1 h-100" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
       </v-col>
 
       <!-- CENTER COLUMN: Choose Study + Family & Child Info -->
@@ -82,23 +82,26 @@
                   </div>
                 </div>
 
-                <!-- Participation Stats Chips -->
-                <div class="d-flex flex-wrap justify-center justify-sm-start gap-1 mt-3" style="gap: 4px;" v-if="participationStats.Total > 0">
-                  <v-chip size="x-small" color="primary" variant="flat">Total: {{ participationStats.Total }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Completed', true)" class="text-white" variant="flat"
-                    v-if="participationStats.Completed">Completed: {{ participationStats.Completed }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Confirmed', false)" variant="flat"
-                    v-if="participationStats.Confirmed">Confirmed: {{ participationStats.Confirmed }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('No Show', false)" class="text-white" variant="flat"
-                    v-if="participationStats['No Show']">No-Show: {{ participationStats['No Show'] }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Cancelled', false)" class="text-white" variant="flat"
-                    v-if="participationStats.Cancelled">Cancelled: {{ participationStats.Cancelled }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat"
-                    v-if="participationStats.Rejected">Rejected: {{ participationStats.Rejected }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat"
-                    v-if="participationStats.TBD">TBD: {{ participationStats.TBD }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white" variant="flat"
-                    v-if="participationStats.Rescheduling">Rescheduling: {{ participationStats.Rescheduling }}</v-chip>
+                <!-- Participation Stats Chips — always rendered so card height is consistent -->
+                <div class="d-flex flex-wrap align-center justify-center justify-sm-start mt-3" style="gap: 4px; min-height: 24px;">
+                  <template v-if="participationStats.Total > 0">
+                    <v-chip size="x-small" color="primary" variant="flat">Total: {{ participationStats.Total }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('Completed', true)" class="text-white" variant="flat"
+                      v-if="participationStats.Completed">Completed: {{ participationStats.Completed }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('Confirmed', false)" variant="flat"
+                      v-if="participationStats.Confirmed">Confirmed: {{ participationStats.Confirmed }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('No Show', false)" class="text-white" variant="flat"
+                      v-if="participationStats['No Show']">No-Show: {{ participationStats['No Show'] }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('Cancelled', false)" class="text-white" variant="flat"
+                      v-if="participationStats.Cancelled">Cancelled: {{ participationStats.Cancelled }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat"
+                      v-if="participationStats.Rejected">Rejected: {{ participationStats.Rejected }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat"
+                      v-if="participationStats.TBD">TBD: {{ participationStats.TBD }}</v-chip>
+                    <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white" variant="flat"
+                      v-if="participationStats.Rescheduling">Rescheduling: {{ participationStats.Rescheduling }}</v-chip>
+                  </template>
+                  <span v-else class="text-caption text-disabled" style="line-height: 24px;">No participation history</span>
                 </div>
               </v-col>
               <v-col cols="12" sm="4" class="d-flex flex-column align-end justify-center" style="gap: 8px;">

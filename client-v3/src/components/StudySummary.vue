@@ -1,5 +1,5 @@
 <template>
-  <v-card class="ds-card" variant="flat" style="position: relative; overflow: hidden;">
+  <v-card class="ds-card h-100" variant="flat" style="position: relative; overflow: hidden;">
 
     <!-- Background Study Type Watermark -->
     <div v-if="selectedStudy?.StudyType"
