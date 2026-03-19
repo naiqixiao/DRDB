@@ -179,6 +179,11 @@ exports.search = asyncHandler(async (req, res) => {
   if (req.query.id) {
     queryString.id = req.query.id;
   }
+  // Guard: require age range when searching by study to prevent massive unfiltered results
+  if (req.query.studyID && (!req.query.minAge || !req.query.maxAge)) {
+    return res.status(400).json({ error: "minAge and maxAge are required when searching by study." });
+  }
+
   if (req.query.minAge && req.query.maxAge) {
     queryString.Age = {
       [Op.between]: [req.query.minAge * 30.5 - 1, req.query.maxAge * 30.5 - 1],

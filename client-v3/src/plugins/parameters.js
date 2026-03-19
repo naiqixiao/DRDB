@@ -54,8 +54,8 @@ export default {
             { label: "Vehicle", field: "Vehicle", width: "5" },
             { label: "Address", field: "Address", width: "5" },
             { label: "English %", width: "2", field: "EnglishPercent" },
-            { label: "Next Contact Date", width: "4", field: "NextContactDate" },
-            { label: "Last Contact Date", width: "4", field: "LastContactDate" },
+            { label: "Next Contact Date", width: "4", field: "NextContactDate", rules: "date" },
+            { label: "Last Contact Date", width: "4", field: "LastContactDate", rules: "date" },
             {
                 label: "Recruited via",
                 field: "RecruitmentMethod",
@@ -553,15 +553,27 @@ export default {
                 }
             ],
             dob: [
-                // (value) => !!value || "Required.",
+                (value) => !!value || "Date of birth is required.",
                 (value) => {
                     const pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
                     if (value) {
-                        return pattern.test(value) || "Invalid Date format.";
+                        if (!pattern.test(value)) return "Invalid format. Use YYYY-MM-DD.";
+                        const d = new Date(value);
+                        if (isNaN(d.getTime())) return "Invalid date.";
+                        if (d > new Date()) return "Date of birth cannot be in the future.";
+                        return true;
                     }
-                    else {
-                        return true
-                    }
+                    return true;
+                },
+            ],
+            date: [
+                (value) => {
+                    if (!value) return true;
+                    const pattern = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+                    if (!pattern.test(value)) return "Invalid format. Use YYYY-MM-DD.";
+                    const d = new Date(value);
+                    if (isNaN(d.getTime())) return "Invalid date.";
+                    return true;
                 },
             ],
             time: [

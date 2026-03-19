@@ -104,6 +104,7 @@
         <v-divider></v-divider>
 
         <v-card-text class="pt-6 pb-2" style="max-height: 70vh;">
+          <v-form ref="formChild" v-model="validChild">
           <v-container class="px-0">
             
             <div class="mb-6">
@@ -129,9 +130,10 @@
                           <v-text-field
                             v-model="editedItem.DoB"
                             :label="item.label"
+                            :rules="$rules.dob"
                             variant="outlined"
                             density="compact"
-                            hide-details
+                            hide-details="auto"
                             class="mb-2"
                             placeholder="YYYY-MM-DD"
                           >
@@ -148,8 +150,9 @@
                         ></v-date-picker>
                       </v-menu>
                     </template>
-                    <v-text-field v-else v-model="editedItem[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2"></v-text-field>
+                    <v-text-field v-else v-model="editedItem[item.field]" :label="item.label"
+                      :rules="item.rules ? $rules[item.rules] : []"
+                      variant="outlined" density="compact" hide-details="auto" class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -178,6 +181,7 @@
             </div>
 
           </v-container>
+          </v-form>
         </v-card-text>
 
         <v-card-actions class="px-6 pb-6 pt-0">
@@ -238,6 +242,7 @@ export default {
       Age: "",
       Note: ""
     },
+    validChild: true,
     dobMenuEdit: false,
     dobPickerEditDate: null,
     // Mock global properties (replace with actual global properties or store if needed)
@@ -498,6 +503,14 @@ export default {
     },
 
     async save() {
+      // Validate form before saving
+      let validationResults = true;
+      if (this.$refs.formChild) {
+        const { valid } = await this.$refs.formChild.validate();
+        validationResults = valid;
+      }
+      if (!validationResults) return;
+
       // Normalize DoB: zero-pad parts and convert empty/invalid to null
       this.editedItem.DoB = this.normalizeDob(this.editedItem.DoB);
       this.editedItem.Age = this.editedItem.DoB
@@ -505,9 +518,6 @@ export default {
         : null;
 
       if (this.editedIndex > -1) {
-        // update — find child by id, NOT by editedIndex, because the template
-        // iterates over sortedChildren (sorted by DoB) whose indices don't
-        // match the original Children array.
         const realIndex = this.Children.findIndex(c => c.id === this.editedItem.id);
         if (realIndex > -1) {
           Object.assign(this.Children[realIndex], this.editedItem);
@@ -524,12 +534,12 @@ export default {
           newChildInfo.FK_Family = this.familyId;
 
           await child.create(newChildInfo);
-          // Tell parent to refresh family data so the new child appears with full server data
           this.$emit('childAdded');
         } catch (error) {
           console.log(error);
         }
       }
+      if (this.$refs.formChild) this.$refs.formChild.resetValidation();
       this.close();
     },
 

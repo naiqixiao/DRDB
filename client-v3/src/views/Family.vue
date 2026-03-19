@@ -725,8 +725,8 @@ export default {
         { label: "Vehicle", field: "Vehicle", width: "5" },
         { label: "Address", field: "Address", width: "5" },
         { label: "English %", width: "2", field: "EnglishPercent" },
-        { label: "Next Contact Date", width: "4", field: "NextContactDate" },
-        { label: "Last Contact Date", width: "4", field: "LastContactDate" },
+        { label: "Next Contact Date", width: "4", field: "NextContactDate", rules: "date" },
+        { label: "Last Contact Date", width: "4", field: "LastContactDate", rules: "date" },
         { label: "Recruited via", field: "RecruitmentMethod", width: "2", options: "recruitmentMethod" },
       ],
       familyBasicInfo: [

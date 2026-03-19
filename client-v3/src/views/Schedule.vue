@@ -445,7 +445,8 @@
                           <v-text-field
                             v-model="editedChild.DoB"
                             :label="item.label"
-                            variant="outlined" density="compact" hide-details class="mb-2"
+                            :rules="$rules.dob"
+                            variant="outlined" density="compact" hide-details="auto" class="mb-2"
                             placeholder="YYYY-MM-DD"
                           >
                             <template v-slot:append-inner>
@@ -456,8 +457,9 @@
                         <v-date-picker v-model="dobPickerEdit" @update:model-value="onDobPickerEdit" hide-header show-adjacent-months></v-date-picker>
                       </v-menu>
                     </template>
-                    <v-text-field v-else v-model="editedChild[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2"></v-text-field>
+                    <v-text-field v-else v-model="editedChild[item.field]" :label="item.label"
+                      :rules="item.rules ? $rules[item.rules] : []"
+                      variant="outlined" density="compact" hide-details="auto" class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -517,7 +519,8 @@
                           <v-text-field
                             v-model="newChildData.DoB"
                             :label="item.label"
-                            variant="outlined" density="compact" hide-details class="mb-2"
+                            :rules="$rules.dob"
+                            variant="outlined" density="compact" hide-details="auto" class="mb-2"
                             placeholder="YYYY-MM-DD"
                           >
                             <template v-slot:append-inner>
@@ -528,8 +531,9 @@
                         <v-date-picker v-model="dobPickerAdd" @update:model-value="onDobPickerAdd" hide-header show-adjacent-months></v-date-picker>
                       </v-menu>
                     </template>
-                    <v-text-field v-else v-model="newChildData[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2"></v-text-field>
+                    <v-text-field v-else v-model="newChildData[item.field]" :label="item.label"
+                      :rules="item.rules ? $rules[item.rules] : []"
+                      variant="outlined" density="compact" hide-details="auto" class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -877,6 +881,17 @@ export default {
       } else if (groups.length > 0) {
         minAge = Math.min(...groups.map(g => g.MinAge));
         maxAge = Math.max(...groups.map(g => g.MaxAge));
+      }
+
+      // Guard: require age range to prevent unfiltered queries returning massive datasets
+      if (minAge == null || maxAge == null) {
+        this.store.setLoadingStatus(false);
+        await this.$refs.confirmD.open(
+          'No Age Groups',
+          'This study has no age groups configured. Please add age groups to the study before searching for eligible children.',
+          { color: 'warning', noconfirm: true }
+        );
+        return;
       }
 
       const queryString = {
