@@ -38,6 +38,13 @@
                 Family ID: {{ item.Family?.id }}
               </v-chip>
               <v-tooltip location="top">
+                <template v-slot:activator="{ props: copyProps }">
+                  <v-btn v-bind="copyProps" icon="mdi-content-copy" variant="text" size="x-small"
+                    density="compact" class="ml-1" @click.stop="copyToClipboard(String(item.Family?.id))"></v-btn>
+                </template>
+                <span>Copy Family ID</span>
+              </v-tooltip>
+              <v-tooltip location="top">
                 <template v-slot:activator="{ props }">
                   <v-btn v-bind="props" icon="mdi-account-details-outline" variant="text" size="small" density="compact"
                     color="primary" class="ml-2" @click.stop="$emit('showFamily', item.Family)"></v-btn>
@@ -177,6 +184,18 @@ export default {
       let cleaned = ("" + Phone).replace(/\D/g, "");
       let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
       return match ? `(${match[1]}) ${match[2]}-${match[3]}` : Phone;
+    },
+
+    copyToClipboard(text) {
+      if (!text) return;
+      navigator.clipboard.writeText(text).catch(() => {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      });
     },
 
     getColor(status, completed) {

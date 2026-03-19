@@ -66,8 +66,10 @@
                     <h2 class="text-h5 font-weight-bold mb-1" style="font-family: var(--ds-font-family-heading)">
                       {{ currentFamily.NamePrimary || 'Unknown Family' }}
                     </h2>
-                    <div class="text-subtitle-2 text-muted">
+                    <div class="text-subtitle-2 text-muted d-flex align-center" style="gap: 4px;">
                       Family ID: {{ currentFamily.id || '—' }}
+                      <v-btn v-if="currentFamily.id" icon="mdi-content-copy" variant="text" size="x-small"
+                        density="compact" @click="copyToClipboard(String(currentFamily.id))"></v-btn>
                     </div>
                   </div>
                 </div>
@@ -772,6 +774,18 @@ export default {
   },
 
   methods: {
+    copyToClipboard(text) {
+      if (!text) return;
+      navigator.clipboard.writeText(String(text)).catch(() => {
+        const el = document.createElement('textarea');
+        el.value = String(text);
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      });
+    },
+
     async openDuplicateDialog() {
       this.duplicateDialog = true;
       this.loadingDuplicates = true;

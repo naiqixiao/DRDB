@@ -104,32 +104,60 @@
             ></v-select>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field 
-              @update:model-value="getSearchKeys('AppointmentTimeAfter', $event)" 
-              @keydown.enter="searchSchedule" 
-              ref="textfieldAfter"
-              label="After" 
-              type="date"
-              v-model="queryString.AppointmentTimeAfter" 
-              bg-color="textbackground" 
-              hide-details
-              variant="outlined" 
-              density="compact"
-            ></v-text-field>
+            <v-menu v-model="dateMenuAfter" :close-on-content-click="false" location="bottom start">
+              <template v-slot:activator="{ props: menuProps }">
+                <v-text-field
+                  @update:model-value="getSearchKeys('AppointmentTimeAfter', $event)"
+                  @keydown.enter="searchSchedule"
+                  ref="textfieldAfter"
+                  label="After"
+                  v-model="queryString.AppointmentTimeAfter"
+                  bg-color="textbackground"
+                  hide-details
+                  variant="outlined"
+                  density="compact"
+                  placeholder="YYYY-MM-DD"
+                >
+                  <template v-slot:append-inner>
+                    <v-icon v-bind="menuProps" style="cursor:pointer">mdi-calendar</v-icon>
+                  </template>
+                </v-text-field>
+              </template>
+              <v-date-picker
+                v-model="datePickerAfter"
+                @update:model-value="onDatePickerAfter"
+                hide-header
+                show-adjacent-months
+              ></v-date-picker>
+            </v-menu>
           </v-col>
           <v-col cols="12" md="3">
-            <v-text-field 
-              @keydown.enter="searchSchedule" 
-              @update:model-value="getSearchKeys('AppointmentTimeBefore', $event)" 
-              ref="textfieldBefore"
-              label="Before" 
-              type="date"
-              v-model="queryString.AppointmentTimeBefore" 
-              bg-color="textbackground" 
-              hide-details
-              variant="outlined" 
-              density="compact"
-            ></v-text-field>
+            <v-menu v-model="dateMenuBefore" :close-on-content-click="false" location="bottom start">
+              <template v-slot:activator="{ props: menuProps }">
+                <v-text-field
+                  @keydown.enter="searchSchedule"
+                  @update:model-value="getSearchKeys('AppointmentTimeBefore', $event)"
+                  ref="textfieldBefore"
+                  label="Before"
+                  v-model="queryString.AppointmentTimeBefore"
+                  bg-color="textbackground"
+                  hide-details
+                  variant="outlined"
+                  density="compact"
+                  placeholder="YYYY-MM-DD"
+                >
+                  <template v-slot:append-inner>
+                    <v-icon v-bind="menuProps" style="cursor:pointer">mdi-calendar</v-icon>
+                  </template>
+                </v-text-field>
+              </template>
+              <v-date-picker
+                v-model="datePickerBefore"
+                @update:model-value="onDatePickerBefore"
+                hide-header
+                show-adjacent-months
+              ></v-date-picker>
+            </v-menu>
           </v-col>
         </v-row>
 
@@ -298,6 +326,10 @@ export default {
         AppointmentTimeBefore: null,
         AppointmentTimeAfter: null,
       },
+      dateMenuAfter: false,
+      dateMenuBefore: false,
+      datePickerAfter: null,
+      datePickerBefore: null,
       Schedules: [],
       searchingFields: [
         { label: "Family ID", field: "FamilyId", width: 2 },
@@ -360,6 +392,24 @@ export default {
       if (value !== null && value !== undefined && field) {
         this.queryString[field] = value;
       }
+    },
+
+    onDatePickerAfter(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const formatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      this.queryString.AppointmentTimeAfter = formatted;
+      this.getSearchKeys('AppointmentTimeAfter', formatted);
+      this.dateMenuAfter = false;
+    },
+
+    onDatePickerBefore(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const formatted = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      this.queryString.AppointmentTimeBefore = formatted;
+      this.getSearchKeys('AppointmentTimeBefore', formatted);
+      this.dateMenuBefore = false;
     },
 
     async searchSchedule() {

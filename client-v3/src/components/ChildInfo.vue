@@ -13,16 +13,25 @@
               </v-icon>
               <span class="text-h6 font-weight-bold">{{ child.Name ? child.Name.split(' ')[0] : 'Unknown' }}</span>
             </div>
-            <v-menu location="bottom end">
-              <template v-slot:activator="{ props }">
-                <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props"></v-btn>
-              </template>
-              <v-list density="compact">
-                <v-list-item @click="editChild(child, index)" prepend-icon="mdi-pencil" title="Edit"></v-list-item>
-                <v-list-item @click="deleteChild(child.id, index)" prepend-icon="mdi-delete" base-color="error"
-                  title="Delete"></v-list-item>
-              </v-list>
-            </v-menu>
+            <div class="d-flex align-center">
+              <!-- Note indicator — shows amber note icon with tooltip when a note exists -->
+              <v-tooltip v-if="child.Note" location="bottom" max-width="260">
+                <template v-slot:activator="{ props }">
+                  <v-icon v-bind="props" size="small" color="amber-darken-2" class="mr-1">mdi-note-text</v-icon>
+                </template>
+                <span style="white-space: pre-wrap;">{{ child.Note }}</span>
+              </v-tooltip>
+              <v-menu location="bottom end">
+                <template v-slot:activator="{ props }">
+                  <v-btn icon="mdi-dots-vertical" variant="text" size="small" v-bind="props"></v-btn>
+                </template>
+                <v-list density="compact">
+                  <v-list-item @click="editChild(child, index)" prepend-icon="mdi-pencil" title="Edit"></v-list-item>
+                  <v-list-item @click="deleteChild(child.id, index)" prepend-icon="mdi-delete" base-color="error"
+                    title="Delete"></v-list-item>
+                </v-list>
+              </v-menu>
+            </div>
           </v-card-title>
 
           <v-card-text class="pt-4 flex-grow-1" style="position: relative; z-index: 1;">
@@ -113,9 +122,34 @@
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
                     <v-checkbox v-else-if="item.type == 'checkbox'" v-model="editedItem[item.field]" :label="item.label"
                       density="compact" hide-details class="mb-2" color="primary"></v-checkbox>
+                    <!-- DoB: text input + calendar picker -->
+                    <template v-else-if="item.field === 'DoB'">
+                      <v-menu v-model="dobMenuEdit" :close-on-content-click="false" location="bottom start">
+                        <template v-slot:activator="{ props: menuProps }">
+                          <v-text-field
+                            v-model="editedItem.DoB"
+                            :label="item.label"
+                            variant="outlined"
+                            density="compact"
+                            hide-details
+                            class="mb-2"
+                            placeholder="YYYY-MM-DD"
+                          >
+                            <template v-slot:append-inner>
+                              <v-icon v-bind="menuProps" style="cursor:pointer">mdi-calendar</v-icon>
+                            </template>
+                          </v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="dobPickerEditDate"
+                          @update:model-value="onDobPickerEdit"
+                          hide-header
+                          show-adjacent-months
+                        ></v-date-picker>
+                      </v-menu>
+                    </template>
                     <v-text-field v-else v-model="editedItem[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" 
-                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
+                      density="compact" hide-details class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -204,6 +238,8 @@ export default {
       Age: "",
       Note: ""
     },
+    dobMenuEdit: false,
+    dobPickerEditDate: null,
     // Mock global properties (replace with actual global properties or store if needed)
     // Assuming $childInfo and $childSensitiveInfo are available globally or need to be imported/defined.
     // For now I will assume they are available on the instance via app.config.globalProperties or mixin.
@@ -409,13 +445,27 @@ export default {
       // format DOB for date input
       if (this.editedItem.DoB) {
         this.editedItem.DoB = moment(this.editedItem.DoB).format("YYYY-MM-DD");
+        this.dobPickerEditDate = new Date(this.editedItem.DoB + 'T12:00:00');
+      } else {
+        this.dobPickerEditDate = null;
       }
       this.dialogChild = true;
+    },
+
+    onDobPickerEdit(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.editedItem.DoB = `${yyyy}-${mm}-${dd}`;
+      this.dobMenuEdit = false;
     },
 
     addChild() {
       this.editedIndex = -1;
       this.editedItem = Object.assign({}, this.defaultItem);
+      this.dobPickerEditDate = null;
       this.dialogChild = true;
     },
 
@@ -448,13 +498,11 @@ export default {
     },
 
     async save() {
-      // Sanitize: convert empty DoB/Age to null so the DB doesn't receive "Invalid date"
-      if (!this.editedItem.DoB || this.editedItem.DoB === '') {
-        this.editedItem.DoB = null;
-      }
-      if (!this.editedItem.Age || this.editedItem.Age === '') {
-        this.editedItem.Age = null;
-      }
+      // Normalize DoB: zero-pad parts and convert empty/invalid to null
+      this.editedItem.DoB = this.normalizeDob(this.editedItem.DoB);
+      this.editedItem.Age = this.editedItem.DoB
+        ? Math.floor((new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000))
+        : null;
 
       if (this.editedIndex > -1) {
         // update — find child by id, NOT by editedIndex, because the template
@@ -483,6 +531,16 @@ export default {
         }
       }
       this.close();
+    },
+
+    // Normalize DoB to strict YYYY-MM-DD with zero-padded month/day, or null if empty/invalid
+    normalizeDob(dob) {
+      if (!dob || String(dob).trim() === '') return null;
+      const parts = String(dob).trim().split('-');
+      if (parts.length !== 3) return null;
+      const [y, m, d] = parts;
+      const normalized = `${y.padStart(4, '0')}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+      return isNaN(new Date(normalized).getTime()) ? null : normalized;
     },
 
     Schedule(child, index) {

@@ -4,19 +4,33 @@
       class="pa-0 d-flex align-center"
       style="gap: 12px;"
     >
-      <!-- Date picker -->
-      <v-text-field
-        ref="studyDateInput"
-        label="Date"
-        type="date"
-        v-model="dateValue"
-        :disabled="dateTimePickerDisable"
-        @update:model-value="onDateTimeChange"
-        hide-details
-        variant="outlined"
-        density="compact"
-        style="max-width: 180px; flex-shrink: 0;"
-      ></v-text-field>
+      <!-- Date: text input + calendar picker -->
+      <v-menu v-model="dateMenu" :close-on-content-click="false" location="bottom start">
+        <template v-slot:activator="{ props: menuProps }">
+          <v-text-field
+            ref="studyDateInput"
+            label="Date"
+            v-model="dateValue"
+            :disabled="dateTimePickerDisable"
+            @update:model-value="onDateTimeChange"
+            hide-details
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DD"
+            style="max-width: 200px; flex-shrink: 0;"
+          >
+            <template v-slot:append-inner>
+              <v-icon v-bind="menuProps" :disabled="dateTimePickerDisable" style="cursor:pointer">mdi-calendar</v-icon>
+            </template>
+          </v-text-field>
+        </template>
+        <v-date-picker
+          v-model="datePickerValue"
+          @update:model-value="onDatePickerSelect"
+          hide-header
+          show-adjacent-months
+        ></v-date-picker>
+      </v-menu>
 
       <!-- Hour select -->
       <v-select
@@ -66,6 +80,8 @@ export default {
       studyDateTimeReady: false,
       validScheduleDateTime: true,
       dateValue: null,
+      datePickerValue: null,
+      dateMenu: false,
       hourValue: 9,
       minuteValue: "00",
       hourOptions: Array.from({ length: 24 }, (_, i) => i),
@@ -87,6 +103,17 @@ export default {
       this.dateTimeValidation();
     },
 
+    onDatePickerSelect(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.dateValue = `${yyyy}-${mm}-${dd}`;
+      this.dateMenu = false;
+      this.dateTimeValidation();
+    },
+
     async dateTimeValidation() {
       const isValid = this.dateValue && this.hourValue !== null && this.minuteValue !== null;
       this.studyDateTimeReady = isValid;
@@ -97,11 +124,13 @@ export default {
       if (this.appointmentTime) {
         const m = moment(this.appointmentTime);
         this.dateValue = m.format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
         this.hourValue = m.hour();
         this.minuteValue = this.snapMinute(m.minute());
         this.studyDateTimeReady = true;
       } else {
         this.dateValue = moment().format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
         this.hourValue = 9;
         this.minuteValue = "00";
         this.studyDateTimeReady = true;
@@ -112,11 +141,13 @@ export default {
       if (this.appointmentTime) {
         const m = moment(this.appointmentTime);
         this.dateValue = m.format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
         this.hourValue = m.hour();
         this.minuteValue = this.snapMinute(m.minute());
       } else {
         // Default to today at 09:00
         this.dateValue = moment().format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
         this.hourValue = 9;
         this.minuteValue = "00";
       }

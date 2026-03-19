@@ -32,8 +32,14 @@ exports.update = asyncHandler(async (req, res) => {
 exports.search = asyncHandler(async (req, res) => {
   const queryString = { ...req.query };
   
-  if (queryString.AppointmentTimeBefore && queryString.AppointmentTimeAfter) {
-    queryString.AppointmentTime = { [Op.between]: [new Date(queryString.AppointmentTimeAfter), new Date(queryString.AppointmentTimeBefore)] };
+  if (queryString.AppointmentTimeAfter && queryString.AppointmentTimeBefore) {
+    queryString.AppointmentTime = {
+      [Op.between]: [new Date(queryString.AppointmentTimeAfter), new Date(queryString.AppointmentTimeBefore)]
+    };
+  } else if (queryString.AppointmentTimeAfter) {
+    queryString.AppointmentTime = { [Op.gte]: new Date(queryString.AppointmentTimeAfter) };
+  } else if (queryString.AppointmentTimeBefore) {
+    queryString.AppointmentTime = { [Op.lte]: new Date(queryString.AppointmentTimeBefore) };
   }
   if (queryString.trainingMode === "true") queryString["$Family.TrainingSet$"] = true;
   else queryString["$Family.TrainingSet$"] = false;

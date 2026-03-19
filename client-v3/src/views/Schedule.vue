@@ -73,9 +73,11 @@
                     <h2 class="text-h6 font-weight-bold mb-1" style="font-family: var(--ds-font-family-heading)">
                       {{ currentFamily.NamePrimary || 'Unknown Family' }}
                     </h2>
-                    <div class="text-subtitle-2 text-muted">
+                    <div class="text-subtitle-2 text-muted d-flex align-center" style="gap: 4px;">
                       Family ID: {{ currentFamily.id || '—' }}
-                      <span v-if="familyChildrenCount > 0" class="ml-2">· {{ familyChildrenCount }} {{ familyChildrenCount === 1 ? 'Child' : 'Children' }}</span>
+                      <v-btn v-if="currentFamily.id" icon="mdi-content-copy" variant="text" size="x-small"
+                        density="compact" @click="copyToClipboard(String(currentFamily.id))"></v-btn>
+                      <span v-if="familyChildrenCount > 0" class="ml-1">· {{ familyChildrenCount }} {{ familyChildrenCount === 1 ? 'Child' : 'Children' }}</span>
                     </div>
                   </div>
                 </div>
@@ -186,7 +188,11 @@
                 hide-details
                 v-model="currentChild.Note"
                 density="compact"
+                @update:model-value="saveChildNote"
               ></v-textarea>
+              <div v-if="childNoteSaving" class="text-caption text-muted mt-1 text-right">
+                <v-icon size="x-small" color="success">mdi-check-circle</v-icon> Saved
+              </div>
             </div>
           </v-card-text>
 
@@ -357,7 +363,7 @@
         <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
           <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
             Edit Family & Child Information
-            <span class="text-subtitle-1 text-muted ml-2 font-weight-regular">(Family ID: {{ currentFamily.id }})</span>
+            <span class="text-subtitle-1 text-white ml-2 font-weight-regular" style="opacity: 0.7;">(Family ID: {{ currentFamily.id }})</span>
           </span>
           <v-btn icon="mdi-close" variant="text" density="comfortable" @click="closeUnifiedEdit"></v-btn>
         </v-card-title>
@@ -429,9 +435,26 @@
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
                     <v-select v-if="item.options" v-model="editedChild[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <!-- DoB: text input + calendar picker -->
+                    <template v-else-if="item.field === 'DoB'">
+                      <v-menu v-model="dobMenuEdit" :close-on-content-click="false" location="bottom start">
+                        <template v-slot:activator="{ props: menuProps }">
+                          <v-text-field
+                            v-model="editedChild.DoB"
+                            :label="item.label"
+                            variant="outlined" density="compact" hide-details class="mb-2"
+                            placeholder="YYYY-MM-DD"
+                          >
+                            <template v-slot:append-inner>
+                              <v-icon v-bind="menuProps" style="cursor:pointer">mdi-calendar</v-icon>
+                            </template>
+                          </v-text-field>
+                        </template>
+                        <v-date-picker v-model="dobPickerEdit" @update:model-value="onDobPickerEdit" hide-header show-adjacent-months></v-date-picker>
+                      </v-menu>
+                    </template>
                     <v-text-field v-else v-model="editedChild[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" 
-                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
+                      density="compact" hide-details class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -484,9 +507,26 @@
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
                     <v-select v-if="item.options" v-model="newChildData[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <!-- DoB: text input + calendar picker -->
+                    <template v-else-if="item.field === 'DoB'">
+                      <v-menu v-model="dobMenuAdd" :close-on-content-click="false" location="bottom start">
+                        <template v-slot:activator="{ props: menuProps }">
+                          <v-text-field
+                            v-model="newChildData.DoB"
+                            :label="item.label"
+                            variant="outlined" density="compact" hide-details class="mb-2"
+                            placeholder="YYYY-MM-DD"
+                          >
+                            <template v-slot:append-inner>
+                              <v-icon v-bind="menuProps" style="cursor:pointer">mdi-calendar</v-icon>
+                            </template>
+                          </v-text-field>
+                        </template>
+                        <v-date-picker v-model="dobPickerAdd" @update:model-value="onDobPickerAdd" hide-header show-adjacent-months></v-date-picker>
+                      </v-menu>
+                    </template>
                     <v-text-field v-else v-model="newChildData[item.field]" :label="item.label" variant="outlined"
-                      density="compact" hide-details class="mb-2" 
-                      :placeholder="item.field === 'DoB' ? 'YYYY-MM-DD' : ''"></v-text-field>
+                      density="compact" hide-details class="mb-2"></v-text-field>
                   </v-col>
                 </template>
               </v-row>
@@ -623,6 +663,12 @@ export default {
       deleteDialog: false,
       isDeletingTimelineSchedule: false,
       scheduleToDelete: null,
+      childNoteSaving: false,
+      _childNoteTimer: null,
+      dobMenuEdit: false,
+      dobMenuAdd: false,
+      dobPickerEdit: null,
+      dobPickerAdd: null,
       defaultAppointment: {
         index: "", FK_Family: "", FK_Child: "", FK_Study: "", FK_Schedule: "",
         PrimaryExperimenter: [], SecondaryExperimenter: [],
@@ -952,8 +998,11 @@ export default {
           await family.update(this.editedFamily);
           this.currentChild.Family = this.editedFamily;
 
-          // Save child
-          this.editedChild.Age = Math.floor((new Date() - new Date(this.editedChild.DoB)) / (24 * 3600 * 1000));
+          // Sanitize DoB before saving
+          this.editedChild.DoB = this.normalizeDob(this.editedChild.DoB);
+          this.editedChild.Age = this.editedChild.DoB
+            ? Math.floor((new Date() - new Date(this.editedChild.DoB)) / (24 * 3600 * 1000))
+            : null;
           await child.update(this.editedChild);
 
           if (this.editedIndex >= 0) {
@@ -982,9 +1031,13 @@ export default {
       if (validationResults) {
         try {
           this.newChildData.FK_Family = this.currentFamily.id;
-          this.newChildData.Age = Math.floor((new Date() - new Date(this.newChildData.DoB)) / (24 * 3600 * 1000));
+          // Sanitize DoB: normalize padding and convert empty to null
+          this.newChildData.DoB = this.normalizeDob(this.newChildData.DoB);
+          this.newChildData.Age = this.newChildData.DoB
+            ? Math.floor((new Date() - new Date(this.newChildData.DoB)) / (24 * 3600 * 1000))
+            : null;
           this.newChildData.CreatedBy = this.store.userID;
-          
+
           const result = await child.create(this.newChildData);
           if (result && result.data) {
             this.newChildData.id = result.data.id;
@@ -995,6 +1048,22 @@ export default {
           console.log(error);
         }
       }
+    },
+
+    // Normalize DoB to strict YYYY-MM-DD with zero-padded month/day, or null if empty
+    normalizeDob(dob) {
+      if (!dob || dob.trim() === '') return null;
+      const parts = dob.trim().split('-');
+      if (parts.length !== 3) return null;
+      const [y, m, d] = parts;
+      const year = y.padStart(4, '0');
+      const month = m.padStart(2, '0');
+      const day = d.padStart(2, '0');
+      const normalized = `${year}-${month}-${day}`;
+      // Validate it's a real date
+      const date = new Date(normalized);
+      if (isNaN(date.getTime())) return null;
+      return normalized;
     },
 
     closeUnifiedEdit() {
@@ -1111,6 +1180,26 @@ export default {
       }
     },
 
+    onDobPickerEdit(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.editedChild.DoB = `${yyyy}-${mm}-${dd}`;
+      this.dobMenuEdit = false;
+    },
+
+    onDobPickerAdd(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.newChildData.DoB = `${yyyy}-${mm}-${dd}`;
+      this.dobMenuAdd = false;
+    },
+
     async nextPage() {
       if (this.Children.length === 0 || this.page >= this.Children.length) return;
       if (!this.currentChild.scheduled && !this.contactedByOthers && this.currentChild.FK_Family) {
@@ -1177,6 +1266,21 @@ export default {
           console.log(error);
         }
       }
+    },
+
+    async saveChildNote() {
+      // Debounce: wait 800ms after the user stops typing before saving
+      clearTimeout(this._childNoteTimer);
+      this._childNoteTimer = setTimeout(async () => {
+        if (!this.currentChild?.id) return;
+        try {
+          await child.update({ id: this.currentChild.id, Note: this.currentChild.Note });
+          this.childNoteSaving = true;
+          setTimeout(() => { this.childNoteSaving = false; }, 2000);
+        } catch (e) {
+          console.error('Failed to save child note:', e);
+        }
+      }, 800);
     },
 
     async saveNotes(newNotes) {
