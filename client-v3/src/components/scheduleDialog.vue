@@ -458,20 +458,21 @@ export default {
       this.$emit("newAppointment", app);
     },
     readyToCreateSchedule() {
-      if (this.$refs.appointmentDetailsRef?.appointmentDetailReady && this.$refs.dateTimePickerComp?.studyDateTimeReady) {
+      const appointmentReady = this.$refs.appointmentDetailsRef?.appointmentDetailReady;
+      const dateTimeReady = this.$refs.dateTimePickerComp?.studyDateTimeReady;
+      // When the date picker is disabled (Cancel, No Show, Reschedule), date/time is not required
+      const dateTimeOk = dateTimeReady || this.dateTimePickerDisable;
+
+      if (appointmentReady && dateTimeOk) {
         this.scheduleEnable = true;
-        if (this.createdScheduleInSession) {
-          this.scheduleButtonText = "Update Schedule Event";
-        } else {
-          this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Schedule" : "Update Schedule";
-        }
       } else {
         this.scheduleEnable = false;
-        if (this.createdScheduleInSession) {
-          this.scheduleButtonText = "Update Schedule Event";
-        } else {
-          this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Schedule" : "Update Schedule";
-        }
+      }
+
+      if (this.createdScheduleInSession) {
+        this.scheduleButtonText = "Update Schedule Event";
+      } else {
+        this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Schedule" : "Update Schedule";
       }
     },
 
@@ -705,8 +706,8 @@ export default {
         app.calendarEventId = calendarEvents[index].eventId;
         app.eventURL = calendarEvents[index].eventURL;
 
-        app.Experimenters = app.PrimaryExperimenter.map(exp => exp.id);
-        app.Experimenters_2nd = app.SecondaryExperimenter.map(exp => exp.id);
+        app.Experimenters = app.PrimaryExperimenter ? app.PrimaryExperimenter.filter(exp => exp && exp.id).map(exp => exp.id) : [];
+        app.Experimenters_2nd = app.SecondaryExperimenter ? app.SecondaryExperimenter.filter(exp => exp && exp.id).map(exp => exp.id) : [];
       });
 
       const createdScheduleData = await this.createScheduleBackend(newSchedule);
@@ -805,8 +806,8 @@ export default {
         app.calendarEventId = updatedCalendarEvents[index].eventId;
         app.eventURL = updatedCalendarEvents[index].eventURL;
 
-        app.Experimenters = app.PrimaryExperimenter.map(exp => exp.id);
-        app.Experimenters_2nd = app.SecondaryExperimenter.map(exp => exp.id);
+        app.Experimenters = app.PrimaryExperimenter ? app.PrimaryExperimenter.filter(exp => exp && exp.id).map(exp => exp.id) : [];
+        app.Experimenters_2nd = app.SecondaryExperimenter ? app.SecondaryExperimenter.filter(exp => exp && exp.id).map(exp => exp.id) : [];
         app.FK_Schedule = updatedSchedule.id;
       });
 
@@ -1117,15 +1118,20 @@ export default {
         this.scheduleButtonText = (this.scheduleType === 'create') ? "Create Appointment" : "Update Appointment";
 
         this.initiateVariables(this.dialogType);
-        this.dateTimePickerDisable = (this.parentResponse !== 'Confirmed');
 
-        switch (this.parentResponse) {
-          case 'Interested':
-          case 'Left a message':
-          case 'Rejected':
-            this.scheduleEnable = true;
-            break;
+        // For the create path, dateTimePickerDisable is driven by parentResponse
+        if (this.scheduleType === 'create') {
+          this.dateTimePickerDisable = (this.parentResponse !== 'Confirmed');
+
+          switch (this.parentResponse) {
+            case 'Interested':
+            case 'Left a message':
+            case 'Rejected':
+              this.scheduleEnable = true;
+              break;
+          }
         }
+        // For the update path, initiateVariables already handles dateTimePickerDisable
       }
     },
   },

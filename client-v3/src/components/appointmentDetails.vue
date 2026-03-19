@@ -523,10 +523,12 @@ export default {
     },
 
     checkAppointmentsAssignedExperimenter() {
-      return this.editedAppointments.some((appointment, index) => 
-        (appointment.status === "Update appointment time" || appointment.status === "Confirmed") && 
-        (this.selectedExperimenters[index] && 'id' in this.selectedExperimenters[index])
-      );
+      const activeAppointments = this.editedAppointments.filter(app => app.status === "Update appointment time" || app.status === "Confirmed");
+      if (activeAppointments.length === 0) return true;
+      return activeAppointments.every((appointment) => {
+        const index = this.editedAppointments.indexOf(appointment);
+        return this.selectedExperimenters[index] && 'id' in this.selectedExperimenters[index];
+      });
     },
 
     checkAppointmentsAssignedStatus() {
@@ -539,7 +541,7 @@ export default {
         appointment.SecondaryExperimenter = this.selectedExperimenters_2nd[index];
         appointment.FK_Study = this.selectedStudies[index]?.id;
         appointment.Study = this.selectedStudies[index];
-        appointment.E1 = this.selectedExperimenters[index]?.Name + " (" + this.selectedExperimenters[index]?.Email + ")";
+        appointment.E1 = this.selectedExperimenters[index] ? this.selectedExperimenters[index].Name + " (" + this.selectedExperimenters[index].Email + ")" : "TBD";
 
         const experimenterNames_2nd = (this.selectedExperimenters_2nd[index] || []).map((experimenter) => {
           return experimenter.Name + " (" + experimenter.Email + ")";
@@ -556,6 +558,8 @@ export default {
       if (statusValues.length > 1) {
         newAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Update appointment time' || appointment.status === 'Reschedule (need to follow-up)');
         completedAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Completed');
+        // Collect Cancelled/No Show so their status changes are saved (not silently dropped)
+        updatedAppointments = this.editedAppointments.filter(appointment => appointment.status === 'Cancelled' || appointment.status === 'No Show');
       } else if (statusValues.length === 1) {
         switch (statusValues[0]) {
           case 'Update appointment time':
@@ -620,14 +624,14 @@ export default {
       let attendees = [];
       if (appointment.PrimaryExperimenter) {
         appointment.PrimaryExperimenter.forEach((experimenter) => {
-          if (experimenter.Calendar) {
+          if (experimenter && experimenter.Calendar) {
             attendees.push({ displayName: experimenter.Name, email: experimenter.Calendar });
           }
         });
       }
       if (appointment.SecondaryExperimenter) {
         appointment.SecondaryExperimenter.forEach((experimenter) => {
-           if (experimenter.Calendar) {
+           if (experimenter && experimenter.Calendar) {
              attendees.push({ displayName: experimenter.Name, email: experimenter.Calendar });
            }
         });

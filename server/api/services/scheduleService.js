@@ -129,30 +129,49 @@ exports.updateSchedule = async (updatedScheduleInfo, oAuth2Client, labId) => {
     updatedScheduleInfo.AppointmentTime = moment(updatedScheduleInfo.AppointmentTime).toISOString(true);
   }
 
+  // 1. ALWAYS Process Appointments (Regardless of Schedule Status)
+  let experimenterList = [];
+  let experimenter_2ndList = [];
+
+  for (const appointment of updatedScheduleInfo.Appointments) {
+    // Create new appointment if one was added during the update
+    if (!appointment.id) {
+      const newAppointment = await model.appointment.create({
+        ...appointment,
+        FK_Schedule: updatedScheduleInfo.id
+      });
+      appointment.id = newAppointment.id;
+    } else {
+      // Update existing appointment
+      await model.appointment.update(appointment, { where: { id: appointment.id } });
+
+      // Clear old experimenters so we can safely recreate them below if needed
+      await model.experimenterAssignment.destroy({ where: { FK_Appointment: appointment.id } });
+      await model.experimenterAssignment_2nd.destroy({ where: { FK_Appointment: appointment.id } });
+      updatedScheduleInfo.Reminded = 0;
+    }
+
+    // Only queue up new experimenter assignments if the schedule is firmly Confirmed
+    if (updatedScheduleInfo.Status === "Confirmed") {
+      (appointment.Experimenters || []).forEach(exp => {
+        experimenterList.push({ FK_Experimenter: exp, FK_Appointment: appointment.id });
+      });
+      (appointment.Experimenters_2nd || []).forEach(exp => {
+        experimenter_2ndList.push({ FK_Experimenter: exp, FK_Appointment: appointment.id });
+      });
+    }
+  }
+
+  // 2. Re-assign experimenters
+  if (experimenterList.length > 0) await model.experimenterAssignment.bulkCreate(experimenterList);
+  if (experimenter_2ndList.length > 0) await model.experimenterAssignment_2nd.bulkCreate(experimenter_2ndList);
+
+  // 3. Handle Status-Specific Logic (Family Lab Assignment & Completion)
   switch (updatedScheduleInfo.Status) {
     case "Confirmed":
+    case "Rescheduling":
+    case "TBD":
       updatedScheduleInfo.Completed = false;
-      let experimenterList = [];
-      let experimenter_2ndList = [];
-
-      for (const appointment of updatedScheduleInfo.Appointments) {
-        if (!appointment.id) {
-          const newAppointment = await model.appointment.create(appointment);
-          appointment.id = newAppointment.id;
-        } else {
-          await model.appointment.update(appointment, { where: { id: appointment.id } });
-          await model.experimenterAssignment.destroy({ where: { FK_Appointment: appointment.id } });
-          await model.experimenterAssignment_2nd.destroy({ where: { FK_Appointment: appointment.id } });
-          updatedScheduleInfo.Reminded = 0;
-        }
-
-        (appointment.Experimenters || []).forEach(exp => experimenterList.push({ FK_Experimenter: exp, FK_Appointment: appointment.id }));
-        (appointment.Experimenters_2nd || []).forEach(exp => experimenter_2ndList.push({ FK_Experimenter: exp, FK_Appointment: appointment.id }));
-      }
-
-      if (experimenterList.length > 0) await model.experimenterAssignment.bulkCreate(experimenterList);
-      if (experimenter_2ndList.length > 0) await model.experimenterAssignment_2nd.bulkCreate(experimenter_2ndList);
-
       if (updatedScheduleInfo.FK_Family) {
         await model.family.update({ AssignedLab: labId }, { where: { id: updatedScheduleInfo.FK_Family } });
       }
@@ -160,14 +179,19 @@ exports.updateSchedule = async (updatedScheduleInfo, oAuth2Client, labId) => {
 
     case "Cancelled":
     case "Rejected":
+    case "No Show":
       updatedScheduleInfo.Completed = true;
+      // Free up the family so they can be recruited by other labs
       await model.family.update({ AssignedLab: null }, { where: { id: updatedScheduleInfo.FK_Family } });
       break;
   }
 
+  // 4. Update the Schedule Record itself
   await model.schedule.update(updatedScheduleInfo, { where: { id: updatedScheduleInfo.id } });
 
-  return { id: updatedScheduleInfo.id, Status: updatedScheduleInfo.Status };
+  // 5. Return the fully populated updated Schedule
+  const updated = await searchSchedules({ id: updatedScheduleInfo.id });
+  return updated[0];
 };
 
 /**
@@ -176,9 +200,16 @@ exports.updateSchedule = async (updatedScheduleInfo, oAuth2Client, labId) => {
 exports.deleteSchedule = async (scheduleId, oAuth2Client) => {
   const schedule = await model.schedule.findOne({ where: { id: scheduleId } });
 
-  if (schedule && schedule.calendarEventId) {
-    await calendarService.deleteEvent(oAuth2Client, "primary", schedule.calendarEventId);
+  // Safely delete the Google Calendar event if it exists
+  if (schedule && schedule.calendarEventId && oAuth2Client) {
+    try {
+      await calendarService.deleteEvent(oAuth2Client, "primary", schedule.calendarEventId);
+    } catch (error) {
+      console.warn(`Could not delete calendar event ${schedule.calendarEventId}:`, error.message);
+    }
   }
 
+  // Delete the schedule from the database
   await model.schedule.destroy({ where: { id: scheduleId } });
 };
+
