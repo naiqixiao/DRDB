@@ -56,3 +56,9 @@ server/stats/*.json
 client/.shared/
 server/server_output_debug.log
 .agent/skills/ui-ux-pro-max/scripts/__pycache__/
+client/.vscode/
+client/.agent/
+repomix-output.xml
+error_logs.txt
+stats/monthYearWeekN.json
+pm2_logs.txt

@@ -42,7 +42,22 @@ The upgrade changes how age ranges are stored and introduces `TestingRoom` recor
 
 ---
 
-## 3. Backend Upgrade (`server`)
+## 3. Google API Credentials
+
+DRDB integrates with Google Calendar and Gmail. You must provide a valid `credentials.json` to enable these features.
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project or select an existing one.
+3. Navigate to **APIs & Services > Library** and enable both the **Google Calendar API** and **Gmail API**.
+4. Go to **APIs & Services > OAuth consent screen** and configure it (typically for "Internal" use within your organization).
+5. Go to **APIs & Services > Credentials**.
+6. Click **Create Credentials > OAuth client ID**. (Choose "Desktop app" or "Web application", depending on how your backend handles the auth flow.)
+7. Download the resulting JSON file and rename it to `credentials.json`.
+8. Place the file in the backend directory at `server/api/google/general/credentials.json`.
+
+---
+
+## 4. Backend Upgrade (`server`)
 
 The backend has updated dependencies to support the new database structure and features.
 
@@ -70,14 +85,11 @@ The backend has updated dependencies to support the new database structure and f
 
 ---
 
-## 4. Frontend Upgrade (`client-v3`)
-
-> [!WARNING]
-> **Crucial Change**: The frontend directory has shifted from `client/` to `client-v3/`. Ensure you run all frontend commands from the new `client-v3/` directory!
+## 5. Frontend Upgrade (`client`)
 
 1. **Navigate to the new directory and install dependencies**:
    ```bash
-   cd ~/DRDB/client-v3
+   cd ~/DRDB/client
    npm install
    ```
 
@@ -85,14 +97,11 @@ The backend has updated dependencies to support the new database structure and f
    ```bash
    npm run build
    ```
-   *This command will generate the production-ready application within the `~/DRDB/client-v3/dist` directory.*
+   *This command will generate the production-ready application within the `~/DRDB/client/dist` directory.*
 
 3. **Deploy the frontend artifacts to NGINX**:
    Assuming your NGINX web root for DRDB is located at `/var/www/html/DRDB`:
-   ```bash
-   # Optional but recommended: Remove the old vue2 artifacts first
-   sudo rm -rf /var/www/html/DRDB/*
-   
+   ```bash   
    # Copy the newly built V3 artifacts over
    sudo cp -r -T dist /var/www/html/DRDB  
    ```
@@ -104,7 +113,7 @@ The backend has updated dependencies to support the new database structure and f
 
 ---
 
-## 5. Verification Checklist
+## 6. Verification Checklist
 
 1. **Access the Website**: Open the system URL. You should see the newly redesigned, modernized login page indicating the UI framework has changed.
 2. **Verify the Backend**: Log in with an admin or researcher account. Success means the backend JWT validation and database connection are working.
