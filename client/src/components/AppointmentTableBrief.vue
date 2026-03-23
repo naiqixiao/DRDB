@@ -1,141 +1,102 @@
-<!-- todo, make the data management simpler, create the list of Appointments based on Schedule. -->
-<!-- todo, need to update the pie chart the same way. -->
 <template>
-  <v-data-table
-    hide-default-footer
-    disable-pagination
-    fixed-header
-    single-select
+  <v-data-table hide-default-footer items-per-page="-1" fixed-header
     no-data-text="The family hasn't participated in any study or no family is selected."
-    :headers="this.$headersAppointmentsBrief"
-    :items="Appointments"
-    class="elevation-1"
-    height="450px"
-    calculate-widths
-  >
+    :headers="$headersAppointmentsBrief" :items="Appointments || []" class="elevation-1" height="450px">
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.AppointmentTime="{ item }">
-      <DateDisplay
-        :date="item.Schedule.AppointmentTime"
-        :format="'long'"
-        :status="item.Schedule.Status"
-      />
+      <DateDisplay v-if="item.Schedule && item.Schedule.AppointmentTime" :date="item.Schedule.AppointmentTime"
+        format="long" :status="item.Schedule?.Status" />
     </template>
+
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.updatedAt="{ item }">
-      <DateDisplay
-        :date="item.Schedule.updatedAt"
-        :format="'short'"
-        :status="item.Schedule.Status"
-      />
+      <DateDisplay v-if="item.Schedule && item.Schedule.updatedAt" :date="item.Schedule.updatedAt" format="short"
+        :status="item.Schedule?.Status" />
     </template>
+
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.AgeByParticipation="{ item }">
       <AgeByParticipation :item="item" />
     </template>
+
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Schedule.Status="{ item }">
-      <v-chip
-        :color="getColor(item.Schedule.Status, item.Schedule.Completed)"
-        dark
-      >
+      <v-chip v-if="item.Schedule" :color="getColor(item.Schedule.Status, item.Schedule.Completed)" variant="outlined"
+        class="font-weight-bold" size="default">
         {{
-          item.Schedule.Status == "Confirmed" && item.Schedule.Completed
+          item.Schedule.Status === "Confirmed" && (item.Schedule.Completed === true || item.Schedule.Completed === 1)
             ? "Completed"
             : item.Schedule.Status
         }}
       </v-chip>
     </template>
 
+    <!-- eslint-disable-next-line vue/valid-v-slot -->
     <template #item.Study.StudyName="{ item }">
-      {{ "[ Lab: " + item.Study.Lab.PI + " ] " + item.Study.StudyName}}
+      {{ item.Study ? "[ Lab: " + (item.Study.Lab?.PI || 'Unknown') + " ] " + item.Study.StudyName : '' }}
     </template>
-
   </v-data-table>
 </template>
 
 <script>
-import DateDisplay from "@/components/DateDisplay";
-import AgeByParticipation from "@/components/AgeByParticipation";
+import DateDisplay from "@/components/DateDisplay.vue";
+import AgeByParticipation from "@/components/AgeByParticipation.vue";
 
 export default {
+  name: "AppointmentTableBrief",
   components: {
     DateDisplay,
     AgeByParticipation,
   },
   props: {
-    Appointments: Array,
-    family: Object,
-  },
-  data() {
-    return {
-      Child: {
-        Name: null,
-        DoB: new Date(),
-      },
-    };
+    Appointments: {
+      type: Array,
+      default: () => []
+    },
+    family: {
+      type: Object,
+      default: () => ({})
+    },
   },
   methods: {
     getColor(status, completed) {
-      var color = "";
       switch (status) {
         case "Completed":
-          color = "#01579B";
-          break;
+          return "#002B4D"; // very dark blue
         case "Confirmed":
-          if (completed) {
-            color = "#01579B";
-          } else {
-            color = "light-blue accent-2";
-          }
-          break;
+          return completed ? "#002B4D" : "#004D8C"; // dark blue
         case "TBD":
-          color = "teal darken-2";
-          break;
+          return "#003D33"; // dark teal
         case "Rescheduling":
-          color = "lime darken-3";
-          break;
+          return "#424900"; // dark olive
         case "No Show":
-          color = "orange darken-3";
-          break;
+          return "#8C2900"; // dark burnt orange
         case "Cancelled":
-          color = "deep-orange darken-1";
-          break;
+          return "#941F00"; // dark rust red
         case "Rejected":
-          color = "blue-grey darken-4";
-          break;
+          return "#1C272C"; // очень dark grey-blue
+        default:
+          return "#263238"; // dark grey fallback
       }
-
-      return color;
     },
   },
-  // computed: {
-  //   sortableAppointments() {
-  //     if (this.Appointments) {
-  //       return this.Appointments.map((appointment) => {
-  //         return {
-  //           ...appointment,
-  //           sortableAppointmentTime:
-  //             appointment.Schedule.AppointmentTime &&
-  //             new Date(appointment.Schedule.AppointmentTime).toISOString(),
-  //         };
-  //       });
-  //     } else {
-  //       return [];
-  //     }
-  //   },
-  // },
+  computed: {
+    $headersAppointmentsBrief() {
+      return [
+        { title: "Study Time", key: "Schedule.AppointmentTime", width: "15%" },
+        { title: "Study", key: "Study.StudyName", width: "40%" },
+        { title: "Child", key: "Child.Name", width: "15%" },
+        { title: "Age", key: "AgeByParticipation", width: "10%" },
+        { title: "Status", key: "Schedule.Status", width: "10%" },
+        { title: "Updated", key: "Schedule.updatedAt", width: "10%" }
+      ];
+    }
+  }
 };
 </script>
 
-<style lang="css" scoped>
-.theme--light.v-icon {
-  color: var(--v-primary-base);
-  font-size: 28px;
-  padding-left: 2px;
-  padding-right: 2px;
-}
-
- tr.v-data-table__selected {
-  /* color: var(--v-secondary-lighten1) !important; */
-  /* margin: 2px !important;
-  border-style: double   !important; */
-  background-color: var(--v-secondary-lighten1) !important;
+<style scoped>
+.v-data-table {
+  font-size: 14px;
 }
 </style>

@@ -13,7 +13,18 @@ google.options({
 });
 
 const fs = require("fs");
+const path = require("path");
 const log = require("../controllers/log");
+
+// Helper to determine where to save JSON outputs
+// Defaults to a 'stats' folder in the root of the server directory
+const getStatsDir = () => {
+  const dir = process.env.STATS_OUTPUT_PATH || path.join(__dirname, '../../../stats');
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  return dir;
+};
 // {
 //             "FK_Schedule": 35,
 //             "FK_Study": 3,
@@ -158,7 +169,7 @@ exports.create = asyncHandler(async (req, res) => {
         });
       }
     } catch (error) {
-      throw error;
+      console.error("Calendar update error:", error);
     }
 
     // Update Schedule updatedAt
@@ -238,14 +249,13 @@ exports.search = asyncHandler(async (req, res) => {
         model: model.study,
         attributes: [
           "StudyName",
-          "MinAge",
-          "MaxAge",
           "StudyType",
           "FK_Lab",
           "EmailTemplate",
           "ReminderTemplate",
           "FollowUPEmailSnippet",
         ],
+        include: [{ model: model.studyAgeGroup, as: 'AgeGroups' }],
       },
       {
         model: model.personnel,
@@ -265,30 +275,6 @@ exports.search = asyncHandler(async (req, res) => {
   console.log("Search successful!");
 });
 
-// Update an appointment by the id in the request
-// exports.update = asyncHandler(async (req, res) => {
-//   var updatedAppointmentInfo = req.body;
-
-//   if (updatedAppointmentInfo.id) {
-//     var ID = updatedAppointmentInfo.id;
-//     delete updatedAppointmentInfo["id"];
-//   }
-
-//   try {
-//     const updatedAppointment = await model.appointment.update(
-//       updatedAppointmentInfo,
-//       {
-//         where: { id: ID }
-//       }
-//     );
-
-//     res.status(200).send(updatedAppointment);
-
-//     console.log("Appointment Information Updated.");
-//   } catch (error) {
-//     console.log("Appointment update error:" + error);
-//   }
-// });
 
 exports.update = asyncHandler(async (req, res) => {
   const updatedAppointmentInfo = req.body.updatedExperimenters;
@@ -441,7 +427,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     console.log("Appointment Information Updated.");
   } catch (error) {
-    console.log("Appointment update error:" + error);
+    console.error("Appointment update error:", error);
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -577,13 +564,6 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
       });
     }
 
-    // // await model.schedule.update(
-    // //   { Note: Schedule.Note + "" },
-    // //   { where: { id: Schedule.id } }
-    // // );
-
-    // Schedule.dataValues.updatedAt = new Date();
-
     // Log
     const User = req.body.User;
 
@@ -597,7 +577,8 @@ exports.updateExperimenters = asyncHandler(async (req, res) => {
 
     console.log("Experimenters updated!");
   } catch (error) {
-    console.log("Experimenters update error:" + error);
+    console.error("Experimenters update error:", error);
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -630,210 +611,108 @@ exports.delete = asyncHandler(async (req, res) => {
   }
 });
 
-// Delete an appointment with the specified id in the request
-exports.delete0 = asyncHandler(async (req, res) => {
-  try {
-    var Schedule = await model.schedule.findOne({
-      where: { id: req.query.FK_Schedule },
-      include: [
-        {
-          model: model.appointment,
-          include: [
-            { model: model.family },
-            {
-              model: model.child,
-            },
-            {
-              model: model.study,
-            },
-            {
-              model: model.personnel,
-              as: "PrimaryExperimenter",
-              through: { model: model.experimenterAssignment },
-            },
-            {
-              model: model.personnel,
-              as: "SecondaryExperimenter",
-              through: { model: model.experimenterAssignment_2nd },
-            },
-          ],
-        },
-      ],
-    });
-
-    var updatedAppointments = Schedule.Appointments.filter(
-      (appointment) => appointment.id != req.query.id
-    );
-
-    var studyNames = updatedAppointments.map((appointment) => {
-      return (
-        appointment.Study.StudyName +
-        " (" +
-        appointment.FK_Family +
-        appointment.Child.IdWithinFamily +
-        ")"
-      );
-    });
-
-    studyNames = Array.from(new Set(studyNames));
-
-    var attendees = [];
-
-    updatedAppointments.forEach((appointment) => {
-      appointment.PrimaryExperimenter.forEach((experimenter) => {
-        attendees.push({
-          displayName: experimenter.Name,
-          email: experimenter.Calendar,
-        });
-      });
-      appointment.SecondaryExperimenter.forEach((experimenter) => {
-        attendees.push({
-          displayName: experimenter.Name,
-          email: experimenter.Calendar,
-        });
-      });
-    });
-
-    const updatedScheduleInfo = {
-      summary: studyNames.join(" + "),
-      attendees: attendees,
-    };
-
-    try {
-      const calendar = google.calendar({
-        version: "v3",
-        auth: req.oAuth2Client,
-      });
-      const appointment = Schedule.Appointments.find(
-        (appointment) => `${appointment.id}` === req.query.id
-      );
-
-      const testingRooms = await model.testingRoom.findAll({
-        where: { FK_Lab: req.query.lab },
-      });
-
-      const testingRoomId = appointment.Study.FK_TestingRoom;
-      let calId;
-      if (testingRoomId) {
-        const curTestingRoom = testingRooms.find(
-          (room) => room.id === testingRoomId
-        );
-        calId = curTestingRoom.calendarId;
-      } else {
-        calId = "primary";
-      }
-
-      calendar.events.delete({
-        calendarId: calId,
-        eventId: appointment.calendarEventId,
-      });
-
-      await model.appointment.update(
-        { eventURL: null, calendarEventId: null },
-        { where: { id: req.query.id } }
-      );
-    } catch (err) {
-      throw err;
-    }
-
-    await model.appointment.destroy({
-      where: { id: req.query.id },
-    });
-
-    // Update Schedule updatedAt
-    await model.schedule.update(
-      { Note: Schedule.Note + "" },
-      { where: { id: req.query.FK_Schedule } }
-    );
-
-    Schedule.dataValues.updatedAt = new Date();
-
-    // Log
-    const User = JSON.parse(req.query.User);
-
-    await log.createLog(
-      "Appointment Delete",
-      User,
-      "delelete a study appointment from a schedule (" + Schedule.id + ")"
-    );
-
-    res.status(200).send(Schedule);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-
 // Update monthYearN
 exports.monthYearN = asyncHandler(async (req, res) => {
-  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed'     AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearN = await model.sequelize.query(queryString);
-
-  const jsonString = JSON.stringify(monthYearN[0], null, 2);
-
-  // Specify the file path
-  if (!fs.existsSync("./stats/")) {
-    fs.mkdirSync("./stats/");
-  }
-  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearN.json';
-
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth, 
+      Study.StudyType AS StudyType, 
+      COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND Lab.id = 2 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0 
+    GROUP BY YearMonth, Year, Month, StudyType 
+    ORDER BY Year, Month;
+  `;
 
   try {
-    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
-      // Write the JSON string to the file
-      fs.writeFileSync(filePath, jsonString);
-      console.log('File has been written successfully.');
-      res.status(200).send("File has been written successfully.");
-    }
+    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const jsonString = JSON.stringify(monthYearN, null, 2);
+
+    const filePath = path.join(getStatsDir(), 'monthYearN.json');
+    fs.writeFileSync(filePath, jsonString);
+    
+    console.log('monthYearN.json has been written successfully.');
+    if (res) res.status(200).send("File has been written successfully.");
   } catch (err) {
-    console.error('Error writing file:', err);
+    console.error("Monthly stats write error:", err);
+    if (res) res.status(500).json({ error: err.message });
   }
 });
 
-// Update monthYearN
+// Update monthYearN0
 exports.monthYearN0 = asyncHandler(async (req, res) => {
-  var queryString =  "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth,     ${{DBName}}.Study.StudyType AS StudyType,     COUNT(DISTINCT ${{DBName}}.Appointment.id) AS NumberOfParticipants FROM ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed' AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0 GROUP BY YearMonth,     Year,     Month,     StudyType ORDER BY Year,     Month;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearN = await model.sequelize.query(queryString);
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b 1 %Y') AS YearMonth, 
+      Study.StudyType AS StudyType, 
+      COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0 
+    GROUP BY YearMonth, Year, Month, StudyType 
+    ORDER BY Year, Month;
+  `;
 
   try {
-
+    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
     res.status(200).send(monthYearN);
   } catch (err) {
-    console.error('Error getting file:', err);
+    console.error("Monthly stats query error:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 // Update monthYearWeekN
 exports.monthYearWeekN = asyncHandler(async (req, res) => {
-  var queryString = "SELECT     YEAR(${{DBName}}.Schedule.AppointmentTime) AS Year,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%b') AS Month,     DATE_FORMAT(${{DBName}}.Schedule.AppointmentTime, '%a') AS weekday,     COUNT(${{DBName}}.Appointment.id) AS NumberOfParticipants FROM     ${{DBName}}.Appointment     INNER JOIN ${{DBName}}.Schedule ON ${{DBName}}.Appointment.FK_Schedule = ${{DBName}}.Schedule.id     INNER JOIN ${{DBName}}.Study ON ${{DBName}}.Appointment.FK_Study = ${{DBName}}.Study.id     INNER JOIN ${{DBName}}.Lab ON ${{DBName}}.Study.FK_Lab = ${{DBName}}.Lab.id     INNER JOIN ${{DBName}}.Family ON ${{DBName}}.Schedule.FK_Family = ${{DBName}}.Family.id WHERE     ${{DBName}}.Schedule.createdAt > '2021-01-01'     AND ${{DBName}}.Schedule.Status = 'Confirmed'     AND ${{DBName}}.Lab.id = 2     AND YEAR(${{DBName}}.Schedule.AppointmentTime) > 2020     AND ${{DBName}}.Family.TrainingSet = 0  GROUP BY     weekday,     Year,     Month ORDER BY     Year,     Month,     weekday;";
-
-  queryString = queryString.replace(/\${{DBName}}/g, config.DBName);
-
-  const monthYearWeekN = await model.sequelize.query(queryString);
-
-  const jsonString = JSON.stringify(monthYearWeekN[0], null, 2);
-
-  // Specify the file path
-  if (!fs.existsSync("./stats/")) {
-    fs.mkdirSync("./stats/");
-  }
-  // const filePath = './stats/monthYearWeekN.json';
-  const filePath = '/home/xiaon8/public_html/babylab/assets/js/assets/data/monthYearWeekN.json';
+  const queryString = `
+    SELECT 
+      YEAR(Schedule.AppointmentTime) AS Year, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%b') AS Month, 
+      DATE_FORMAT(Schedule.AppointmentTime, '%a') AS weekday, 
+      COUNT(Appointment.id) AS NumberOfParticipants 
+    FROM Appointment 
+    INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
+    INNER JOIN Study ON Appointment.FK_Study = Study.id 
+    INNER JOIN Lab ON Study.FK_Lab = Lab.id 
+    INNER JOIN Family ON Schedule.FK_Family = Family.id 
+    WHERE Schedule.createdAt > '2021-01-01' 
+      AND Schedule.Status = 'Confirmed' 
+      AND Lab.id = 2 
+      AND YEAR(Schedule.AppointmentTime) > 2020 
+      AND Family.TrainingSet = 0  
+    GROUP BY weekday, Year, Month 
+    ORDER BY Year, Month, weekday;
+  `;
 
   try {
-    if (fs.existsSync("/home/xiaon8/public_html/babylab/assets/js/assets/data/")) {
+    const monthYearWeekN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const jsonString = JSON.stringify(monthYearWeekN, null, 2);
 
-      // Write the JSON string to the file
-      fs.writeFileSync(filePath, jsonString);
-      console.log('File has been written successfully.');
-      res.status(200).send("File has been written successfully.");
-    }
+    const filePath = path.join(getStatsDir(), 'monthYearWeekN.json');
+    fs.writeFileSync(filePath, jsonString);
+    
+    console.log('monthYearWeekN.json has been written successfully.');
+    if (res) res.status(200).send("File has been written successfully.");
   } catch (err) {
     console.error('Error writing file:', err);
+    if (res) res.status(500).json({ error: err.message });
   }
 });

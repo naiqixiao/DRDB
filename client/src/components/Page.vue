@@ -1,36 +1,30 @@
 <template>
   <div class="pagination-container">
-    <v-btn class="ma-0" text icon @click="previousPage" :disabled="page <= 1">
-      <v-icon large>navigate_before </v-icon></v-btn
-    >
+    <v-btn class="ma-0" variant="text" icon="mdi-chevron-left" size="large" @click="previousPage" :disabled="page <= 1">
+    </v-btn>
 
-    <div class="title" style="width:45px">{{ page }}</div>
-    <div class="title" style="padding-left: 8px; padding-right: 8px;">{{" / " }}</div>
-    <div class="title" style="width:45px; text-align: left">{{ NofPages }}</div>
+    <span class="text-h6" style="min-width: 20px; text-align: right">{{ page }}</span>
+    <span class="text-h6 mx-1" style="opacity: 0.5">/</span>
+    <span class="text-h6" style="min-width: 20px; text-align: left">{{ NofPages }}</span>
 
-    <v-btn
-      class="ma-0"
-      text
-      icon
-      @click="nextPage"
-      :disabled="page >= NofPages || page == 0"
-      ><v-icon large>navigate_next </v-icon></v-btn
-    >
+    <v-btn class="ma-0" variant="text" icon="mdi-chevron-right" size="large" @click="nextPage"
+      :disabled="page >= NofPages || page === 0">
+    </v-btn>
   </div>
 </template>
 
 <script>
 export default {
+  name: "Page",
   props: {
     page: Number,
     NofPages: Number,
   },
-
+  emits: ["nextPage", "previousPage"],
   methods: {
     nextPage() {
       this.$emit("nextPage");
     },
-
     previousPage() {
       this.$emit("previousPage");
     },
@@ -38,10 +32,10 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .pagination-container {
-  text-align: end;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
 }
 </style>

@@ -1,199 +1,133 @@
 <template>
-  <div ref="chart" class="pieChart"></div>
+  <div style="position: relative; height: 300px; width: 100%">
+    <Doughnut v-if="hasData" :data="chartData" :options="chartOptions" :plugins="[centerTextPlugin]" />
+    <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
+      <v-icon class="mr-2">mdi-chart-donut-variant</v-icon>
+      No data available yet
+    </div>
+  </div>
 </template>
 
 <script>
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = src;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-}
+import { Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
 
 export default {
-  name: "ProgressChart",
-  props: {
-    stats: Array,
-  },
-
-  async mounted() {
-    try {
-      await loadScript("https://cdn.jsdelivr.net/npm/vega@5.25.0");
-      await loadScript("https://cdn.jsdelivr.net/npm/vega-lite@5.16.3");
-      await loadScript("https://cdn.jsdelivr.net/npm/vega-embed@6.22.2");
-      this.renderChart();
-    } catch (error) {
-      console.error("Failed to load Vega scripts", error);
-    }
-  },
-
-  methods: {
-    renderChart() {
-      if (typeof window.vegaEmbed === "undefined") {
-        console.error("vegaEmbed is not loaded");
-        return;
-      }
-
-      const spec = {
-        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
-        width: 300,
-        height: 300,
-        background: null,
-        description:
-          "Pie chart of participants' statuses for the study 'EmotionConsistency'.",
-        data: {
-          values: this.stats,
-        },
-        config: {
-          title: {
-            fontSize: 24,
-            offset: 40,
-          },
-          axis: {
-            domain: false,
-            labelFontSize: 12,
-            titleFontSize: 14,
-          },
-          headerFacet: {
-            titleFontSize: 14,
-            labelFontSize: 14,
-          },
-          text: {
-            fontSize: 18,
-          },
+  name: "studyProgressChart",
+  components: { Doughnut },
+  props: { stats: { type: Array, default: () => [] } },
+  data() {
+    return {
+      // 1. Define the custom plugin locally
+      centerTextPlugin: {
+        id: 'centerText',
+        beforeDraw(chart) {
+          const { width, height, ctx } = chart;
+          ctx.restore();
+          
+          // Calculate the total N
+          const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          
+          // Draw the Number
+          const fontSize = (height / 120).toFixed(2);
+          ctx.font = `bold ${fontSize}em 'Fira Sans', sans-serif`;
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#1E3A8A"; // var(--color-primary)
+          const text = `${total}`;
+          const textX = Math.round((width - ctx.measureText(text).width) / 2);
+          const textY = height / 2 - 10;
+          ctx.fillText(text, textX, textY);
+          
+          // Draw the Subtitle
+          ctx.font = `normal ${(fontSize * 0.35).toFixed(2)}em 'Fira Sans', sans-serif`;
+          ctx.fillStyle = "#64748B"; // text-muted
+          const subText = "Participants";
+          const subX = Math.round((width - ctx.measureText(subText).width) / 2);
+          ctx.fillText(subText, subX, textY + 28);
+          ctx.save();
+        }
+      },
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%', // Thinner ring looks more elegant
+        plugins: {
           legend: {
-            titleFontSize: 24,
-            labelFontSize: 24,
-            offset: 80,
-            orient: "bottom",
-            layout: { bottom: { anchor: "middle" } },
-            columns: 3,
+            position: 'bottom',
+            labels: {
+              usePointStyle: true,
+              padding: 20,
+              font: { family: "'Fira Sans', sans-serif", size: 13 }
+            }
           },
-        },
-        title: "Overall progress",
-        layer: [
-          {
-            mark: {
-              type: "arc",
-              outerRadius: 180,
-              innerRadius: 100,
-              tooltip: true,
-            },
-            encoding: {
-              theta: {
-                field: "NumberOfParticipants",
-                type: "quantitative",
-                stack: true,
-              },
-              color: {
-                field: "Status",
-                type: "nominal",
-                scale: {
-                  domain: [
-                    "Confirmed",
-                    "TBD",
-                    "Rescheduling",
-                    "No Show",
-                    "Cancelled",
-                    "Rejected",
-                  ],
-                  range: [
-                    "#4E4E4E",
-                    "#FFBF78",
-                    "#ACD793",
-                    "#BC5A94",
-                    "#C80036",
-                    "#EE4E4E",
-                  ],
-                },
-                sort: [
-                  "Confirmed",
-                  "TBD",
-                  "Rescheduling",
-                  "No Show",
-                  "Cancelled",
-                  "Rejected",
-                ],
-              },
-            },
-          },
-          {
-            mark: {
-              type: "text",
-              radius: 75,
-              color: "black",
-              fontWeight: "bold",
-            },
-            encoding: {
-              text: {
-                field: "NumberOfParticipants",
-                type: "quantitative",
-              },
-              theta: {
-                field: "NumberOfParticipants",
-                type: "quantitative",
-                stack: true,
-              },
-              color: {
-                field: "Status",
-                type: "nominal",
-                scale: {
-                  domain: [
-                    "Confirmed",
-                    "TBD",
-                    "Rescheduling",
-                    "No Show",
-                    "Cancelled",
-                    "Rejected",
-                  ],
-                  range: [
-                    "#4E4E4E",
-                    "#FFBF78",
-                    "#ACD793",
-                    "#BC5A94",
-                    "#C80036",
-                    "#EE4E4E",
-                  ],
-                },
-                sort: [
-                  "Confirmed",
-                  "TBD",
-                  "Rescheduling",
-                  "No Show",
-                  "Cancelled",
-                  "Rejected",
-                ],
-              },
-            },
-          },
-        ],
-      };
-
-      window
-        .vegaEmbed(this.$refs.chart, spec, { actions: false })
-        .then((result) => {
-          // You can access the Vega view instance via result.view
-          console.log("Vega view instance", result.view);
-        })
-        .catch((error) => console.error(error));
-    },
-  },
-  watch: {
-    stats(newVal) {
-      if (newVal) {
-        this.renderChart();
+          tooltip: {
+            backgroundColor: 'rgba(30, 58, 138, 0.9)',
+            titleFont: { family: "'Fira Sans', sans-serif", size: 14 },
+            bodyFont: { family: "'Fira Sans', sans-serif", size: 14 },
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                let label = context.label || '';
+                if (label) label += ': ';
+                if (context.parsed !== null) {
+                  const value = context.parsed;
+                  // Calculate total of the stacked bar or doughnut
+                  const total = context.chart._metasets[context.datasetIndex].total || 
+                                context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? Math.round((value / total) * 100) + '%' : '0%';
+                  label += `${value} (${percentage})`;
+                }
+                return label;
+              }
+            }
+          }
+        }
+      },
+      statusColors: {
+        'Completed': '#34D399', // Bright mint green
+        'Confirmed': '#60A5FA', // Bright sky blue
+        'TBD': '#A78BFA',       // Vibrant violet
+        'Rescheduling': '#FBBF24',// Bright amber/yellow
+        'No Show': '#FB923C',   // Vibrant orange
+        'Cancelled': '#F87171', // Bright soft red
+        'Rejected': '#94A3B8'   // Muted slate (kept for contrast)
       }
-    },
+    };
   },
+  computed: {
+    hasData() {
+      return this.stats && this.stats.length > 0;
+    },
+    chartData() {
+      if (!this.hasData) return { labels: [], datasets: [] };
+
+      const labels = [];
+      const data = [];
+      const backgroundColors = [];
+
+      // Sort stats so Completed/Confirmed are always first
+      const sortedStats = [...this.stats].sort((a, b) => b.NumberOfParticipants - a.NumberOfParticipants);
+
+      sortedStats.forEach(stat => {
+        labels.push(stat.Status);
+        data.push(stat.NumberOfParticipants);
+        backgroundColors.push(this.statusColors[stat.Status] || '#CBD5E1');
+      });
+
+      return {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: backgroundColors,
+          borderWidth: 2,
+          borderColor: '#ffffff',
+          hoverOffset: 4
+        }]
+      };
+    }
+  }
 };
 </script>
-
-<style scoped>
-.pieChart {
-  padding: 20px;
-}
-</style>

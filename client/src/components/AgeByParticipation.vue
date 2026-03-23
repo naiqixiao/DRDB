@@ -1,33 +1,38 @@
 <template>
-  <span v-if="item.Schedule.AppointmentTime">
-    {{ AgeByParticipation(item) }}
+  <span v-if="item.Schedule && item.Schedule.AppointmentTime">
+    {{ AgeByParticipationText(item) }}
   </span>
   <span v-else>
-    {{ "NA" }}
+    NA
   </span>
 </template>
 
 <script>
 export default {
+  name: "AgeByParticipation",
   props: {
-    item: {},
+    item: {
+      type: Object,
+      required: true
+    },
   },
   methods: {
-    AgeByParticipation(item) {
-      var Age = Math.floor(
+    AgeByParticipationText(item) {
+      if (!item.Child || !item.Child.DoB) return "NA";
+      
+      const Age = Math.floor(
         (new Date(item.Schedule.AppointmentTime) - new Date(item.Child.DoB)) /
           (1000 * 60 * 60 * 24)
       );
 
-      var formated = "Not born yet.";
+      let formated = "Not born yet.";
 
       if (Age > 0) {
-        var years = Math.floor(Age / 365);
-        var months = (Age % 365) / 30.5;
+        const years = Math.floor(Age / 365);
+        let months = (Age % 365) / 30.5;
         months = months.toFixed(1);
-        // var days = Math.floor((Age % 365) % 30.5);
-        var Y = years > 0 ? years + " y " : "";
-        var M = months + " m";
+        const Y = years > 0 ? years + " y " : "";
+        const M = months + " m";
         formated = Y + M;
       }
 
@@ -36,4 +41,3 @@ export default {
   },
 };
 </script>
-<style lang="scss" scoped></style>

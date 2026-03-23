@@ -1,116 +1,14 @@
 const model = require("../models/DRDB");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const asyncHandler = require("express-async-handler");
-const { google } = require("googleapis");
-
 const fs = require("fs");
-const { OAuth2 } = google.auth;
 
 const config = require("../../config/general");
-
 const log = require("../controllers/log");
-
-// function generalAuth() {
-//   const credentialsPath = "api/google/general/credentials.json";
-//   const tokenPath = "api/google/general/token.json";
-
-//   const credentials = fs.readFileSync(credentialsPath);
-
-//   const { client_secret, client_id, redirect_uris } = JSON.parse(
-//     credentials
-//   ).installed;
-
-//   const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-
-//   const token = fs.readFileSync(tokenPath);
-//   oAuth2Client.setCredentials(JSON.parse(token));
-
-//   return oAuth2Client;
-// }
-
-function makeBody(to, from, cc, subject, body) {
-  var message = [
-    'Content-Type: text/html; charset="UTF-8"\n',
-    "MIME-Version: 1.0\n",
-    "Content-Transfer-Encoding: 7bit\n",
-    "to: ",
-    to,
-    "\n",
-    "from: ",
-    from,
-    "\n",
-    "cc: ",
-    cc,
-    "\n",
-    "subject: ",
-    subject,
-    "\n\n",
-    body,
-  ].join("");
-
-  var encodedMail = Buffer.from(message)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  return encodedMail;
-}
-
-async function sendEmail(emailContent) {
-  const credentialsPath = "api/google/general/credentials.json";
-  const tokenPath = "api/google/general/token.json";
-
-  const credentials = fs.readFileSync(credentialsPath);
-
-  const { client_secret, client_id, redirect_uris } = JSON.parse(
-    credentials
-  ).installed;
-
-  const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
-
-  const token = fs.readFileSync(tokenPath);
-  oAuth2Client.setCredentials(JSON.parse(token));
-
-  const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-  const adminSendAs = await adminGmail.users.settings.sendAs.list({
-    userId: "me",
-  });
-
-  var sendAsEmail = {};
-
-  adminSendAs.data.sendAs.forEach((email) => {
-    if (email.isDefault) {
-      sendAsEmail = email;
-    }
-  });
-
-  var adminEmail = sendAsEmail.sendAsEmail;
-
-  emailContent.from = "Developmental Research Management System" + "<" + adminEmail + ">";
-
-  var raw = makeBody(
-    emailContent.to,
-    emailContent.from,
-    emailContent.cc,
-    emailContent.subject,
-    emailContent.body
-  );
-
-  try {
-    const result = await adminGmail.users.messages.send({
-      userId: "me",
-      requestBody: {
-        raw: raw,
-      },
-    });
-
-    return result;
-  } catch (error) {
-    return error;
-  }
-}
+const { sendAdminEmail } = require("../utils/emailUtil");
+const { buildWelcomeEmail, buildPasswordChangedEmail, buildPasswordResetEmail } = require("../utils/userTemplates");
 
 exports.signup = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
@@ -119,9 +17,7 @@ exports.signup = asyncHandler(async (req, res) => {
   }
 
   try {
-    const password = Math.random()
-      .toString(36)
-      .substring(2);
+    const password = crypto.randomBytes(12).toString('base64url');
 
     const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -135,7 +31,7 @@ exports.signup = asyncHandler(async (req, res) => {
     const personnel = await model.personnel.findOne({
       where: {
         Email: req.body.Email,
-      }
+      },
     });
 
     if (personnel && personnel.Retired === false) {
@@ -164,36 +60,17 @@ exports.signup = asyncHandler(async (req, res) => {
 
       }
 
-      var emailContent = {
-        to: newUser.Name + "<" + newUser.Email + ">",
-        subject:
-          "Your user account has been created!",
-        body:
-          "<p>Hello " +
-          newUser.Name.split(" ")[0] +
-          ",</p> " +
-          "<p>Welcome to the developmental research management system!<br>" +
-          "Your role is <b>" +
-          newUser.Role +
-          "</b>, and your temporary password is <b><em>" +
-          password +
-          "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-          "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-          "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-          "<p> </p>" +
-          "<p>Thank you! <br>" +
-          "Developmental Research Management System</p>",
-      };
-
-      await sendEmail(emailContent);
+      const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
+      await sendAdminEmail(welcomeEmail);
 
       // log
       await log.createLog("User Created", User, "created " + newUser.Email);
 
     }
   } catch (error) {
-    throw error;
-  }
+      console.error("Signup error:", error);
+      res.status(500).json({ error: error.message });
+    }
 });
 
 exports.signupBatch = asyncHandler(async (req, res) => {
@@ -224,9 +101,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
       } else {
 
-        const password = Math.random()
-          .toString(36)
-          .substring(2);
+        const password = crypto.randomBytes(12).toString('base64url');
 
         const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -249,36 +124,17 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 
         }
 
-        var emailContent = {
-          to: newUser.Name + "<" + newUser.Email + ">",
-          subject:
-            "Your user account has been created!",
-          body:
-            "<p>Hello " +
-            newUser.Name.split(" ")[0] +
-            ",</p> " +
-            "<p>Welcome to the developmental research management system!<br>" +
-            "Your role is <b>" +
-            newUser.Role +
-            "</b>, and your temporary password is <b><em>" +
-            password +
-            "</em></b>. Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + ".<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
-            "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-            "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-            "<p> </p>" +
-            "<p>Thank you! <br>" +
-            "Developmental Research Management System</p>",
-        };
-
-        await sendEmail(emailContent);
+        const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
+        await sendAdminEmail(welcomeEmail);
 
         // log
         await log.createLog("User Created", User, "created " + newUser.Email);
 
+        }
+      } catch (error) {
+        console.error("Signup batch error:", error);
+        res.status(500).json({ error: error.message });
       }
-    } catch (error) {
-      throw error;
-    }
 
   }
 
@@ -310,6 +166,9 @@ exports.login = asyncHandler(async (req, res) => {
                 model: model.experimenter,
               },
             },
+            { model: model.studyAgeGroup, as: 'AgeGroups' },
+            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
+            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
           ]
         }],
       },
@@ -320,18 +179,6 @@ exports.login = asyncHandler(async (req, res) => {
     // log the login information.
 
     await log.createLog("Not Exist", {}, Email + " does not exist (or has been retired)");
-    //   const logFolder = "api/logs";
-    // if (!fs.existsSync(logFolder)) {
-    //   fs.mkdirSync(logFolder)
-    // }
-    //   const logFile = logFolder + "/log.txt";
-    //   var logInfo = "[Login ERROR] " + Email + " does not exist (or has been retired) at " + new Date().toString() + "\r\n"
-
-    //   if (fs.existsSync(logFile)) {
-    //     fs.appendFileSync(logFile, logInfo)
-    //   } else {
-    //     fs.writeFileSync(logFile, logInfo)
-    //   }
 
     return res.status(401).send({
       error: "The login information was incorrect",
@@ -408,7 +255,20 @@ exports.changePassword = asyncHandler(async (req, res) => {
     include: [
       {
         model: model.lab,
-        include: [{ model: model.study }],
+        include: [{
+          model: model.study,
+          include: [
+            { model: model.personnel, as: 'PointofContact' },
+            {
+              model: model.personnel,
+              as: 'Experimenters',
+              through: { model: model.experimenter },
+            },
+            { model: model.studyAgeGroup, as: 'AgeGroups' },
+            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
+            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
+          ],
+        }],
       },
     ],
   });
@@ -469,36 +329,20 @@ exports.changePassword = asyncHandler(async (req, res) => {
     });
 
 
-    var emailContent = {
-      to: personnel.Name + "<" + personnel.Email + ">",
-      subject:
-        "Your login password is updated.",
-      body:
-        "<p>Hello " +
-        personnel.Name.split(" ")[0] +
-        ",</p> " +
-        "<p>Your login password has recently been changed. <br>" +
-        "If you didn't change your password, please contact your lab manager as soon as possible.</p> " +
-        "<p> </p>" +
-        "<p>Thank you!<br>" +
-        "Developmental Research Management System</p>",
-    };
-
-
-    await sendEmail(emailContent);
+    const pwChangedEmail = buildPasswordChangedEmail(personnel.Name, personnel.Email);
+    await sendAdminEmail(pwChangedEmail);
 
     // log
     await log.createLog("Change Password", User, "chagned password");
 
   } catch (error) {
-    throw error;
+    console.error("Change password error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 exports.resetPassword = asyncHandler(async (req, res) => {
-  const password = Math.random()
-    .toString(36)
-    .substring(2);
+  const password = crypto.randomBytes(12).toString('base64url');
 
   const hashPassword = bcrypt.hashSync(password, 10);
 
@@ -535,27 +379,12 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       message: "Password reset!",
     });
 
-    var emailContent = {
-      to: personnel.Name + "<" + personnel.Email + ">",
-      subject: "Your password is reset",
-      body:
-        "<p>Hello " +
-        personnel.Name.split(" ")[0] +
-        ",</p> " +
-        "<p>You login password is reset, and the temporary passwor is: <b>" +
-        password +
-        "</b></p> <p>Please login to change your password.<br> " +
-        "<p><a href='https://docs.google.com/document/d/1oaucm_FrpTxsO7UcOb-r-Y2Ck2zBe1G-BMvw_MD18N0/edit?usp=sharing'>A brief manual</a><br>" +
-        "<a href='https://mcmasteru365-my.sharepoint.com/:p:/g/personal/xiaon8_mcmaster_ca/ERk1uev-LENDrca6aWXwSqYBAn1J1OEsJ3tNjPkbpvcwtA?e=Gz73ZK'>How to set up a Google account to activate email and calendar functions.</a></p>" +
-        "<p> </p>" +
-        "<p>Thank you! <br>" +
-        "Developmental Research Management System</p>",
-    };
-
-    await sendEmail(emailContent);
+    const resetEmail = buildPasswordResetEmail(personnel.Name, personnel.Email, password);
+    await sendAdminEmail(resetEmail);
 
   } catch (error) {
-    throw error;
+    console.error("Reset password error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 

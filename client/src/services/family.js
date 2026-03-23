@@ -1,13 +1,13 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(familyInfo) {
     familyInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
 
     return api().post("family/add", familyInfo);
@@ -15,9 +15,9 @@ export default {
   batchImport(familyInfo) {
     familyInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
 
     return api().post("family/addBatch", familyInfo);
@@ -34,9 +34,9 @@ export default {
   },
   update(familyInfo) {
     familyInfo.User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("family/", familyInfo);
   },
@@ -44,12 +44,26 @@ export default {
 
     familyInfo.User = {
       
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().delete("family/", {
       params: familyInfo
     });
+  },
+  
+  getDuplicates() {
+    return api().get("family/duplicates");
+  },
+  
+  merge(mergeData, mergeChildren) {
+    mergeData.User = {
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
+    }
+    mergeData.mergeChildren = mergeChildren;
+    return api().post("family/merge", mergeData);
   }
 };

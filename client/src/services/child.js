@@ -1,13 +1,13 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(childInfo) {
     childInfo.User = {
 
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
 
     return api().post("child/add", childInfo);
@@ -20,20 +20,31 @@ export default {
   update(childInfo) {
     childInfo.User = {
 
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().post("child/", childInfo);
   },
   delete(childInfo) {
     childInfo.User = {
-      Name: store.state.name,
-      Email: store.state.user,
-      LabName: store.state.labName
+      Name: useMainStore().name,
+      Email: useMainStore().user,
+      LabName: useMainStore().labName
     }
     return api().delete("child/", {
       params: childInfo
+    });
+  },
+  mergeChildren(primaryChildId, secondaryChildIds) {
+    return api().post("child/merge", {
+      primaryChildId,
+      secondaryChildIds,
+      User: {
+        Name: useMainStore().name,
+        Email: useMainStore().user,
+        LabName: useMainStore().labName
+      }
     });
   }
 };

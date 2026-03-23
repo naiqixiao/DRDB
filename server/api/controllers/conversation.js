@@ -26,7 +26,7 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  const User = JSON.parse(req.query.User);
+  const User = typeof req.query.User === 'string' ? JSON.parse(req.query.User) : req.query.User;
 
   await log.createLog("Conversation Deleted", User, "deleted a conversation");
 

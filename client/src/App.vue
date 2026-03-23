@@ -1,76 +1,234 @@
 <template>
-  <v-app
-    style="
-       {
-        background: $vuetify.theme.themes.light.secondary;
-      }
-    "
-  >
-    <Header />
+  <v-app :style="{ '--dynamic-bg': pageBackgroundColor }">
+    <v-app-bar v-if="$route.name !== 'Login'" class="ds-header-gradient elevation-1" density="default">
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+
+      <v-toolbar-title class="title-text">
+        <h2 class="text-h5 font-weight-bold ma-2">{{ $route.name }}</h2>
+      </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <template v-if="store.user != null">
+        <span class="title-text text-subtitle-1 font-weight-medium mr-4">
+          {{
+            store.labName +
+            ": " +
+            store.name +
+            " (" +
+            store.role +
+            ")"
+          }}
+        </span>
+        <v-tooltip location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props" @click.stop="feedbackDialog = true">
+              <v-icon>mdi-message-alert</v-icon>
+            </v-btn>
+          </template>
+          <span>Send us your questions, issues, requests, and suggestions!</span>
+        </v-tooltip>
+        <v-switch :model-value="!!store.trainingMode" color="white" inset
+          :label="store.trainingMode ? 'Training Mode' : 'Working Mode'" hide-details
+          @update:model-value="changeTrainingMode" class="training-switch ml-4 mr-2" density="compact"></v-switch>
+      </template>
+
+      <v-progress-linear :active="store.loadingStatus" :indeterminate="store.loadingStatus" height="5"
+        absolute location="bottom" color="secondary"></v-progress-linear>
+    </v-app-bar>
+
+    <!-- Feedback Dialog -->
+    <v-dialog v-model="feedbackDialog" max-width="800px" :retain-focus="false" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title>
+          <span class="text-h5">Send us your questions and suggestions!</span>
+        </v-card-title>
+
+        <v-container>
+          <v-row>
+            <v-col cols="12" sm="10" md="10">
+              <v-text-field v-model="currentFeedback.Title" label="Title" variant="outlined"></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="10" md="10">
+              <v-textarea v-model="currentFeedback.Content" label="Content" variant="outlined" rows="6"></v-textarea>
+            </v-col>
+          </v-row>
+        </v-container>
+
+        <v-card-actions>
+          <v-row justify="space-between" style="height: 50px">
+            <v-col md="4"></v-col>
+            <v-col md="2">
+              <v-btn color="primary" variant="elevated" @click="closeFeedback">Cancel</v-btn>
+            </v-col>
+            <v-col md="2">
+              <v-btn color="primary" variant="elevated" @click="createFeedback"
+                :disabled="currentFeedback.Title === '' || currentFeedback.Content === ''">Send</v-btn>
+            </v-col>
+            <v-col md="4"></v-col>
+          </v-row>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer v-if="$route.name !== 'Login'" v-model="drawer" temporary width="300">
+      <v-list density="default" nav class="nav-list">
+        <v-list-item v-for="nav in navs" :key="nav.label" :to="nav.address" :prepend-icon="nav.icon" :title="nav.label"
+          @click="drawer = false"></v-list-item>
+      </v-list>
+
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block @click="logout" :disabled="!store.userID">Logout</v-btn>
+        </div>
+      </template>
+    </v-navigation-drawer>
+
+    <v-main>
+      <router-view :training="store.trainingMode" />
+    </v-main>
   </v-app>
 </template>
 
 <script>
-import Header from "./components/Header";
-import login from "./services/login";
+import feedback from "@/services/feedback";
+import login from "@/services/login";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "App",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
+  data() {
+    return {
+      drawer: false,
+      feedbackDialog: false,
+      currentFeedback: {
+        Title: "",
+        Content: "",
+        CurrentPage: "",
+        CreatedBy: "",
+      },
+      navs: [
+        { address: "/home", label: "Home", icon: "mdi-home" },
+        { address: "/family", label: "Family information", icon: "mdi-face-man" },
+        { address: "/schedule", label: "Schedule studies", icon: "mdi-phone" },
+        { address: "/appointment", label: "Study appointments", icon: "mdi-format-list-bulleted-square" },
+        { address: "/study", label: "Study management", icon: "mdi-file-document" },
+        { address: "/personnel", label: "Personnel management", icon: "mdi-account" },
+        { address: "/settings", label: "Settings", icon: "mdi-cog" },
+        { address: "/", label: "Login", icon: "mdi-fingerprint" },
+      ],
+    };
+  },
 
-  components: {
-    Header,
+  methods: {
+    logout() {
+      console.log("log out complete!");
+      this.store.clearAll();
+
+      if (this.$route.name !== "Login") {
+        this.$router.push({ name: "Login" });
+      }
+    },
+
+    async createFeedback() {
+      this.currentFeedback.CreatedBy = this.store.userID;
+      this.currentFeedback.CurrentPage = this.$route.name;
+      this.currentFeedback.Email = this.store.user;
+
+      try {
+        await feedback.create(this.currentFeedback);
+        this.closeFeedback();
+      } catch (error) {
+        console.log(error.response);
+      }
+    },
+
+    closeFeedback() {
+      this.feedbackDialog = false;
+      setTimeout(() => {
+        this.currentFeedback.Title = "";
+        this.currentFeedback.Content = "";
+        this.currentFeedback.CreatedBy = "";
+        this.currentFeedback.CurrentPage = "";
+        this.currentFeedback.Email = "";
+      }, 300);
+    },
+
+    changeTrainingMode() {
+      this.store.setTrainingMode(!this.store.trainingMode);
+    },
+  },
+
+  computed: {
+    pageBackgroundColor() {
+      switch (this.$route.name) {
+        case 'Family information':
+          return '#F0F9FF'; // Very pale blue
+        case 'Schedule studies':
+          return '#FFFBEB'; // Very pale amber
+        case 'Study appointments':
+          return '#F0FDF4'; // Very pale emerald
+        case 'Study management':
+          return '#F5F3FF'; // Very pale violet
+        case 'Personnel management':
+          return '#F8FAFC'; // Very light slate blue-grey
+        case 'Settings':
+          return '#F8FAFC'; // Very pale slate
+        case 'Home':
+        case 'Login':
+        default:
+          return 'var(--ds-field-bg)'; // Default pale gray
+      }
+    }
   },
 
   watch: {
-    group() {},
-  },
-
-  data() {
-    return {};
-  },
-  methods: {
-    // async deleteUpload() {
-    //   await login.check_login();
-    // },
-    // beforePageDestroyed: function() {
-    //   this.$store.dispatch("setToken", null);
-    //   login.logout();
-    // },
+    feedbackDialog(val) {
+      val || this.closeFeedback();
+    },
   },
 
   async created() {
-    // window.addEventListener("beforeunload", (event) => {
-
-    //   login.logout();
-
-    //   this.$store.dispatch("setToken", null);
-
-    //   // Cancel the event as stated by the standard.
-    //   event.preventDefault();
-    //   // Chrome requires returnValue to be set.
-    //   event.returnValue = "";
-    // });
-
-    // window.addEventListener("beforeunload", this.beforePageDestroyed);
-
     try {
       await login.check_login();
-      // console.log("User is already logged in.");
     } catch (error) {
-      if (error.response.status === 401) {
-        this.$store.dispatch("setToken", null);
-        this.$store.dispatch("setUser", null);
-        this.$store.dispatch("setUserID", null);
+      if (error.response && error.response.status === 401) {
+        this.store.clearAll();
 
-        alert("Authentication failed, please login.");
-
-        if (this.$route.name != "Login") {
-          this.$router.push({
-            name: "Login",
-          });
+        if (this.$route.name !== "Login") {
+          this.$router.push({ name: "Login" });
         }
       }
     }
   },
 };
 </script>
+
+<style>
+.title-text {
+  color: var(--v-theme-secondary) !important;
+  font-family: var(--ds-font-family-heading) !important;
+  font-weight: 600;
+}
+
+.title-text h2 {
+  font-family: var(--ds-font-family-heading) !important;
+}
+
+.training-switch .v-label {
+  color: var(--v-theme-secondary) !important;
+  font-family: var(--ds-font-family-body) !important;
+  font-size: 1rem;
+}
+
+.nav-list .v-list-item-title {
+  font-size: 1rem !important;
+  font-weight: 500;
+  font-family: var(--ds-font-family-body) !important;
+}
+</style>

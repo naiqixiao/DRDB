@@ -11,7 +11,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     res.status(200).send(testingRoom);
   } catch (error) {
-    throw error;
+    console.error("Testing room search error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -24,7 +25,8 @@ exports.search = asyncHandler(async (req, res) => {
     });
     res.status(200).send(testingRooms);
   } catch (error) {
-    throw error;
+    console.error("Testing room create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -38,7 +40,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(testingRoom);
   } catch (error) {
-    throw error;
+    console.error("Testing room update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -56,6 +59,7 @@ exports.delete = asyncHandler(async (req, res) => {
       .status(200)
       .send(`Testing Room: ${testingRoomInfo.name} has been deleted`);
   } catch (error) {
-    throw error;
+    console.error("Testing room delete error:", error);
+    res.status(500).json({ error: error.message });
   }
 });

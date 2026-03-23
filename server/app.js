@@ -3,26 +3,24 @@ const app = express();
 
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./swaggerDef');
 
 app.use(morgan("dev"));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(bodyParser.urlencoded({ extended: true, limit: '100mb' }));
 app.use(bodyParser.json({ limit: '100mb' }));
 
-// app.use(bodyParser({limit: '50mb'}));
+const cors = require("cors");
+const config = require("./config/general");
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
-    return res.status(200).json({});
-  }
-  next();
-});
+app.use(cors({
+  origin: config.frontendURL,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+}));
 
 // Routers
 const userRoutes = require("./api/routes/user");
@@ -51,6 +49,9 @@ const reminderRoutes = require("./api/routes/reminder");
 const rtuRoutes = require("./api/routes/RTU");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
+
+const emailTestRoutes = require("./api/routes/emailTest");
+const calendarTestRoutes = require("./api/routes/calendarTest");
 
 const auto = require("./api/routes/auto");
 
@@ -82,6 +83,9 @@ app.use("/api/reminder", reminderRoutes);
 app.use("/api/RTU", rtuRoutes);
 
 app.use("/api/TestingRoom", testingRoomRoutes);
+
+app.use("/api/emailTest", emailTestRoutes);
+app.use("/api/calendarTest", calendarTestRoutes);
 
 // Error handling
 app.use((req, res, next) => {

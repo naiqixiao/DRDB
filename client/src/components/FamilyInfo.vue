@@ -1,182 +1,91 @@
 <template>
   <div>
-    <v-row justify="start" dense>
-      <v-col cols="12" md="12" style="text-align: start">
-        <span class="title">Family information</span>
-      </v-col>
-      <v-col
-        cols="12"
-        md="6"
-        dense
-        v-for="item in searchingFields"
-        :key="item.label"
-      >
-        <v-text-field
-          :label="item.label"
-          :value="
-            item.label === 'Phone'
-              ? PhoneFormated(currentFamily[item.field])
-              : currentFamily[item.field]
-          "
-          readonly
-          height="48px"
-          background-color="textbackground"
-          hide-details
-          placeholder="  "
-          outlined
-          dense
-        ></v-text-field>
-      </v-col>
-    </v-row>
-    <v-row justify="space-between" align="end" dense>
-      <v-col cols="12" md="12">
-        <v-textarea
-          class="conv-textarea"
-          label="Notes for next contact"
-          outlined
-          no-resize
-          rows="6"
-          hide-details
-          readonly
-          v-model="currentFamily.NextContactNote"
-        ></v-textarea>
-      </v-col>
-    </v-row>
+    <SectionHeader title="Family Information" icon="mdi-account-group" />
 
-    <v-row justify="end">
-      <v-col cols="12" md="3" dense>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn
-                color="primary"
-                fab
-                @click.stop="editFamily"
-                :disabled="!currentFamily.id"
-              >
-                <v-icon>edit</v-icon>
-              </v-btn>
+    <div class="info-grid info-grid--2">
+      <InfoField label="Family ID" :value="currentFamily?.id" icon="mdi-identifier" highlight />
+      <InfoField label="Email" :value="currentFamily?.Email" type="email" icon="mdi-email-outline" />
+      <InfoField label="Phone" :value="currentFamily?.Phone" type="phone" icon="mdi-phone-outline" />
+      <InfoField label="Postal Code" :value="currentFamily?.Address" icon="mdi-map-marker-outline" />
+      <InfoField label="Primary Caregiver" :value="currentFamily?.NamePrimary" icon="mdi-account" />
+      <InfoField label="Secondary Caregiver" :value="currentFamily?.NameSecondary" icon="mdi-account-outline" />
+    </div>
+
+    <div v-if="currentFamily?.NextContactNote" class="mt-3">
+      <v-textarea class="conv-textarea" label="Notes for next contact" variant="outlined" no-resize rows="4"
+        hide-details readonly :model-value="currentFamily?.NextContactNote"></v-textarea>
+    </div>
+
+    <v-row justify="end" class="mt-3">
+      <v-col cols="auto">
+        <v-tooltip location="top">
+          <template v-slot:activator="{ props }">
+            <div v-bind="props">
+              <v-btn color="primary" icon="mdi-pencil" size="small" @click.stop="editFamily"
+                :disabled="!currentFamily?.id"></v-btn>
             </div>
           </template>
           <span>Edit family information</span>
         </v-tooltip>
       </v-col>
-      <v-col cols="12" md="12">
-        <NotesConversation
-          :Conversation="currentFamily.Conversations"
-          :familyId="parseInt(currentFamily.id)"
-          :notes="currentFamily.Note"
-          @updateNotes="saveNotes"
-        ></NotesConversation>
-      </v-col>
     </v-row>
 
+    <div class="mt-2">
+      <NotesConversation v-if="currentFamily?.id" :Conversation="currentFamily.Conversations"
+        :familyId="parseInt(currentFamily.id)" :notes="currentFamily.Note" @updateNotes="saveNotes"></NotesConversation>
+    </div>
+
     <v-dialog v-model="dialog" max-width="1200px" :retain-focus="false">
-      <v-card outlined>
-        <v-card-title>
-          <span class="headline">Edit family information</span>
+      <v-card variant="outlined">
+        <v-card-title class="d-flex">
+          <span class="text-h5">Edit family information</span>
           <v-spacer></v-spacer>
-          <span class="headline">{{ "Family ID: " + editedItem.id }}</span>
+          <span class="text-h5">{{ "Family ID: " + editedItem.id }}</span>
         </v-card-title>
         <v-card-text>
-          <v-form ref="form" v-model="valid" lazy-validation>
+          <v-form ref="formFamily" v-model="valid">
             <v-row dense style="padding: 8px 8px 4px">
-              <v-col md="12" class="subtitle">
+              <v-col md="12" class="mt-4">
                 <v-divider></v-divider>
-                <h4 class="text-left">Family information:</h4>
+                <h4 class="text-left mt-2">Family information:</h4>
               </v-col>
-              <v-col
-                cols="12"
-                :md="item.width"
-                v-for="item in this.$familyBasicInfo"
-                :key="item.label"
-              >
+              <v-col cols="12" :md="item.width" v-for="item in $familyBasicInfo" :key="item.label">
                 <div v-if="!!item.options">
-                  <!-- :item-value="$Options[item.options]" -->
-                  <div v-if="item.field != 'AutismHistory'">
-                    <v-combobox
-                      class="textfield-family"
-                      justify="start"
-                      v-model="editedItem[item.field]"
-                      :items="$Options[item.options]"
-                      outlined
-                      :label="item.label"
-                      dense
-                    ></v-combobox>
+                  <div v-if="item.field !== 'AutismHistory'">
+                    <v-combobox justify="start" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                      variant="outlined" :label="item.label" density="compact"></v-combobox>
                   </div>
                   <div v-else>
-                    <!-- :item-value="editedItem[item.field]"
-                        :item-text="AutismText(editedItem[item.field])" -->
-                    <v-select
-                      class="textfield-family"
-                      :items="$Options[item.options]"
-                      v-model="editedItem[item.field]"
-                      :return-object="false"
-                      :label="item.label"
-                      outlined
-                      dense
-                    ></v-select>
+                    <v-select :items="$Options[item.options]" v-model="editedItem[item.field]" :label="item.label"
+                      variant="outlined" density="compact"></v-select>
                   </div>
                 </div>
                 <div v-else-if="item.rules">
-                  <v-text-field
-                    :label="item.label"
-                    :rules="$rules[item.rules]"
-                    v-model="editedItem[item.field]"
-                    outlined
-                    hide-details
-                    dense
-                  ></v-text-field>
+                  <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
+                    variant="outlined" hide-details="auto" density="compact"></v-text-field>
                 </div>
                 <div v-else>
-                  <v-text-field
-                    :label="item.label"
-                    v-model="editedItem[item.field]"
-                    outlined
-                    hide-details
-                    dense
-                  ></v-text-field>
+                  <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details
+                    density="compact"></v-text-field>
                 </div>
               </v-col>
 
-              <v-col md="12" class="subtitle">
+              <v-col md="12" class="mt-4">
                 <v-divider></v-divider>
-                <h4 class="text-left">Contact information:</h4>
+                <h4 class="text-left mt-2">Contact information:</h4>
               </v-col>
-              <v-col
-                cols="12"
-                :md="item.width"
-                v-for="item in this.$familyContactInfo"
-                :key="item.label"
-              >
+              <v-col cols="12" :md="item.width" v-for="item in $familyContactInfo" :key="item.label">
                 <div v-if="item.options">
-                  <v-combobox
-                    justify="start"
-                    :items="$Options[item.options]"
-                    v-model="editedItem[item.field]"
-                    outlined
-                    :label="item.label"
-                    dense
-                  ></v-combobox>
+                  <v-combobox justify="start" :items="$Options[item.options]" v-model="editedItem[item.field]"
+                    variant="outlined" :label="item.label" density="compact"></v-combobox>
                 </div>
                 <div v-else-if="item.rules">
-                  <v-text-field
-                    :label="item.label"
-                    :rules="$rules[item.rules]"
-                    v-model="editedItem[item.field]"
-                    outlined
-                    hide-details
-                    dense
-                  ></v-text-field>
+                  <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
+                    variant="outlined" hide-details="auto" density="compact"></v-text-field>
                 </div>
                 <div v-else>
-                  <v-text-field
-                    :label="item.label"
-                    v-model="editedItem[item.field]"
-                    outlined
-                    hide-details
-                    dense
-                  ></v-text-field>
+                  <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details
+                    density="compact"></v-text-field>
                 </div>
               </v-col>
             </v-row>
@@ -186,10 +95,10 @@
           <v-row justify="space-between">
             <v-col md="4"></v-col>
             <v-col md="2">
-              <v-btn color="primary" @click="dialog = false">Cancel</v-btn>
+              <v-btn color="primary" variant="elevated" @click="close">Cancel</v-btn>
             </v-col>
             <v-col md="2">
-              <v-btn color="primary" @click="save">Save</v-btn>
+              <v-btn color="primary" variant="elevated" @click="save">Save</v-btn>
             </v-col>
             <v-col md="4"></v-col>
           </v-row>
@@ -201,17 +110,30 @@
 
 <script>
 import family from "@/services/family";
-import store from "@/store";
-import NotesConversation from "@/components/NotesConversation";
+import NotesConversation from "@/components/NotesConversation.vue";
+import InfoField from "@/components/InfoField.vue";
+import SectionHeader from "@/components/SectionHeader.vue";
+
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
+  name: "FamilyInfo",
   components: {
     NotesConversation,
+    InfoField,
+    SectionHeader,
   },
   props: {
-    currentFamily: Object,
+    currentFamily: {
+      type: Object,
+      default: () => ({})
+    },
   },
-
+  emits: ["updateFamily"],
   data() {
     return {
       dialog: false,
@@ -283,6 +205,7 @@ export default {
 
   methods: {
     editFamily() {
+      if (!this.currentFamily) return;
       this.editedItem = Object.assign({}, this.currentFamily);
       this.editableFields = this.searchingFields.concat(this.otherInfo);
       this.editableFields.shift();
@@ -292,18 +215,22 @@ export default {
     },
 
     async save() {
-      var validationResults = this.$refs.form.validate();
+      let validationResults = true;
+      if (this.$refs.formFamily) {
+        const { valid } = await this.$refs.formFamily.validate();
+        validationResults = valid;
+      }
 
       if (validationResults) {
         try {
-          this.editedItem.UpdatedBy = store.state.userID;
-
+          this.editedItem.UpdatedBy = this.store.userID;
           await family.update(this.editedItem);
-
           this.$emit("updateFamily", this.editedItem);
-
           console.log("Family information updated!");
-          this.$refs.form.resetValidation();
+
+          if (this.$refs.formFamily) {
+            this.$refs.formFamily.resetValidation();
+          }
         } catch (error) {
           console.log(error.response);
         }
@@ -320,45 +247,25 @@ export default {
     },
 
     async saveNotes(newNotes) {
+      if (!this.currentFamily) return;
       this.currentFamily.Note = newNotes;
-
-      this.currentFamily.UpdatedBy = store.state.userID;
-
+      this.currentFamily.UpdatedBy = this.store.userID;
       await family.update(this.currentFamily);
-
-      // this.currentChild.Family = this.currentFamily;
-
-      // Object.assign(this.Children[this.page - 1], this.currentChild);
     },
 
     PhoneFormated(Phone) {
       if (Phone) {
-        var cleaned = ("" + Phone).replace(/\D/g, "");
-        var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+        const cleaned = ("" + Phone).replace(/\D/g, "");
+        const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
         if (match) {
           return "(" + match[1] + ") " + match[2] + "-" + match[3];
         }
         return null;
       }
+      return "";
     },
   },
-
-  computed: {},
 };
 </script>
 
-<style scoped>
-/deep/ .v-text-field .v-input__control .v-input__slot {
-  width: "150px";
-  dense: true;
-  clearable: true;
-  color: "primary";
-  autocomplete: "off";
-  outlined: true;
-}
-
-/deep/ .v-container {
-  display: flex; /* or inline-flex */
-  flex-direction: row;
-}
-</style>
+<style scoped></style>

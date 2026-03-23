@@ -1,121 +1,137 @@
 <template>
-  <div>
+  <v-container fluid class="pa-0">
     <v-row dense justify="start">
-      <v-col cols="12" md="4" v-for="study in Studies" :key="study.id" dense>
-        <v-card class="child-card d-flex flex-column">
-          <v-card-title class="title" style="padding: 8px">
+      <v-col cols="12" md="4" v-for="study in enrichedStudies" :key="study.id" class="mb-2">
+        <v-card class="ds-card d-flex flex-column h-100 bg-white transition-all duration-200 border-slate-200 hover:border-primary cursor-pointer hover:-translate-y-1 hover:shadow-md" variant="outlined">
+          <v-card-title class="d-flex align-center py-2 text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
             {{ study.StudyName }}
             <v-spacer></v-spacer>
-            {{ " (" + study.StudyType + ")" }}
+            <span class="text-caption text-medium-emphasis mr-2">({{ study.StudyType }})</span>
+            <v-tooltip location="top">
+              <template v-slot:activator="{ props }">
+                <v-btn
+                  v-bind="props"
+                  icon="mdi-open-in-new"
+                  variant="text"
+                  size="x-small"
+                  color="grey"
+                  class="transition-transform duration-200 hover-scale"
+                  :to="`/study/${study.id}`"
+                  target="_blank"
+                ></v-btn>
+              </template>
+              <span>Manage study</span>
+            </v-tooltip>
           </v-card-title>
 
-          <v-card-text
-            class="body-1"
-            align="start"
-            style="padding: 8px; color: var(--v-primary)"
-          >
-            {{
-              "Age range: " +
-                AgeFormated2(study.MinAge) +
-                " to " +
-                AgeFormated2(study.MaxAge)
-            }}
+          <v-card-text class="py-2 text-body-2 text-primary">
+            <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
+              <span v-for="(group, i) in study.AgeGroups" :key="i">
+                {{ AgeFormated(group.MinAge) }} to {{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1"> &middot; </span>
+              </span>
+            </template>
+            <template v-else>Age range not set</template>
           </v-card-text>
-          <v-card-text
-            class="body-1"
-            align="end"
-            style="padding: 8px; color: red"
-          >
+          
+          <v-card-text class="py-2 text-caption font-weight-bold text-uppercase text-right" :class="study.Completed ? 'text-success' : 'text-primary'">
+            <v-icon start size="14" class="mr-1">{{ study.Completed ? 'mdi-check-circle' : 'mdi-progress-clock' }}</v-icon>
             {{ study.Completed ? "Completed" : "In progress" }}
           </v-card-text>
         </v-card>
       </v-col>
-
-      <div>
-        <v-dialog v-model="dialogStudy" max-width="800px">
-          <v-card>
-            <v-card-title class="title" style="padding: 8px">{{
-              "Assign studies to " + personnelName
-            }}</v-card-title>
-
-            <v-card-text>
-              <v-row justify="center" align="center" style="height: 200px;" dense>
-                <v-col cols="12" md="8">
-                  <v-select
-                    :items="labStudies"
-                    :item-value="'id'"
-                    :item-text="'StudyName'"
-                    v-model="editedStudies"
-                    return-object
-                    label="Studies"
-                    multiple
-                    hide-details
-                    height="48px"
-                    placeholder="  "
-                    outlined
-                    dense
-                    chip
-                  ></v-select>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            
-            <v-card-actions style="padding: 16px;">
-              <v-row justify="space-between">
-                <v-col md="3"></v-col>
-                <v-col md="2">
-                  <v-btn color="primary" @click="close()">Cancel</v-btn>
-                </v-col>
-                <v-col md="2">
-                  <v-btn color="primary" @click="save()">Save</v-btn>
-                </v-col>
-                <v-col md="3"></v-col>
-              </v-row>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </div>
     </v-row>
-    <v-row align="center" justify="end">
-      <v-col cols="12" md="2" dense>
-        <v-tooltip top>
-          <template v-slot:activator="{ on }">
-            <div v-on="on">
-              <v-btn
+
+    <!-- Assign Studies Dialog -->
+    <v-dialog v-model="dialogStudy" max-width="800px" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
+            Assign studies to {{ personnelName }}
+          </span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="close"></v-btn>
+        </v-card-title>
+
+        <v-card-text class="pt-6">
+          <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Study Selection</div>
+          <v-row justify="center">
+            <v-col cols="12">
+              <v-select
+                v-model="editedStudies"
+                :items="activeLabStudies"
+                item-title="StudyName"
+                item-value="id"
+                return-object
+                label="Select studies..."
+                multiple
+                chips
+                hide-details
+                variant="outlined"
+                density="compact"
+                bg-color="white"
                 color="primary"
-                fab
-                large
-                @click.stop="updateStudies"
-                :disabled="
-                  !(
-                    personnelId == $store.state.userID ||
-                    $store.state.role == 'Admin' ||
-                    $store.state.role == 'PI' ||
-                    $store.state.role == 'Lab manager'
-                  )
-                "
-              >
-                <v-icon>badge</v-icon>
-              </v-btn>
-            </div>
+              ></v-select>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        
+        <v-card-actions class="px-6 pb-6 pt-0 d-flex justify-end">
+          <v-btn color="error" variant="text" @click="close" class="mr-2">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" @click="save" prepend-icon="mdi-content-save">Save Assignments</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-row align="center" justify="end" class="mt-4">
+      <v-col cols="auto">
+        <v-tooltip location="top">
+          <template v-slot:activator="{ props }">
+            <v-btn
+              color="primary"
+              variant="flat"
+              prepend-icon="mdi-book-plus-multiple"
+              class="text-none font-weight-bold"
+              v-bind="props"
+              @click.stop="updateStudies"
+              :disabled="!canManageStudies"
+            >
+              Assign Studies
+            </v-btn>
           </template>
           <span>Assign studies to this person</span>
         </v-tooltip>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <script>
-import experimenter from "@/services/experimenter";
+import api from "@/services/api";
+
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
-  components: {},
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
+  name: "AssignedStudies",
   props: {
-    Studies: Array,
-    labStudies: Array,
-    personnelId: Number,
-    personnelName: String,
+    Studies: {
+      type: Array,
+      default: () => []
+    },
+    labStudies: {
+      type: Array,
+      default: () => []
+    },
+    personnelId: {
+      type: Number,
+      required: true
+    },
+    personnelName: {
+      type: String,
+      default: ""
+    },
   },
 
   data() {
@@ -124,52 +140,77 @@ export default {
       editedStudies: [],
     };
   },
+
+  computed: {
+    enrichedStudies() {
+      return this.Studies.map(study => {
+        const fullStudy = this.labStudies.find(ls => ls.id === study.id) || {};
+        return {
+          ...study,
+          AgeGroups: fullStudy.AgeGroups || study.AgeGroups || []
+        };
+      });
+    },
+    
+    activeLabStudies() {
+      // Only show active (non-completed) studies in the assign dialog
+      return this.labStudies.filter(study => !study.Completed);
+    },
+    
+    canManageStudies() {
+      const role = this.store.role;
+      return (
+        this.personnelId == this.store.userID ||
+        role === 'Admin' ||
+        role === 'PI' ||
+        role === 'Lab manager'
+      );
+    }
+  },
+
   methods: {
     updateStudies() {
-      this.editedStudies = this.Studies;
+      // Create a shallow copy to edit so we don't mutate props directly
+      this.editedStudies = [...this.Studies];
       this.dialogStudy = true;
     },
 
     async save() {
-      var newStudies = {};
-
-      newStudies.studies = this.editedStudies.map((study) => {
-        return {
+      const newStudies = {
+        studies: this.editedStudies.map((study) => ({
           FK_Experimenter: this.personnelId,
           FK_Study: study.id,
-        };
-      });
+        }))
+      };
 
       try {
-        await experimenter.postStudies(newStudies);
-
+        await api().post('/experimenter/studies', newStudies);
         this.$emit("updatedStudies", this.editedStudies);
-
         this.close();
-        console.log("Studies updated.");
       } catch (error) {
-        console.error(error);
+        console.error("Error assigning studies:", error);
       }
     },
 
     close() {
       this.dialogStudy = false;
-      this.editedStudies = {};
+      this.editedStudies = [];
     },
 
-    AgeFormated2(Age) {
-      var formated = "Not born yet.";
-      if (Age > 0) {
-        var years = Math.floor(Age / 12);
-        var months = Age % 12;
-        var Y = years > 0 ? years + " y " : "";
-        var M = months + " m";
-        formated = Y + M;
-      }
-      return formated;
+    AgeFormated(Age) {
+      if (Age === null || Age === undefined || Age < 0) return "Not born yet.";
+      
+      const years = Math.floor(Age / 12);
+      const months = Age % 12;
+      
+      let formatted = "";
+      if (years > 0) formatted += `${years} y `;
+      if (months > 0 || years === 0) formatted += `${months} m`;
+      
+      return formatted.trim();
     },
   },
-  computed: {},
+  
   watch: {
     dialogStudy(val) {
       val || this.close();
@@ -177,5 +218,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss" scoped></style>

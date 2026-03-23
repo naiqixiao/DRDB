@@ -6,6 +6,7 @@ const fs = require("fs");
 const Sequelize = require("sequelize");
 
 const log = require("../controllers/log");
+const familyService = require("../services/familyService");
 
 function shuffle(array) {
   // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -71,29 +72,13 @@ function containsObject(obj, array) {
 exports.create = asyncHandler(async (req, res) => {
   var newFamilyInfo = req.body;
 
+  // Extract User before Sequelize create — it's not a DB column
+  const User = newFamilyInfo.User;
+  delete newFamilyInfo.User;
+
   if (newFamilyInfo.id) {
     delete newFamilyInfo["id"];
   }
-
-  // if (newFamilyInfo.AutismHistory.value) {
-
-  //   // newFamilyInfo.AutismHistory = newFamilyInfo.AutismHistory.value;
-  //   // switch (newFamilyInfo.AutismHistory) {
-  //   //   case 'Yes':
-  //   //     newFamilyInfo.AutismHistory = 1;
-  //   //     break;
-
-  //   //   case 'No':
-  //   //     newFamilyInfo.AutismHistory = 0;
-  //   //     break;
-
-  //   //   case 'Unknown':
-  //   //     newFamilyInfo.AutismHistory = null;
-  //   //     break;
-
-  //   // }
-
-  // }
 
   try {
     const newFamily = await model.family.create(newFamilyInfo, {
@@ -105,7 +90,6 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     // Log
-    const User = req.body.User;
 
     await log.createLog(
       "Family Created",
@@ -115,7 +99,8 @@ exports.create = asyncHandler(async (req, res) => {
 
     res.status(200).send(newFamily);
   } catch (error) {
-    throw error;
+    console.error("Family create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -170,191 +155,19 @@ exports.batchCreate = asyncHandler(async (req, res) => {
 
     res.status(200).send(newFamily);
   } catch (error) {
-    throw error;
+    console.error("Family batch create error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
 // batch upload families
 exports.batchCreate0 = asyncHandler(async (req, res) => {
   try {
-    var newFamilies = req.body;
-
-    const alphabet = "abcdefghijk".split("");
-
-    var doubleCheckList = [];
-    var skipList = [];
-    var skipImport = false;
-    var nOfSkip = 0;
-    var nOfAdded = 0;
-
-    for (var i = 0; i < newFamilies.length; i++) {
-      // check whether the family exists
-
-      var child = {};
-      child.Name = newFamilies[i].Name;
-      // child.Name = newFamilies[i].Child_Last_Name
-      //   ? newFamilies[i].Child_First_Name + " " + newFamilies[i].Child_Last_Name
-      //   : newFamilies[i].Child_First_Name;
-      child.Sex = newFamilies[i].Sex;
-      child.Gender = newFamilies[i].Gender;
-      child.DoB = newFamilies[i].DoB;
-      child.Age = newFamilies[i].Age;
-      child.Note = newFamilies[i].Notes;
-      child.BirthWeight = newFamilies[i].BirthWeight;
-      child.Gestation = newFamilies[i].Gestation;
-      child.HearingLoss = newFamilies[i].HearingLoss;
-      child.VisionLoss = newFamilies[i].VisionLoss;
-      child.RecruitmentMethod = newFamilies[i].RecruitmentMethod;
-
-      const phone = newFamilies[i].Phone;
-      const email = newFamilies[i].Email;
-
-      var searchString = [];
-
-      if (phone && phone != "") {
-        searchString.push({ Phone: phone });
-      }
-      if (email && email != "") {
-        searchString.push({ Email: email });
-      }
-
-      var family = await model.family.findOne({
-        where: {
-          [Op.or]: searchString,
-        },
-        include: [model.child],
-      });
-
-      if (!!family) {
-        // when the family exists in the database, add the children to this family.
-        // in the future, outout the existing family and the current familly to
-        // remind users the potential conflict and allow users to decide whether the merge.
-
-        // newFamily[i].Children.forEach((child) => {
-        //   child.FK_Family = family.id;
-        // });
-
-        if ("DoB" in newFamilies[i]) {
-          family.Children.forEach((existingChild) => {
-            if (existingChild.DoB == child.DoB) {
-              if (existingChild.Name == child.Name) {
-                skipImport = true;
-                nOfSkip += 1;
-                skipList.push({
-                  Email: family.Email,
-                  Name: child.Name,
-                  DoB: child.DoB,
-                });
-              } else {
-                doubleCheckList.push({
-                  FK_Family: family.id,
-                  Email: family.Email,
-                  childID: existingChild.id,
-                });
-              }
-            }
-          });
-
-          if (!skipImport) {
-            child.FK_Family = family.id;
-
-            // if any of the children was already imported to the database, would the child be skipped?
-            await model.child.create(child);
-
-            newFamily = await model.family.findOne({
-              where: { id: family.id },
-              include: [model.child],
-            });
-          }
-        } else {
-          skipImport = true;
-        }
-      } else {
-        family = await model.family.create(newFamilies[i]);
-
-        if ("DoB" in newFamilies[i]) {
-          child.FK_Family = family.id;
-          child.IdWithinFamily = IdWithinFamily = alphabet[0];
-
-          await model.child.create(child);
-
-          var newFamily = await model.family.findOne({
-            where: { id: family.id },
-            include: [model.child],
-          });
-        } else {
-          skipImport = true;
-        }
-      }
-
-      // update sibbling table & assign child id within this family
-      if (!skipImport) {
-        if (newFamily.Children.length > 1) {
-          var Children = newFamily.Children;
-
-          var siblings = [];
-
-          var children = [];
-
-          for (var j = 0; j < Children.length; j++) {
-            var childId = Children[j].id;
-
-            Children.forEach((sibling) => {
-              if (sibling.id != childId) {
-                siblings.push({ FK_Child: childId, Sibling: sibling.id });
-              }
-            });
-
-            children.push(childId);
-
-            // assign child id within each family
-            if (Children[j].IdWithinFamily == null) {
-              Children[j].IdWithinFamily = alphabet[j];
-
-              await model.child.update(
-                { IdWithinFamily: alphabet[j] },
-                {
-                  where: { id: childId },
-                }
-              );
-            }
-          }
-
-          existingSibling = await model.sibling.findAll({
-            attributes: ["FK_Child", "Sibling"],
-            where: {
-              FK_Child: { [Op.in]: children },
-            },
-          });
-
-          var filteredSiblings = siblings.filter(function(value) {
-            return !containsObject(value, existingSibling);
-          });
-
-          await model.sibling.bulkCreate(filteredSiblings);
-        }
-      }
-
-      if (skipImport) {
-        skipImport = false;
-      } else {
-        nOfAdded += 1;
-      }
-    }
-
-    doubleCheckList = doubleCheckList.filter(
-      (item, index, self) =>
-        index === self.findIndex((t) => t.FK_Family === item.FK_Family)
-    );
-
-    res.status(200).send({
-      doubleCheckList,
-      nOfSkip,
-      nOfAdded,
-      skipList,
-    });
+    const result = await familyService.batchImportFamilies(req.body);
+    res.status(200).send(result);
   } catch (error) {
-    throw error;
+    console.error("Family batch import error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -431,111 +244,10 @@ exports.search = asyncHandler(async (req, res) => {
   var families = await model.family.findAll({
     where: queryString,
     include: [
-      {model: model.conversations, separate: true},
-      {
-        model: model.child,
-        separate: true,
-        include: [
-          {
-            model: model.appointment,
-            attributes: ["FK_Study"],
-          },
-          {
-            model: model.family,
-            attributes: ["AutismHistory"],
-          },
-        ],
-        order: [['id', 'DESC']]
-      },
-      {
-        model: model.schedule,
-        separate: true,
-        order: [['id', 'DESC']],
-        include: [
-          {
-            model: model.family,
-            include: [
-              {
-                model: model.child,
-                include: [
-                  {
-                    model: model.appointment,
-                    attributes: ["FK_Study"],
-                  },
-                  {
-                    model: model.family,
-                    attributes: ["AutismHistory"],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            model: model.personnel,
-          },
-          {
-            model: model.appointment,
-            separate: true,
-            include: [
-              {
-                model: model.child,
-                include: [
-                  {
-                    model: model.appointment,
-                    attributes: ["FK_Study"],
-                  },
-                  {
-                    model: model.family,
-                    attributes: ["AutismHistory"],
-                  },
-                ],
-              },
-              {
-                model: model.study,
-                include: [
-                  { model: model.lab },
-                  {
-                    model: model.personnel,
-                    as: "Experimenters",
-                    through: {
-                      model: model.experimenter,
-                    },
-                  },
-                ],
-              },
-              {
-                model: model.personnel,
-                as: "PrimaryExperimenter",
-                through: { model: model.experimenterAssignment },
-                attributes: [
-                  "id",
-                  "Name",
-                  "Email",
-                  "Calendar",
-                  "ZoomLink",
-                  "Initial",
-                ],
-              },
-              {
-                model: model.personnel,
-                as: "SecondaryExperimenter",
-                through: { model: model.experimenterAssignment_2nd },
-                attributes: [
-                  "id",
-                  "Name",
-                  "Email",
-                  "Calendar",
-                  "ZoomLink",
-                  "Initial",
-                ],
-              },
-            ],
-          },
-        ],
-        // order: [[{model: model.schedule}, 'id', 'DESC']],
-      },
+      { model: model.conversations, separate: true },
+      familyService.childInclude(),
+      familyService.scheduleInclude(true),
     ],
-    // order: [[{model: model.schedule}, 'id', 'DESC']],
   });
 
   // remove families who requested "No more contact."
@@ -598,132 +310,15 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
   const families = await model.family.findAll({
     where: queryString,
-    // {
-    //   [Op.or]: [{
-    //     '$Schedules.Status$': 'TBD'
-    //   }, {
-    //     '$Schedules.Status$': 'Rescheduling'
-
-    //   }, {
-    //     '$Schedules.Status$': 'No Show'
-    //   }],
-    //   [Op.or]: [
-    //     {
-    //       NextContactDate: {
-    //         [Op.lte]: moment()
-    //           .startOf("day")
-    //           .toDate()
-    //       },
-    //     },
-    //     { NextContactDate: { [Op.eq]: null } },
-    //   ],
-    //   TrainingSet: queryString.TrainingSet
-    //   // AssignedLab: req.query.AssignedLab
-
-    // },
     include: [
-      {model: model.conversations, separate: true},
+      { model: model.conversations, separate: true },
+      familyService.childInclude(),
       {
-        model: model.child,
-        separate: true,
-        include: [
-          {
-            model: model.appointment,
-            attributes: ["FK_Study"],
-          },
-          {
-            model: model.family,
-            attributes: ["AutismHistory"],
-          },
-        ],
-      },
-      {
-        model: model.schedule,
-        separate: false,
-        include: [
-          {
-            model: model.family,
-            include: [
-              {
-                model: model.child,
-                include: [
-                  {
-                    model: model.appointment,
-                    attributes: ["FK_Study"],
-                  },
-                  {
-                    model: model.family,
-                    attributes: ["AutismHistory"],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            model: model.personnel,
-          },
-          {
-            model: model.appointment,
-            include: [
-              {
-                model: model.child,
-                include: [
-                  {
-                    model: model.appointment,
-                    attributes: ["FK_Study"],
-                  },
-                  {
-                    model: model.family,
-                    attributes: ["AutismHistory"],
-                  },
-                ],
-              },
-              {
-                model: model.study,
-                include: [
-                  { model: model.lab },
-                  {
-                    model: model.personnel,
-                    as: "Experimenters",
-                    through: {
-                      model: model.experimenter,
-                    },
-                  },
-                ],
-              },
-              {
-                model: model.personnel,
-                as: "PrimaryExperimenter",
-                through: { model: model.experimenterAssignment },
-                attributes: [
-                  "id",
-                  "Name",
-                  "Email",
-                  "Calendar",
-                  "ZoomLink",
-                  "Initial",
-                ],
-              },
-              {
-                model: model.personnel,
-                as: "SecondaryExperimenter",
-                through: { model: model.experimenterAssignment_2nd },
-                attributes: [
-                  "id",
-                  "Name",
-                  "Email",
-                  "Calendar",
-                  "ZoomLink",
-                  "Initial",
-                ],
-              },
-            ],
-          },
-        ],
+        ...familyService.scheduleInclude(false),
         order: [[model.schedule, "AppointmentTime", "DESC"]],
       },
     ],
-    order: [[{model: model.schedule}, 'id', 'DESC']],
+    order: [[{ model: model.schedule }, 'id', 'DESC']],
   });
 
   shuffle(families);
@@ -738,26 +333,6 @@ exports.update = asyncHandler(async (req, res) => {
   var updatedFamilyInfo = req.body;
   console.log("Family Information Updated!");
 
-  // if (updatedFamilyInfo.AutismHistory.value) {
-
-  //   updatedFamilyInfo.AutismHistory = updatedFamilyInfo.AutismHistory.value;
-
-  //   // switch (updatedFamilyInfo.AutismHistory.value) {
-  //   //   case 'Yes':
-  //   //     updatedFamilyInfo.AutismHistory = 1;
-  //   //     break;
-
-  //   //   case 'No':
-  //   //     updatedFamilyInfo.AutismHistory = 0;
-  //   //     break;
-
-  //   //   case 'Unknown':
-  //   //     updatedFamilyInfo.AutismHistory = null;
-  //   //     break;
-
-  //   // }
-
-  // }
   try {
     const family = await model.family.update(updatedFamilyInfo, {
       where: { id: ID },
@@ -782,7 +357,8 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(family);
   } catch (error) {
-    throw error;
+    console.error("Family update error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -795,7 +371,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
 
   // 2. The families have been contacted within the past 2 weeks, yet the appointment is tentative. These appointments are regarded as onGoing.
   var queryString2 = {};
-  
+
   // queryString2.Status = ["TBD", "Rescheduling", "Rescheduled", "No Show", ];
   queryString2.Completed = 0;
   queryString2.updatedAt = {
@@ -847,7 +423,7 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
       const updateFamilyInfo = { AssignedLab: null };
 
       queryString = {};
-      queryString.id = {[Op.in]: IDs};
+      queryString.id = { [Op.in]: IDs };
 
       await model.family.update(updateFamilyInfo, {
         where: queryString,
@@ -858,18 +434,19 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
         "Family Lab Assisgnment Release",
         {},
         "Families (" +
-          IDs.join(", ") +
-          ") were no longer assigned to any lab due to schedule completion."
+        IDs.join(", ") +
+        ") were no longer assigned to any lab due to schedule completion."
       );
     }
 
-    if(res){
+    if (res) {
 
       res.status(200).send(IDs);
     }
 
   } catch (error) {
-    throw error;
+    console.error("Family search error:", error);
+    if (res) res.status(500).json({ error: error.message });
   }
 });
 
@@ -894,13 +471,15 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
   try {
     const schedules = await model.schedule.findAll({
       where: queryString,
-      include: [{ model: model.family }, {model: model.appointment, include: [model.study]}],
+      include: [{ model: model.family }, { model: model.appointment, include: [model.study] }],
     });
 
     // release the families.
     IDs = schedules.map((schedule) => {
-      return {familyID: schedule.FK_Family,
-      labID: schedule.Appointments[0].Study.FK_Lab};
+      return {
+        familyID: schedule.FK_Family,
+        labID: schedule.Appointments[0].Study.FK_Lab
+      };
     });
 
     IDs = Array.from(new Set(IDs)); // unique IDs
@@ -909,7 +488,7 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
       const updateFamilyInfo = { AssignedLab: idItem.labID };
 
       await model.family.update(updateFamilyInfo, {
-        where: {id: idItem.familyID},
+        where: { id: idItem.familyID },
       });
 
     })
@@ -935,13 +514,14 @@ exports.assignLabtoFamilies = asyncHandler(async (req, res) => {
     //   );
     // }
 
-    if(res){
+    if (res) {
 
       res.status(200).send(IDs);
     }
 
   } catch (error) {
-    throw error;
+    console.error("Family release error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -1078,8 +658,8 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
         "Family Lab Assisgnment Release",
         {},
         "Families (" +
-          IDs.join(", ") +
-          ") were no longer assigned to any lab due to study completion"
+        IDs.join(", ") +
+        ") were no longer assigned to any lab due to study completion"
       );
 
       // res.status(200).send(IDs.length + " families released.");
@@ -1088,7 +668,8 @@ exports.releaseFamily = asyncHandler(async (req, res) => {
     //   res.status(200).send("no family needs to be released.");
     // }
   } catch (error) {
-    throw error;
+    console.error("Family assign lab error:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -1099,12 +680,12 @@ exports.delete = asyncHandler(async (req, res) => {
   });
 
   // Log
-  const User = JSON.parse(req.query.User);
+  const User = typeof req.query.User === 'string' ? JSON.parse(req.query.User) : req.query.User;
 
   await log.createLog(
     "Family Deleted",
     User,
-    "deleted family (" + ID + ") from the database"
+    "deleted family (" + req.query.id + ") from the database"
   );
 
   res.status(200).json(family);
@@ -1214,4 +795,134 @@ exports.changeTrainingFamilyEmail = asyncHandler(async (req, res) => {
   });
 
   res.status(200);
+});
+
+// ─── DATA INTEGRITY: FIND DUPLICATES ────────────────────────────────────
+exports.getDuplicates = asyncHandler(async (req, res) => {
+  // 1. Find emails that appear more than once
+  //    Use Op.and to avoid the JS duplicate-key collision when checking null + empty string
+  const emailDups = await model.family.findAll({
+    attributes: ['Email'],
+    where: {
+      Email: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] },
+      TrainingSet: false
+    },
+    group: ['Email'],
+    having: model.sequelize.literal('count(Email) > 1')
+  });
+
+  // 2. Find phones that appear more than once
+  const phoneDups = await model.family.findAll({
+    attributes: ['Phone'],
+    where: {
+      Phone: { [Op.and]: [{ [Op.ne]: null }, { [Op.ne]: '' }] },
+      TrainingSet: false
+    },
+    group: ['Phone'],
+    having: model.sequelize.literal('count(Phone) > 1')
+  });
+
+  const emails = emailDups.map(e => e.Email);
+  const phones = phoneDups.map(p => p.Phone);
+
+  if (emails.length === 0 && phones.length === 0) {
+    return res.status(200).json([]); // No duplicates found
+  }
+
+  // 3. Fetch full records for the suspicious families
+  const duplicateFamilies = await model.family.findAll({
+    where: {
+      [Op.or]: [
+        { Email: { [Op.in]: emails } },
+        { Phone: { [Op.in]: phones } }
+      ],
+      TrainingSet: false
+    },
+    include: [
+      // Only fetch the fields the frontend actually needs (reduces payload)
+      { model: model.child, attributes: ['id', 'Name', 'DoB', 'Sex'] },
+      { model: model.schedule, attributes: ['id'] }
+    ]
+  });
+
+  // 4. Group them for the frontend
+  let groups = [];
+  const processedIds = new Set();
+
+  duplicateFamilies.forEach(fam => {
+    if (processedIds.has(fam.id)) return;
+    
+    const related = duplicateFamilies.filter(f => 
+      (f.Email && fam.Email && f.Email.toLowerCase() === fam.Email.toLowerCase()) || 
+      (f.Phone && fam.Phone && f.Phone === fam.Phone)
+    );
+
+    if (related.length > 1) {
+      groups.push({
+        matchReason: (fam.Email === related[1].Email) ? `Matched Email: ${fam.Email}` : `Matched Phone: ${fam.Phone}`,
+        families: related
+      });
+      related.forEach(r => processedIds.add(r.id));
+    }
+  });
+
+  res.status(200).json(groups);
+});
+
+// ─── DATA INTEGRITY: MERGE RECORDS ──────────────────────────────────────
+exports.merge = asyncHandler(async (req, res) => {
+  const { primaryId, secondaryIds, mergeChildren, User } = req.body;
+
+  if (!primaryId || !secondaryIds || secondaryIds.length === 0) {
+    return res.status(400).json({ error: "Missing primaryId or secondaryIds." });
+  }
+
+  // Wrap all mutations in a transaction so a mid-merge failure leaves no partial state
+  await model.sequelize.transaction(async (t) => {
+    const opts = { transaction: t };
+
+    // 1. Always move schedules, appointments, and conversations to the Primary Family
+    await model.schedule.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+    await model.appointment.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+    await model.conversations.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+
+    // 2. ALWAYS move children to the primary family to prevent FK cascade deletion.
+    await model.child.update({ FK_Family: primaryId }, { where: { FK_Family: { [Op.in]: secondaryIds } }, ...opts });
+
+    // 3. If mergeChildren: re-letter IdWithinFamily and rebuild sibling table.
+    if (mergeChildren !== false) {
+      const alphabet = "abcdefghijk".split("");
+      const children = await model.child.findAll({ where: { FK_Family: primaryId }, order: [['DoB', 'ASC']], ...opts });
+
+      for (let i = 0; i < children.length; i++) {
+        await model.child.update({ IdWithinFamily: alphabet[i] }, { where: { id: children[i].id }, ...opts });
+      }
+
+      const childIds = children.map(c => c.id);
+      await model.sibling.destroy({ where: { FK_Child: { [Op.in]: childIds } }, ...opts });
+      await model.sibling.destroy({ where: { Sibling: { [Op.in]: childIds } }, ...opts });
+
+      const siblingRows = [];
+      for (let i = 0; i < children.length; i++) {
+        for (let j = 0; j < children.length; j++) {
+          if (i !== j) siblingRows.push({ FK_Child: children[i].id, Sibling: children[j].id });
+        }
+      }
+      if (siblingRows.length > 0) {
+        await model.sibling.bulkCreate(siblingRows, { ignoreDuplicates: true, ...opts });
+      }
+    }
+
+    // 4. Delete the now-empty secondary families
+    await model.family.destroy({ where: { id: { [Op.in]: secondaryIds } }, ...opts });
+  });
+
+  // 5. Log outside the transaction (non-blocking; log failure must not roll back the merge)
+  try {
+    await log.createLog("Family Merged", User, `Merged families [${secondaryIds.join(', ')}] into Master Family (${primaryId}). Children merged: ${mergeChildren !== false}`);
+  } catch (logErr) {
+    console.error("Merge log failed (merge itself succeeded):", logErr.message);
+  }
+
+  res.status(200).json({ message: "Families successfully merged!" });
 });

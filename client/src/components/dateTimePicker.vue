@@ -1,183 +1,207 @@
 <template>
-    <v-form ref="validScheduleDateTime" v-model="validScheduleDateTime" lazy-validation>
-        <v-container
-            style="padding: 0px !important; display: flex; flex-wrap: wrap; justify-content: start; align-items: center; gap: 40px; height:80px">
-            <h2 class="text-left" style="margin-right: 0px;">Study date & time:
-            </h2>
+  <v-form ref="validScheduleDateTime" v-model="validScheduleDateTime" lazy-validation>
+    <v-container
+      class="pa-0 d-flex align-center"
+      style="gap: 12px;"
+    >
+      <!-- Date: text input + calendar picker -->
+      <v-menu v-model="dateMenu" :close-on-content-click="false" location="bottom start">
+        <template v-slot:activator="{ props: menuProps }">
+          <v-text-field
+            ref="studyDateInput"
+            label="Date"
+            v-model="dateValue"
+            :disabled="dateTimePickerDisable"
+            @update:model-value="onDateTimeChange"
+            hide-details
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DD"
+            style="max-width: 200px; flex-shrink: 0;"
+          >
+            <template v-slot:append-inner>
+              <v-icon v-bind="menuProps" :disabled="dateTimePickerDisable" style="cursor:pointer">mdi-calendar</v-icon>
+            </template>
+          </v-text-field>
+        </template>
+        <v-date-picker
+          v-model="datePickerValue"
+          @update:model-value="onDatePickerSelect"
+          hide-header
+          show-adjacent-months
+        ></v-date-picker>
+      </v-menu>
 
-            <v-text-field filled dense outlined ref="studyDate" label="Study date (YYYY-MM-DD)" v-model="studyDate"
-                :rules="$rules.dob" :disabled="dateTimePickerDisable" hide-details prepend-inner-icon="mdi-calendar"
-                @click:prepend-inner="datePicker = true" @click="datePicker = true"></v-text-field>
+      <!-- Hour select -->
+      <v-select
+        label="Hour"
+        :items="hourOptions"
+        v-model="hourValue"
+        :disabled="dateTimePickerDisable"
+        @update:model-value="onDateTimeChange"
+        hide-details
+        variant="outlined"
+        density="compact"
+        style="max-width: 90px; flex-shrink: 0;"
+      ></v-select>
 
-            <v-combobox v-model="studyTime" :items="$studyTimeSlots" :rules="$rules.time" @change="dateTimeValidation"
-                label="Study time" prepend-inner-icon="mdi-clock-time-nine-outline" :disabled="dateTimePickerDisable"
-                hide-details filled dense outlined></v-combobox>
-            <v-spacer></v-spacer>
+      <span style="font-size: 1.2rem; font-weight: 600; opacity: 0.5; margin: 0 -4px;">:</span>
 
+      <!-- Minute select -->
+      <v-select
+        label="Min"
+        :items="minuteOptions"
+        v-model="minuteValue"
+        :disabled="dateTimePickerDisable"
+        @update:model-value="onDateTimeChange"
+        hide-details
+        variant="outlined"
+        density="compact"
+        style="max-width: 90px; flex-shrink: 0;"
+      ></v-select>
 
-
-            <!-- <v-tooltip right>
-                        <template v-slot:activator="{ on }">
-                            <div v-on="on">
-                                <v-checkbox style="padding: 4px !important" label="Skip study date/time" class="ma-0 pa-0"
-                                    :value="skipStudyDateTimeStatus" @change="skipStudyDateTime()" hide-details
-                                    dense></v-checkbox>
-                            </div>
-                        </template>
-                        <span>Check this box to use current date/time for the current
-                            appointment.<br />NO Google Calendar event will be
-                            created.</span>
-                    </v-tooltip>
-                    <v-tooltip right>
-                        <template v-slot:activator="{ on }">
-                            <div v-on="on">
-                                <v-checkbox style="padding: 4px !important" label="Skip reminder email" class="ma-0 pa-0"
-                                    :value="skipReminderEmailStatus" @change="skipReminderEmail()" hide-details
-                                    dense></v-checkbox>
-                            </div>
-                        </template>
-                        <span>Check this box to prevent reminder email from being sent to
-                            the participant.</span>
-                    </v-tooltip> -->
-
-            <v-dialog v-model="datePicker" max-width="290px">
-                <v-card outlined>
-                    <v-date-picker v-model="studyDate" show-current @click:date="datePick"></v-date-picker>
-                </v-card>
-            </v-dialog>
-        </v-container>
-        <!-- <body align="start" v-html="parentContact(item.Family)"></body> -->
-
-        <body align="center" v-html="dateTimeNotice"></body>
-    </v-form>
+      <span v-html="dateTimeNotice" style="flex: 1;"></span>
+    </v-container>
+  </v-form>
 </template>
 
 <script>
 import moment from "moment";
 
 export default {
-    props: {
-        dateTimePickerDisable: Boolean,
-        appointmentTime: String,
-    },
-    data() {
-        return {
-            datePicker: false,
-            studyDateTimeReady: false,
-            validScheduleDateTime: true,
-            studyDate: null,
-            studyTime: null,
-        }
-    },
-    methods: {
-        datePick() {
-            this.datePicker = false;
-            setTimeout(() => {
-                this.$refs.studyDate.focus();
-            }, 100);
-        },
-
-        extractHourAndMinute(timeString) {
-            const parts = timeString.split(':');
-            let hour = parseInt(parts[0], 10);
-            const minute = parseInt(parts[1].substring(0, 2), 10);
-            const amPm = parts[1].substring(2).toUpperCase();
-
-            if (amPm === 'PM' && hour !== 12) {
-                hour += 12;
-            } else if (amPm === 'AM' && hour === 12) {
-                hour = 0;
-            }
-
-            return { hour, minute };
-        },
-
-        studyDateTime() {
-            if (this.studyTime && this.studyDate) {
-                const { hour, minute } = this.extractHourAndMinute(this.studyTime)
-
-                const StudyHour = hour.toString().padStart(2, '0');
-                const StudyMin = minute.toString().padStart(2, '0');
-
-                const studyDateTime = this.studyDate + "T" + StudyHour + ":" + StudyMin;
-
-                return studyDateTime;
-
-            } else {
-                return null;
-
-            }
-        },
-
-        dateTimeValidation() {
-            var validationResults = this.$refs.validScheduleDateTime.validate();
-            this.studyDateTimeReady = (validationResults && (this.studyTime !== null) && (this.studyDate !== null));
-            this.$emit("readyToCreateSchedule")
-        },
-
-        resetDateTime() {
-            if (this.appointmentTime) {
-                this.studyDate = moment(this.appointmentTime).format("YYYY-MM-DD");
-                this.studyTime = moment(this.appointmentTime).format("hh:mmA");
-                this.studyDateTimeReady = true;
-            } else {
-                this.studyDate = null;
-                this.studyTime = null;
-                this.studyDateTimeReady = false;
-            }
-        },
-
-        assignDateTime() {
-            if (this.appointmentTime) {
-                this.studyDate = moment(this.appointmentTime).format("YYYY-MM-DD");
-                this.studyTime = moment(this.appointmentTime).format("hh:mmA");
-            } else {
-                this.studyDate = null;
-                this.studyTime = null;
-            }
-        }
-    },
-
-    computed: {
-        dateTimeNotice() {
-            if (this.studyDateTimeReady) {
-                return `<p style="font-size: 14px; margin: 0px;">Appointment date and time are entered correctly!</p>`
-
-            } else {
-                if (this.dateTimePickerDisable) {
-                    return `<p style="font-size: 14px; margin: 0px;">No appointment date or time is required</p>`
-                } else {
-                    return `<p style="color: #ff0000; font-weight: 500; font-size: 14px; margin: 0px;">Please select or update appointment date and time.</p>`
-                }
-            }
-        }
-    },
-    watch: {
-        // dateTimePickerDisable(newVal) {
-
-        //     if (newVal) {
-        //         this.resetDateTime()
-        //     }
-        // },
-        appointmentTime(newVal) {
-            // console.log("appointmentTimeChanged")
-
-            if (newVal) {
-                this.assignDateTime()
-                // console.log("appointmentTime", newVal)
-            }
-        },
-
-        studyDate(newVal) {
-
-            if (newVal) {
-                this.dateTimeValidation()
-            }
-        },
-    },
-    mounted() {
-        this.assignDateTime()
-        // console.log("appointmentTimeMounted")
+  name: "dateTimePicker",
+  props: {
+    dateTimePickerDisable: Boolean,
+    appointmentTime: String,
+  },
+  emits: ["readyToCreateSchedule"],
+  data() {
+    return {
+      studyDateTimeReady: false,
+      validScheduleDateTime: true,
+      dateValue: null,
+      datePickerValue: null,
+      dateMenu: false,
+      hourValue: 9,
+      minuteValue: "00",
+      hourOptions: Array.from({ length: 24 }, (_, i) => i),
+      minuteOptions: ["00", "15", "30", "45"],
     }
+  },
+  methods: {
+    studyDateTime() {
+      if (this.dateValue && this.hourValue !== null) {
+        const h = String(this.hourValue).padStart(2, '0');
+        const m = this.minuteValue || '00';
+        return `${this.dateValue}T${h}:${m}`;
+      } else {
+        return null;
+      }
+    },
+
+    onDateTimeChange() {
+      this.dateTimeValidation();
+    },
+
+    onDatePickerSelect(date) {
+      if (!date) return;
+      const d = new Date(date);
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      this.dateValue = `${yyyy}-${mm}-${dd}`;
+      this.dateMenu = false;
+      this.dateTimeValidation();
+    },
+
+    async dateTimeValidation() {
+      const isValid = this.dateValue && this.hourValue !== null && this.minuteValue !== null;
+      this.studyDateTimeReady = isValid;
+      this.$emit("readyToCreateSchedule");
+    },
+
+    resetDateTime() {
+      if (this.appointmentTime) {
+        const m = moment(this.appointmentTime);
+        this.dateValue = m.format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
+        this.hourValue = m.hour();
+        this.minuteValue = this.snapMinute(m.minute());
+        this.studyDateTimeReady = true;
+      } else {
+        this.dateValue = moment().format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
+        this.hourValue = 9;
+        this.minuteValue = "00";
+        this.studyDateTimeReady = true;
+      }
+    },
+
+    assignDateTime() {
+      if (this.appointmentTime) {
+        const m = moment(this.appointmentTime);
+        this.dateValue = m.format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
+        this.hourValue = m.hour();
+        this.minuteValue = this.snapMinute(m.minute());
+      } else {
+        // Default to today at 09:00
+        this.dateValue = moment().format("YYYY-MM-DD");
+        this.datePickerValue = new Date(this.dateValue + 'T12:00:00');
+        this.hourValue = 9;
+        this.minuteValue = "00";
+      }
+    },
+
+    snapMinute(min) {
+      // Snap to nearest 15-minute interval
+      const intervals = [0, 15, 30, 45];
+      let closest = "00";
+      let minDiff = 60;
+      for (const iv of intervals) {
+        const diff = Math.abs(min - iv);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closest = String(iv).padStart(2, '0');
+        }
+      }
+      return closest;
+    }
+  },
+  computed: {
+    studyDateTimeValue() {
+      if (this.dateValue && this.hourValue !== null) {
+        const h = String(this.hourValue).padStart(2, '0');
+        const m = this.minuteValue || '00';
+        return `${this.dateValue}  ${h}:${m}`;
+      }
+      return null;
+    },
+    dateTimeNotice() {
+      if (this.studyDateTimeReady) {
+        return `<p style="font-size: 14px; margin: 0px;">Appointment date and time are entered correctly!</p>`;
+      } else {
+        if (this.dateTimePickerDisable) {
+          return `<p style="font-size: 14px; margin: 0px;">No appointment date or time is required</p>`;
+        } else {
+          return `<p style="color: #ff0000; font-weight: 500; font-size: 14px; margin: 0px;">Please select or update appointment date and time.</p>`;
+        }
+      }
+    }
+  },
+  watch: {
+    appointmentTime(newVal) {
+      if (newVal) {
+        this.assignDateTime();
+      }
+    },
+    dateValue() {
+      this.dateTimeValidation();
+    },
+  },
+  mounted() {
+    this.assignDateTime();
+    this.dateTimeValidation();
+  }
 }
 </script>

@@ -75,7 +75,7 @@ exports.autoCancellation = asyncHandler(async (req, res) => {
 
     // res.status(200).send(schedules);
   } catch (error) {
-    throw error;
+    console.error("Auto-cancellation error:", error);
   }
 });
 
@@ -190,6 +190,6 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    throw error;
+    console.error("Auto-completion error:", error);
   }
 });
