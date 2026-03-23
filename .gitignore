@@ -62,3 +62,9 @@ repomix-output.xml
 error_logs.txt
 stats/monthYearWeekN.json
 pm2_logs.txt
+.agent/
+.agents/
+.github/
+.vscode/
+backups/
+stats/
