@@ -62,7 +62,7 @@
                 </div>
                 <div v-else-if="item.rules">
                   <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
-                    variant="outlined" hide-details density="compact"></v-text-field>
+                    variant="outlined" hide-details="auto" density="compact"></v-text-field>
                 </div>
                 <div v-else>
                   <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details
@@ -81,7 +81,7 @@
                 </div>
                 <div v-else-if="item.rules">
                   <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedItem[item.field]"
-                    variant="outlined" hide-details density="compact"></v-text-field>
+                    variant="outlined" hide-details="auto" density="compact"></v-text-field>
                 </div>
                 <div v-else>
                   <v-text-field :label="item.label" v-model="editedItem[item.field]" variant="outlined" hide-details

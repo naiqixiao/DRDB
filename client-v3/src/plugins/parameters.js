@@ -546,7 +546,8 @@ export default {
                 // (value) => !!value || "Required.",
                 (value) => {
                     if (value) {
-                        return (value && value.length <= 10) || "Have to be 10 digits"
+                        const cleaned = String(value).replace(/\D/g, "");
+                        return (cleaned.length <= 10) || "Have to be 10 digits"
                     } else {
                         return true
                     }

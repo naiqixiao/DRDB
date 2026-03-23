@@ -14,9 +14,18 @@
         <v-btn color="success" variant="tonal" class="mr-2" @click="addFamily" prepend-icon="mdi-account-multiple-plus">
           New Family
         </v-btn>
-        
-        <v-btn color="warning" variant="tonal" @click="openDuplicateDialog" prepend-icon="mdi-account-search" :disabled="['RA', 'Undergrad'].includes(store.role)">
+
+        <v-btn color="warning" variant="tonal" @click="openDuplicateDialog" prepend-icon="mdi-account-search"
+          :disabled="['RA', 'Undergrad'].includes(store.role)">
           Find Duplicates
+        </v-btn>
+
+        <v-spacer></v-spacer>
+
+        <v-btn color="error" variant="outlined" class="mr-2" @click="deleteFamilyDialog = true"
+          :disabled="!currentFamily.id" v-if="['Admin', 'PI', 'Lab manager'].includes(store.role)"
+          prepend-icon="mdi-delete">
+          Delete Family
         </v-btn>
 
         <v-spacer></v-spacer>
@@ -25,9 +34,9 @@
           prepend-icon="mdi-pencil">
           Edit Family
         </v-btn>
-        
-        <v-btn color="primary" variant="flat" class="mr-2" @click="$refs.childInfo.addChild()" :disabled="!currentFamily.id"
-          prepend-icon="mdi-account-child">
+
+        <v-btn color="primary" variant="flat" class="mr-2" @click="$refs.childInfo.addChild()"
+          :disabled="!currentFamily.id" prepend-icon="mdi-account-child">
           Add Child
         </v-btn>
 
@@ -49,9 +58,11 @@
       <v-col cols="12" md="5">
 
         <v-card class="ds-card h-100 d-flex flex-column" variant="flat" style="position: relative; overflow: hidden;">
-          
+
           <!-- Background Family ID -->
-          <div style="position: absolute; right: 10px; bottom: -10px; font-size: 120px; font-weight: 900; color: rgba(0,0,0,0.08); z-index: 100; line-height: 0.8; pointer-events: none; user-select: none;" v-if="currentFamily.id">
+          <div
+            style="position: absolute; right: 10px; bottom: -10px; font-size: 120px; font-weight: 900; color: rgba(0,0,0,0.08); z-index: 100; line-height: 0.8; pointer-events: none; user-select: none;"
+            v-if="currentFamily.id">
             {{ currentFamily.id }}
           </div>
 
@@ -98,18 +109,24 @@
                   <v-chip size="x-small" color="primary" variant="flat">Total: {{ participationStats.Total }}</v-chip>
                   <v-chip size="x-small" :color="getTimelineColor('Completed', true)" class="text-white" variant="flat"
                     v-if="participationStats.Completed">Completed: {{ participationStats.Completed }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Confirmed', false)" variant="flat" v-if="participationStats.Confirmed">Confirmed: {{
-                    participationStats.Confirmed }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('No Show', false)" class="text-white" variant="flat" v-if="participationStats['No Show']">No-Show: {{
-                    participationStats['No Show'] }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Cancelled', false)" class="text-white" variant="flat" v-if="participationStats.Cancelled">Cancelled: {{
-                    participationStats.Cancelled }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat" v-if="participationStats.Rejected">Rejected: {{
-                    participationStats.Rejected }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat" v-if="participationStats.TBD">TBD: {{
-                    participationStats.TBD }}</v-chip>
-                  <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white" variant="flat" v-if="participationStats.Rescheduling">Rescheduling: {{
-                    participationStats.Rescheduling }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Confirmed', false)" variant="flat"
+                    v-if="participationStats.Confirmed">Confirmed: {{
+                      participationStats.Confirmed }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('No Show', false)" class="text-white" variant="flat"
+                    v-if="participationStats['No Show']">No-Show: {{
+                      participationStats['No Show'] }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Cancelled', false)" class="text-white" variant="flat"
+                    v-if="participationStats.Cancelled">Cancelled: {{
+                      participationStats.Cancelled }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Rejected', false)" class="text-white" variant="flat"
+                    v-if="participationStats.Rejected">Rejected: {{
+                      participationStats.Rejected }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('TBD', false)" class="text-white" variant="flat"
+                    v-if="participationStats.TBD">TBD: {{
+                      participationStats.TBD }}</v-chip>
+                  <v-chip size="x-small" :color="getTimelineColor('Rescheduling', false)" class="text-white"
+                    variant="flat" v-if="participationStats.Rescheduling">Rescheduling: {{
+                      participationStats.Rescheduling }}</v-chip>
                 </div>
               </v-col>
             </v-row>
@@ -117,25 +134,15 @@
             <v-divider class="my-4"></v-divider>
 
             <!-- Duplicate Children Warning -->
-            <v-alert
-              v-if="duplicateChildren.length > 0"
-              type="warning"
-              variant="tonal"
-              density="compact"
-              class="mb-3"
-              icon="mdi-account-alert"
-            >
+            <v-alert v-if="duplicateChildren.length > 0" type="warning" variant="tonal" density="compact" class="mb-3"
+              icon="mdi-account-alert">
               <div class="d-flex align-center justify-space-between">
                 <span class="text-body-2">
-                  <strong>{{ duplicateChildren.length }} possible duplicate {{ duplicateChildren.length === 1 ? 'child' : 'children' }}</strong> detected in this family.
+                  <strong>{{ duplicateChildren.length }} possible duplicate {{ duplicateChildren.length === 1 ? 'child'
+                    : 'children' }}</strong> detected in this family.
                 </span>
-                <v-btn
-                  size="small"
-                  variant="flat"
-                  color="warning"
-                  class="ml-3 text-none"
-                  @click="childMergeCandidates = duplicateChildren; childMergeDialog = true; selectedMasterChildIds = duplicateChildren.map(() => null)"
-                >
+                <v-btn size="small" variant="flat" color="warning" class="ml-3 text-none"
+                  @click="childMergeCandidates = duplicateChildren; childMergeDialog = true; selectedMasterChildIds = duplicateChildren.map(() => null)">
                   Merge Duplicate Children
                 </v-btn>
               </div>
@@ -145,7 +152,8 @@
               <span class="text-caption font-weight-bold text-uppercase text-muted">Contact Info</span>
               <v-tooltip location="top">
                 <template v-slot:activator="{ props }">
-                  <v-btn v-bind="props" icon="mdi-information-outline" density="compact" variant="text" size="small" color="primary" @click="detailsDialog = true" :disabled="!currentFamily.id"></v-btn>
+                  <v-btn v-bind="props" icon="mdi-information-outline" density="compact" variant="text" size="small"
+                    color="primary" @click="detailsDialog = true" :disabled="!currentFamily.id"></v-btn>
                 </template>
                 <span>View Full Details</span>
               </v-tooltip>
@@ -155,20 +163,25 @@
               <v-list-item prepend-icon="mdi-email-outline" class="px-0">
                 <v-list-item-title class="d-flex align-center">
                   <span>{{ currentFamily.Email || 'No email provided' }}</span>
-                  <v-btn v-if="currentFamily.Email" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Email)"></v-btn>
+                  <v-btn v-if="currentFamily.Email" icon="mdi-content-copy" variant="text" size="x-small"
+                    density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Email)"></v-btn>
                 </v-list-item-title>
               </v-list-item>
               <v-list-item prepend-icon="mdi-phone-outline" class="px-0">
                 <v-list-item-title class="d-flex align-center">
                   <span v-if="currentFamily.Phone">{{ PhoneFormated(currentFamily.Phone) }}</span>
                   <span v-else class="text-muted">No phone</span>
-                  <v-btn v-if="currentFamily.Phone" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Phone)"></v-btn>
-                  <span v-if="currentFamily.CellPhone" class="text-muted ml-2">(Cell: {{ PhoneFormated(currentFamily.CellPhone) }})</span>
-                  <v-btn v-if="currentFamily.CellPhone" icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-2" @click="copyToClipboard(currentFamily.CellPhone)"></v-btn>
+                  <v-btn v-if="currentFamily.Phone" icon="mdi-content-copy" variant="text" size="x-small"
+                    density="compact" class="ml-2" @click="copyToClipboard(currentFamily.Phone)"></v-btn>
+                  <span v-if="currentFamily.CellPhone" class="text-muted ml-2">(Cell: {{
+                    PhoneFormated(currentFamily.CellPhone)
+                    }})</span>
+                  <v-btn v-if="currentFamily.CellPhone" icon="mdi-content-copy" variant="text" size="x-small"
+                    density="compact" class="ml-2" @click="copyToClipboard(currentFamily.CellPhone)"></v-btn>
                 </v-list-item-title>
               </v-list-item>
-              <v-list-item prepend-icon="mdi-map-marker-outline" :title="currentFamily.Address || 'No home address provided'"
-                class="px-0"></v-list-item>
+              <v-list-item prepend-icon="mdi-map-marker-outline"
+                :title="currentFamily.Address || 'No home address provided'" class="px-0"></v-list-item>
             </v-list>
 
             <v-divider class="my-2"></v-divider>
@@ -178,9 +191,20 @@
                 <v-list-item-title class="text-caption text-muted">Next Contact Date</v-list-item-title>
                 <v-list-item-subtitle class="font-weight-medium">{{ currentFamily.NextContactDate ?
                   formatDate(currentFamily.NextContactDate) : 'Not set' }}</v-list-item-subtitle>
+                <template v-slot:append>
+                  <v-tooltip location="top" v-if="currentFamily.id">
+                    <template v-slot:activator="{ props }">
+                      <v-btn v-bind="props" icon variant="text" color="warning" @click="NoMoreContact">
+                        <v-icon>mdi-hand-back-right</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Family requests no more contact?</span>
+                  </v-tooltip>
+                </template>
               </v-list-item>
 
-              <v-list-item prepend-icon="mdi-message-text-outline" class="px-0 pb-2" v-if="currentFamily.NextContactNote" style="background-color: transparent !important;">
+              <v-list-item prepend-icon="mdi-message-text-outline" class="px-0 pb-2"
+                v-if="currentFamily.NextContactNote" style="background-color: transparent !important;">
                 <v-list-item-title class="text-caption text-muted">Notes for next contact</v-list-item-title>
                 <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
                   {{ currentFamily.NextContactNote }}
@@ -209,27 +233,31 @@
           <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
             <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">
               {{ editedIndex === -1 ? 'Add a new family' : 'Edit family information' }}
-              <span v-if="editedIndex !== -1" class="text-subtitle-1 text-muted ml-2 font-weight-regular">(ID: {{ editedItem.id }})</span>
+              <span v-if="editedIndex !== -1" class="text-subtitle-1 text-muted ml-2 font-weight-regular">(ID: {{
+                editedItem.id }})</span>
             </span>
             <v-btn icon="mdi-close" variant="text" density="comfortable" @click="dialog = false"></v-btn>
           </v-card-title>
-          
+
           <v-divider></v-divider>
 
           <v-card-text class="pt-6 pb-2" style="max-height: 70vh;">
             <v-form ref="form" v-model="valid" lazy-validation>
-              
+
               <div class="mb-6">
                 <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Family Information</div>
                 <v-row dense>
-                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyBasicInfo" :key="item.label">
+                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyBasicInfo"
+                    :key="item.label">
                     <div v-if="item.options">
-                      <v-combobox class="textfield-family mb-2" v-model="editedItem[item.field]" :items="Options[item.options]"
-                        variant="outlined" :label="item.label" density="compact" hide-details></v-combobox>
+                      <v-combobox class="textfield-family mb-2" v-model="editedItem[item.field]"
+                        :items="Options[item.options]" variant="outlined" :label="item.label" density="compact"
+                        hide-details></v-combobox>
                     </div>
                     <div v-else>
                       <v-text-field class="textfield-family mb-2" :label="item.label" v-model="editedItem[item.field]"
-                        variant="outlined" hide-details density="compact"></v-text-field>
+                        :rules="item.rules ? $rules[item.rules] : []" variant="outlined" hide-details="auto"
+                        density="compact"></v-text-field>
                     </div>
                   </v-col>
                 </v-row>
@@ -238,16 +266,18 @@
               <div class="mb-4">
                 <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Contact Information</div>
                 <v-row dense>
-                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyContactInfo" :key="item.label">
+                  <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyContactInfo"
+                    :key="item.label">
                     <v-text-field class="textfield-family mb-2" :label="item.label" v-model="editedItem[item.field]"
-                      variant="outlined" hide-details density="compact"></v-text-field>
+                      :rules="item.rules ? $rules[item.rules] : []" variant="outlined" hide-details="auto"
+                      density="compact"></v-text-field>
                   </v-col>
                 </v-row>
               </div>
 
             </v-form>
           </v-card-text>
-          
+
           <v-card-actions class="px-6 pb-6 pt-0">
             <v-spacer></v-spacer>
             <v-btn color="error" variant="text" @click="dialog = false">Cancel</v-btn>
@@ -269,13 +299,15 @@
 
           <v-card-text class="pt-6 pb-2">
             <div v-for="category in searchFamilyCategories" :key="category.category" class="mb-4">
-              <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">{{ category.category }}</div>
+              <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">{{ category.category }}
+              </div>
               <v-row dense>
-                <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in category.fields" :key="item.label">
+                <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in category.fields"
+                  :key="item.label">
                   <div v-if="item.options">
                     <v-combobox class="textfield-family mb-2" v-model="queryString[item.field]"
-                      :items="Options[item.options]" variant="outlined" :label="item.label" density="compact" hide-details
-                      clearable></v-combobox>
+                      :items="Options[item.options]" variant="outlined" :label="item.label" density="compact"
+                      hide-details clearable></v-combobox>
                   </div>
                   <div v-else>
                     <v-text-field class="textfield-family mb-2" :label="item.label" v-model="queryString[item.field]"
@@ -301,15 +333,16 @@
       <v-dialog v-model="detailsDialog" max-width="600px" scrollable>
         <v-card class="ds-card" variant="flat">
           <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
-            <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Family Details</span>
+            <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Family
+              Details</span>
             <v-btn icon="mdi-close" variant="text" density="comfortable" @click="detailsDialog = false"></v-btn>
           </v-card-title>
-          
+
           <v-divider></v-divider>
-          
+
           <v-card-text class="pt-2 pb-6 px-4" style="max-height: 70vh;">
             <v-list density="compact" class="text-left">
-              
+
               <!-- Caregivers -->
               <v-list-item prepend-icon="mdi-account" class="px-2">
                 <v-list-item-title class="text-caption text-muted">Primary Caregiver</v-list-item-title>
@@ -317,7 +350,7 @@
                   {{ currentFamily.NamePrimary || 'Not provided' }}
                 </v-list-item-subtitle>
               </v-list-item>
-              
+
               <v-list-item prepend-icon="mdi-account-multiple" class="px-2" v-if="currentFamily.NameSecondary">
                 <v-list-item-title class="text-caption text-muted">Secondary Caregiver</v-list-item-title>
                 <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
@@ -332,8 +365,10 @@
                 <v-list-item-title class="text-caption text-muted">Languages</v-list-item-title>
                 <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
                   Primary: {{ currentFamily.LanguagePrimary || 'Not specified' }}
-                  <span v-if="currentFamily.LanguageSecondary"> | Secondary: {{ currentFamily.LanguageSecondary }}</span>
-                  <span v-if="currentFamily.EnglishPercent !== null"> | English: {{ currentFamily.EnglishPercent }}%</span>
+                  <span v-if="currentFamily.LanguageSecondary"> | Secondary: {{ currentFamily.LanguageSecondary
+                    }}</span>
+                  <span v-if="currentFamily.EnglishPercent !== null"> | English: {{ currentFamily.EnglishPercent
+                    }}%</span>
                 </v-list-item-subtitle>
               </v-list-item>
 
@@ -344,7 +379,7 @@
                   <span v-if="currentFamily.RaceSecondary"> | Secondary: {{ currentFamily.RaceSecondary }}</span>
                 </v-list-item-subtitle>
               </v-list-item>
-              
+
               <v-divider class="my-2"></v-divider>
 
               <!-- Additional Details -->
@@ -365,10 +400,11 @@
               <v-list-item prepend-icon="mdi-brain" class="px-2">
                 <v-list-item-title class="text-caption text-muted">Autism History</v-list-item-title>
                 <v-list-item-subtitle class="font-weight-medium text-wrap mt-1" style="line-height: 1.4; opacity: 1;">
-                  {{ currentFamily.AutismHistory === 1 ? 'Yes' : (currentFamily.AutismHistory === 0 ? 'No' : 'Unknown') }}
+                  {{ currentFamily.AutismHistory === 1 ? 'Yes' : (currentFamily.AutismHistory === 0 ? 'No' : 'Unknown')
+                  }}
                 </v-list-item-subtitle>
               </v-list-item>
-              
+
             </v-list>
           </v-card-text>
         </v-card>
@@ -393,13 +429,9 @@
       <!-- RIGHT COLUMN: Notes & Conversations -->
       <v-col cols="12" md="3">
         <div v-if="currentFamily.id" class="h-100">
-          <NotesConversation
-            class="h-100"
-            :Conversation="currentFamily.Conversations || []"
-            :familyId="currentFamily.id ? parseInt(currentFamily.id) : null"
-            :notes="familyNotes"
-            @updateNotes="saveNotes"
-          />
+          <NotesConversation class="h-100" :Conversation="currentFamily.Conversations || []"
+            :familyId="currentFamily.id ? parseInt(currentFamily.id) : null" :notes="familyNotes"
+            @updateNotes="saveNotes" />
         </div>
         <v-card v-else class="ds-card h-100 d-flex flex-column align-center justify-center" variant="flat">
           <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-forum-outline</v-icon>
@@ -411,6 +443,26 @@
       </v-col>
     </v-row>
 
+    <!-- Delete Family Dialog -->
+    <v-dialog v-model="deleteFamilyDialog" max-width="500px">
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="text-h6 font-weight-bold bg-error text-white py-3">
+          Delete Family?
+        </v-card-title>
+        <v-card-text class="pt-6 pb-2">
+          Are you sure you want to delete this family? This action will remove the family, associated children, and
+          appointments from the database completely. This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteFamilyDialog = false"
+            :disabled="isDeletingFamily">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="isDeletingFamily" @click="deleteFamily"
+            prepend-icon="mdi-delete">Yes, Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Delete Timeline Schedule Dialog -->
     <v-dialog v-model="deleteDialog" max-width="500px">
       <v-card class="ds-card" variant="flat">
@@ -418,12 +470,15 @@
           Delete Schedule?
         </v-card-title>
         <v-card-text class="pt-6 pb-2">
-          Are you sure you want to delete this schedule and its associated Google Calendar event? This action cannot be undone.
+          Are you sure you want to delete this schedule and its associated Google Calendar event? This action cannot be
+          undone.
         </v-card-text>
         <v-card-actions class="px-6 pb-6 pt-0">
           <v-spacer></v-spacer>
-          <v-btn color="grey-darken-1" variant="text" @click="deleteDialog = false" :disabled="isDeletingTimelineSchedule">Cancel</v-btn>
-          <v-btn color="error" variant="flat" :loading="isDeletingTimelineSchedule" @click="deleteTimelineSchedule" prepend-icon="mdi-delete">Yes, Delete</v-btn>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteDialog = false"
+            :disabled="isDeletingTimelineSchedule">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="isDeletingTimelineSchedule" @click="deleteTimelineSchedule"
+            prepend-icon="mdi-delete">Yes, Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -443,8 +498,9 @@
           <v-window v-model="historyTab">
 
             <v-window-item value="timeline" class="pa-6">
-              
-              <div v-if="reversedSchedules && reversedSchedules.length > 0" class="d-flex align-center text-caption text-muted mb-2">
+
+              <div v-if="reversedSchedules && reversedSchedules.length > 0"
+                class="d-flex align-center text-caption text-muted mb-2">
                 <v-icon size="small" class="mr-1" color="grey">mdi-information-outline</v-icon>
                 <span>Only schedules updated within the last 7 days can be deleted.</span>
               </div>
@@ -458,15 +514,12 @@
                     style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background-color: #CBD5E1; z-index: 0; transform: translateY(-50%); pointer-events: none;">
                   </div>
 
-                  <TimelineCard v-for="schedule in reversedSchedules" :key="schedule.id"
-                    :schedule="schedule"
-                    :deletable="isScheduleDeletable(schedule)"
-                    @delete="confirmDeleteTimelineSchedule" />
+                  <TimelineCard v-for="schedule in reversedSchedules" :key="schedule.id" :schedule="schedule"
+                    :deletable="isScheduleDeletable(schedule)" @delete="confirmDeleteTimelineSchedule" />
                 </div>
               </div>
 
-              <div v-if="!reversedSchedules || reversedSchedules.length === 0"
-                class="text-center text-muted py-8">
+              <div v-if="!reversedSchedules || reversedSchedules.length === 0" class="text-center text-muted py-8">
                 <v-icon size="large" class="mb-2" color="grey-lighten-1">mdi-clipboard-text-off-outline</v-icon>
                 <div>No participation history available for this family.</div>
               </div>
@@ -497,7 +550,7 @@
             <v-progress-circular indeterminate color="primary" size="48"></v-progress-circular>
             <div class="mt-4 text-muted">Scanning database for matching emails or phones...</div>
           </div>
-          
+
           <div v-else-if="duplicateGroups.length === 0" class="text-center py-12">
             <v-icon size="64" color="success">mdi-check-decagram</v-icon>
             <h3 class="text-h6 mt-4 text-success">Database is clean!</h3>
@@ -507,17 +560,20 @@
           <v-expansion-panels v-else variant="accordion">
             <v-expansion-panel v-for="(group, index) in duplicateGroups" :key="index" class="mb-4 rounded">
               <v-expansion-panel-title class="font-weight-bold text-primary">
-                {{ group.matchReason }} 
+                {{ group.matchReason }}
                 <v-chip size="x-small" color="error" class="ml-3">{{ group.families.length }} Records Found</v-chip>
               </v-expansion-panel-title>
-              
+
               <v-expansion-panel-text class="bg-white pt-4">
                 <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-                  Select the <strong>Master Record</strong> you want to keep. Study histories will always be moved into the Master Record. Children can optionally be merged too.
+                  Select the <strong>Master Record</strong> you want to keep. Study histories will always be moved into
+                  the
+                  Master Record. Children can optionally be merged too.
                 </v-alert>
 
                 <v-radio-group v-model="selectedPrimaryIds[index]">
-                  <v-card v-for="fam in group.families" :key="fam.id" variant="outlined" class="mb-3 pa-3" :style="selectedPrimaryIds[index] === fam.id ? 'border-color: var(--color-primary) !important; background-color: rgba(30, 64, 175, 0.05);' : ''">
+                  <v-card v-for="fam in group.families" :key="fam.id" variant="outlined" class="mb-3 pa-3"
+                    :style="selectedPrimaryIds[index] === fam.id ? 'border-color: var(--color-primary) !important; background-color: rgba(30, 64, 175, 0.05);' : ''">
                     <div class="d-flex align-start">
                       <v-radio :value="fam.id" color="primary" class="mt-n1"></v-radio>
                       <div class="flex-grow-1">
@@ -530,14 +586,16 @@
                         </div>
                         <div class="d-flex align-center" style="gap: 8px; flex-wrap: wrap;">
                           <!-- Children chip -->
-                          <v-chip size="small" :color="fam.Children && fam.Children.length > 0 ? 'primary' : 'grey'" variant="tonal" prepend-icon="mdi-human-child">
+                          <v-chip size="small" :color="fam.Children && fam.Children.length > 0 ? 'primary' : 'grey'"
+                            variant="tonal" prepend-icon="mdi-human-child">
                             {{ fam.Children?.length || 0 }} {{ fam.Children?.length === 1 ? 'Child' : 'Children' }}
                             <span v-if="fam.Children && fam.Children.length > 0" class="ml-1">
-                              ({{ fam.Children.map(c => c.Name.split(' ')[0]).join(', ') }})
+                              ({{fam.Children.map(c => c.Name.split(' ')[0]).join(', ')}})
                             </span>
                           </v-chip>
                           <!-- Studies chip -->
-                          <v-chip size="small" :color="fam.Schedules && fam.Schedules.length > 0 ? 'teal' : 'grey'" variant="tonal" prepend-icon="mdi-flask-outline">
+                          <v-chip size="small" :color="fam.Schedules && fam.Schedules.length > 0 ? 'teal' : 'grey'"
+                            variant="tonal" prepend-icon="mdi-flask-outline">
                             {{ fam.Schedules?.length || 0 }} {{ fam.Schedules?.length === 1 ? 'Study' : 'Studies' }}
                           </v-chip>
                         </div>
@@ -552,23 +610,23 @@
                     <div>
                       <div class="text-body-2 font-weight-bold">Merge Children into Master Record?</div>
                       <div class="text-caption text-muted mt-1">
-                        <span v-if="mergeChildrenFlags[index]">Children from all records will be <strong>combined</strong> under the Master Record.</span>
-                        <span v-else>Children will <strong>stay</strong> in their original family records (only study histories are merged).</span>
+                        <span v-if="mergeChildrenFlags[index]">Children from all records will be
+                          <strong>combined</strong>
+                          under the Master Record.</span>
+                        <span v-else>Children will <strong>stay</strong> in their original family records (only study
+                          histories are merged).</span>
                       </div>
                     </div>
-                    <v-switch
-                      v-model="mergeChildrenFlags[index]"
-                      color="primary"
-                      hide-details
-                      density="compact"
-                      class="ml-4 flex-shrink-0"
-                    ></v-switch>
+                    <v-switch v-model="mergeChildrenFlags[index]" color="primary" hide-details density="compact"
+                      class="ml-4 flex-shrink-0"></v-switch>
                   </div>
                 </v-card>
 
                 <div class="d-flex justify-end mt-2">
-                  <v-btn variant="text" color="grey" class="mr-2" @click="dismissGroup(index)">Dismiss (Not Duplicates)</v-btn>
-                  <v-btn color="warning" variant="flat" :disabled="!selectedPrimaryIds[index]" @click="mergeGroup(index, group)">Merge & Clean</v-btn>
+                  <v-btn variant="text" color="grey" class="mr-2" @click="dismissGroup(index)">Dismiss (Not
+                    Duplicates)</v-btn>
+                  <v-btn color="warning" variant="flat" :disabled="!selectedPrimaryIds[index]"
+                    @click="mergeGroup(index, group)">Merge & Clean</v-btn>
                 </div>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -581,13 +639,16 @@
     <v-dialog v-model="childMergeDialog" max-width="600px" persistent>
       <v-card class="ds-card" variant="flat">
         <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
-          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Merge Duplicate Children</span>
+          <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading)">Merge Duplicate
+            Children</span>
           <v-btn icon="mdi-close" variant="text" density="comfortable" @click="childMergeDialog = false"></v-btn>
         </v-card-title>
         <v-divider></v-divider>
         <v-card-text class="pt-4">
           <v-alert type="info" variant="tonal" density="compact" class="mb-4">
-            Select the <strong>Master Record</strong> to keep. The other record's appointments will be moved into it, then deleted.
+            Select the <strong>Master Record</strong> to keep. The other record's appointments will be moved into it,
+            then
+            deleted.
           </v-alert>
 
           <div v-for="(pair, pi) in childMergeCandidates" :key="pi" class="mb-6">
@@ -595,13 +656,8 @@
               Possible duplicate pair {{ pi + 1 }}
             </div>
             <v-radio-group v-model="selectedMasterChildIds[pi]">
-              <v-card
-                v-for="c in [pair.a, pair.b]"
-                :key="c.id"
-                variant="outlined"
-                class="mb-2 pa-3"
-                :style="selectedMasterChildIds[pi] === c.id ? 'border-color: var(--color-primary) !important; background: rgba(30,64,175,0.05)' : ''"
-              >
+              <v-card v-for="c in [pair.a, pair.b]" :key="c.id" variant="outlined" class="mb-2 pa-3"
+                :style="selectedMasterChildIds[pi] === c.id ? 'border-color: var(--color-primary) !important; background: rgba(30,64,175,0.05)' : ''">
                 <div class="d-flex align-center">
                   <v-radio :value="c.id" color="primary"></v-radio>
                   <div class="ml-2">
@@ -620,8 +676,7 @@
         <v-card-actions class="px-6 pb-6 pt-0 d-flex justify-end">
           <v-btn color="grey" variant="text" class="mr-2" @click="childMergeDialog = false">Cancel</v-btn>
           <v-btn color="warning" variant="flat"
-            :disabled="childMergeCandidates.some((_, pi) => !selectedMasterChildIds[pi])"
-            @click="mergeChildPair">
+            :disabled="childMergeCandidates.some((_, pi) => !selectedMasterChildIds[pi])" @click="mergeChildPair">
             Merge & Keep Masters
           </v-btn>
         </v-card-actions>
@@ -678,6 +733,8 @@ export default {
       searchStatus: false,
       searchDialog: false,
       detailsDialog: false,
+      deleteFamilyDialog: false,
+      isDeletingFamily: false,
       deleteDialog: false,
       scheduleToDelete: null,
       isDeletingTimelineSchedule: false,
@@ -792,7 +849,7 @@ export default {
       this.duplicateGroups = [];
       this.selectedPrimaryIds = {};
       this.mergeChildrenFlags = {};
-      
+
       try {
         const response = await family.getDuplicates();
         this.duplicateGroups = response.data;
@@ -1111,12 +1168,78 @@ export default {
 
     formatDate(dateStr) {
       if (!dateStr) return '';
-      return moment(dateStr).format('YYYY-MM-DD HH:mm');
+      return moment(dateStr).format('YYYY-MM-DD');
     },
 
     confirmDeleteTimelineSchedule(schedule) {
       this.scheduleToDelete = schedule;
       this.deleteDialog = true;
+    },
+
+    async deleteFamily() {
+      if (!this.currentFamily.id) return;
+      this.isDeletingFamily = true;
+      const familyId = this.currentFamily.id;
+
+      try {
+        await family.delete({
+          id: familyId,
+          User: JSON.stringify({ Name: this.store.name, Email: this.store.user, LabName: this.store.labName })
+        });
+
+        this.deleteFamilyDialog = false;
+
+        if (this.Families && this.Families.length > 0) {
+          this.Families = this.Families.filter(f => f.id !== familyId);
+          if (this.page > this.Families.length) this.page = this.Families.length;
+
+          if (this.Families.length > 0) {
+            this.currentFamily = this.Families[Math.max(0, this.page - 1)];
+            this.participationStats = this.analyzeParticipation(this.currentFamily);
+            if (this.$refs.childInfo) {
+              this.$refs.childInfo.processChildren(this.currentFamily.Children);
+            }
+          } else {
+            this.page = 0;
+            this.currentFamily = Object.assign({}, this.familyTemplate);
+            this.participationStats = { Total: 0 };
+            if (this.$refs.childInfo) {
+              this.$refs.childInfo.processChildren([]);
+            }
+          }
+        } else {
+          this.currentFamily = Object.assign({}, this.familyTemplate);
+          this.participationStats = { Total: 0 };
+        }
+      } catch (error) {
+        console.error("Family delete error:", error);
+        alert("Failed to delete family.");
+      } finally {
+        this.isDeletingFamily = false;
+      }
+    },
+
+    async NoMoreContact() {
+      if (!this.$refs.confirmD) return;
+      if (await this.$refs.confirmD.open("Remove this family from the database", "Can you confirm the removal?")) {
+        const updatedFamilyInfo = {
+          id: this.currentFamily.id,
+          NextContactNote: "Parents asked to be removed from the database.",
+          LastContactDate: moment().startOf("day").tz(this.store.timeZone).format("YYYY-MM-DD"),
+          NoMoreContact: true,
+        };
+        try {
+          await family.update(updatedFamilyInfo);
+          Object.assign(this.currentFamily, updatedFamilyInfo);
+          if (this.page > 0 && this.Families.length > 0) {
+            Object.assign(this.Families[this.page - 1], this.currentFamily);
+          }
+          this.$refs.confirmD.open('Family Removed', 'This family has been removed from the database.', { color: 'warning', noconfirm: true });
+        } catch (error) {
+          console.log(error);
+          this.$refs.confirmD.open('Error', 'Failed to update family.', { color: 'error', noconfirm: true });
+        }
+      }
     },
 
     async deleteTimelineSchedule() {
@@ -1126,24 +1249,24 @@ export default {
         if (this.scheduleToDelete.Appointments) {
           for (const app of this.scheduleToDelete.Appointments) {
             if (app.calendarEventId) {
-              await calendar.delete({ 
+              await calendar.delete({
                 id: app.id,
-                eventId: app.calendarEventId, 
+                eventId: app.calendarEventId,
                 FK_Schedule: this.scheduleToDelete.id,
-                lab: this.store.lab 
+                lab: this.store.lab
               });
             }
           }
         }
 
         await scheduleService.delete({ id: this.scheduleToDelete.id });
-        
+
         // Remove from UI cache and enforce reactivity
         if (this.currentFamily && this.currentFamily.Schedules) {
           this.currentFamily.Schedules = this.currentFamily.Schedules.filter(s => s.id !== this.scheduleToDelete.id);
           Object.assign(this.Families[this.page - 1], this.currentFamily);
         }
-        
+
         this.deleteDialog = false;
         this.scheduleToDelete = null;
         this.$refs.confirmD.open('Deleted', 'Schedule and calendar event successfully deleted.', { color: 'success', noconfirm: true });
@@ -1273,13 +1396,16 @@ export default {
 .notes-textarea {
   height: 100%;
 }
+
 .notes-textarea :deep(.v-field) {
   height: 100%;
 }
+
 .notes-textarea :deep(.v-field__field),
 .notes-textarea :deep(.v-field__input) {
   height: 100% !important;
 }
+
 .notes-textarea :deep(textarea) {
   height: 100% !important;
 }

@@ -105,6 +105,11 @@
                 </div>
               </v-col>
               <v-col cols="12" sm="4" class="d-flex flex-column align-end justify-center" style="gap: 8px;">
+                <v-btn color="error" variant="outlined" size="small" prepend-icon="mdi-delete" width="130"
+                  v-if="['Admin', 'Lab manager'].includes(store.role)"
+                  @click.stop="deleteFamilyDialog = true" :disabled="!currentFamily.id">
+                  Delete Family
+                </v-btn>
                 <v-btn color="primary" variant="outlined" size="small" prepend-icon="mdi-pencil" width="130"
                   @click.stop="editFamilyAndChild" :disabled="!currentChild.id">
                   Edit Info
@@ -393,10 +398,10 @@
                   </div>
                   <div v-else-if="item.rules">
                     <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedFamily[item.field]"
-                      variant="outlined" hide-details density="compact" class="mb-2"></v-text-field>
+                      variant="outlined" hide-details="auto" density="compact" class="mb-2"></v-text-field>
                   </div>
                   <div v-else>
-                    <v-text-field :label="item.label" v-model="editedFamily[item.field]" variant="outlined" hide-details
+                    <v-text-field :label="item.label" v-model="editedFamily[item.field]" variant="outlined" hide-details="auto"
                       density="compact" class="mb-2"></v-text-field>
                   </div>
                 </v-col>
@@ -414,10 +419,10 @@
                   </div>
                   <div v-else-if="item.rules">
                     <v-text-field :label="item.label" :rules="$rules[item.rules]" v-model="editedFamily[item.field]"
-                      variant="outlined" hide-details density="compact" class="mb-2"></v-text-field>
+                      variant="outlined" hide-details="auto" density="compact" class="mb-2"></v-text-field>
                   </div>
                   <div v-else>
-                    <v-text-field :label="item.label" v-model="editedFamily[item.field]" variant="outlined" hide-details
+                    <v-text-field :label="item.label" v-model="editedFamily[item.field]" variant="outlined" hide-details="auto"
                       density="compact" class="mb-2"></v-text-field>
                   </div>
                 </v-col>
@@ -559,6 +564,23 @@
       </v-card>
     </v-dialog>
 
+    <!-- Delete Family Dialog -->
+    <v-dialog v-model="deleteFamilyDialog" max-width="500px">
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="text-h6 font-weight-bold bg-error text-white py-3">
+          Delete Family?
+        </v-card-title>
+        <v-card-text class="pt-6 pb-2">
+          Are you sure you want to delete this family? This action will remove the family, associated children, and appointments completely. This action cannot be undone.
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0">
+          <v-spacer></v-spacer>
+          <v-btn color="grey-darken-1" variant="text" @click="deleteFamilyDialog = false" :disabled="isDeletingFamily">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="isDeletingFamily" @click="deleteFamily" prepend-icon="mdi-delete">Yes, Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <!-- Schedule Dialog Component -->
     <scheduleDialog 
       ref="scheduleDialog" 
@@ -618,6 +640,8 @@ export default {
       dialogUnifiedEdit: false,
       dialogAddChild: false,
       dialogSchedule: false,
+      deleteFamilyDialog: false,
+      isDeletingFamily: false,
       validUnified: true,
       validAddChild: true,
       historyTab: 'timeline',
@@ -992,6 +1016,42 @@ export default {
         this.editedChild.DoB = moment(this.editedChild.DoB).format("YYYY-MM-DD");
       }
       this.dialogUnifiedEdit = true;
+    },
+
+    async deleteFamily() {
+      if (!this.currentFamily.id) return;
+      this.isDeletingFamily = true;
+      const familyId = this.currentFamily.id;
+      
+      try {
+        await family.delete({ 
+          id: familyId,
+          User: JSON.stringify({ Name: this.store.name, Email: this.store.user, LabName: this.store.labName }) 
+        });
+        
+        this.deleteFamilyDialog = false;
+        
+        if (this.Children && this.Children.length > 0) {
+           this.Children = this.Children.filter(c => c.FK_Family !== familyId);
+           if (this.page > this.Children.length) this.page = this.Children.length;
+           
+           if (this.Children.length > 0) {
+             this.currentChild = this.Children[Math.max(0, this.page - 1)];
+             await this.loadFullChild(this.currentChild);
+           } else {
+             this.page = 0;
+             this.currentChild = Object.assign({}, this.defaultItem);
+             this.currentFamily = Object.assign({}, this.defaultItem.Family);
+             this.participationStats = { Total: 0 };
+             this.appointments = [];
+           }
+        }
+      } catch (error) {
+        console.error("Family delete error:", error);
+        alert("Failed to delete family.");
+      } finally {
+        this.isDeletingFamily = false;
+      }
     },
 
     addNewChild() {
