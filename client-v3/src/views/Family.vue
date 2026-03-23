@@ -1195,21 +1195,12 @@ export default {
 
           if (this.Families.length > 0) {
             this.currentFamily = this.Families[Math.max(0, this.page - 1)];
-            this.participationStats = this.analyzeParticipation(this.currentFamily);
-            if (this.$refs.childInfo) {
-              this.$refs.childInfo.processChildren(this.currentFamily.Children);
-            }
           } else {
             this.page = 0;
             this.currentFamily = Object.assign({}, this.familyTemplate);
-            this.participationStats = { Total: 0 };
-            if (this.$refs.childInfo) {
-              this.$refs.childInfo.processChildren([]);
-            }
           }
         } else {
           this.currentFamily = Object.assign({}, this.familyTemplate);
-          this.participationStats = { Total: 0 };
         }
       } catch (error) {
         console.error("Family delete error:", error);

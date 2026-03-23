@@ -1042,7 +1042,6 @@ export default {
              this.page = 0;
              this.currentChild = Object.assign({}, this.defaultItem);
              this.currentFamily = Object.assign({}, this.defaultItem.Family);
-             this.participationStats = { Total: 0 };
              this.appointments = [];
            }
         }
