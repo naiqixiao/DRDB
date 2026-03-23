@@ -15,11 +15,11 @@ Please check installation instruction and detailed introductions here: https://d
 # Tech Stack Structure
 
 - **Backend (`server/`)**: Express.js REST API with Sequelize ORM (MySQL). Interacts heavily with Google APIs (Calendar, Email) for seamless daily logistics.
-- **Frontend (`client-v3/`)**: A modern Single Page Application built with Vue 3 (Composition API), Vite, Pinia for state management, and Tailwind CSS (utility classes) for rapid UI styling. 
+- **Frontend (`client/`)**: A modern Single Page Application built with Vue 3 (Composition API), Vite, Pinia for state management, and Tailwind CSS (utility classes) for rapid UI styling. 
 
 To start the development server for the new client:
 ```bash
-cd client-v3
+cd client
 npm install
 npm run dev
 ```
