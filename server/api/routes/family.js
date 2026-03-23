@@ -13,12 +13,10 @@ const familyCreateValidation = [
         .isLength({ max: 40 }).withMessage("Email must not exceed 40 characters"),
     body("Phone")
         .optional({ values: "falsy" })
-        .isLength({ max: 11 }).withMessage("Phone must not exceed 11 characters")
-        .matches(/^\d+$/).withMessage("Phone must contain only digits"),
+        .isLength({ max: 20 }).withMessage("Phone must not exceed 20 characters"),
     body("CellPhone")
         .optional({ values: "falsy" })
-        .isLength({ max: 11 }).withMessage("CellPhone must not exceed 11 characters")
-        .matches(/^\d+$/).withMessage("CellPhone must contain only digits"),
+        .isLength({ max: 20 }).withMessage("CellPhone must not exceed 20 characters"),
     body("NamePrimary")
         .optional({ values: "falsy" })
         .isLength({ max: 50 }).withMessage("NamePrimary must not exceed 50 characters"),

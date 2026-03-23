@@ -48,13 +48,21 @@ exports.search = asyncHandler(async (req, res) => {
   delete queryString.AppointmentTimeAfter;
   delete queryString.trainingMode;
   
-  if (queryString.Email) { queryString["$Family.Email$"] = { [Op.like]: `${queryString.Email}%` }; }
+  if (queryString.Email) {
+    queryString["$Family.Email$"] = { [Op.like]: `${queryString.Email}%` };
+  }
   delete queryString.Email;
-  if (queryString.NamePrimary) { queryString["$Family.NamePrimary$"] = { [Op.like]: `${queryString.NamePrimary}%` }; }
+  if (queryString.NamePrimary) {
+    queryString["$Family.NamePrimary$"] = { [Op.like]: `${queryString.NamePrimary}%` };
+  }
   delete queryString.NamePrimary;
-  if (queryString.NameSecondary) { queryString["$Family.NameSecondary$"] = { [Op.like]: `${queryString.NameSecondary}%` }; }
+  if (queryString.NameSecondary) {
+    queryString["$Family.NameSecondary$"] = { [Op.like]: `${queryString.NameSecondary}%` };
+  }
   delete queryString.NameSecondary;
-  if (queryString.Phone) { queryString["$Family.Phone$"] = { [Op.like]: `${queryString.Phone}%` }; }
+  if (queryString.Phone) {
+    queryString["$Family.Phone$"] = { [Op.like]: `${queryString.Phone}%` };
+  }
   delete queryString.Phone;
   if (queryString.StudyName) { queryString["$Appointments.FK_Study$"] = queryString.StudyName; }
   delete queryString.StudyName;

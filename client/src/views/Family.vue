@@ -821,11 +821,24 @@ export default {
             this.$refs.form.resetValidation();
             // this.$emit("searchFamily", this.editedItem);
           }
+
+          this.close();
         } catch (error) {
           console.log(error);
+          if (error.response && error.response.data) {
+            const data = error.response.data;
+            if (data.errors) {
+              const messages = data.errors.map(e => e.msg || e.message).join("\n");
+              alert("Validation failed:\n" + messages);
+            } else if (data.error) {
+              alert("Error: " + data.error);
+            } else {
+              alert("Failed to save family. Please check your input and try again.");
+            }
+          } else {
+            alert("Failed to save family. Please try again.");
+          }
         }
-
-        this.close();
       }
     },
 
