@@ -1047,11 +1047,24 @@ export default {
           this.Families.push(this.editedItem);
           this.page = this.Families.length;
         }
+
+        this.close();
       } catch (error) {
         console.log(error);
+        if (error.response && error.response.data) {
+          const data = error.response.data;
+          if (data.errors) {
+            const messages = data.errors.map(e => e.msg || e.message).join("\n");
+            this.$refs.confirmD.open('Validation Failed', messages, { color: 'error', noconfirm: true });
+          } else if (data.error) {
+            this.$refs.confirmD.open('Error', data.error, { color: 'error', noconfirm: true });
+          } else {
+            this.$refs.confirmD.open('Error', 'Failed to save family. Please check your input and try again.', { color: 'error', noconfirm: true });
+          }
+        } else {
+          this.$refs.confirmD.open('Error', 'Failed to save family. Please try again.', { color: 'error', noconfirm: true });
+        }
       }
-
-      this.close();
     },
 
     close() {
