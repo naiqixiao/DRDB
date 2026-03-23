@@ -72,6 +72,10 @@ function containsObject(obj, array) {
 exports.create = asyncHandler(async (req, res) => {
   var newFamilyInfo = req.body;
 
+  // Extract User before Sequelize create — it's not a DB column
+  const User = newFamilyInfo.User;
+  delete newFamilyInfo.User;
+
   if (newFamilyInfo.id) {
     delete newFamilyInfo["id"];
   }
@@ -86,7 +90,6 @@ exports.create = asyncHandler(async (req, res) => {
     });
 
     // Log
-    const User = req.body.User;
 
     await log.createLog(
       "Family Created",
