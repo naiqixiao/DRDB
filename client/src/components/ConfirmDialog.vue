@@ -5,36 +5,31 @@
     :style="{ zIndex: options.zIndex }"
     @keydown.esc="cancel"
   >
-    <v-card height="300px">
-      <v-toolbar dark color="primary" flat>
-        <h2 class="title-text title-p-4 ma-2">
+    <v-card class="ds-card" variant="flat">
+      <v-toolbar :color="options.color || 'primary'" dark>
+        <v-toolbar-title class="font-weight-medium">
           {{ title }}
-        </h2>
+        </v-toolbar-title>
       </v-toolbar>
-      <div style="height: 120px">
-        <v-card-text justify="center"
-          v-show="!!message"
-          class="pa-4 body-2 text-left"
-          v-html="message"
-        ></v-card-text>
-      </div>
-      <v-spacer></v-spacer>
+      
+      <v-card-text class="pt-6 pb-4 text-body-1" v-show="!!message" v-html="message">
+      </v-card-text>
 
-      <v-card-actions class="pt-3">
+      <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
         <v-btn
           v-if="!options.noconfirm"
-          color="grey"
-          text
-          class="body-2 font-weight-bold"
-          @click.native="cancel"
+          color="grey-darken-1"
+          variant="text"
+          class="text-none"
+          @click="cancel"
           >Cancel</v-btn
         >
         <v-btn
-          color="primary"
-          class="body-2 font-weight-bold"
-          text
-          @click.native="agree"
+          :color="options.color || 'primary'"
+          variant="elevated"
+          class="text-none font-weight-bold"
+          @click="agree"
           >Confirm</v-btn
         >
       </v-card-actions>
@@ -55,7 +50,7 @@ export default {
       options: {
         color: "grey lighten-3",
         width: 500,
-        zIndex: 200,
+        zIndex: 3000,
         noconfirm: false,
       },
     };

@@ -1,62 +1,79 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
+import { createRouter, createWebHashHistory } from 'vue-router'
 
-import Home from "../views/Home"
-import Family from "@/views/Family";
-import Appointment from "@/views/Appointment";
-import Schedule from "@/views/Schedule";
-import Personnel from "@/views/Personnel";
-import Study from "@/views/Study";
-import Login from "@/views/Login";
-import Settings from "@/views/Settings";
-
-Vue.use(VueRouter);
+// Views - Lazy loaded
+const Home = () => import('@/views/Home.vue')
+const Login = () => import('@/views/Login.vue')
+const Family = () => import('@/views/Family.vue')
+const Appointment = () => import('@/views/Appointment.vue')
+const Schedule = () => import('@/views/Schedule.vue')
+const Personnel = () => import('@/views/Personnel.vue')
+const Study = () => import('@/views/Study.vue')
+const Settings = () => import('@/views/Settings.vue')
+const OAuthCallback = () => import('@/views/OAuthCallback.vue')
+const EmailTest = () => import('@/views/EmailTest.vue')
+const CalendarTest = () => import('@/views/CalendarTest.vue')
 
 const routes = [
-  {
-    path: "/home",
-    name: "Home",
-    component: Home
-  },
-  {
-    path: "/settings",
-    name: "Settings",
-    component: Settings
-  },
-  {
-    path: "/",
-    name: "Login",
-    component: Login
-  },
-  {
-    path: "/family",
-    name: "Family information",
-    component: Family
-  },
-  {
-    path: "/schedule",
-    name: "Schedule studies",
-    component: Schedule
-  },
-  {
-    path: "/personnel",
-    name: "Personnel management",
-    component: Personnel
-  },
-  {
-    path: "/study",
-    name: "Study management",
-    component: Study
-  },
-  {
-    path: "/appointment",
-    name: "Study appointments",
-    component: Appointment
-  }
-];
+    {
+        path: '/',
+        name: 'Login',
+        component: Login
+    },
+    {
+        path: '/home',
+        name: 'Home',
+        component: Home
+    },
+    {
+        path: '/family',
+        name: 'Family information',
+        component: Family
+    },
+    {
+        path: '/appointment',
+        name: 'Study appointments',
+        component: Appointment
+    },
+    {
+        path: '/schedule',
+        name: 'Schedule studies',
+        component: Schedule
+    },
+    {
+        path: '/personnel',
+        name: 'Personnel management',
+        component: Personnel
+    },
+    {
+        path: '/study/:id?',
+        name: 'Study management',
+        component: Study
+    },
+    {
+        path: '/settings',
+        name: 'Settings',
+        component: Settings
+    },
+    {
+        path: '/email-test',
+        name: 'Email Test',
+        component: EmailTest
+    },
+    {
+        path: '/calendar-test',
+        name: 'Calendar Test',
+        component: CalendarTest
+    },
+    {
+        path: '/oauth/callback',
+        name: 'OAuthCallback',
+        component: OAuthCallback
+    }
+]
 
-const router = new VueRouter({
-  routes
-});
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes
+})
 
-export default router;
+export default router

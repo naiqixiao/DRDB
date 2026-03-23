@@ -1,9 +1,9 @@
 import api from "./api";
-import store from "@/store";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(testingRoomInfo) {
-    testingRoomInfo.labName = store.state.labName;
+    testingRoomInfo.labName = useMainStore().labName;
     return api().post("testingRoom/add", testingRoomInfo);
   },
 

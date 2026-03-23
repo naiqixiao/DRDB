@@ -1,5 +1,5 @@
 import api from "./api";
-// import store from "@/store";
+// import { useMainStore } from "@/stores/mainStore";
 
 export default {
   get() {

@@ -1,18 +1,16 @@
 <template>
-  <v-container v-if="date" style = "display: flex; align-content: space-around; flex-wrap: wrap;">
-
-    <body align="start" class='Time' v-html="DateFormat(date, format, status).formatedTime"></body>
-
-    <body align="end" class='Date'  v-html="DateFormat(date, format, status).formatedDate"></body>
-
+  <v-container v-if="date" class="d-flex align-content-space-around flex-wrap">
+    <div class="Time text-start w-100" v-html="DateFormat(date, format, status).formatedTime"></div>
+    <div class="Date text-end w-100" v-html="DateFormat(date, format, status).formatedDate"></div>
   </v-container>
-  <v-container v-else>{{ "Not available" }}</v-container>
+  <v-container v-else>Not available</v-container>
 </template>
 
 <script>
 import moment from "moment-timezone";
 
 export default {
+  name: "DateDisplay",
   props: {
     date: String,
     format: String,
@@ -20,8 +18,8 @@ export default {
   },
   methods: {
     DateFormat(date, format, status) {
-      var formatedDate = "";
-      var formatedTime = "";
+      let formatedDate = "";
+      let formatedTime = "";
       switch (format) {
         case "long":
           if (moment(date).diff(moment(), "days") >= -60) {
@@ -32,10 +30,9 @@ export default {
             formatedTime = moment(date).tz("America/Toronto").format("hh:mm");
           }
 
-          if (status != "Confirmed" && status != "Completed") {
+          if (status !== "Confirmed" && status !== "Completed") {
             formatedTime = "[orig.] " + formatedTime;
           }
-
           break;
 
         default:
@@ -44,14 +41,6 @@ export default {
       }
 
       return { formatedTime, formatedDate };
-    },
-    htmlTime(formatedTime) {
-      var outputTime = "<span class='Time'>" + formatedTime + "</span>"
-      return outputTime
-    },
-    htmlData(formatedDate) {
-      var outputDate = "<span class='Date'>" + formatedDate + "</span>"
-      return outputDate
     }
   },
 };
@@ -61,13 +50,9 @@ export default {
 .Time {
   font-size: 22px;
   font-weight: 900;
-  flex: 0 0 100%;
 }
 
 .Date {
   font-size: 18px;
-  flex: 0 0 100%;
-  /* font-weight: 900; */
-
 }
 </style>

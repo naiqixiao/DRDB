@@ -7,10 +7,10 @@ server/public
 server/node_modules/
 server/sequelizeAuto.js
 
-client/src/views/Family copy.vue
+client-v2/src/views/Family copy.vue
 server/api/controllers/appointment_old.js
 server/api/models/SequelizeAuto/Appointment_old.js
-client/src/services/appointment copy.js
+client-v2/src/services/appointment copy.js
 
 server/api/controllers/gmail_old.js
 
@@ -21,16 +21,16 @@ server/api/google/general/token.json
 server/api/google/general/credentials.json
 
 
-client/._.DS_Store
+client-v2/._.DS_Store
 .DS_Store
 ._.DS_Store
 server/api/logs
-client/src/components/AppointmentTable.vue
+client-v2/src/components/AppointmentTable.vue
 docs/_build
 docs/_static/
 docs/_templates/
-client/src/components/AppointmentTable.vue
-client/src/components/EmailDialog.vue
+client-v2/src/components/AppointmentTable.vue
+client-v2/src/components/EmailDialog.vue
 docs/_build/html/genindex.html
 docs/_build/html/index.html
 docs/_build/html/.buildinfo
@@ -44,15 +44,15 @@ server/api/models/DRDB.js.orig
 .vscode/settings.json
 server/config/general.js-20201102
 server/config/general.js-20210124
-client/src/plugins/variables.js
+client-v2/src/plugins/variables.js
 server/server.cert
 server/server.key
-client/src/components/ScheduleTable_old.vue
+client-v2/src/components/ScheduleTable_old.vue
 server/api/controllers/reminder copy.js
 server/api/controllers/reminder_test.js
-client/vue.config.js
+client-v2/vue.config.js
 server/api/realtimeUpdate
 server/stats/*.json
-client-v3/.shared/
+client/.shared/
 server/server_output_debug.log
 .agent/skills/ui-ux-pro-max/scripts/__pycache__/

@@ -1,122 +1,253 @@
 <template>
-  <v-card outlined>
-    <v-tabs v-model="tabs" fixed-tabs color="var(--v-secondary-base)" background-color="var(--v-primary-base)">
-      <v-tab>
-        <v-icon style="padding-right: 8px">record_voice_over </v-icon>
-        Phone Script
-      </v-tab>
+  <v-card class="ds-card h-100" variant="flat" style="position: relative; overflow: hidden;">
 
-      <v-tab>
-        <v-icon style="padding-right: 8px">view_list</v-icon>
-        Study Info
-      </v-tab>
+    <!-- Background Study Type Watermark -->
+    <div v-if="selectedStudy?.StudyType"
+      style="position: absolute; right: 10px; top: 10px; font-size: 60px; font-weight: 900; color: rgba(0,0,0,0.06); z-index: 0; line-height: 0.8; pointer-events: none; user-select: none;">
+      {{ selectedStudy.StudyType }}
+    </div>
 
-      <v-tab-item class="tabs-items">
-        <v-row dense>
-          <v-col md="12" class="subtitle">
-            <v-textarea label="" background-color="textbackground" outlined no-resize :value="selectedStudy.PhoneScript
-              ? selectedStudy.PhoneScript
-              : 'No phone script is available.'
-              " rows="16" readonly hide-details></v-textarea>
-          </v-col>
-        </v-row>
-      </v-tab-item>
-  
-      <v-tab-item class="tabs-items">
-        <v-row dense style="overflow-y: scroll !important">
-          <v-row dense>
-            <v-col md="12" class="subtitle">
-              <v-divider></v-divider>
-              <h4 class="text-left"></h4>
-            </v-col>
-            <v-col cols="12" sm="6" md="4" v-for="item in this.$studyBasicFields" :key="item.label">
-              <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
-                :value="selectedStudy[item.field]" placeholder="  " outlined dense readonly></v-text-field>
-            </v-col>
-            <v-col md="12" class="subtitle">
-              <v-textarea label="Study summary" background-color="textbackground" outlined no-resize rows="5"
-                :value="selectedStudy.Description" readonly hide-details></v-textarea>
-            </v-col>
-          </v-row>
-  
-          <v-row justify="space-around" dense>
-            <v-col md="12">
-              <v-divider></v-divider>
-              <h4 class="text-left">Point of contact:</h4>
-            </v-col>
-            <v-col cols="12" sm="4" v-for="item in this.$studyPointofContact" :key="item.label">
-              <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
-                :value="selectedStudy.PointofContact[item.field]" placeholder="  " readonly outlined dense></v-text-field>
-            </v-col>
-          </v-row>
-  
-          <v-row dense>
-            <v-col md="12" class="subtitle">
-              <v-divider></v-divider>
-              <h4 class="text-left">Study criteria:</h4>
-            </v-col>
-  
-            <v-col cols="12" sm="6" :md="item.width" v-for="item in this.$studyCriteriaFields" :key="item.label">
-              <v-text-field class="textfield-family" background-color="textbackground" hide-details :label="item.label"
-                :value="item.field == 'MinAge' || item.field == 'MaxAge'
-                  ? AgeFormated2(selectedStudy[item.field])
-                  : selectedStudy[item.field]
-                  " placeholder="  " outlined dense readonly></v-text-field>
-            </v-col>
-          </v-row>
-        </v-row>
-      </v-tab-item>
-    </v-tabs>
+    <v-card-text class="pt-5 pb-4" style="position: relative; z-index: 1;">
+      <!-- Header: Study Name + Shortcut -->
+      <div class="d-flex align-center mb-4">
+        <v-avatar color="primary" size="48" class="mr-3">
+          <v-icon size="24" color="white">mdi-flask-outline</v-icon>
+        </v-avatar>
+        <div class="flex-grow-1">
+          <h2 class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); line-height: 1.3;">
+            {{ selectedStudy?.StudyName || 'Select a study' }}
+          </h2>
+          <div class="text-caption text-muted" v-if="selectedStudy?.StudyType">
+            {{ selectedStudy.StudyType }}
+          </div>
+        </div>
+        <v-tooltip location="top" max-width="250">
+          <template v-slot:activator="{ props }">
+            <v-btn v-bind="props" icon="mdi-open-in-new" size="small" variant="text" color="primary"
+              @click="goToStudyPage"></v-btn>
+          </template>
+          <span>Shortcut to the Study Management page</span>
+        </v-tooltip>
+      </div>
 
+      <!-- Age Range -->
+      <div class="mb-3" v-if="selectedStudy?.AgeGroups && selectedStudy.AgeGroups.length > 0">
+        <!-- "All ages" chip only shown when multiple groups exist -->
+        <v-chip
+          v-if="selectedStudy.AgeGroups.length > 1"
+          size="small"
+          :variant="selectedAgeGroupIndex === null ? 'flat' : 'tonal'"
+          :color="selectedAgeGroupIndex === null ? 'primary' : 'default'"
+          prepend-icon="mdi-human-child"
+          class="mr-1 mb-1"
+          @click="selectAgeGroup(null)"
+        >All ages</v-chip>
+        <v-chip
+          v-for="(group, i) in selectedStudy.AgeGroups"
+          :key="i"
+          size="small"
+          :variant="isGroupSelected(i) ? 'flat' : 'tonal'"
+          :color="isGroupSelected(i) ? 'primary' : 'default'"
+          prepend-icon="mdi-human-child"
+          class="mr-1 mb-1"
+          @click="selectedStudy.AgeGroups.length > 1 && selectAgeGroup(i)"
+        >
+          {{ AgeFormated2(group.MinAge) }} — {{ AgeFormated2(group.MaxAge) }}
+        </v-chip>
+      </div>
+
+      <!-- Prerequisites & Exclusions in two columns -->
+      <div class="mb-3 d-flex" style="gap: 12px;"
+        v-if="(selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0) || (selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0)">
+        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0">
+          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Prerequisites</div>
+          <div class="d-flex flex-wrap" style="gap: 4px;">
+            <v-chip
+              v-for="prereq in selectedStudy.Prerequisites"
+              :key="prereq.id"
+              size="x-small"
+              variant="tonal"
+              color="success"
+              prepend-icon="mdi-check-circle-outline"
+            >{{ prereq.StudyName }}</v-chip>
+          </div>
+        </div>
+        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0">
+          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Exclusions</div>
+          <div class="d-flex flex-wrap" style="gap: 4px;">
+            <v-chip
+              v-for="excl in selectedStudy.Exclusions"
+              :key="excl.id"
+              size="x-small"
+              variant="tonal"
+              color="error"
+              prepend-icon="mdi-close-circle-outline"
+            >{{ excl.StudyName }}</v-chip>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exclusion / Inclusion Criteria -->
+      <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Criteria</div>
+      <div class="d-flex flex-wrap mb-4" style="gap: 6px;" v-if="hasCriteriaChips">
+        <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.ASDParticipant)"
+          v-if="selectedStudy?.ASDParticipant && selectedStudy?.ASDParticipant !== 'Include'">
+          ASD: {{ selectedStudy.ASDParticipant }}
+        </v-chip>
+        <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.PrematureParticipant)"
+          v-if="selectedStudy?.PrematureParticipant && selectedStudy?.PrematureParticipant !== 'Include'">
+          Premature: {{ selectedStudy.PrematureParticipant }}
+        </v-chip>
+        <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.IllParticipant)"
+          v-if="selectedStudy?.IllParticipant && selectedStudy?.IllParticipant !== 'Include'">
+          Illness: {{ selectedStudy.IllParticipant }}
+        </v-chip>
+        <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.VisionLossParticipant)"
+          v-if="selectedStudy?.VisionLossParticipant && selectedStudy?.VisionLossParticipant !== 'Include'">
+          Vision: {{ selectedStudy.VisionLossParticipant }}
+        </v-chip>
+        <v-chip size="x-small" variant="tonal" :color="criteriaColor(selectedStudy?.HearingLossParticipant)"
+          v-if="selectedStudy?.HearingLossParticipant && selectedStudy?.HearingLossParticipant !== 'Include'">
+          Hearing: {{ selectedStudy.HearingLossParticipant }}
+        </v-chip>
+      </div>
+
+      <!-- Point of Contact -->
+      <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Point of Contact</div>
+      <div v-if="selectedStudy?.PointofContact?.Name" class="mb-3 d-flex align-center flex-wrap" style="gap: 6px;">
+        <v-chip size="small" variant="tonal" color="primary" prepend-icon="mdi-account-star">
+          {{ selectedStudy.PointofContact.Name }}
+        </v-chip>
+        <v-chip v-if="selectedStudy.PointofContact.Email" size="small" variant="tonal" color="primary"
+          prepend-icon="mdi-email-outline" :href="'mailto:' + selectedStudy.PointofContact.Email"
+          link class="text-truncate" style="max-width: 220px;">
+          {{ selectedStudy.PointofContact.Email }}
+          <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-1"
+            @click.prevent="copyToClipboard(selectedStudy.PointofContact.Email)"></v-btn>
+        </v-chip>
+        <v-chip v-if="selectedStudy.PointofContact.Phone" size="small" variant="tonal" color="primary"
+          prepend-icon="mdi-phone-outline">
+          {{ PhoneFormated(selectedStudy.PointofContact.Phone) }}
+          <v-btn icon="mdi-content-copy" variant="text" size="x-small" density="compact" class="ml-1"
+            @click.prevent="copyToClipboard(selectedStudy.PointofContact.Phone)"></v-btn>
+        </v-chip>
+      </div>
+
+      <v-divider class="my-3"></v-divider>
+
+      <!-- Study Description (collapsible) -->
+      <div v-if="selectedStudy?.Description">
+        <div class="d-flex align-center cursor-pointer" @click="showDescription = !showDescription">
+          <v-icon size="small" class="mr-1">{{ showDescription ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+          <span class="text-caption font-weight-bold text-uppercase text-muted">Study Description</span>
+        </div>
+        <div v-if="showDescription" class="text-body-2 mt-2 px-1" style="line-height: 1.5; white-space: pre-wrap;">{{ selectedStudy.Description }}</div>
+      </div>
+
+      <!-- Phone Script (collapsible) -->
+      <div class="mt-3" v-if="selectedStudy?.StudyName">
+        <div class="d-flex align-center cursor-pointer" @click="showPhoneScript = !showPhoneScript">
+          <v-icon size="small" class="mr-1">{{ showPhoneScript ? 'mdi-chevron-down' : 'mdi-chevron-right' }}</v-icon>
+          <span class="text-caption font-weight-bold text-uppercase text-muted">Phone Script</span>
+        </div>
+        <v-textarea v-if="showPhoneScript"
+          :model-value="selectedStudy?.PhoneScript ? selectedStudy.PhoneScript : 'No phone script is available.'"
+          variant="outlined" no-resize rows="12" readonly hide-details class="mt-2"></v-textarea>
+      </div>
+    </v-card-text>
   </v-card>
 </template>
 
 <script>
 export default {
+  name: "StudySummary",
   props: {
-    selectedStudy: Object,
+    selectedStudy: {
+      type: Object,
+      default: () => ({})
+    },
   },
+  emits: ['ageGroupFilter'],
   data() {
     return {
-      tabs: null,
+      showPhoneScript: true,
+      showDescription: false,
+      selectedAgeGroupIndex: null,
     };
   },
+  watch: {
+    selectedStudy() {
+      this.selectedAgeGroupIndex = null;
+    },
+  },
+  computed: {
+    hasCriteriaChips() {
+      const s = this.selectedStudy;
+      if (!s) return false;
+      return [s.ASDParticipant, s.PrematureParticipant, s.IllParticipant, s.VisionLossParticipant, s.HearingLossParticipant]
+        .some(v => v && v !== 'Include');
+    },
+  },
   methods: {
+    isGroupSelected(i) {
+      if (!this.selectedStudy || this.selectedStudy.AgeGroups.length === 1) return true;
+      return this.selectedAgeGroupIndex === i;
+    },
+    selectAgeGroup(index) {
+      this.selectedAgeGroupIndex = index;
+      const group = index !== null ? this.selectedStudy.AgeGroups[index] : null;
+      this.$emit('ageGroupFilter', group);
+    },
     AgeFormated2(Age) {
-      var formated = "Not born yet.";
+      let formated = "N/A";
       if (Age > 0) {
-        var years = Math.floor(Age / 12);
-        var months = Age % 12;
-        // months = months.toFixed(1);
-        var Y = years > 0 ? years + " year" : "";
+        const years = Math.floor(Age / 12);
+        const months = Age % 12;
+        let Y = years > 0 ? years + " year" : "";
         Y = years > 1 ? Y + "s " : Y + " ";
 
-        var M = "";
-
+        let M = "";
         if (months > 0) {
           M = months + " month";
           M = months !== 1 ? M + "s" : M;
         }
 
-        formated = Y + M;
+        formated = (Y + M).trim();
       }
       return formated;
+    },
+    criteriaColor(value) {
+      if (value === 'Exclude') return 'error';
+      if (value === 'Only') return 'warning';
+      return 'grey';
+    },
+    goToStudyPage() {
+      if (this.selectedStudy && this.selectedStudy.id) {
+        this.$router.push({ name: 'Study management', params: { id: this.selectedStudy.id } });
+      } else {
+        this.$router.push({ name: 'Study management' });
+      }
+    },
+    PhoneFormated(Phone) {
+      if (!Phone) return '';
+      var cleaned = ('' + Phone).replace(/\D/g, '');
+      var match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+      if (match) return '(' + match[1] + ') ' + match[2] + '-' + match[3];
+      return Phone;
+    },
+    copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        console.log('Copied to clipboard:', text);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
     },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-.noPadding {
-  padding: 8px 8px 4px 8px !important;
-}
-
-.tabs-items {
-  background-color: rgba($color: #000000, $alpha: 0);
-  height: 480px;
-}
-
-.v-tab {
-  max-width: 50%;
+<style scoped>
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

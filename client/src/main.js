@@ -1,28 +1,51 @@
-import Vue from "vue";
-import App from "./App.vue";
-import router from "./router";
-import store from "./store";
-import vuetify from "./plugins/vuetify";
-import "./plugins/axios";
-import { sync } from "vuex-router-sync";
-import "material-design-icons-iconfont/dist/material-design-icons.css";
-import AsyncComputed from "vue-async-computed";
-import parameters from "./plugins/parameters";
-import CKEditor from '@ckeditor/ckeditor5-vue2';
+import { createApp } from 'vue'
+import './style.css'
+import './design-system.css'
+import App from './App.vue'
 
-// Importing the global.scss file
-import "@/assets/global.scss"
+// Vuetify
+import 'vuetify/styles'
+import { createVuetify } from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
+import '@mdi/font/css/materialdesignicons.css'
 
-sync(store, router);
+// Global parameters plugin
+import parameters from './plugins/parameters'
 
-Vue.config.productionTip = false;
-Vue.use(AsyncComputed);
-Vue.use(parameters);
-Vue.use( CKEditor );
+const vuetify = createVuetify({
+    components,
+    directives,
+    theme: {
+        defaultTheme: 'light',
+        themes: {
+            light: {
+                colors: {
+                    primary: '#1E40AF',
+                    secondary: '#3B82F6',
+                    tertiary: '#607D8B',
+                    quaternary: '#607D8B',
+                    background: '#F8FAFC',
+                    textbackground: '#FFFFFF',
+                    warning: '#F59E0B',
+                },
+            },
+        },
+    },
+})
 
-new Vue({
-  router,
-  store,
-  vuetify,
-  render: (h) => h(App),
-}).$mount("#app");
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+import router from './router'
+
+const app = createApp(App)
+
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+app.use(vuetify)
+app.use(router)
+app.use(pinia)
+app.use(parameters)
+app.mount('#app')

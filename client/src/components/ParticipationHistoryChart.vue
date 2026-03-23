@@ -1,20 +1,26 @@
 <template>
-  <v-card name="participationStatistics" outlined height="450px">
-    <v-card-text v-if="family.Appointments || family.Schedules">
-      <doughnut-chart
-        :chart-data="datacollection.chartData"
-        :height="280"
-      ></doughnut-chart>
+  <v-card name="participationStatistics" variant="outlined" height="450px">
+    <v-card-text v-if="family?.Appointments || family?.Schedules">
+      <div style="position: relative; height: 280px; width: 100%">
+        <Doughnut
+          :data="datacollection.chartData"
+          :options="chartOptions"
+        />
+      </div>
     </v-card-text>
   </v-card>
 </template>
 
 <script>
-import DoughnutChart from "../plugins/doughnutChart";
+import { Doughnut } from 'vue-chartjs'
+import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
+
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale)
 
 export default {
+  name: "ParticipationHistoryChart",
   components: {
-    DoughnutChart,
+    Doughnut,
   },
   props: {
     family: Object,
@@ -41,78 +47,87 @@ export default {
         "#F4511E",
         "#263238",
       ],
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+      }
     };
   },
-
-  methods: {},
   computed: {
     datacollection() {
-      var scheduleStatus = {};
-      var chartIndices = [];
+      const scheduleStatus = {};
+      const chartIndices = [];
 
-      if (this.family.Schedules) {
+      if (!this.family) {
+        return { chartData: { labels: [], datasets: [] } };
+      }
+
+      if (this.family.Schedules && this.family.Schedules.length > 0) {
         this.family.Schedules.forEach((schedule) => {
-
-          if (schedule.Status == "Confirmed" && schedule.Completed) {
-            schedule.Status = "Completed";
+          let currentStatus = schedule.Status;
+          if (currentStatus === "Confirmed" && schedule.Completed) {
+            currentStatus = "Completed";
           }
 
-          if (scheduleStatus[schedule.Status]) {
-            scheduleStatus[schedule.Status] += 1;
+          if (scheduleStatus[currentStatus]) {
+            scheduleStatus[currentStatus] += 1;
           } else {
-            scheduleStatus[schedule.Status] = 1;
-            chartIndices.push(this.status.indexOf(schedule.Status));
+            scheduleStatus[currentStatus] = 1;
+            chartIndices.push(this.status.indexOf(currentStatus));
           }
         });
-      } else {
-        var schedule = [];
+      } else if (this.family.Appointments && this.family.Appointments.length > 0) {
+        const schedule = [];
         this.family.Appointments.forEach((appointment) => {
-          schedule.push({
-            id: appointment.FK_Schedule,
-            status: appointment.Schedule.Status,
-            AppointmentTime: appointment.Schedule.AppointmentTime,
-            completed: appointment.Schedule.Completed,
-          });
+          if (appointment.Schedule) {
+            schedule.push({
+              id: appointment.FK_Schedule,
+              status: appointment.Schedule.Status,
+              AppointmentTime: appointment.Schedule.AppointmentTime,
+              completed: appointment.Schedule.Completed,
+            });
+          }
         });
 
-        const uniqueSchedule = schedule.reduce((schedule, current) => {
-          const x = schedule.find((item) => item.id === current.id);
+        const uniqueSchedule = schedule.reduce((acc, current) => {
+          const x = acc.find((item) => item.id === current.id);
           if (!x) {
-            return schedule.concat([current]);
+            return acc.concat([current]);
           } else {
-            return schedule;
+            return acc;
           }
         }, []);
 
-        uniqueSchedule.forEach((schedule) => {
-          if (schedule.status == "Confirmed" && schedule.completed) {
-            schedule.status = "Completed";
+        uniqueSchedule.forEach((sch) => {
+          if (sch.status === "Confirmed" && sch.completed) {
+            sch.status = "Completed";
           }
         });
 
-        uniqueSchedule.forEach((schedule) => {
-          if (scheduleStatus[schedule.status]) {
-            scheduleStatus[schedule.status] += 1;
+        uniqueSchedule.forEach((sch) => {
+          if (scheduleStatus[sch.status]) {
+            scheduleStatus[sch.status] += 1;
           } else {
-            scheduleStatus[schedule.status] = 1;
-            chartIndices.push(this.status.indexOf(schedule.status));
+            scheduleStatus[sch.status] = 1;
+            const idx = this.status.indexOf(sch.status);
+            if (idx !== -1) {
+              chartIndices.push(idx);
+            }
           }
         });
       }
 
-      chartIndices.sort((a, b) => {
-        return a - b;
-      });
+      chartIndices.sort((a, b) => a - b);
 
-      var chartColors = [];
-      var chartStatus = [];
+      const chartColors = [];
+      const chartStatus = [];
 
       chartIndices.forEach((index) => {
         chartColors.push(this.colors[index]);
         chartStatus.push(this.status[index]);
       });
 
-      var scheduleCount = [];
+      const scheduleCount = [];
       chartStatus.forEach((status) => {
         scheduleCount.push(scheduleStatus[status]);
       });
@@ -120,7 +135,6 @@ export default {
       return {
         chartData: {
           labels: chartStatus,
-
           datasets: [
             {
               backgroundColor: chartColors,
@@ -128,17 +142,11 @@ export default {
             },
           ],
         },
-        // options: {
-        //   title: {
-        //     display: true,
-        //     text: "Custom Chart Title",
-        //   },
-        //   width: 200,
-        // },
       };
     },
   },
 };
 </script>
 
-<style></style>
+<style scoped>
+</style>

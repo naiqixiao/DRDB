@@ -1,100 +1,119 @@
 <template>
-  <v-card>
-    <v-tabs fixed-tabs v-model="tabs" color="var(--v-secondary-base)" background-color="var(--v-primary-base)">
-      <v-tab>
-        <v-icon style="padding-right: 4px">format_list_bulleted</v-icon>
+  <v-card class="ds-card h-100 d-flex flex-column" variant="flat">
+    <ConfirmDlg ref="confirmD" />
+    <v-tabs v-model="tab" color="primary" bg-color="grey-lighten-4" align-tabs="center">
+      <v-tab value="notes">
+        <v-icon start>mdi-format-list-bulleted</v-icon>
         Notes
       </v-tab>
-      <v-tab>
-        <v-icon style="padding-right: 4px">forum</v-icon>
+      <v-tab value="conv">
+        <v-icon start>mdi-forum</v-icon>
         Conv.
       </v-tab>
-
-      <v-tab-item class="tabs-items">
-        <v-row justify="space-between" align="end" dense>
-          <v-col class="noPadding">
-            <v-textarea class="conv-textarea" label="Notes about the family." no-resize rows="23" hide-details
-              v-model="newNotes" :disabled="!familyId" @change="saveNotes"></v-textarea>
-          </v-col>
-        </v-row>
-      </v-tab-item>
-
-      <v-tab-item class="tabs-items">
-        <v-row justify="space-between" align="end" dense>
-          <v-col cols="12" md="12" class="noPadding">
-            <v-data-table hide-default-footer height="450px" dense fixed-header single-select
-              no-data-text="No conversation is stored." :headers="headers" :items="Conversation" class="elevation-1"
-              justify-center calculate-widths disable-pagination>
-              <template #item.Time="{ value }">
-                <DateDisplay :date="value" :format="'short'" />
-              </template>
-              <template #item.Conversation="{ value }">
-                <div style="text-align: left">{{ value }}</div>
-              </template>
-
-              <template #item.actions="{ item }">
-                <v-icon @click="deleteItem(item)">delete</v-icon>
-              </template>
-            </v-data-table>
-          </v-col>
-          <v-col class="noPadding">
-            <v-textarea class="conv-textarea" label="Conversation with parents" outlined no-resize rows="4" hide-details
-              v-model="conv" :disabled="!familyId" append-icon="mdi-send" @click:append="submitConversation"></v-textarea>
-          </v-col>
-        </v-row>
-      </v-tab-item>
     </v-tabs>
 
+    <v-window v-model="tab" class="tabs-items flex-grow-1 h-100">
+      <v-window-item value="notes" class="h-100">
+        <v-container class="h-100 pa-2 d-flex flex-column">
+          <v-textarea 
+            class="conv-textarea flex-grow-1 d-flex flex-column h-100" 
+            label="Notes about the family." 
+            variant="outlined"
+            no-resize 
+            hide-details
+            v-model="newNotes" 
+            :disabled="!familyId" 
+            @update:model-value="saveNotes"
+          ></v-textarea>
+        </v-container>
+      </v-window-item>
+
+      <v-window-item value="conv" class="h-100">
+        <v-container class="h-100 pa-2 d-flex flex-column">
+          <div class="flex-grow-1" style="position: relative; min-height: 0;">
+            <div style="position: absolute; top: 0; bottom: 0; left: 0; right: 0;">
+              <v-data-table 
+                :headers="headers" 
+                :items="Conversation" 
+                class="elevation-1 h-100 d-flex flex-column"
+                fixed-header
+                height="100%"
+                items-per-page="-1"
+                hide-default-footer
+                no-data-text="No conversation is stored."
+              >
+                <!-- eslint-disable-next-line vue/valid-v-slot -->
+                <template #item.Time="{ item }">
+                  <DateDisplay :date="item.Time" format="short" />
+                </template>
+                <!-- eslint-disable-next-line vue/valid-v-slot -->
+                <template #item.Conversation="{ item }">
+                  <div class="text-start">{{ item.Conversation }}</div>
+                </template>
+                <!-- eslint-disable-next-line vue/valid-v-slot -->
+                <template #item.actions="{ item }">
+                  <v-btn icon="mdi-delete" variant="text" size="small" @click="deleteItem(item)"></v-btn>
+                </template>
+              </v-data-table>
+            </div>
+          </div>
+          
+          <div class="flex-shrink-0 mt-2">
+            <v-textarea 
+              class="conv-textarea-small" 
+              label="Conversation with parents" 
+              variant="outlined" 
+              no-resize 
+              rows="3" 
+              hide-details
+              v-model="conv" 
+              :disabled="!familyId" 
+              append-inner-icon="mdi-send" 
+              @click:append-inner="submitConversation"
+              @keydown.enter.prevent="submitConversation"
+            ></v-textarea>
+          </div>
+        </v-container>
+      </v-window-item>
+    </v-window>
   </v-card>
 </template>
 
 <script>
-import DateDisplay from "@/components/DateDisplay";
+import DateDisplay from "@/components/DateDisplay.vue";
 import conversation from "@/services/conversation";
+import ConfirmDlg from "@/components/ConfirmDialog.vue";
 
 export default {
+  name: "NotesConversation",
   components: {
     DateDisplay,
+    ConfirmDlg
   },
   props: {
-    Conversation: Array,
+    Conversation: {
+      type: Array,
+      default: () => [],
+    },
     notes: String,
     familyId: Number,
   },
-
+  emits: ["updateNotes"],
   data() {
     return {
-      tabs: null,
+      tab: "notes",
       conv: "",
-      newNotes: "",
+      newNotes: this.notes || "",
       headers: [
-        {
-          text: "Time",
-          align: "center",
-          value: "Time",
-          sortable: false,
-          width: "25%",
-        },
-        {
-          text: "Conversation",
-          align: "center",
-          value: "Conversation",
-          sortable: false,
-          width: "67%",
-        },
-        {
-          text: "",
-          align: "center",
-          value: "actions",
-          sortable: false,
-          width: "8%",
-        },
+        { title: "Time", align: "center", key: "Time", sortable: false, width: "25%" },
+        { title: "Conversation", align: "center", key: "Conversation", sortable: false, width: "67%" },
+        { title: "", align: "center", key: "actions", sortable: false, width: "8%" },
       ],
     };
   },
-
   methods: {
     async submitConversation() {
+      if (!this.conv.trim()) return;
       const newConversation = {
         FK_Family: this.familyId,
         Conversation: this.conv,
@@ -109,7 +128,7 @@ export default {
         this.Conversation.push(newConversation);
         console.log("Conversation added!");
       } catch (error) {
-        console.log("Conversation failed!");
+        console.error("Conversation failed!", error);
       }
     },
 
@@ -119,49 +138,48 @@ export default {
 
     async deleteItem(item) {
       const index = this.Conversation.indexOf(item);
-      if (
-        confirm("Are you sure you want to delete this conversation record?")
-      ) {
-        try {
-          await conversation.delete({ id: item.id });
-          this.Conversation.splice(index, 1);
-          console.log("conversation deleted.");
-        } catch (error) {
-          console.log(error);
-        }
+      if (!(await this.$refs.confirmD.open('Confirm Delete', 'Are you sure you want to delete this conversation record?'))) {
+        return;
+      }
+      try {
+        await conversation.delete({ id: item.id });
+        this.Conversation.splice(index, 1);
+        console.log("conversation deleted.");
+      } catch (error) {
+        console.error(error);
       }
     },
   },
-
   watch: {
     familyId(val) {
       if (val) {
         this.newNotes = this.notes;
-      }
-      if (!val) {
+      } else {
         this.newNotes = "";
       }
     },
-    // notes(val) {
-    //   if (val) {
-    //     this.newNotes = this.notes;
-    //   }
-    // },
+    notes(val) {
+      if (this.familyId) {
+        this.newNotes = val;
+      }
+    }
   },
 };
 </script>
 
-<style lang="scss" scoped>
-.noPadding {
-  padding: 8px 8px 4px 8px !important;
+<style scoped>
+:deep(.v-window__container) {
+  height: 100%;
 }
-
-.tabs-items {
-  background-color: rgba($color: #000000, $alpha: 0);
-  height: 600px;
+:deep(.v-window-item) {
+  height: 100%;
 }
-
-.v-tab {
-  max-width: 50%;
+:deep(.conv-textarea .v-input__control) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+:deep(.conv-textarea .v-field) {
+  height: 100%;
 }
 </style>
