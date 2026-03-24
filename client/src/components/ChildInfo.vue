@@ -119,8 +119,10 @@
                   
                   <!-- Render other fields normally using their specified widths -->
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
-                    <v-select v-if="item.options" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                    <v-select v-if="item.options && item.field === 'Sex'" v-model="editedItem[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <v-combobox v-else-if="item.options" v-model="editedItem[item.field]" :items="$Options[item.options]"
+                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-combobox>
                     <v-checkbox v-else-if="item.type == 'checkbox'" v-model="editedItem[item.field]" :label="item.label"
                       density="compact" hide-details class="mb-2" color="primary"></v-checkbox>
                     <!-- DoB: text input + calendar picker -->

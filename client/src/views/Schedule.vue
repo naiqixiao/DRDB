@@ -441,8 +441,10 @@
                       density="compact" hide-details class="mb-2" rows="3"></v-textarea>
                   </v-col>
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
-                    <v-select v-if="item.options" v-model="editedChild[item.field]" :items="$Options[item.options]"
+                    <v-select v-if="item.options && item.field === 'Sex'" v-model="editedChild[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <v-combobox v-else-if="item.options" v-model="editedChild[item.field]" :items="$Options[item.options]"
+                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-combobox>
                     <!-- DoB: text input + calendar picker -->
                     <template v-else-if="item.field === 'DoB'">
                       <v-menu v-model="dobMenuEdit" :close-on-content-click="false" location="bottom start">
@@ -515,8 +517,10 @@
                       density="compact" hide-details class="mb-2" rows="3"></v-textarea>
                   </v-col>
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
-                    <v-select v-if="item.options" v-model="newChildData[item.field]" :items="$Options[item.options]"
+                    <v-select v-if="item.options && item.field === 'Sex'" v-model="newChildData[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                    <v-combobox v-else-if="item.options" v-model="newChildData[item.field]" :items="$Options[item.options]"
+                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-combobox>
                     <!-- DoB: text input + calendar picker -->
                     <template v-else-if="item.field === 'DoB'">
                       <v-menu v-model="dobMenuAdd" :close-on-content-click="false" location="bottom start">

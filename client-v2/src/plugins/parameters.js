@@ -484,6 +484,7 @@ export default {
         "Events",
         "SocialMedia",
         "PreviousParticipation",
+        "MUMC hospital",
       ],
       studyType: ["Behavioural", "EEG/ERP", "EyeTracking", "fNIRS", "Online"],
       fullRoles: [

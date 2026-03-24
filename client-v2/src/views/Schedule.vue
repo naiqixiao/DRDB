@@ -236,7 +236,11 @@
                   <v-container>
                     <v-row dense style="padding: 8px 8px 4px">
                       <v-col cols="12" :md="item.width" v-for="item in this.$childInfo" :key="item.label">
-                        <div v-if="!!item.options">
+                        <div v-if="item.options && item.field === 'Sex'">
+                          <v-select :label="item.label" :items="$Options[item.options]" justify="start"
+                            v-model="editedChild[item.field]" outlined hide-details dense></v-select>
+                        </div>
+                        <div v-else-if="!!item.options">
                           <v-combobox :label="item.label" :items="$Options[item.options]" justify="start"
                             v-model="editedChild[item.field]" outlined hide-details dense></v-combobox>
                         </div>
