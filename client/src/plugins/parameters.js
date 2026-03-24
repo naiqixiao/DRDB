@@ -448,15 +448,15 @@ export default {
 
         app.config.globalProperties.$Options = {
             autism: [{
-                text: 'Yes',
+                title: 'Yes',
                 value: 1
             },
             {
-                text: 'No',
+                title: 'No',
                 value: 0
             },
             {
-                text: 'Unknown',
+                title: 'Unknown',
                 value: null
             }
             ],

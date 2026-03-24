@@ -393,7 +393,7 @@
                     </div>
                     <div v-else>
                       <v-select :items="$Options[item.options]" v-model="editedFamily[item.field]"
-                        :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                        :label="item.label" variant="outlined" density="compact" hide-details class="mb-2" item-title="title" item-value="value"></v-select>
                     </div>
                   </div>
                   <div v-else-if="item.rules">

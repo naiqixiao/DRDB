@@ -250,9 +250,12 @@
                   <v-col cols="12" :sm="item.width === '12' ? 12 : 6" :md="item.width" v-for="item in familyBasicInfo"
                     :key="item.label">
                     <div v-if="item.options">
-                      <v-combobox class="textfield-family mb-2" v-model="editedItem[item.field]"
+                      <v-combobox v-if="item.field !== 'AutismHistory'" class="textfield-family mb-2" v-model="editedItem[item.field]"
                         :items="Options[item.options]" variant="outlined" :label="item.label" density="compact"
                         hide-details></v-combobox>
+                      <v-select v-else class="textfield-family mb-2" v-model="editedItem[item.field]"
+                        :items="Options[item.options]" variant="outlined" :label="item.label" density="compact"
+                        hide-details item-title="title" item-value="value"></v-select>
                     </div>
                     <div v-else>
                       <v-text-field class="textfield-family mb-2" :label="item.label" v-model="editedItem[item.field]"

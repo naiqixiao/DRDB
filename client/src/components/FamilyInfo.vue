@@ -57,7 +57,7 @@
                   </div>
                   <div v-else>
                     <v-select :items="$Options[item.options]" v-model="editedItem[item.field]" :label="item.label"
-                      variant="outlined" density="compact"></v-select>
+                      variant="outlined" density="compact" item-title="title" item-value="value"></v-select>
                   </div>
                 </div>
                 <div v-else-if="item.rules">
