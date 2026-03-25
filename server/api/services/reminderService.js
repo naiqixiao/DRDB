@@ -101,8 +101,15 @@ async function getCompletionReminderData() {
 
     schedules.forEach((schedule) => {
       if (
+        schedule.Appointments[0] &&
+        schedule.Appointments[0].PrimaryExperimenter[0] &&
         schedule.Appointments[0].PrimaryExperimenter[0].id === experimenter.id
       ) {
+        // Skip schedules with missing study data (orphaned records)
+        if (!schedule.Appointments[0].Study) {
+          console.warn(`Skipping schedule ${schedule.id}: missing study data`);
+          return;
+        }
         reminderList.scheduleList.push({
           id: schedule.id,
           Email: schedule.Family.Email,
@@ -215,6 +222,11 @@ async function getRejectionReminderData() {
 
     schedules.forEach((schedule) => {
       if (schedule.Personnel.id === researcher.id) {
+        // Skip schedules with missing appointment or study data (orphaned records)
+        if (!schedule.Appointments || !schedule.Appointments[0] || !schedule.Appointments[0].Study) {
+          console.warn(`Skipping schedule ${schedule.id}: missing appointment or study data`);
+          return;
+        }
         reminderList.scheduleList.push({
           id: schedule.id,
           Email: schedule.Family.Email,

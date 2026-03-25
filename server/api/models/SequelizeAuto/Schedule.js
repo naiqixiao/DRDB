@@ -13,7 +13,7 @@ module.exports = function(sequelize, DataTypes) {
 			allowNull: true
 		},
 		Status: {
-			type: DataTypes.ENUM('Confirmed','TBD','Rescheduling','Rescheduled','No Show','Cancelled','Rejected'),
+			type: DataTypes.ENUM('Confirmed','TBD','Rescheduling','Rescheduled','No Show','Cancelled','Rejected','Interested','Left a message'),
 			allowNull: false
 		},
 		Reminded: {
