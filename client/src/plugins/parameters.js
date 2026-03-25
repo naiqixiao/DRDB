@@ -487,7 +487,7 @@ export default {
             name: [
                 // (value) => !!value || "Required.",
                 (value) => {
-                    var pattern = /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/;
+                    var pattern = /^[\p{L}\p{M}'\-,.][^\d_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/u;
 
                     if (value) { return pattern.test(value) || "Invalid Name."; }
                     else {
