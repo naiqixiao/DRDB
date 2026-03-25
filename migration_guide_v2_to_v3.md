@@ -1,6 +1,6 @@
 # DRDB V2 to V3 Migration Guide
 
-This guide provides step-by-step instructions to migrate your DRDB system from version 2 to version 3. The V3 update is a major upgrade introducing a completely rewritten Vue 3 frontend (`client-v3`), enhanced study logistics (age groups, prerequisites), and testing room integrations.
+This guide provides step-by-step instructions to migrate your DRDB system from version 2 to version 3. The V3 update is a major upgrade introducing a completely rewritten Vue 3 frontend (`client`), enhanced study logistics (age groups, prerequisites), and testing room integrations.
 
 > [!CAUTION]
 > **Take a full backup before proceeding.** This major version includes significant database structure changes, particularly moving age requirements into separate tables.
@@ -43,7 +43,6 @@ The upgrade changes how age ranges are stored and introduces `TestingRoom` recor
 ---
 
 ## 3. Google API Credentials
-
 DRDB integrates with Google Calendar and Gmail. You must provide a valid `credentials.json` to enable these features.
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
