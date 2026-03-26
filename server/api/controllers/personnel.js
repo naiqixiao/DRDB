@@ -88,6 +88,18 @@ exports.update = asyncHandler(async (req, res) => {
 
   const personnel = await model.personnel.findOne({
     where: { id: ID },
+    include: [
+      model.lab,
+      {
+        model: model.study,
+        as: "AssignedStudies",
+        through: { model: model.experimenter },
+      },
+      {
+        model: model.study,
+        as: "StudyinCharge",
+      },
+    ],
   });
 
   // Log

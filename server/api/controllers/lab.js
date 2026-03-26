@@ -71,9 +71,10 @@ exports.delete = asyncHandler(async (req, res) => {
   // delete a folder to store credentials
   const labFolderPath = "api/google/labs/lab" + req.query.lab;
 
-  if (!fs.existsSync(labFolderPath)) {
-    // fs.unlinkSync(labFolderPath + "/credentials.json");
-    fs.unlinkSync(labFolderPath + "/token.json");
+  if (fs.existsSync(labFolderPath)) {
+    if (fs.existsSync(labFolderPath + "/token.json")) {
+      fs.unlinkSync(labFolderPath + "/token.json");
+    }
     fs.rmdirSync(labFolderPath);
   }
 

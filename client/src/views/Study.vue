@@ -17,6 +17,12 @@
           
           <v-spacer></v-spacer>
 
+          <v-btn color="success" variant="tonal" prepend-icon="mdi-plus" @click.stop="createStudy" :disabled="!canCreateStudy">
+            New Study
+          </v-btn>
+
+          <v-spacer></v-spacer>
+
           <v-text-field 
             v-model="search" 
             placeholder="Search by Study Name..." 
@@ -37,58 +43,75 @@
             class="mr-4"
           ></v-switch>
 
-          <v-btn color="success" variant="tonal" prepend-icon="mdi-plus" @click.stop="createStudy" :disabled="!canCreateStudy">
-            New Study
-          </v-btn>
+          <v-select
+            v-model="groupBy"
+            :items="groupByOptions"
+            item-title="label"
+            item-value="value"
+            placeholder="Group By"
+            density="compact"
+            variant="outlined"
+            hide-details
+            prepend-inner-icon="mdi-format-list-group"
+            style="max-width: 200px; background-color: white;"
+            class="mr-4"
+          ></v-select>
+
         </v-toolbar>
       </v-card>
 
-      <v-row>
-        <v-col cols="12" sm="6" md="4" lg="3" v-for="study in filteredStudies" :key="study.id">
-          <v-card class="ds-card ds-interactive h-100 d-flex flex-column" variant="flat" @click="rowSelected(null, { item: study })">
-            
-            <v-card-title class="d-flex justify-space-between align-start pt-4" style="white-space: normal; line-height: 1.3;">
-              <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); font-size: 1.15rem;">
-                {{ study.StudyName }}
-              </span>
-            </v-card-title>
-            
-            <v-card-subtitle class="pb-3 mt-1">
-              <v-chip size="small" variant="tonal" color="primary" class="mr-2">{{ study.StudyType }}</v-chip>
-              <v-chip size="small" :color="study.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
-                {{ study.Completed ? 'Completed' : 'In Progress' }}
-              </v-chip>
-            </v-card-subtitle>
-
-            <v-card-text class="flex-grow-1 pt-2">
-              <div class="d-flex align-center mb-2">
-                <v-icon size="18" class="mr-3" color="grey">mdi-account-star</v-icon>
-                <span class="text-body-1 font-weight-medium">{{ study.PointofContact?.Name || 'No Contact Set' }}</span>
-              </div>
-              <div class="d-flex align-center mb-2">
-                <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
-                <span class="text-body-1 text-muted">
-                  <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
-                    <span v-for="(group, i) in study.AgeGroups" :key="i">{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1">, </span></span>
-                  </template>
-                  <template v-else>Age range not set</template>
-                </span>
-              </div>
-              <div class="d-flex align-center">
-                <v-icon size="18" class="mr-3" color="grey">mdi-door-open</v-icon>
-                <span class="text-body-1 text-muted text-truncate">{{ getRoomName(study.FK_TestingRoom) }}</span>
-              </div>
-            </v-card-text>
-
-            <v-divider></v-divider>
-            
-            <v-card-actions class="pa-3 bg-grey-lighten-4 d-flex justify-space-between align-center">
-              <span class="text-body-2 text-muted font-weight-bold">ID: {{ study.id }}</span>
-              <v-btn size="small" color="primary" variant="text" append-icon="mdi-arrow-right" class="text-none">Manage</v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-
+      <!-- Grouped layout -->
+      <template v-if="groupBy !== 'none'">
+        <div v-for="group in groupedStudies" :key="group.label" class="mb-6">
+          <div class="d-flex align-center mb-3 mt-2">
+            <v-icon size="20" color="primary" class="mr-2">{{ groupByIcon }}</v-icon>
+            <h3 class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+              {{ group.label }}
+            </h3>
+            <v-chip size="x-small" variant="tonal" color="primary" class="ml-2">{{ group.studies.length }}</v-chip>
+          </div>
+          <v-row>
+            <v-col cols="12" sm="6" md="4" lg="3" v-for="study in group.studies" :key="study.id">
+              <v-card class="ds-card ds-interactive h-100 d-flex flex-column" variant="flat" @click="rowSelected(null, { item: study })">
+                <v-card-title class="d-flex justify-space-between align-start pt-4" style="white-space: normal; line-height: 1.3;">
+                  <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); font-size: 1.15rem;">
+                    {{ study.StudyName }}
+                  </span>
+                </v-card-title>
+                <v-card-subtitle class="pb-3 mt-1">
+                  <v-chip size="small" variant="tonal" color="primary" class="mr-2">{{ study.StudyType }}</v-chip>
+                  <v-chip size="small" :color="study.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
+                    {{ study.Completed ? 'Completed' : 'In Progress' }}
+                  </v-chip>
+                </v-card-subtitle>
+                <v-card-text class="flex-grow-1 pt-2">
+                  <div class="d-flex align-center mb-2">
+                    <v-icon size="18" class="mr-3" color="grey">mdi-account-star</v-icon>
+                    <span class="text-body-1 font-weight-medium">{{ study.PointofContact?.Name || 'No Contact Set' }}</span>
+                  </div>
+                  <div class="d-flex align-center mb-2">
+                    <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
+                    <span class="text-body-1 text-muted">
+                      <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
+                        <span v-for="(group, i) in study.AgeGroups" :key="i">{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1">, </span></span>
+                      </template>
+                      <template v-else>Age range not set</template>
+                    </span>
+                  </div>
+                  <div class="d-flex align-center">
+                    <v-icon size="18" class="mr-3" color="grey">mdi-door-open</v-icon>
+                    <span class="text-body-1 text-muted text-truncate">{{ getRoomName(study.FK_TestingRoom) }}</span>
+                  </div>
+                </v-card-text>
+                <v-divider></v-divider>
+                <v-card-actions class="pa-3 bg-grey-lighten-4 d-flex justify-space-between align-center">
+                  <span class="text-body-2 text-muted font-weight-bold">ID: {{ study.id }}</span>
+                  <v-btn size="small" color="primary" variant="text" append-icon="mdi-arrow-right" class="text-none">Manage</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
         <v-col cols="12" v-if="filteredStudies.length === 0">
           <v-card class="ds-card text-center py-12" variant="flat">
             <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-flask-empty-outline</v-icon>
@@ -96,7 +119,60 @@
             <p class="text-body-2 text-muted">Try adjusting your search or filter settings.</p>
           </v-card>
         </v-col>
-      </v-row>
+      </template>
+
+      <!-- Flat layout (no grouping) -->
+      <template v-else>
+        <v-row>
+          <v-col cols="12" sm="6" md="4" lg="3" v-for="study in filteredStudies" :key="study.id">
+            <v-card class="ds-card ds-interactive h-100 d-flex flex-column" variant="flat" @click="rowSelected(null, { item: study })">
+              <v-card-title class="d-flex justify-space-between align-start pt-4" style="white-space: normal; line-height: 1.3;">
+                <span class="text-h6 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: var(--color-primary); font-size: 1.15rem;">
+                  {{ study.StudyName }}
+                </span>
+              </v-card-title>
+              <v-card-subtitle class="pb-3 mt-1">
+                <v-chip size="small" variant="tonal" color="primary" class="mr-2">{{ study.StudyType }}</v-chip>
+                <v-chip size="small" :color="study.Completed ? 'success' : 'warning'" variant="flat" class="text-white font-weight-bold">
+                  {{ study.Completed ? 'Completed' : 'In Progress' }}
+                </v-chip>
+              </v-card-subtitle>
+              <v-card-text class="flex-grow-1 pt-2">
+                <div class="d-flex align-center mb-2">
+                  <v-icon size="18" class="mr-3" color="grey">mdi-account-star</v-icon>
+                  <span class="text-body-1 font-weight-medium">{{ study.PointofContact?.Name || 'No Contact Set' }}</span>
+                </div>
+                <div class="d-flex align-center mb-2">
+                  <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
+                  <span class="text-body-1 text-muted">
+                    <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
+                      <span v-for="(group, i) in study.AgeGroups" :key="i">{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge) }}<span v-if="i < study.AgeGroups.length - 1">, </span></span>
+                    </template>
+                    <template v-else>Age range not set</template>
+                  </span>
+                </div>
+                <div class="d-flex align-center">
+                  <v-icon size="18" class="mr-3" color="grey">mdi-door-open</v-icon>
+                  <span class="text-body-1 text-muted text-truncate">{{ getRoomName(study.FK_TestingRoom) }}</span>
+                </div>
+              </v-card-text>
+              <v-divider></v-divider>
+              <v-card-actions class="pa-3 bg-grey-lighten-4 d-flex justify-space-between align-center">
+                <span class="text-body-2 text-muted font-weight-bold">ID: {{ study.id }}</span>
+                <v-btn size="small" color="primary" variant="text" append-icon="mdi-arrow-right" class="text-none">Manage</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" v-if="filteredStudies.length === 0">
+            <v-card class="ds-card text-center py-12" variant="flat">
+              <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-flask-empty-outline</v-icon>
+              <h3 class="text-h6 text-muted">No studies found</h3>
+              <p class="text-body-2 text-muted">Try adjusting your search or filter settings.</p>
+            </v-card>
+          </v-col>
+        </v-row>
+      </template>
     </div>
 
     <!-- ============================================ -->
@@ -560,10 +636,10 @@
                     <h3 class="text-h6 mb-4">Age Groups</h3>
                     <v-row v-for="(group, index) in editedStudy.AgeGroups" :key="index" dense align="center">
                       <v-col cols="5">
-                        <v-text-field v-model.number="group.MinAge" label="Min Age (months)" type="number" variant="outlined" density="compact"></v-text-field>
+                        <v-text-field v-model.number="group.MinAge" label="Min Age (months)" type="number" variant="outlined" density="compact" :rules="[v => v !== null && v !== '' || 'Required', v => v >= 0 || 'Must be ≥ 0', v => group.MaxAge === null || group.MaxAge === '' || v < group.MaxAge || 'Must be less than Max Age']"></v-text-field>
                       </v-col>
                       <v-col cols="5">
-                        <v-text-field v-model.number="group.MaxAge" label="Max Age (months)" type="number" variant="outlined" density="compact"></v-text-field>
+                        <v-text-field v-model.number="group.MaxAge" label="Max Age (months)" type="number" variant="outlined" density="compact" :rules="[v => v !== null && v !== '' || 'Required', v => v >= 0 || 'Must be ≥ 0', v => group.MinAge === null || group.MinAge === '' || v > group.MinAge || 'Must be greater than Min Age']"></v-text-field>
                       </v-col>
                       <v-col cols="2" class="text-center">
                         <v-btn icon="mdi-delete-outline" color="error" variant="text" @click="editedStudy.AgeGroups.splice(index, 1)"></v-btn>
@@ -786,6 +862,13 @@ export default {
       studyStatsLoaded: false,
       savingTemplates: false,
       tab: 'one',
+      groupBy: 'year',
+      groupByOptions: [
+        { label: 'None', value: 'none' },
+        { label: 'Year Created', value: 'year' },
+        { label: 'Point of Contact', value: 'contact' },
+        { label: 'Study Type', value: 'type' },
+      ],
       studyStats: {
         totalNperStatus: [],
         totalNWeeklyRecrtuiment: [],
@@ -812,6 +895,38 @@ export default {
         );
       }
       return result;
+    },
+
+    groupedStudies() {
+      const studies = this.filteredStudies;
+      if (this.groupBy === 'none' || !this.groupBy) return null;
+
+      const groups = {};
+
+      studies.forEach(study => {
+        let key;
+        if (this.groupBy === 'year') {
+          key = study.createdAt ? new Date(study.createdAt).getFullYear().toString() : 'Unknown';
+        } else if (this.groupBy === 'contact') {
+          key = study.PointofContact?.Name || 'No Contact Set';
+        } else if (this.groupBy === 'type') {
+          key = study.StudyType || 'Unknown';
+        }
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(study);
+      });
+
+      // Sort group keys and return as an array to guarantee order
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        if (this.groupBy === 'year') return b.localeCompare(a); // descending
+        return a.localeCompare(b); // alphabetical
+      });
+      return sortedKeys.map(k => ({ label: k, studies: groups[k] }));
+    },
+
+    groupByIcon() {
+      const icons = { year: 'mdi-calendar', contact: 'mdi-account-star', type: 'mdi-flask-outline' };
+      return icons[this.groupBy] || 'mdi-format-list-group';
     },
 
     canCreateStudy() {
@@ -1042,6 +1157,11 @@ export default {
         FK_Lab: this.store.lab,
         StudyType: 'Behavioural',
         Completed: false,
+        Description: '',
+        PhoneScript: '',
+        EmailTemplate: '',
+        ReminderTemplate: '',
+        FollowUPEmailSnippet: '',
         AgeGroups: [],
         PrerequisiteIds: [],
         ExclusionIds: [],
@@ -1099,6 +1219,12 @@ export default {
     },
 
     async save() {
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) {
+        this.$refs.confirmD.open('Validation Error', 'Please fill in all required fields and fix any errors before saving.', { color: 'warning', noconfirm: true });
+        return;
+      }
+
       if (!this.PointofContact) {
         this.$refs.confirmD.open('Validation Error', 'Please select a Point of Contact.', { color: 'warning', noconfirm: true });
         return;

@@ -464,7 +464,8 @@ export default {
     getRules(ruleName) {
       if (ruleName === 'required') return [v => !!v || 'Required'];
       if (ruleName === 'name') return [
-        v => !v || /^[\w'\-,.][^0-9_!¡?÷?¿/\\+=@#$%ˆ&*{}|~<>;:[\]]{2,}$/.test(v) || 'Invalid Name'
+        v => !!v || 'Name is required',
+        v => !v || v.trim().length >= 2 || 'Name must be at least 2 characters'
       ];
       if (ruleName === 'email') return [
         v => !v || /^[^@]+@[^@]+\.[a-zA-Z]{2,}$/.test(v) || 'Invalid Email'
@@ -568,8 +569,9 @@ export default {
     },
 
     async save() {
-      if (!this.editedPersonnel.Name || !this.editedPersonnel.Email || !this.editedPersonnel.Role) {
-        await this.$refs.confirmDialog.open("Missing Details", "Please fill in the required fields.", { color: "warning", noconfirm: true });
+      const { valid } = await this.$refs.dialogForm.validate();
+      if (!valid) {
+        await this.$refs.confirmDialog.open("Validation Error", "Please fill in all required fields and fix any errors before saving.", { color: "warning", noconfirm: true });
         return;
       }
 
@@ -578,6 +580,8 @@ export default {
         try {
           const Result = await login.register(this.editedPersonnel);
           this.editedPersonnel.id = Result.data.id;
+          this.editedPersonnel.AssignedStudies = [];
+          this.editedPersonnel.StudyinCharge = [];
           this.Personnels.push(this.editedPersonnel);
           await this.$refs.confirmDialog.open("Success", `${Result.data.Email} has been added to the system!`, { color: "success", noconfirm: true });
 

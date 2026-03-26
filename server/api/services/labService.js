@@ -57,7 +57,7 @@ exports.createLab = async (labData) => {
     IllParticipant: "Include",
     FK_Personnel: lab.Personnels[0].id,
     FK_Lab: lab.id,
-    FK_TestingRoom: 1,
+    FK_TestingRoom: null,
   });
 
   // Create the default age group for the sample study

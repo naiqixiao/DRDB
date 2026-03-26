@@ -230,7 +230,7 @@
             <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Lab Identity</div>
             <v-row dense class="mb-4">
               <v-col cols="12" md="6">
-                <v-text-field label="Lab Name" v-model="currentLab.LabName" variant="outlined" density="compact"></v-text-field>
+                <v-text-field label="Lab Name *" v-model="currentLab.LabName" variant="outlined" density="compact" :rules="[v => !!v || 'Lab Name is required']"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field label="Default Zoom Link" v-model="currentLab.ZoomLink" variant="outlined" density="compact"></v-text-field>
@@ -269,7 +269,7 @@
             <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Global Information</div>
             <v-row>
               <v-col cols="12" md="4">
-                <v-text-field label="Lab Name" v-model="editedLab.LabName" variant="outlined" density="compact" bg-color="white"></v-text-field>
+                <v-text-field label="Lab Name *" v-model="editedLab.LabName" variant="outlined" density="compact" bg-color="white" :rules="[v => !!v || 'Lab Name is required']"></v-text-field>
               </v-col>
               <v-col cols="12" md="8">
                 <v-text-field label="Physical Location" v-model="editedLab.Location" variant="outlined" density="compact" bg-color="white"></v-text-field>
@@ -368,6 +368,11 @@ export default {
       this.editedLab.ZoomLink = this.store.ZoomLink; this.dialogEditLab = true;
     },
     async saveNewLab() {
+      const { valid } = await this.$refs.formNewLab.validate();
+      if (!valid) {
+        this.$refs.confirmD.open('Validation Error', 'Please fill in all required fields.', { color: 'warning', noconfirm: true });
+        return;
+      }
       try {
         this.currentLab.PI = this.currentLab.Personnels[0].Initial;
         await lab.create(this.currentLab);
@@ -376,6 +381,11 @@ export default {
       this.closeNewLab();
     },
     async saveEditLab() {
+      const { valid } = await this.$refs.formEdit.validate();
+      if (!valid) {
+        this.$refs.confirmD.open('Validation Error', 'Please fill in all required fields.', { color: 'warning', noconfirm: true });
+        return;
+      }
       this.requestInProgress = true;
       try {
         await lab.update(this.editedLab);
