@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Authentication — DRDB</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 48px 40px; text-align: center; max-width: 440px; width: 90%; }
+    .icon { font-size: 56px; margin-bottom: 16px; }
+    h2 { font-size: 20px; margin-bottom: 8px; color: #333; }
+    p { font-size: 14px; color: #666; margin-top: 8px; line-height: 1.5; }
+    .error { color: #d32f2f; }
+    .success { color: #2e7d32; }
+    .code-box { background: #f0f0f0; border-radius: 6px; padding: 12px; margin-top: 16px; word-break: break-all; font-family: monospace; font-size: 13px; }
+    .spinner { width: 48px; height: 48px; border: 4px solid #e0e0e0; border-top-color: #1976d2; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    button { background: #1976d2; color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 16px; }
+    button:hover { background: #1565c0; }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="spinner"></div>
+    <h2>Processing authentication...</h2>
+    <p>Please wait while we complete the Google sign-in.</p>
+  </div>
+
+  <script>
+    (function () {
+      var card = document.getElementById('card');
+      var params = new URLSearchParams(window.location.search);
+      var code = params.get('code');
+      var error = params.get('error');
+
+      if (error) {
+        card.innerHTML =
+          '<div class="icon">❌</div>' +
+          '<h2 class="error">Authentication Failed</h2>' +
+          '<p>' + error + '</p>' +
+          '<button onclick="window.close()">Close</button>';
+        return;
+      }
+
+      if (!code) {
+        card.innerHTML =
+          '<div class="icon">⚠️</div>' +
+          '<h2>No Authorization Code</h2>' +
+          '<p>No code was received from Google. Please try again from the Settings page.</p>' +
+          '<button onclick="window.close()">Close</button>';
+        return;
+      }
+
+      // Send the code back to the opener (Settings page)
+      if (window.opener) {
+        try {
+          window.opener.postMessage(
+            { type: 'GOOGLE_OAUTH_CODE', code: code },
+            window.location.origin
+          );
+
+          card.innerHTML =
+            '<div class="icon">✅</div>' +
+            '<h2 class="success">Authentication Successful!</h2>' +
+            '<p>The authorization code has been sent back to the application.<br>This window will close automatically...</p>';
+
+          setTimeout(function () { window.close(); }, 2000);
+        } catch (e) {
+          // If postMessage fails, show the code for manual copy
+          card.innerHTML =
+            '<div class="icon">⚠️</div>' +
+            '<h2>Almost Done</h2>' +
+            '<p>Could not send the code automatically. Please copy the code below and paste it in the Settings page:</p>' +
+            '<div class="code-box">' + code + '</div>' +
+            '<button onclick="window.close()">Close</button>';
+        }
+      } else {
+        // Not opened as a popup — show the code for manual copy
+        card.innerHTML =
+          '<div class="icon">⚠️</div>' +
+          '<h2>Almost Done</h2>' +
+          '<p>Please copy the code below and paste it in the Settings page:</p>' +
+          '<div class="code-box">' + code + '</div>' +
+          '<button onclick="window.close()">Close</button>';
+      }
+    })();
+  </script>
+</body>
+</html>

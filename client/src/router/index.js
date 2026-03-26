@@ -63,11 +63,6 @@ const routes = [
         path: '/calendar-test',
         name: 'Calendar Test',
         component: CalendarTest
-    },
-    {
-        path: '/oauth/callback',
-        name: 'OAuthCallback',
-        component: OAuthCallback
     }
 ]
 
