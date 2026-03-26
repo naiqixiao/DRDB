@@ -7,12 +7,6 @@ const { OAuth2 } = google.auth;
 
 exports.googleCredentialsURL = asyncHandler(async (req, res) => {
   try {
-    // if (req.body.lab) {
-    //   var lab = req.body.lab;
-    // } else {
-    //   var lab = req.query.lab;
-    // }
-
     const SCOPES = [
       "https://mail.google.com/",
       "https://www.googleapis.com/auth/gmail.modify",
@@ -26,16 +20,22 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
     ];
 
     const credentialsPath = "api/google/general/credentials.json";
-    // const tokenPath = "api/google/lab" + lab + "/token.json";
 
-    const credentials = fs.readFileSync(credentialsPath, { recursive: true });
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
-    const redirect_uri = redirect_uris.includes("http://localhost:5173/oauth/callback")
-      ? "http://localhost:5173/oauth/callback"
-      : "http://localhost:5173/oauth/callback"; // Hardcode for development
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
+    const credentials = fs.readFileSync(credentialsPath);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
+
+    // Determine the redirect URI based on the request's origin
+    const origin = req.get('origin') || "http://localhost:5173";
+    const redirect_uri = `${origin}/oauth/callback`;
+    
+    // Check if the current origin's redirect URI is in the authorized list
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
+      ? redirect_uri 
+      : redirect_uris[0];
+
+    const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
@@ -49,7 +49,11 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
 
     res.status(200).send(authUrl);
   } catch (error) {
-    return res.send(error);
+    console.error("error in googleCredentialsURL:", error);
+    return res.status(500).send({ 
+      message: error.message || "Internal Server Error",
+      details: "Ensure api/google/general/credentials.json is correct and contains valid JSON."
+    });
   }
 });
 
@@ -76,11 +80,17 @@ exports.googleToken = asyncHandler(async (req, res) => {
     }
 
     const credentials = fs.readFileSync(credentialsPath);
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
-    const redirect_uri = "http://localhost:5173/oauth/callback";
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
+
+    const origin = req.get('origin') || "http://localhost:5173";
+    const redirect_uri = `${origin}/oauth/callback`;
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
+      ? redirect_uri 
+      : redirect_uris[0];
+
+    const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
     var token = await oAuth2Client.getToken(code);
 
@@ -100,11 +110,6 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     var labEmail = sendAsEmail.sendAsEmail;
 
-    // if (sendAsEmail.displayName != "") {
-    //   var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
-    // } else {
-    //   var labInfo = { Email: labEmail };
-    // }
     // update lab email info.
     await model.lab.update(
       { Email: labEmail },
@@ -114,14 +119,13 @@ exports.googleToken = asyncHandler(async (req, res) => {
     );
 
     fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
-    console.log(JSON.stringify(token.tokens));
 
     res.status(200).send({
       message: "Google account is successfully set up!",
-      Email: profile.data.emailAddress,
     });
   } catch (error) {
-    return res.send(error);
+    console.error("error in googleToken:", error);
+    return res.status(500).send({ message: error.message || "Internal Server Error" });
   }
 });
 
@@ -137,19 +141,21 @@ exports.adminToken = asyncHandler(async (req, res) => {
     const tokenPath = "api/google/general/token.json";
 
     const credentials = fs.readFileSync(credentialsPath);
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
-    const redirect_uri = "http://localhost:5173/oauth/callback";
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
+
+    const origin = req.get('origin') || "http://localhost:5173";
+    const redirect_uri = `${origin}/oauth/callback`;
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
+      ? redirect_uri 
+      : redirect_uris[0];
+
+    const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
     var token = await oAuth2Client.getToken(code);
 
     oAuth2Client.setCredentials(token.tokens);
-
-    // const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-    // const profile = await gmail.users.getProfile({ userId: "me" });
 
     const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
@@ -174,7 +180,8 @@ exports.adminToken = asyncHandler(async (req, res) => {
       Email: adminEmail,
     });
   } catch (error) {
-    return res.send(error);
+    console.error("error in adminToken:", error);
+    return res.status(500).send({ message: error.message || "Internal Server Error" });
   }
 });
 
@@ -184,18 +191,21 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     const tokenPath = "api/google/labs/lab" + req.body.lab + "/token.json";
 
     const credentials = fs.readFileSync(credentialsPath);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
 
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
+    const origin = req.get('origin') || "http://localhost:5173";
+    const redirect_uri = `${origin}/oauth/callback`;
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
+      ? redirect_uri 
+      : redirect_uris[0];
 
-    const redirect_uri = "http://localhost:5173/oauth/callback";
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
+    const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
     var sendAsEmail = {};
 
     if (fs.existsSync(tokenPath)) {
-
       const token = fs.readFileSync(tokenPath);
       oAuth2Client.setCredentials(JSON.parse(token));
 
@@ -212,15 +222,8 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       });
 
       var labEmail = sendAsEmail.sendAsEmail;
-
-      // if (sendAsEmail.displayName != "") {
-      //   var labInfo = { Email: labEmail, LabName: sendAsEmail.displayName };
-      // } else {
-      //   var labInfo = { Email: labEmail };
-      // }
       var labInfo = { Email: labEmail };
 
-      // update lab email info.
       await model.lab.update(labInfo, {
         where: { id: req.body.lab },
       });
@@ -231,7 +234,7 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     }
 
   } catch (error) {
-    console.log(error);
+    console.error("error in googleEmail lab profile:", error);
     var labEmail = null;
   }
 
@@ -241,22 +244,22 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     const tokenPath = "api/google/general/token.json";
 
     const credentials = fs.readFileSync(credentialsPath);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
 
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
+    const origin = req.get('origin') || "http://localhost:5173";
+    const redirect_uri = `${origin}/oauth/callback`;
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
+      ? redirect_uri 
+      : redirect_uris[0];
 
-    const redirect_uri = "http://localhost:5173/oauth/callback";
-    const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uri);
+    const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
     const token = fs.readFileSync(tokenPath);
     oAuth2Client.setCredentials(JSON.parse(token));
 
     const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-    // const profile2 = await adminGmail.users.getProfile({ userId: "me" });
-
-    // var adminEmail = profile2.data.emailAddress;
 
     const adminSendAs = await adminGmail.users.settings.sendAs.list({
       userId: "me",
@@ -272,7 +275,7 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
   } catch (error) {
     var adminEmail = null;
-    console.log(error);
+    console.error("error in googleEmail admin profile:", error);
   }
 
   res.status(200).send({

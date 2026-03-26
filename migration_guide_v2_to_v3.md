@@ -45,14 +45,18 @@ The upgrade changes how age ranges are stored and introduces `TestingRoom` recor
 ## 3. Google API Credentials
 DRDB integrates with Google Calendar and Gmail. You must provide a valid `credentials.json` to enable these features.
 
+> [!IMPORTANT]
+> For a complete, step-by-step guide including troubleshooting, see the **[Google OAuth Setup section in README.md](README.md#google-oauth-setup)**.
+
+**Quick summary:**
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
 2. Create a new project or select an existing one.
-3. Navigate to **APIs & Services > Library** and enable both the **Google Calendar API** and **Gmail API**.
-4. Go to **APIs & Services > OAuth consent screen** and configure it (typically for "Internal" use within your organization).
-5. Go to **APIs & Services > Credentials**.
-6. Click **Create Credentials > OAuth client ID**. (Choose "Desktop app" or "Web application", depending on how your backend handles the auth flow.)
-7. Download the resulting JSON file and rename it to `credentials.json`.
-8. Place the file in the backend directory at `server/api/google/general/credentials.json`.
+3. Enable both the **Google Calendar API** and **Gmail API**.
+4. Configure the **OAuth consent screen** (add test users if in "Testing" mode).
+5. Go to **Credentials** > **Create Credentials** > **OAuth client ID**.
+6. Choose **Web application** and add your production redirect URI (e.g., `https://yourdomain.com/oauth/callback`).
+7. Download the resulting JSON file, rename it to `credentials.json`.
+8. Place the file at `server/api/google/general/credentials.json`.
 
 ---
 

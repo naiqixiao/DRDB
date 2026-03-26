@@ -14,9 +14,9 @@ module.exports = asyncHandler(async (req, res, next) => {
     const tokenPath = "api/google/labs/lab" + lab + "/token.json";
     // const credentials = await fs.promises.readFile(credentialsPath);
     const credentials = fs.readFileSync(credentialsPath);
-    const { client_secret, client_id, redirect_uris } = JSON.parse(
-      credentials
-    ).installed;
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
     const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // const token = await fs.promises.readFile(tokenPath);
