@@ -16,6 +16,7 @@ Please check installation instruction and detailed introductions here: https://d
 
 - **Backend (`server/`)**: Express.js REST API with Sequelize ORM (MySQL). Interacts heavily with Google APIs (Calendar, Email) for seamless daily logistics.
 - **Frontend (`client/`)**: A modern Single Page Application built with Vue 3 (Composition API), Vite, Pinia for state management, and Tailwind CSS (utility classes) for rapid UI styling. 
+  - **Customization**: A detailed guide on changing colors, logo, and fonts is available in [client/README.md](client/README.md).
 
 To start the development server for the new client:
 ```bash
