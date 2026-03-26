@@ -194,6 +194,32 @@ export default {
   },
 
   async created() {
+    // Handle OAuth callback — detect if we landed here from a Google redirect
+    if (window.location.pathname === '/oauth/callback') {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const error = params.get('error');
+
+      if (code && window.opener) {
+        // Send the code back to the Settings page that opened this window
+        window.opener.postMessage(
+          { type: 'GOOGLE_OAUTH_CODE', code: code },
+          window.location.origin
+        );
+        // Replace page content with a success message
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><div style="font-size:56px;margin-bottom:16px;">✅</div><h2>Authentication Successful!</h2><p style="color:#666;margin-top:8px;">This window will close automatically...</p></div></div>';
+        setTimeout(() => { window.close(); }, 2000);
+        return; // Don't proceed with normal app flow
+      } else if (code) {
+        // No opener — show code for manual copy
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><div style="font-size:56px;margin-bottom:16px;">⚠️</div><h2>Almost Done</h2><p style="color:#666;margin-top:8px;">Please copy this code and paste it in the Settings page:</p><div style="background:#f0f0f0;border-radius:6px;padding:12px;margin-top:16px;word-break:break-all;font-family:monospace;font-size:13px;">' + code + '</div></div></div>';
+        return;
+      } else if (error) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;text-align:center;"><div><div style="font-size:56px;margin-bottom:16px;">❌</div><h2 style="color:#d32f2f;">Authentication Failed</h2><p style="color:#666;margin-top:8px;">' + error + '</p></div></div>';
+        return;
+      }
+    }
+
     try {
       await login.check_login();
     } catch (error) {

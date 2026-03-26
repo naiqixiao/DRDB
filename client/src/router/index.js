@@ -9,7 +9,6 @@ const Schedule = () => import('@/views/Schedule.vue')
 const Personnel = () => import('@/views/Personnel.vue')
 const Study = () => import('@/views/Study.vue')
 const Settings = () => import('@/views/Settings.vue')
-const OAuthCallback = () => import('@/views/OAuthCallback.vue')
 const EmailTest = () => import('@/views/EmailTest.vue')
 const CalendarTest = () => import('@/views/CalendarTest.vue')
 
