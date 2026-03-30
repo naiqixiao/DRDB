@@ -137,7 +137,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
     const labId = resolveLabId(req);
     const schedules = await getFamilyReminderSchedules(labId);
 
-    schedules.forEach(async (schedule) => {
+    for (const schedule of schedules) {
       const labels = ["Reminder-email"];
 
       for (const appointment of schedule.Appointments) {
@@ -197,7 +197,11 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           );
         }
       }
-    });
+    }
+
+    if (res) {
+      res.status(200).send({ info: "reminder email sent!", count: schedules.length });
+    }
   } catch (error) {
     console.error("Auto-completion reminder error:", error);
   }

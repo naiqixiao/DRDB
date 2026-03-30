@@ -7,66 +7,146 @@ const calendarService = require("./googleCalendarService");
  * Standardized Include Block for Schedule Queries
  * Extracted from the old controller to ensure consistent data shaping.
  */
-async function searchSchedules(queryString) {
+function normalizePagination(options = {}) {
+  if (options.disablePagination) {
+    return {};
+  }
+
+  const requestedLimit = Number.parseInt(options.limit, 10);
+  const requestedOffset = Number.parseInt(options.offset, 10);
+
+  const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+    ? Math.min(requestedLimit, 200)
+    : 100;
+  const offset = Number.isInteger(requestedOffset) && requestedOffset >= 0
+    ? requestedOffset
+    : 0;
+
+  return { limit, offset };
+}
+
+function buildScheduleSearchInclude() {
+  return [
+    {
+      model: model.appointment,
+      separate: false,
+      include: [
+        {
+          model: model.child,
+          attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"],
+          include: [
+            { model: model.appointment, separate: true, attributes: ["FK_Study"] },
+            { model: model.family, attributes: ["AutismHistory"] },
+          ],
+        },
+        {
+          model: model.study,
+          include: [
+            { model: model.lab },
+            { model: model.personnel, as: "Experimenters", through: { model: model.experimenter } },
+          ],
+        },
+        {
+          model: model.personnel,
+          as: "PrimaryExperimenter",
+          through: { model: model.experimenterAssignment },
+          attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+        },
+        {
+          model: model.personnel,
+          as: "SecondaryExperimenter",
+          through: { model: model.experimenterAssignment_2nd },
+          attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
+        },
+      ],
+    },
+    {
+      model: model.family,
+      include: [
+        {
+          model: model.child,
+          separate: true,
+          include: [
+            { model: model.appointment, separate: true, attributes: ["FK_Study"] },
+            { model: model.family, attributes: ["AutismHistory"] },
+          ],
+        },
+        { model: model.conversations },
+      ],
+    },
+    {
+      model: model.personnel,
+    },
+  ];
+}
+
+function buildScheduleCountInclude() {
+  return [
+    {
+      model: model.appointment,
+      attributes: [],
+      required: false,
+      include: [
+        {
+          model: model.study,
+          attributes: [],
+          required: false,
+        },
+      ],
+    },
+    {
+      model: model.family,
+      attributes: [],
+      required: false,
+    },
+  ];
+}
+
+async function countSchedules(queryString) {
+  return model.schedule.count({
+    where: queryString,
+    include: buildScheduleCountInclude(),
+    distinct: true,
+    col: "id",
+    subQuery: false,
+  });
+}
+
+async function searchSchedules(queryString, options = {}) {
+  const pagination = normalizePagination(options);
+
   return await model.schedule.findAll({
     where: queryString,
-    include: [
-      {
-        model: model.appointment,
-        separate: false,
-        include: [
-          {
-            model: model.child,
-            attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"],
-            include: [
-              { model: model.appointment, separate: true, attributes: ["FK_Study"] },
-              { model: model.family, attributes: ["AutismHistory"] },
-            ],
-          },
-          {
-            model: model.study,
-            include: [
-              { model: model.lab },
-              { model: model.personnel, as: "Experimenters", through: { model: model.experimenter } },
-            ],
-          },
-          {
-            model: model.personnel,
-            as: "PrimaryExperimenter",
-            through: { model: model.experimenterAssignment },
-            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-          },
-          {
-            model: model.personnel,
-            as: "SecondaryExperimenter",
-            through: { model: model.experimenterAssignment_2nd },
-            attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"],
-          },
-        ],
-      },
-      {
-        model: model.family,
-        include: [
-          {
-            model: model.child,
-            separate: true,
-            include: [
-              { model: model.appointment, separate: true, attributes: ["FK_Study"] },
-              { model: model.family, attributes: ["AutismHistory"] },
-            ],
-          },
-          { model: model.conversations },
-        ],
-      },
-      {
-        model: model.personnel,
-      },
-    ],
+    include: buildScheduleSearchInclude(),
     order: [['id', 'DESC']],
+    ...pagination,
   });
 }
 
 exports.searchSchedules = searchSchedules;
+
+async function searchSchedulesWithPagination(queryString, options = {}) {
+  const schedules = await searchSchedules(queryString, options);
+
+  if (options.disablePagination) {
+    return { schedules, pagination: null };
+  }
+
+  const { limit, offset } = normalizePagination(options);
+  const total = await countSchedules(queryString);
+
+  return {
+    schedules,
+    pagination: {
+      limit,
+      offset,
+      total,
+      hasMore: offset + schedules.length < total,
+    },
+  };
+}
+
+exports.searchSchedulesWithPagination = searchSchedulesWithPagination;
 
 /**
  * Creates a new schedule, its appointments, assigns experimenters,

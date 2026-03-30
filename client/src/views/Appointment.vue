@@ -223,9 +223,22 @@
         <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
           Results
         </span>
-        <v-chip class="ml-3" size="small" variant="tonal" color="primary">{{ Schedules.length }} found</v-chip>
+        <v-chip class="ml-3" size="small" variant="tonal" color="primary">
+          Showing {{ currentScheduleResultStart }}-{{ currentScheduleResultEnd }} of {{ scheduleSearchTotal }}
+        </v-chip>
+        <v-chip class="ml-2" size="small" variant="outlined" color="primary">
+          Page {{ currentScheduleResultsPage }} / {{ totalScheduleResultPages }}
+        </v-chip>
+        <v-spacer></v-spacer>
+        <v-btn icon="mdi-page-first" variant="text" density="comfortable" @click="previousScheduleResultsPage"
+          :disabled="!hasPreviousScheduleResultsPage"></v-btn>
+        <v-btn icon="mdi-page-next" variant="text" density="comfortable" @click="nextScheduleResultsPage"
+          :disabled="!hasNextScheduleResultsPage"></v-btn>
       </v-toolbar>
       <v-divider></v-divider>
+      <v-alert v-if="showScheduleRefineHint" type="warning" variant="tonal" density="compact" border="start" class="ma-4 mb-0">
+        This search returned {{ scheduleSearchTotal }} appointments. Refine the search filters if you need a narrower result set.
+      </v-alert>
       <v-card-text class="pa-0">
         <ScheduleTable 
           :Schedules="Schedules" 
@@ -331,6 +344,12 @@ export default {
       datePickerAfter: null,
       datePickerBefore: null,
       Schedules: [],
+      scheduleSearchLimit: 100,
+      scheduleSearchOffset: 0,
+      scheduleSearchTotal: 0,
+      scheduleSearchActive: false,
+      scheduleResultsMode: null,
+      lastScheduleQuery: null,
       searchingFields: [
         { label: "Family ID", field: "FamilyId", width: 2 },
         { label: "Email", field: "Email", width: 3 },
@@ -412,81 +431,125 @@ export default {
       this.dateMenuBefore = false;
     },
 
-    async searchSchedule() {
-      this.store.setLoadingStatus(true);
-      this.queryString.trainingMode = this.store.trainingMode;
+    resetScheduleSearchState() {
+      this.scheduleSearchLimit = 100;
+      this.scheduleSearchOffset = 0;
+      this.scheduleSearchTotal = 0;
+      this.scheduleSearchActive = false;
+      this.scheduleResultsMode = null;
+      this.lastScheduleQuery = null;
+    },
 
-      try {
-        const Result = await schedule.search(this.queryString);
-        this.Schedules = Result.data;
-
-        if (!this.Schedules || this.Schedules.length === 0) {
-          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
-        }
-      } catch (error) {
-        if (error.response?.status !== 401) console.error(error);
-      }
-
+    resetScheduleSearchForm() {
       this.queryString = Object.assign({}, this.defaultQueryString);
       this.queryString.Status = [];
       this.queryString.StudyName = [];
       this.index = -1;
+    },
+
+    async loadScheduleResults(mode, offset = 0) {
+      const requestParams = {
+        ...(this.lastScheduleQuery || {}),
+        trainingMode: this.store.trainingMode,
+        limit: this.scheduleSearchLimit,
+        offset,
+      };
+
+      let result;
+      switch (mode) {
+        case "followups":
+          result = await schedule.searchFollowUps(requestParams);
+          break;
+        case "today":
+          result = await schedule.today(requestParams);
+          break;
+        case "tomorrow":
+          result = await schedule.tomorrow(requestParams);
+          break;
+        case "thisWeek":
+          result = await schedule.week(requestParams);
+          break;
+        default:
+          result = await schedule.search(requestParams);
+          break;
+      }
+
+      const payload = result.data || {};
+      this.Schedules = payload.schedules || [];
+
+      const pagination = payload.pagination || {};
+      this.scheduleSearchLimit = pagination.limit || this.scheduleSearchLimit;
+      this.scheduleSearchOffset = pagination.offset || 0;
+      this.scheduleSearchTotal = pagination.total || 0;
+      this.scheduleSearchActive = true;
+      this.scheduleResultsMode = mode;
+
+      if (!this.Schedules || this.Schedules.length === 0) {
+        this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
+      }
+    },
+
+    async searchSchedule() {
+      this.store.setLoadingStatus(true);
+
+      try {
+        this.lastScheduleQuery = { ...this.queryString };
+        await this.loadScheduleResults("search", 0);
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
+
+      this.resetScheduleSearchForm();
       setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     async followupSearch() {
       this.store.setLoadingStatus(true);
-      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
-        const Result = await schedule.searchFollowUps(this.queryString);
-        this.Schedules = Result.data;
-
-        if (!this.Schedules || this.Schedules.length === 0) {
-          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
-        }
+        this.lastScheduleQuery = {};
+        await this.loadScheduleResults("followups", 0);
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
 
-      this.queryString = Object.assign({}, this.defaultQueryString);
-      this.queryString.Status = [];
-      this.queryString.StudyName = [];
-      this.index = -1;
+      this.resetScheduleSearchForm();
       setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     async studiesInaPeriod(serchRange) {
       this.store.setLoadingStatus(true);
-      this.queryString.trainingMode = this.store.trainingMode;
-      let Result = [];
       
       try {
-        switch (serchRange) {
-          case "today":
-            Result = await schedule.today(this.queryString);
-            break;
-          case "tomorrow":
-            Result = await schedule.tomorrow(this.queryString);
-            break;
-          case "thisWeek":
-            Result = await schedule.week(this.queryString);
-            break;
-        }
-        
-        this.Schedules = Result.data;
-
-        if (!this.Schedules || this.Schedules.length === 0) {
-          this.$refs.confirmD.open('No Results', 'No study appointment can be found. Sorry~', { color: 'warning', noconfirm: true });
-        }
+        this.lastScheduleQuery = {};
+        await this.loadScheduleResults(serchRange, 0);
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
 
-      this.queryString = Object.assign({}, this.defaultQueryString);
-      this.queryString.Status = [];
-      this.queryString.StudyName = [];
-      this.index = -1;
+      this.resetScheduleSearchForm();
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
+    },
+
+    async nextScheduleResultsPage() {
+      if (!this.hasNextScheduleResultsPage || !this.scheduleResultsMode) return;
+      this.store.setLoadingStatus(true);
+      try {
+        await this.loadScheduleResults(this.scheduleResultsMode, this.scheduleSearchOffset + this.scheduleSearchLimit);
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
+    },
+
+    async previousScheduleResultsPage() {
+      if (!this.hasPreviousScheduleResultsPage || !this.scheduleResultsMode) return;
+      this.store.setLoadingStatus(true);
+      try {
+        await this.loadScheduleResults(this.scheduleResultsMode, Math.max(0, this.scheduleSearchOffset - this.scheduleSearchLimit));
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
       setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
@@ -522,6 +585,31 @@ export default {
   },
 
   computed: {
+    currentScheduleResultStart() {
+      if (!this.scheduleSearchActive || this.Schedules.length === 0) return 0;
+      return this.scheduleSearchOffset + 1;
+    },
+    currentScheduleResultEnd() {
+      if (!this.scheduleSearchActive || this.Schedules.length === 0) return 0;
+      return this.scheduleSearchOffset + this.Schedules.length;
+    },
+    currentScheduleResultsPage() {
+      if (!this.scheduleSearchActive) return 0;
+      return Math.floor(this.scheduleSearchOffset / this.scheduleSearchLimit) + 1;
+    },
+    totalScheduleResultPages() {
+      if (!this.scheduleSearchActive) return 0;
+      return Math.ceil(this.scheduleSearchTotal / this.scheduleSearchLimit);
+    },
+    hasPreviousScheduleResultsPage() {
+      return this.scheduleSearchActive && this.scheduleSearchOffset > 0;
+    },
+    hasNextScheduleResultsPage() {
+      return this.scheduleSearchActive && this.currentScheduleResultEnd < this.scheduleSearchTotal;
+    },
+    showScheduleRefineHint() {
+      return this.scheduleSearchActive && this.scheduleSearchTotal > 300;
+    },
     isSearchDisabled() {
       const q = this.queryString;
       return !(
@@ -535,6 +623,7 @@ export default {
   watch: {
     training() {
       this.Schedules = [];
+      this.resetScheduleSearchState();
     },
   },
 };

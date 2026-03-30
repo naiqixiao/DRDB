@@ -1,4 +1,26 @@
-### Release v3.0.0
+### Release v3.0.1
+
+This release focuses on search reliability and backend stability. We added true pagination with total counts to large search flows, made eligible-child ordering fairer and consistent, and reduced backend memory spikes in nightly jobs and reminder processing.
+
+#### New Features
+* **True Search Pagination:** Family, follow-up, appointment, and eligible-child searches now show real totals and page ranges instead of silently stopping at the first 100 records.
+* **Eligible Child Rotation:** The Schedule page now uses a deterministic daily ordering for eligible children so the list rotates fairly while staying consistent for everyone on the same day.
+* **Large Result Warnings:** Search screens now warn you when a result set is very large and suggest refining filters.
+
+#### Scheduling
+* **Appointment Search Pages:** Appointment search, quick date-range shortcuts, and follow-up results now support paging through the full result set.
+* **Eligible Child Search:** The Schedule page now pages through eligible children across the full result pool instead of only showing the first batch.
+* **Stable Family Ordering:** Family search results are now ordered consistently by newest family first so records do not jump between pages.
+
+#### Design
+* **Search Status Hints:** The Family and Schedule pages now display clearer result counts and ordering hints so users know what they are looking at.
+
+#### Architecture
+* **Batch Processing:** Reminder and nightly cleanup jobs now process records in smaller batches and use lighter queries to reduce memory pressure.
+* **Bulk Updates:** Automated completion, rejection, and family-release jobs now update records in groups instead of loading full objects one at a time.
+* **Search Hardening:** Several large backend search endpoints now paginate at the API level to avoid unbounded result loads.
+
+### Release v3.0.1
 
 DRDB v3 is a complete rewrite. We migrated the frontend to Vue 3 and built a new component library to fix the inconsistent UI issues from v2.
 

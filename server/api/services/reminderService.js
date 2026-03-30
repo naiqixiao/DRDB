@@ -16,6 +16,57 @@ function getStudyWhereFilter(labId) {
   return { FK_Lab: labId };
 }
 
+const REMINDER_BATCH_SIZE = 200;
+
+async function fetchSchedulesInBatches({ where, include, order = [["id", "ASC"]] }) {
+  const schedules = [];
+  let offset = 0;
+
+  while (true) {
+    const batch = await model.schedule.findAll({
+      attributes: ["id", "AppointmentTime", "Status", "updatedAt"],
+      where,
+      include,
+      order,
+      limit: REMINDER_BATCH_SIZE,
+      offset,
+    });
+
+    if (batch.length === 0) {
+      break;
+    }
+
+    schedules.push(...batch);
+
+    if (batch.length < REMINDER_BATCH_SIZE) {
+      break;
+    }
+
+    offset += REMINDER_BATCH_SIZE;
+  }
+
+  return schedules;
+}
+
+async function fetchPersonnelInBatches({ where, include, order = [["id", "ASC"]] }) {
+  const results = [];
+  let offset = 0;
+  while (true) {
+    const batch = await model.personnel.findAll({
+      where,
+      include,
+      order,
+      limit: REMINDER_BATCH_SIZE,
+      offset,
+    });
+    if (batch.length === 0) break;
+    results.push(...batch);
+    if (batch.length < REMINDER_BATCH_SIZE) break;
+    offset += REMINDER_BATCH_SIZE;
+  }
+  return results;
+}
+
 /**
  * Get schedules for auto-completion reminders.
  * Returns a list grouped by primary experimenter:
@@ -39,36 +90,28 @@ async function getCompletionReminderData(labId) {
     },
   };
 
-  const schedules = await model.schedule.findAll({
+  const schedules = await fetchSchedulesInBatches({
     where: queryString,
     include: [
       {
         model: model.appointment,
+        required: true,
+        attributes: ["id", "FK_Study"],
         include: [
           {
             model: model.study,
             where: studyWhere,
+            required: true,
+            attributes: ["id", "StudyName", "FK_Lab"],
             include: [
-              { model: model.lab },
-              {
-                model: model.personnel,
-                as: "Experimenters",
-                through: { model: model.experimenter },
-              },
+              { model: model.lab, attributes: ["id", "LabName", "Email"] },
             ],
           },
           {
             model: model.personnel,
             as: "PrimaryExperimenter",
             through: { model: model.experimenterAssignment },
-            attributes: [
-              "id",
-              "Name",
-              "Email",
-              "Calendar",
-              "ZoomLink",
-              "Initial",
-            ],
+            attributes: ["id", "Name", "Email"],
           },
         ],
       },
@@ -76,64 +119,51 @@ async function getCompletionReminderData(labId) {
         model: model.family,
         attributes: ["id", "NamePrimary", "Email"],
       },
-      {
-        model: model.personnel,
-      },
     ],
   });
 
-  // Deduplicate primary experimenters
-  var primaryExperimenters = schedules.map((schedule) => ({
-    id: schedule.Appointments[0].PrimaryExperimenter[0].id,
-    Name: schedule.Appointments[0].PrimaryExperimenter[0].Name,
-    Email: schedule.Appointments[0].PrimaryExperimenter[0].Email,
-  }));
+  const completionByExperimenter = new Map();
 
-  primaryExperimenters = primaryExperimenters.filter(
-    (experimenter, index, self) =>
-      index ===
-      self.findIndex(
-        (e) =>
-          e.id === experimenter.id &&
-          e.Name === experimenter.Name &&
-          e.Email === experimenter.Email
-      )
-  );
+  schedules.forEach((schedule) => {
+    const appointment = schedule.Appointments && schedule.Appointments[0];
+    const study = appointment && appointment.Study;
+    const primary = appointment && appointment.PrimaryExperimenter && appointment.PrimaryExperimenter[0];
 
-  // Group schedules by primary experimenter
-  const autoCompletionList = primaryExperimenters.map((experimenter) => {
-    const reminderList = {
-      experimenterName: experimenter.Name,
-      experimenterEmail: experimenter.Email,
-      scheduleList: [],
-    };
+    if (!study || !primary || !study.Lab) {
+      console.warn(`Skipping schedule ${schedule.id}: missing study/experimenter data`);
+      return;
+    }
 
-    schedules.forEach((schedule) => {
-      if (
-        schedule.Appointments[0] &&
-        schedule.Appointments[0].PrimaryExperimenter[0] &&
-        schedule.Appointments[0].PrimaryExperimenter[0].id === experimenter.id
-      ) {
-        // Skip schedules with missing study data (orphaned records)
-        if (!schedule.Appointments[0].Study) {
-          console.warn(`Skipping schedule ${schedule.id}: missing study data`);
-          return;
-        }
-        reminderList.scheduleList.push({
-          id: schedule.id,
-          Email: schedule.Family.Email,
-          Name: schedule.Family.NamePrimary,
-          StudyName: schedule.Appointments[0].Study.StudyName,
-          AppointmentTime: schedule.AppointmentTime,
-          LabName: schedule.Appointments[0].Study.Lab.LabName,
-          LabEmail: schedule.Appointments[0].Study.Lab.Email,
-          LabID: schedule.Appointments[0].Study.Lab.id,
-        });
-      }
+    const key = String(primary.id);
+    if (!completionByExperimenter.has(key)) {
+      completionByExperimenter.set(key, {
+        id: primary.id,
+        experimenterName: primary.Name,
+        experimenterEmail: primary.Email,
+        scheduleList: [],
+      });
+    }
+
+    completionByExperimenter.get(key).scheduleList.push({
+      id: schedule.id,
+      Email: schedule.Family && schedule.Family.Email,
+      Name: schedule.Family && schedule.Family.NamePrimary,
+      StudyName: study.StudyName,
+      AppointmentTime: schedule.AppointmentTime,
+      LabName: study.Lab.LabName,
+      LabEmail: study.Lab.Email,
+      LabID: study.Lab.id,
     });
-
-    return reminderList;
   });
+
+  const autoCompletionList = Array.from(completionByExperimenter.values()).filter(
+    (entry) => entry.scheduleList.length > 0
+  );
+  const primaryExperimenters = autoCompletionList.map((entry) => ({
+    id: entry.id,
+    Name: entry.experimenterName,
+    Email: entry.experimenterEmail,
+  }));
 
   return { autoCompletionList, schedules, primaryExperimenters };
 }
@@ -162,35 +192,21 @@ async function getRejectionReminderData(labId) {
     },
   };
 
-  const schedules = await model.schedule.findAll({
+  const schedules = await fetchSchedulesInBatches({
     where: queryString,
     include: [
       {
         model: model.appointment,
+        required: true,
+        attributes: ["id", "FK_Study"],
         include: [
           {
             model: model.study,
             where: studyWhere,
+            required: true,
+            attributes: ["id", "StudyName", "FK_Lab"],
             include: [
-              { model: model.lab },
-              {
-                model: model.personnel,
-                as: "Experimenters",
-                through: { model: model.experimenter },
-              },
-            ],
-          },
-          {
-            model: model.personnel,
-            as: "PrimaryExperimenter",
-            through: { model: model.experimenterAssignment },
-            attributes: [
-              "id",
-              "Name",
-              "Email",
-              "Calendar",
-              "ZoomLink",
-              "Initial",
+              { model: model.lab, attributes: ["id", "LabName", "Email"] },
             ],
           },
         ],
@@ -201,60 +217,56 @@ async function getRejectionReminderData(labId) {
       },
       {
         model: model.personnel,
+        required: true,
+        attributes: ["id", "Name", "Email"],
       },
     ],
   });
 
-  // Deduplicate contact researchers
-  var contactResearchers = schedules.map((schedule) => ({
-    id: schedule.Personnel.id,
-    Name: schedule.Personnel.Name,
-    Email: schedule.Personnel.Email,
-  }));
+  const rejectionByResearcher = new Map();
 
-  contactResearchers = contactResearchers.filter(
-    (experimenter, index, self) =>
-      index ===
-      self.findIndex(
-        (e) =>
-          e.id === experimenter.id &&
-          e.Name === experimenter.Name &&
-          e.Email === experimenter.Email
-      )
-  );
+  schedules.forEach((schedule) => {
+    const researcher = schedule.Personnel;
+    const appointment = schedule.Appointments && schedule.Appointments[0];
+    const study = appointment && appointment.Study;
 
-  // Group schedules by contact researcher
-  const autoRejectionList = contactResearchers.map((researcher) => {
-    const reminderList = {
-      researcherName: researcher.Name,
-      researcherEmail: researcher.Email,
-      scheduleList: [],
-    };
+    if (!researcher || !study || !study.Lab) {
+      console.warn(`Skipping schedule ${schedule.id}: missing researcher/study data`);
+      return;
+    }
 
-    schedules.forEach((schedule) => {
-      if (schedule.Personnel.id === researcher.id) {
-        // Skip schedules with missing appointment or study data (orphaned records)
-        if (!schedule.Appointments || !schedule.Appointments[0] || !schedule.Appointments[0].Study) {
-          console.warn(`Skipping schedule ${schedule.id}: missing appointment or study data`);
-          return;
-        }
-        reminderList.scheduleList.push({
-          id: schedule.id,
-          Email: schedule.Family.Email,
-          Name: schedule.Family.NamePrimary,
-          AppointmentTime: schedule.AppointmentTime,
-          Status: schedule.Status,
-          StudyName: schedule.Appointments[0].Study.StudyName,
-          LabName: schedule.Appointments[0].Study.Lab.LabName,
-          LabEmail: schedule.Appointments[0].Study.Lab.Email,
-          LabID: schedule.Appointments[0].Study.Lab.id,
-          updatedAt: schedule.updatedAt,
-        });
-      }
+    const key = String(researcher.id);
+    if (!rejectionByResearcher.has(key)) {
+      rejectionByResearcher.set(key, {
+        id: researcher.id,
+        researcherName: researcher.Name,
+        researcherEmail: researcher.Email,
+        scheduleList: [],
+      });
+    }
+
+    rejectionByResearcher.get(key).scheduleList.push({
+      id: schedule.id,
+      Email: schedule.Family && schedule.Family.Email,
+      Name: schedule.Family && schedule.Family.NamePrimary,
+      AppointmentTime: schedule.AppointmentTime,
+      Status: schedule.Status,
+      StudyName: study.StudyName,
+      LabName: study.Lab.LabName,
+      LabEmail: study.Lab.Email,
+      LabID: study.Lab.id,
+      updatedAt: schedule.updatedAt,
     });
-
-    return reminderList;
   });
+
+  const autoRejectionList = Array.from(rejectionByResearcher.values()).filter(
+    (entry) => entry.scheduleList.length > 0
+  );
+  const contactResearchers = autoRejectionList.map((entry) => ({
+    id: entry.id,
+    Name: entry.researcherName,
+    Email: entry.researcherEmail,
+  }));
 
   return { autoRejectionList, schedules, contactResearchers };
 }
@@ -282,7 +294,7 @@ async function getFamilyReminderSchedules(labId) {
     "$Family.TrainingSet$": false,
   };
 
-  return model.schedule.findAll({
+  return fetchSchedulesInBatches({
     where: queryString,
     include: [
       {
@@ -338,6 +350,7 @@ async function getFamilyReminderSchedules(labId) {
       },
       {
         model: model.family,
+        required: true,
       },
       {
         model: model.personnel,
@@ -403,7 +416,7 @@ async function getExperimenterReminderData(labId) {
     ? { ...baseWhere, FK_Lab: labId }
     : baseWhere;
 
-  return model.personnel.findAll({
+  return fetchPersonnelInBatches({
     where,
     include: [
       model.lab,

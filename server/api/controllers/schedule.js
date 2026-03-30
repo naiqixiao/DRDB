@@ -4,6 +4,20 @@ const log = require("../controllers/log");
 const scheduleService = require("../services/scheduleService");
 const model = require("../models/DRDB");
 
+function parsePagination(query) {
+  const requestedLimit = Number.parseInt(query.limit, 10);
+  const requestedOffset = Number.parseInt(query.offset, 10);
+
+  const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+    ? Math.min(requestedLimit, 200)
+    : 100;
+  const offset = Number.isInteger(requestedOffset) && requestedOffset >= 0
+    ? requestedOffset
+    : 0;
+
+  return { limit, offset };
+}
+
 // Temporary wrapper to log exact errors!
 const asyncHandler = fn => (req, res, next) => {
   return Promise.resolve(fn(req, res, next)).catch(err => {
@@ -31,6 +45,7 @@ exports.update = asyncHandler(async (req, res) => {
 // ─── SEARCH ─────────────────────────────────────────────────────────────
 exports.search = asyncHandler(async (req, res) => {
   const queryString = { ...req.query };
+  const pagination = parsePagination(req.query);
   
   if (queryString.AppointmentTimeAfter && queryString.AppointmentTimeBefore) {
     queryString.AppointmentTime = {
@@ -47,6 +62,8 @@ exports.search = asyncHandler(async (req, res) => {
   delete queryString.AppointmentTimeBefore;
   delete queryString.AppointmentTimeAfter;
   delete queryString.trainingMode;
+  delete queryString.limit;
+  delete queryString.offset;
   
   if (queryString.Email) {
     queryString["$Family.Email$"] = { [Op.like]: `${queryString.Email}%` };
@@ -74,23 +91,24 @@ exports.search = asyncHandler(async (req, res) => {
   if (queryString.FamilyId) { queryString.FK_Family = queryString.FamilyId; }
   delete queryString.FamilyId;
 
-  const schedules = await scheduleService.searchSchedules(queryString);
-  res.status(200).send(schedules);
+  const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
+  res.status(200).send(result);
 });
 
 exports.today = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const queryString = {
     AppointmentTime: { [Op.between]: [moment().startOf("day").toDate(), moment().startOf("day").add(1, "days").toDate()] },
     "$Family.TrainingSet$": req.query.trainingMode === "true",
   };
   if (req.query.lab) queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   
-  const schedules = await scheduleService.searchSchedules(queryString);
-  res.status(200).send(schedules);
+  const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
+  res.status(200).send(result);
 });
 
 exports.tomorrow = asyncHandler(async (req, res) => {
-  const daysToAdd = moment().day() >= 5 ? 3 : 1; 
+  const pagination = parsePagination(req.query);
   const endDate = moment().day() >= 5 ? moment().add(1, "weeks").weekday(2).startOf("day").toDate() : moment().add(2, "days").startOf("day").toDate();
 
   const queryString = {
@@ -99,21 +117,23 @@ exports.tomorrow = asyncHandler(async (req, res) => {
   };
   if (req.query.lab) queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   
-  const schedules = await scheduleService.searchSchedules(queryString);
-  res.status(200).send(schedules);
+  const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
+  res.status(200).send(result);
 });
 
 exports.week = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const queryString = {
     AppointmentTime: { [Op.between]: [moment().weekday(0).startOf("day").toDate(), moment().weekday(7).startOf("day").toDate()] },
     "$Family.TrainingSet$": req.query.trainingMode === "true",
   };
   if (req.query.lab) queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
-  const schedules = await scheduleService.searchSchedules(queryString);
-  res.status(200).send(schedules);
+  const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
+  res.status(200).send(result);
 });
 
 exports.searchFollowUps = asyncHandler(async (req, res) => {
+  const pagination = parsePagination(req.query);
   const queryString = {
     "$Family.NextContactDate$": { [Op.or]: [{ [Op.lte]: moment().startOf("day").toDate() }, { [Op.eq]: null }] },
     "$Family.NoMoreContact$": 0,
@@ -122,8 +142,8 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
     "$Family.AssignedLab$": req.query.lab
   };
   if (req.query.lab) queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
-  const schedules = await scheduleService.searchSchedules(queryString);
-  res.status(200).send(schedules);
+  const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
+  res.status(200).send(result);
 });
 
 exports.upcoming = asyncHandler(async (req, res) => {
@@ -193,7 +213,10 @@ exports.delete = asyncHandler(async (req, res) => {
 });
 
 exports.special = asyncHandler(async (req, res) => {
-  const schedules = await scheduleService.searchSchedules({ "$Appointments.Study.FK_Lab$": 2 });
+  const schedules = await scheduleService.searchSchedules(
+    { "$Appointments.Study.FK_Lab$": 2 },
+    { disablePagination: true }
+  );
   
   for (const schedule of schedules) {
     for (const appointment of schedule.Appointments) {

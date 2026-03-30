@@ -52,6 +52,23 @@
           </v-col>
         </v-row>
 
+        <div v-if="showEligibleChildSearchPagination" class="d-flex align-center justify-end flex-wrap mb-2" style="gap: 8px;">
+          <v-chip size="small" variant="tonal" color="primary">
+            Showing {{ currentEligibleChildResultStart }}-{{ currentEligibleChildResultEnd }} of {{ eligibleChildSearchTotal }}
+          </v-chip>
+          <v-chip size="small" variant="outlined" color="primary">
+            Page {{ currentEligibleChildResultsPage }} / {{ totalEligibleChildResultPages }}
+          </v-chip>
+          <v-btn icon="mdi-page-first" variant="text" density="comfortable" @click="previousEligibleChildResultsPage"
+            :disabled="!hasPreviousEligibleChildResultsPage"></v-btn>
+          <v-btn icon="mdi-page-next" variant="text" density="comfortable" @click="nextEligibleChildResultsPage"
+            :disabled="!hasNextEligibleChildResultsPage"></v-btn>
+        </div>
+
+        <v-alert v-if="showEligibleChildRefineHint" type="warning" variant="tonal" density="compact" border="start" class="mb-2">
+          This search returned {{ eligibleChildSearchTotal }} eligible children. Refine the study filters if you need a narrower result set.
+        </v-alert>
+
         <v-spacer></v-spacer>
 
         <v-card class="ds-card d-flex flex-column flex-grow-1" variant="flat" style="position: relative; overflow: hidden;">
@@ -669,6 +686,11 @@ export default {
       Children: [],
       pages: 0,
       page: 0,
+      eligibleChildSearchLimit: 100,
+      eligibleChildSearchOffset: 0,
+      eligibleChildSearchTotal: 0,
+      eligibleChildSearchActive: false,
+      lastEligibleChildQuery: null,
       scheduleButtonIcon: "mdi-calendar",
       scheduleButtonTooltip: "",
       currentSchedule: {},
@@ -712,6 +734,42 @@ export default {
   },
 
   computed: {
+    showEligibleChildSearchPagination() {
+      return this.eligibleChildSearchActive && this.eligibleChildSearchTotal > 0;
+    },
+
+    currentEligibleChildResultStart() {
+      if (!this.showEligibleChildSearchPagination || this.Children.length === 0) return 0;
+      return this.eligibleChildSearchOffset + 1;
+    },
+
+    currentEligibleChildResultEnd() {
+      if (!this.showEligibleChildSearchPagination || this.Children.length === 0) return 0;
+      return this.eligibleChildSearchOffset + this.Children.length;
+    },
+
+    currentEligibleChildResultsPage() {
+      if (!this.showEligibleChildSearchPagination) return 0;
+      return Math.floor(this.eligibleChildSearchOffset / this.eligibleChildSearchLimit) + 1;
+    },
+
+    totalEligibleChildResultPages() {
+      if (!this.showEligibleChildSearchPagination) return 0;
+      return Math.ceil(this.eligibleChildSearchTotal / this.eligibleChildSearchLimit);
+    },
+
+    hasPreviousEligibleChildResultsPage() {
+      return this.showEligibleChildSearchPagination && this.eligibleChildSearchOffset > 0;
+    },
+
+    hasNextEligibleChildResultsPage() {
+      return this.showEligibleChildSearchPagination && this.currentEligibleChildResultEnd < this.eligibleChildSearchTotal;
+    },
+
+    showEligibleChildRefineHint() {
+      return this.showEligibleChildSearchPagination && this.eligibleChildSearchTotal > 300;
+    },
+
     currentFamily() {
       if (this.currentChild) {
         return this.currentChild.Family || {};
@@ -892,13 +950,77 @@ export default {
       this.searchChild();
     },
 
-    async searchChild() {
-      this.store.setLoadingStatus(true);
+    resetEligibleChildSearchState() {
+      this.eligibleChildSearchLimit = 100;
+      this.eligibleChildSearchOffset = 0;
+      this.eligibleChildSearchTotal = 0;
+      this.eligibleChildSearchActive = false;
+      this.lastEligibleChildQuery = null;
+    },
 
-      if (!this.currentChild.scheduled && this.currentChild.FK_Family) {
+    async releaseCurrentChildVisitLock() {
+      if (!this.currentChild.scheduled && !this.contactedByOthers && this.currentChild.FK_Family) {
         const results = await RTU.remove(this.currentChild.FK_Family);
         this.currentVisitedFamilies = results.data;
       }
+    },
+
+    async activateCurrentChild(targetChild, options = {}) {
+      const { showReminder = false } = options;
+
+      this.page = 1;
+      this.currentChild = targetChild;
+      this.response = null;
+
+      await this.loadFullChild(this.currentChild);
+
+      if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
+        this.currentChild.scheduled = true;
+        this.contactedByOthers = true;
+      } else {
+        const results = await RTU.add(this.currentChild.FK_Family);
+        this.currentVisitedFamilies = results.data;
+        this.contactedByOthers = false;
+      }
+
+      if (showReminder) {
+        await this.$refs.confirmD.open('Reminder', 'Make sure to confirm with parents about their email address and child\'s information.<br><br>Use the <b>Edit Info</b> button to update family and/or child information.<br><br>Your little effort will benefit everyone in the future!<br><br>Thanks! :)', { color: 'primary', noconfirm: true });
+      }
+    },
+
+    async loadEligibleChildPage(offset = 0, options = {}) {
+      const { showReminder = false } = options;
+      const result = await child.search({
+        ...this.lastEligibleChildQuery,
+        limit: this.eligibleChildSearchLimit,
+        offset,
+      });
+
+      const payload = result.data || {};
+      const eligibleChildren = payload.children || [];
+      const pagination = payload.pagination || {};
+
+      this.eligibleChildSearchLimit = pagination.limit || this.eligibleChildSearchLimit;
+      this.eligibleChildSearchOffset = pagination.offset || 0;
+      this.eligibleChildSearchTotal = pagination.total || 0;
+      this.eligibleChildSearchActive = true;
+
+      if (eligibleChildren.length > 0) {
+        this.Children = eligibleChildren;
+        await this.activateCurrentChild(this.Children[0], { showReminder });
+      } else {
+        await this.$refs.confirmD.open('No Results', 'No child is eligible for the selected study. :(', { color: 'warning', noconfirm: true });
+        this.page = 0;
+        this.Children = [];
+        this.currentChild = Object.assign({}, this.defaultItem);
+        this.contactedByOthers = false;
+      }
+    },
+
+    async searchChild() {
+      this.store.setLoadingStatus(true);
+
+      await this.releaseCurrentChildVisitLock();
 
       // Compute age range: use actively selected group or overall min/max across all groups
       const groups = this.selectedStudy.AgeGroups || [];
@@ -928,6 +1050,9 @@ export default {
         studyID: this.selectedStudy.id,
         trainingMode: this.store.trainingMode,
         slim: true,  // fetch minimal data for the list; full data loaded on selection
+        eligibilityAgeGroups: JSON.stringify(this.activeAgeGroup ? [this.activeAgeGroup] : (this.selectedStudy.AgeGroups || [])),
+        prerequisiteStudyIds: JSON.stringify((this.selectedStudy.Prerequisites || []).map((study) => study.id)),
+        exclusionStudyIds: JSON.stringify((this.selectedStudy.Exclusions || []).map((study) => study.id)),
       };
 
       if (this.selectedStudy.ASDParticipant === "Exclude") queryString.ASDParticipant = 0;
@@ -946,66 +1071,37 @@ export default {
       else if (this.selectedStudy.HearingLossParticipant === "Only") queryString.HearingLossParticipant = 1;
 
       try {
-        let eligible = (await child.search(queryString)).data || [];
-
-        // Client-side strict filter: age gaps + prerequisites + exclusions
-        eligible = eligible.filter(c => {
-          // 1. Strict Age Group check (fixes "age gap" bug where backend returns 10m for 6-8m OR 12-14m study)
-          if (!c.DoB) return false;
-          const ageInDays = Math.floor((new Date() - new Date(c.DoB)) / (24 * 3600 * 1000));
-
-          let ageEligible = true;
-          if (this.selectedStudy.AgeGroups && this.selectedStudy.AgeGroups.length > 0) {
-            if (this.activeAgeGroup) {
-              ageEligible = ageInDays >= this.activeAgeGroup.MinAge * 30.5 - 1 &&
-                            ageInDays <= this.activeAgeGroup.MaxAge * 30.5 - 1;
-            } else {
-              ageEligible = this.selectedStudy.AgeGroups.some(group =>
-                ageInDays >= group.MinAge * 30.5 - 1 && ageInDays <= group.MaxAge * 30.5 - 1
-              );
-            }
-          }
-          if (!ageEligible) return false;
-
-          // 2. Prerequisite / Exclusion check
-          const pastIds = (c.Appointments || []).map(a => a.FK_Study);
-          const prereqs = this.selectedStudy.Prerequisites || [];
-          const exclusions = this.selectedStudy.Exclusions || [];
-          if (prereqs.length > 0 && !prereqs.every(p => pastIds.includes(p.id))) return false;
-          if (exclusions.length > 0 && exclusions.some(e => pastIds.includes(e.id))) return false;
-
-          return true;
-        });
-
-        const Results = { data: eligible };
-
-        if (Results.data && Results.data.length > 0) {
-          this.page = 1;
-          this.Children = Results.data;
-          this.currentChild = this.Children[0];
-
-          // Lazy-load full family data for the first child
-          await this.loadFullChild(this.currentChild);
-
-          if (this.currentVisitedFamilies.includes(this.currentChild.FK_Family)) {
-            this.currentChild.scheduled = true;
-          } else {
-            const results = await RTU.add(this.currentChild.FK_Family);
-            this.currentVisitedFamilies = results.data;
-          }
-
-          await this.$refs.confirmD.open('Reminder', 'Make sure to confirm with parents about their email address and child\'s information.<br><br>Use the <b>Edit Info</b> button to update family and/or child information.<br><br>Your little effort will benefit everyone in the future!<br><br>Thanks! :)', { color: 'primary', noconfirm: true });
-        } else {
-          await this.$refs.confirmD.open('No Results', 'No child is eligible for the selected study. :(', { color: 'warning', noconfirm: true });
-          this.page = 0;
-          this.Children = [];
-          this.currentChild = Object.assign({}, this.defaultItem);
-        }
+        this.lastEligibleChildQuery = queryString;
+        await this.loadEligibleChildPage(0, { showReminder: true });
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
 
       this.response = null;
+      setTimeout(() => this.store.setLoadingStatus(false), 500);
+    },
+
+    async nextEligibleChildResultsPage() {
+      if (!this.hasNextEligibleChildResultsPage) return;
+      this.store.setLoadingStatus(true);
+      await this.releaseCurrentChildVisitLock();
+      try {
+        await this.loadEligibleChildPage(this.eligibleChildSearchOffset + this.eligibleChildSearchLimit);
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
+      setTimeout(() => this.store.setLoadingStatus(false), 500);
+    },
+
+    async previousEligibleChildResultsPage() {
+      if (!this.hasPreviousEligibleChildResultsPage) return;
+      this.store.setLoadingStatus(true);
+      await this.releaseCurrentChildVisitLock();
+      try {
+        await this.loadEligibleChildPage(Math.max(0, this.eligibleChildSearchOffset - this.eligibleChildSearchLimit));
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
       setTimeout(() => this.store.setLoadingStatus(false), 500);
     },
 
@@ -1398,6 +1494,7 @@ export default {
       this.editedIndex = -1;
       this.Children = [];
       this.page = 0;
+      this.resetEligibleChildSearchState();
     },
     response(val) {
       switch (val) {

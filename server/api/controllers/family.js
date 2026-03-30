@@ -43,6 +43,20 @@ function containsObject(obj, array) {
   return false;
 }
 
+function parsePagination(query) {
+  const requestedLimit = Number.parseInt(query.limit, 10);
+  const requestedOffset = Number.parseInt(query.offset, 10);
+
+  const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+    ? Math.min(requestedLimit, 200)
+    : 100;
+  const offset = Number.isInteger(requestedOffset) && requestedOffset >= 0
+    ? requestedOffset
+    : 0;
+
+  return { limit, offset };
+}
+
 // Create and Save a new family
 
 //   {
@@ -174,6 +188,7 @@ exports.batchCreate0 = asyncHandler(async (req, res) => {
 // Retrieve all families from the database.
 exports.search = asyncHandler(async (req, res) => {
   var queryString = {};
+  const { limit, offset } = parsePagination(req.query);
 
   if (req.query.trainingMode === "true") {
     queryString.TrainingSet = true;
@@ -226,6 +241,8 @@ exports.search = asyncHandler(async (req, res) => {
 
   if (req.query.childName) {
     const children = await model.child.findAll({
+      attributes: ["FK_Family"],
+      raw: true,
       where: {
         Name: {
           [Op.like]: `${req.query.childName}%`,
@@ -233,16 +250,31 @@ exports.search = asyncHandler(async (req, res) => {
       },
     });
 
-    var familyIDs = [];
-    children.forEach((child) => {
-      familyIDs.push(child.FK_Family);
-    });
+    const familyIDs = [...new Set(children.map((child) => child.FK_Family).filter(Boolean))];
 
-    queryString.id = familyIDs;
+    queryString.id = { [Op.in]: familyIDs.length > 0 ? familyIDs : [-1] };
   }
 
+  const searchableFamiliesWhere = {
+    ...queryString,
+    NoMoreContact: { [Op.ne]: 1 },
+  };
+
+  const [total, removedFamiliesCount] = await Promise.all([
+    model.family.count({ where: searchableFamiliesWhere }),
+    model.family.count({
+      where: {
+        ...queryString,
+        NoMoreContact: 1,
+      },
+    }),
+  ]);
+
   var families = await model.family.findAll({
-    where: queryString,
+    where: searchableFamiliesWhere,
+    limit,
+    offset,
+    order: [["id", "DESC"]],
     include: [
       { model: model.conversations, separate: true },
       familyService.childInclude(),
@@ -250,36 +282,34 @@ exports.search = asyncHandler(async (req, res) => {
     ],
   });
 
-  // remove families who requested "No more contact."
-  var nOfRemoval = 0;
-  families.forEach((family) => {
-    if (family.NoMoreContact === 1) {
-      var i = families.indexOf(family);
-      families.splice(i, 1);
-
-      nOfRemoval += 1;
-    }
-  });
-
   var message = "";
 
   if (families.length < 1) {
-    if (nOfRemoval > 0) {
+    if (removedFamiliesCount > 0) {
       message = "The family was removed from database upon parents' request.";
     } else {
       message = "Oops, we can't find the family you're looking for.";
     }
-  } else {
-    shuffle(families);
   }
 
-  res.status(200).send({ families: families, message: message });
+  res.status(200).send({
+    families: families,
+    message: message,
+    pagination: {
+      limit,
+      offset,
+      total,
+      hasMore: offset + families.length < total,
+    },
+  });
   // console.log("Search successful!");
 });
 
 // Retrieve all families from the database.
 exports.followupSearch = asyncHandler(async (req, res) => {
   var queryString = {};
+  const { limit, offset } = parsePagination(req.query);
+  const followupStatuses = ["TBD", "Rescheduling", "No Show"];
 
   if (req.query.trainingMode === "true") {
     queryString.TrainingSet = true;
@@ -305,11 +335,34 @@ exports.followupSearch = asyncHandler(async (req, res) => {
   queryString.NoMoreContact = 0;
 
   queryString["$Schedules.Status$"] = {
-    [Op.in]: ["TBD", "Rescheduling", "No Show"],
+    [Op.in]: followupStatuses,
   };
+
+  const countWhere = { ...queryString };
+  delete countWhere["$Schedules.Status$"];
+
+  const total = await model.family.count({
+    where: countWhere,
+    include: [
+      {
+        model: model.schedule,
+        required: true,
+        attributes: [],
+        where: {
+          Status: {
+            [Op.in]: followupStatuses,
+          },
+        },
+      },
+    ],
+    distinct: true,
+    col: "id",
+  });
 
   const families = await model.family.findAll({
     where: queryString,
+    limit,
+    offset,
     include: [
       { model: model.conversations, separate: true },
       familyService.childInclude(),
@@ -321,9 +374,16 @@ exports.followupSearch = asyncHandler(async (req, res) => {
     order: [[{ model: model.schedule }, 'id', 'DESC']],
   });
 
-  shuffle(families);
-
-  res.status(200).send(families);
+  res.status(200).send({
+    families,
+    message: families.length < 1 ? "No family needs to be followed up." : "",
+    pagination: {
+      limit,
+      offset,
+      total,
+      hasMore: offset + families.length < total,
+    },
+  });
   console.log("Search successful!");
 });
 
@@ -367,7 +427,6 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
   var IDs = [];
 
   queryString.Completed = 1;
-  queryString["$Family.AssignedLab$"] = { [Op.ne]: null };
 
   // 2. The families have been contacted within the past 2 weeks, yet the appointment is tentative. These appointments are regarded as onGoing.
   var queryString2 = {};
@@ -388,35 +447,43 @@ exports.releaseFamilyNew = asyncHandler(async (req, res) => {
 
   try {
     const schedules = await model.schedule.findAll({
+      attributes: ["FK_Family"],
+      raw: true,
       where: queryString,
-      include: [{ model: model.family }],
+      include: [
+        {
+          model: model.family,
+          required: true,
+          attributes: [],
+          where: {
+            AssignedLab: { [Op.ne]: null },
+          },
+        },
+      ],
     });
 
-    // release the families.
-    IDs = schedules.map((schedule) => {
-      // return {familyID: schedule.FK_Family,
-      // labID: schedule.Appointments[0].Study.FK_Lab};
-      return schedule.FK_Family
-    });
-
-    IDs = Array.from(new Set(IDs)); // unique IDs
+    const completedFamilyIds = new Set(
+      schedules
+        .map((schedule) => schedule.FK_Family)
+        .filter((id) => id !== null && id !== undefined)
+    );
 
     const schedulesOnGoing = await model.schedule.findAll({
+      attributes: ["FK_Family"],
+      raw: true,
       where: queryString2,
     });
 
-    // remove the families with onGoing study appointments from the family list
-    if (schedulesOnGoing.length > 0) {
-      var IDsOnGoing = schedulesOnGoing.map((schedule) => {
-        return schedule.FK_Family;
-      });
+    const ongoingFamilyIds = new Set(
+      schedulesOnGoing
+        .map((schedule) => schedule.FK_Family)
+        .filter((id) => id !== null && id !== undefined)
+    );
 
-      IDsOnGoing = Array.from(new Set(IDsOnGoing)); // unique IDs
-
-      // remove the families with onGoing study appointments from the list of families completed studies.
-      IDs = IDs.filter((id) => !IDsOnGoing.includes(id));
-
-    }
+    // remove families with on-going appointments from releasable completed families.
+    IDs = Array.from(completedFamilyIds).filter(
+      (id) => !ongoingFamilyIds.has(id)
+    );
 
     if (IDs.length > 0) {
       // update family by removing AssignedLab from the family

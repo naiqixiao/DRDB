@@ -27,40 +27,45 @@ exports.autoCancellation = asyncHandler(async (req, res) => {
 
   try {
     const schedules = await model.schedule.findAll({
+      attributes: ["id", "FK_Family"],
+      raw: true,
       where: queryString,
-      include: [{ model: model.family }],
     });
 
-    schedules.forEach(async (schedule) => {
+    const scheduleIds = schedules.map((schedule) => schedule.id);
+    if (scheduleIds.length > 0) {
       await model.schedule.update(
         {
           Status: "Rejected",
           Completed: true,
         },
-        { where: { id: schedule.id } }
+        { where: { id: { [Op.in]: scheduleIds } } }
       );
 
       await log.createLog(
         "Auto cancellation",
         User,
-        "marked a schedule(" +
-          schedule.id +
-          ") as Rejected, due to the lack of update for two weeks."
+        "marked " +
+          scheduleIds.length +
+          " schedules as Rejected due to lack of update for two weeks."
       );
-    });
+    }
 
     // release the families.
-    IDs = schedules.map((schedule) => {
-      return schedule.FK_Family;
-    });
-    IDs = Array.from(new Set(IDs)); // unique IDs
+    const familyIds = Array.from(
+      new Set(
+        schedules
+          .map((schedule) => schedule.FK_Family)
+          .filter((id) => id !== null && id !== undefined)
+      )
+    );
 
-    if (IDs.length > 0) {
+    if (familyIds.length > 0) {
       // update family by removing AssignedLab from the family
       const updateFamilyInfo = { AssignedLab: null };
 
       await model.family.update(updateFamilyInfo, {
-        where: { id: IDs },
+        where: { id: familyIds },
       });
 
       // Log
@@ -68,7 +73,7 @@ exports.autoCancellation = asyncHandler(async (req, res) => {
         "Family Lab Assisgnment Release",
         {},
         "Families (" +
-          IDs.join(", ") +
+          familyIds.join(", ") +
           ") were no longer assigned to any lab due to auto cancellation."
       );
     }
@@ -100,26 +105,28 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
 
   try {
     const schedules1 = await model.schedule.findAll({
+      attributes: ["id"],
+      raw: true,
       where: queryString,
-      include: [{ model: model.family }],
     });
 
-    schedules1.forEach(async (schedule) => {
+    const schedule1Ids = schedules1.map((schedule) => schedule.id);
+    if (schedule1Ids.length > 0) {
       await model.schedule.update(
         {
           Completed: 1,
         },
-        { where: { id: schedule.id } }
+        { where: { id: { [Op.in]: schedule1Ids } } }
       );
 
       await log.createLog(
         "Auto Completion",
         {},
-        "marked a schedule(" +
-          schedule.id +
-          ") as Completed, due to its completion."
+        "marked " +
+          schedule1Ids.length +
+          " schedules as Completed due to elapsed appointment time."
       );
-    });
+    }
 
     // 2. search for appointments with **Tentative** status, if the last contacted date was 2 weeks ago, mark them as rejected, and completed.
     queryString = {};
@@ -135,27 +142,29 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
     };
 
     const schedules2 = await model.schedule.findAll({
+      attributes: ["id"],
+      raw: true,
       where: queryString,
-      include: [{ model: model.family }],
     });
 
-    schedules2.forEach(async (schedule) => {
+    const schedule2Ids = schedules2.map((schedule) => schedule.id);
+    if (schedule2Ids.length > 0) {
       await model.schedule.update(
         {
           Status: "Rejected",
           Completed: true,
         },
-        { where: { id: schedule.id } }
+        { where: { id: { [Op.in]: schedule2Ids } } }
       );
 
       await log.createLog(
         "Auto Completion",
         {},
-        "marked a schedule(" +
-          schedule.id +
-          ") as Rejected, due to the lack of update for two weeks. The schedule was marked as Completed."
+        "marked " +
+          schedule2Ids.length +
+          " stale schedules as Rejected and Completed."
       );
-    });
+    }
 
     // 3. search for appointments with **Rejected** status, mark them as completed.
     queryString = {};
@@ -163,30 +172,39 @@ exports.autoCompletion = asyncHandler(async (req, res) => {
     queryString.Completed = false;
 
     const schedules3 = await model.schedule.findAll({
+      attributes: ["id"],
+      raw: true,
       where: queryString,
-      include: [{ model: model.family }],
     });
 
-    schedules3.forEach(async (schedule) => {
+    const schedule3Ids = schedules3.map((schedule) => schedule.id);
+    if (schedule3Ids.length > 0) {
       await model.schedule.update(
         {
           Completed: true,
         },
-        { where: { id: schedule.id } }
+        { where: { id: { [Op.in]: schedule3Ids } } }
       );
 
       await log.createLog(
         "Auto Completion",
         {},
-        "marked a schedule(" + schedule.id + ") as Completed due to rejection."
+        "marked " +
+          schedule3Ids.length +
+          " rejected schedules as Completed."
       );
-    });
+    }
 
     if (res) {
       res.status(200).send({
-        schedule1: schedules1,
-        schedule2: schedules2,
-        schedule3: schedules3,
+        schedule1: schedule1Ids,
+        schedule2: schedule2Ids,
+        schedule3: schedule3Ids,
+        counts: {
+          schedule1: schedule1Ids.length,
+          schedule2: schedule2Ids.length,
+          schedule3: schedule3Ids.length,
+        },
       });
     }
   } catch (error) {

@@ -45,12 +45,33 @@
         <div class="d-flex align-center bg-grey-lighten-4 rounded px-2 py-1">
           <v-btn icon="mdi-chevron-left" variant="text" density="comfortable" @click="previousPage"
             :disabled="page <= 1"></v-btn>
-          <span class="text-body-2 font-weight-bold mx-3">{{ page }} / {{ Families ? Families.length : 0 }}</span>
+          <span class="text-body-2 font-weight-bold mx-3">Family {{ page }} / {{ Families ? Families.length : 0 }}</span>
           <v-btn icon="mdi-chevron-right" variant="text" density="comfortable" @click="nextPage"
             :disabled="page >= Families.length || page == 0"></v-btn>
         </div>
 
+        <div v-if="showFamilySearchPagination" class="d-flex align-center bg-blue-lighten-5 rounded px-2 py-1 ml-2">
+          <v-btn icon="mdi-page-first" variant="text" density="comfortable" @click="previousSearchResultsPage"
+            :disabled="!hasPreviousSearchResultsPage"></v-btn>
+          <span class="text-body-2 font-weight-bold mx-3">
+            Showing {{ currentSearchResultStart }}-{{ currentSearchResultEnd }} of {{ familySearchTotal }}
+          </span>
+          <span class="text-caption text-medium-emphasis mr-2">
+            Page {{ currentSearchResultsPage }} / {{ totalFamilySearchPages }}
+          </span>
+          <v-btn icon="mdi-page-next" variant="text" density="comfortable" @click="nextSearchResultsPage"
+            :disabled="!hasNextSearchResultsPage"></v-btn>
+        </div>
+
       </v-toolbar>
+
+      <div v-if="showFamilySearchPagination" class="px-4 pb-2 text-caption text-medium-emphasis">
+        Results are sorted by newest family first.
+      </div>
+
+      <v-alert v-if="showFamilySearchRefineHint" type="warning" variant="tonal" density="compact" border="start" class="mx-4 mb-3">
+        This search returned {{ familySearchTotal }} families. Refine the search filters if you need a narrower result set.
+      </v-alert>
     </v-card>
 
     <v-row justify="space-around" class="mt-4">
@@ -733,6 +754,11 @@ export default {
       selectedMasterChildIds: [], // per-pair selection (array indexed by pair)
       queryString: {},
       page: 0,
+      familySearchLimit: 100,
+      familySearchOffset: 0,
+      familySearchTotal: 0,
+      familySearchActive: false,
+      familySearchMode: null,
       searchStatus: false,
       searchDialog: false,
       detailsDialog: false,
@@ -986,16 +1012,98 @@ export default {
       }
     },
 
-    searchMode() {
-      this.searchDialog = true;
+    resetFamilySearchPagination() {
+      this.familySearchLimit = 100;
+      this.familySearchOffset = 0;
+      this.familySearchTotal = 0;
+      this.familySearchActive = false;
+      this.familySearchMode = null;
+    },
+
+    resetCurrentFamily() {
       this.currentFamily = Object.assign({}, this.familyTemplate);
       this.currentFamily.Children = [];
       this.currentFamily.Schedules = [];
       this.currentFamily.Conversations = [];
+      this.currentFamily.Email = "";
+      this.currentFamily.Phone = "";
+      this.currentFamily.CellPhone = "";
+      this.currentFamily.id = "";
+      this.familyNotes = "";
+    },
+
+    setCurrentFamilyByPage(pageNumber) {
+      this.page = pageNumber;
+      this.currentFamily = this.Families[this.page - 1];
+      this.familyNotes = this.currentFamily?.Note || "";
+    },
+
+    async loadFamilySearchPage(offset = 0) {
+      const Results = await family.search({
+        ...this.queryString,
+        trainingMode: this.store.trainingMode,
+        limit: this.familySearchLimit,
+        offset,
+      });
+
+      const families = Results.data.families || [];
+      const pagination = Results.data.pagination || {};
+
+      this.familySearchLimit = pagination.limit || this.familySearchLimit;
+      this.familySearchOffset = pagination.offset || 0;
+      this.familySearchTotal = pagination.total || 0;
+      this.familySearchActive = true;
+      this.familySearchMode = "search";
+
+      if (families.length > 0) {
+        this.Families = families;
+        this.setCurrentFamilyByPage(1);
+      } else {
+        this.page = 0;
+        this.Families = [];
+        this.resetCurrentFamily();
+        this.$refs.confirmD.open('No Results', Results.data.message || 'No families found.', { color: 'warning', noconfirm: true });
+      }
+
+      this.searchDialog = false;
+      this.searchStatus = false;
+    },
+
+    async loadFamilyFollowupPage(offset = 0) {
+      const Results = await family.followupSearch({
+        AssignedLab: this.store.lab,
+        trainingMode: this.store.trainingMode,
+        limit: this.familySearchLimit,
+        offset,
+      });
+
+      const families = Results.data.families || [];
+      const pagination = Results.data.pagination || {};
+
+      this.familySearchLimit = pagination.limit || this.familySearchLimit;
+      this.familySearchOffset = pagination.offset || 0;
+      this.familySearchTotal = pagination.total || 0;
+      this.familySearchActive = true;
+      this.familySearchMode = "followup";
+
+      if (families.length > 0) {
+        this.Families = families;
+        this.setCurrentFamilyByPage(1);
+      } else {
+        this.page = 0;
+        this.Families = [];
+        this.resetCurrentFamily();
+        this.$refs.confirmD.open('No Results', Results.data.message || 'No family needs to be followed up.', { color: 'warning', noconfirm: true });
+      }
+    },
+
+    searchMode() {
+      this.searchDialog = true;
+      this.resetCurrentFamily();
       this.Families = [];
       this.page = 0;
       this.queryString = {};
-      this.familyNotes = "";
+      this.resetFamilySearchPagination();
     },
 
     getSearchKeys(field, value) {
@@ -1006,31 +1114,9 @@ export default {
 
     async searchFamily() {
       this.store.setLoadingStatus(true);
-      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
-        const Results = await family.search(this.queryString);
-        if (Results.data.families && Results.data.families.length > 0) {
-          this.Families = Results.data.families;
-          this.page = 1;
-          this.currentFamily = this.Families[this.page - 1];
-          this.familyNotes = this.currentFamily.Note || "";
-        } else {
-          this.page = 0;
-          this.currentFamily = Object.assign({}, this.familyTemplate);
-          this.currentFamily.Children = [];
-          this.currentFamily.Schedules = [];
-          this.currentFamily.Email = "";
-          this.currentFamily.Phone = "";
-          this.currentFamily.CellPhone = "";
-          this.currentFamily.id = "";
-          this.familyNotes = "";
-
-          this.$refs.confirmD.open('No Results', Results.data.message || 'No families found.', { color: 'warning', noconfirm: true });
-        }
-
-        this.searchDialog = false;
-        this.searchStatus = false;
+        await this.loadFamilySearchPage(0);
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
@@ -1040,25 +1126,11 @@ export default {
 
     async followupSearch() {
       this.store.setLoadingStatus(true);
-      this.queryString = {}; // Fix: reset leftover query params before searching followups
-      this.queryString.AssignedLab = this.store.lab;
-      this.queryString.trainingMode = this.store.trainingMode;
 
       try {
-        const Results = await family.followupSearch(this.queryString);
-        if (Results.data && Results.data.length > 0) {
-          this.Families = Results.data;
-          this.page = 1;
-          this.currentFamily = this.Families[this.page - 1];
-          this.familyNotes = this.currentFamily.Note || "";
-        } else {
-          this.$refs.confirmD.open('No Results', 'No family needs to be followed up.', { color: 'warning', noconfirm: true });
-          this.page = 0;
-          this.currentFamily = Object.assign({}, this.familyTemplate);
-          this.currentFamily.Children = [];
-          this.currentFamily.Schedules = [];
-          this.familyNotes = "";
-        }
+        this.queryString = {};
+        this.resetFamilySearchPagination();
+        await this.loadFamilyFollowupPage(0);
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
       }
@@ -1146,15 +1218,42 @@ export default {
     },
 
     nextPage() {
-      this.page += 1;
-      this.currentFamily = this.Families[this.page - 1];
-      this.familyNotes = this.currentFamily.Note || "";
+      this.setCurrentFamilyByPage(this.page + 1);
     },
 
     previousPage() {
-      this.page -= 1;
-      this.currentFamily = this.Families[this.page - 1];
-      this.familyNotes = this.currentFamily.Note || "";
+      this.setCurrentFamilyByPage(this.page - 1);
+    },
+
+    async nextSearchResultsPage() {
+      if (!this.hasNextSearchResultsPage) return;
+      this.store.setLoadingStatus(true);
+      try {
+        if (this.familySearchMode === "followup") {
+          await this.loadFamilyFollowupPage(this.familySearchOffset + this.familySearchLimit);
+        } else {
+          await this.loadFamilySearchPage(this.familySearchOffset + this.familySearchLimit);
+        }
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
+    },
+
+    async previousSearchResultsPage() {
+      if (!this.hasPreviousSearchResultsPage) return;
+      this.store.setLoadingStatus(true);
+      try {
+        const nextOffset = Math.max(0, this.familySearchOffset - this.familySearchLimit);
+        if (this.familySearchMode === "followup") {
+          await this.loadFamilyFollowupPage(nextOffset);
+        } else {
+          await this.loadFamilySearchPage(nextOffset);
+        }
+      } catch (error) {
+        if (error.response?.status !== 401) console.error(error);
+      }
+      setTimeout(() => this.store.setLoadingStatus(false), 1000);
     },
 
     PhoneFormated(Phone) {
@@ -1295,6 +1394,34 @@ export default {
   },
 
   computed: {
+    showFamilySearchPagination() {
+      return this.familySearchActive && this.familySearchTotal > 0;
+    },
+    showFamilySearchRefineHint() {
+      return this.showFamilySearchPagination && this.familySearchTotal > 300;
+    },
+    currentSearchResultStart() {
+      if (!this.showFamilySearchPagination || this.Families.length === 0) return 0;
+      return this.familySearchOffset + 1;
+    },
+    currentSearchResultEnd() {
+      if (!this.showFamilySearchPagination || this.Families.length === 0) return 0;
+      return this.familySearchOffset + this.Families.length;
+    },
+    currentSearchResultsPage() {
+      if (!this.showFamilySearchPagination) return 0;
+      return Math.floor(this.familySearchOffset / this.familySearchLimit) + 1;
+    },
+    totalFamilySearchPages() {
+      if (!this.showFamilySearchPagination) return 0;
+      return Math.ceil(this.familySearchTotal / this.familySearchLimit);
+    },
+    hasPreviousSearchResultsPage() {
+      return this.showFamilySearchPagination && this.familySearchOffset > 0;
+    },
+    hasNextSearchResultsPage() {
+      return this.showFamilySearchPagination && this.currentSearchResultEnd < this.familySearchTotal;
+    },
     reversedSchedules() {
       if (!this.currentFamily || !this.currentFamily.Schedules) return [];
       return [...this.currentFamily.Schedules].sort((a, b) => {

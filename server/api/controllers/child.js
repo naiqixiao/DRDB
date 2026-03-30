@@ -29,6 +29,206 @@ function shuffle(array) {
   return array;
 }
 
+function parsePagination(query) {
+  const requestedLimit = Number.parseInt(query.limit, 10);
+  const requestedOffset = Number.parseInt(query.offset, 10);
+
+  const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+    ? Math.min(requestedLimit, 200)
+    : 100;
+  const offset = Number.isInteger(requestedOffset) && requestedOffset >= 0
+    ? requestedOffset
+    : 0;
+
+  return { limit, offset };
+}
+
+function parseArrayQueryParam(value) {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function buildSlimChildInclude() {
+  return [
+    {
+      model: model.appointment,
+      separate: true,
+      attributes: ["id", "FK_Study", "FK_Schedule"],
+    },
+    {
+      model: model.family,
+      required: true,
+      attributes: [
+        "id",
+        "NamePrimary",
+        "NameSecondary",
+        "Phone",
+        "CellPhone",
+        "Email",
+        "AutismHistory",
+        "NextContactDate",
+        "NoMoreContact",
+        "Note",
+        "LanguagePrimary",
+        "Address",
+        "TrainingSet",
+      ],
+    },
+  ];
+}
+
+function hashStringToUint32(value) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function deterministicDailyScore(childId, seed) {
+  let mixed = (Number(childId) ^ seed) >>> 0;
+  mixed ^= mixed >>> 16;
+  mixed = Math.imul(mixed, 0x7feb352d) >>> 0;
+  mixed ^= mixed >>> 15;
+  mixed = Math.imul(mixed, 0x846ca68b) >>> 0;
+  mixed ^= mixed >>> 16;
+  return mixed >>> 0;
+}
+
+function getUtcDaySeed() {
+  return hashStringToUint32(moment().utc().format("YYYY-MM-DD"));
+}
+
+function isChildEligibleForSlimSearch(childRecord, eligibility) {
+  const { ageGroups, prerequisiteStudyIds, exclusionStudyIds } = eligibility;
+
+  if (ageGroups.length > 0) {
+    if (!childRecord.DoB) {
+      return false;
+    }
+
+    const ageInDays = Math.floor((Date.now() - new Date(childRecord.DoB).getTime()) / (24 * 3600 * 1000));
+    const isInAnyAgeGroup = ageGroups.some((group) => {
+      const minAge = Number(group.MinAge);
+      const maxAge = Number(group.MaxAge);
+
+      if (!Number.isFinite(minAge) || !Number.isFinite(maxAge)) {
+        return false;
+      }
+
+      return ageInDays >= minAge * 30.5 - 1 && ageInDays <= maxAge * 30.5 - 1;
+    });
+
+    if (!isInAnyAgeGroup) {
+      return false;
+    }
+  }
+
+  const pastStudyIds = new Set((childRecord.Appointments || []).map((appointment) => appointment.FK_Study));
+
+  if (prerequisiteStudyIds.length > 0) {
+    const hasAllPrerequisites = prerequisiteStudyIds.every((studyId) => pastStudyIds.has(studyId));
+    if (!hasAllPrerequisites) {
+      return false;
+    }
+  }
+
+  if (exclusionStudyIds.length > 0) {
+    const hasExcludedStudy = exclusionStudyIds.some((studyId) => pastStudyIds.has(studyId));
+    if (hasExcludedStudy) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function searchSlimChildrenWithPagination(queryString, pagination, eligibility) {
+  const { limit, offset } = pagination;
+  const batchSize = Math.max(limit, 200);
+  const eligibleChildIds = [];
+  let scannedOffset = 0;
+
+  while (true) {
+    const batch = await model.child.findAll({
+      where: queryString,
+      include: buildSlimChildInclude(),
+      order: [["id", "DESC"]],
+      limit: batchSize,
+      offset: scannedOffset,
+    });
+
+    if (batch.length === 0) {
+      break;
+    }
+
+    for (const childRecord of batch) {
+      if (!isChildEligibleForSlimSearch(childRecord, eligibility)) {
+        continue;
+      }
+
+      eligibleChildIds.push(childRecord.id);
+    }
+
+    if (batch.length < batchSize) {
+      break;
+    }
+
+    scannedOffset += batchSize;
+  }
+
+  const daySeed = getUtcDaySeed();
+  eligibleChildIds.sort((a, b) => {
+    const scoreA = deterministicDailyScore(a, daySeed);
+    const scoreB = deterministicDailyScore(b, daySeed);
+
+    if (scoreA !== scoreB) {
+      return scoreA - scoreB;
+    }
+
+    return Number(a) - Number(b);
+  });
+
+  const total = eligibleChildIds.length;
+  const pageIds = eligibleChildIds.slice(offset, offset + limit);
+  let children = [];
+
+  if (pageIds.length > 0) {
+    const pageChildren = await model.child.findAll({
+      where: { id: { [Op.in]: pageIds } },
+      include: buildSlimChildInclude(),
+    });
+
+    const childrenById = new Map(pageChildren.map((childRecord) => [String(childRecord.id), childRecord]));
+    children = pageIds
+      .map((childId) => childrenById.get(String(childId)))
+      .filter(Boolean);
+  }
+
+  return {
+    children,
+    pagination: {
+      limit,
+      offset,
+      total,
+      hasMore: offset + children.length < total,
+    },
+  };
+}
+
 // Create and Save a new child of an existing family
 exports.create = asyncHandler(async (req, res) => {
   const newChildInfo = req.body;
@@ -238,23 +438,26 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   const isSlim = req.query.slim === 'true';
+  const pagination = isSlim ? parsePagination(req.query) : {};
+
+  if (isSlim) {
+    const eligibility = {
+      ageGroups: parseArrayQueryParam(req.query.eligibilityAgeGroups),
+      prerequisiteStudyIds: parseArrayQueryParam(req.query.prerequisiteStudyIds)
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value)),
+      exclusionStudyIds: parseArrayQueryParam(req.query.exclusionStudyIds)
+        .map((value) => Number(value))
+        .filter((value) => Number.isInteger(value)),
+    };
+
+    const result = await searchSlimChildrenWithPagination(queryString, pagination, eligibility);
+    return res.status(200).json(result);
+  }
 
   const children = await model.child.findAll({
     where: queryString,
-    include: isSlim ? [
-      // Slim mode: only what's needed for Schedule page list + client-side filtering
-      {
-        model: model.appointment,
-        separate: true,
-        attributes: ["id", "FK_Study", "FK_Schedule"],
-      },
-      {
-        model: model.family,
-        attributes: ["id", "NamePrimary", "NameSecondary", "Phone", "CellPhone", "Email",
-                     "AutismHistory", "NextContactDate", "NoMoreContact", "Note",
-                     "LanguagePrimary", "Address", "TrainingSet"],
-      },
-    ] : [
+    include: [
       // Full mode: all nested data (used by Family page and other callers)
       { model: model.appointment, separate: true, include: [model.schedule] },
       {
@@ -296,6 +499,7 @@ exports.search = asyncHandler(async (req, res) => {
         ],
       },
     ],
+    ...pagination,
   });
 
   shuffle(children);
