@@ -157,6 +157,119 @@
             </div>
           </v-expand-transition>
         </v-card>
+
+        <v-card class="ds-card mb-6" variant="flat" v-if="canViewScheduledJobs">
+          <v-toolbar color="transparent" density="compact" class="px-2">
+            <v-icon class="mr-2" color="primary">mdi-calendar-clock-outline</v-icon>
+            <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+              Scheduled Backend Tasks
+            </span>
+            <v-spacer></v-spacer>
+            <v-btn
+              variant="text"
+              size="small"
+              color="primary"
+              prepend-icon="mdi-refresh"
+              :loading="scheduledJobsLoading"
+              @click="loadScheduledJobs"
+            >Refresh</v-btn>
+          </v-toolbar>
+          <v-divider></v-divider>
+          <v-card-text>
+            <p class="text-body-2 mb-3 text-muted">
+              These are automated backend jobs configured on the server.
+            </p>
+            <v-alert
+              v-if="scheduledJobsError"
+              density="compact"
+              type="error"
+              variant="tonal"
+              class="mb-4"
+            >
+              {{ scheduledJobsError }}
+            </v-alert>
+
+            <div v-if="scheduledJobsLoading" class="py-3">
+              <v-progress-linear indeterminate color="primary"></v-progress-linear>
+            </div>
+
+            <v-table v-else density="compact">
+              <thead>
+                <tr>
+                  <th class="text-left">Task</th>
+                  <th class="text-left">Description</th>
+                  <th class="text-left">Runs</th>
+                  <th class="text-left">Status</th>
+                  <th class="text-left">Timezone</th>
+                  <th class="text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="job in scheduledJobs" :key="job.name + job.cron">
+                  <td>{{ job.name }}</td>
+                  <td>{{ job.description || 'No description available.' }}</td>
+                  <td>
+                    <div v-if="job.editable" class="d-flex align-center" style="gap: 10px; min-width: 240px;">
+                      <v-text-field
+                        v-model="jobDrafts[job.id].time"
+                        type="time"
+                        density="compact"
+                        variant="outlined"
+                        hide-details
+                        style="max-width: 150px;"
+                      ></v-text-field>
+                      <v-btn
+                        size="small"
+                        color="primary"
+                        variant="tonal"
+                        :loading="Boolean(jobActionLoading[job.id])"
+                        @click="saveJobRuntime(job)"
+                      >Save</v-btn>
+                    </div>
+                    <div v-else>{{ job.schedule }}</div>
+                    <div class="text-caption text-medium-emphasis">Cron: {{ job.cron }}</div>
+                  </td>
+                  <td>
+                    <v-chip
+                      :color="job.enabled ? 'success' : 'warning'"
+                      size="x-small"
+                      variant="tonal"
+                    >
+                      {{ job.enabled ? 'Active' : 'Shut down' }}
+                    </v-chip>
+                  </td>
+                  <td>{{ job.timezone }}</td>
+                  <td>
+                    <div v-if="job.editable" class="d-flex" style="gap: 8px;">
+                      <v-btn
+                        v-if="job.enabled"
+                        size="small"
+                        color="warning"
+                        variant="tonal"
+                        prepend-icon="mdi-power"
+                        :loading="Boolean(jobActionLoading[job.id])"
+                        @click="setJobEnabled(job, false)"
+                      >Shutdown</v-btn>
+                      <v-btn
+                        v-else
+                        size="small"
+                        color="success"
+                        variant="tonal"
+                        prepend-icon="mdi-play"
+                        :loading="Boolean(jobActionLoading[job.id])"
+                        @click="setJobEnabled(job, true)"
+                      >Resume</v-btn>
+                    </div>
+                    <span v-else class="text-caption text-medium-emphasis">Read-only</span>
+                  </td>
+                </tr>
+                <tr v-if="!scheduledJobs.length && !scheduledJobsError">
+                  <td colspan="6" class="text-medium-emphasis py-3">No scheduled jobs found.</td>
+                </tr>
+              </tbody>
+            </v-table>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
 
@@ -308,6 +421,7 @@ import login from "@/services/login";
 import lab from "@/services/lab";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
+import jobsService from "@/services/jobs";
 import TestingRooms from "@/components/TestingRooms.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
@@ -328,6 +442,8 @@ export default {
       editedLab: { LabName: null, Location: null, ZoomLink: null, EmailOpening: null, EmailClosing: null, TYEmail: null, TransportationInstructions: null },
       inputFile: undefined, uploadFile: null, importReport: "", loadingStatus: false,
       roleOptions: ["PI", "Lab manager"], requestInProgress: false, currentTestingRooms: [],
+      scheduledJobs: [], scheduledJobsLoading: false, scheduledJobsError: null,
+      jobDrafts: {}, jobActionLoading: {},
       labPI: [
         { label: "Name of PI/Manager", field: "Name" }, { label: "Initials", field: "Initial" },
         { label: "Email of PI/Manager", field: "Email" }, { label: "Phone", field: "Phone" },
@@ -345,6 +461,7 @@ export default {
     passwordConfirmationRule() { return this.newPassword === this.newPasswordVerify || "Password must match"; },
     newPasswordRule() { return this.newPassword !== this.password || "New password must be different from the current one."; },
     canManageLab() { return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(this.store.role); },
+    canViewScheduledJobs() { return ['Admin', 'PI', 'Lab manager'].includes(this.store.role); },
   },
   methods: {
     async changePassword() {
@@ -468,6 +585,77 @@ export default {
       return alertText;
     },
     testingRoomsUpdated(testingRooms) { this.currentTestingRooms = testingRooms; },
+    async loadScheduledJobs() {
+      if (!this.canViewScheduledJobs) {
+        this.scheduledJobs = [];
+        this.scheduledJobsError = null;
+        return;
+      }
+
+      this.scheduledJobsLoading = true;
+      this.scheduledJobsError = null;
+
+      try {
+        const response = await jobsService.getScheduledJobs();
+        this.scheduledJobs = response.data.jobs || [];
+        this.scheduledJobs.forEach((job) => {
+          const existing = this.jobDrafts[job.id] || {};
+          this.jobDrafts[job.id] = {
+            time: existing.time || this.dailyCronToTime(job.cron),
+          };
+        });
+      } catch (error) {
+        this.scheduledJobs = [];
+        this.scheduledJobsError = "Failed to load scheduled backend tasks.";
+      }
+
+      this.scheduledJobsLoading = false;
+    },
+    dailyCronToTime(cronExpression) {
+      const parts = (cronExpression || "").split(" ");
+      if (parts.length !== 5) return "";
+
+      const minute = Number(parts[0]);
+      const hour = Number(parts[1]);
+      if (Number.isNaN(minute) || Number.isNaN(hour)) return "";
+
+      return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    },
+    timeToCron(timeValue) {
+      const [hour, minute] = (timeValue || "").split(":");
+      if (hour === undefined || minute === undefined) return null;
+
+      return `${Number(minute)} ${Number(hour)} * * *`;
+    },
+    async saveJobRuntime(job) {
+      const selectedTime = this.jobDrafts[job.id]?.time;
+      const nextCron = this.timeToCron(selectedTime);
+      if (!nextCron) {
+        this.$refs.confirmD.open('Invalid Time', 'Please choose a valid time before saving.', { color: 'warning', noconfirm: true });
+        return;
+      }
+
+      this.jobActionLoading[job.id] = true;
+      try {
+        await jobsService.updateScheduledJob(job.id, { cron: nextCron });
+        this.$refs.confirmD.open('Updated', `${job.name} runtime has been updated.`, { color: 'success', noconfirm: true });
+        await this.loadScheduledJobs();
+      } catch (error) {
+        this.$refs.confirmD.open('Error', 'Could not update this task runtime.', { color: 'error', noconfirm: true });
+      }
+      this.jobActionLoading[job.id] = false;
+    },
+    async setJobEnabled(job, enabled) {
+      this.jobActionLoading[job.id] = true;
+      try {
+        await jobsService.updateScheduledJob(job.id, { enabled });
+        this.$refs.confirmD.open('Updated', enabled ? `${job.name} has resumed.` : `${job.name} has been shut down.`, { color: 'success', noconfirm: true });
+        await this.loadScheduledJobs();
+      } catch (error) {
+        this.$refs.confirmD.open('Error', enabled ? 'Could not resume this task.' : 'Could not shut down this task.', { color: 'error', noconfirm: true });
+      }
+      this.jobActionLoading[job.id] = false;
+    },
     handleOAuthMessage(event) {
       if (event.origin !== window.location.origin) return;
       if (event.data && event.data.type === 'GOOGLE_OAUTH_CODE' && event.data.code) {
@@ -481,6 +669,9 @@ export default {
   async mounted() {
     window.addEventListener('message', this.handleOAuthMessage);
     this.currentTestingRooms = this.store.testingRooms || [];
+    if (this.canViewScheduledJobs) {
+      await this.loadScheduledJobs();
+    }
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
       if (profile.data) {

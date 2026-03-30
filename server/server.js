@@ -41,4 +41,6 @@ function shutDown() {
 // In a clustered environment, wrap this in a primary-worker check
 // to prevent duplicate execution (e.g. cluster.isPrimary).
 const { registerJobs } = require("./jobs/scheduler");
-registerJobs();
+registerJobs().catch((error) => {
+  console.error("[Jobs] Failed to register scheduled tasks:", error);
+});

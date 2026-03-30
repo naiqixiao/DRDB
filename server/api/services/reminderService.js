@@ -9,12 +9,20 @@ const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const moment = require("moment");
 
+function getStudyWhereFilter(labId) {
+  if (!Number.isInteger(labId)) {
+    return undefined;
+  }
+  return { FK_Lab: labId };
+}
+
 /**
  * Get schedules for auto-completion reminders.
  * Returns a list grouped by primary experimenter:
  * [{ experimenterName, experimenterEmail, scheduleList: [...] }, ...]
  */
-async function getCompletionReminderData() {
+async function getCompletionReminderData(labId) {
+  const studyWhere = getStudyWhereFilter(labId);
   const queryString = {
     Status: "Confirmed",
     Completed: false,
@@ -39,6 +47,7 @@ async function getCompletionReminderData() {
         include: [
           {
             model: model.study,
+            where: studyWhere,
             include: [
               { model: model.lab },
               {
@@ -134,7 +143,8 @@ async function getCompletionReminderData() {
  * Returns a list grouped by the researcher who last contacted:
  * [{ researcherName, researcherEmail, scheduleList: [...] }, ...]
  */
-async function getRejectionReminderData() {
+async function getRejectionReminderData(labId) {
+  const studyWhere = getStudyWhereFilter(labId);
   const queryString = {
     Status: { [Op.in]: ["TBD", "Rescheduling", "No Show", "Cancelled"] },
     Completed: false,
@@ -160,6 +170,7 @@ async function getRejectionReminderData() {
         include: [
           {
             model: model.study,
+            where: studyWhere,
             include: [
               { model: model.lab },
               {
@@ -251,7 +262,8 @@ async function getRejectionReminderData() {
 /**
  * Get tomorrow's confirmed family schedules for reminder emails.
  */
-async function getFamilyReminderSchedules() {
+async function getFamilyReminderSchedules(labId) {
+  const studyWhere = getStudyWhereFilter(labId);
   const queryString = {
     AppointmentTime: {
       [Op.between]: [
@@ -282,6 +294,7 @@ async function getFamilyReminderSchedules() {
           },
           {
             model: model.study,
+            where: studyWhere,
             attributes: [
               "StudyName",
               "EmailTemplate",
@@ -336,48 +349,62 @@ async function getFamilyReminderSchedules() {
 /**
  * Get experimenters who have confirmed studies tomorrow.
  */
-async function getExperimenterReminderData() {
+async function getExperimenterReminderData(labId) {
+  const baseWhere = {
+    [Op.and]: [
+      {
+        [Op.or]: [
+          {
+            "$PrimaryExperimenterof.Schedule.AppointmentTime$": {
+              [Op.between]: [
+                moment()
+                  .startOf("day")
+                  .add(1, "days")
+                  .toDate(),
+                moment()
+                  .startOf("day")
+                  .add(2, "days")
+                  .toDate(),
+              ],
+            },
+          },
+          {
+            "$SecondaryExperimenterof.Schedule.AppointmentTime$": {
+              [Op.between]: [
+                moment()
+                  .startOf("day")
+                  .add(1, "days")
+                  .toDate(),
+                moment()
+                  .startOf("day")
+                  .add(2, "days")
+                  .toDate(),
+              ],
+            },
+          },
+        ],
+      },
+      {
+        [Op.or]: [
+          { "$PrimaryExperimenterof.Schedule.Status$": "Confirmed" },
+          { "$SecondaryExperimenterof.Schedule.Status$": "Confirmed" },
+        ],
+      },
+      {
+        [Op.or]: [
+          { "$PrimaryExperimenterof.Child.Family.TrainingSet$": false },
+          { "$SecondaryExperimenterof.Child.Family.TrainingSet$": false },
+        ],
+      },
+    ],
+  };
+
+  const where = Number.isInteger(labId)
+    ? { ...baseWhere, FK_Lab: labId }
+    : baseWhere;
+
   return model.personnel.findAll({
-    where: {
-      [Op.or]: [
-        {
-          "$PrimaryExperimenterof.Schedule.AppointmentTime$": {
-            [Op.between]: [
-              moment()
-                .startOf("day")
-                .add(1, "days")
-                .toDate(),
-              moment()
-                .startOf("day")
-                .add(2, "days")
-                .toDate(),
-            ],
-          },
-        },
-        {
-          "$SecondaryExperimenterof.Schedule.AppointmentTime$": {
-            [Op.between]: [
-              moment()
-                .startOf("day")
-                .add(1, "days")
-                .toDate(),
-              moment()
-                .startOf("day")
-                .add(2, "days")
-                .toDate(),
-            ],
-          },
-        },
-      ],
-      [Op.or]: [
-        { "$PrimaryExperimenterof.Schedule.Status$": "Confirmed" },
-        { "$SecondaryExperimenterof.Schedule.Status$": "Confirmed" },
-      ],
-      [Op.or]: [
-        { "$PrimaryExperimenterof.Child.Family.TrainingSet$": false },
-        { "$SecondaryExperimenterof.Child.Family.TrainingSet$": false },
-      ],
-    },
+    where,
     include: [
       model.lab,
       {

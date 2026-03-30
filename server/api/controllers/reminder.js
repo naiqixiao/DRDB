@@ -25,12 +25,28 @@ const {
   getExperimenterReminderData,
 } = require("../services/reminderService");
 
+function resolveLabId(context) {
+  if (context === null || context === undefined) return null;
+
+  if (typeof context === "number" || typeof context === "string") {
+    const parsed = Number(context);
+    return Number.isInteger(parsed) ? parsed : null;
+  }
+
+  const parsed = Number(
+    context.labId ?? context.query?.labId ?? context.body?.labId
+  );
+
+  return Number.isInteger(parsed) ? parsed : null;
+}
+
 // ─── Auto-completion reminder ──────────────────────────────────────
 // Sends to experimenters asking them to confirm yesterday's study completions.
 exports.autoCompletionReminder = asyncHandler(async (req, res) => {
   try {
+    const labId = resolveLabId(req);
     const { autoCompletionList, schedules, primaryExperimenters } =
-      await getCompletionReminderData();
+      await getCompletionReminderData(labId);
 
     for (const reminder of autoCompletionList) {
       const htmlBody = buildCompletionReminderBody(
@@ -73,8 +89,9 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
 // Sends to researchers about unresolved tentative/rescheduling/no-show appointments.
 exports.autoRejectionReminder = asyncHandler(async (req, res) => {
   try {
+    const labId = resolveLabId(req);
     const { autoRejectionList, schedules, contactResearchers } =
-      await getRejectionReminderData();
+      await getRejectionReminderData(labId);
 
     for (const reminder of autoRejectionList) {
       const htmlBody = buildRejectionReminderBody(
@@ -117,7 +134,8 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
 // Sends to parents the day before a confirmed study appointment.
 exports.reminderEmail = asyncHandler(async (req, res) => {
   try {
-    const schedules = await getFamilyReminderSchedules();
+    const labId = resolveLabId(req);
+    const schedules = await getFamilyReminderSchedules(labId);
 
     schedules.forEach(async (schedule) => {
       const labels = ["Reminder-email"];
@@ -189,7 +207,8 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 // Sends to each experimenter with a summary of their studies tomorrow.
 exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
   try {
-    const experimenters = await getExperimenterReminderData();
+    const labId = resolveLabId(req);
+    const experimenters = await getExperimenterReminderData(labId);
 
     for (const experimenter of experimenters) {
       const htmlBody = buildExperimenterReminderBody(experimenter);

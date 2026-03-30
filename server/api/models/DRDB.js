@@ -1,4 +1,5 @@
 const config = require("../../config/general");
+const Sequelize = require("sequelize");
 
 
 const sequelize = config.sequelize;
@@ -57,6 +58,43 @@ const Study = sequelize.import("../models/SequelizeAuto/Study");
 const StudyAgeGroup = sequelize.import("../models/SequelizeAuto/StudyAgeGroup");
 const Experimenter = sequelize.import("../models/SequelizeAuto/Experimenter");
 const TestingRoom = sequelize.import("../models/SequelizeAuto/TestingRoom");
+const ScheduledJobSetting = sequelize.define(
+  "ScheduledJobSetting",
+  {
+    id: {
+      autoIncrement: true,
+      type: Sequelize.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+    },
+    FK_Lab: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+    JobId: {
+      type: Sequelize.STRING(100),
+      allowNull: false,
+    },
+    CronExpression: {
+      type: Sequelize.STRING(100),
+      allowNull: false,
+    },
+    Enabled: {
+      type: Sequelize.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+  },
+  {
+    tableName: "ScheduledJobSetting",
+    indexes: [
+      {
+        unique: true,
+        fields: ["FK_Lab", "JobId"],
+      },
+    ],
+  }
+);
 
 Lab.hasMany(Personnel, {
   foreignKey: "FK_Lab",
@@ -83,6 +121,13 @@ Lab.hasMany(TestingRoom, {
   foreignKey: "FK_Lab",
 });
 TestingRoom.belongsTo(Lab, {
+  foreignKey: "FK_Lab",
+});
+
+Lab.hasMany(ScheduledJobSetting, {
+  foreignKey: "FK_Lab",
+});
+ScheduledJobSetting.belongsTo(Lab, {
   foreignKey: "FK_Lab",
 });
 
@@ -246,6 +291,7 @@ exports.experimenterAssignment = ExperimenterAssignment;
 exports.experimenterAssignment_2nd = SecondExperimenterAssignment;
 exports.feedback = Feedback;
 exports.testingRoom = TestingRoom;
+exports.scheduledJobSetting = ScheduledJobSetting;
 exports.sequelize = sequelize;
 
 // Synchronize with database (tables created/updated in background)

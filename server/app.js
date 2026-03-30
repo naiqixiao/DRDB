@@ -47,6 +47,7 @@ const feedbackRoutes = require("./api/routes/feedback");
 
 const reminderRoutes = require("./api/routes/reminder");
 const rtuRoutes = require("./api/routes/RTU");
+const jobsRoutes = require("./api/routes/jobs");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
 
@@ -81,6 +82,7 @@ app.use("/api/feedback", feedbackRoutes);
 
 app.use("/api/reminder", reminderRoutes);
 app.use("/api/RTU", rtuRoutes);
+app.use("/api/jobs", jobsRoutes);
 
 app.use("/api/TestingRoom", testingRoomRoutes);
 
