@@ -65,9 +65,9 @@
             :disabled="!hasNextEligibleChildResultsPage"></v-btn>
         </div>
 
-        <v-alert v-if="showEligibleChildRefineHint" type="warning" variant="tonal" density="compact" border="start" class="mb-2">
+        <!-- <v-alert v-if="showEligibleChildRefineHint" type="warning" variant="tonal" density="compact" border="start" class="mb-2" style="align-items: center;">
           This search returned {{ eligibleChildSearchTotal }} eligible children. Refine the study filters if you need a narrower result set.
-        </v-alert>
+        </v-alert> -->
 
         <v-spacer></v-spacer>
 

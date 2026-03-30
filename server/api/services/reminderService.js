@@ -363,6 +363,7 @@ async function getFamilyReminderSchedules(labId) {
  * Get experimenters who have confirmed studies tomorrow.
  */
 async function getExperimenterReminderData(labId) {
+  const studyWhere = getStudyWhereFilter(labId);
   const baseWhere = {
     [Op.and]: [
       {
@@ -442,7 +443,7 @@ async function getExperimenterReminderData(labId) {
               },
             },
           },
-          { model: model.study },
+          { model: model.study, where: studyWhere },
           {
             model: model.child,
             include: [
@@ -489,7 +490,7 @@ async function getExperimenterReminderData(labId) {
               },
             },
           },
-          { model: model.study },
+          { model: model.study, where: studyWhere },
           {
             model: model.child,
             include: [

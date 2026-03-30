@@ -307,6 +307,9 @@ async function updateScheduledJob(jobId, updates = {}, labId) {
   await persistRuntimeForJob(job, labId, nextConfig);
   upsertRuntimeForJob(job, labId, nextConfig);
   unscheduleJob(job.id, labId);
+  // ensureRuntimeInitialized is a no-op here since we just upserted,
+  // but handles the case where this lab was created after server startup
+  // and has no handle yet — scheduleJob will create one.
   scheduleJob(job, labId);
 
   return listScheduledJobs(labId).find((scheduledJob) => scheduledJob.id === job.id);

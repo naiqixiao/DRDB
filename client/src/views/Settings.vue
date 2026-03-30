@@ -177,7 +177,7 @@
           <v-divider></v-divider>
           <v-card-text>
             <p class="text-body-2 mb-3 text-muted">
-              These are automated backend jobs configured on the server.
+              Automated backend jobs configured on the server. Configurable tasks can be adjusted per lab; system tasks run globally and cannot be modified.
             </p>
             <v-alert
               v-if="scheduledJobsError"
@@ -193,81 +193,140 @@
               <v-progress-linear indeterminate color="primary"></v-progress-linear>
             </div>
 
-            <v-table v-else density="compact">
-              <thead>
-                <tr>
-                  <th class="text-left">Task</th>
-                  <th class="text-left">Description</th>
-                  <th class="text-left">Runs</th>
-                  <th class="text-left">Status</th>
-                  <th class="text-left">Timezone</th>
-                  <th class="text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="job in scheduledJobs" :key="job.name + job.cron">
-                  <td>{{ job.name }}</td>
-                  <td>{{ job.description || 'No description available.' }}</td>
-                  <td>
-                    <div v-if="job.editable" class="d-flex align-center" style="gap: 10px; min-width: 240px;">
-                      <v-text-field
-                        v-model="jobDrafts[job.id].time"
-                        type="time"
-                        density="compact"
-                        variant="outlined"
-                        hide-details
-                        style="max-width: 150px;"
-                      ></v-text-field>
-                      <v-btn
-                        size="small"
-                        color="primary"
-                        variant="tonal"
-                        :loading="Boolean(jobActionLoading[job.id])"
-                        @click="saveJobRuntime(job)"
-                      >Save</v-btn>
+            <template v-else>
+              <v-expansion-panels v-model="jobsPanels" multiple variant="accordion" class="rounded">
+
+                <!-- ── Panel 1: Configurable tasks ── -->
+                <v-expansion-panel>
+                  <v-expansion-panel-title>
+                    <div class="d-flex align-center" style="gap: 8px;">
+                      <v-icon color="primary" size="small">mdi-tune</v-icon>
+                      <span class="text-body-2 font-weight-bold">Configurable Tasks</span>
+                      <v-chip size="x-small" color="primary" variant="tonal">{{ editableJobs.length }}</v-chip>
                     </div>
-                    <div v-else>{{ job.schedule }}</div>
-                    <div class="text-caption text-medium-emphasis">Cron: {{ job.cron }}</div>
-                  </td>
-                  <td>
-                    <v-chip
-                      :color="job.enabled ? 'success' : 'warning'"
-                      size="x-small"
-                      variant="tonal"
-                    >
-                      {{ job.enabled ? 'Active' : 'Shut down' }}
-                    </v-chip>
-                  </td>
-                  <td>{{ job.timezone }}</td>
-                  <td>
-                    <div v-if="job.editable" class="d-flex" style="gap: 8px;">
-                      <v-btn
-                        v-if="job.enabled"
-                        size="small"
-                        color="warning"
-                        variant="tonal"
-                        prepend-icon="mdi-power"
-                        :loading="Boolean(jobActionLoading[job.id])"
-                        @click="setJobEnabled(job, false)"
-                      >Shutdown</v-btn>
-                      <v-btn
-                        v-else
-                        size="small"
-                        color="success"
-                        variant="tonal"
-                        prepend-icon="mdi-play"
-                        :loading="Boolean(jobActionLoading[job.id])"
-                        @click="setJobEnabled(job, true)"
-                      >Resume</v-btn>
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text class="pa-0">
+                    <v-table density="compact">
+                      <thead>
+                        <tr>
+                          <th class="text-left">Task</th>
+                          <th class="text-left">Description</th>
+                          <th class="text-left" style="min-width: 220px;">Run Time</th>
+                          <th class="text-left">Status</th>
+                          <th class="text-left">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="job in editableJobs" :key="job.id">
+                          <td class="text-body-2">{{ job.name }}</td>
+                          <td class="text-body-2">{{ job.description || 'No description.' }}</td>
+                          <td>
+                            <div class="d-flex align-center" style="gap: 8px; padding: 4px 0;">
+                              <v-text-field
+                                v-model="jobDrafts[job.id].time"
+                                type="time"
+                                density="compact"
+                                variant="outlined"
+                                hide-details
+                                style="max-width: 130px;"
+                              ></v-text-field>
+                              <v-btn
+                                size="small"
+                                color="primary"
+                                variant="tonal"
+                                :loading="Boolean(jobActionLoading[job.id])"
+                                @click="saveJobRuntime(job)"
+                              >Save</v-btn>
+                            </div>
+                            <div class="text-caption text-medium-emphasis">{{ job.schedule }}</div>
+                          </td>
+                          <td>
+                            <v-chip
+                              :color="job.enabled ? 'success' : 'warning'"
+                              size="x-small"
+                              variant="tonal"
+                            >
+                              {{ job.enabled ? 'Active' : 'Shut down' }}
+                            </v-chip>
+                          </td>
+                          <td>
+                            <v-btn
+                              v-if="job.enabled"
+                              size="small"
+                              color="warning"
+                              variant="tonal"
+                              prepend-icon="mdi-power"
+                              :loading="Boolean(jobActionLoading[job.id])"
+                              @click="setJobEnabled(job, false)"
+                            >Shutdown</v-btn>
+                            <v-btn
+                              v-else
+                              size="small"
+                              color="success"
+                              variant="tonal"
+                              prepend-icon="mdi-play"
+                              :loading="Boolean(jobActionLoading[job.id])"
+                              @click="setJobEnabled(job, true)"
+                            >Resume</v-btn>
+                          </td>
+                        </tr>
+                        <tr v-if="!editableJobs.length">
+                          <td colspan="5" class="text-medium-emphasis py-3">No configurable tasks found.</td>
+                        </tr>
+                      </tbody>
+                    </v-table>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+
+                <!-- ── Panel 2: System tasks ── -->
+                <v-expansion-panel>
+                  <v-expansion-panel-title>
+                    <div class="d-flex align-center" style="gap: 8px;">
+                      <v-icon color="secondary" size="small">mdi-cog-outline</v-icon>
+                      <span class="text-body-2 font-weight-bold">System Tasks</span>
+                      <v-chip size="x-small" color="secondary" variant="tonal">{{ readonlyJobs.length }}</v-chip>
                     </div>
-                    <span v-else class="text-caption text-medium-emphasis">Read-only</span>
-                  </td>
-                </tr>
-                <tr v-if="!scheduledJobs.length && !scheduledJobsError">
-                  <td colspan="6" class="text-medium-emphasis py-3">No scheduled jobs found.</td>
-                </tr>
-              </tbody>
-            </v-table>
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text class="pa-0">
+                    <v-table density="compact">
+                      <thead>
+                        <tr>
+                          <th class="text-left">Task</th>
+                          <th class="text-left">Description</th>
+                          <th class="text-left">Schedule</th>
+                          <th class="text-left">Status</th>
+                          <th class="text-left">Timezone</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="job in readonlyJobs" :key="job.id">
+                          <td class="text-body-2">{{ job.name }}</td>
+                          <td class="text-body-2">{{ job.description || 'No description.' }}</td>
+                          <td>
+                            <div class="text-body-2">{{ job.schedule }}</div>
+                            <!-- <div class="text-caption text-medium-emphasis">Cron: {{ job.cron }}</div> -->
+                          </td>
+                          <td>
+                            <v-chip
+                              :color="job.enabled ? 'success' : 'warning'"
+                              size="x-small"
+                              variant="tonal"
+                            >
+                              {{ job.enabled ? 'Active' : 'Shut down' }}
+                            </v-chip>
+                          </td>
+                          <td class="text-body-2">{{ job.timezone }}</td>
+                        </tr>
+                        <tr v-if="!readonlyJobs.length">
+                          <td colspan="5" class="text-medium-emphasis py-3">No system tasks found.</td>
+                        </tr>
+                      </tbody>
+                    </v-table>
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+
+              </v-expansion-panels>
+            </template>
           </v-card-text>
         </v-card>
       </v-col>
@@ -444,6 +503,7 @@ export default {
       roleOptions: ["PI", "Lab manager"], requestInProgress: false, currentTestingRooms: [],
       scheduledJobs: [], scheduledJobsLoading: false, scheduledJobsError: null,
       jobDrafts: {}, jobActionLoading: {},
+      jobsPanels: [0],
       labPI: [
         { label: "Name of PI/Manager", field: "Name" }, { label: "Initials", field: "Initial" },
         { label: "Email of PI/Manager", field: "Email" }, { label: "Phone", field: "Phone" },
@@ -462,6 +522,8 @@ export default {
     newPasswordRule() { return this.newPassword !== this.password || "New password must be different from the current one."; },
     canManageLab() { return ['Admin', 'PI', 'PostDoc', 'GradStudent', 'Lab manager'].includes(this.store.role); },
     canViewScheduledJobs() { return ['Admin', 'PI', 'Lab manager'].includes(this.store.role); },
+    editableJobs() { return this.scheduledJobs.filter((j) => j.editable); },
+    readonlyJobs() { return this.scheduledJobs.filter((j) => !j.editable); },
   },
   methods: {
     async changePassword() {

@@ -119,6 +119,7 @@ async function searchSchedules(queryString, options = {}) {
     where: queryString,
     include: buildScheduleSearchInclude(),
     order: [['id', 'DESC']],
+    subQuery: false,
     ...pagination,
   });
 }
