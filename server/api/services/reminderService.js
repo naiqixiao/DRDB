@@ -6,7 +6,7 @@
  */
 
 const model = require("../models/DRDB");
-const { Op } = require("sequelize");
+const { Op, literal } = require("sequelize");
 const moment = require("moment");
 
 function getStudyWhereFilter(labId) {
@@ -14,6 +14,22 @@ function getStudyWhereFilter(labId) {
     return undefined;
   }
   return { FK_Lab: labId };
+}
+
+// Returns a Sequelize literal that checks whether a Schedule has at least one
+// Appointment linked to a Study in the given lab.  Avoids putting a `where`
+// condition on a deeply-nested include inside fetchSchedulesInBatches, which
+// causes Sequelize v5 to generate a broken subquery (Appointments.FK_Study
+// referenced before the Appointment table is joined).
+function getLabExistsLiteral(labId) {
+  if (!Number.isInteger(labId)) return null;
+  // labId is validated as an integer above, so interpolation is safe.
+  return literal(
+    `EXISTS (SELECT 1 FROM \`Appointment\` \`_a\`
+      INNER JOIN \`Study\` \`_s\` ON \`_a\`.\`FK_Study\` = \`_s\`.\`id\`
+      WHERE \`_a\`.\`FK_Schedule\` = \`Schedule\`.\`id\`
+        AND \`_s\`.\`FK_Lab\` = ${labId})`
+  );
 }
 
 const REMINDER_BATCH_SIZE = 200;
@@ -74,7 +90,7 @@ async function fetchPersonnelInBatches({ where, include, order = [["id", "ASC"]]
  * [{ experimenterName, experimenterEmail, scheduleList: [...] }, ...]
  */
 async function getCompletionReminderData(labId) {
-  const studyWhere = getStudyWhereFilter(labId);
+  const labExists = getLabExistsLiteral(labId);
   const queryString = {
     Status: "Confirmed",
     Completed: false,
@@ -89,6 +105,7 @@ async function getCompletionReminderData(labId) {
           .toDate(),
       ],
     },
+    ...(labExists && { [Op.and]: [labExists] }),
   };
 
   const schedules = await fetchSchedulesInBatches({
@@ -101,7 +118,6 @@ async function getCompletionReminderData(labId) {
         include: [
           {
             model: model.study,
-            where: studyWhere,
             required: true,
             attributes: ["id", "StudyName", "FK_Lab"],
             include: [
@@ -175,7 +191,7 @@ async function getCompletionReminderData(labId) {
  * [{ researcherName, researcherEmail, scheduleList: [...] }, ...]
  */
 async function getRejectionReminderData(labId) {
-  const studyWhere = getStudyWhereFilter(labId);
+  const labExists = getLabExistsLiteral(labId);
   const queryString = {
     Status: { [Op.in]: ["TBD", "Rescheduling", "No Show", "Cancelled"] },
     Completed: false,
@@ -191,6 +207,7 @@ async function getRejectionReminderData(labId) {
           .toDate(),
       ],
     },
+    ...(labExists && { [Op.and]: [labExists] }),
   };
 
   const schedules = await fetchSchedulesInBatches({
@@ -203,7 +220,6 @@ async function getRejectionReminderData(labId) {
         include: [
           {
             model: model.study,
-            where: studyWhere,
             required: true,
             attributes: ["id", "StudyName", "FK_Lab"],
             include: [
@@ -276,7 +292,7 @@ async function getRejectionReminderData(labId) {
  * Get tomorrow's confirmed family schedules for reminder emails.
  */
 async function getFamilyReminderSchedules(labId) {
-  const studyWhere = getStudyWhereFilter(labId);
+  const labExists = getLabExistsLiteral(labId);
   const queryString = {
     AppointmentTime: {
       [Op.between]: [
@@ -293,6 +309,7 @@ async function getFamilyReminderSchedules(labId) {
     Reminded: 0,
     Status: "Confirmed",
     "$Family.TrainingSet$": false,
+    ...(labExists && { [Op.and]: [labExists] }),
   };
 
   const schedules = await fetchSchedulesInBatches({
@@ -308,7 +325,6 @@ async function getFamilyReminderSchedules(labId) {
           },
           {
             model: model.study,
-            where: studyWhere,
             required: true,
             attributes: [
               "StudyName",

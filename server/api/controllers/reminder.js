@@ -136,7 +136,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    return handleReminderError("Experimenter reminder error:", error, res);
+    return handleReminderError("Auto-rejection reminder error:", error, res);
   }
 });
 
