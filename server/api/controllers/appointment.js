@@ -16,6 +16,8 @@ const fs = require("fs");
 const path = require("path");
 const log = require("../controllers/log");
 
+const getSequelizeInstance = () => model.sequelize || config.sequelize || null;
+
 // Helper to determine where to save JSON outputs
 // Defaults to a 'stats' folder in the root of the server directory
 const getStatsDir = () => {
@@ -635,7 +637,14 @@ exports.monthYearN = asyncHandler(async (req, res) => {
   `;
 
   try {
-    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const sequelizeInstance = getSequelizeInstance();
+    if (!sequelizeInstance) {
+      throw new Error("Sequelize instance is unavailable.");
+    }
+
+    const monthYearN = await sequelizeInstance.query(queryString, {
+      type: QueryTypes.SELECT,
+    });
     const jsonString = JSON.stringify(monthYearN, null, 2);
 
     const filePath = path.join(getStatsDir(), 'monthYearN.json');
@@ -672,7 +681,14 @@ exports.monthYearN0 = asyncHandler(async (req, res) => {
   `;
 
   try {
-    const monthYearN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const sequelizeInstance = getSequelizeInstance();
+    if (!sequelizeInstance) {
+      throw new Error("Sequelize instance is unavailable.");
+    }
+
+    const monthYearN = await sequelizeInstance.query(queryString, {
+      type: QueryTypes.SELECT,
+    });
     res.status(200).send(monthYearN);
   } catch (err) {
     console.error("Monthly stats query error:", err);
@@ -703,7 +719,14 @@ exports.monthYearWeekN = asyncHandler(async (req, res) => {
   `;
 
   try {
-    const monthYearWeekN = await model.sequelize.query(queryString, { type: QueryTypes.SELECT });
+    const sequelizeInstance = getSequelizeInstance();
+    if (!sequelizeInstance) {
+      throw new Error("Sequelize instance is unavailable.");
+    }
+
+    const monthYearWeekN = await sequelizeInstance.query(queryString, {
+      type: QueryTypes.SELECT,
+    });
     const jsonString = JSON.stringify(monthYearWeekN, null, 2);
 
     const filePath = path.join(getStatsDir(), 'monthYearWeekN.json');
