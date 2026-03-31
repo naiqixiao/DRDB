@@ -5,7 +5,13 @@
       No upcoming confirmed appointments found.
     </div>
 
-    <div class="cards-row" v-else>
+    <div
+      :class="[
+        'cards-row',
+        layout === 'horizontal' ? 'cards-row--horizontal' : 'cards-row--vertical',
+      ]"
+      v-else
+    >
       <v-card
         v-for="schedule in upcomingSchedules"
         :key="schedule.id"
@@ -21,10 +27,17 @@
           <span class="card-relative">{{ relativeTime(schedule.AppointmentTime) }}</span>
           <v-tooltip location="top">
             <template v-slot:activator="{ props }">
-              <v-btn v-bind="props" icon="mdi-autorenew" variant="text" size="x-small" density="compact"
-                class="ml-1" style="color: white; opacity: 0.9;"
+              <v-btn
+                v-bind="props"
+                icon="mdi-autorenew"
+                variant="text"
+                size="x-small"
+                density="compact"
+                class="ml-1"
+                style="color: white; opacity: 0.9"
                 :disabled="schedule.Status === 'Confirmed' && schedule.Completed === true"
-                @click.stop="$emit('updateSchedule', schedule)"></v-btn>
+                @click.stop="$emit('updateSchedule', schedule)"
+              ></v-btn>
             </template>
             <span>Update this appointment</span>
           </v-tooltip>
@@ -35,14 +48,19 @@
           <div v-for="(appt, idx) in schedule.Appointments" :key="idx" class="study-row">
             <div class="study-name">
               <v-icon size="14" class="mr-1" color="primary">mdi-flask-outline</v-icon>
-              {{ appt.Study ? appt.Study.StudyName : 'Unknown' }}
+              {{ appt.Study ? appt.Study.StudyName : "Unknown" }}
             </div>
             <div class="child-info">
               <v-icon size="13" class="mr-1">mdi-account-child</v-icon>
-              <strong>{{ appt.Child ? appt.Child.Name : 'Unknown' }}</strong>
-              <span class="child-detail" v-if="appt.Child"> · {{ childAge(appt.Child) }} · {{ appt.Child.Sex }}</span>
+              <strong>{{ appt.Child ? appt.Child.Name : "Unknown" }}</strong>
+              <span class="child-detail" v-if="appt.Child">
+                · {{ childAge(appt.Child) }} · {{ appt.Child.Sex }}</span
+              >
             </div>
-            <div class="experimenter-info" v-if="appt.PrimaryExperimenter && appt.PrimaryExperimenter.length > 0">
+            <div
+              class="experimenter-info"
+              v-if="appt.PrimaryExperimenter && appt.PrimaryExperimenter.length > 0"
+            >
               <v-icon size="13" class="mr-1">mdi-account-hard-hat</v-icon>
               E1: {{ appt.PrimaryExperimenter[0].Name }}
             </div>
@@ -54,12 +72,21 @@
           <div class="family-info" v-if="schedule.Family">
             <v-icon size="13" class="mr-1">mdi-account-group-outline</v-icon>
             {{ schedule.Family.NamePrimary }}
-            <span v-if="schedule.Family.Phone" class="family-detail"> · {{ formatPhone(schedule.Family.Phone) }}</span>
+            <span v-if="schedule.Family.Phone" class="family-detail">
+              · {{ formatPhone(schedule.Family.Phone) }}</span
+            >
             <v-spacer></v-spacer>
             <v-tooltip location="top">
               <template v-slot:activator="{ props }">
-                <v-btn v-bind="props" icon="mdi-account-details-outline" variant="text" size="x-small" density="compact"
-                  color="primary" @click.stop="$emit('showFamily', schedule.Family)"></v-btn>
+                <v-btn
+                  v-bind="props"
+                  icon="mdi-account-details-outline"
+                  variant="text"
+                  size="x-small"
+                  density="compact"
+                  color="primary"
+                  @click.stop="$emit('showFamily', schedule.Family)"
+                ></v-btn>
               </template>
               <span>View Family Details</span>
             </v-tooltip>
@@ -82,6 +109,12 @@ export default {
     return { store };
   },
   emits: ["selectSchedule", "showFamily", "updateSchedule"],
+  props: {
+    layout: {
+      type: String,
+      default: "vertical",
+    },
+  },
   data() {
     return {
       upcomingSchedules: [],
@@ -188,17 +221,55 @@ export default {
 
 .cards-row {
   display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 16px;
 }
 
-.upcoming-card {
-  flex: 1 1 0;
-  min-width: 220px;
-  max-width: 340px;
+/* Vertical layout (Home page): wrap cards, scroll vertically */
+.cards-row--vertical {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  overflow-y: auto;
+}
+
+.cards-row--vertical .upcoming-card {
+  flex: 0 0 auto;
+  width: 100%;
   border-radius: 10px !important;
   overflow: hidden;
   cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+/* Horizontal layout (Appointment page): single row, scroll horizontally */
+.cards-row--horizontal {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cards-row--horizontal::-webkit-scrollbar {
+  height: 5px;
+}
+
+.cards-row--horizontal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cards-row--horizontal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+.cards-row--horizontal .upcoming-card {
+  flex: 0 0 320px;
+  width: 320px;
+  border-radius: 10px !important;
+  overflow: hidden;
+  cursor: pointer;
+  scroll-snap-align: start;
   transition: box-shadow 0.2s, transform 0.15s;
 }
 

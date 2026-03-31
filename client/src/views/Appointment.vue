@@ -31,6 +31,7 @@
           <v-card-text class="pt-3 pb-4">
             <UpcomingAppointments
               ref="upcomingRef"
+              layout="horizontal"
               @selectSchedule="onSelectUpcoming"
               @showFamily="openFamilyDialog"
               @updateSchedule="openScheduleDialog"
