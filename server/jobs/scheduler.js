@@ -16,10 +16,37 @@ const autoCancelController = require("../api/controllers/autoCancellation");
 const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
 
-const labModel = model.lab || model.Lab;
-const scheduledJobSettingModel =
-  model.scheduledJobSetting || model.ScheduledJobSetting;
-let scheduledJobPersistenceEnabled = Boolean(scheduledJobSettingModel);
+let scheduledJobPersistenceEnabled = true;
+
+function getLabModel() {
+  return (
+    model.lab ||
+    model.Lab ||
+    model?.sequelize?.models?.Lab ||
+    model?.sequelize?.models?.lab ||
+    null
+  );
+}
+
+function getPersonnelModel() {
+  return (
+    model.personnel ||
+    model.Personnel ||
+    model?.sequelize?.models?.Personnel ||
+    model?.sequelize?.models?.personnel ||
+    null
+  );
+}
+
+function getScheduledJobSettingModel() {
+  return (
+    model.scheduledJobSetting ||
+    model.ScheduledJobSetting ||
+    model?.sequelize?.models?.ScheduledJobSetting ||
+    model?.sequelize?.models?.scheduledJobSetting ||
+    null
+  );
+}
 
 const TIMEZONE = process.env.TIMEZONE || "America/Toronto";
 const EDITABLE_JOB_IDS = new Set([
@@ -158,6 +185,8 @@ function upsertRuntimeForJob(job, labId, nextConfig) {
 }
 
 async function loadPersistedRuntimeConfigs(labIds) {
+  const scheduledJobSettingModel = getScheduledJobSettingModel();
+
   if (!scheduledJobPersistenceEnabled || !scheduledJobSettingModel) {
     console.warn("[Jobs] ScheduledJobSetting model is unavailable; using default runtimes.");
     return;
@@ -197,6 +226,8 @@ async function loadPersistedRuntimeConfigs(labIds) {
 }
 
 async function persistRuntimeForJob(job, labId, runtimeConfig) {
+  const scheduledJobSettingModel = getScheduledJobSettingModel();
+
   if (!scheduledJobPersistenceEnabled || !scheduledJobSettingModel) {
     // Backward compatibility during phased deploys where this model/table is not present yet.
     return;
@@ -353,11 +384,21 @@ async function updateScheduledJob(jobId, updates = {}, labId) {
 async function registerJobs() {
   console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Timezone: ${TIMEZONE})...`);
 
-  if (!labModel) {
-    throw new Error("Lab model is unavailable; cannot register lab-scoped jobs.");
+  const labModel = getLabModel();
+  const personnelModel = getPersonnelModel();
+  let labs = [];
+
+  if (labModel) {
+    labs = await labModel.findAll({ attributes: ["id"] });
+  } else if (personnelModel) {
+    console.warn("[Jobs] Lab model unavailable; deriving lab IDs from Personnel records.");
+    const personnelRows = await personnelModel.findAll({ attributes: ["FK_Lab"] });
+    const uniqueLabIds = [...new Set(personnelRows.map((row) => Number(row.FK_Lab)).filter(Boolean))];
+    labs = uniqueLabIds.map((id) => ({ id }));
+  } else {
+    console.warn("[Jobs] Lab model unavailable; lab-scoped jobs will not be pre-scheduled at startup.");
   }
 
-  const labs = await labModel.findAll({ attributes: ["id"] });
   const labIds = new Set(labs.map((lab) => Number(lab.id)));
   await loadPersistedRuntimeConfigs(labIds);
 
