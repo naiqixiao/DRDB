@@ -42,8 +42,7 @@ function buildScheduleSearchInclude() {
         {
           model: model.study,
           include: [
-            { model: model.lab },
-            { model: model.personnel, as: "Experimenters", through: { model: model.experimenter } },
+            { model: model.lab, attributes: ["id", "PI"] },
           ],
         },
         {
@@ -71,7 +70,6 @@ function buildScheduleSearchInclude() {
             { model: model.family, attributes: ["AutismHistory"] },
           ],
         },
-        { model: model.conversations },
       ],
     },
     {

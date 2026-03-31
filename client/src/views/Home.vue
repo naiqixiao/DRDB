@@ -15,8 +15,8 @@
       </div>
     </div>
 
-    <v-row>
-      <v-col cols="12" lg="8">
+    <v-row style="align-items: stretch;">
+      <v-col cols="12" lg="8" class="d-flex flex-column">
         <v-card class="ds-card mb-6" variant="flat">
           <v-toolbar color="transparent" density="compact" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
             <v-icon class="mr-2" color="primary">mdi-chart-timeline-variant</v-icon>
@@ -64,8 +64,8 @@
         </v-row>
       </v-col>
 
-      <v-col cols="12" lg="4">
-        <v-card class="ds-card h-100" variant="flat">
+      <v-col cols="12" lg="4" class="d-flex flex-column">
+        <v-card class="ds-card d-flex flex-column flex-grow-1" variant="flat">
           <v-toolbar color="transparent" density="compact" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
             <v-icon class="mr-2" color="primary">mdi-calendar-clock</v-icon>
             <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
@@ -73,19 +73,19 @@
             </span>
           </v-toolbar>
           
-          <v-card-text class="pt-4 pb-0 h-100" style="overflow-y: auto; background-color: #F8FAFC;">
+          <v-card-text class="pt-4 pb-0 flex-grow-1" style="overflow-y: auto; background-color: #F8FAFC;">
             <UpcomingAppointments 
               @selectSchedule="handleScheduleSelect" 
               @showFamily="handleShowFamily"
               @updateSchedule="handleUpdateSchedule"
             />
-            
-            <div class="text-center mt-4 mb-6">
-              <v-btn variant="text" color="primary" append-icon="mdi-arrow-right" @click="$router.push('/appointment')">
-                View full calendar
-              </v-btn>
-            </div>
           </v-card-text>
+
+          <div class="text-center py-3" style="border-top: 1px solid #E2E8F0; background-color: #fff;">
+            <v-btn variant="text" color="primary" append-icon="mdi-arrow-right" @click="$router.push('/appointment')">
+              View full calendar
+            </v-btn>
+          </div>
         </v-card>
       </v-col>
     </v-row>
