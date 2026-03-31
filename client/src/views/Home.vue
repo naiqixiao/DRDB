@@ -64,8 +64,8 @@
         </v-row>
       </v-col>
 
-      <v-col cols="12" lg="4" class="d-flex flex-column">
-        <v-card class="ds-card d-flex flex-column flex-grow-1" variant="flat">
+      <v-col cols="12" lg="4" class="d-flex flex-column" style="height: 100%;">
+        <v-card class="ds-card d-flex flex-column flex-grow-1" variant="flat" style="min-height: 0;">
           <v-toolbar color="transparent" density="compact" class="px-2" style="border-bottom: 1px solid #E2E8F0;">
             <v-icon class="mr-2" color="primary">mdi-calendar-clock</v-icon>
             <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
@@ -73,7 +73,7 @@
             </span>
           </v-toolbar>
           
-          <v-card-text class="pt-4 pb-0 flex-grow-1" style="overflow-y: auto; background-color: #F8FAFC;">
+          <v-card-text class="pt-4 pb-0 flex-grow-1" style="overflow-y: auto; background-color: #F8FAFC; min-height: 0;">
             <UpcomingAppointments 
               @selectSchedule="handleScheduleSelect" 
               @showFamily="handleShowFamily"
