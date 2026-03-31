@@ -20,7 +20,7 @@ This release focuses on search reliability and backend stability. We added true 
 * **Bulk Updates:** Automated completion, rejection, and family-release jobs now update records in groups instead of loading full objects one at a time.
 * **Search Hardening:** Several large backend search endpoints now paginate at the API level to avoid unbounded result loads.
 
-### Release v3.0.1
+### Release v3.0.0
 
 DRDB v3 is a complete rewrite. We migrated the frontend to Vue 3 and built a new component library to fix the inconsistent UI issues from v2.
 

@@ -237,8 +237,13 @@ function unscheduleJob(jobId, labId) {
   const handle = jobHandles.get(key);
   if (!handle) return;
 
-  handle.stop();
-  handle.destroy();
+  // node-cron task APIs vary by version; stop is always available, destroy is optional.
+  if (typeof handle.stop === "function") {
+    handle.stop();
+  }
+  if (typeof handle.destroy === "function") {
+    handle.destroy();
+  }
   jobHandles.delete(key);
 }
 
