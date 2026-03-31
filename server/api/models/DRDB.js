@@ -1,6 +1,4 @@
 const config = require("../../config/general");
-const Sequelize = require("sequelize");
-
 
 const sequelize = config.sequelize;
 const log = require("../controllers/log");
@@ -58,42 +56,8 @@ const Study = sequelize.import("../models/SequelizeAuto/Study");
 const StudyAgeGroup = sequelize.import("../models/SequelizeAuto/StudyAgeGroup");
 const Experimenter = sequelize.import("../models/SequelizeAuto/Experimenter");
 const TestingRoom = sequelize.import("../models/SequelizeAuto/TestingRoom");
-const ScheduledJobSetting = sequelize.define(
-  "ScheduledJobSetting",
-  {
-    id: {
-      autoIncrement: true,
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-    },
-    FK_Lab: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-    },
-    JobId: {
-      type: Sequelize.STRING(100),
-      allowNull: false,
-    },
-    CronExpression: {
-      type: Sequelize.STRING(100),
-      allowNull: false,
-    },
-    Enabled: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
-  },
-  {
-    tableName: "ScheduledJobSetting",
-    indexes: [
-      {
-        unique: true,
-        fields: ["FK_Lab", "JobId"],
-      },
-    ],
-  }
+const ScheduledJobSetting = sequelize.import(
+  "../models/SequelizeAuto/ScheduledJobSetting"
 );
 
 Lab.hasMany(Personnel, {
