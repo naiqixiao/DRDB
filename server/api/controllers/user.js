@@ -15,9 +15,24 @@ function resolveModel(...keys) {
     if (model[key]) return model[key];
   }
 
-  const sequelizeModels = model?.sequelize?.models || {};
-  for (const key of keys) {
-    if (sequelizeModels[key]) return sequelizeModels[key];
+  const sequelizeSources = [model?.sequelize, config?.sequelize].filter(Boolean);
+
+  for (const sequelizeInstance of sequelizeSources) {
+    const sequelizeModels = sequelizeInstance.models || {};
+    for (const key of keys) {
+      if (sequelizeModels[key]) return sequelizeModels[key];
+    }
+
+    const managedModels = sequelizeInstance.modelManager?.models || [];
+    for (const key of keys) {
+      const matchedModel = managedModels.find(
+        (managedModel) =>
+          managedModel?.name === key ||
+          managedModel?.options?.name?.singular === key ||
+          managedModel?.options?.name?.plural === key
+      );
+      if (matchedModel) return matchedModel;
+    }
   }
 
   return null;
