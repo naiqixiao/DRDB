@@ -28,6 +28,7 @@ async function fetchSchedulesInBatches({ where, include, order = [["id", "ASC"]]
       where,
       include,
       order,
+      subQuery: false,
       limit: REMINDER_BATCH_SIZE,
       offset,
     });
@@ -294,11 +295,12 @@ async function getFamilyReminderSchedules(labId) {
     "$Family.TrainingSet$": false,
   };
 
-  return fetchSchedulesInBatches({
+  const schedules = await fetchSchedulesInBatches({
     where: queryString,
     include: [
       {
         model: model.appointment,
+        required: true,
         include: [
           {
             model: model.child,
@@ -307,6 +309,7 @@ async function getFamilyReminderSchedules(labId) {
           {
             model: model.study,
             where: studyWhere,
+            required: true,
             attributes: [
               "StudyName",
               "EmailTemplate",
@@ -357,6 +360,20 @@ async function getFamilyReminderSchedules(labId) {
       },
     ],
   });
+
+  return schedules
+    .map((schedule) => {
+      if (!Array.isArray(schedule.Appointments)) {
+        return schedule;
+      }
+
+      schedule.Appointments = schedule.Appointments.filter(
+        (appointment) => appointment && appointment.Study
+      );
+
+      return schedule;
+    })
+    .filter((schedule) => schedule.Appointments && schedule.Appointments.length > 0);
 }
 
 /**

@@ -25,6 +25,16 @@ const {
   getExperimenterReminderData,
 } = require("../services/reminderService");
 
+function handleReminderError(logLabel, error, res) {
+  console.error(logLabel, error);
+
+  if (res && typeof res.status === "function" && !res.headersSent) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  throw error;
+}
+
 function resolveLabId(context) {
   if (context === null || context === undefined) return null;
 
@@ -81,7 +91,7 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Reminder email error:", error);
+    return handleReminderError("Reminder email error:", error, res);
   }
 });
 
@@ -126,7 +136,7 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Experimenter reminder error:", error);
+    return handleReminderError("Experimenter reminder error:", error, res);
   }
 });
 
@@ -203,7 +213,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
       res.status(200).send({ info: "reminder email sent!", count: schedules.length });
     }
   } catch (error) {
-    console.error("Auto-completion reminder error:", error);
+    return handleReminderError("Family reminder error:", error, res);
   }
 });
 
@@ -233,7 +243,14 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
         "Reminder email (experimenter) is sent to " + experimenter.Name
       );
     }
-  } catch (error) {
-      console.error("Auto-rejection reminder error:", error);
+
+    if (res) {
+      res.status(200).send({
+        info: "experimenter reminder email sent!",
+        count: experimenters.length,
+      });
     }
+  } catch (error) {
+    return handleReminderError("Experimenter reminder error:", error, res);
+  }
 });
