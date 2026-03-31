@@ -42,11 +42,12 @@ export default {
       params: schedule,
     });
   },
-  upcoming() {
+  upcoming(limit = 7) {
     return api().get("schedule/upcoming", {
       params: {
         lab: useMainStore().lab,
         trainingMode: useMainStore().trainingMode,
+        limit,
       },
     });
   },

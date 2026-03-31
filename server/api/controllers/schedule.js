@@ -147,7 +147,7 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
 });
 
 exports.upcoming = asyncHandler(async (req, res) => {
-  const limit = parseInt(req.query.limit) || 3;
+  const limit = parseInt(req.query.limit) || 7;
   const queryString = {
     AppointmentTime: { [Op.gte]: moment().toDate() },
     Status: "Confirmed",
@@ -163,20 +163,16 @@ exports.upcoming = asyncHandler(async (req, res) => {
       {
         model: model.appointment,
         include: [
-          { model: model.child, attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"] },
+          { model: model.child, attributes: ["id", "Name", "DoB", "Age", "Sex"] },
           {
             model: model.study,
             attributes: ["id", "StudyName", "FK_TestingRoom", "StudyType", "EmailTemplate", "ReminderTemplate"],
-            include: [
-              { model: model.lab },
-              { model: model.personnel, as: "Experimenters", through: { model: model.experimenter } },
-            ],
           },
           { model: model.personnel, as: "PrimaryExperimenter", through: { model: model.experimenterAssignment }, attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"] },
           { model: model.personnel, as: "SecondaryExperimenter", through: { model: model.experimenterAssignment_2nd }, attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"] },
         ],
       },
-      { model: model.family, attributes: ["id", "NamePrimary", "NameSecondary", "Phone", "Email", "TrainingSet"] }
+      { model: model.family, attributes: ["id", "NamePrimary", "NameSecondary", "Phone", "Email"] }
     ],
     order: [["AppointmentTime", "ASC"]],
     limit: limit,
