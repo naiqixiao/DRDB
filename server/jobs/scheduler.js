@@ -16,6 +16,11 @@ const autoCancelController = require("../api/controllers/autoCancellation");
 const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
 
+const labModel = model.lab || model.Lab;
+const scheduledJobSettingModel =
+  model.scheduledJobSetting || model.ScheduledJobSetting;
+let scheduledJobPersistenceEnabled = Boolean(scheduledJobSettingModel);
+
 const TIMEZONE = process.env.TIMEZONE || "America/Toronto";
 const EDITABLE_JOB_IDS = new Set([
   "family-reminders",
@@ -153,11 +158,24 @@ function upsertRuntimeForJob(job, labId, nextConfig) {
 }
 
 async function loadPersistedRuntimeConfigs(labIds) {
-  await model.scheduledJobSetting.sync();
+  if (!scheduledJobPersistenceEnabled || !scheduledJobSettingModel) {
+    console.warn("[Jobs] ScheduledJobSetting model is unavailable; using default runtimes.");
+    return;
+  }
 
-  const rows = await model.scheduledJobSetting.findAll({
-    attributes: ["FK_Lab", "JobId", "CronExpression", "Enabled"],
-  });
+  let rows = [];
+  try {
+    await scheduledJobSettingModel.sync();
+    rows = await scheduledJobSettingModel.findAll({
+      attributes: ["FK_Lab", "JobId", "CronExpression", "Enabled"],
+    });
+  } catch (error) {
+    scheduledJobPersistenceEnabled = false;
+    console.warn(
+      `[Jobs] Scheduled job persistence is disabled (${error.message}); using default runtimes.`
+    );
+    return;
+  }
 
   rows.forEach((row) => {
     if (!EDITABLE_JOB_IDS.has(row.JobId)) return;
@@ -179,35 +197,47 @@ async function loadPersistedRuntimeConfigs(labIds) {
 }
 
 async function persistRuntimeForJob(job, labId, runtimeConfig) {
-  const existing = await model.scheduledJobSetting.findOne({
-    where: {
-      FK_Lab: labId,
-      JobId: job.id,
-    },
-  });
-
-  if (!existing) {
-    await model.scheduledJobSetting.create({
-      FK_Lab: labId,
-      JobId: job.id,
-      CronExpression: runtimeConfig.cron,
-      Enabled: runtimeConfig.enabled,
-    });
+  if (!scheduledJobPersistenceEnabled || !scheduledJobSettingModel) {
+    // Backward compatibility during phased deploys where this model/table is not present yet.
     return;
   }
 
-  await model.scheduledJobSetting.update(
-    {
-      CronExpression: runtimeConfig.cron,
-      Enabled: runtimeConfig.enabled,
-    },
-    {
+  try {
+    const existing = await scheduledJobSettingModel.findOne({
       where: {
         FK_Lab: labId,
         JobId: job.id,
       },
+    });
+
+    if (!existing) {
+      await scheduledJobSettingModel.create({
+        FK_Lab: labId,
+        JobId: job.id,
+        CronExpression: runtimeConfig.cron,
+        Enabled: runtimeConfig.enabled,
+      });
+      return;
     }
-  );
+
+    await scheduledJobSettingModel.update(
+      {
+        CronExpression: runtimeConfig.cron,
+        Enabled: runtimeConfig.enabled,
+      },
+      {
+        where: {
+          FK_Lab: labId,
+          JobId: job.id,
+        },
+      }
+    );
+  } catch (error) {
+    scheduledJobPersistenceEnabled = false;
+    console.warn(
+      `[Jobs] Scheduled job persistence write failed (${error.message}); switching to in-memory runtime only.`
+    );
+  }
 }
 
 function listScheduledJobs(labId) {
@@ -323,7 +353,11 @@ async function updateScheduledJob(jobId, updates = {}, labId) {
 async function registerJobs() {
   console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Timezone: ${TIMEZONE})...`);
 
-  const labs = await model.lab.findAll({ attributes: ["id"] });
+  if (!labModel) {
+    throw new Error("Lab model is unavailable; cannot register lab-scoped jobs.");
+  }
+
+  const labs = await labModel.findAll({ attributes: ["id"] });
   const labIds = new Set(labs.map((lab) => Number(lab.id)));
   await loadPersistedRuntimeConfigs(labIds);
 
