@@ -10,10 +10,86 @@ const log = require("../controllers/log");
 const { sendAdminEmail } = require("../utils/emailUtil");
 const { buildWelcomeEmail, buildPasswordChangedEmail, buildPasswordResetEmail } = require("../utils/userTemplates");
 
+function resolveModel(...keys) {
+  for (const key of keys) {
+    if (model[key]) return model[key];
+  }
+
+  const sequelizeModels = model?.sequelize?.models || {};
+  for (const key of keys) {
+    if (sequelizeModels[key]) return sequelizeModels[key];
+  }
+
+  return null;
+}
+
+function getUserModels() {
+  return {
+    PersonnelModel: resolveModel("personnel", "Personnel"),
+    LabModel: resolveModel("lab", "Lab"),
+    StudyModel: resolveModel("study", "Study"),
+    StudyAgeGroupModel: resolveModel("studyAgeGroup", "StudyAgeGroup"),
+    ExperimenterModel: resolveModel("experimenter", "Experimenter"),
+  };
+}
+
+function buildLabInclude() {
+  const {
+    PersonnelModel,
+    LabModel,
+    StudyModel,
+    StudyAgeGroupModel,
+    ExperimenterModel,
+  } = getUserModels();
+
+  if (!LabModel) return [];
+  if (!StudyModel) return [{ model: LabModel }];
+
+  const studyInclude = [];
+
+  if (PersonnelModel) {
+    studyInclude.push({ model: PersonnelModel, as: "PointofContact" });
+    if (ExperimenterModel) {
+      studyInclude.push({
+        model: PersonnelModel,
+        as: "Experimenters",
+        through: { model: ExperimenterModel },
+      });
+    }
+  }
+
+  if (StudyAgeGroupModel) {
+    studyInclude.push({ model: StudyAgeGroupModel, as: "AgeGroups" });
+  }
+
+  studyInclude.push({
+    model: StudyModel,
+    as: "Prerequisites",
+    attributes: ["id", "StudyName"],
+  });
+  studyInclude.push({
+    model: StudyModel,
+    as: "Exclusions",
+    attributes: ["id", "StudyName"],
+  });
+
+  return [
+    {
+      model: LabModel,
+      include: [{ model: StudyModel, include: studyInclude }],
+    },
+  ];
+}
+
 exports.signup = asyncHandler(async (req, res) => {
   const logFolder = "api/logs";
   if (!fs.existsSync(logFolder)) {
     fs.mkdirSync(logFolder)
+  }
+
+  const { PersonnelModel } = getUserModels();
+  if (!PersonnelModel) {
+    return res.status(500).json({ error: "Personnel model is unavailable." });
   }
 
   try {
@@ -28,7 +104,7 @@ exports.signup = asyncHandler(async (req, res) => {
     newUser.temporaryPassword = true;
 
     // check whether the user is in the system (previously being retired).
-    const personnel = await model.personnel.findOne({
+    const personnel = await PersonnelModel.findOne({
       where: {
         Email: req.body.Email,
       },
@@ -43,14 +119,14 @@ exports.signup = asyncHandler(async (req, res) => {
 
       if (!personnel) {
 
-        const newPersonnel = await model.personnel.create(newUser);
+        const newPersonnel = await PersonnelModel.create(newUser);
 
         res.status(200).send(newPersonnel);
 
       } else {
 
         newUser.Retired = false
-        await model.personnel.update(newUser, {
+        await PersonnelModel.update(newUser, {
           where: {
             Email: req.body.Email,
           }
@@ -79,6 +155,11 @@ exports.signupBatch = asyncHandler(async (req, res) => {
     fs.mkdirSync(logFolder)
   }
 
+  const { PersonnelModel } = getUserModels();
+  if (!PersonnelModel) {
+    return res.status(500).json({ error: "Personnel model is unavailable." });
+  }
+
   const User = req.body.User;
 
   for (var i = 0; i < req.body.newUsers.length; i++) {
@@ -88,7 +169,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
     try {
 
       // check whether the user is in the system (previously being retired).
-      const personnel = await model.personnel.findOne({
+      const personnel = await PersonnelModel.findOne({
         where: {
           Email: newUser.Email,
         }
@@ -111,12 +192,12 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         if (!personnel) {
 
           newUser.FK_Lab = req.body.lab
-          await model.personnel.create(newUser);
+          await PersonnelModel.create(newUser);
 
         } else {
 
           newUser.Retired = false
-          await model.personnel.update(newUser, {
+          await PersonnelModel.update(newUser, {
             where: {
               Email: newUser.Email,
             }
@@ -145,35 +226,21 @@ exports.signupBatch = asyncHandler(async (req, res) => {
 exports.login = asyncHandler(async (req, res) => {
 
   const { Email, Password } = req.body;
-  const personnel = await model.personnel.findOne({
+  const { PersonnelModel } = getUserModels();
+  if (!PersonnelModel) {
+    return res.status(500).send({ error: "Personnel model is unavailable." });
+  }
+
+  const personnel = await PersonnelModel.findOne({
     where: {
       Email: Email,
       Retired: false
     },
-    include: [
-      {
-        model: model.lab,
-        include: [{
-          model: model.study, include: [
-            {
-              model: model.personnel,
-              as: 'PointofContact'
-            },
-            {
-              model: model.personnel,
-              as: 'Experimenters',
-              through: {
-                model: model.experimenter,
-              },
-            },
-            { model: model.studyAgeGroup, as: 'AgeGroups' },
-            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
-            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
-          ]
-        }],
-      },
-    ],
+    include: buildLabInclude(),
   });
+
+  const personnelLab = personnel?.Lab || personnel?.lab || null;
+  const labName = personnelLab?.LabName || "Unknown";
 
   if (!personnel) {
     // log the login information.
@@ -190,7 +257,7 @@ exports.login = asyncHandler(async (req, res) => {
   if (!isPasswordValid) {
 
     // log the login information.
-    personnel.LabName = personnel.Lab.LabName;
+    personnel.LabName = labName;
 
     await log.createLog("Login Error", personnel, "login password mismatched");
 
@@ -211,7 +278,7 @@ exports.login = asyncHandler(async (req, res) => {
   );
 
   // log the login information.
-  personnel.LabName = personnel.Lab.LabName;
+  personnel.LabName = labName;
   await log.createLog("Log in", personnel, "logged in successfully!");
 
   res.status(200).send({
@@ -222,15 +289,15 @@ exports.login = asyncHandler(async (req, res) => {
     userID: personnel.id,
     role: personnel.Role,
     lab: personnel.FK_Lab,
-    labName: personnel.Lab.LabName,
-    labEmail: personnel.Lab.Email,
+    labName: labName,
+    labEmail: personnelLab?.Email,
     token: token,
-    studies: personnel.Lab.Studies,
-    emailOpening: personnel.Lab.EmailOpening,
-    emailClosing: personnel.Lab.EmailClosing,
-    TYEmail: personnel.Lab.TYEmail,
-    location: personnel.Lab.Location,
-    transportationInstructions: personnel.Lab.TransportationInstructions,
+    studies: personnelLab?.Studies || [],
+    emailOpening: personnelLab?.EmailOpening,
+    emailClosing: personnelLab?.EmailClosing,
+    TYEmail: personnelLab?.TYEmail,
+    location: personnelLab?.Location,
+    transportationInstructions: personnelLab?.TransportationInstructions,
     ZoomLink: personnel.ZoomLink,
     timeZone: config.timeZone
   });
@@ -247,31 +314,21 @@ exports.changePassword = asyncHandler(async (req, res) => {
   }
 
   const { Email, Password, newPassword, User } = req.body;
-  const personnel = await model.personnel.findOne({
+  const { PersonnelModel } = getUserModels();
+  if (!PersonnelModel) {
+    return res.status(500).send({ error: "Personnel model is unavailable." });
+  }
+
+  const personnel = await PersonnelModel.findOne({
     where: {
       Email: Email,
       Retired: false
     },
-    include: [
-      {
-        model: model.lab,
-        include: [{
-          model: model.study,
-          include: [
-            { model: model.personnel, as: 'PointofContact' },
-            {
-              model: model.personnel,
-              as: 'Experimenters',
-              through: { model: model.experimenter },
-            },
-            { model: model.studyAgeGroup, as: 'AgeGroups' },
-            { model: model.study, as: 'Prerequisites', attributes: ['id', 'StudyName'] },
-            { model: model.study, as: 'Exclusions', attributes: ['id', 'StudyName'] },
-          ],
-        }],
-      },
-    ],
+    include: buildLabInclude(),
   });
+
+  const personnelLab = personnel?.Lab || personnel?.lab || null;
+  const labName = personnelLab?.LabName || "Unknown";
 
   if (!personnel) {
     return res.status(401).send({
@@ -290,7 +347,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
   const hashNewPassword = bcrypt.hashSync(newPassword, 10);
 
   try {
-    await model.personnel.update(
+    await PersonnelModel.update(
       { Password: hashNewPassword, temporaryPassword: false },
       {
         where: {
@@ -318,14 +375,14 @@ exports.changePassword = asyncHandler(async (req, res) => {
       userID: personnel.id,
       role: personnel.Role,
       lab: personnel.FK_Lab,
-      labName: personnel.Lab.LabName,
-      labEmail: personnel.Lab.Email,
-      studies: personnel.Lab.Studies,
-      emailOpening: personnel.Lab.EmailOpening,
-      emailClosing: personnel.Lab.EmailClosing,
-      TYEmail: personnel.Lab.TYEmail,
-      location: personnel.Lab.Location,
-      transportationInstructions: personnel.Lab.TransportationInstructions,
+      labName: labName,
+      labEmail: personnelLab?.Email,
+      studies: personnelLab?.Studies || [],
+      emailOpening: personnelLab?.EmailOpening,
+      emailClosing: personnelLab?.EmailClosing,
+      TYEmail: personnelLab?.TYEmail,
+      location: personnelLab?.Location,
+      transportationInstructions: personnelLab?.TransportationInstructions,
     });
 
 
@@ -346,9 +403,14 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 
   const hashPassword = bcrypt.hashSync(password, 10);
 
+  const { PersonnelModel } = getUserModels();
+  if (!PersonnelModel) {
+    return res.status(500).send({ error: "Personnel model is unavailable." });
+  }
+
   try {
     const { Email, User } = req.body;
-    const personnel = await model.personnel.findOne({
+    const personnel = await PersonnelModel.findOne({
       where: {
         Email: Email,
         Retired: false
@@ -361,7 +423,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
       });
     }
 
-    await model.personnel.update(
+    await PersonnelModel.update(
       { Password: hashPassword, temporaryPassword: true },
       {
         where: {
