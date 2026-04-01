@@ -111,19 +111,15 @@
         <v-avatar size="64" color="white" class="mb-4 elevation-2">
           <v-icon size="36" color="primary">mdi-account-circle</v-icon>
         </v-avatar>
-        <div class="text-h6 text-white font-weight-bold mb-1">{{ store.name }}</div>
-        <div class="text-body-2 text-white mb-3" style="opacity: 0.95">
+        <div
+          class="text-h6 font-weight-bold mb-1"
+          style="color: primary; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3)"
+        >
+          {{ store.name }}
+        </div>
+        <div class="text-body-2 mb-3" style="color: primary">
           {{ store.labName }}
         </div>
-        <v-chip
-          size="small"
-          color="white"
-          variant="flat"
-          class="px-3"
-          style="font-weight: 500"
-        >
-          <span style="color: var(--v-theme-primary)">{{ store.role }}</span>
-        </v-chip>
       </div>
 
       <!-- Navigation Items -->
