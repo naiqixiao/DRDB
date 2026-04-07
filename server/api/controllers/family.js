@@ -334,12 +334,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
 
   queryString.NoMoreContact = 0;
 
-  queryString["$Schedules.Status$"] = {
-    [Op.in]: followupStatuses,
-  };
-
   const countWhere = { ...queryString };
-  delete countWhere["$Schedules.Status$"];
 
   const total = await model.family.count({
     where: countWhere,
@@ -368,7 +363,13 @@ exports.followupSearch = asyncHandler(async (req, res) => {
       familyService.childInclude(),
       {
         ...familyService.scheduleInclude(false),
-        order: [[model.schedule, "AppointmentTime", "DESC"]],
+        required: true,
+        where: {
+          Status: {
+            [Op.in]: followupStatuses,
+          },
+        },
+        order: [["AppointmentTime", "DESC"]],
       },
     ],
     order: [[{ model: model.schedule }, 'id', 'DESC']],

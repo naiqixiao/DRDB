@@ -95,7 +95,7 @@ function buildScheduleCountInclude() {
     {
       model: model.family,
       attributes: [],
-      required: false,
+      required: true,
     },
   ];
 }

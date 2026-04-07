@@ -91,6 +91,10 @@ exports.search = asyncHandler(async (req, res) => {
   if (queryString.FamilyId) { queryString.FK_Family = queryString.FamilyId; }
   delete queryString.FamilyId;
 
+  // Strip empty array filters — Sequelize translates [] to `IN ()` which is invalid SQL.
+  if (Array.isArray(queryString.Status) && queryString.Status.length === 0) delete queryString.Status;
+  if (Array.isArray(queryString["$Appointments.FK_Study$"]) && queryString["$Appointments.FK_Study$"].length === 0) delete queryString["$Appointments.FK_Study$"];
+
   const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
   res.status(200).send(result);
 });
@@ -139,8 +143,10 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
     "$Family.NoMoreContact$": 0,
     Status: { [Op.in]: ["TBD", "Rescheduling", "No Show"] },
     "$Family.TrainingSet$": req.query.trainingMode === "true",
-    "$Family.AssignedLab$": req.query.lab
   };
+  // Filter by lab via the appointment's study, not AssignedLab.
+  // Families that "No Showed" have AssignedLab cleared by updateSchedule,
+  // so using AssignedLab here would exclude all the families that need follow-up.
   if (req.query.lab) queryString["$Appointments.Study.FK_Lab$"] = req.query.lab;
   const result = await scheduleService.searchSchedulesWithPagination(queryString, pagination);
   res.status(200).send(result);
