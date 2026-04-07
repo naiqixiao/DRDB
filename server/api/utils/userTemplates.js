@@ -20,7 +20,7 @@ function buildWelcomeEmail(name, email, role, password) {
   const firstName = name.split(" ")[0];
 
   return {
-    to: name + "<" + email + ">",
+    to: name + " <" + email + ">",
     subject: "Your user account has been created!",
     htmlBody:
       "<p>Hello " + firstName + ",</p> " +
@@ -43,7 +43,7 @@ function buildPasswordChangedEmail(name, email) {
   const firstName = name.split(" ")[0];
 
   return {
-    to: name + "<" + email + ">",
+    to: name + " <" + email + ">",
     subject: "Your login password is updated.",
     htmlBody:
       "<p>Hello " + firstName + ",</p> " +
@@ -63,7 +63,7 @@ function buildPasswordResetEmail(name, email, password) {
   const firstName = name.split(" ")[0];
 
   return {
-    to: name + "<" + email + ">",
+    to: name + " <" + email + ">",
     subject: "Your password is reset",
     htmlBody:
       "<p>Hello " + firstName + ",</p> " +

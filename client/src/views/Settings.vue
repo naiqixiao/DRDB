@@ -1,6 +1,11 @@
 <template>
   <v-container fluid>
-    <div v-if="!store.labEmailStatus" class="mb-4">
+    <v-alert v-if="emailSetupError" type="error" variant="flat" color="#c73460" class="mb-4" density="compact" style="font-weight: 600">
+      <v-icon start icon="mdi-alert-circle"></v-icon>
+      {{ emailSetupError }}
+    </v-alert>
+
+    <div v-if="!store.labEmailStatus && !emailSetupError" class="mb-4">
       <v-alert
         border="start"
         type="error"
@@ -646,6 +651,9 @@
           >
         </v-card-title>
         <v-card-text class="pt-6">
+          <v-alert v-if="emailSetupError" type="error" variant="tonal" class="mb-4" density="compact">
+            {{ emailSetupError }}
+          </v-alert>
           <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">
             Paste Sign-in Code
           </div>
@@ -912,6 +920,7 @@ export default {
       signInCode: null,
       labEmail: "Lab email is not set up yet.",
       adminEmail: "Admin email is not set up yet.",
+      emailSetupError: null,
       dialogNewLab: false,
       dialogEditLab: false,
       currentLab: {
@@ -1420,12 +1429,14 @@ export default {
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
       if (profile.data) {
+        this.emailSetupError = profile.data.error || null;
         this.labEmail = profile.data.labEmail || "Lab email is not set up yet.";
         this.adminEmail = profile.data.adminEmail || "Admin email is not set up yet.";
         this.store.setLabEmailStatus(!!profile.data.labEmail);
         this.store.setAdminEmailStatus(!!profile.data.adminEmail);
       }
     } catch (error) {
+      this.emailSetupError = "Failed to connect to the server's Google API service.";
       console.log("Could not load email profile:", error);
     }
   },

@@ -21,6 +21,12 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
 
     const credentialsPath = "api/google/general/credentials.json";
 
+    if (!fs.existsSync(credentialsPath)) {
+      return res.status(404).send({
+        message: "Google API credentials file is missing on the server. Please contact your administrator and ensure 'api/google/general/credentials.json' is present.",
+      });
+    }
+
     const credentials = fs.readFileSync(credentialsPath);
     const parsedCredentials = JSON.parse(credentials);
     const config = parsedCredentials.installed || parsedCredentials.web;
@@ -189,11 +195,6 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   try {
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/labs/lab" + req.body.lab + "/token.json";
-
-    const credentials = fs.readFileSync(credentialsPath);
-    const parsedCredentials = JSON.parse(credentials);
-    const config = parsedCredentials.installed || parsedCredentials.web;
-    const { client_secret, client_id, redirect_uris } = config;
 
     const origin = req.get('origin') || "http://localhost:5173";
     const redirect_uri = `${origin}/oauth/callback`;

@@ -111,29 +111,21 @@ exports.signup = asyncHandler(async (req, res) => {
     });
 
     if (personnel && personnel.Retired === false) {
-      res.status(400).send({
+      return res.status(400).send({
         message: "The entered information (Email or CalendarID) already exists in the system.\nPlease double check or enter new information.",
       });
 
     } else {
 
       if (!personnel) {
-
-        const newPersonnel = await PersonnelModel.create(newUser);
-
-        res.status(200).send(newPersonnel);
-
+        await PersonnelModel.create(newUser);
       } else {
-
         newUser.Retired = false
         await PersonnelModel.update(newUser, {
           where: {
             Email: req.body.Email,
           }
         });
-
-        res.status(200).send(newUser);
-
       }
 
       const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
@@ -142,6 +134,7 @@ exports.signup = asyncHandler(async (req, res) => {
       // log
       await log.createLog("User Created", User, "created " + newUser.Email);
 
+      res.status(200).send(newUser);
     }
   } catch (error) {
       console.error("Signup error:", error);
@@ -214,7 +207,7 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         }
       } catch (error) {
         console.error("Signup batch error:", error);
-        res.status(500).json({ error: error.message });
+        // We continue with other users even if one fails, but we don't send a response yet
       }
 
   }
