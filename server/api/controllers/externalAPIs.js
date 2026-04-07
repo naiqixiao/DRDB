@@ -128,6 +128,7 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     res.status(200).send({
       message: "Google account is successfully set up!",
+      Email: labEmail,
     });
   } catch (error) {
     console.error("error in googleToken:", error);
@@ -192,19 +193,26 @@ exports.adminToken = asyncHandler(async (req, res) => {
 });
 
 exports.googleEmail = asyncHandler(async (req, res) => {
+  var sendAsEmail = {};
+
+  // ── Lab email profile ─────────────────────────────────────────────
   try {
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/labs/lab" + req.body.lab + "/token.json";
 
+    // Load credentials here — they are needed to build the OAuth2 client
+    const credentials = fs.readFileSync(credentialsPath);
+    const parsedCredentials = JSON.parse(credentials);
+    const config = parsedCredentials.installed || parsedCredentials.web;
+    const { client_secret, client_id, redirect_uris } = config;
+
     const origin = req.get('origin') || "http://localhost:5173";
     const redirect_uri = `${origin}/oauth/callback`;
-    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
-      ? redirect_uri 
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri)
+      ? redirect_uri
       : redirect_uris[0];
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
-
-    var sendAsEmail = {};
 
     if (fs.existsSync(tokenPath)) {
       const token = fs.readFileSync(tokenPath);
@@ -223,15 +231,14 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       });
 
       var labEmail = sendAsEmail.sendAsEmail;
-      var labInfo = { Email: labEmail };
 
-      await model.lab.update(labInfo, {
+      await model.lab.update({ Email: labEmail }, {
         where: { id: req.body.lab },
       });
 
     } else {
       var labEmail = null;
-      sendAsEmail.displayName = null
+      sendAsEmail.displayName = null;
     }
 
   } catch (error) {
