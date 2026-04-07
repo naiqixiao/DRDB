@@ -32,6 +32,30 @@ function getLabExistsLiteral(labId) {
   );
 }
 
+function getExperimenterHasAppointmentsLiteral(labId) {
+  const tomorrowStart = moment().startOf("day").add(1, "days").format("YYYY-MM-DD HH:mm:ss");
+  const tomorrowEnd = moment().startOf("day").add(2, "days").format("YYYY-MM-DD HH:mm:ss");
+  
+  const labCondition = Number.isInteger(labId) ? `AND \`_s\`.\`FK_Lab\` = ${labId}` : "";
+  
+  return literal(
+    `EXISTS (
+      SELECT 1 FROM \`Appointment\` \`_a\`
+      INNER JOIN \`Schedule\` \`_sc\` ON \`_a\`.\`FK_Schedule\` = \`_sc\`.\`id\`
+      INNER JOIN \`Study\` \`_s\` ON \`_a\`.\`FK_Study\` = \`_s\`.\`id\`
+      INNER JOIN \`Child\` \`_c\` ON \`_a\`.\`FK_Child\` = \`_c\`.\`id\`
+      INNER JOIN \`Family\` \`_f\` ON \`_c\`.\`FK_Family\` = \`_f\`.\`id\`
+      LEFT JOIN \`ExperimenterAssignment\` \`_ea\` ON \`_a\`.\`id\` = \`_ea\`.\`FK_Appointment\`
+      LEFT JOIN \`SecondExperimenterAssignment\` \`_sea\` ON \`_a\`.\`id\` = \`_sea\`.\`FK_Appointment\`
+      WHERE (\`_ea\`.\`FK_Experimenter\` = \`Personnel\`.\`id\` OR \`_sea\`.\`FK_Experimenter\` = \`Personnel\`.\`id\`)
+        AND \`_sc\`.\`AppointmentTime\` BETWEEN '${tomorrowStart}' AND '${tomorrowEnd}'
+        AND \`_sc\`.\`Status\` = 'Confirmed'
+        AND \`_f\`.\`TrainingSet\` = 0
+        ${labCondition}
+    )`
+  );
+}
+
 const REMINDER_BATCH_SIZE = 200;
 
 async function fetchSchedulesInBatches({ where, include, order = [["id", "ASC"]] }) {
@@ -397,58 +421,16 @@ async function getFamilyReminderSchedules(labId) {
  */
 async function getExperimenterReminderData(labId) {
   const studyWhere = getStudyWhereFilter(labId);
-  const baseWhere = {
-    [Op.and]: [
-      {
-        [Op.or]: [
-          {
-            "$PrimaryExperimenterof.Schedule.AppointmentTime$": {
-              [Op.between]: [
-                moment()
-                  .startOf("day")
-                  .add(1, "days")
-                  .toDate(),
-                moment()
-                  .startOf("day")
-                  .add(2, "days")
-                  .toDate(),
-              ],
-            },
-          },
-          {
-            "$SecondaryExperimenterof.Schedule.AppointmentTime$": {
-              [Op.between]: [
-                moment()
-                  .startOf("day")
-                  .add(1, "days")
-                  .toDate(),
-                moment()
-                  .startOf("day")
-                  .add(2, "days")
-                  .toDate(),
-              ],
-            },
-          },
-        ],
-      },
-      {
-        [Op.or]: [
-          { "$PrimaryExperimenterof.Schedule.Status$": "Confirmed" },
-          { "$SecondaryExperimenterof.Schedule.Status$": "Confirmed" },
-        ],
-      },
-      {
-        [Op.or]: [
-          { "$PrimaryExperimenterof.Child.Family.TrainingSet$": false },
-          { "$SecondaryExperimenterof.Child.Family.TrainingSet$": false },
-        ],
-      },
-    ],
-  };
-
+  const experimenterExists = getExperimenterHasAppointmentsLiteral(labId);
+  
   const where = Number.isInteger(labId)
-    ? { ...baseWhere, FK_Lab: labId }
-    : baseWhere;
+    ? { 
+        FK_Lab: labId,
+        [Op.and]: [experimenterExists] 
+      }
+    : {
+        [Op.and]: [experimenterExists]
+      };
 
   return fetchPersonnelInBatches({
     where,
