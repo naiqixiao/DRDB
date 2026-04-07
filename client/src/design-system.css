@@ -395,3 +395,20 @@ h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-
 .v-application .v-main {
   background: transparent !important;
 }
+
+/* --- Vuetify 3 Input Fixes: Vertical Centering --- */
+.v-field:not(.v-textarea) .v-field__field,
+.v-field:not(.v-textarea) .v-field__input {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.v-field:not(.v-textarea) .v-field__input input {
+  align-self: center !important;
+}
+
+/* Keep the label floating properly */
+.v-field--variant-outlined .v-label.v-field-label--floating {
+  top: 0 !important;
+  transform: translateY(-50%) scale(0.75) !important;
+}

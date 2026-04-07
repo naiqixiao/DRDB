@@ -41,7 +41,6 @@
               bg-color="white" 
               hide-details 
               variant="outlined" 
-              density="comfortable"
             ></v-select>
           </v-col>
           <v-col cols="auto" class="d-flex align-center" style="gap: 8px;">
