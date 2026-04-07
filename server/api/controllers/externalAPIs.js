@@ -108,21 +108,24 @@ exports.googleToken = asyncHandler(async (req, res) => {
       userId: "me",
     });
 
+    let sendAsEmail = {};
     sendAs.data.sendAs.forEach((email) => {
       if (email.isDefault) {
         sendAsEmail = email;
       }
     });
 
-    var labEmail = sendAsEmail.sendAsEmail;
+    const labEmail = sendAsEmail.sendAsEmail;
 
-    // update lab email info.
-    await model.lab.update(
-      { Email: labEmail },
-      {
-        where: { id: req.body.lab },
-      }
-    );
+    // update lab email info if found.
+    if (labEmail) {
+      await model.lab.update(
+        { Email: labEmail },
+        {
+          where: { id: req.body.lab },
+        }
+      );
+    }
 
     fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
 
@@ -194,6 +197,7 @@ exports.adminToken = asyncHandler(async (req, res) => {
 
 exports.googleEmail = asyncHandler(async (req, res) => {
   var sendAsEmail = {};
+  let labEmail = null;
 
   // ── Lab email profile ─────────────────────────────────────────────
   try {
@@ -224,26 +228,39 @@ exports.googleEmail = asyncHandler(async (req, res) => {
         userId: "me",
       });
 
+      let sendAsEmailEntry = {};
       sendAs.data.sendAs.forEach((email) => {
         if (email.isDefault) {
-          sendAsEmail = email;
+          sendAsEmailEntry = email;
         }
       });
 
-      var labEmail = sendAsEmail.sendAsEmail;
+      labEmail = sendAsEmailEntry.sendAsEmail;
 
-      await model.lab.update({ Email: labEmail }, {
-        where: { id: req.body.lab },
-      });
+      if (labEmail) {
+        await model.lab.update({ Email: labEmail }, {
+          where: { id: req.body.lab },
+        });
+      }
+    }
 
-    } else {
-      var labEmail = null;
-      sendAsEmail.displayName = null;
+    // Fallback: If Gmail retrieval fails or token is missing, fetch from database to keep UI consistent
+    if (!labEmail) {
+      const currentLab = await model.lab.findByPk(req.body.lab);
+      if (currentLab && currentLab.Email) {
+        labEmail = currentLab.Email;
+      }
     }
 
   } catch (error) {
     console.error("error in googleEmail lab profile:", error);
-    var labEmail = null;
+    // Even on error, try to fetch from database to show current status
+    const currentLab = await model.lab.findByPk(req.body.lab);
+    if (currentLab && currentLab.Email) {
+      labEmail = currentLab.Email;
+    } else {
+      labEmail = null;
+    }
   }
 
   // admin profile

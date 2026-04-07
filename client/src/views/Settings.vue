@@ -931,6 +931,7 @@ export default {
       },
       editedLab: {
         LabName: null,
+        Email: null,
         Location: null,
         ZoomLink: null,
         EmailOpening: null,
@@ -1048,6 +1049,8 @@ export default {
     },
     async editLabInfo() {
       this.editedLab.LabName = this.store.labName;
+      // Only copy the email if it looks like a real email to avoid saving placeholder text
+      this.editedLab.Email = (this.labEmail && this.labEmail.includes('@')) ? this.labEmail : null;
       this.editedLab.EmailOpening = this.store.emailOpening;
       this.editedLab.EmailClosing = this.store.emailClosing;
       this.editedLab.TYEmail = this.store.tyEmailClosing;
@@ -1150,6 +1153,7 @@ export default {
       try {
         const response = await externalAPIs.setLabToken(this.signInCode);
         this.labEmail = response.data.Email;
+        this.editedLab.Email = response.data.Email; // Update the form state with the new email
         this.store.setLabEmailStatus(true);
         this.store.setLabEmail(this.labEmail);
         this.$refs.confirmD.open("Success", "Lab email account is successfully setup!", {
@@ -1433,6 +1437,7 @@ export default {
         this.labEmail = profile.data.labEmail || "Lab email is not set up yet.";
         this.adminEmail = profile.data.adminEmail || "Admin email is not set up yet.";
         this.store.setLabEmailStatus(!!profile.data.labEmail);
+        this.store.setLabEmail(profile.data.labEmail); // Crucial sync with store
         this.store.setAdminEmailStatus(!!profile.data.adminEmail);
       }
     } catch (error) {

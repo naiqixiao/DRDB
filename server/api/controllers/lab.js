@@ -49,6 +49,9 @@ exports.search = asyncHandler(async (req, res) => {
 exports.update = asyncHandler(async (req, res) => {
   var updatedLabInfo = req.body;
 
+  // Prevent accidental erasure of the associated lab email, which is managed via OAuth
+  delete updatedLabInfo.Email;
+
   const lab = await model.lab.update(updatedLabInfo, {
     where: { id: updatedLabInfo.lab },
   });
