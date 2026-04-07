@@ -372,7 +372,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
         order: [["AppointmentTime", "DESC"]],
       },
     ],
-    order: [[{ model: model.schedule }, 'id', 'DESC']],
+    order: [['id', 'DESC']],
   });
 
   res.status(200).send({
