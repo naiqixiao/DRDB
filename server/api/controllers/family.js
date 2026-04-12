@@ -328,9 +328,8 @@ exports.followupSearch = asyncHandler(async (req, res) => {
     ],
   };
 
-  if (req.query.AssignedLab) {
-    queryString.AssignedLab = req.query.AssignedLab;
-  }
+  // Remove req.query.AssignedLab from top-level queryString so it doesn't crash SubQuery
+  const assignedLab = req.query.AssignedLab;
 
   queryString.NoMoreContact = 0;
 
@@ -348,11 +347,51 @@ exports.followupSearch = asyncHandler(async (req, res) => {
             [Op.in]: followupStatuses,
           },
         },
+        include: [
+          {
+            model: model.appointment,
+            attributes: [],
+            required: !!assignedLab,
+            include: [
+              {
+                model: model.study,
+                attributes: [],
+                required: !!assignedLab,
+                where: assignedLab ? { FK_Lab: assignedLab } : undefined,
+              }
+            ]
+          }
+        ]
       },
     ],
     distinct: true,
     col: "id",
   });
+
+  const schedIncludeForFind = {
+    ...familyService.scheduleInclude(false),
+    required: true,
+    where: {
+      Status: {
+        [Op.in]: followupStatuses,
+      },
+    },
+    order: [["AppointmentTime", "DESC"]],
+  };
+
+  if (assignedLab) {
+    // Find the appointment include and make it not separate so we can filter by Study Lab
+    const apptInc = schedIncludeForFind.include.find(i => i.model === model.appointment);
+    if (apptInc) {
+      apptInc.separate = false;
+      apptInc.required = true;
+      const studyInc = apptInc.include.find(i => i.model === model.study);
+      if (studyInc) {
+        studyInc.required = true;
+        studyInc.where = { FK_Lab: assignedLab };
+      }
+    }
+  }
 
   const families = await model.family.findAll({
     where: queryString,
@@ -361,18 +400,10 @@ exports.followupSearch = asyncHandler(async (req, res) => {
     include: [
       { model: model.conversations, separate: true },
       familyService.childInclude(),
-      {
-        ...familyService.scheduleInclude(false),
-        required: true,
-        where: {
-          Status: {
-            [Op.in]: followupStatuses,
-          },
-        },
-        order: [["AppointmentTime", "DESC"]],
-      },
+      schedIncludeForFind,
     ],
     order: [['id', 'DESC']],
+    subQuery: false // disable subQuery if we are doing complex joins with limit to avoid mysql unknown column pagination issues
   });
 
   res.status(200).send({
