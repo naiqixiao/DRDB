@@ -368,43 +368,58 @@ exports.followupSearch = asyncHandler(async (req, res) => {
     col: "id",
   });
 
-  const schedIncludeForFind = {
-    ...familyService.scheduleInclude(false),
-    required: true,
-    where: {
-      Status: {
-        [Op.in]: followupStatuses,
+  const familyIdsRows = await model.family.findAll({
+    attributes: ['id'],
+    where: countWhere,
+    include: [
+      {
+        model: model.schedule,
+        required: true,
+        attributes: [],
+        where: { Status: { [Op.in]: followupStatuses } },
+        include: [
+          {
+            model: model.appointment,
+            attributes: [],
+            required: !!assignedLab,
+            include: [
+              {
+                model: model.study,
+                attributes: [],
+                required: !!assignedLab,
+                where: assignedLab ? { FK_Lab: assignedLab } : undefined,
+              }
+            ]
+          }
+        ]
       },
-    },
-    order: [["AppointmentTime", "DESC"]],
-  };
-
-  if (assignedLab) {
-    // Find the appointment include and make it not separate so we can filter by Study Lab
-    const apptInc = schedIncludeForFind.include.find(i => i.model === model.appointment);
-    if (apptInc) {
-      apptInc.separate = false;
-      apptInc.required = true;
-      const studyInc = apptInc.include.find(i => i.model === model.study);
-      if (studyInc) {
-        studyInc.required = true;
-        studyInc.where = { FK_Lab: assignedLab };
-      }
-    }
-  }
-
-  const families = await model.family.findAll({
-    where: queryString,
+    ],
+    group: ['Family.id'],
+    order: [['id', 'DESC']],
     limit,
     offset,
-    include: [
-      { model: model.conversations, separate: true },
-      familyService.childInclude(),
-      schedIncludeForFind,
-    ],
-    order: [['id', 'DESC']],
-    subQuery: false // disable subQuery if we are doing complex joins with limit to avoid mysql unknown column pagination issues
+    subQuery: false
   });
+
+  const familyIds = familyIdsRows.map(row => row.id);
+
+  let families = [];
+  if (familyIds.length > 0) {
+    families = await model.family.findAll({
+      where: { id: { [Op.in]: familyIds } },
+      include: [
+        { model: model.conversations, separate: true },
+        familyService.childInclude(),
+        {
+          ...familyService.scheduleInclude(false),
+          required: false,
+          where: { Status: { [Op.in]: followupStatuses } },
+          order: [["AppointmentTime", "DESC"]],
+        },
+      ],
+      order: [['id', 'DESC']],
+    });
+  }
 
   res.status(200).send({
     families,
@@ -950,9 +965,9 @@ exports.getDuplicates = asyncHandler(async (req, res) => {
 
   duplicateFamilies.forEach(fam => {
     if (processedIds.has(fam.id)) return;
-    
-    const related = duplicateFamilies.filter(f => 
-      (f.Email && fam.Email && f.Email.toLowerCase() === fam.Email.toLowerCase()) || 
+
+    const related = duplicateFamilies.filter(f =>
+      (f.Email && fam.Email && f.Email.toLowerCase() === fam.Email.toLowerCase()) ||
       (f.Phone && fam.Phone && f.Phone === fam.Phone)
     );
 
