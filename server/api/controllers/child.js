@@ -89,29 +89,6 @@ function buildSlimChildInclude() {
   ];
 }
 
-function hashStringToUint32(value) {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-function deterministicDailyScore(childId, seed) {
-  let mixed = (Number(childId) ^ seed) >>> 0;
-  mixed ^= mixed >>> 16;
-  mixed = Math.imul(mixed, 0x7feb352d) >>> 0;
-  mixed ^= mixed >>> 15;
-  mixed = Math.imul(mixed, 0x846ca68b) >>> 0;
-  mixed ^= mixed >>> 16;
-  return mixed >>> 0;
-}
-
-function getUtcDaySeed() {
-  return hashStringToUint32(moment().utc().format("YYYY-MM-DD"));
-}
-
 function isChildEligibleForSlimSearch(childRecord, eligibility) {
   const { ageGroups, prerequisiteStudyIds, exclusionStudyIds } = eligibility;
 
@@ -190,17 +167,7 @@ async function searchSlimChildrenWithPagination(queryString, pagination, eligibi
     scannedOffset += batchSize;
   }
 
-  const daySeed = getUtcDaySeed();
-  eligibleChildIds.sort((a, b) => {
-    const scoreA = deterministicDailyScore(a, daySeed);
-    const scoreB = deterministicDailyScore(b, daySeed);
-
-    if (scoreA !== scoreB) {
-      return scoreA - scoreB;
-    }
-
-    return Number(a) - Number(b);
-  });
+  shuffle(eligibleChildIds);
 
   const total = eligibleChildIds.length;
   const pageIds = eligibleChildIds.slice(offset, offset + limit);
