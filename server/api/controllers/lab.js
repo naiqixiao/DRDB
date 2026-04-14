@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const log = require("../controllers/log");
 const labService = require("../services/labService");
+const { reloadLabJobs } = require("../../jobs/scheduler");
 
 // Create and Save a new lab
 exports.create = asyncHandler(async (req, res) => {
@@ -64,6 +65,11 @@ exports.update = asyncHandler(async (req, res) => {
     User,
     "updated lab information (" + updatedLabInfo.LabName + ")"
   );
+
+  // If timezone was updated, reload jobs for this lab
+  if (updatedLabInfo.Timezone) {
+    await reloadLabJobs(updatedLabInfo.lab);
+  }
 
   res.status(200).send(lab);
   console.log("Lab Information Updated!");

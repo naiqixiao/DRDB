@@ -1,3 +1,22 @@
+### Release v3.0.2
+
+This release introduces a centralized, hierarchical timezone management system. You can now set a global system timezone or override it with lab-specific settings directly from the UI, ensuring all scheduled reminders and jobs run at the correct local time.
+
+#### Timezone Management
+* **Hierarchical Timezone Logic:** Implemented a tiered system where the configuration follows a Lab-specific > General system > Environment fallback priority.
+* **General Timezone Setting:** Admins can now configure the system-wide default timezone from the new "System Settings" section.
+* **Lab-specific Timezones:** Individual labs can now override the global default with their own local timezone in the Lab Profile settings.
+* **Dynamic Job Rescheduling:** Scheduled tasks and reminders (Family Reminders, Auto-completion, etc.) automatically re-register themselves whenever a timezone setting is changed.
+* **Visual Status:** The "Timezone" column in the Scheduled Tasks table now reflects the dynamic, effective timezone for each task.
+
+#### Improvements
+* **Settings UI:** Added a new "System Settings" section for Admins to manage global configurations securely from the frontend.
+* **Database Stability:** Introduced a `SystemSetting` table for persistent global configuration and added a `Timezone` field to the `Lab` table.
+
+#### Fixes
+* **Async Job Resolution:** Fixed a `SyntaxError` and async handling issues in the job scheduler that could prevent task registration.
+* **Login Sync:** Updated the login protocol to ensure the correct effective timezone is synced to the frontend state immediately.
+
 ### Release v3.0.1
 
 This release focuses on search reliability and backend stability. We added true pagination with total counts to large search flows, made eligible-child ordering fairer and consistent, and reduced backend memory spikes in nightly jobs and reminder processing.

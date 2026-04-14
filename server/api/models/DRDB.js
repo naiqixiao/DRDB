@@ -59,6 +59,9 @@ const TestingRoom = sequelize.import("../models/SequelizeAuto/TestingRoom");
 const ScheduledJobSetting = sequelize.import(
   "../models/SequelizeAuto/ScheduledJobSetting"
 );
+const SystemSetting = sequelize.import(
+  "../models/SequelizeAuto/SystemSetting"
+);
 
 Lab.hasMany(Personnel, {
   foreignKey: "FK_Lab",
@@ -256,6 +259,7 @@ exports.experimenterAssignment_2nd = SecondExperimenterAssignment;
 exports.feedback = Feedback;
 exports.testingRoom = TestingRoom;
 exports.scheduledJobSetting = ScheduledJobSetting;
+exports.systemSetting = SystemSetting;
 exports.sequelize = sequelize;
 
 // Synchronize with database (tables created/updated in background)

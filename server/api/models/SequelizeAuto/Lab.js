@@ -56,6 +56,10 @@ module.exports = function(sequelize, DataTypes) {
 		ZoomLink: {
 			type: DataTypes.STRING(300),
 			allowNull: true
+		},
+		Timezone: {
+			type: DataTypes.STRING(45),
+			allowNull: true
 		}
 	}, {
 		sequelize,

@@ -23,6 +23,8 @@ function resolveModel(...keys) {
   return null;
 }
 
+const { getEffectiveTimezone } = require("../../jobs/scheduler");
+
 function getUserModels() {
   return {
     PersonnelModel: resolveModel("personnel", "Personnel"),
@@ -292,7 +294,7 @@ exports.login = asyncHandler(async (req, res) => {
     location: personnelLab?.Location,
     transportationInstructions: personnelLab?.TransportationInstructions,
     ZoomLink: personnel.ZoomLink,
-    timeZone: config.timeZone
+    timeZone: await getEffectiveTimezone(personnel.FK_Lab)
   });
 });
 
@@ -376,6 +378,7 @@ exports.changePassword = asyncHandler(async (req, res) => {
       TYEmail: personnelLab?.TYEmail,
       location: personnelLab?.Location,
       transportationInstructions: personnelLab?.TransportationInstructions,
+      timeZone: await getEffectiveTimezone(personnel.FK_Lab)
     });
 
 

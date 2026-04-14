@@ -77,7 +77,7 @@
               Supported by the Canada Foundation for Innovation (CFI), Natural Sciences and Engineering Research Council of Canada (NSERC), Social Sciences and Humanities Research Council (SSHRC), and McMaster University
             </p>
             <p class="text-caption text-muted" style="font-size: 0.75rem !important;">
-              Version 3.0.1
+              Version 3.0.2
             </p>
           </div>
         </div>

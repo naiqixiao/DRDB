@@ -1,5 +1,5 @@
 const model = require("../models/DRDB");
-const { listScheduledJobs, updateScheduledJob, TIMEZONE } = require("../../jobs/scheduler");
+const { listScheduledJobs, updateScheduledJob, getEffectiveTimezone } = require("../../jobs/scheduler");
 
 const ALLOWED_ROLES = new Set(["Admin", "PI", "Lab manager"]);
 
@@ -24,11 +24,12 @@ exports.getScheduledJobs = async (req, res) => {
     });
   }
 
-  const jobs = listScheduledJobs(personnel.FK_Lab);
+  const jobs = await listScheduledJobs(personnel.FK_Lab);
+  const timezone = await getEffectiveTimezone(personnel.FK_Lab);
 
   res.status(200).json({
     labId: personnel.FK_Lab,
-    timezone: TIMEZONE,
+    timezone: timezone,
     count: jobs.length,
     jobs,
   });

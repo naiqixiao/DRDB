@@ -48,7 +48,35 @@ function getScheduledJobSettingModel() {
   );
 }
 
-const TIMEZONE = process.env.TIMEZONE || "America/Toronto";
+const DEFAULT_TIMEZONE = process.env.TIMEZONE || "America/Toronto";
+
+async function getGeneralTimezone() {
+  const SystemSettingModel = model.systemSetting || model?.sequelize?.models?.SystemSetting;
+  if (!SystemSettingModel) return DEFAULT_TIMEZONE;
+
+  try {
+    const setting = await SystemSettingModel.findOne({
+      where: { SettingKey: "GeneralTimezone" },
+    });
+    return setting?.SettingValue || DEFAULT_TIMEZONE;
+  } catch (error) {
+    return DEFAULT_TIMEZONE;
+  }
+}
+
+async function getEffectiveTimezone(labId) {
+  if (!labId) return await getGeneralTimezone();
+
+  const LabModel = getLabModel();
+  if (!LabModel) return await getGeneralTimezone();
+
+  try {
+    const lab = await LabModel.findByPk(labId, { attributes: ["Timezone"] });
+    return lab?.Timezone || (await getGeneralTimezone());
+  } catch (error) {
+    return await getGeneralTimezone();
+  }
+}
 const EDITABLE_JOB_IDS = new Set([
   "family-reminders",
   "experimenter-reminders",
@@ -271,22 +299,25 @@ async function persistRuntimeForJob(job, labId, runtimeConfig) {
   }
 }
 
-function listScheduledJobs(labId) {
-  return SCHEDULED_JOBS.map((job) => {
-    const runtime = getRuntimeForJob(job, labId);
+async function listScheduledJobs(labId) {
+  return Promise.all(
+    SCHEDULED_JOBS.map(async (job) => {
+      const runtime = getRuntimeForJob(job, labId);
+      const timezone = await getEffectiveTimezone(labId);
 
-    return {
-      id: job.id,
-      name: job.name,
-      description: job.description,
-      editable: EDITABLE_JOB_IDS.has(job.id),
-      scope: EDITABLE_JOB_IDS.has(job.id) ? "lab" : "global",
-      enabled: runtime.enabled,
-      schedule: toHumanSchedule(runtime.cron),
-      cron: runtime.cron,
-      timezone: TIMEZONE,
-    };
-  });
+      return {
+        id: job.id,
+        name: job.name,
+        description: job.description,
+        editable: EDITABLE_JOB_IDS.has(job.id),
+        scope: EDITABLE_JOB_IDS.has(job.id) ? "lab" : "global",
+        enabled: runtime.enabled,
+        schedule: toHumanSchedule(runtime.cron),
+        cron: runtime.cron,
+        timezone: timezone,
+      };
+    })
+  );
 }
 
 function findJobById(jobId) {
@@ -308,10 +339,11 @@ function unscheduleJob(jobId, labId) {
   jobHandles.delete(key);
 }
 
-function scheduleJob(job, labId) {
+async function scheduleJob(job, labId) {
   const runtime = getRuntimeForJob(job, labId);
   if (!runtime.enabled) return;
 
+  const timezone = await getEffectiveTimezone(labId);
   const handleKey = getScopedHandleKey(job.id, labId);
 
   const executeTask = EDITABLE_JOB_IDS.has(job.id)
@@ -329,7 +361,7 @@ function scheduleJob(job, labId) {
         console.error(`[CRON] Error executing ${job.name}:`, error);
       }
     },
-    { scheduled: true, timezone: TIMEZONE }
+    { scheduled: true, timezone: timezone }
   );
 
   jobHandles.set(handleKey, handle);
@@ -376,13 +408,52 @@ async function updateScheduledJob(jobId, updates = {}, labId) {
   // ensureRuntimeInitialized is a no-op here since we just upserted,
   // but handles the case where this lab was created after server startup
   // and has no handle yet — scheduleJob will create one.
-  scheduleJob(job, labId);
+  await scheduleJob(job, labId);
 
-  return listScheduledJobs(labId).find((scheduledJob) => scheduledJob.id === job.id);
+  const jobs = await listScheduledJobs(labId);
+  return jobs.find((scheduledJob) => scheduledJob.id === job.id);
+}
+
+async function reloadLabJobs(labId) {
+  if (!labId) return;
+
+  console.log(`[Jobs] Reloading all tasks for Lab ${labId}...`);
+  SCHEDULED_JOBS.forEach((job) => {
+    if (EDITABLE_JOB_IDS.has(job.id)) {
+      unscheduleJob(job.id, labId);
+    }
+  });
+
+  const promises = SCHEDULED_JOBS.map((job) => {
+    if (EDITABLE_JOB_IDS.has(job.id)) {
+      ensureRuntimeInitialized(job, labId);
+      return scheduleJob(job, labId);
+    }
+    return Promise.resolve();
+  });
+
+  await Promise.all(promises);
+  console.log(`[Jobs] Lab ${labId} tasks reloaded.`);
+}
+
+async function reloadAllJobs() {
+  console.log("[Jobs] Reloading all system and lab tasks...");
+  const labHandles = Array.from(jobHandles.keys());
+  labHandles.forEach((key) => {
+    const handle = jobHandles.get(key);
+    if (handle) {
+      if (typeof handle.stop === "function") handle.stop();
+      if (typeof handle.destroy === "function") handle.destroy();
+    }
+  });
+  jobHandles.clear();
+
+  await registerJobs();
 }
 
 async function registerJobs() {
-  console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Timezone: ${TIMEZONE})...`);
+  const generalTimezone = await getEffectiveTimezone();
+  console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Default Timezone: ${generalTimezone})...`);
 
   const labModel = getLabModel();
   const personnelModel = getPersonnelModel();
@@ -402,19 +473,28 @@ async function registerJobs() {
   const labIds = new Set(labs.map((lab) => Number(lab.id)));
   await loadPersistedRuntimeConfigs(labIds);
 
-  SCHEDULED_JOBS.forEach((job) => {
-    if (EDITABLE_JOB_IDS.has(job.id)) {
-      labs.forEach((lab) => {
-        ensureRuntimeInitialized(job, lab.id);
-        scheduleJob(job, lab.id);
-      });
-    } else {
-      ensureRuntimeInitialized(job);
-      scheduleJob(job);
-    }
-  });
+  await Promise.all(
+    SCHEDULED_JOBS.map(async (job) => {
+      if (EDITABLE_JOB_IDS.has(job.id)) {
+        for (const lab of labs) {
+          ensureRuntimeInitialized(job, lab.id);
+          await scheduleJob(job, lab.id);
+        }
+      } else {
+        ensureRuntimeInitialized(job);
+        await scheduleJob(job);
+      }
+    })
+  );
 
   console.log("[Jobs] All scheduled tasks registered.");
 }
 
-module.exports = { registerJobs, listScheduledJobs, updateScheduledJob, TIMEZONE };
+module.exports = {
+  registerJobs,
+  listScheduledJobs,
+  updateScheduledJob,
+  reloadLabJobs,
+  reloadAllJobs,
+  getEffectiveTimezone,
+};

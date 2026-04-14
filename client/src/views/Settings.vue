@@ -217,6 +217,48 @@
             </div>
           </v-card-text>
         </v-card>
+
+        <v-card v-if="store.role == 'Admin'" class="ds-card mb-6" variant="flat">
+          <v-toolbar color="transparent" density="compact" class="px-2">
+            <v-icon class="mr-2" color="primary">mdi-cog-outline</v-icon>
+            <span
+              class="text-subtitle-1 font-weight-bold"
+              style="
+                font-family: var(--ds-font-family-heading);
+                color: rgb(var(--v-theme-primary));
+              "
+            >
+              System Settings
+            </span>
+          </v-toolbar>
+          <v-divider></v-divider>
+          <v-card-text>
+            <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">
+              General Timezone
+            </div>
+            <v-select
+              v-model="generalTimezone"
+              :items="timezoneOptions"
+              label="Select General Timezone"
+              variant="outlined"
+              density="compact"
+              hide-details
+              prepend-inner-icon="mdi-clock-outline"
+              class="mb-3"
+            ></v-select>
+            <div class="d-flex justify-end">
+              <v-btn
+                color="primary"
+                variant="tonal"
+                size="small"
+                @click="saveGeneralTimezone"
+                :loading="generalSettingLoading"
+                prepend-icon="mdi-content-save"
+                >Save General TZ</v-btn
+              >
+            </div>
+          </v-card-text>
+        </v-card>
       </v-col>
 
       <v-col cols="12" md="8">
@@ -826,6 +868,18 @@
                   bg-color="white"
                 ></v-text-field>
               </v-col>
+              <v-col cols="12" md="4">
+                <v-select
+                  label="Lab Timezone"
+                  v-model="editedLab.Timezone"
+                  :items="timezoneOptions"
+                  variant="outlined"
+                  density="compact"
+                  bg-color="white"
+                  clearable
+                  placeholder="Inherit General TZ"
+                ></v-select>
+              </v-col>
             </v-row>
 
             <v-divider class="my-6"></v-divider>
@@ -895,6 +949,7 @@ import lab from "@/services/lab";
 import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import jobsService from "@/services/jobs";
+import systemSetting from "@/services/systemSetting";
 import TestingRooms from "@/components/TestingRooms.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
@@ -952,6 +1007,22 @@ export default {
       jobDrafts: {},
       jobActionLoading: {},
       jobsPanels: [0],
+      generalTimezone: null,
+      generalSettingLoading: false,
+      timezoneOptions: [
+        "America/Toronto",
+        "America/New_York",
+        "America/Chicago",
+        "America/Denver",
+        "America/Los_Angeles",
+        "America/Vancouver",
+        "Europe/London",
+        "Europe/Paris",
+        "Asia/Tokyo",
+        "Asia/Shanghai",
+        "Asia/Hong_Kong",
+        "UTC",
+      ],
       labPI: [
         { label: "Name of PI/Manager", field: "Name" },
         { label: "Initials", field: "Initial" },
@@ -1057,6 +1128,7 @@ export default {
       this.editedLab.TransportationInstructions = this.store.transportationInstructions;
       this.editedLab.Location = this.store.location;
       this.editedLab.ZoomLink = this.store.ZoomLink;
+      this.editedLab.Timezone = this.store.timeZone;
       this.dialogEditLab = true;
     },
     async saveNewLab() {
@@ -1104,6 +1176,7 @@ export default {
           this.editedLab.TransportationInstructions
         );
         this.store.setZoomLink(this.editedLab.ZoomLink);
+        this.store.setTimeZone(this.editedLab.Timezone);
         this.$refs.confirmD.open("Updated", "Lab information is updated!", {
           color: "success",
           noconfirm: true,
@@ -1398,6 +1471,31 @@ export default {
       }
       this.jobActionLoading[job.id] = false;
     },
+    async saveGeneralTimezone() {
+      this.generalSettingLoading = true;
+      try {
+        await systemSetting.updateSetting({
+          SettingKey: "GeneralTimezone",
+          SettingValue: this.generalTimezone,
+        });
+        this.$refs.confirmD.open(
+          "Success",
+          "General timezone has been updated application-wide.",
+          { color: "success", noconfirm: true }
+        );
+        // Refresh local store if they are inheriting
+        if (!this.store.timeZone) {
+          // You might want to refresh the store's timeZone here if it's currently null
+          // But for now, a refresh or simple message is enough.
+        }
+      } catch (error) {
+        this.$refs.confirmD.open("Error", "Failed to update general timezone.", {
+          color: "error",
+          noconfirm: true,
+        });
+      }
+      this.generalSettingLoading = false;
+    },
     handleOAuthMessage(event) {
       if (event.origin !== window.location.origin) return;
       if (event.data && event.data.type === "GOOGLE_OAUTH_CODE" && event.data.code) {
@@ -1429,6 +1527,16 @@ export default {
     this.currentTestingRooms = this.store.testingRooms || [];
     if (this.canViewScheduledJobs) {
       await this.loadScheduledJobs();
+    }
+    if (this.store.role === "Admin") {
+      try {
+        const response = await systemSetting.getSettings("GeneralTimezone");
+        if (response.data) {
+          this.generalTimezone = response.data.SettingValue;
+        }
+      } catch (error) {
+        console.error("Failed to load general timezone:", error);
+      }
     }
     try {
       const profile = await externalAPIs.googleGetEmailAddress();

@@ -50,6 +50,7 @@ const rtuRoutes = require("./api/routes/RTU");
 const jobsRoutes = require("./api/routes/jobs");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
+const systemSettingRoutes = require("./api/routes/systemSetting");
 
 const emailTestRoutes = require("./api/routes/emailTest");
 const calendarTestRoutes = require("./api/routes/calendarTest");
@@ -85,6 +86,7 @@ app.use("/api/RTU", rtuRoutes);
 app.use("/api/jobs", jobsRoutes);
 
 app.use("/api/TestingRoom", testingRoomRoutes);
+app.use("/api/systemSetting", systemSettingRoutes);
 
 app.use("/api/emailTest", emailTestRoutes);
 app.use("/api/calendarTest", calendarTestRoutes);
