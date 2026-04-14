@@ -150,26 +150,32 @@ exports.delete = asyncHandler(async (req, res) => {
 // ─── GET PERSONNEL STATS ─────────────────────────────────────────────
 // Retrieve all-time KPI stats (E1, E2, and Recruiting totals) for a specific user
 exports.getStats = asyncHandler(async (req, res) => {
-  const personnelId = req.query.id;
+  const personnelId = Number(req.query.id);
 
-  if (!personnelId) {
+  if (!Number.isInteger(personnelId) || personnelId <= 0) {
     return res.status(400).json({ error: "Personnel ID is required." });
   }
 
   try {
-    // 1. Count how many times they were E1
+    // Count distinct appointments to avoid inflated totals if assignment rows are duplicated.
     const e1Count = await model.experimenterAssignment.count({
-      where: { FK_Experimenter: personnelId }
+      where: { FK_Experimenter: personnelId },
+      distinct: true,
+      col: "FK_Appointment"
     });
 
-    // 2. Count how many times they were E2
+    // Count distinct appointments to avoid inflated totals if assignment rows are duplicated.
     const e2Count = await model.experimenterAssignment_2nd.count({
-      where: { FK_Experimenter: personnelId }
+      where: { FK_Experimenter: personnelId },
+      distinct: true,
+      col: "FK_Appointment"
     });
 
     // 3. Count how many schedules they created (Recruited)
     const scheduledCount = await model.schedule.count({
-      where: { ScheduledBy: personnelId }
+      where: { ScheduledBy: personnelId },
+      distinct: true,
+      col: "id"
     });
 
     res.status(200).json({
