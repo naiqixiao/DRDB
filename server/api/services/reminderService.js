@@ -97,6 +97,7 @@ async function fetchPersonnelInBatches({ where, include, order = [["id", "ASC"]]
       where,
       include,
       order,
+      subQuery: false,
       limit: REMINDER_BATCH_SIZE,
       offset,
     });
