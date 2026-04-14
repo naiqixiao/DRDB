@@ -274,7 +274,7 @@ exports.search = asyncHandler(async (req, res) => {
     where: searchableFamiliesWhere,
     limit,
     offset,
-    order: [["id", "DESC"]],
+    order: [[Sequelize.fn('RAND')]],
     include: [
       { model: model.conversations, separate: true },
       familyService.childInclude(),
@@ -395,7 +395,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
       },
     ],
     group: ['Family.id'],
-    order: [['id', 'DESC']],
+    order: [[Sequelize.fn('RAND')]],
     limit,
     offset,
     subQuery: false
@@ -417,7 +417,7 @@ exports.followupSearch = asyncHandler(async (req, res) => {
           order: [["AppointmentTime", "DESC"]],
         },
       ],
-      order: [['id', 'DESC']],
+      order: [[Sequelize.fn('RAND')]],
     });
   }
 

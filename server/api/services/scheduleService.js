@@ -1,5 +1,6 @@
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
+const Sequelize = require("sequelize");
 const moment = require("moment");
 const calendarService = require("./googleCalendarService");
 
@@ -116,7 +117,7 @@ async function searchSchedules(queryString, options = {}) {
   return await model.schedule.findAll({
     where: queryString,
     include: buildScheduleSearchInclude(),
-    order: [['id', 'DESC']],
+    order: [[Sequelize.fn('RAND')]],
     subQuery: false,
     ...pagination,
   });
