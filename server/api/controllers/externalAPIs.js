@@ -45,6 +45,7 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
 
     const authUrl = oAuth2Client.generateAuthUrl({
       access_type: "offline",
+      prompt: "consent",
       scope: SCOPES,
     });
 
@@ -100,7 +101,17 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     var token = await oAuth2Client.getToken(code);
 
-    oAuth2Client.setCredentials(token.tokens);
+    let finalTokens = token.tokens;
+    if (fs.existsSync(tokenPath)) {
+      try {
+        const oldToken = JSON.parse(fs.readFileSync(tokenPath));
+        finalTokens = { ...oldToken, ...token.tokens };
+      } catch (e) {
+        console.error("Error parsing old token:", e);
+      }
+    }
+
+    oAuth2Client.setCredentials(finalTokens);
 
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
@@ -127,7 +138,7 @@ exports.googleToken = asyncHandler(async (req, res) => {
       );
     }
 
-    fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
+    fs.writeFileSync(tokenPath, JSON.stringify(finalTokens));
 
     res.status(200).send({
       message: "Google account is successfully set up!",
@@ -165,7 +176,17 @@ exports.adminToken = asyncHandler(async (req, res) => {
 
     var token = await oAuth2Client.getToken(code);
 
-    oAuth2Client.setCredentials(token.tokens);
+    let finalTokens = token.tokens;
+    if (fs.existsSync(tokenPath)) {
+      try {
+        const oldToken = JSON.parse(fs.readFileSync(tokenPath));
+        finalTokens = { ...oldToken, ...token.tokens };
+      } catch (e) {
+        console.error("Error parsing old admin token:", e);
+      }
+    }
+
+    oAuth2Client.setCredentials(finalTokens);
 
     const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
@@ -183,7 +204,7 @@ exports.adminToken = asyncHandler(async (req, res) => {
 
     var adminEmail = sendAsEmail.sendAsEmail;
 
-    fs.writeFileSync(tokenPath, JSON.stringify(token.tokens));
+    fs.writeFileSync(tokenPath, JSON.stringify(finalTokens));
 
     res.status(200).send({
       message: "Admin account is successfully set up!",
@@ -290,13 +311,14 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       userId: "me",
     });
 
+    let adminSendAsEmailEntry = {};
     adminSendAs.data.sendAs.forEach((email) => {
       if (email.isDefault) {
-        sendAsEmail = email;
+        adminSendAsEmailEntry = email;
       }
     });
 
-    var adminEmail = sendAsEmail.sendAsEmail;
+    var adminEmail = adminSendAsEmailEntry.sendAsEmail;
 
   } catch (error) {
     var adminEmail = null;
