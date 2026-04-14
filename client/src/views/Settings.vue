@@ -1542,11 +1542,26 @@ export default {
       const profile = await externalAPIs.googleGetEmailAddress();
       if (profile.data) {
         this.emailSetupError = profile.data.error || null;
-        this.labEmail = profile.data.labEmail || "Lab email is not set up yet.";
-        this.adminEmail = profile.data.adminEmail || "Admin email is not set up yet.";
-        this.store.setLabEmailStatus(!!profile.data.labEmail);
-        this.store.setLabEmail(profile.data.labEmail); // Crucial sync with store
-        this.store.setAdminEmailStatus(!!profile.data.adminEmail);
+        const hasLabEmail = !!profile.data.labEmail;
+        const hasAdminEmail = !!profile.data.adminEmail;
+
+        if (hasLabEmail) {
+          this.labEmail = profile.data.labEmail;
+          this.store.setLabEmailStatus(true);
+          this.store.setLabEmail(profile.data.labEmail);
+        } else if (!this.store.labEmailStatus) {
+          this.labEmail = "Lab email is not set up yet.";
+          this.store.setLabEmailStatus(false);
+          this.store.setLabEmail(null);
+        }
+
+        if (hasAdminEmail) {
+          this.adminEmail = profile.data.adminEmail;
+          this.store.setAdminEmailStatus(true);
+        } else if (!this.store.adminEmailStatus) {
+          this.adminEmail = "Admin email is not set up yet.";
+          this.store.setAdminEmailStatus(false);
+        }
       }
     } catch (error) {
       this.emailSetupError = "Failed to connect to the server's Google API service.";

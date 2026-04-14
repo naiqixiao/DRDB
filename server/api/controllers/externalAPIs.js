@@ -66,12 +66,11 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
 
 exports.googleToken = asyncHandler(async (req, res) => {
   try {
-    if (req.body.lab) {
-      var lab = req.body.lab;
-      var code = req.body.signInCode;
-    } else {
-      var lab = req.query.lab;
-      var code = req.query.signInCode;
+    const lab = req.body.lab || req.query.lab || req.userData?.lab;
+    const code = req.body.signInCode || req.query.signInCode;
+
+    if (!lab || !code) {
+      return res.status(400).send({ message: "Missing lab id or sign-in code." });
     }
 
     const credentialsPath = "api/google/general/credentials.json";
@@ -133,7 +132,7 @@ exports.googleToken = asyncHandler(async (req, res) => {
       await model.lab.update(
         { Email: labEmail },
         {
-          where: { id: req.body.lab },
+          where: { id: lab },
         }
       );
     }
@@ -217,13 +216,20 @@ exports.adminToken = asyncHandler(async (req, res) => {
 });
 
 exports.googleEmail = asyncHandler(async (req, res) => {
-  var sendAsEmail = {};
+  const labId = req.body.lab || req.query.lab || req.userData?.lab;
+
+  if (!labId) {
+    return res.status(400).send({ message: "Missing lab id." });
+  }
+
   let labEmail = null;
+  let adminEmail = null;
+  let labName = null;
 
   // ── Lab email profile ─────────────────────────────────────────────
   try {
     const credentialsPath = "api/google/general/credentials.json";
-    const tokenPath = "api/google/labs/lab" + req.body.lab + "/token.json";
+    const tokenPath = "api/google/labs/lab" + labId + "/token.json";
 
     // Load credentials here — they are needed to build the OAuth2 client
     const credentials = fs.readFileSync(credentialsPath);
@@ -257,17 +263,18 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       });
 
       labEmail = sendAsEmailEntry.sendAsEmail;
+      labName = sendAsEmailEntry.displayName || null;
 
       if (labEmail) {
         await model.lab.update({ Email: labEmail }, {
-          where: { id: req.body.lab },
+          where: { id: labId },
         });
       }
     }
 
     // Fallback: If Gmail retrieval fails or token is missing, fetch from database to keep UI consistent
     if (!labEmail) {
-      const currentLab = await model.lab.findByPk(req.body.lab);
+      const currentLab = await model.lab.findByPk(labId);
       if (currentLab && currentLab.Email) {
         labEmail = currentLab.Email;
       }
@@ -276,7 +283,7 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   } catch (error) {
     console.error("error in googleEmail lab profile:", error);
     // Even on error, try to fetch from database to show current status
-    const currentLab = await model.lab.findByPk(req.body.lab);
+    const currentLab = await model.lab.findByPk(labId);
     if (currentLab && currentLab.Email) {
       labEmail = currentLab.Email;
     } else {
@@ -302,32 +309,34 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
-    const token = fs.readFileSync(tokenPath);
-    oAuth2Client.setCredentials(JSON.parse(token));
+    if (fs.existsSync(tokenPath)) {
+      const token = fs.readFileSync(tokenPath);
+      oAuth2Client.setCredentials(JSON.parse(token));
 
-    const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
+      const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
 
-    const adminSendAs = await adminGmail.users.settings.sendAs.list({
-      userId: "me",
-    });
+      const adminSendAs = await adminGmail.users.settings.sendAs.list({
+        userId: "me",
+      });
 
-    let adminSendAsEmailEntry = {};
-    adminSendAs.data.sendAs.forEach((email) => {
-      if (email.isDefault) {
-        adminSendAsEmailEntry = email;
-      }
-    });
+      let adminSendAsEmailEntry = {};
+      adminSendAs.data.sendAs.forEach((email) => {
+        if (email.isDefault) {
+          adminSendAsEmailEntry = email;
+        }
+      });
 
-    var adminEmail = adminSendAsEmailEntry.sendAsEmail;
+      adminEmail = adminSendAsEmailEntry.sendAsEmail || null;
+    }
 
   } catch (error) {
-    var adminEmail = null;
+    adminEmail = null;
     console.error("error in googleEmail admin profile:", error);
   }
 
   res.status(200).send({
     labEmail: labEmail,
     adminEmail: adminEmail,
-    labName: sendAsEmail.displayName
+    labName: labName
   });
 });
