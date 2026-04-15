@@ -262,5 +262,26 @@ exports.scheduledJobSetting = ScheduledJobSetting;
 exports.systemSetting = SystemSetting;
 exports.sequelize = sequelize;
 
+const { seedDatabase } = require("../utils/seeder");
+
 // Synchronize with database (tables created/updated in background)
-sequelize.sync({ force: false });
+sequelize.sync({ force: false }).then(async () => {
+  
+  try {
+    // SAFETY CHECK: Count how many labs or users exist
+    // (Assuming 'lab' or 'user' is one of your exported models)
+    const existingLabs = await exports.lab.count();
+
+    if (existingLabs === 0) {
+      console.log("🌱 Empty database detected. Running seeder...");
+      // Pass the exports object so the seeder has access to all initialized models
+      await seedDatabase(exports);
+      console.log("✅ Seeding complete.");
+    } else {
+      console.log("⚡ Database already contains data. Skipping seeder.");
+    }
+  } catch (error) {
+    console.error("❌ Error during startup sync/seeding:", error);
+  }
+
+});
