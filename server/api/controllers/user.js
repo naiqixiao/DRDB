@@ -276,9 +276,20 @@ exports.login = asyncHandler(async (req, res) => {
   personnel.LabName = labName;
   await log.createLog("Log in", personnel, "logged in successfully!");
 
+  // Fetch system settings to check for first run
+  const SystemSettingModel = resolveModel("systemSetting", "SystemSetting");
+  let isFirstRun = false;
+  if (SystemSettingModel) {
+    const firstRunSetting = await SystemSettingModel.findOne({ where: { SettingKey: "isFirstRun" } });
+    if (firstRunSetting && firstRunSetting.SettingValue === "true") {
+      isFirstRun = true;
+    }
+  }
+
   res.status(200).send({
     message: "Auth succsessful.",
     temporaryPassword: personnel.temporaryPassword,
+    isFirstRun: isFirstRun,
     name: personnel.Name,
     user: personnel.Email,
     userID: personnel.id,

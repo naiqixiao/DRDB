@@ -223,7 +223,16 @@ export default {
             this.store.setTestingRooms(testingRooms.data);
           } catch(e) { console.log("Could not load testing rooms", e); }
 
-          if (response.data.temporaryPassword) {
+          this.store.setTemporaryPassword(response.data.temporaryPassword || false);
+          if (response.data.isFirstRun !== undefined) {
+            this.store.setIsFirstRun(response.data.isFirstRun);
+          }
+
+          if (response.data.temporaryPassword && response.data.isFirstRun) {
+            // Force them into the first-time Setup Wizard
+            this.$router.push({ name: "Setup Wizard" });
+          } else if (response.data.temporaryPassword && !response.data.isFirstRun) {
+            // Just a forgot-password flow, keep inline dialog
             this.changeTemporaryPassword = response.data.temporaryPassword;
             this.dialog = true;
           } else {

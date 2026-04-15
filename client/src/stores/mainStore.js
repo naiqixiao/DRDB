@@ -23,7 +23,9 @@ export const useMainStore = defineStore('main', {
     ZoomLink: null,
     trainingMode: false,
     timeZone: null,
-    testingRooms: null
+    testingRooms: null,
+    temporaryPassword: false,
+    isFirstRun: false
   }),
   
   persist: true,
@@ -53,6 +55,8 @@ export const useMainStore = defineStore('main', {
     setTrainingMode(mode) { this.trainingMode = mode; },
     setTimeZone(zone) { this.timeZone = zone; },
     setTestingRooms(rooms) { this.testingRooms = rooms; },
+    setTemporaryPassword(status) { this.temporaryPassword = status; },
+    setIsFirstRun(status) { this.isFirstRun = status; },
     
     clearAll() {
       this.$reset();

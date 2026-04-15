@@ -139,6 +139,18 @@ exports.googleToken = asyncHandler(async (req, res) => {
 
     fs.writeFileSync(tokenPath, JSON.stringify(finalTokens));
 
+    try {
+      const SystemSettingModel = model.systemSetting || (model.sequelize && model.sequelize.models && model.sequelize.models.SystemSetting);
+      if (SystemSettingModel) {
+        await SystemSettingModel.update(
+          { SettingValue: "false" },
+          { where: { SettingKey: "isFirstRun" } }
+        );
+      }
+    } catch (err) {
+      console.error("Could not update isFirstRun setting:", err);
+    }
+
     res.status(200).send({
       message: "Google account is successfully set up!",
       Email: labEmail,
