@@ -183,9 +183,35 @@ exports.delete = asyncHandler(async (req, res) => {
 
 // Retrieve study progress infomation from the database.
 exports.studyStats = asyncHandler(async (req, res) => {
-  const studyID = req.query.studyID;
+  const studyID = Number(req.query.studyID);
+
+  if (!Number.isInteger(studyID) || studyID <= 0) {
+    return res.status(400).json({ error: "Valid studyID is required." });
+  }
 
   try {
+    const requester = await model.personnel.findOne({
+      where: { id: req.userData?.id },
+      attributes: ["id", "FK_Lab"],
+    });
+
+    if (!requester) {
+      return res.status(401).json({ error: "Authentication failed." });
+    }
+
+    const requestedStudy = await model.study.findOne({
+      where: { id: studyID },
+      attributes: ["id", "FK_Lab"],
+    });
+
+    if (!requestedStudy) {
+      return res.status(404).json({ error: "Study not found." });
+    }
+
+    if (requestedStudy.FK_Lab !== requester.FK_Lab) {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
     const queryStringN = `
       SELECT 
         Study.StudyName, 
@@ -266,10 +292,10 @@ exports.studyStats = asyncHandler(async (req, res) => {
 
     const queryStringNWeeklyRecrtuiment = `
       SELECT 
-        YEAR(Schedule.updatedAt) AS Year, 
+        YEAR(Schedule.createdAt) AS Year, 
         Schedule.Status AS Status, 
         COUNT(DISTINCT Appointment.id) AS NumberOfParticipants, 
-        DATE_FORMAT(DATE_SUB(Schedule.updatedAt, INTERVAL WEEKDAY(Schedule.updatedAt) DAY), '%Y-%m-%d') AS WeekStartDate 
+        DATE_FORMAT(DATE_SUB(Schedule.createdAt, INTERVAL WEEKDAY(Schedule.createdAt) DAY), '%Y-%m-%d') AS WeekStartDate 
       FROM Appointment 
       INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
       INNER JOIN Study ON Appointment.FK_Study = Study.id 
@@ -282,6 +308,17 @@ exports.studyStats = asyncHandler(async (req, res) => {
       ORDER BY Year, WeekStartDate;
     `;
 
+    const queryStringCompletedRuns = `
+      SELECT COUNT(DISTINCT Appointment.id) AS NumberOfParticipants
+      FROM Appointment
+      INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id
+      INNER JOIN Study ON Appointment.FK_Study = Study.id
+      INNER JOIN Family ON Schedule.FK_Family = Family.id
+      WHERE Study.id = :studyID
+        AND Family.TrainingSet = 0
+        AND Schedule.Completed = 1;
+    `;
+
     // Safely execute queries with parameter binding
     const options = { replacements: { studyID }, type: QueryTypes.SELECT };
 
@@ -290,6 +327,8 @@ exports.studyStats = asyncHandler(async (req, res) => {
     const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp, options);
     const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp, options);
     const totalNWeeklyRecrtuiment = await model.sequelize.query(queryStringNWeeklyRecrtuiment, options);
+    const totalCompletedRunsResult = await model.sequelize.query(queryStringCompletedRuns, options);
+    const totalCompletedRuns = totalCompletedRunsResult?.[0]?.NumberOfParticipants || 0;
 
     // QueryTypes.SELECT returns data directly without the metadata wrapper
     res.status(200).send({ 
@@ -297,7 +336,8 @@ exports.studyStats = asyncHandler(async (req, res) => {
       totalNperPersonnelStatus, 
       totalNperPersonnelPriExp, 
       totalNperPersonnelAssistExp, 
-      totalNWeeklyRecrtuiment 
+      totalNWeeklyRecrtuiment,
+      totalCompletedRuns
     });
   } catch (error) {
     console.error("Study stats error:", error);
