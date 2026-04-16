@@ -1,13 +1,16 @@
-# DRDB — Developmental Research Database
+# DRDB: Developmental Research Database System
 
-An open-source system for managing participant databases, studies, study schedules, and research personnel.
+### System Overview
+The **Developmental Research Database (DRDB)** is a secure, laboratory management system designed specifically for developmental psychology and cognitive science research labs. It provides a centralized, modern interface to streamline participant recruitment, longitudinal study tracking, scheduling, and personnel management. 
 
-- **Demo Videos:** [System Overview](https://mcmaster-baby-lab.github.io/handbook/DRDB)
-- **Documentation:** [drdb.readthedocs.io](https://drdb.readthedocs.io)
+Built with a robust Vue 3 frontend and a Node.js/MySQL backend, DRDB eliminates the friction of decentralized spreadsheets and legacy databases, allowing Principal Investigators (PIs) and Research Assistants (RAs) to focus on science rather than administrative overhead.
+
+- **Demo Videos & Instructions (v2, to be updated):** [System Overview](https://mcmaster-baby-lab.github.io/handbook/DRDB)
+- **Documentation (v1, obsolete):** [drdb.readthedocs.io](https://drdb.readthedocs.io)
 
 ---
 
-# Recent Updates (V3.0.0)
+# Recent Updates
 
 - **Vue 3 Frontend:** The client (`client/`) has been rebuilt with Vue 3, Vite, and Pinia.
 - **Testing Rooms:** Dedicated rooms (e.g., Eye Tracking, fNIRS) linked to independent Google Calendars.
