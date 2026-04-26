@@ -15,6 +15,13 @@
         You are running in a training mode.
       </v-alert>
     </div>
+    <div v-if="!studies || studies.length === 0" class="mb-4">
+      <v-alert border="start" type="info" color="primary" density="compact" style="font-weight: 600">
+        There are no studies in your lab yet. Please
+        <a href="#/study" class="text-primary font-weight-bold" style="text-decoration: underline;">create a study</a>
+        before you can recruit participants.
+      </v-alert>
+    </div>
 
     <ConfirmDlg ref="confirmD" />
 
@@ -222,9 +229,27 @@
 
           <!-- Empty state when no child is loaded -->
           <v-card-text v-else class="text-center py-12 flex-grow-1 d-flex flex-column align-center justify-center">
-            <v-icon size="64" color="grey-lighten-1" class="mb-3">mdi-account-search-outline</v-icon>
-            <div class="text-h6 text-muted">Select a study to load families</div>
-            <div class="text-caption text-muted">Choose a study from the dropdown above to begin</div>
+            <v-icon size="64" color="grey-lighten-1" class="mb-3">
+              {{ (!studies || studies.length === 0) ? 'mdi-flask-empty-outline' : 'mdi-account-search-outline' }}
+            </v-icon>
+            <div class="text-h6 text-muted">
+              <template v-if="!studies || studies.length === 0">
+                No studies available
+              </template>
+              <template v-else>
+                Select a study to load families
+              </template>
+            </div>
+            <div class="text-caption text-muted">
+              <template v-if="!studies || studies.length === 0">
+                Create a study in
+                <a href="#/study" class="text-primary" style="text-decoration: underline;">Study management</a>
+                to begin recruiting participants.
+              </template>
+              <template v-else>
+                Choose a study from the dropdown above to begin
+              </template>
+            </div>
           </v-card-text>
         </v-card>
 
