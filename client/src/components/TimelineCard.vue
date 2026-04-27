@@ -48,9 +48,14 @@
 
 <script>
 import moment from "moment-timezone";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "TimelineCard",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   props: {
     schedule: { type: Object, required: true },
     deletable: { type: Boolean, default: false }
@@ -70,7 +75,7 @@ export default {
     },
     formattedDate() {
       if (!this.schedule.AppointmentTime) return "TBD";
-      return moment(this.schedule.AppointmentTime).format("YYYY-MM-DD HH:mm");
+      return moment(this.schedule.AppointmentTime).tz(this.store.timeZone || "America/Toronto").format("YYYY-MM-DD HH:mm");
     },
     childNames() {
       if (!this.schedule.Appointments || this.schedule.Appointments.length === 0) return "";

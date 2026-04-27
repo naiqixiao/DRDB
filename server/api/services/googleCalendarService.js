@@ -25,14 +25,16 @@ google.options({
 async function createEvent(oAuth2Client, event) {
   const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
 
+  const tz = event.timeZone || config.timeZone;
+
   event.start = {
-    dateTime: moment(event.AppointmentTime).toISOString(true),
-    timeZone: config.timeZone,
+    dateTime: moment(event.AppointmentTime).format("YYYY-MM-DDTHH:mm:ss"),
+    timeZone: tz,
   };
 
   event.end = {
-    dateTime: moment(event.AppointmentTime).add(1, "h").toISOString(true),
-    timeZone: config.timeZone,
+    dateTime: moment(event.AppointmentTime).add(1, "h").format("YYYY-MM-DDTHH:mm:ss"),
+    timeZone: tz,
   };
 
   const calEvent = await calendar.events.insert({
@@ -58,14 +60,16 @@ async function createEvent(oAuth2Client, event) {
 async function updateEvent(oAuth2Client, event) {
   const calendar = google.calendar({ version: "v3", auth: oAuth2Client });
 
+  const tz = event.timeZone || config.timeZone;
+
   event.start = {
-    dateTime: moment(event.AppointmentTime).toISOString(true),
-    timeZone: config.timeZone,
+    dateTime: moment(event.AppointmentTime).format("YYYY-MM-DDTHH:mm:ss"),
+    timeZone: tz,
   };
 
   event.end = {
-    dateTime: moment(event.AppointmentTime).add(1, "h").toISOString(true),
-    timeZone: config.timeZone,
+    dateTime: moment(event.AppointmentTime).add(1, "h").format("YYYY-MM-DDTHH:mm:ss"),
+    timeZone: tz,
   };
 
   const calEvent = await calendar.events.patch({

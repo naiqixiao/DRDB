@@ -138,11 +138,11 @@ export default {
     },
 
     formatTime(date) {
-      return moment(date).tz("America/Toronto").format("h:mm A");
+      return moment(date).tz(this.store.timeZone || "America/Toronto").format("h:mm A");
     },
 
     formatDate(date) {
-      return moment(date).tz("America/Toronto").format("ddd, MMM D");
+      return moment(date).tz(this.store.timeZone || "America/Toronto").format("ddd, MMM D");
     },
 
     relativeTime(date) {

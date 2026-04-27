@@ -2,10 +2,14 @@ const asyncHandler = require("express-async-handler");
 const model = require("../models/DRDB");
 
 const calendarService = require("../services/googleCalendarService");
+const { getEffectiveTimezone } = require("../../jobs/scheduler");
 
 // a new calendar event creation function to generate a list of events for each appointment, and then send the output back to frontend.
 exports.create = asyncHandler(async (req, res) => {
   try {
+    const tz = await getEffectiveTimezone(req.body.lab);
+    req.body.event.timeZone = tz;
+
     const event = await calendarService.createEvent(
       req.oAuth2Client,
       req.body.event
@@ -19,6 +23,9 @@ exports.create = asyncHandler(async (req, res) => {
 
 exports.update = asyncHandler(async (req, res) => {
   try {
+    const tz = await getEffectiveTimezone(req.body.lab);
+    req.body.event.timeZone = tz;
+
     const event = await calendarService.updateEvent(
       req.oAuth2Client,
       req.body.event

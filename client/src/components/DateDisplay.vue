@@ -8,9 +8,14 @@
 
 <script>
 import moment from "moment-timezone";
+import { useMainStore } from "@/stores/mainStore";
 
 export default {
   name: "DateDisplay",
+  setup() {
+    const store = useMainStore();
+    return { store };
+  },
   props: {
     date: String,
     format: String,
@@ -20,14 +25,16 @@ export default {
     DateFormat(date, format, status) {
       let formatedDate = "";
       let formatedTime = "";
+      const tz = this.store.timeZone || "America/Toronto";
+
       switch (format) {
         case "long":
           if (moment(date).diff(moment(), "days") >= -60) {
-            formatedDate = moment(date).tz("America/Toronto").format("MMM DD (ddd)");
-            formatedTime = moment(date).tz("America/Toronto").format("hh:mmA");
+            formatedDate = moment(date).tz(tz).format("MMM DD (ddd)");
+            formatedTime = moment(date).tz(tz).format("hh:mmA");
           } else {
-            formatedDate = moment(date).tz("America/Toronto").format("MM/DD/YYYY");
-            formatedTime = moment(date).tz("America/Toronto").format("hh:mm");
+            formatedDate = moment(date).tz(tz).format("MM/DD/YYYY");
+            formatedTime = moment(date).tz(tz).format("hh:mm");
           }
 
           if (status !== "Confirmed" && status !== "Completed") {
@@ -36,7 +43,7 @@ export default {
           break;
 
         default:
-          formatedDate = moment(date).tz("America/Toronto").format("L");
+          formatedDate = moment(date).tz(tz).format("L");
           break;
       }
 
