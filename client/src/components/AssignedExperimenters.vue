@@ -42,13 +42,14 @@
             <v-col cols="12">
               <v-select
                 v-model="editedExperimenter"
-                :items="labMembers"
+                :items="allMembers"
                 item-title="Name"
                 item-value="id"
                 return-object
                 label="Select experimenters..."
                 multiple
                 chips
+                closable-chips
                 hide-details
                 variant="outlined"
                 density="compact"
@@ -136,6 +137,24 @@ export default {
         role === 'PI' ||
         role === 'Lab manager'
       );
+    },
+    allMembers() {
+      // Combine labMembers with currently assigned experimenters
+      // to ensure retired members are visible and correctly labeled
+      const combined = [...this.labMembers];
+      const activeIds = new Set(this.labMembers.map(m => m.id));
+      
+      this.Experimenters.forEach(exp => {
+        if (!activeIds.has(exp.id)) {
+          // Add retired member to the list so they can be seen/removed in the select
+          combined.push({ 
+            ...exp, 
+            Name: exp.Name ? `${exp.Name} (Retired)` : 'Unknown (Retired)'
+          });
+        }
+      });
+      
+      return combined;
     }
   },
 
