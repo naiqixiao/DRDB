@@ -15,14 +15,14 @@ async function seedDatabase(models) {
       return;
     }
 
-    console.log("🌱 Empty database detected. Seeding initial default data...");
+    const systemTimezone = process.env.TIMEZONE || process.env.TZ || "America/Toronto";
 
     // 2. Create a default Lab
     const defaultLab = await models.lab.create({
       LabName: "Default Lab",
       PI: "System Administrator",
       Email: "admin@example.com",
-      Timezone: "America/Toronto",
+      Timezone: systemTimezone,
       EmailOpening: "<p>Welcome to our lab.</p>",
       EmailClosing: "<p>Thank you,</p>",
       Location: "Main Campus",
@@ -45,11 +45,18 @@ async function seedDatabase(models) {
       FK_Lab: defaultLab.id
     });
 
-    // 4. Set the System Setting flag for the Frontend Wizard
-    await models.systemSetting.findOrCreate({
-      where: { SettingKey: "isFirstRun" },
-      defaults: { SettingValue: "true" }
-    });
+    // 4. Set the System Settings
+    const defaultSettings = [
+      { SettingKey: "isFirstRun", SettingValue: "true" },
+      { SettingKey: "GeneralTimezone", SettingValue: systemTimezone }
+    ];
+
+    for (const setting of defaultSettings) {
+      await models.systemSetting.findOrCreate({
+        where: { SettingKey: setting.SettingKey },
+        defaults: { SettingValue: setting.SettingValue }
+      });
+    }
 
     console.log("✅ Database seeding completed successfully.");
     console.log("---------------------------------------------------");

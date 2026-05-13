@@ -59,7 +59,8 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		Timezone: {
 			type: DataTypes.STRING(45),
-			allowNull: true
+			allowNull: true,
+			defaultValue: ''
 		}
 	}, {
 		sequelize,

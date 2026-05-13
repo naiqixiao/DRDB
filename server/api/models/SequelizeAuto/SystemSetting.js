@@ -15,7 +15,8 @@ module.exports = function(sequelize, DataTypes) {
 		},
 		SettingValue: {
 			type: DataTypes.TEXT,
-			allowNull: true
+			allowNull: true,
+			defaultValue: ''
 		},
 		createdAt: {
 			type: DataTypes.DATE,
