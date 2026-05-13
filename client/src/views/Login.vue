@@ -8,7 +8,7 @@
           
           <div class="text-center mb-8">
             <img src="@/assets/logo.png" alt="DRDB Logo" height="180" class="mb-4" />
-            <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">DRDB</h1>
+            <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">TAUCCD</h1>
             <p class="text-body-1 text-muted">Tel Aviv University Center for Cognitive Development</p>
           </div>
 
