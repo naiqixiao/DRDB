@@ -70,3 +70,6 @@ backups/
 stats/
 BUG-AUDIT-2026-04-26.md
 docs/
+Sagi.md
+client/dist.zip
+server/.env
