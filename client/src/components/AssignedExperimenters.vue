@@ -1,8 +1,13 @@
 <template>
   <div>
-    <div>
+    <!-- Active Experimenters -->
+    <div v-if="activeExperimenters.length > 0" class="mb-4">
+      <div class="d-flex align-center mb-3">
+        <span class="text-caption font-weight-bold text-uppercase text-muted">Active</span>
+        <v-chip size="x-small" variant="tonal" color="primary" class="ml-1">{{ activeExperimenters.length }}</v-chip>
+      </div>
       <v-row dense>
-        <v-col cols="12" md="6" v-for="experimenter in Experimenters" :key="experimenter.id" class="mb-2">
+        <v-col cols="12" md="6" v-for="experimenter in activeExperimenters" :key="experimenter.id" class="mb-2">
           <v-card class="experimenter-card pa-4 h-100" variant="outlined" style="border-color: #E2E8F0 !important; transition: all 0.2s ease;">
             <div class="d-flex align-center">
               <v-avatar :color="getRoleColor(experimenter.Role)" variant="tonal" size="44" class="mr-3 font-weight-bold">
@@ -24,6 +29,43 @@
           </v-card>
         </v-col>
       </v-row>
+    </div>
+
+    <!-- Retired Experimenters -->
+    <div v-if="retiredExperimenters.length > 0" class="mb-4">
+      <div class="d-flex align-center mb-3">
+        <span class="text-caption font-weight-bold text-uppercase text-muted">Retired</span>
+        <v-chip size="x-small" variant="tonal" color="grey" class="ml-1">{{ retiredExperimenters.length }}</v-chip>
+      </div>
+      <v-row dense>
+        <v-col cols="12" md="6" v-for="experimenter in retiredExperimenters" :key="experimenter.id" class="mb-2">
+          <v-card class="experimenter-card experimenter-card--retired pa-4 h-100" variant="outlined" style="transition: all 0.2s ease;">
+            <div class="d-flex align-center">
+              <v-avatar :color="getRoleColor(experimenter.Role)" variant="tonal" size="44" class="mr-3 font-weight-bold">
+                {{ experimenter.Name ? experimenter.Name.charAt(0) : '?' }}
+              </v-avatar>
+              <div class="flex-grow-1" style="min-width: 0;">
+                <div class="d-flex align-center justify-space-between">
+                  <div class="text-subtitle-1 font-weight-bold text-truncate">
+                    {{ experimenter.Name }} ({{ experimenter.Initial }})
+                  </div>
+                  <v-chip size="x-small" :color="getRoleColor(experimenter.Role)" variant="flat" class="text-white ml-2 font-weight-bold flex-shrink-0">{{ experimenter.Role }}</v-chip>
+                </div>
+                <div class="d-flex align-center mt-1 text-body-2 text-medium-emphasis">
+                  <v-icon size="14" class="mr-1">mdi-email-outline</v-icon>
+                  {{ experimenter.Email }}
+                </div>
+              </div>
+            </div>
+          </v-card>
+        </v-col>
+      </v-row>
+    </div>
+
+    <!-- No experimenters assigned -->
+    <div v-if="Experimenters.length === 0" class="text-center py-6">
+      <v-icon size="40" color="grey-lighten-1">mdi-account-multiple-off</v-icon>
+      <p class="text-body-2 text-muted mt-2">No experimenters assigned yet.</p>
     </div>
 
     <!-- Assign Experimenters Dialog -->
@@ -128,6 +170,12 @@ export default {
   },
 
   computed: {
+    activeExperimenters() {
+      return this.Experimenters.filter((e) => !e.Retired);
+    },
+    retiredExperimenters() {
+      return this.Experimenters.filter((e) => e.Retired);
+    },
     canManageExperimenters() {
       if (!this.studyId) return false;
       const role = this.store.role;
@@ -209,3 +257,10 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.experimenter-card--retired {
+  opacity: 0.65;
+  border-style: dashed !important;
+}
+</style>
