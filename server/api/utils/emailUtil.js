@@ -40,7 +40,7 @@ async function getAdminGmailClient() {
     fs.readFileSync("api/google/general/token.json")
   );
 
-  const { client_id, client_secret, redirect_uris } = credentials.installed;
+  const { client_id, client_secret, redirect_uris } = credentials.installed || credentials.web;
   const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
   oAuth2Client.setCredentials(token);
 
@@ -161,7 +161,7 @@ function getLabOAuth2Client(labId) {
     fs.readFileSync(`api/google/labs/lab${labId}/token.json`)
   );
 
-  const { client_id, client_secret, redirect_uris } = credentials.installed;
+  const { client_id, client_secret, redirect_uris } = credentials.installed || credentials.web;
   const oAuth2Client = new OAuth2(client_id, client_secret, redirect_uris[0]);
   oAuth2Client.setCredentials(token);
   return oAuth2Client;

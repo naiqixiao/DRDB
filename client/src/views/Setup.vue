@@ -301,6 +301,7 @@ export default {
         await externalAPIs.setLabToken(this.form3.authCode);
         // Backend marks isFirstRun=false automatically on token exchange
         this.store.setLabEmailStatus(true);
+        this.store.setAdminEmailStatus(false);
         this.store.setIsFirstRun(false);
         this.successDialog = true;
       } catch (err) {
@@ -316,10 +317,14 @@ export default {
         // Mark first run complete without Google — they can connect later via Settings
         await systemSetting.updateSetting({ SettingKey: 'isFirstRun', SettingValue: 'false' });
         this.store.setIsFirstRun(false);
+        this.store.setLabEmailStatus(false);
+        this.store.setAdminEmailStatus(false);
         this.successDialog = true;
       } catch (err) {
         // Even if the API call fails, clear the flag locally so they aren't trapped
         this.store.setIsFirstRun(false);
+        this.store.setLabEmailStatus(false);
+        this.store.setAdminEmailStatus(false);
         this.successDialog = true;
       } finally {
         this.loading = false;

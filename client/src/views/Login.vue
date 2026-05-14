@@ -238,9 +238,17 @@ export default {
           } else {
             try {
               const profile = await externalAPIs.googleGetEmailAddress();
-              if (profile?.data?.labEmail) this.store.setLabEmailStatus(true);
-              if (profile?.data?.adminEmail) this.store.setAdminEmailStatus(true);
-            } catch(e) { console.log("Could not load google profile", e); }
+              const hasLabEmail = !!profile?.data?.labEmail;
+              const hasAdminEmail = !!profile?.data?.adminEmail;
+              const hasAdminToken = !!profile?.data?.adminEmailConfigured;
+              const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
+              this.store.setLabEmailStatus(hasLabEmail);
+              this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+            } catch(e) {
+              this.store.setLabEmailStatus(false);
+              this.store.setAdminEmailStatus(false);
+              console.log("Could not load google profile", e);
+            }
             this.$router.push({ name: "Family information" });
           }
         } catch (error) {
@@ -294,9 +302,16 @@ export default {
 
         try {
           const profile = await externalAPIs.googleGetEmailAddress();
-          if (profile?.data?.labEmail) this.store.setLabEmailStatus(true);
-          if (profile?.data?.adminEmail) this.store.setAdminEmailStatus(true);
-        } catch(e) {}
+          const hasLabEmail = !!profile?.data?.labEmail;
+          const hasAdminEmail = !!profile?.data?.adminEmail;
+          const hasAdminToken = !!profile?.data?.adminEmailConfigured;
+          const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
+          this.store.setLabEmailStatus(hasLabEmail);
+          this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+        } catch(e) {
+          this.store.setLabEmailStatus(false);
+          this.store.setAdminEmailStatus(false);
+        }
 
         this.changeTemporaryPassword = false;
         await this.$refs.confirmD.open('Welcome!', 'Your password is set! Welcome!', { color: 'success', noconfirm: true });
