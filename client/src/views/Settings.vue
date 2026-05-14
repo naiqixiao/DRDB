@@ -1644,7 +1644,7 @@ export default {
     async setAdminToken() {
       try {
         const response = await externalAPIs.setAdminToken(this.signInCode);
-        this.adminEmail = response.data.Email;
+        this.adminEmail = response.data.Email || "admin configured";
         this.$refs.confirmD.open(
           "Success",
           "Admin email account is successfully setup!",
@@ -1946,12 +1946,14 @@ export default {
         this.emailSetupError = profile.data.error || null;
         const hasLabEmail = !!profile.data.labEmail;
         const hasAdminEmail = !!profile.data.adminEmail;
+        const hasAdminToken = !!profile.data.adminEmailConfigured;
+        const adminFetchFailed = !!profile.data.adminEmailFetchError;
 
         if (hasLabEmail) {
           this.labEmail = profile.data.labEmail;
           this.store.setLabEmailStatus(true);
           this.store.setLabEmail(profile.data.labEmail);
-        } else if (!this.store.labEmailStatus) {
+        } else {
           this.labEmail = "Lab email is not set up yet.";
           this.store.setLabEmailStatus(false);
           this.store.setLabEmail(null);
@@ -1960,7 +1962,13 @@ export default {
         if (hasAdminEmail) {
           this.adminEmail = profile.data.adminEmail;
           this.store.setAdminEmailStatus(true);
-        } else if (!this.store.adminEmailStatus) {
+        } else if (hasAdminToken) {
+          this.adminEmail = "Admin token is configured, but Gmail verification is unavailable.";
+          this.store.setAdminEmailStatus(true);
+          if (adminFetchFailed && !this.emailSetupError) {
+            this.emailSetupError = "Admin email token exists, but Gmail could not be reached to verify the address.";
+          }
+        } else {
           this.adminEmail = "Admin email is not set up yet.";
           this.store.setAdminEmailStatus(false);
         }

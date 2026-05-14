@@ -213,7 +213,7 @@ exports.adminToken = asyncHandler(async (req, res) => {
       }
     });
 
-    var adminEmail = sendAsEmail.sendAsEmail;
+    var adminEmail = sendAsEmail.sendAsEmail || null;
 
     fs.writeFileSync(tokenPath, JSON.stringify(finalTokens));
 
@@ -237,6 +237,8 @@ exports.googleEmail = asyncHandler(async (req, res) => {
   let labEmail = null;
   let adminEmail = null;
   let labName = null;
+  let adminEmailConfigured = false;
+  let adminEmailFetchError = false;
 
   // ── Lab email profile ─────────────────────────────────────────────
   try {
@@ -308,6 +310,8 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     const credentialsPath = "api/google/general/credentials.json";
     const tokenPath = "api/google/general/token.json";
 
+    adminEmailConfigured = fs.existsSync(tokenPath);
+
     const credentials = fs.readFileSync(credentialsPath);
     const parsedCredentials = JSON.parse(credentials);
     const config = parsedCredentials.installed || parsedCredentials.web;
@@ -315,13 +319,13 @@ exports.googleEmail = asyncHandler(async (req, res) => {
 
     const origin = req.get('origin') || "http://localhost:5173";
     const redirect_uri = `${origin}/oauth/callback`;
-    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
-      ? redirect_uri 
+    const valid_redirect_uri = redirect_uris.includes(redirect_uri)
+      ? redirect_uri
       : redirect_uris[0];
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
-    if (fs.existsSync(tokenPath)) {
+    if (adminEmailConfigured) {
       const token = fs.readFileSync(tokenPath);
       oAuth2Client.setCredentials(JSON.parse(token));
 
@@ -342,13 +346,16 @@ exports.googleEmail = asyncHandler(async (req, res) => {
     }
 
   } catch (error) {
-    adminEmail = null;
+    // Keep adminEmail null on Gmail failures and report configuration state separately.
+    adminEmailFetchError = adminEmailConfigured;
     console.error("error in googleEmail admin profile:", error);
   }
 
   res.status(200).send({
     labEmail: labEmail,
     adminEmail: adminEmail,
-    labName: labName
+    labName: labName,
+    adminEmailConfigured: adminEmailConfigured,
+    adminEmailFetchError: adminEmailFetchError
   });
 });
