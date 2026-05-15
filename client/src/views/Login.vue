@@ -241,12 +241,17 @@ export default {
               const hasLabEmail = !!profile?.data?.labEmail;
               const hasAdminEmail = !!profile?.data?.adminEmail;
               const hasAdminToken = !!profile?.data?.adminEmailConfigured;
-              const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
               this.store.setLabEmailStatus(hasLabEmail);
-              this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+              if (hasAdminEmail) {
+                this.store.setAdminEmailStatus(true);
+              } else if (hasAdminToken) {
+                this.store.setAdminEmailStatus(true);
+              } else {
+                this.store.setAdminEmailStatus(false);
+              }
             } catch(e) {
               this.store.setLabEmailStatus(false);
-              this.store.setAdminEmailStatus(false);
+              // Preserve last known admin email status instead of clearing it on transient API failure
               console.log("Could not load google profile", e);
             }
             this.$router.push({ name: "Family information" });
@@ -305,12 +310,17 @@ export default {
           const hasLabEmail = !!profile?.data?.labEmail;
           const hasAdminEmail = !!profile?.data?.adminEmail;
           const hasAdminToken = !!profile?.data?.adminEmailConfigured;
-          const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
           this.store.setLabEmailStatus(hasLabEmail);
-          this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+          if (hasAdminEmail) {
+            this.store.setAdminEmailStatus(true);
+          } else if (hasAdminToken) {
+            this.store.setAdminEmailStatus(true);
+          } else {
+            this.store.setAdminEmailStatus(false);
+          }
         } catch(e) {
           this.store.setLabEmailStatus(false);
-          this.store.setAdminEmailStatus(false);
+          // Preserve last known admin email status instead of clearing it on transient API failure
         }
 
         this.changeTemporaryPassword = false;
