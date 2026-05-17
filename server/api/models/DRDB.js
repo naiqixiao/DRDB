@@ -266,10 +266,46 @@ exports.sequelize = sequelize;
 
 const { seedDatabase } = require("../utils/seeder");
 
+async function relaxLegacyStudyAgeConstraintsIfNeeded() {
+  try {
+    const queryInterface = sequelize.getQueryInterface();
+    const columns = await queryInterface.describeTable("Study");
+
+    const hasLegacyMinAge = Object.prototype.hasOwnProperty.call(columns, "MinAge");
+    const hasLegacyMaxAge = Object.prototype.hasOwnProperty.call(columns, "MaxAge");
+
+    if (!hasLegacyMinAge && !hasLegacyMaxAge) {
+      return;
+    }
+
+    if (hasLegacyMinAge && columns.MinAge && columns.MinAge.allowNull === false) {
+      await sequelize.query(
+        "ALTER TABLE `Study` MODIFY COLUMN `MinAge` DECIMAL(10,2) NULL"
+      );
+      console.log("Adjusted legacy Study.MinAge to allow NULL for backward compatibility.");
+    }
+
+    if (hasLegacyMaxAge && columns.MaxAge && columns.MaxAge.allowNull === false) {
+      await sequelize.query(
+        "ALTER TABLE `Study` MODIFY COLUMN `MaxAge` DECIMAL(10,2) NULL"
+      );
+      console.log("Adjusted legacy Study.MaxAge to allow NULL for backward compatibility.");
+    }
+  } catch (error) {
+    console.warn(
+      "Could not auto-relax legacy Study MinAge/MaxAge constraints. " +
+        "Please run migration manually if needed:",
+      error.message
+    );
+  }
+}
+
 // Synchronize with database (tables created/updated in background)
 sequelize.sync({ force: false }).then(async () => {
   
   try {
+    await relaxLegacyStudyAgeConstraintsIfNeeded();
+
     // SAFETY CHECK: Count how many labs or users exist
     // (Assuming 'lab' or 'user' is one of your exported models)
     const existingLabs = await exports.lab.count();
