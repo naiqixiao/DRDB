@@ -7,9 +7,52 @@ const fs = require("fs");
 const log = require("../controllers/log");
 const config = require("../../config/general");
 
+const STUDY_CRITERIA_DEFAULTS = {
+  ASDParticipant: "Include",
+  PrematureParticipant: "Include",
+  VisionLossParticipant: "Include",
+  HearingLossParticipant: "Include",
+  IllParticipant: "Include",
+};
+
+function normalizeStudyWritePayload(payload = {}) {
+  return {
+    ...payload,
+    Completed: payload.Completed ?? false,
+    Description: payload.Description ?? "",
+    PhoneScript: payload.PhoneScript ?? "",
+    EmailTemplate: payload.EmailTemplate ?? "",
+    ReminderTemplate: payload.ReminderTemplate ?? "",
+    FollowUPEmailSnippet: payload.FollowUPEmailSnippet ?? "",
+    StudyType: payload.StudyType ?? "Behavioural",
+    ...Object.fromEntries(
+      Object.entries(STUDY_CRITERIA_DEFAULTS).map(([key, fallback]) => [
+        key,
+        payload[key] ?? fallback,
+      ])
+    ),
+  };
+}
+
+function getMissingRequiredFields(payload, requiredKeys) {
+  return requiredKeys.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
+}
+
 // Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
-  const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...newStudyInfo } = req.body;
+  const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
+  const newStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+
+  const missingFields = getMissingRequiredFields(newStudyInfo, [
+    "StudyName",
+    "FK_Lab",
+    "FK_Personnel",
+  ]);
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      error: `Missing required field(s): ${missingFields.join(", ")}`,
+    });
+  }
 
   try {
     const study = await model.sequelize.transaction(async (transaction) => {
@@ -109,7 +152,19 @@ exports.search = asyncHandler(async (req, res) => {
 // Update a Tutorial by the id in the request
 exports.update = asyncHandler(async (req, res) => {
   const ID = req.body.id;
-  const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...updatedStudyInfo } = req.body;
+  const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
+  const updatedStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+
+  const missingFields = getMissingRequiredFields(updatedStudyInfo, [
+    "StudyName",
+    "FK_Lab",
+    "FK_Personnel",
+  ]);
+  if (missingFields.length > 0) {
+    return res.status(400).json({
+      error: `Missing required field(s): ${missingFields.join(", ")}`,
+    });
+  }
 
   try {
     await model.study.update(updatedStudyInfo, {
