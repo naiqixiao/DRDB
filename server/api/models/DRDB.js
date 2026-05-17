@@ -125,6 +125,7 @@ Study.hasMany(StudyAgeGroup, { foreignKey: "FK_Study", as: "AgeGroups" });
 StudyAgeGroup.belongsTo(Study, { foreignKey: "FK_Study" });
 
 // Prerequisites (Many-to-Many self-referencing)
+// Some deployments do not have createdAt/updatedAt on this junction table.
 const StudyPrerequisites = sequelize.define('StudyPrerequisites', {}, { timestamps: false, tableName: 'StudyPrerequisites' });
 
 Study.belongsToMany(Study, {
@@ -135,6 +136,7 @@ Study.belongsToMany(Study, {
 });
 
 // Exclusions (Many-to-Many self-referencing)
+// Some deployments do not have createdAt/updatedAt on this junction table.
 const StudyExclusions = sequelize.define('StudyExclusions', {}, { timestamps: false, tableName: 'StudyExclusions' });
 
 Study.belongsToMany(Study, {

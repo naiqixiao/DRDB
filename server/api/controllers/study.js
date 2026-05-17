@@ -12,32 +12,38 @@ exports.create = asyncHandler(async (req, res) => {
   const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...newStudyInfo } = req.body;
 
   try {
-    const created = await model.study.create(
-      { ...newStudyInfo, AgeGroups: AgeGroups || [] },
-      { include: [{ model: model.studyAgeGroup, as: "AgeGroups" }] }
-    );
-
-    if (PrerequisiteIds && PrerequisiteIds.length > 0) {
-      await created.setPrerequisites(PrerequisiteIds);
-    }
-    if (ExclusionIds && ExclusionIds.length > 0) {
-      await created.setExclusions(ExclusionIds);
-    }
-
-    const study = await model.study.findOne({
-      where: { id: created.id },
-      include: [
-        { model: model.studyAgeGroup, as: "AgeGroups" },
-        { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
-        { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
-        model.lab,
-        { model: model.personnel, as: "PointofContact" },
+    const study = await model.sequelize.transaction(async (transaction) => {
+      const created = await model.study.create(
+        { ...newStudyInfo, AgeGroups: AgeGroups || [] },
         {
-          model: model.personnel,
-          as: "Experimenters",
-          through: { model: model.experimenter },
-        },
-      ],
+          include: [{ model: model.studyAgeGroup, as: "AgeGroups" }],
+          transaction,
+        }
+      );
+
+      if (PrerequisiteIds && PrerequisiteIds.length > 0) {
+        await created.setPrerequisites(PrerequisiteIds, { transaction });
+      }
+      if (ExclusionIds && ExclusionIds.length > 0) {
+        await created.setExclusions(ExclusionIds, { transaction });
+      }
+
+      return await model.study.findOne({
+        where: { id: created.id },
+        include: [
+          { model: model.studyAgeGroup, as: "AgeGroups" },
+          { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
+          { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
+          model.lab,
+          { model: model.personnel, as: "PointofContact" },
+          {
+            model: model.personnel,
+            as: "Experimenters",
+            through: { model: model.experimenter },
+          },
+        ],
+        transaction,
+      });
     });
 
     await log.createLog(
