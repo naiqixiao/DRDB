@@ -300,11 +300,50 @@ async function relaxLegacyStudyAgeConstraintsIfNeeded() {
   }
 }
 
+async function patchLegacyPersonnelSchemaIfNeeded() {
+  try {
+    const queryInterface = sequelize.getQueryInterface();
+    const columns = await queryInterface.describeTable("Personnel");
+
+    const hasTemporaryPassword = Object.prototype.hasOwnProperty.call(columns, "temporaryPassword");
+    const hasZoomLink = Object.prototype.hasOwnProperty.call(columns, "ZoomLink");
+    const hasRetired = Object.prototype.hasOwnProperty.call(columns, "Retired");
+
+    if (!hasTemporaryPassword) {
+      await sequelize.query(
+        "ALTER TABLE `Personnel` ADD COLUMN `temporaryPassword` TINYINT NOT NULL DEFAULT 0 AFTER `updatedAt`"
+      );
+      console.log("Patched legacy Personnel table: added temporaryPassword.");
+    }
+
+    if (!hasZoomLink) {
+      await sequelize.query(
+        "ALTER TABLE `Personnel` ADD COLUMN `ZoomLink` VARCHAR(300) NULL AFTER `temporaryPassword`"
+      );
+      console.log("Patched legacy Personnel table: added ZoomLink.");
+    }
+
+    if (!hasRetired) {
+      await sequelize.query(
+        "ALTER TABLE `Personnel` ADD COLUMN `Retired` INT NOT NULL DEFAULT 0 AFTER `ZoomLink`"
+      );
+      console.log("Patched legacy Personnel table: added Retired.");
+    }
+  } catch (error) {
+    console.warn(
+      "Could not auto-patch legacy Personnel schema. " +
+        "Please run migration manually if needed:",
+      error.message
+    );
+  }
+}
+
 // Synchronize with database (tables created/updated in background)
 sequelize.sync({ force: false }).then(async () => {
   
   try {
     await relaxLegacyStudyAgeConstraintsIfNeeded();
+    await patchLegacyPersonnelSchemaIfNeeded();
 
     // SAFETY CHECK: Count how many labs or users exist
     // (Assuming 'lab' or 'user' is one of your exported models)

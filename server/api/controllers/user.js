@@ -130,16 +130,40 @@ exports.signup = asyncHandler(async (req, res) => {
         });
       }
 
+      let warning = null;
       const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
-      await sendAdminEmail(welcomeEmail);
+      try {
+        await sendAdminEmail(welcomeEmail);
+      } catch (emailError) {
+        // Account creation should not fail if notification email delivery fails.
+        warning = "User created, but welcome email could not be sent. Please verify admin Gmail OAuth setup.";
+        console.error("Signup email error:", emailError);
+      }
 
       // log
       await log.createLog("User Created", User, "created " + newUser.Email);
+
+      if (warning) {
+        return res.status(200).json({
+          ...newUser,
+          warning,
+        });
+      }
 
       res.status(200).send(newUser);
     }
   } catch (error) {
       console.error("Signup error:", error);
+      if (
+        error?.name === "SequelizeDatabaseError" &&
+        /Unknown column|doesn't exist|ER_BAD_FIELD_ERROR/i.test(error?.message || "")
+      ) {
+        return res.status(500).json({
+          error: "Database schema is out of date for Personnel. Please run migration patches and restart the server.",
+          details: error.message,
+        });
+      }
+
       res.status(500).json({ error: error.message });
     }
 });
@@ -201,7 +225,12 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         }
 
         const welcomeEmail = buildWelcomeEmail(newUser.Name, newUser.Email, newUser.Role, password);
-        await sendAdminEmail(welcomeEmail);
+        try {
+          await sendAdminEmail(welcomeEmail);
+        } catch (emailError) {
+          // Keep batch creation resilient when email service is unavailable.
+          console.error("Signup batch email error:", emailError);
+        }
 
         // log
         await log.createLog("User Created", User, "created " + newUser.Email);
