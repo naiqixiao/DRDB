@@ -1,3 +1,31 @@
+### Release v3.0.3
+
+This release adds per-lab duration settings for automatic schedule jobs. Labs can now configure how many days to wait before auto-cancellation, auto-completion, and stale-schedule cleanup, with values stored in each lab's existing `LabSettings_<id>` JSON in `SystemSetting`.
+
+#### Auto Job Duration Settings
+* **Per-lab thresholds:** Added configurable durations for automatic schedule actions at the lab level.
+* **`autoCancellationDays` (default: 14):** Days without contact before TBD/Rescheduling schedules are auto-rejected.
+* **`autoCompletionDays` (default: 2):** Days after appointment time before Confirmed schedules are auto-completed.
+* **`staleScheduleDays` (default: 13):** Days since last update before stale schedules (for example TBD, Rescheduling, No Show, or Cancelled) are auto-rejected.
+
+#### Backend
+* **Controller update:** `server/api/controllers/autoCancellation.js` now reads a full lab-settings map instead of only opt-out flags.
+* **Grouped duration execution:** Replaced single-cutoff queries with group-by-duration processing so labs with different thresholds are handled correctly.
+* **Efficient query strategy:** Jobs now run one query per unique duration value (plus a default group), rather than one query per lab.
+
+#### Frontend
+* **Settings UI controls:** Extended Lab Preferences in Settings with numeric day inputs under each auto-job toggle.
+* **Smart defaults:** Inputs prefill from `labSettingsConfig` or system defaults when no custom lab value exists.
+* **State behavior:** Duration inputs disable when the related toggle is off.
+
+#### Architecture
+* **No store schema change required:** `client/src/stores/mainStore.js` already persists the full `labSettings` JSON, so new duration keys serialize automatically.
+
+#### Verification
+* **Lab-specific completion window:** Verified auto-completion uses each lab's configured `autoCompletionDays` value.
+* **Default fallback coverage:** Verified labs without custom duration settings continue to use system defaults.
+* **Round-trip settings check:** Verified saved values persist in `LabSettings_<id>` and reload correctly in Settings.
+
 ### Release v3.0.2
 
 This release introduces a centralized, hierarchical timezone management system. You can now set a global system timezone or override it with lab-specific settings directly from the UI, ensuring all scheduled reminders and jobs run at the correct local time.

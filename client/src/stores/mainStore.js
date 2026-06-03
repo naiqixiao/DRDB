@@ -25,7 +25,8 @@ export const useMainStore = defineStore('main', {
     timeZone: null,
     testingRooms: null,
     temporaryPassword: false,
-    isFirstRun: false
+    isFirstRun: false,
+    labSettings: null
   }),
   
   persist: true,
@@ -57,6 +58,7 @@ export const useMainStore = defineStore('main', {
     setTestingRooms(rooms) { this.testingRooms = rooms; },
     setTemporaryPassword(status) { this.temporaryPassword = status; },
     setIsFirstRun(status) { this.isFirstRun = status; },
+    setLabSettings(settings) { this.labSettings = settings; },
     
     clearAll() {
       this.$reset();

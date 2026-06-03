@@ -365,6 +365,129 @@
 
         <v-card class="ds-card mb-6" variant="flat" v-if="canViewScheduledJobs">
           <v-toolbar color="transparent" density="compact" class="px-2">
+            <v-icon class="mr-2" color="primary">mdi-cog-outline</v-icon>
+            <span
+              class="text-subtitle-1 font-weight-bold"
+              style="
+                font-family: var(--ds-font-family-heading);
+                color: rgb(var(--v-theme-primary));
+              "
+            >
+              Lab Preferences
+            </span>
+          </v-toolbar>
+          <v-divider></v-divider>
+          <v-card-text>
+            <!-- Auto-Complete Passed Schedules -->
+            <div class="d-flex align-center mb-1">
+              <v-switch
+                v-model="labSettingsConfig.autoCompletion"
+                label="Auto-Complete Passed Schedules"
+                color="primary"
+                hide-details
+                density="compact"
+                class="flex-grow-1"
+                @change="saveLabSettings"
+              ></v-switch>
+            </div>
+            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
+              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Mark as completed after</span>
+              <div style="max-width: 100px;">
+                <v-text-field
+                  v-model.number="labSettingsConfig.autoCompletionDays"
+                  type="number"
+                  min="1"
+                  max="90"
+                  density="compact"
+                  variant="outlined"
+                  hint="1 – 90 days"
+                  persistent-hint
+                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
+                  :disabled="!labSettingsConfig.autoCompletion"
+                  @change="saveLabSettings"
+                ></v-text-field>
+              </div>
+              <span class="text-body-2 text-medium-emphasis mt-2">days</span>
+            </div>
+
+            <!-- Auto-Cancel Unresponsive Families -->
+            <div class="d-flex align-center mb-1">
+              <v-switch
+                v-model="labSettingsConfig.autoCancellation"
+                label="Auto-Cancel Unresponsive Families"
+                color="primary"
+                hide-details
+                density="compact"
+                class="flex-grow-1"
+                @change="saveLabSettings"
+              ></v-switch>
+            </div>
+            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
+              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Release after</span>
+              <div style="max-width: 100px;">
+                <v-text-field
+                  v-model.number="labSettingsConfig.autoCancellationDays"
+                  type="number"
+                  min="1"
+                  max="90"
+                  density="compact"
+                  variant="outlined"
+                  hint="1 – 90 days"
+                  persistent-hint
+                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
+                  :disabled="!labSettingsConfig.autoCancellation"
+                  @change="saveLabSettings"
+                ></v-text-field>
+              </div>
+              <span class="text-body-2 text-medium-emphasis mt-2">days without contact</span>
+            </div>
+
+            <!-- Auto-Close Stale Schedules -->
+            <div class="d-flex align-center mb-1">
+              <v-switch
+                v-model="labSettingsConfig.autoCompletion"
+                label="Auto-Close Inactive Schedules"
+                color="primary"
+                hide-details
+                density="compact"
+                class="flex-grow-1"
+                @change="saveLabSettings"
+              ></v-switch>
+            </div>
+            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
+              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Auto-close inactive schedules after</span>
+              <div style="max-width: 100px;">
+                <v-text-field
+                  v-model.number="labSettingsConfig.staleScheduleDays"
+                  type="number"
+                  min="1"
+                  max="90"
+                  density="compact"
+                  variant="outlined"
+                  hint="1 – 90 days"
+                  persistent-hint
+                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
+                  :disabled="!labSettingsConfig.autoCompletion"
+                  @change="saveLabSettings"
+                ></v-text-field>
+              </div>
+              <span class="text-body-2 text-medium-emphasis mt-2">days inactive</span>
+            </div>
+
+            <!-- Allow Editing Completed Schedules -->
+            <v-switch
+              v-model="labSettingsConfig.allowUpdateCompleted"
+              label="Allow Editing Completed Schedules"
+              color="primary"
+              hide-details
+              density="compact"
+              @change="saveLabSettings"
+            ></v-switch>
+          </v-card-text>
+        </v-card>
+
+        <v-card class="ds-card mb-6" variant="flat" v-if="canViewScheduledJobs">
+          <v-toolbar color="transparent" density="compact" class="px-2">
             <v-icon class="mr-2" color="primary">mdi-calendar-clock-outline</v-icon>
             <span
               class="text-subtitle-1 font-weight-bold"
@@ -993,6 +1116,14 @@ export default {
         EmailClosing: null,
         TYEmail: null,
         TransportationInstructions: null,
+      },
+      labSettingsConfig: {
+        autoCompletion: true,
+        autoCancellation: true,
+        allowUpdateCompleted: false,
+        autoCompletionDays: 2,
+        autoCancellationDays: 14,
+        staleScheduleDays: 13
       },
       inputFile: undefined,
       uploadFile: null,
@@ -1898,6 +2029,48 @@ export default {
       }
       this.generalSettingLoading = false;
     },
+    async loadLabSettings() {
+      try {
+        const labId = this.store.lab;
+        if (!labId) return;
+        const response = await systemSetting.getSettings(`LabSettings_${labId}`);
+        if (response.data && response.data.SettingValue) {
+          const val = JSON.parse(response.data.SettingValue);
+          this.labSettingsConfig = { ...this.labSettingsConfig, ...val };
+          this.store.setLabSettings(this.labSettingsConfig);
+        } else {
+          this.store.setLabSettings(this.labSettingsConfig);
+        }
+      } catch (err) {
+        console.error("Failed to load lab settings:", err);
+      }
+    },
+    async saveLabSettings() {
+      try {
+        const labId = this.store.lab;
+        if (!labId) return;
+
+        // Clamp all duration fields to the valid range (1–90 days)
+        const clamp = (val, min, max, fallback) => {
+          const n = parseInt(val, 10);
+          if (isNaN(n) || n < min) return fallback;
+          if (n > max) return max;
+          return n;
+        };
+        this.labSettingsConfig.autoCompletionDays   = clamp(this.labSettingsConfig.autoCompletionDays,   1, 90, 2);
+        this.labSettingsConfig.autoCancellationDays = clamp(this.labSettingsConfig.autoCancellationDays, 1, 90, 14);
+        this.labSettingsConfig.staleScheduleDays    = clamp(this.labSettingsConfig.staleScheduleDays,    1, 90, 13);
+
+        await systemSetting.updateSetting({
+          SettingKey: `LabSettings_${labId}`,
+          SettingValue: JSON.stringify(this.labSettingsConfig)
+        });
+
+        this.store.setLabSettings(this.labSettingsConfig);
+      } catch (err) {
+        console.error("Failed to save lab settings:", err);
+      }
+    },
     handleOAuthMessage(event) {
       if (event.origin !== window.location.origin) return;
       if (event.data && event.data.type === "GOOGLE_OAUTH_CODE" && event.data.code) {
@@ -1928,8 +2101,11 @@ export default {
     window.addEventListener("message", this.handleOAuthMessage);
     this.currentTestingRooms = this.store.testingRooms || [];
     if (this.canViewScheduledJobs) {
-      await this.loadScheduledJobs();
+      this.loadScheduledJobs();
+      this.loadGeneralTimezone();
+      this.loadLabSettings();
     }
+    this.emailSetupError = null;
     if (this.store.role === "Admin") {
       try {
         const response = await systemSetting.getSettings("GeneralTimezone");

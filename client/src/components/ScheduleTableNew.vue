@@ -76,7 +76,7 @@
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" variant="outlined" icon="mdi-autorenew" size="default" color="primary"
                 @click.stop="showDialog(item, 'schedule')"
-                :disabled="item.Status === 'Confirmed' && (item.Completed === true || item.Completed === 1)"></v-btn>
+                :disabled="!allowUpdateCompleted && item.Status === 'Confirmed' && (item.Completed === true || item.Completed === 1)"></v-btn>
             </template>
             <span>Update the current appointment</span>
           </v-tooltip>
@@ -87,7 +87,7 @@
             <template v-slot:activator="{ props }">
               <v-btn v-bind="props" variant="outlined" icon="mdi-email" size="default" color="secondary"
                 @click.stop="showDialog(item, 'email')"
-                :disabled="item.Status === 'Confirmed' && (item.Completed === true || item.Completed === 1)"></v-btn>
+                :disabled="!allowUpdateCompleted && item.Status === 'Confirmed' && (item.Completed === true || item.Completed === 1)"></v-btn>
             </template>
             <span>Email the family regarding the current appointment</span>
           </v-tooltip>
@@ -140,6 +140,8 @@
 import scheduleDialog from '@/components/scheduleDialog.vue';
 import DateDisplay from '@/components/DateDisplay.vue';
 import { childAge, childStudyAge } from '@/assets/JS/displayFunctions.js';
+import { mapState } from 'pinia';
+import { useMainStore } from '@/stores/mainStore';
 
 export default {
   name: "ScheduleTableNew",
@@ -165,6 +167,12 @@ export default {
       { title: "Actions", align: "center", key: "actions", sortable: false, width: "18%" },
     ]
   }),
+  computed: {
+    ...mapState(useMainStore, ['labSettings']),
+    allowUpdateCompleted() {
+      return this.labSettings?.allowUpdateCompleted === true;
+    }
+  },
   methods: {
     childAge, childStudyAge,
 
