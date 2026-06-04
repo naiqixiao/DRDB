@@ -201,6 +201,7 @@
 import feedback from "@/services/feedback";
 import login from "@/services/login";
 import { useMainStore } from "@/stores/mainStore";
+import brandingService from "@/services/branding";
 
 export default {
   name: "App",
@@ -402,6 +403,9 @@ export default {
         return;
       }
     }
+
+    const branding = await brandingService.loadPublicBranding(this.store.lab);
+    brandingService.applyBrandingToDocument(branding);
 
     try {
       await login.check_login();

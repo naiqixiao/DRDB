@@ -1,6 +1,14 @@
 <template>
   <v-container fluid>
-    <v-alert v-if="emailSetupError" type="error" variant="flat" color="#c73460" class="mb-4" density="compact" style="font-weight: 600">
+    <v-alert
+      v-if="emailSetupError"
+      type="error"
+      variant="flat"
+      color="#c73460"
+      class="mb-4"
+      density="compact"
+      style="font-weight: 600"
+    >
       <v-icon start icon="mdi-alert-circle"></v-icon>
       {{ emailSetupError }}
     </v-alert>
@@ -218,7 +226,7 @@
           </v-card-text>
         </v-card>
 
-        <v-card v-if="store.role == 'Admin'" class="ds-card mb-6" variant="flat">
+        <v-card v-if="canManageLab" class="ds-card mb-6" variant="flat">
           <v-toolbar color="transparent" density="compact" class="px-2">
             <v-icon class="mr-2" color="primary">mdi-cog-outline</v-icon>
             <span
@@ -233,30 +241,129 @@
           </v-toolbar>
           <v-divider></v-divider>
           <v-card-text>
-            <div class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1">
-              General Timezone
-            </div>
-            <v-select
-              v-model="generalTimezone"
-              :items="timezoneOptions"
-              label="Select General Timezone"
-              variant="outlined"
-              density="compact"
-              hide-details
-              prepend-inner-icon="mdi-clock-outline"
-              class="mb-3"
-            ></v-select>
-            <div class="d-flex justify-end">
-              <v-btn
-                color="primary"
-                variant="tonal"
-                size="small"
-                @click="saveGeneralTimezone"
-                :loading="generalSettingLoading"
-                prepend-icon="mdi-content-save"
-                >Save General TZ</v-btn
+            <template v-if="store.role === 'Admin'">
+              <div
+                class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1"
               >
-            </div>
+                General Timezone
+              </div>
+              <v-select
+                v-model="generalTimezone"
+                :items="timezoneOptions"
+                label="Select General Timezone"
+                variant="outlined"
+                density="compact"
+                hide-details
+                prepend-inner-icon="mdi-clock-outline"
+                class="mb-3"
+              ></v-select>
+              <div class="d-flex justify-end">
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+                  @click="saveGeneralTimezone"
+                  :loading="generalSettingLoading"
+                  prepend-icon="mdi-content-save"
+                  >Save General TZ</v-btn
+                >
+              </div>
+
+              <v-divider class="my-4"></v-divider>
+
+              <div
+                class="text-caption font-weight-bold text-uppercase text-muted mb-2 px-1"
+              >
+                Global Branding
+              </div>
+              <v-text-field
+                v-model="brandingConfig.appTitle"
+                label="Browser Tab Title"
+                variant="outlined"
+                density="compact"
+                prepend-inner-icon="mdi-format-title"
+                class="mb-3"
+              ></v-text-field>
+              <v-text-field
+                v-model="brandingConfig.loginHeading"
+                label="Login Heading"
+                variant="outlined"
+                density="compact"
+                prepend-inner-icon="mdi-format-header-1"
+                class="mb-3"
+              ></v-text-field>
+              <v-text-field
+                v-model="brandingConfig.loginSubheading"
+                label="Login Subheading"
+                variant="outlined"
+                density="compact"
+                prepend-inner-icon="mdi-format-text"
+                class="mb-3"
+              ></v-text-field>
+              <v-switch
+                v-model="showAdvancedBrandingUrls"
+                label="Show advanced image URL fields"
+                color="primary"
+                hide-details
+                density="compact"
+                class="mb-2"
+              ></v-switch>
+              <v-expand-transition>
+                <v-text-field
+                  v-if="showAdvancedBrandingUrls"
+                  v-model="brandingConfig.logoUrl"
+                  label="Global Logo URL"
+                  variant="outlined"
+                  density="compact"
+                  prepend-inner-icon="mdi-image-outline"
+                  class="mb-2"
+                ></v-text-field>
+              </v-expand-transition>
+              <v-file-input
+                accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
+                label="Upload Global Logo"
+                variant="outlined"
+                density="compact"
+                prepend-inner-icon="mdi-upload"
+                prepend-icon=""
+                class="mb-3"
+                :loading="brandingUploadLoading.globalLogo"
+                @update:model-value="uploadGlobalBrandingAsset('logo', $event)"
+              ></v-file-input>
+              <v-expand-transition>
+                <v-text-field
+                  v-if="showAdvancedBrandingUrls"
+                  v-model="brandingConfig.faviconUrl"
+                  label="Global Favicon URL"
+                  variant="outlined"
+                  density="compact"
+                  prepend-inner-icon="mdi-tab"
+                  class="mb-2"
+                ></v-text-field>
+              </v-expand-transition>
+              <v-file-input
+                accept="image/png,image/jpeg,image/webp,image/svg+xml,image/x-icon"
+                label="Upload Global Favicon"
+                variant="outlined"
+                density="compact"
+                prepend-inner-icon="mdi-upload"
+                prepend-icon=""
+                class="mb-3"
+                :loading="brandingUploadLoading.globalFavicon"
+                @update:model-value="uploadGlobalBrandingAsset('favicon', $event)"
+              ></v-file-input>
+              <div class="d-flex justify-end">
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+                  @click="saveBrandingSettings"
+                  :loading="brandingSettingLoading"
+                  prepend-icon="mdi-content-save"
+                  >Save Global Branding</v-btn
+                >
+              </div>
+            </template>
           </v-card-text>
         </v-card>
       </v-col>
@@ -390,19 +497,23 @@
                 @change="saveLabSettings"
               ></v-switch>
             </div>
-            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
-              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Mark as completed after</span>
-              <div style="max-width: 100px;">
+            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px">
+              <span
+                class="text-body-2 text-medium-emphasis mt-2"
+                style="white-space: nowrap"
+                >Mark as completed after</span
+              >
+              <div style="max-width: 100px">
                 <v-text-field
                   v-model.number="labSettingsConfig.autoCompletionDays"
                   type="number"
                   min="1"
-                  max="90"
+                  max="14"
                   density="compact"
                   variant="outlined"
-                  hint="1 – 90 days"
+                  hint="1 – 14 days"
                   persistent-hint
-                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
+                  :rules="[(v) => (v >= 1 && v <= 14) || '1–14']"
                   :disabled="!labSettingsConfig.autoCompletion"
                   @change="saveLabSettings"
                 ></v-text-field>
@@ -422,56 +533,30 @@
                 @change="saveLabSettings"
               ></v-switch>
             </div>
-            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
-              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Release after</span>
-              <div style="max-width: 100px;">
+            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px">
+              <span
+                class="text-body-2 text-medium-emphasis mt-2"
+                style="white-space: nowrap"
+                >Release after</span
+              >
+              <div style="max-width: 100px">
                 <v-text-field
                   v-model.number="labSettingsConfig.autoCancellationDays"
                   type="number"
                   min="1"
-                  max="90"
+                  max="14"
                   density="compact"
                   variant="outlined"
-                  hint="1 – 90 days"
+                  hint="1 – 14 days"
                   persistent-hint
-                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
+                  :rules="[(v) => (v >= 1 && v <= 14) || '1–14']"
                   :disabled="!labSettingsConfig.autoCancellation"
                   @change="saveLabSettings"
                 ></v-text-field>
               </div>
-              <span class="text-body-2 text-medium-emphasis mt-2">days without contact</span>
-            </div>
-
-            <!-- Auto-Close Stale Schedules -->
-            <div class="d-flex align-center mb-1">
-              <v-switch
-                v-model="labSettingsConfig.autoCompletion"
-                label="Auto-Close Inactive Schedules"
-                color="primary"
-                hide-details
-                density="compact"
-                class="flex-grow-1"
-                @change="saveLabSettings"
-              ></v-switch>
-            </div>
-            <div class="d-flex align-start mb-2 pl-2" style="gap: 8px;">
-              <span class="text-body-2 text-medium-emphasis mt-2" style="white-space: nowrap;">Auto-close inactive schedules after</span>
-              <div style="max-width: 100px;">
-                <v-text-field
-                  v-model.number="labSettingsConfig.staleScheduleDays"
-                  type="number"
-                  min="1"
-                  max="90"
-                  density="compact"
-                  variant="outlined"
-                  hint="1 – 90 days"
-                  persistent-hint
-                  :rules="[v => (v >= 1 && v <= 90) || '1–90']"
-                  :disabled="!labSettingsConfig.autoCompletion"
-                  @change="saveLabSettings"
-                ></v-text-field>
-              </div>
-              <span class="text-body-2 text-medium-emphasis mt-2">days inactive</span>
+              <span class="text-body-2 text-medium-emphasis mt-2"
+                >days without contact</span
+              >
             </div>
 
             <!-- Allow Editing Completed Schedules -->
@@ -816,7 +901,13 @@
           >
         </v-card-title>
         <v-card-text class="pt-6">
-          <v-alert v-if="emailSetupError" type="error" variant="tonal" class="mb-4" density="compact">
+          <v-alert
+            v-if="emailSetupError"
+            type="error"
+            variant="tonal"
+            class="mb-4"
+            density="compact"
+          >
             {{ emailSetupError }}
           </v-alert>
           <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">
@@ -1073,6 +1164,7 @@ import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import jobsService from "@/services/jobs";
 import systemSetting from "@/services/systemSetting";
+import brandingService, { DEFAULT_BRANDING } from "@/services/branding";
 import TestingRooms from "@/components/TestingRooms.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
@@ -1123,7 +1215,7 @@ export default {
         allowUpdateCompleted: false,
         autoCompletionDays: 2,
         autoCancellationDays: 14,
-        staleScheduleDays: 13
+        staleScheduleDays: 13,
       },
       inputFile: undefined,
       uploadFile: null,
@@ -1140,6 +1232,13 @@ export default {
       jobsPanels: [0],
       generalTimezone: null,
       generalSettingLoading: false,
+      brandingConfig: { ...DEFAULT_BRANDING },
+      brandingSettingLoading: false,
+      brandingUploadLoading: {
+        globalLogo: false,
+        globalFavicon: false,
+      },
+      showAdvancedBrandingUrls: false,
       timezoneOptions: [
         "Africa/Abidjan",
         "Africa/Accra",
@@ -1554,7 +1653,7 @@ export default {
         "Pacific/Tongatapu",
         "Pacific/Wake",
         "Pacific/Wallis",
-        "UTC"
+        "UTC",
       ],
       labPI: [
         { label: "Name of PI/Manager", field: "Name" },
@@ -1654,7 +1753,8 @@ export default {
     async editLabInfo() {
       this.editedLab.LabName = this.store.labName;
       // Only copy the email if it looks like a real email to avoid saving placeholder text
-      this.editedLab.Email = (this.labEmail && this.labEmail.includes('@')) ? this.labEmail : null;
+      this.editedLab.Email =
+        this.labEmail && this.labEmail.includes("@") ? this.labEmail : null;
       this.editedLab.EmailOpening = this.store.emailOpening;
       this.editedLab.EmailClosing = this.store.emailClosing;
       this.editedLab.TYEmail = this.store.tyEmailClosing;
@@ -1996,11 +2096,7 @@ export default {
         const message =
           error?.response?.data?.message ||
           (enabled ? "Could not resume this task." : "Could not shut down this task.");
-        this.$refs.confirmD.open(
-          "Error",
-          message,
-          { color: "error", noconfirm: true }
-        );
+        this.$refs.confirmD.open("Error", message, { color: "error", noconfirm: true });
       }
       this.jobActionLoading[job.id] = false;
     },
@@ -2028,6 +2124,90 @@ export default {
         });
       }
       this.generalSettingLoading = false;
+    },
+    async loadGeneralTimezone() {
+      if (this.store.role !== "Admin") return;
+      try {
+        const response = await systemSetting.getSettings("GeneralTimezone");
+        if (response.data?.SettingValue) {
+          this.generalTimezone = response.data.SettingValue;
+        }
+      } catch (error) {
+        console.error("Failed to load general timezone:", error);
+      }
+    },
+    async loadBrandingSettings() {
+      this.brandingSettingLoading = true;
+      try {
+        if (this.store.role === "Admin") {
+          this.brandingConfig = await brandingService.loadGlobalBrandingSettings();
+        }
+      } catch (error) {
+        console.error("Failed to load branding settings:", error);
+        this.brandingConfig = { ...DEFAULT_BRANDING };
+      }
+      this.brandingSettingLoading = false;
+    },
+    async saveBrandingSettings() {
+      if (this.store.role !== "Admin") return;
+
+      this.brandingSettingLoading = true;
+      try {
+        const entries = brandingService.toSystemSettingEntries(this.brandingConfig);
+        for (const entry of entries) {
+          await systemSetting.updateSetting(entry);
+        }
+
+        this.brandingConfig = brandingService.normalizeBranding(this.brandingConfig);
+        brandingService.applyBrandingToDocument(this.brandingConfig);
+
+        this.$refs.confirmD.open("Success", "Branding settings have been updated.", {
+          color: "success",
+          noconfirm: true,
+        });
+      } catch (error) {
+        this.$refs.confirmD.open("Error", "Failed to update branding settings.", {
+          color: "error",
+          noconfirm: true,
+        });
+      }
+      this.brandingSettingLoading = false;
+    },
+    normalizeUploadFile(fileOrList) {
+      if (!fileOrList) return null;
+      if (Array.isArray(fileOrList)) return fileOrList[0] || null;
+      return fileOrList;
+    },
+    async uploadGlobalBrandingAsset(assetType, fileOrList) {
+      if (this.store.role !== "Admin") return;
+
+      const file = this.normalizeUploadFile(fileOrList);
+      if (!file) return;
+
+      const loadingKey = assetType === "logo" ? "globalLogo" : "globalFavicon";
+      this.brandingUploadLoading[loadingKey] = true;
+      try {
+        const assetUrl = await brandingService.uploadBrandingAsset({
+          assetType,
+          scope: "global",
+          file,
+        });
+
+        if (assetType === "logo") {
+          this.brandingConfig.logoUrl = assetUrl;
+        } else {
+          this.brandingConfig.faviconUrl = assetUrl;
+          brandingService.applyBrandingToDocument(this.brandingConfig);
+        }
+      } catch (error) {
+        const detail =
+          error?.response?.data?.message || error?.message || "Unknown error";
+        this.$refs.confirmD.open("Error", `Failed to upload branding image. ${detail}`, {
+          color: "error",
+          noconfirm: true,
+        });
+      }
+      this.brandingUploadLoading[loadingKey] = false;
     },
     async loadLabSettings() {
       try {
@@ -2057,13 +2237,28 @@ export default {
           if (n > max) return max;
           return n;
         };
-        this.labSettingsConfig.autoCompletionDays   = clamp(this.labSettingsConfig.autoCompletionDays,   1, 90, 2);
-        this.labSettingsConfig.autoCancellationDays = clamp(this.labSettingsConfig.autoCancellationDays, 1, 90, 14);
-        this.labSettingsConfig.staleScheduleDays    = clamp(this.labSettingsConfig.staleScheduleDays,    1, 90, 13);
+        this.labSettingsConfig.autoCompletionDays = clamp(
+          this.labSettingsConfig.autoCompletionDays,
+          1,
+          14,
+          2
+        );
+        this.labSettingsConfig.autoCancellationDays = clamp(
+          this.labSettingsConfig.autoCancellationDays,
+          1,
+          14,
+          14
+        );
+        this.labSettingsConfig.staleScheduleDays = clamp(
+          this.labSettingsConfig.staleScheduleDays,
+          1,
+          14,
+          13
+        );
 
         await systemSetting.updateSetting({
           SettingKey: `LabSettings_${labId}`,
-          SettingValue: JSON.stringify(this.labSettingsConfig)
+          SettingValue: JSON.stringify(this.labSettingsConfig),
         });
 
         this.store.setLabSettings(this.labSettingsConfig);
@@ -2102,20 +2297,15 @@ export default {
     this.currentTestingRooms = this.store.testingRooms || [];
     if (this.canViewScheduledJobs) {
       this.loadScheduledJobs();
-      this.loadGeneralTimezone();
       this.loadLabSettings();
     }
-    this.emailSetupError = null;
-    if (this.store.role === "Admin") {
-      try {
-        const response = await systemSetting.getSettings("GeneralTimezone");
-        if (response.data) {
-          this.generalTimezone = response.data.SettingValue;
-        }
-      } catch (error) {
-        console.error("Failed to load general timezone:", error);
-      }
+    if (this.canManageLab) {
+      await this.loadBrandingSettings();
     }
+    if (this.store.role === "Admin") {
+      await this.loadGeneralTimezone();
+    }
+    this.emailSetupError = null;
     try {
       const profile = await externalAPIs.googleGetEmailAddress();
       if (profile.data) {
@@ -2139,10 +2329,12 @@ export default {
           this.adminEmail = profile.data.adminEmail;
           this.store.setAdminEmailStatus(true);
         } else if (hasAdminToken) {
-          this.adminEmail = "Admin token is configured, but Gmail verification is unavailable.";
+          this.adminEmail =
+            "Admin token is configured, but Gmail verification is unavailable.";
           this.store.setAdminEmailStatus(true);
           if (adminFetchFailed && !this.emailSetupError) {
-            this.emailSetupError = "Admin email token exists, but Gmail could not be reached to verify the address.";
+            this.emailSetupError =
+              "Admin email token exists, but Gmail could not be reached to verify the address.";
           }
         } else {
           this.adminEmail = "Admin email is not set up yet.";

@@ -1,30 +1,31 @@
 ### Release v3.0.3
 
-This release adds per-lab duration settings for automatic schedule jobs. Labs can now configure how many days to wait before auto-cancellation, auto-completion, and stale-schedule cleanup, with values stored in each lab's existing `LabSettings_<id>` JSON in `SystemSetting`.
+This release expands customization in Settings for both branding and lab-level scheduling policy. Configuration is stored in system settings and applied consistently across users in the same lab.
 
-#### Auto Job Duration Settings
-* **Per-lab thresholds:** Added configurable durations for automatic schedule actions at the lab level.
-* **`autoCancellationDays` (default: 14):** Days without contact before TBD/Rescheduling schedules are auto-rejected.
-* **`autoCompletionDays` (default: 2):** Days after appointment time before Confirmed schedules are auto-completed.
-* **`staleScheduleDays` (default: 13):** Days since last update before stale schedules (for example TBD, Rescheduling, No Show, or Cancelled) are auto-rejected.
+#### Customization Options
+* **Global branding controls:** Added upload-based customization for app logo and favicon from Settings.
+* **Advanced branding URLs:** Added optional advanced fields for directly setting logo and favicon URLs when needed.
+* **Per-lab auto-job durations:** Labs can configure `autoCancellationDays` and `autoCompletionDays` with validated ranges.
+* **Completed schedule edit policy:** Added `allowUpdateCompleted` so each lab can decide whether confirmed/completed schedules are editable.
+* **Lab-wide persistence:** Lab preferences are saved under `LabSettings_<labId>`, so users in the same lab share the same behavior.
 
 #### Backend
-* **Controller update:** `server/api/controllers/autoCancellation.js` now reads a full lab-settings map instead of only opt-out flags.
-* **Grouped duration execution:** Replaced single-cutoff queries with group-by-duration processing so labs with different thresholds are handled correctly.
-* **Efficient query strategy:** Jobs now run one query per unique duration value (plus a default group), rather than one query per lab.
+* **Lab-settings-driven jobs:** `server/api/controllers/autoCancellation.js` reads lab settings values rather than using fixed-only cutoffs.
+* **Completed schedule enforcement:** `server/api/controllers/schedule.js` now enforces `allowUpdateCompleted` server-side for schedule update actions.
+* **Branding asset handling:** Branding asset upload and retrieval paths are normalized to support reliable logo/favicon loading.
 
 #### Frontend
-* **Settings UI controls:** Extended Lab Preferences in Settings with numeric day inputs under each auto-job toggle.
-* **Smart defaults:** Inputs prefill from `labSettingsConfig` or system defaults when no custom lab value exists.
-* **State behavior:** Duration inputs disable when the related toggle is off.
+* **Settings UI controls:** Added dedicated controls for branding uploads and lab preference toggles in Settings.
+* **Validation and bounds:** Duration inputs enforce valid numeric ranges before saving.
+* **Improved feedback:** Branding upload/save flows provide clearer success and error messages.
 
 #### Architecture
-* **No store schema change required:** `client/src/stores/mainStore.js` already persists the full `labSettings` JSON, so new duration keys serialize automatically.
+* **No store schema change required:** `client/src/stores/mainStore.js` already persists lab settings JSON, so new keys serialize automatically.
 
 #### Verification
-* **Lab-specific completion window:** Verified auto-completion uses each lab's configured `autoCompletionDays` value.
-* **Default fallback coverage:** Verified labs without custom duration settings continue to use system defaults.
-* **Round-trip settings check:** Verified saved values persist in `LabSettings_<id>` and reload correctly in Settings.
+* **Round-trip settings check:** Verified settings persist and reload from `LabSettings_<id>`.
+* **Cross-user consistency:** Verified lab preference choices are shared across users in the same lab.
+* **Policy enforcement check:** Verified completed confirmed schedules are blocked from editing when `allowUpdateCompleted` is disabled.
 
 ### Release v3.0.2
 

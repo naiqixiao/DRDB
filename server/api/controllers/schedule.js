@@ -4,6 +4,36 @@ const log = require("../controllers/log");
 const scheduleService = require("../services/scheduleService");
 const model = require("../models/DRDB");
 
+async function getLabSettings(labId) {
+  const numericLabId = Number(labId);
+  if (!Number.isInteger(numericLabId) || numericLabId <= 0) return {};
+
+  const row = await model.systemSetting.findOne({
+    where: { SettingKey: `LabSettings_${numericLabId}` },
+  });
+
+  if (!row?.SettingValue) return {};
+
+  try {
+    return JSON.parse(row.SettingValue);
+  } catch (error) {
+    return {};
+  }
+}
+
+async function canUpdateCompletedConfirmedSchedules(labId) {
+  const settings = await getLabSettings(labId);
+  return settings.allowUpdateCompleted === true;
+}
+
+function isCompletedConfirmed(schedule) {
+  return (
+    schedule &&
+    schedule.Status === "Confirmed" &&
+    (schedule.Completed === true || schedule.Completed === 1)
+  );
+}
+
 function parsePagination(query) {
   const requestedLimit = Number.parseInt(query.limit, 10);
   const requestedOffset = Number.parseInt(query.offset, 10);
@@ -36,6 +66,21 @@ exports.create = asyncHandler(async (req, res) => {
 
 // ─── UPDATE ─────────────────────────────────────────────────────────────
 exports.update = asyncHandler(async (req, res) => {
+  const existing = await model.schedule.findOne({
+    where: { id: req.body.id },
+    attributes: ["id", "Status", "Completed"],
+  });
+
+  if (isCompletedConfirmed(existing)) {
+    const labId = req.body.lab || req.userData?.lab;
+    const allowed = await canUpdateCompletedConfirmedSchedules(labId);
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Editing completed confirmed schedules is disabled by lab settings.",
+      });
+    }
+  }
+
   const schedule = await scheduleService.updateSchedule(req.body, req.oAuth2Client, req.body.lab);
   
   await log.createLog("Appointment Updated", req.body.User, `updated a study appointment (${schedule.id})`);
@@ -194,6 +239,21 @@ exports.remind = asyncHandler(async (req, res) => {
 });
 
 exports.tyEmail = asyncHandler(async (req, res) => {
+  const existing = await model.schedule.findOne({
+    where: { id: req.body.id },
+    attributes: ["id", "Status", "Completed"],
+  });
+
+  if (isCompletedConfirmed(existing)) {
+    const labId = req.body.lab || req.userData?.lab;
+    const allowed = await canUpdateCompletedConfirmedSchedules(labId);
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Editing completed confirmed schedules is disabled by lab settings.",
+      });
+    }
+  }
+
   await model.schedule.update(req.body, { where: { id: req.body.id } });
   await log.createLog("Appointment update", req.body.User, `sent a thank you email for study schedule (${req.body.id})`);
   res.status(200).send(await model.schedule.findOne({ where: { id: req.body.id } }));

@@ -48,7 +48,12 @@ async function seedDatabase(models) {
     // 4. Set the System Settings
     const defaultSettings = [
       { SettingKey: "isFirstRun", SettingValue: "true" },
-      { SettingKey: "GeneralTimezone", SettingValue: systemTimezone }
+      { SettingKey: "GeneralTimezone", SettingValue: systemTimezone },
+      { SettingKey: "BrandingAppTitle", SettingValue: "DRDB - Developmental Research Database" },
+      { SettingKey: "BrandingLoginHeading", SettingValue: "DRDB" },
+      { SettingKey: "BrandingLoginSubheading", SettingValue: "Developmental Research Database System" },
+      { SettingKey: "BrandingLogoUrl", SettingValue: "/logo.png" },
+      { SettingKey: "BrandingFaviconUrl", SettingValue: "/logo.png" }
     ];
 
     for (const setting of defaultSettings) {

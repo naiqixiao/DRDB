@@ -7,9 +7,9 @@
         <div style="width: 100%; max-width: 400px;" class="px-6">
           
           <div class="text-center mb-8">
-            <img src="@/assets/logo.png" alt="DRDB Logo" height="180" class="mb-4" />
-            <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">DRDB</h1>
-            <p class="text-body-1 text-muted">Developmental Research Database System</p>
+            <img :src="branding.logoUrl" :alt="`${branding.loginHeading} Logo`" height="180" class="mb-4" />
+            <h1 class="text-h4 font-weight-bold mb-2" style="font-family: var(--ds-font-family-heading); color: var(--color-primary);">{{ branding.loginHeading }}</h1>
+            <p class="text-body-1 text-muted">{{ branding.loginSubheading }}</p>
           </div>
 
           <v-alert v-if="error" type="error" variant="tonal" density="compact" class="mb-6" border="start" closable>
@@ -157,6 +157,7 @@ import HistogramChart from '@/components/HistogramChart.vue';
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import { useMainStore } from "@/stores/mainStore";
 import { marked } from "marked";
+import brandingService, { DEFAULT_BRANDING } from "@/services/branding";
 
 export default {
   components: { HistogramChart, ConfirmDlg },
@@ -176,9 +177,16 @@ export default {
       valid: true,
       validLogin: false,
       releaseNote: "Loading release notes...",
+      branding: { ...DEFAULT_BRANDING },
     };
   },
   async mounted() {
+    const labFromQuery = Number(this.$route?.query?.lab);
+    const labId = Number.isInteger(labFromQuery) && labFromQuery > 0 ? labFromQuery : null;
+
+    this.branding = await brandingService.loadPublicBranding(labId);
+    brandingService.applyBrandingToDocument(this.branding);
+
     try {
       const response = await fetch('/CHANGELOG.md');
       if (response.ok) {
@@ -217,6 +225,9 @@ export default {
           this.store.setTYEmailClosing(response.data.TYEmail);
           this.store.setLocation(response.data.location);
           this.store.setTransportationInstructions(response.data.transportationInstructions);
+
+          const resolvedBranding = await brandingService.loadPublicBranding(response.data.lab);
+          brandingService.applyBrandingToDocument(resolvedBranding);
           
           try {
             const testingRooms = await testingRoom.search(this.store.lab);
@@ -299,6 +310,9 @@ export default {
         this.store.setLocation(response.data.location);
         this.store.setTransportationInstructions(response.data.transportationInstructions);
         this.store.setZoomLink(response.data.ZoomLink);
+
+        const resolvedBranding = await brandingService.loadPublicBranding(response.data.lab);
+        brandingService.applyBrandingToDocument(resolvedBranding);
 
         try {
           const profile = await externalAPIs.googleGetEmailAddress();
