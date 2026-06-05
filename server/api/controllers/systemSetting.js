@@ -299,7 +299,8 @@ exports.getPublicBranding = asyncHandler(async (req, res) => {
   }
 
   const mergedBranding = {
-    appTitle: sanitizeText(labOverride.appTitle, globalBranding.appTitle, 120),
+    // Keep browser tab title global so refresh always reflects BrandingAppTitle.
+    appTitle: globalBranding.appTitle,
     loginHeading: sanitizeText(labOverride.loginHeading, globalBranding.loginHeading, 80),
     loginSubheading: sanitizeText(
       labOverride.loginSubheading,

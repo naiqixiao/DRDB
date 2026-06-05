@@ -278,10 +278,13 @@
               </div>
               <v-text-field
                 v-model="brandingConfig.appTitle"
-                label="Browser Tab Title"
+                label="Website Title (Tab Text)"
                 variant="outlined"
                 density="compact"
                 prepend-inner-icon="mdi-format-title"
+                hint="Shown on the browser tab."
+                persistent-hint
+                @update:model-value="previewBrandingTitle"
                 class="mb-3"
               ></v-text-field>
               <v-text-field
@@ -2172,6 +2175,9 @@ export default {
         });
       }
       this.brandingSettingLoading = false;
+    },
+    previewBrandingTitle() {
+      brandingService.applyBrandingToDocument(this.brandingConfig);
     },
     normalizeUploadFile(fileOrList) {
       if (!fileOrList) return null;

@@ -4,6 +4,7 @@ This release expands customization in Settings for both branding and lab-level s
 
 #### Customization Options
 * **Global branding controls:** Added upload-based customization for app logo and favicon from Settings.
+* **Website title control:** Added a customizable browser tab title (`BrandingAppTitle`) in Global Branding.
 * **Advanced branding URLs:** Added optional advanced fields for directly setting logo and favicon URLs when needed.
 * **Per-lab auto-job durations:** Labs can configure `autoCancellationDays` and `autoCompletionDays` with validated ranges.
 * **Completed schedule edit policy:** Added `allowUpdateCompleted` so each lab can decide whether confirmed/completed schedules are editable.
