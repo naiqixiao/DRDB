@@ -5,6 +5,28 @@ const model = require("../models/DRDB");
 const { google } = require("googleapis");
 const { OAuth2 } = google.auth;
 
+async function resolveGmailAddress(gmailClient) {
+  try {
+    const sendAs = await gmailClient.users.settings.sendAs.list({ userId: "me" });
+    const entries = sendAs?.data?.sendAs || [];
+    const defaultEntry = entries.find((entry) => entry.isDefault) || entries[0];
+    if (defaultEntry?.sendAsEmail) {
+      return {
+        email: defaultEntry.sendAsEmail,
+        displayName: defaultEntry.displayName || null,
+      };
+    }
+  } catch (error) {
+    // Fall back to Gmail profile when sendAs endpoint is unavailable.
+  }
+
+  const profile = await gmailClient.users.getProfile({ userId: "me" });
+  return {
+    email: profile?.data?.emailAddress || null,
+    displayName: null,
+  };
+}
+
 exports.googleCredentialsURL = asyncHandler(async (req, res) => {
   try {
     const SCOPES = [
@@ -113,19 +135,8 @@ exports.googleToken = asyncHandler(async (req, res) => {
     oAuth2Client.setCredentials(finalTokens);
 
     const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-    const sendAs = await gmail.users.settings.sendAs.list({
-      userId: "me",
-    });
-
-    let sendAsEmail = {};
-    sendAs.data.sendAs.forEach((email) => {
-      if (email.isDefault) {
-        sendAsEmail = email;
-      }
-    });
-
-    const labEmail = sendAsEmail.sendAsEmail;
+    const resolved = await resolveGmailAddress(gmail);
+    const labEmail = resolved.email;
 
     // update lab email info if found.
     if (labEmail) {
@@ -200,20 +211,8 @@ exports.adminToken = asyncHandler(async (req, res) => {
     oAuth2Client.setCredentials(finalTokens);
 
     const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-    const adminSendAs = await adminGmail.users.settings.sendAs.list({
-      userId: "me",
-    });
-
-    var sendAsEmail = {};
-
-    adminSendAs.data.sendAs.forEach((email) => {
-      if (email.isDefault) {
-        sendAsEmail = email;
-      }
-    });
-
-    var adminEmail = sendAsEmail.sendAsEmail || null;
+    const resolved = await resolveGmailAddress(adminGmail);
+    var adminEmail = resolved.email || null;
 
     fs.writeFileSync(tokenPath, JSON.stringify(finalTokens));
 
@@ -264,20 +263,9 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       oAuth2Client.setCredentials(JSON.parse(token));
 
       const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-      const sendAs = await gmail.users.settings.sendAs.list({
-        userId: "me",
-      });
-
-      let sendAsEmailEntry = {};
-      sendAs.data.sendAs.forEach((email) => {
-        if (email.isDefault) {
-          sendAsEmailEntry = email;
-        }
-      });
-
-      labEmail = sendAsEmailEntry.sendAsEmail;
-      labName = sendAsEmailEntry.displayName || null;
+      const resolved = await resolveGmailAddress(gmail);
+      labEmail = resolved.email;
+      labName = resolved.displayName;
 
       if (labEmail) {
         await model.lab.update({ Email: labEmail }, {
@@ -330,19 +318,9 @@ exports.googleEmail = asyncHandler(async (req, res) => {
       oAuth2Client.setCredentials(JSON.parse(token));
 
       const adminGmail = google.gmail({ version: "v1", auth: oAuth2Client });
-
-      const adminSendAs = await adminGmail.users.settings.sendAs.list({
-        userId: "me",
-      });
-
-      let adminSendAsEmailEntry = {};
-      adminSendAs.data.sendAs.forEach((email) => {
-        if (email.isDefault) {
-          adminSendAsEmailEntry = email;
-        }
-      });
-
-      adminEmail = adminSendAsEmailEntry.sendAsEmail || null;
+      const resolved = await resolveGmailAddress(adminGmail);
+      adminEmail = resolved.email || null;
+      adminEmailFetchError = !adminEmail;
     }
 
   } catch (error) {
