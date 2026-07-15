@@ -252,9 +252,12 @@ export default {
               const hasLabEmail = !!profile?.data?.labEmail;
               const hasAdminEmail = !!profile?.data?.adminEmail;
               const hasAdminToken = !!profile?.data?.adminEmailConfigured;
-              const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
               this.store.setLabEmailStatus(hasLabEmail);
-              this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+              // A saved admin OAuth token means the account remains configured even
+              // when Gmail cannot temporarily resolve its profile address. This
+              // matches the Settings view and avoids showing a false "not set up"
+              // warning after a transient Gmail API failure.
+              this.store.setAdminEmailStatus(hasAdminEmail || hasAdminToken);
             } catch(e) {
               this.store.setLabEmailStatus(false);
               this.store.setAdminEmailStatus(false);
@@ -319,9 +322,10 @@ export default {
           const hasLabEmail = !!profile?.data?.labEmail;
           const hasAdminEmail = !!profile?.data?.adminEmail;
           const hasAdminToken = !!profile?.data?.adminEmailConfigured;
-          const adminFetchFailed = !!profile?.data?.adminEmailFetchError;
           this.store.setLabEmailStatus(hasLabEmail);
-          this.store.setAdminEmailStatus(hasAdminEmail || (hasAdminToken && !adminFetchFailed));
+          // Do not treat a temporary Gmail profile lookup failure as lost OAuth
+          // configuration; the persisted token is the configuration source.
+          this.store.setAdminEmailStatus(hasAdminEmail || hasAdminToken);
         } catch(e) {
           this.store.setLabEmailStatus(false);
           this.store.setAdminEmailStatus(false);
