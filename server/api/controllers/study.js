@@ -6,6 +6,7 @@ const fs = require("fs");
 
 const log = require("../controllers/log");
 const config = require("../../config/general");
+const { recordPersonnelHistory } = require("../services/personnelHistoryService");
 
 const STUDY_CRITERIA_DEFAULTS = {
   ASDParticipant: "Include",
@@ -63,6 +64,12 @@ exports.create = asyncHandler(async (req, res) => {
           transaction,
         }
       );
+
+      await recordPersonnelHistory(model, {
+        FK_Personnel: created.FK_Personnel, FK_Lab: created.FK_Lab,
+        EventType: "leadership_started", EffectiveDate: created.createdAt,
+        FK_Study: created.id, StudyName: created.StudyName, CreatedBy: req.userData?.id || null,
+      }, { transaction });
 
       if (PrerequisiteIds && PrerequisiteIds.length > 0) {
         await created.setPrerequisites(PrerequisiteIds, { transaction });
@@ -167,8 +174,22 @@ exports.update = asyncHandler(async (req, res) => {
   }
 
   try {
-    await model.study.update(updatedStudyInfo, {
-      where: { id: ID },
+    const previousStudy = await model.study.findByPk(ID);
+    if (!previousStudy) return res.status(404).json({ error: "Study not found." });
+    await model.sequelize.transaction(async (transaction) => {
+      await model.study.update(updatedStudyInfo, { where: { id: ID }, transaction });
+      if (updatedStudyInfo.FK_Personnel !== undefined && updatedStudyInfo.FK_Personnel !== previousStudy.FK_Personnel) {
+        await recordPersonnelHistory(model, {
+          FK_Personnel: previousStudy.FK_Personnel, FK_Lab: previousStudy.FK_Lab,
+          EventType: "leadership_ended", FK_Study: previousStudy.id, StudyName: previousStudy.StudyName,
+          CreatedBy: req.userData?.id || null,
+        }, { transaction });
+        await recordPersonnelHistory(model, {
+          FK_Personnel: updatedStudyInfo.FK_Personnel, FK_Lab: previousStudy.FK_Lab,
+          EventType: "leadership_started", FK_Study: previousStudy.id,
+          StudyName: updatedStudyInfo.StudyName || previousStudy.StudyName, CreatedBy: req.userData?.id || null,
+        }, { transaction });
+      }
     });
 
     // Sync age groups: replace existing with the new set

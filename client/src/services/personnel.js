@@ -22,6 +22,18 @@ export default {
       params: { id }
     });
   },
+  getHistory(id) {
+    return api().get(`personnel/${id}/history`);
+  },
+  createHistory(id, entry) {
+    return api().post(`personnel/${id}/history`, entry);
+  },
+  updateHistory(id, entryId, entry) {
+    return api().patch(`personnel/${id}/history/${entryId}`, entry);
+  },
+  deleteHistory(id, entryId) {
+    return api().delete(`personnel/${id}/history/${entryId}`);
+  },
   update(personnelInfo) {
     personnelInfo.User = {
       

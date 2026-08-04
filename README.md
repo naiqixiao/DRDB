@@ -163,6 +163,117 @@ FRONTEND_URL=https://yourdomain.com
 
 ---
 
+# Docker deployment
+
+The repository includes a production-oriented Docker Compose deployment with
+three services: Vue/Nginx frontend, Node backend, and MariaDB. The browser only
+needs the frontend port; Nginx forwards `/api` requests internally to the
+backend.
+
+## First deployment
+
+1. Install Docker Engine and Docker Compose on the host.
+2. Copy the example configuration and replace every placeholder with a strong,
+   unique value:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Set `FRONTEND_URL` and `URL` to the public address users will visit (use an
+   `https://` URL when a TLS reverse proxy is in front of DRDB).
+3. Build and start all services:
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+   Open `http://localhost:8080` (or the configured `HTTP_PORT`). The initial
+   empty database is initialized from `MySQL/Template.sql` and the current
+   migration tables. Initialization scripts run only once, when the database
+   volume is first created.
+4. Before configuring Google integration, copy the Google OAuth credential
+   file into the backend's persistent runtime volume:
+
+   ```bash
+   docker cp server/api/google/general/credentials.json "$(docker compose ps -q backend):/app/api/google/general/credentials.json"
+   ```
+
+   OAuth tokens created through the application then remain in the same
+   persistent volume. Never add credentials, tokens, or `.env` to Git.
+
+For an existing installation, first create a verified `mysqldump` backup, then
+import it into the new database container rather than allowing the blank-schema
+initialization to become the source of truth. See the backup and restore
+commands below.
+
+## Upgrades and database safety
+
+Application images and database data are separate. MariaDB uses the named
+volume `drdb_database`; it is not rebuilt or replaced when frontend/backend
+images are rebuilt. Update the application services without touching the
+database service:
+
+```bash
+docker compose build frontend backend
+docker compose up -d --no-deps frontend backend
+```
+
+Do not run `docker compose pull` as the routine application upgrade command:
+it can also pull a newer MariaDB image. The volume still prevents a database
+replacement, but a database-engine upgrade can perform its own system-table or
+storage-format migrations. Treat MariaDB version changes as separate,
+backup-first maintenance and follow the MariaDB upgrade guide for the exact
+versions involved.
+
+Do **not** use `docker compose down -v`, `docker volume rm drdb_database`, or
+`docker system prune --volumes` unless you intentionally want to delete the
+database. `docker compose down` (without `-v`) is safe: it stops and removes
+containers but preserves all named volumes.
+
+Create an off-host backup before every upgrade:
+
+```bash
+docker compose exec -T database mariadb-dump -u"$DB_USER" -p"$DB_PASS" DRDB > drdb-backup-$(date +%F).sql
+```
+
+To restore into a deliberately empty database volume:
+
+```bash
+docker compose exec -T database mariadb -u"$DB_USER" -p"$DB_PASS" DRDB < drdb-backup-YYYY-MM-DD.sql
+```
+
+The compose file also persists Google credentials/tokens, branding uploads,
+and generated statistics independently of backend images. For an internet
+deployment, place a TLS-capable reverse proxy in front of port 8080 (or expose
+that port only on a private network); this compose file intentionally does not
+ship TLS certificates.
+
+## Full system migration
+
+An active **Admin** can open **Settings → System Migration** to export an
+encrypted `.drdb-migration` archive or import one into a new deployment. The
+archive contains the full database, branding/uploads, and Google OAuth
+credentials/tokens. It therefore contains participant data and secrets: keep
+the downloaded archive and its passphrase separately in approved secure
+storage.
+
+Importing is deliberately destructive. It requires typing `REPLACE THIS
+SYSTEM`, temporarily places DRDB in maintenance mode, and stores a pre-import
+backup in the backend's persistent `app_data/migration-backups` directory.
+After an import, sign in using an account from the imported system. Google may
+ask for reauthorization if the new deployment uses a different public URL.
+
+The backend image includes the MariaDB command-line client required by this
+feature. Rebuild the backend after upgrading to a release containing it:
+
+```bash
+docker compose build backend
+docker compose up -d --no-deps backend
+```
+
+---
+
 # Automated Schedule
 
 Cron jobs are defined in `server/jobs/scheduler.js` and registered from `server/server.js`.

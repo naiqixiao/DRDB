@@ -1,0 +1,72 @@
+services:
+  database:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: DRDB
+      MARIADB_USER: ${DB_USER:-drdb}
+      MARIADB_PASSWORD: ${DB_PASS:?Set DB_PASS in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS:?Set DB_ROOT_PASS in .env}
+      TZ: ${TIMEZONE:-America/Toronto}
+    volumes:
+      # This named volume is deliberately independent of every image.
+      - drdb_database:/var/lib/mysql
+      # These scripts run only when drdb_database is first created.
+      - ./MySQL/Template.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./MySQL/migrate_age_groups.sql:/docker-entrypoint-initdb.d/02-age-groups.sql:ro
+      - ./docker/db-init/03-current-tables.sql:/docker-entrypoint-initdb.d/03-current-tables.sql:ro
+      - ./MySQL/databasePatch1.03.sql:/docker-entrypoint-initdb.d/04-personnel-history.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u$$MARIADB_USER -p$$MARIADB_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  backend:
+    build:
+      context: ./server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      JWT_KEY: ${JWT_KEY:?Set JWT_KEY in .env}
+      DB_HOST: database
+      DB_NAME: DRDB
+      DB_DIALECT: mariadb
+      DB_USER: ${DB_USER:-drdb}
+      DB_PASS: ${DB_PASS:?Set DB_PASS in .env}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+      URL: ${URL:-http://localhost:8080}
+      TIMEZONE: ${TIMEZONE:-America/Toronto}
+      STATS_OUTPUT_PATH: /app/data/stats
+    volumes:
+      # Runtime files are deliberately independent of every image.
+      - drdb_google_general:/app/api/google/general
+      - drdb_google_labs:/app/api/google/labs
+      - drdb_uploads:/app/api/uploads
+      - drdb_app_data:/app/data
+    depends_on:
+      database:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./client
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  drdb_database:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_database
+  drdb_app_data:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_app_data
+  drdb_google_general:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_google_general
+  drdb_google_labs:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_google_labs
+  drdb_uploads:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_uploads

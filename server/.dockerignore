@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+.env
+api/google
+api/uploads
+data
+drdb.sqlite
+server.cert
+server.key

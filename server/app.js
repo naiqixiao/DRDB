@@ -19,7 +19,7 @@ const config = require("./config/general");
 app.use(cors({
   origin: config.frontendURL,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization", "X-Migration-Passphrase", "X-Migration-Confirmation"],
 }));
 
 // Routers
@@ -51,11 +51,20 @@ const jobsRoutes = require("./api/routes/jobs");
 
 const testingRoomRoutes = require("./api/routes/testingRoom");
 const systemSettingRoutes = require("./api/routes/systemSetting");
+const systemMigrationRoutes = require("./api/routes/systemMigration");
+const { isMaintenanceMode } = require("./api/services/systemMigrationService");
 
 const emailTestRoutes = require("./api/routes/emailTest");
 const calendarTestRoutes = require("./api/routes/calendarTest");
 
 const auto = require("./api/routes/auto");
+
+app.use((req, res, next) => {
+  if (isMaintenanceMode() && !req.path.startsWith("/api/systemMigration")) {
+    return res.status(503).json({ message: "System migration is in progress. Please try again shortly." });
+  }
+  next();
+});
 
 app.use("/api/user", userRoutes);
 
@@ -87,6 +96,7 @@ app.use("/api/jobs", jobsRoutes);
 
 app.use("/api/TestingRoom", testingRoomRoutes);
 app.use("/api/systemSetting", systemSettingRoutes);
+app.use("/api/systemMigration", systemMigrationRoutes);
 
 app.use("/api/emailTest", emailTestRoutes);
 app.use("/api/calendarTest", calendarTestRoutes);

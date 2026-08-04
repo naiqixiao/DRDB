@@ -61,7 +61,7 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="8" lg="9" style="height: calc(100vh - 120px); overflow-y: auto;">
+      <v-col cols="12" md="8" lg="9">
         <div v-if="currentPersonnel.id">
 
           <v-card class="ds-card mb-6" variant="flat">
@@ -131,6 +131,12 @@
                       </v-list-item-title>
                     </v-list-item>
 
+                    <v-list-item prepend-icon="mdi-account-clock-outline" class="px-0 mb-1" density="compact">
+                      <v-list-item-title class="d-flex align-center text-muted">
+                        <span class="mr-2">Joined lab:</span> {{ formatHistoryDate(personnelJoinedDate) || 'Not recorded' }}
+                      </v-list-item-title>
+                    </v-list-item>
+
                     <v-list-item prepend-icon="mdi-video-outline" class="px-0" density="compact"
                       v-if="currentPersonnel.ZoomLink">
                       <v-list-item-title class="d-flex align-center font-weight-medium">
@@ -143,6 +149,11 @@
                       </v-list-item-title>
                     </v-list-item>
                   </v-list>
+
+                  <v-btn color="primary" variant="tonal" size="small" prepend-icon="mdi-timeline-text-outline"
+                    class="mt-3" @click="openHistoryViewer">
+                    View History &amp; Achievements
+                  </v-btn>
 
                   <div v-if="currentPersonnel.StudyinCharge && currentPersonnel.StudyinCharge.length > 0"
                     class="mt-4 mb-2">
@@ -204,6 +215,10 @@
               <v-chip class="ml-3" size="small" variant="tonal" color="primary">
                 {{ currentPersonnel.AssignedStudies?.length || 0 }} Active
               </v-chip>
+              <v-spacer></v-spacer>
+              <v-btn variant="text" color="primary" size="small" prepend-icon="mdi-history" @click="openPastStudies">
+                View past studies
+              </v-btn>
             </v-toolbar>
             <v-divider class="mt-2"></v-divider>
 
@@ -213,6 +228,7 @@
                 @updatedStudies="updatedStudies" />
             </v-card-text>
           </v-card>
+
         </div>
 
         <div v-else class="h-100 d-flex flex-column align-center justify-center text-center pa-6">
@@ -249,10 +265,15 @@
                 <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="getRules('required')"
                   variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col v-if="editedIndex === -1" cols="12" md="3">
                 <v-select v-model="editedPersonnel.Role" :items="availableRoles" label="Role *"
                   :rules="[v => !!v || 'Required']" variant="outlined" density="compact" bg-color="white"
                   color="primary"></v-select>
+              </v-col>
+              <v-col v-else cols="12" md="3">
+                <v-text-field :model-value="editedPersonnel.Role" label="Current role" readonly variant="outlined"
+                  density="compact" bg-color="grey-lighten-4" hint="Update roles from History & Achievements"
+                  persistent-hint></v-text-field>
               </v-col>
             </v-row>
 
@@ -297,6 +318,97 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="historyViewerDialog" max-width="900px" scrollable>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex align-center py-4 ds-header-gradient">
+          <v-icon class="mr-2">mdi-timeline-text-outline</v-icon>
+          <span class="text-h6 font-weight-bold">{{ historyViewerTitle }}</span>
+          <v-spacer></v-spacer>
+          <v-btn v-if="historyFilter === 'projects'" color="primary" size="small" variant="text" prepend-icon="mdi-timeline-text-outline" class="mr-2" @click="showFullHistory">
+            All history
+          </v-btn>
+          <v-btn v-if="canManageHistory" color="primary" size="small" variant="flat" prepend-icon="mdi-plus" class="mr-3" @click="openHistoryDialog()">
+            Add Entry
+          </v-btn>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="historyViewerDialog = false"></v-btn>
+        </v-card-title>
+        <v-card-text class="pa-6 bg-white" style="max-height: 70vh;">
+          <v-timeline v-if="visibleHistoryEntries.length" class="history-timeline" density="compact" align="start" side="end" truncate-line="both">
+            <v-timeline-item v-for="entry in visibleHistoryEntries" :key="entry.id" :dot-color="historyColor(entry)" size="small">
+              <template v-slot:opposite>
+                <span class="font-weight-bold text-caption" :style="{ color: historyColor(entry) }">{{ formatHistoryMonth(entry.EffectiveDate) }}</span>
+              </template>
+              <v-card variant="flat" class="history-card w-100 mb-4" :class="{ 'history-card--current': isCurrentRoleEntry(entry) }" :style="{ '--history-accent': historyColor(entry) }">
+                <div class="history-card__accent"></div>
+                <div class="pa-4">
+                  <div class="d-flex align-start justify-space-between mb-3">
+                    <div class="d-flex align-center" style="gap: 10px;">
+                      <div class="history-date-badge">{{ formatHistoryMonth(entry.EffectiveDate) }}</div>
+                      <v-icon :color="historyColor(entry)" size="20">{{ historyIcon(entry.EventType) }}</v-icon>
+                    </div>
+                    <div v-if="canManageHistory" class="d-flex">
+                      <v-btn icon="mdi-pencil" variant="text" size="x-small" @click="openHistoryDialog(entry)"></v-btn>
+                      <v-btn icon="mdi-delete-outline" color="error" variant="text" size="x-small" @click="removeHistoryEntry(entry)"></v-btn>
+                    </div>
+                  </div>
+                  <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-center" style="gap: 6px;">
+                      <span class="font-weight-bold text-body-1">{{ historyTitle(entry) }}</span>
+                      <v-chip v-if="isCurrentRoleEntry(entry)" size="x-small" color="deep-purple" variant="flat" class="text-white">Current role</v-chip>
+                      <v-chip v-if="entry.Category" size="x-small" variant="tonal" color="primary">{{ entry.Category }}</v-chip>
+                      <v-chip v-if="entry.Imported" size="x-small" variant="outlined" color="grey">Imported</v-chip>
+                    </div>
+                    <div v-if="entry.Detail" class="text-body-2 text-muted mt-2" style="white-space: pre-wrap;">{{ entry.Detail }}</div>
+                  </div>
+                </div>
+              </v-card>
+            </v-timeline-item>
+          </v-timeline>
+          <div v-else class="text-center pa-10 text-muted">
+            <v-icon size="42" color="grey-lighten-2" class="mb-2">mdi-timeline-outline</v-icon>
+            <div>{{ historyFilter === 'projects' ? 'No past study involvement has been recorded yet.' : 'No history has been recorded yet.' }}</div>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="historyDialog" max-width="620px" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="d-flex justify-space-between align-center py-4 ds-header-gradient">
+          <span class="text-h6 font-weight-bold">{{ editingHistoryId ? 'Edit History Entry' : 'Add History Entry' }}</span>
+          <v-btn icon="mdi-close" variant="text" density="comfortable" @click="closeHistoryDialog"></v-btn>
+        </v-card-title>
+        <v-card-text class="pt-6">
+          <v-form ref="historyForm" v-model="validHistoryForm">
+            <v-row dense>
+              <v-col cols="12" md="6">
+                <v-select v-model="editedHistory.EventType" :items="historyEntryTypes" item-title="title" item-value="value" label="Entry type *" :disabled="!!editingHistoryId" variant="outlined" density="compact"></v-select>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field v-model="editedHistory.EffectiveDate" label="Effective date *" type="date" :rules="getRules('required')" variant="outlined" density="compact"></v-text-field>
+              </v-col>
+              <v-col v-if="editedHistory.EventType === 'achievement_note'" cols="12" md="6">
+                <v-select v-model="editedHistory.Category" :items="achievementCategories" label="Category" clearable variant="outlined" density="compact"></v-select>
+              </v-col>
+              <v-col v-if="editedHistory.EventType === 'role_changed'" cols="12" md="6">
+                <v-select v-model="editedHistory.Role" :items="roleOptions.allRoles" label="New role *" :rules="getRules('required')" variant="outlined" density="compact"></v-select>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field v-model="editedHistory.Title" :label="editedHistory.EventType === 'achievement_note' ? 'Achievement title *' : 'Title (optional)'" :rules="editedHistory.EventType === 'achievement_note' ? getRules('required') : []" variant="outlined" density="compact"></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-textarea v-model="editedHistory.Detail" label="Details" rows="4" variant="outlined" density="compact"></v-textarea>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions class="px-6 pb-6 pt-0 justify-end">
+          <v-btn color="error" variant="text" @click="closeHistoryDialog">Cancel</v-btn>
+          <v-btn color="primary" variant="flat" prepend-icon="mdi-content-save" @click="saveHistoryEntry">Save Entry</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -331,6 +443,20 @@ export default {
         e2Count: 0,
         scheduledCount: 0
       },
+      personnelHistory: [],
+      personnelJoinedDate: null,
+      currentRoleHistoryEntryId: null,
+      historyViewerDialog: false,
+      historyFilter: 'all',
+      historyDialog: false,
+      editingHistoryId: null,
+      editedHistory: {},
+      validHistoryForm: true,
+      achievementCategories: ["Award", "Scholarship", "Presentation", "Publication", "Grant", "Certification", "Other"],
+      historyEntryTypes: [
+        { title: "Achievement note", value: "achievement_note" },
+        { title: "Role update", value: "role_changed" },
+      ],
       currentPersonnel: {},
       editedPersonnel: {},
       defaultPersonnel: {
@@ -348,6 +474,7 @@ export default {
       activeMemberFilter: true,
 
       roleOptions: {
+        allRoles: ["Admin", "PI", "Lab manager", "PostDoc", "GradStudent", "RA", "Staff", "Undergrad"],
         fullRoles: ["PostDoc", "PI", "GradStudent", "Undergrad", "RA", "Lab manager", "Staff"],
         limitedRoles: ["PostDoc", "GradStudent", "Undergrad", "RA", "Staff"]
       }
@@ -435,6 +562,19 @@ export default {
       if (['Admin', 'PI', 'Lab manager'].includes(role)) return true;
       if (['PostDoc', 'GradStudent'].includes(role) && ['Lab manager', 'RA', 'Staff', 'Undergrad'].includes(this.currentPersonnel.Role)) return true;
       return false;
+    },
+
+    canManageHistory() {
+      return ['Admin', 'PI', 'Lab manager'].includes(this.store.role);
+    },
+
+    visibleHistoryEntries() {
+      if (this.historyFilter !== 'projects') return this.personnelHistory;
+      return this.personnelHistory.filter(entry => this.isProjectHistoryEntry(entry));
+    },
+
+    historyViewerTitle() {
+      return this.historyFilter === 'projects' ? 'Past Studies' : 'History & Achievements';
     }
   },
 
@@ -544,6 +684,12 @@ export default {
 
       // 2. Reset the stats initially so old data doesn't linger
       this.personnelStats = { e1Count: 0, e2Count: 0, scheduledCount: 0 };
+      this.personnelHistory = [];
+      this.personnelJoinedDate = null;
+      this.currentRoleHistoryEntryId = null;
+      this.historyFilter = 'all';
+
+      this.loadPersonnelHistory(person.id);
 
       // 3. Fetch new stats if the user has permission to see them
       if (this.canViewStats) {
@@ -553,6 +699,120 @@ export default {
         } catch (error) {
           console.error("Failed to load personnel stats:", error);
         }
+      }
+    },
+
+    async loadPersonnelHistory(personnelId) {
+      try {
+        const response = await personnel.getHistory(personnelId);
+        if (this.currentPersonnel.id === personnelId) {
+          this.personnelHistory = response.data.entries || [];
+          this.personnelJoinedDate = response.data.joinedDate;
+          this.currentRoleHistoryEntryId = response.data.currentRoleEntryId || null;
+          if (response.data.currentRole) {
+            this.currentPersonnel.Role = response.data.currentRole;
+            const memberIndex = this.Personnels.findIndex(person => person.id === personnelId);
+            if (memberIndex !== -1) this.Personnels[memberIndex].Role = response.data.currentRole;
+          }
+        }
+      } catch (error) {
+        if (error.response?.status !== 401) console.error("Failed to load personnel history:", error);
+      }
+    },
+
+    async openHistoryViewer() {
+      await this.loadPersonnelHistory(this.currentPersonnel.id);
+      this.historyFilter = 'all';
+      this.historyViewerDialog = true;
+    },
+
+    async openPastStudies() {
+      await this.loadPersonnelHistory(this.currentPersonnel.id);
+      this.historyFilter = 'projects';
+      this.historyViewerDialog = true;
+    },
+
+    showFullHistory() {
+      this.historyFilter = 'all';
+    },
+
+    formatHistoryDate(value) {
+      if (!value) return null;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    },
+
+    formatHistoryMonth(value) {
+      if (!value) return 'Unknown date';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return 'Unknown date';
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    },
+
+    isCurrentRoleEntry(entry) {
+      return entry.id === this.currentRoleHistoryEntryId;
+    },
+
+    isProjectHistoryEntry(entry) {
+      return ['project_started', 'project_ended', 'leadership_started', 'leadership_ended'].includes(entry.EventType);
+    },
+
+    historyColor(entry) {
+      if (this.isCurrentRoleEntry(entry)) return '#7C3AED';
+      return ({ joined: '#22C55E', role_changed: '#2563EB', project_started: '#0891B2', project_ended: '#94A3B8', leadership_started: '#9333EA', leadership_ended: '#94A3B8', achievement_note: '#D97706' })[entry.EventType] || '#2563EB';
+    },
+
+    historyIcon(type) {
+      return ({ joined: 'mdi-account-plus-outline', role_changed: 'mdi-account-switch-outline', project_started: 'mdi-book-plus-outline', project_ended: 'mdi-book-minus-outline', leadership_started: 'mdi-star-circle-outline', leadership_ended: 'mdi-star-off-outline', achievement_note: 'mdi-trophy-outline' })[type] || 'mdi-timeline-text-outline';
+    },
+
+    historyTitle(entry) {
+      if (entry.EventType === 'joined') return `Joined as ${entry.Role || 'member'}`;
+      if (entry.EventType === 'role_changed') return entry.Title || `Role changed to ${entry.Role || 'Unknown'}`;
+      if (entry.EventType === 'project_started') return `Joined project: ${entry.StudyName || 'Unknown project'}`;
+      if (entry.EventType === 'project_ended') return `Left project: ${entry.StudyName || 'Unknown project'}`;
+      if (entry.EventType === 'leadership_started') return `Became project lead: ${entry.StudyName || 'Unknown project'}`;
+      if (entry.EventType === 'leadership_ended') return `Ended project leadership: ${entry.StudyName || 'Unknown project'}`;
+      return entry.Title || 'Achievement';
+    },
+
+    openHistoryDialog(entry = null) {
+      this.editingHistoryId = entry?.id || null;
+      this.editedHistory = entry ? {
+        EventType: entry.EventType,
+        EffectiveDate: entry.EffectiveDate ? new Date(entry.EffectiveDate).toISOString().slice(0, 10) : '',
+        Role: entry.Role || null, Category: entry.Category || null, Title: entry.Title || '', Detail: entry.Detail || '',
+      } : { EventType: 'achievement_note', EffectiveDate: new Date().toISOString().slice(0, 10), Category: null, Title: '', Detail: '' };
+      this.historyDialog = true;
+    },
+
+    closeHistoryDialog() {
+      this.historyDialog = false;
+      this.editingHistoryId = null;
+      this.editedHistory = {};
+    },
+
+    async saveHistoryEntry() {
+      const { valid } = await this.$refs.historyForm.validate();
+      if (!valid) return;
+      try {
+        if (this.editingHistoryId) await personnel.updateHistory(this.currentPersonnel.id, this.editingHistoryId, this.editedHistory);
+        else await personnel.createHistory(this.currentPersonnel.id, this.editedHistory);
+        this.closeHistoryDialog();
+        await this.loadPersonnelHistory(this.currentPersonnel.id);
+      } catch (error) {
+        await this.$refs.confirmDialog.open('Unable to save entry', error.response?.data?.error || 'Please review the entry and try again.', { color: 'error', noconfirm: true });
+      }
+    },
+
+    async removeHistoryEntry(entry) {
+      const confirmed = await this.$refs.confirmDialog.open('Delete History Entry', `Remove <strong>${this.historyTitle(entry)}</strong>?`, { color: 'error' });
+      if (!confirmed) return;
+      try {
+        await personnel.deleteHistory(this.currentPersonnel.id, entry.id);
+        await this.loadPersonnelHistory(this.currentPersonnel.id);
+      } catch (error) {
+        await this.$refs.confirmDialog.open('Unable to delete entry', error.response?.data?.error || 'Please try again.', { color: 'error', noconfirm: true });
       }
     },
 
@@ -662,4 +922,47 @@ export default {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
+
+.history-card {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.05);
+}
+
+.history-timeline {
+  width: 100%;
+}
+
+.history-timeline :deep(.v-timeline-item__body) {
+  flex: 1 1 0;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+.history-card--current {
+  border-color: #c4b5fd;
+  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.14);
+}
+
+.history-card__accent {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--history-accent);
+}
+
+.history-date-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 </style>

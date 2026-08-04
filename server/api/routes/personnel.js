@@ -58,6 +58,11 @@ router.get("/", checkAuth, PersonnelController.search);
  */
 router.get("/stats", checkAuth, PersonnelController.getStats);
 
+router.get("/:id/history", checkAuth, PersonnelController.getHistory);
+router.post("/:id/history", checkAuth, PersonnelController.createHistory);
+router.patch("/:id/history/:entryId", checkAuth, PersonnelController.updateHistory);
+router.delete("/:id/history/:entryId", checkAuth, PersonnelController.deleteHistory);
+
 /**
  * @swagger
  * /api/personnel:

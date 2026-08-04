@@ -1,7 +1,7 @@
 <template>
   <v-app :style="{ '--dynamic-bg': pageBackgroundColor }">
     <v-app-bar
-      v-if="$route.name !== 'Login'"
+      v-if="!isLoginRoute"
       class="ds-header-gradient elevation-3"
       density="default"
       style="border-radius: 12px; margin: 8px 16px 0 16px; max-width: calc(100% - 32px)"
@@ -100,7 +100,7 @@
 
     <!-- Navigation Drawer -->
     <v-navigation-drawer
-      v-if="$route.name !== 'Login'"
+      v-if="!isLoginRoute"
       v-model="drawer"
       temporary
       width="300"
@@ -191,7 +191,10 @@
       </template>
     </v-navigation-drawer>
 
-    <v-main style="padding-top: 72px">
+    <v-main
+      :class="{ 'login-main': isLoginRoute }"
+      :style="isLoginRoute ? undefined : { paddingTop: '72px' }"
+    >
       <router-view :training="store.trainingMode" />
     </v-main>
   </v-app>
@@ -340,6 +343,11 @@ export default {
   },
 
   computed: {
+    isLoginRoute() {
+      // The root path is the login view. Checking both route name and path
+      // keeps the shell hidden if a deployment loses the route-name metadata.
+      return this.$route?.name === "Login" || this.$route?.path === "/";
+    },
     pageBackgroundColor() {
       switch (this.$route.name) {
         case "Family information":
@@ -448,6 +456,13 @@ export default {
 /* Navigation Drawer Enhancements */
 .drawer-container {
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+  /* Temporary drawers normally start below the app bar. The navigation
+   * drawer is the page-level navigation, so it should cover the full screen. */
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  z-index: 1007 !important;
 }
 
 .drawer-header {
@@ -538,5 +553,31 @@ export default {
 .active-nav-item {
   background-color: rgba(var(--v-theme-primary-darken-1), 0.08) !important;
   border-left: 3px solid var(--v-theme-primary) !important;
+}
+
+/* The login overview owns its own right-side scroll area. Keeping the app
+ * shell at viewport height prevents it from creating a second page scrollbar
+ * (and removes the empty app-bar offset on this route). */
+.login-main {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  max-width: 100%;
+  min-height: 0 !important;
+  overflow: hidden;
+  padding-top: 0 !important;
+}
+
+/* On narrow screens the overview is hidden and the form must remain able to
+ * grow beyond the viewport. */
+@media (max-width: 959px) {
+  .login-main {
+    position: relative;
+    inset: auto;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
 }
 </style>

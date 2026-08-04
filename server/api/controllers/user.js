@@ -9,6 +9,7 @@ const config = require("../../config/general");
 const log = require("../controllers/log");
 const { sendAdminEmail } = require("../utils/emailUtil");
 const { buildWelcomeEmail, buildPasswordChangedEmail, buildPasswordResetEmail } = require("../utils/userTemplates");
+const { recordPersonnelHistory } = require("../services/personnelHistoryService");
 
 function resolveModel(...keys) {
   for (const key of keys) {
@@ -120,7 +121,13 @@ exports.signup = asyncHandler(async (req, res) => {
     } else {
 
       if (!personnel) {
-        await PersonnelModel.create(newUser);
+        const createdPersonnel = await PersonnelModel.create(newUser);
+        await recordPersonnelHistory(model, {
+          FK_Personnel: createdPersonnel.id, FK_Lab: createdPersonnel.FK_Lab,
+          EventType: "joined", EffectiveDate: createdPersonnel.createdAt,
+          Role: createdPersonnel.Role, CreatedBy: req.userData?.id || null,
+        });
+        newUser = createdPersonnel.toJSON();
       } else {
         newUser.Retired = false
         await PersonnelModel.update(newUser, {
@@ -211,7 +218,12 @@ exports.signupBatch = asyncHandler(async (req, res) => {
         if (!personnel) {
 
           newUser.FK_Lab = req.body.lab
-          await PersonnelModel.create(newUser);
+          const createdPersonnel = await PersonnelModel.create(newUser);
+          await recordPersonnelHistory(model, {
+            FK_Personnel: createdPersonnel.id, FK_Lab: createdPersonnel.FK_Lab,
+            EventType: "joined", EffectiveDate: createdPersonnel.createdAt,
+            Role: createdPersonnel.Role, CreatedBy: req.userData?.id || null,
+          });
 
         } else {
 

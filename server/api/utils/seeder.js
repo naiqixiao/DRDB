@@ -33,7 +33,7 @@ async function seedDatabase(models) {
     const defaultPassword = "admin";
     const hashPassword = bcrypt.hashSync(defaultPassword, 10);
 
-    await models.personnel.create({
+    const defaultAdmin = await models.personnel.create({
       Name: "System Admin",
       Initial: "SA",
       Role: "Admin",
@@ -43,6 +43,15 @@ async function seedDatabase(models) {
       Active: 1,
       temporaryPassword: 1, // Flags that they need to change it
       FK_Lab: defaultLab.id
+    });
+
+    await models.personnelHistory.create({
+      FK_Personnel: defaultAdmin.id,
+      FK_Lab: defaultLab.id,
+      EventType: "joined",
+      EffectiveDate: defaultAdmin.createdAt,
+      Role: defaultAdmin.Role,
+      Imported: 1,
     });
 
     // 4. Set the System Settings

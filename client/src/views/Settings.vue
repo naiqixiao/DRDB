@@ -49,6 +49,32 @@
 
     <ConfirmDlg ref="confirmD" />
 
+    <v-dialog v-model="migrationImportDialog" max-width="560px" persistent>
+      <v-card class="ds-card" variant="flat">
+        <v-card-title class="ds-header-gradient">Import complete system migration</v-card-title>
+        <v-card-text class="pt-5">
+          <v-alert type="warning" variant="tonal" density="compact" class="mb-4">
+            This permanently replaces this system's database, uploaded files, and Google tokens. A local pre-import backup is created first.
+          </v-alert>
+          <v-file-input
+            accept=".drdb-migration,application/octet-stream"
+            label="Migration archive"
+            variant="outlined"
+            density="compact"
+            prepend-icon=""
+            @update:model-value="selectMigrationFile"
+          />
+          <v-text-field v-model="migrationImportPassphrase" type="password" label="Archive passphrase" variant="outlined" density="compact" />
+          <v-text-field v-model="migrationConfirmation" label="Type REPLACE THIS SYSTEM to continue" variant="outlined" density="compact" />
+        </v-card-text>
+        <v-card-actions class="px-6 pb-5">
+          <v-spacer />
+          <v-btn variant="text" :disabled="migrationLoading" @click="closeMigrationImport">Cancel</v-btn>
+          <v-btn color="error" variant="flat" :loading="migrationLoading" :disabled="!canImportMigration" @click="importSystemMigration">Replace system</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
     <v-row>
       <v-col cols="12" md="4">
         <v-card class="ds-card mb-6" variant="flat">
@@ -367,6 +393,22 @@
                 >
               </div>
             </template>
+          </v-card-text>
+        </v-card>
+
+        <v-card v-if="store.role === 'Admin'" class="ds-card mb-6" variant="flat">
+          <v-toolbar color="transparent" density="compact" class="px-2">
+            <v-icon class="mr-2" color="error">mdi-database-transfer-outline</v-icon>
+            <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary));">System Migration</span>
+          </v-toolbar>
+          <v-divider></v-divider>
+          <v-card-text>
+            <p class="text-body-2 text-muted mb-4">Create an encrypted full-system archive for a new DRDB deployment, or replace this deployment from a prior archive. Archives include participant data and Google credentials.</p>
+            <v-text-field v-model="migrationExportPassphrase" type="password" label="New archive passphrase" hint="At least 12 characters. It is not stored by DRDB." persistent-hint variant="outlined" density="compact" class="mb-3" />
+            <div class="d-flex flex-wrap" style="gap: 8px">
+              <v-btn color="primary" variant="tonal" prepend-icon="mdi-download" :loading="migrationExportLoading" :disabled="migrationExportPassphrase.length < 12" @click="exportSystemMigration">Export migration</v-btn>
+              <v-btn color="error" variant="tonal" prepend-icon="mdi-upload" :disabled="migrationExportLoading" @click="migrationImportDialog = true">Import migration</v-btn>
+            </div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -1168,7 +1210,8 @@ import externalAPIs from "@/services/externalAPIs";
 import jobsService from "@/services/jobs";
 import systemSetting from "@/services/systemSetting";
 import brandingService, { DEFAULT_BRANDING } from "@/services/branding";
-import TestingRooms from "@/components/TestingRooms.vue";
+import systemMigration from "@/services/systemMigration";
+import TestingRooms from "@/components/testingRooms.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
 import moment from "moment";
 import { useMainStore } from "@/stores/mainStore";
@@ -1242,6 +1285,13 @@ export default {
         globalFavicon: false,
       },
       showAdvancedBrandingUrls: false,
+      migrationExportPassphrase: "",
+      migrationExportLoading: false,
+      migrationImportDialog: false,
+      migrationFile: null,
+      migrationImportPassphrase: "",
+      migrationConfirmation: "",
+      migrationLoading: false,
       timezoneOptions: [
         "Africa/Abidjan",
         "Africa/Accra",
@@ -1715,8 +1765,49 @@ export default {
     readonlyJobs() {
       return this.scheduledJobs.filter((j) => !j.editable);
     },
+    canImportMigration() {
+      return this.migrationFile && this.migrationImportPassphrase.length >= 12 && this.migrationConfirmation === "REPLACE THIS SYSTEM";
+    },
   },
   methods: {
+    async exportSystemMigration() {
+      if (this.store.role !== "Admin" || this.migrationExportPassphrase.length < 12) return;
+      this.migrationExportLoading = true;
+      try {
+        const response = await systemMigration.exportMigration(this.migrationExportPassphrase);
+        const url = URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `drdb-migration-${new Date().toISOString().slice(0, 10)}.drdb-migration`;
+        link.click();
+        URL.revokeObjectURL(url);
+        this.migrationExportPassphrase = "";
+      } catch (error) {
+        this.$refs.confirmD.open("Export failed", error?.response?.data?.message || "Could not create the migration archive.", { color: "error", noconfirm: true });
+      }
+      this.migrationExportLoading = false;
+    },
+    selectMigrationFile(value) {
+      this.migrationFile = Array.isArray(value) ? value[0] : value;
+    },
+    closeMigrationImport() {
+      this.migrationImportDialog = false;
+      this.migrationFile = null;
+      this.migrationImportPassphrase = "";
+      this.migrationConfirmation = "";
+    },
+    async importSystemMigration() {
+      if (this.store.role !== "Admin" || !this.canImportMigration) return;
+      this.migrationLoading = true;
+      try {
+        await systemMigration.importMigration(this.migrationFile, this.migrationImportPassphrase);
+        this.closeMigrationImport();
+        this.$refs.confirmD.open("Migration complete", "The system was replaced successfully. Please sign in again using an account from the imported system.", { color: "success", noconfirm: true });
+      } catch (error) {
+        this.$refs.confirmD.open("Import failed", error?.response?.data?.message || "The archive could not be imported. This system was not changed unless the restore had already begun.", { color: "error", noconfirm: true });
+      }
+      this.migrationLoading = false;
+    },
     async changePassword() {
       try {
         const response = await login.changePassword({

@@ -17,6 +17,7 @@ const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
 
 let scheduledJobPersistenceEnabled = true;
+let migrationPaused = false;
 
 function getLabModel() {
   return (
@@ -451,7 +452,22 @@ async function reloadAllJobs() {
   await registerJobs();
 }
 
+async function pauseJobsForMigration() {
+  migrationPaused = true;
+  Array.from(jobHandles.values()).forEach((handle) => {
+    if (typeof handle.stop === "function") handle.stop();
+    if (typeof handle.destroy === "function") handle.destroy();
+  });
+  jobHandles.clear();
+}
+
+async function resumeJobsAfterMigration() {
+  migrationPaused = false;
+  await reloadAllJobs();
+}
+
 async function registerJobs() {
+  if (migrationPaused) return;
   const generalTimezone = await getEffectiveTimezone();
   console.log(`[Jobs] Registering ${SCHEDULED_JOBS.length} scheduled tasks (Default Timezone: ${generalTimezone})...`);
 
@@ -496,5 +512,7 @@ module.exports = {
   updateScheduledJob,
   reloadLabJobs,
   reloadAllJobs,
+  pauseJobsForMigration,
+  resumeJobsAfterMigration,
   getEffectiveTimezone,
 };

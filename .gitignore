@@ -74,3 +74,10 @@ files for gabriel/
 Sagi.md
 .mcp.json
 server/api/uploads/
+
+# Docker deployment secrets and generated runtime data.
+.env
+server/.env
+!server/config/general.js
+server/data/
+client/dist/

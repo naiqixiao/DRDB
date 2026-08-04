@@ -177,6 +177,7 @@ export default {
 
     async save() {
       const newStudies = {
+        personnelId: this.personnelId,
         studies: this.editedStudies.map((study) => ({
           FK_Experimenter: this.personnelId,
           FK_Study: study.id,

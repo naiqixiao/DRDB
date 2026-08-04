@@ -1,0 +1,25 @@
+-- Personnel history and achievements (run after databasePatch1.02.sql)
+CREATE TABLE IF NOT EXISTS `PersonnelHistory` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `FK_Personnel` INT NOT NULL,
+  `FK_Lab` INT NOT NULL,
+  `EventType` VARCHAR(45) NOT NULL,
+  `EffectiveDate` DATETIME NOT NULL,
+  `Role` VARCHAR(45) NULL,
+  `FK_Study` INT NULL,
+  `StudyName` VARCHAR(100) NULL,
+  `Category` VARCHAR(45) NULL,
+  `Title` VARCHAR(255) NULL,
+  `Detail` TEXT NULL,
+  `Imported` TINYINT NOT NULL DEFAULT 0,
+  `CreatedBy` INT NULL,
+  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  INDEX `idx_personnel_history_personnel_date` (`FK_Personnel`, `EffectiveDate`),
+  INDEX `idx_personnel_history_lab` (`FK_Lab`),
+  CONSTRAINT `fk_personnel_history_personnel` FOREIGN KEY (`FK_Personnel`) REFERENCES `Personnel` (`id`),
+  CONSTRAINT `fk_personnel_history_lab` FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`),
+  CONSTRAINT `fk_personnel_history_study` FOREIGN KEY (`FK_Study`) REFERENCES `Study` (`id`),
+  CONSTRAINT `fk_personnel_history_creator` FOREIGN KEY (`CreatedBy`) REFERENCES `Personnel` (`id`)
+);

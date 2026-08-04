@@ -1,11 +1,11 @@
 {
   "name": "DRDB",
-  "version": "1.0.0",
+  "version": "3.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",

@@ -62,6 +62,7 @@ const ScheduledJobSetting = sequelize.import(
 const SystemSetting = sequelize.import(
   "../models/SequelizeAuto/SystemSetting"
 );
+const PersonnelHistory = sequelize.import("../models/SequelizeAuto/PersonnelHistory");
 
 Lab.hasMany(Personnel, {
   foreignKey: "FK_Lab",
@@ -69,6 +70,12 @@ Lab.hasMany(Personnel, {
 Personnel.belongsTo(Lab, {
   foreignKey: "FK_Lab",
 });
+Personnel.hasMany(PersonnelHistory, { foreignKey: "FK_Personnel", as: "HistoryEntries" });
+PersonnelHistory.belongsTo(Personnel, { foreignKey: "FK_Personnel" });
+Lab.hasMany(PersonnelHistory, { foreignKey: "FK_Lab" });
+PersonnelHistory.belongsTo(Lab, { foreignKey: "FK_Lab" });
+Study.hasMany(PersonnelHistory, { foreignKey: "FK_Study" });
+PersonnelHistory.belongsTo(Study, { foreignKey: "FK_Study" });
 
 Lab.hasMany(Study, {
   foreignKey: "FK_Lab",
@@ -262,9 +269,11 @@ exports.feedback = Feedback;
 exports.testingRoom = TestingRoom;
 exports.scheduledJobSetting = ScheduledJobSetting;
 exports.systemSetting = SystemSetting;
+exports.personnelHistory = PersonnelHistory;
 exports.sequelize = sequelize;
 
 const { seedDatabase } = require("../utils/seeder");
+const { seedPersonnelHistoryBaseline, reconcilePersonnelRoles } = require("../services/personnelHistoryService");
 
 async function relaxLegacyStudyAgeConstraintsIfNeeded() {
   try {
@@ -344,6 +353,8 @@ sequelize.sync({ force: false }).then(async () => {
   try {
     await relaxLegacyStudyAgeConstraintsIfNeeded();
     await patchLegacyPersonnelSchemaIfNeeded();
+    await seedPersonnelHistoryBaseline(exports);
+    await reconcilePersonnelRoles(exports);
 
     // SAFETY CHECK: Count how many labs or users exist
     // (Assuming 'lab' or 'user' is one of your exported models)

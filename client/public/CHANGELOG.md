@@ -1,32 +1,26 @@
-### Release v3.0.3
+### Release v3.1.0
 
-This release expands customization in Settings for both branding and lab-level scheduling policy. Configuration is stored in system settings and applied consistently across users in the same lab.
+DRDB 3.1.0 introduces secure, Administrator-only full-system migration for moving an existing installation into a new Docker deployment.
 
-#### Customization Options
-* **Global branding controls:** Added upload-based customization for app logo and favicon from Settings.
-* **Website title control:** Added a customizable browser tab title (`BrandingAppTitle`) in Global Branding.
-* **Advanced branding URLs:** Added optional advanced fields for directly setting logo and favicon URLs when needed.
-* **Per-lab auto-job durations:** Labs can configure `autoCancellationDays` and `autoCompletionDays` with validated ranges.
-* **Completed schedule edit policy:** Added `allowUpdateCompleted` so each lab can decide whether confirmed/completed schedules are editable.
-* **Lab-wide persistence:** Lab preferences are saved under `LabSettings_<labId>`, so users in the same lab share the same behavior.
+#### System Migration
+* **Encrypted export:** Administrators can download a passphrase-protected `.drdb-migration` archive directly from Settings.
+* **Complete system transfer:** Archives include the DRDB database, participant and scheduling records, system and lab settings, branding uploads, Google OAuth credentials/tokens, and runtime data.
+* **Safe import:** Importing validates the archive and checksums, requires an explicit `REPLACE THIS SYSTEM` confirmation, and creates a pre-import backup before replacing the destination system.
+* **Maintenance protection:** DRDB pauses scheduled jobs and temporarily blocks other API activity while an export or import is in progress, preventing migration races.
 
-#### Backend
-* **Lab-settings-driven jobs:** `server/api/controllers/autoCancellation.js` reads lab settings values rather than using fixed-only cutoffs.
-* **Completed schedule enforcement:** `server/api/controllers/schedule.js` now enforces `allowUpdateCompleted` server-side for schedule update actions.
-* **Branding asset handling:** Branding asset upload and retrieval paths are normalized to support reliable logo/favicon loading.
+#### Docker Deployment
+* **Persistent-state aware:** Migration works with the existing MariaDB and backend runtime volumes; no Docker socket access is required.
+* **Database tooling included:** The backend image now includes the MariaDB command-line client used for consistent database export and restore.
+* **Upgrade guidance:** Docker deployment documentation now describes rebuilding the backend image and handling migration archives securely.
 
-#### Frontend
-* **Settings UI controls:** Added dedicated controls for branding uploads and lab preference toggles in Settings.
-* **Validation and bounds:** Duration inputs enforce valid numeric ranges before saving.
-* **Improved feedback:** Branding upload/save flows provide clearer success and error messages.
-
-#### Architecture
-* **No store schema change required:** `client/src/stores/mainStore.js` already persists lab settings JSON, so new keys serialize automatically.
+#### Security Notes
+* Migration actions are authorized on the server using the current database role; hiding the Settings controls alone is not relied upon.
+* Archives contain sensitive participant data, password hashes, and Google credentials. Store the archive and its passphrase separately in approved secure storage.
+* Google may require reauthorization after import if the destination uses a different public URL.
 
 #### Verification
-* **Round-trip settings check:** Verified settings persist and reload from `LabSettings_<id>`.
-* **Cross-user consistency:** Verified lab preference choices are shared across users in the same lab.
-* **Policy enforcement check:** Verified completed confirmed schedules are blocked from editing when `allowUpdateCompleted` is disabled.
+* Frontend production build completed successfully.
+* Backend test suite completed successfully.
 
 ### Release v3.0.2
 
