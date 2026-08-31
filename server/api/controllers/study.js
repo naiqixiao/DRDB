@@ -313,7 +313,9 @@ exports.studyStats = asyncHandler(async (req, res) => {
     const queryStringNperPersonnel = `
       SELECT 
         Study.StudyName, 
+        Personnel.id as RecruiterId,
         Personnel.Name as RecruitedBy, 
+        Personnel.Retired as Retired,
         Schedule.Status, 
         COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
       FROM Appointment 
@@ -324,52 +326,98 @@ exports.studyStats = asyncHandler(async (req, res) => {
       INNER JOIN Family ON Schedule.FK_Family = Family.id 
       WHERE Study.id = :studyID 
         AND Family.TrainingSet = 0 
-      GROUP BY ScheduledBy, Schedule.Status 
+      GROUP BY Study.StudyName, Personnel.id, Personnel.Name, Personnel.Retired, Schedule.Status
       ORDER BY Personnel.id;
     `;
 
     const queryStringNPriExp = `
       SELECT 
         Study.StudyName, 
+        Experimenter.id as ExperimenterId,
         Experimenter.Name as Experimenter, 
+        Experimenter.Retired as Retired,
         'Primary' as ROLE,  
         COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
       FROM Appointment 
       JOIN ExperimenterAssignment ON Appointment.id = ExperimenterAssignment.FK_Appointment 
       JOIN Personnel AS Experimenter ON ExperimenterAssignment.FK_Experimenter = Experimenter.id 
       INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
-      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
       INNER JOIN Study ON Appointment.FK_Study = Study.id 
       INNER JOIN Lab ON Study.FK_Lab = Lab.id 
       INNER JOIN Family ON Schedule.FK_Family = Family.id 
       WHERE Study.id = :studyID 
         AND Family.TrainingSet = 0 
         AND Schedule.Status = 'Confirmed'  
-      GROUP BY Experimenter.Name, Experimenter.id, Schedule.Status 
+      GROUP BY Study.StudyName, Experimenter.Name, Experimenter.id, Experimenter.Retired, Schedule.Status
       ORDER BY Experimenter.id;
     `;
 
     const queryStringNAssistExp = `
       SELECT 
         Study.StudyName, 
+        Experimenter.id as ExperimenterId,
         Experimenter.Name as Experimenter,  
+        Experimenter.Retired as Retired,
         'Assistant' as ROLE,   
         COUNT(DISTINCT Appointment.id) AS NumberOfParticipants 
       FROM Appointment 
-      INNER JOIN ExperimenterAssignment ON Appointment.id = ExperimenterAssignment.FK_Appointment 
-      INNER JOIN Personnel AS PrimaryExperimenter ON ExperimenterAssignment.FK_Experimenter = PrimaryExperimenter.id 
       INNER JOIN SecondExperimenterAssignment ON Appointment.id = SecondExperimenterAssignment.FK_Appointment 
       INNER JOIN Personnel AS Experimenter ON SecondExperimenterAssignment.FK_Experimenter = Experimenter.id 
       INNER JOIN Schedule ON Appointment.FK_Schedule = Schedule.id 
-      INNER JOIN Personnel ON Schedule.ScheduledBy = Personnel.id 
       INNER JOIN Study ON Appointment.FK_Study = Study.id 
       INNER JOIN Lab ON Study.FK_Lab = Lab.id 
       INNER JOIN Family ON Schedule.FK_Family = Family.id 
       WHERE Study.id = :studyID 
         AND Family.TrainingSet = 0 
         AND Schedule.Status = 'Confirmed'  
-      GROUP BY Experimenter.id, Experimenter.Name, Schedule.Status 
+      GROUP BY Study.StudyName, Experimenter.id, Experimenter.Name, Experimenter.Retired, Schedule.Status
       ORDER BY Experimenter.id;
+    `;
+
+    // A durable study roster built from current assignments, personnel history,
+    // appointment assignments, and recruitment records. This keeps former and
+    // zero-activity researchers visible without treating the current assignment
+    // table as historical data.
+    const queryStringResearchers = `
+      SELECT DISTINCT
+        Personnel.id as PersonnelId,
+        Personnel.Name as Name,
+        Personnel.Retired as Retired
+      FROM Personnel
+      INNER JOIN (
+        SELECT FK_Experimenter as PersonnelId
+        FROM Experimenter
+        WHERE FK_Study = :studyID
+
+        UNION
+
+        SELECT FK_Personnel as PersonnelId
+        FROM PersonnelHistory
+        WHERE FK_Study = :studyID
+          AND EventType IN ('project_started', 'project_ended')
+
+        UNION
+
+        SELECT ExperimenterAssignment.FK_Experimenter as PersonnelId
+        FROM ExperimenterAssignment
+        INNER JOIN Appointment ON Appointment.id = ExperimenterAssignment.FK_Appointment
+        WHERE Appointment.FK_Study = :studyID
+
+        UNION
+
+        SELECT SecondExperimenterAssignment.FK_Experimenter as PersonnelId
+        FROM SecondExperimenterAssignment
+        INNER JOIN Appointment ON Appointment.id = SecondExperimenterAssignment.FK_Appointment
+        WHERE Appointment.FK_Study = :studyID
+
+        UNION
+
+        SELECT Schedule.ScheduledBy as PersonnelId
+        FROM Schedule
+        INNER JOIN Appointment ON Appointment.FK_Schedule = Schedule.id
+        WHERE Appointment.FK_Study = :studyID
+      ) StudyPersonnel ON StudyPersonnel.PersonnelId = Personnel.id
+      ORDER BY Personnel.Retired ASC, Personnel.Name ASC, Personnel.id ASC;
     `;
 
     const queryStringNWeeklyRecrtuiment = `
@@ -408,6 +456,7 @@ exports.studyStats = asyncHandler(async (req, res) => {
     const totalNperPersonnelStatus = await model.sequelize.query(queryStringNperPersonnel, options);
     const totalNperPersonnelPriExp = await model.sequelize.query(queryStringNPriExp, options);
     const totalNperPersonnelAssistExp = await model.sequelize.query(queryStringNAssistExp, options);
+    const researchers = await model.sequelize.query(queryStringResearchers, options);
     const totalNWeeklyRecrtuiment = await model.sequelize.query(queryStringNWeeklyRecrtuiment, options);
     const totalCompletedRunsResult = await model.sequelize.query(queryStringCompletedRuns, options);
     const totalCompletedRuns = totalCompletedRunsResult?.[0]?.NumberOfParticipants || 0;
@@ -418,6 +467,7 @@ exports.studyStats = asyncHandler(async (req, res) => {
       totalNperPersonnelStatus, 
       totalNperPersonnelPriExp, 
       totalNperPersonnelAssistExp, 
+      researchers,
       totalNWeeklyRecrtuiment,
       totalCompletedRuns
     });

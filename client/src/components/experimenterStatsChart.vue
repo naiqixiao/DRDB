@@ -1,9 +1,11 @@
 <template>
-  <div style="position: relative; height: 300px; width: 100%">
-    <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
-    <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
-      <v-icon class="mr-2">mdi-account-hard-hat</v-icon>
-      No experimenter data available
+  <div class="chart-viewport">
+    <div class="chart-surface" :style="chartSurfaceStyle">
+      <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
+      <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
+        <v-icon class="mr-2">mdi-account-hard-hat</v-icon>
+        No experimenter data available
+      </div>
     </div>
   </div>
 </template>
@@ -19,6 +21,10 @@ export default {
   components: { Bar },
   props: {
     stats: {
+      type: Array,
+      default: () => []
+    },
+    researchers: {
       type: Array,
       default: () => []
     },
@@ -83,22 +89,61 @@ export default {
   },
   computed: {
     hasData() {
-      return this.stats && this.stats.length > 0;
+      return this.researcherRoster.length > 0;
+    },
+    researcherRoster() {
+      const roster = new Map();
+      this.researchers.forEach((researcher) => {
+        const id = Number(researcher.PersonnelId);
+        if (Number.isInteger(id)) roster.set(`id:${id}`, {
+          key: `id:${id}`,
+          id,
+          name: researcher.Name || 'Unknown researcher',
+          retired: Boolean(Number(researcher.Retired)),
+        });
+      });
+      this.stats.forEach((stat) => {
+        const id = Number(stat.ExperimenterId);
+        const key = Number.isInteger(id) ? `id:${id}` : `name:${stat.Experimenter || 'Unknown researcher'}`;
+        if (!roster.has(key)) roster.set(key, {
+          key,
+          id,
+          name: stat.Experimenter || 'Unknown researcher',
+          retired: Boolean(Number(stat.Retired)),
+        });
+      });
+      return [...roster.values()];
+    },
+    chartSurfaceStyle() {
+      const longestName = this.researcherRoster.reduce((length, researcher) =>
+        Math.max(length, researcher.name.length + (researcher.retired ? 10 : 0)), 0);
+      return {
+        height: `${Math.max(300, 125 + this.researcherRoster.length * 42)}px`,
+        minWidth: `${Math.max(500, 350 + longestName * 7)}px`,
+      };
     },
     chartData() {
       if (!this.hasData) return { labels: [], datasets: [] };
 
       // 1. Extract all unique experimenters for the Y-axis
-      const experimenters = [...new Set(this.stats.map(s => s.Experimenter))].filter(Boolean);
+      const experimenters = this.researcherRoster;
       
       // 2. Extract unique roles (usually 'Primary' and 'Assistant')
-      const uniqueRoles = [...new Set(this.stats.map(s => s.ROLE))];
+      const uniqueRoles = [...new Set(this.stats.map(s => s.ROLE).filter(Boolean))];
+      if (!uniqueRoles.length) uniqueRoles.push('Primary', 'Assistant');
 
       // 3. Build a dataset for each role
       const datasets = uniqueRoles.map(role => {
-        const dataForRole = experimenters.map(exp => {
-          const record = this.stats.find(s => s.Experimenter === exp && s.ROLE === role);
-          return record ? record.NumberOfParticipants : 0;
+        const dataForRole = experimenters.map(experimenter => {
+          return this.stats
+            .filter(stat => {
+              const statId = Number(stat.ExperimenterId);
+              const statKey = Number.isInteger(statId)
+                ? `id:${statId}`
+                : `name:${stat.Experimenter || 'Unknown researcher'}`;
+              return statKey === experimenter.key && stat.ROLE === role;
+            })
+            .reduce((total, stat) => total + (Number(stat.NumberOfParticipants) || 0), 0);
         });
 
         return {
@@ -110,8 +155,25 @@ export default {
         };
       });
 
-      return { labels: experimenters, datasets };
+      return {
+        labels: experimenters.map(researcher => `${researcher.name}${researcher.retired ? ' (Retired)' : ''}`),
+        datasets,
+      };
     }
   }
 };
 </script>
+
+<style scoped>
+.chart-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.chart-surface {
+  position: relative;
+  width: 100%;
+}
+</style>

@@ -646,7 +646,7 @@
 
               <v-row>
                 <v-col cols="12" md="4">
-                  <v-card class="ds-card pa-4 h-100 text-center" variant="flat">
+                  <v-card class="ds-card analysis-chart-card pa-4 h-100 text-center" variant="flat">
                     <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2">
                       Overall Progress
                     </h3>
@@ -655,9 +655,8 @@
                 </v-col>
                 <v-col cols="12" md="8">
                   <v-card
-                    class="ds-card pa-4 h-100"
+                    class="ds-card analysis-chart-card pa-4 h-100"
                     variant="flat"
-                    style="overflow-x: auto"
                   >
                     <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2">
                       Weekly Recruitment History
@@ -665,11 +664,10 @@
                     <studyHistoryChart :stats="studyStats.totalNWeeklyRecrtuiment" />
                   </v-card>
                 </v-col>
-                <v-col cols="12" md="4">
+                <v-col cols="12" md="6">
                   <v-card
-                    class="ds-card pa-4 h-100"
+                    class="ds-card analysis-chart-card pa-4 h-100"
                     variant="flat"
-                    style="overflow-x: auto"
                   >
                     <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2">
                       Experimenter Workload
@@ -679,20 +677,21 @@
                         ...(studyStats.totalNperPersonnelPriExp || []),
                         ...(studyStats.totalNperPersonnelAssistExp || []),
                       ]"
+                      :researchers="studyStats.researchers || []"
                     />
                   </v-card>
                 </v-col>
-                <v-col cols="12" md="8">
+                <v-col cols="12" md="6">
                   <v-card
-                    class="ds-card pa-4 h-100"
+                    class="ds-card analysis-chart-card pa-4 h-100"
                     variant="flat"
-                    style="overflow-x: auto"
                   >
                     <h3 class="text-subtitle-1 font-weight-bold text-primary mb-2">
                       Recruitment by Researcher
                     </h3>
                     <recruitmentProgressChart
                       :stats="studyStats.totalNperPersonnelStatus"
+                      :researchers="studyStats.researchers || []"
                     />
                   </v-card>
                 </v-col>
@@ -815,6 +814,7 @@
                     :Experimenters="currentStudy.Experimenters"
                     :labMembers="labMembers"
                     :studyId="currentStudy.id"
+                    :studyName="currentStudy.StudyName"
                     :PointofContactId="currentStudy.PointofContact?.id"
                     @updatedExperimenters="updateExperimenters"
                   />
@@ -1762,6 +1762,7 @@ export default {
         totalNperPersonnelStatus: [],
         totalNperPersonnelPriExp: [],
         totalNperPersonnelAssistExp: [],
+        researchers: [],
         totalCompletedRuns: 0,
       },
       inclusionOptions: ["Include", "Exclude", "Only"],
@@ -1938,13 +1939,17 @@ export default {
     },
 
     async fetchStudyProgress() {
+      const studyId = this.currentStudy.id;
+      if (!studyId) return;
       this.studyStatsLoaded = false;
       try {
-        const Result = await studyApi.studyStats({ studyID: this.currentStudy.id });
+        const Result = await studyApi.studyStats({ studyID: studyId });
+        // Ignore a response for a study the user has navigated away from.
+        if (this.currentStudy.id !== studyId) return;
         this.studyStats = Result.data;
         this.studyStatsLoaded = true;
       } catch (error) {
-        console.error(error);
+        if (this.currentStudy.id === studyId) console.error(error);
       }
     },
 
@@ -2260,6 +2265,7 @@ export default {
           totalNperPersonnelStatus: [],
           totalNperPersonnelPriExp: [],
           totalNperPersonnelAssistExp: [],
+          researchers: [],
           totalCompletedRuns: 0,
         };
       }
@@ -2289,6 +2295,11 @@ export default {
 <style scoped>
 .study-table :deep(tr.v-data-table__selected) {
   background-color: rgb(var(--v-theme-secondary), 0.1) !important;
+}
+
+.analysis-chart-card {
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Study Hero Header */

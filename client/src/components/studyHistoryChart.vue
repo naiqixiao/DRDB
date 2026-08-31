@@ -1,9 +1,11 @@
 <template>
-  <div style="position: relative; height: 300px; width: 100%">
-    <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
-    <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
-      <v-icon class="mr-2">mdi-chart-bar</v-icon>
-      No recruitment history available
+  <div class="chart-viewport">
+    <div class="chart-surface" :style="chartSurfaceStyle">
+      <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
+      <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
+        <v-icon class="mr-2">mdi-chart-bar</v-icon>
+        No recruitment history available
+      </div>
     </div>
   </div>
 </template>
@@ -90,6 +92,15 @@ export default {
     hasData() {
       return this.stats && this.stats.length > 0;
     },
+    weekCount() {
+      return new Set(this.stats.map(s => s.WeekStartDate)).size;
+    },
+    chartSurfaceStyle() {
+      return {
+        height: '300px',
+        minWidth: `${Math.max(600, this.weekCount * 85)}px`,
+      };
+    },
     chartData() {
       if (!this.hasData) return { labels: [], datasets: [] };
 
@@ -124,3 +135,17 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.chart-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.chart-surface {
+  position: relative;
+  width: 100%;
+}
+</style>

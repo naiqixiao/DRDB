@@ -288,19 +288,43 @@ exports.delete = asyncHandler(async (req, res) => {
 
   const hashPassword = bcrypt.hashSync(password, 10);
 
-  const personnel = await model.personnel.update({
-    Password: hashPassword,
-    Retired: true,
-    Active: false
-  },
-    {
-      where: { id: req.query.id }
-    });
+  const personnelId = Number(req.query.id);
+  if (!Number.isInteger(personnelId) || personnelId <= 0) {
+    return res.status(400).json({ error: "Valid personnel ID is required." });
+  }
+  const personnel = await model.personnel.findByPk(personnelId);
+  if (!personnel) return res.status(404).json({ error: "Personnel record not found." });
 
-  // removed the personnel from assigned study 
-  await model.experimenter.destroy({
-    where: { FK_Experimenter: req.query.id }
-  })
+  await model.sequelize.transaction(async (transaction) => {
+    const assignments = await model.experimenter.findAll({
+      where: { FK_Experimenter: personnelId },
+      transaction,
+    });
+    const studyIds = [...new Set(assignments.map((assignment) => assignment.FK_Study))];
+    const studies = studyIds.length
+      ? await model.study.findAll({ where: { id: studyIds }, transaction })
+      : [];
+
+    // Repeated retirement requests must not create duplicate end events.
+    if (!personnel.Retired) {
+      for (const study of studies) {
+        await recordPersonnelHistory(model, {
+          FK_Personnel: personnel.id,
+          FK_Lab: personnel.FK_Lab,
+          EventType: "project_ended",
+          FK_Study: study.id,
+          StudyName: study.StudyName,
+          CreatedBy: req.userData?.id || null,
+        }, { transaction });
+      }
+    }
+
+    await personnel.update({ Password: hashPassword, Retired: true, Active: false }, { transaction });
+    await model.experimenter.destroy({
+      where: { FK_Experimenter: personnelId },
+      transaction,
+    });
+  });
 
   // Log
   const User = typeof req.query.User === 'string' ? JSON.parse(req.query.User) : req.query.User;
@@ -322,6 +346,17 @@ exports.getStats = asyncHandler(async (req, res) => {
   }
 
   try {
+    const requester = await getRequester(req);
+    const member = await model.personnel.findByPk(personnelId, {
+      attributes: ["id", "FK_Lab"],
+    });
+    if (!requester || !member) {
+      return res.status(404).json({ error: "Personnel record not found." });
+    }
+    if (requester.FK_Lab !== member.FK_Lab) {
+      return res.status(403).json({ error: "Forbidden." });
+    }
+
     // Count distinct appointments to avoid inflated totals if assignment rows are duplicated.
     const e1Count = await model.experimenterAssignment.count({
       where: { FK_Experimenter: personnelId },
@@ -343,10 +378,50 @@ exports.getStats = asyncHandler(async (req, res) => {
       col: "id"
     });
 
+    // Keep the existing totals intact while adding a study-level breakdown. A schedule
+    // linked to appointments in multiple studies is credited once in each relevant study.
+    const [byStudy] = await model.sequelize.query(`
+      SELECT
+        Study.id AS studyId,
+        Study.StudyName AS studyName,
+        COUNT(DISTINCT CASE
+          WHEN ExperimenterAssignment.FK_Experimenter = :personnelId THEN Appointment.id
+        END) AS e1Count,
+        COUNT(DISTINCT CASE
+          WHEN SecondExperimenterAssignment.FK_Experimenter = :personnelId THEN Appointment.id
+        END) AS e2Count,
+        COUNT(DISTINCT CASE
+          WHEN Schedule.ScheduledBy = :personnelId THEN Schedule.id
+        END) AS scheduledCount
+      FROM Study
+      LEFT JOIN Appointment ON Appointment.FK_Study = Study.id
+      LEFT JOIN ExperimenterAssignment
+        ON ExperimenterAssignment.FK_Appointment = Appointment.id
+        AND ExperimenterAssignment.FK_Experimenter = :personnelId
+      LEFT JOIN SecondExperimenterAssignment
+        ON SecondExperimenterAssignment.FK_Appointment = Appointment.id
+        AND SecondExperimenterAssignment.FK_Experimenter = :personnelId
+      LEFT JOIN Schedule
+        ON Schedule.id = Appointment.FK_Schedule
+        AND Schedule.ScheduledBy = :personnelId
+      WHERE Study.FK_Lab = :labId
+      GROUP BY Study.id, Study.StudyName
+      ORDER BY Study.StudyName ASC
+    `, {
+      replacements: { personnelId, labId: member.FK_Lab },
+    });
+
     res.status(200).json({
       e1Count,
       e2Count,
-      scheduledCount
+      scheduledCount,
+      byStudy: byStudy.map((study) => ({
+        studyId: Number(study.studyId),
+        studyName: study.studyName,
+        e1Count: Number(study.e1Count) || 0,
+        e2Count: Number(study.e2Count) || 0,
+        scheduledCount: Number(study.scheduledCount) || 0,
+      })),
     });
   } catch (error) {
     console.error("Failed to fetch personnel stats:", error);

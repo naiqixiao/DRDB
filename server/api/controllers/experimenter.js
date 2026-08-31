@@ -7,22 +7,68 @@ const log = require("../controllers/log");
 const { recordPersonnelHistory } = require("../services/personnelHistoryService");
 
 exports.updateExperimenters = asyncHandler(async (req, res) => {
-  const experimenters = req.body.experimenters;
+  const experimenters = req.body.experimenters || [];
+  const studyId = Number(req.body.studyId || experimenters[0]?.FK_Study);
+
+  if (!Number.isInteger(studyId) || studyId <= 0) {
+    return res.status(400).json({ error: "Study ID is required." });
+  }
 
   try {
-    await model.experimenter.destroy({
-      where: { FK_Study: experimenters[0].FK_Study }
-    });
+    const assignedExperimenters = await model.sequelize.transaction(async (transaction) => {
+      const study = await model.study.findByPk(studyId, { transaction });
+      if (!study) throw new Error("Study not found.");
 
-    const assignedStudies = await model.experimenter.bulkCreate(experimenters);
+      const priorAssignments = await model.experimenter.findAll({ where: { FK_Study: studyId }, transaction });
+      const priorIds = new Set(priorAssignments.map((assignment) => assignment.FK_Experimenter));
+      const requestedIds = [...new Set(experimenters
+        .map((experimenter) => Number(experimenter.FK_Experimenter))
+        .filter(Number.isInteger))];
+      const requestedPersonnel = requestedIds.length
+        ? await model.personnel.findAll({ where: { id: requestedIds, FK_Lab: study.FK_Lab }, transaction })
+        : [];
+      if (requestedPersonnel.length !== requestedIds.length) {
+        throw new Error("All assigned personnel must belong to the study's lab.");
+      }
+
+      await model.experimenter.destroy({ where: { FK_Study: studyId }, transaction });
+      if (requestedIds.length) {
+        await model.experimenter.bulkCreate(requestedIds.map((FK_Experimenter) => ({
+          FK_Study: studyId,
+          FK_Experimenter,
+        })), { transaction });
+      }
+
+      const requestedIdSet = new Set(requestedIds);
+      for (const personnelId of priorIds) {
+        if (!requestedIdSet.has(personnelId)) {
+          await recordPersonnelHistory(model, {
+            FK_Personnel: personnelId, FK_Lab: study.FK_Lab,
+            EventType: "project_ended", FK_Study: study.id, StudyName: study.StudyName,
+            CreatedBy: req.userData?.id || null,
+          }, { transaction });
+        }
+      }
+      for (const personnelId of requestedIds) {
+        if (!priorIds.has(personnelId)) {
+          await recordPersonnelHistory(model, {
+            FK_Personnel: personnelId, FK_Lab: study.FK_Lab,
+            EventType: "project_started", FK_Study: study.id, StudyName: study.StudyName,
+            CreatedBy: req.userData?.id || null,
+          }, { transaction });
+        }
+      }
+
+      return requestedIds.map((FK_Experimenter) => ({ FK_Study: studyId, FK_Experimenter }));
+    });
 
     // Log
     const User = req.body.User || { Name: "System", Email: "", LabName: "System" };
 
     await log.createLog("Experimenter Assignment Updated", User, "updated experimenter assignment for a study (" +
-      experimenters[0].FK_Study + ")");
+      studyId + ")");
 
-    res.status(200).send(assignedStudies);
+    res.status(200).send(assignedExperimenters);
   } catch (error) {
     res.status(500).send(error);
   }

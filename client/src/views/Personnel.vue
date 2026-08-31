@@ -225,6 +225,7 @@
             <v-card-text class="pa-6 bg-white" style="min-height: 200px;">
               <AssignedStudies v-if="currentPersonnel.id" :Studies="currentPersonnel.AssignedStudies || []"
                 :labStudies="labStudies" :personnelId="currentPersonnel.id" :personnelName="currentPersonnel.Name"
+                :studyStats="personnelStats.byStudy || []" :showStats="canViewStats"
                 @updatedStudies="updatedStudies" />
             </v-card-text>
           </v-card>
@@ -441,7 +442,8 @@ export default {
       personnelStats: {
         e1Count: 0,
         e2Count: 0,
-        scheduledCount: 0
+        scheduledCount: 0,
+        byStudy: []
       },
       personnelHistory: [],
       personnelJoinedDate: null,
@@ -683,7 +685,7 @@ export default {
       this.editedIndex = this.Personnels.findIndex(p => p.id === person.id);
 
       // 2. Reset the stats initially so old data doesn't linger
-      this.personnelStats = { e1Count: 0, e2Count: 0, scheduledCount: 0 };
+      this.personnelStats = { e1Count: 0, e2Count: 0, scheduledCount: 0, byStudy: [] };
       this.personnelHistory = [];
       this.personnelJoinedDate = null;
       this.currentRoleHistoryEntryId = null;

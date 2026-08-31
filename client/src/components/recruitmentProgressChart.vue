@@ -1,9 +1,11 @@
 <template>
-  <div style="position: relative; height: 300px; width: 100%">
-    <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
-    <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
-      <v-icon class="mr-2">mdi-account-search</v-icon>
-      No recruitment data available
+  <div class="chart-viewport">
+    <div class="chart-surface" :style="chartSurfaceStyle">
+      <Bar v-if="hasData" :data="chartData" :options="chartOptions" />
+      <div v-else class="d-flex align-center justify-center h-100 text-muted font-weight-medium">
+        <v-icon class="mr-2">mdi-account-search</v-icon>
+        No recruitment data available
+      </div>
     </div>
   </div>
 </template>
@@ -19,6 +21,10 @@ export default {
   components: { Bar },
   props: {
     stats: {
+      type: Array,
+      default: () => []
+    },
+    researchers: {
       type: Array,
       default: () => []
     },
@@ -87,22 +93,59 @@ export default {
   },
   computed: {
     hasData() {
-      return this.stats && this.stats.length > 0;
+      return this.recruiterRoster.length > 0;
+    },
+    recruiterRoster() {
+      const roster = new Map();
+      this.researchers.forEach((researcher) => {
+        const id = Number(researcher.PersonnelId);
+        if (Number.isInteger(id)) roster.set(`id:${id}`, {
+          key: `id:${id}`,
+          id,
+          name: researcher.Name || 'Unknown researcher',
+          retired: Boolean(Number(researcher.Retired)),
+        });
+      });
+      this.stats.forEach((stat) => {
+        const id = Number(stat.RecruiterId);
+        const key = Number.isInteger(id) ? `id:${id}` : `name:${stat.RecruitedBy || 'Unknown researcher'}`;
+        if (!roster.has(key)) roster.set(key, {
+          key,
+          id,
+          name: stat.RecruitedBy || 'Unknown researcher',
+          retired: Boolean(Number(stat.Retired)),
+        });
+      });
+      return [...roster.values()];
+    },
+    chartSurfaceStyle() {
+      return {
+        height: '320px',
+        minWidth: `${Math.max(520, this.recruiterRoster.length * 105)}px`,
+      };
     },
     chartData() {
       if (!this.hasData) return { labels: [], datasets: [] };
 
       // 1. Extract all unique recruiters for the X-axis
-      const recruiters = [...new Set(this.stats.map(s => s.RecruitedBy))].filter(Boolean);
+      const recruiters = this.recruiterRoster;
       
       // 2. Extract all unique statuses present in the data
-      const uniqueStatuses = [...new Set(this.stats.map(s => s.Status))];
+      const uniqueStatuses = [...new Set(this.stats.map(s => s.Status).filter(Boolean))];
+      if (!uniqueStatuses.length) uniqueStatuses.push('No recorded recruitment');
 
       // 3. Build a dataset for each status
       const datasets = uniqueStatuses.map(status => {
         const dataForStatus = recruiters.map(recruiter => {
-          const record = this.stats.find(s => s.RecruitedBy === recruiter && s.Status === status);
-          return record ? record.NumberOfParticipants : 0;
+          return this.stats
+            .filter(stat => {
+              const statId = Number(stat.RecruiterId);
+              const statKey = Number.isInteger(statId)
+                ? `id:${statId}`
+                : `name:${stat.RecruitedBy || 'Unknown researcher'}`;
+              return statKey === recruiter.key && stat.Status === status;
+            })
+            .reduce((total, stat) => total + (Number(stat.NumberOfParticipants) || 0), 0);
         });
 
         return {
@@ -114,8 +157,25 @@ export default {
         };
       });
 
-      return { labels: recruiters, datasets };
+      return {
+        labels: recruiters.map(researcher => `${researcher.name}${researcher.retired ? ' (Retired)' : ''}`),
+        datasets,
+      };
     }
   }
 };
 </script>
+
+<style scoped>
+.chart-viewport {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.chart-surface {
+  position: relative;
+  width: 100%;
+}
+</style>

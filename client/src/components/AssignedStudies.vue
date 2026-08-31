@@ -32,6 +32,23 @@
             </template>
             <template v-else>Age range not set</template>
           </v-card-text>
+
+          <v-card-text v-if="showStats" class="py-2">
+            <div class="study-stats">
+              <div class="study-stat">
+                <span class="study-stat__value text-primary">{{ statsFor(study.id).e1Count }}</span>
+                <span class="study-stat__label">Sessions (E1)</span>
+              </div>
+              <div class="study-stat">
+                <span class="study-stat__value text-primary">{{ statsFor(study.id).e2Count }}</span>
+                <span class="study-stat__label">Sessions (E2)</span>
+              </div>
+              <div class="study-stat">
+                <span class="study-stat__value text-success">{{ statsFor(study.id).scheduledCount }}</span>
+                <span class="study-stat__label">Recruited</span>
+              </div>
+            </div>
+          </v-card-text>
           
           <v-card-text class="py-2 text-caption font-weight-bold text-uppercase text-right" :class="study.Completed ? 'text-success' : 'text-primary'">
             <v-icon start size="14" class="mr-1">{{ study.Completed ? 'mdi-check-circle' : 'mdi-progress-clock' }}</v-icon>
@@ -132,6 +149,14 @@ export default {
       type: String,
       default: ""
     },
+    studyStats: {
+      type: Array,
+      default: () => []
+    },
+    showStats: {
+      type: Boolean,
+      default: false
+    },
   },
 
   data() {
@@ -169,6 +194,14 @@ export default {
   },
 
   methods: {
+    statsFor(studyId) {
+      return this.studyStats.find(stats => Number(stats.studyId) === Number(studyId)) || {
+        e1Count: 0,
+        e2Count: 0,
+        scheduledCount: 0,
+      };
+    },
+
     updateStudies() {
       // Create a shallow copy to edit so we don't mutate props directly
       this.editedStudies = [...this.Studies];
@@ -219,3 +252,44 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.study-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.study-stat {
+  min-width: 0;
+  text-align: center;
+}
+
+.study-stat__value,
+.study-stat__label {
+  display: block;
+}
+
+.study-stat__value {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.study-stat__label {
+  margin-top: 2px;
+  overflow: hidden;
+  color: #64748b;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+</style>
