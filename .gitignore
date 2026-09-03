@@ -69,7 +69,8 @@ pm2_logs.txt
 backups/
 stats/
 BUG-AUDIT-2026-04-26.md
-docs/
+docs/*
+!docs/AI_Email_Personalization.rst
 files for gabriel/
 Sagi.md
 .mcp.json

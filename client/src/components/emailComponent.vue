@@ -38,6 +38,54 @@
       </div>
     </div>
 
+    <div v-if="canPersonalize" class="ai-personalization-bar">
+      <div class="ai-personalization-actions">
+        <v-btn
+          size="small"
+          variant="tonal"
+          color="primary"
+          prepend-icon="mdi-auto-fix"
+          :loading="personalizationLoading"
+          @click="generatePersonalization"
+        >
+          Suggest personalization
+        </v-btn>
+        <v-chip size="small" variant="text" prepend-icon="mdi-shield-check-outline">
+          Draft only — review before sending
+        </v-chip>
+      </div>
+      <v-alert v-if="personalizationError" type="warning" variant="tonal" density="compact" class="mt-2">
+        {{ personalizationError }}
+      </v-alert>
+      <v-card v-if="personalizationDraft" variant="outlined" class="ai-personalization-card mt-2">
+        <div class="ai-personalization-label">
+          <v-icon size="16">mdi-creation</v-icon>
+          AI suggestion · {{ personalizationDraft.tone }} tone
+        </div>
+        <p v-if="personalizationDraft.personalizationText" class="ai-personalization-text">
+          {{ personalizationDraft.personalizationText }}
+        </p>
+        <p v-if="personalizationDraft.subjectSuggestion" class="ai-subject-suggestion">
+          Suggested subject: {{ personalizationDraft.subjectSuggestion }}
+        </p>
+        <div class="ai-personalization-card-actions">
+          <v-btn size="small" color="primary" variant="flat" @click="acceptPersonalization">
+            Insert paragraph
+          </v-btn>
+          <v-btn
+            v-if="personalizationDraft.subjectSuggestion"
+            size="small"
+            color="primary"
+            variant="text"
+            @click="useSubjectSuggestion"
+          >
+            Use subject
+          </v-btn>
+          <v-btn size="small" variant="text" @click="dismissPersonalization">Dismiss</v-btn>
+        </div>
+      </v-card>
+    </div>
+
     <!-- Email body editor -->
     <div class="email-body-wrapper">
       <RichTextEditor v-model="emailBody" />
@@ -48,6 +96,7 @@
 <script>
 import email from "@/services/email";
 import family from "@/services/family";
+import ai from "@/services/ai";
 import moment from "moment";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
@@ -83,6 +132,9 @@ export default {
       emailUpdate: false,
       emailBody: "",
       emailSubject: "",
+      personalizationLoading: false,
+      personalizationError: "",
+      personalizationDraft: null,
 
     };
   },
@@ -113,6 +165,7 @@ export default {
     },
 
     initializeEmail() {
+      this.resetPersonalization();
       this.emailBody = this.generateEmailBody();
 
       switch (this.emailType) {
@@ -140,6 +193,69 @@ export default {
           this.emailSubject = "Thank you for your participation!";
           break;
       }
+    },
+
+    resetPersonalization() {
+      this.personalizationLoading = false;
+      this.personalizationError = "";
+      this.personalizationDraft = null;
+    },
+
+    async generatePersonalization() {
+      this.personalizationLoading = true;
+      this.personalizationError = "";
+      this.personalizationDraft = null;
+      try {
+        const appointmentIds = this.appointments.map((appointment) => appointment.id).filter(Boolean);
+        const result = await ai.emailPersonalization({
+          familyId: this.familyInfo.id,
+          appointmentIds,
+          emailType: this.emailType,
+        });
+        if (!result.data.personalizationText && !result.data.subjectSuggestion) {
+          this.personalizationError = "No safe personalization was found for this family and study.";
+          this.personalizationDraft = null;
+        } else {
+          this.personalizationDraft = result.data;
+        }
+      } catch (error) {
+        this.personalizationError = error.response?.data?.error ||
+          "Personalization is unavailable. Your original draft is unchanged.";
+      } finally {
+        this.personalizationLoading = false;
+      }
+    },
+
+    acceptPersonalization() {
+      if (!this.personalizationDraft?.personalizationText) return;
+      const text = this.escapeHtml(this.personalizationDraft.personalizationText);
+      const paragraph = "<p>" + text + "</p>";
+      const firstParagraphEnd = this.emailBody.indexOf("</p>");
+      this.emailBody = firstParagraphEnd >= 0
+        ? this.emailBody.slice(0, firstParagraphEnd + 4) + paragraph + this.emailBody.slice(firstParagraphEnd + 4)
+        : paragraph + this.emailBody;
+      this.personalizationDraft = null;
+      this.personalizationError = "Personalization inserted. Please review it before sending.";
+    },
+
+    useSubjectSuggestion() {
+      if (!this.personalizationDraft?.subjectSuggestion) return;
+      this.emailSubject = this.personalizationDraft.subjectSuggestion;
+      this.personalizationError = "Subject suggestion applied. Please review it before sending.";
+    },
+
+    dismissPersonalization() {
+      this.personalizationDraft = null;
+      this.personalizationError = "";
+    },
+
+    escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     },
 
     generateEmailBody() {
@@ -422,6 +538,13 @@ export default {
       return [studyLabel, gmailLabels];
     }
   },
+  computed: {
+    canPersonalize() {
+      return ["Introduction", "Follow-up", "ThankYou"].includes(this.emailType) &&
+        this.appointments.length > 0 &&
+        Boolean(this.familyInfo.id);
+    },
+  },
   watch: {
     dialog(val) {
       if (val) {
@@ -429,6 +552,7 @@ export default {
       } else {
         this.emailBody = "";
         this.emailSubject = "";
+        this.resetPersonalization();
       }
     },
     emailType(val) {
@@ -437,6 +561,7 @@ export default {
       } else {
         this.emailBody = "";
         this.emailSubject = "";
+        this.resetPersonalization();
       }
     },
     familyInfo(newVal) {
@@ -466,6 +591,49 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+.ai-personalization-bar {
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.ai-personalization-actions,
+.ai-personalization-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ai-personalization-card {
+  padding: 12px;
+  background: #fff;
+}
+
+.ai-personalization-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1e40af;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-personalization-text {
+  margin: 10px 0 6px;
+  color: #1e293b;
+}
+
+.ai-subject-suggestion {
+  margin: 0 0 10px;
+  color: #64748b;
+  font-size: 0.85rem;
 }
 
 /* Header section (TO / SUBJECT) */

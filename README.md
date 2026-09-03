@@ -7,6 +7,7 @@ Built with a robust Vue 3 frontend and a Node.js/MySQL backend, DRDB eliminates 
 
 - **Demo Videos & Instructions (v2, to be updated):** [System Overview](https://mcmaster-baby-lab.github.io/handbook/DRDB)
 - **Documentation (v1, obsolete):** [drdb.readthedocs.io](https://drdb.readthedocs.io)
+- **AI email personalization:** [implementation guide](docs/AI_Email_Personalization.rst)
 
 ---
 
@@ -157,6 +158,13 @@ DB_DIALECT=mariadb
 TIMEZONE=America/Toronto
 FRONTEND_URL=https://yourdomain.com
 ```
+
+AI email personalization is opt-in and appears in the existing email
+composer as a human-reviewed suggestion. Cloud testing is restricted to
+training-set or de-identified families unless AI_EMAIL_ALLOW_REAL_DATA=true is
+explicitly enabled after the lab approves the provider's data-processing terms.
+The implementation supports Groq and a local Ollama endpoint. Configure
+AI_EMAIL_PROVIDER=ollama, OLLAMA_URL, and OLLAMA_MODEL to use Ollama.
 
 > [!NOTE]
 > `FRONTEND_URL` controls the CORS allowed origins. Set it to your production domain. Multiple origins can be comma-separated (e.g., `https://yourdomain.com,http://localhost:5173`).
