@@ -379,6 +379,18 @@ h1, h2, h3, h4, h5, h6, .text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-
   color: white !important;
 }
 
+/* Gradient headers own their foreground color. Vuetify typography and button
+   utilities can otherwise apply the theme primary color directly to children,
+   which is difficult to read over the blue/magenta gradient. Keep chips exempt
+   so their semantic color variants continue to work. */
+.ds-header-gradient .v-card-title,
+.ds-header-gradient .v-toolbar-title,
+.ds-header-gradient .v-btn,
+.ds-header-gradient .v-label,
+.ds-header-gradient :is(h1, h2, h3, h4, h5, h6, p, span):not(.v-chip__content) {
+  color: white !important;
+}
+
 .ds-header-gradient .v-chip {
   text-shadow: none;
 }
