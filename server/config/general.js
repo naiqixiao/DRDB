@@ -5,6 +5,11 @@ require("dotenv").config();
 const timeZone = process.env.TIMEZONE || "America/Toronto";
 const databaseName = process.env.DB_NAME || "DRDB";
 
+// Keep Node's local-time parsing/formatting aligned with Sequelize. Without
+// this, a container running in UTC can interpret a timezone-less appointment
+// differently from the database connection.
+process.env.TZ = timeZone;
+
 exports.URL = process.env.URL || "http://localhost:8080";
 exports.timeZone = timeZone;
 exports.otherRequirement = process.env.OTHER_REQUIREMENT || "";

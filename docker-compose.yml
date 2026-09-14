@@ -39,6 +39,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
       URL: ${URL:-http://localhost:8080}
       TIMEZONE: ${TIMEZONE:-America/Toronto}
+      TZ: ${TIMEZONE:-America/Toronto}
       STATS_OUTPUT_PATH: /app/data/stats
     volumes:
       # Runtime files are deliberately independent of every image.

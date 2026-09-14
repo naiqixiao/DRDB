@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const Sequelize = require("sequelize");
 const moment = require("moment");
 const calendarService = require("./googleCalendarService");
+const { normalizeAppointmentTime } = require("../utils/dateTime");
 
 /**
  * Standardized Include Block for Schedule Queries
@@ -152,8 +153,11 @@ exports.searchSchedulesWithPagination = searchSchedulesWithPagination;
  * Creates a new schedule, its appointments, assigns experimenters,
  * and syncs with Google Calendar.
  */
-exports.createSchedule = async (newScheduleInfo, oAuth2Client, labId) => {
-  newScheduleInfo.AppointmentTime = moment(newScheduleInfo.AppointmentTime).toISOString(true);
+exports.createSchedule = async (newScheduleInfo, oAuth2Client, labId, timeZone) => {
+  newScheduleInfo.AppointmentTime = normalizeAppointmentTime(
+    newScheduleInfo.AppointmentTime,
+    timeZone
+  );
 
   // 1. Cleanup previously tentative appointments if they exist
   for (const app of newScheduleInfo.Appointments) {
@@ -204,9 +208,12 @@ exports.createSchedule = async (newScheduleInfo, oAuth2Client, labId) => {
 /**
  * Updates a schedule, recreating appointments/assignments, and updating Family status.
  */
-exports.updateSchedule = async (updatedScheduleInfo, oAuth2Client, labId) => {
+exports.updateSchedule = async (updatedScheduleInfo, oAuth2Client, labId, timeZone) => {
   if (updatedScheduleInfo.AppointmentTime) {
-    updatedScheduleInfo.AppointmentTime = moment(updatedScheduleInfo.AppointmentTime).toISOString(true);
+    updatedScheduleInfo.AppointmentTime = normalizeAppointmentTime(
+      updatedScheduleInfo.AppointmentTime,
+      timeZone
+    );
   }
 
   // 1. ALWAYS Process Appointments (Regardless of Schedule Status)
@@ -292,4 +299,3 @@ exports.deleteSchedule = async (scheduleId, oAuth2Client) => {
   // Delete the schedule from the database
   await model.schedule.destroy({ where: { id: scheduleId } });
 };
-

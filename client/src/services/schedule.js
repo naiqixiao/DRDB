@@ -3,6 +3,7 @@ import { useMainStore } from "@/stores/mainStore";
 
 export default {
   create(schedule) {
+    schedule.lab = useMainStore().lab;
     schedule.User = {
       
       Name: useMainStore().name,

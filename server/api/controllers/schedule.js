@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const moment = require("moment");
 const log = require("../controllers/log");
 const scheduleService = require("../services/scheduleService");
+const { getEffectiveTimezone } = require("../services/timezoneService");
 const model = require("../models/DRDB");
 
 async function getLabSettings(labId) {
@@ -59,7 +60,14 @@ const asyncHandler = fn => (req, res, next) => {
 
 // ─── CREATE ─────────────────────────────────────────────────────────────
 exports.create = asyncHandler(async (req, res) => {
-  const schedule = await scheduleService.createSchedule(req.body, req.oAuth2Client, req.body.lab);
+  const labId = req.body.lab || req.userData?.lab;
+  const timeZone = await getEffectiveTimezone(labId);
+  const schedule = await scheduleService.createSchedule(
+    req.body,
+    req.oAuth2Client,
+    labId,
+    timeZone
+  );
   await log.createLog("Appointment Created", req.body.User, `added a study appointment to a schedule (${schedule.id})`);
   res.status(200).json(schedule);
 });
@@ -81,7 +89,14 @@ exports.update = asyncHandler(async (req, res) => {
     }
   }
 
-  const schedule = await scheduleService.updateSchedule(req.body, req.oAuth2Client, req.body.lab);
+  const labId = req.body.lab || req.userData?.lab;
+  const timeZone = await getEffectiveTimezone(labId);
+  const schedule = await scheduleService.updateSchedule(
+    req.body,
+    req.oAuth2Client,
+    labId,
+    timeZone
+  );
   
   await log.createLog("Appointment Updated", req.body.User, `updated a study appointment (${schedule.id})`);
   res.status(200).send(schedule);

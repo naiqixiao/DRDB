@@ -24,7 +24,7 @@ function resolveModel(...keys) {
   return null;
 }
 
-const { getEffectiveTimezone } = require("../../jobs/scheduler");
+const { getEffectiveTimezone } = require("../services/timezoneService");
 
 function getUserModels() {
   return {

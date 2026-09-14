@@ -24,6 +24,7 @@ const {
   getFamilyReminderSchedules,
   getExperimenterReminderData,
 } = require("../services/reminderService");
+const { getEffectiveTimezone } = require("../services/timezoneService");
 
 function handleReminderError(logLabel, error, res) {
   console.error(logLabel, error);
@@ -59,9 +60,11 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
       await getCompletionReminderData(labId);
 
     for (const reminder of autoCompletionList) {
+      const timeZone = await getEffectiveTimezone(reminder.scheduleList[0].LabID);
       const htmlBody = buildCompletionReminderBody(
         reminder.experimenterName,
-        reminder.scheduleList
+        reminder.scheduleList,
+        timeZone
       );
 
       const oAuth2Client = getLabOAuth2Client(reminder.scheduleList[0].LabID);
@@ -104,9 +107,11 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       await getRejectionReminderData(labId);
 
     for (const reminder of autoRejectionList) {
+      const timeZone = await getEffectiveTimezone(reminder.scheduleList[0].LabID);
       const htmlBody = buildRejectionReminderBody(
         reminder.researcherName,
-        reminder.scheduleList
+        reminder.scheduleList,
+        timeZone
       );
 
       const oAuth2Client = getLabOAuth2Client(reminder.scheduleList[0].LabID);
@@ -149,6 +154,9 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
 
     for (const schedule of schedules) {
       const labels = ["Reminder-email"];
+      const timeZone = await getEffectiveTimezone(
+        schedule.Appointments[0].Study.Lab.id
+      );
 
       for (const appointment of schedule.Appointments) {
         labels.push(appointment.Study.dataValues.StudyName);
@@ -161,7 +169,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
             schedule.Appointments[0].Study.Lab.id
           );
 
-          const emailContent = buildFamilyReminderBody(schedule);
+          const emailContent = buildFamilyReminderBody(schedule, timeZone);
 
           await sendLabEmail(oAuth2Client, {
             to: emailContent.to,
@@ -187,7 +195,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
           );
         } else {
           // Family has no email — send a manual reminder to the lab
-          var emailContent = buildManualReminderBody(schedule);
+          var emailContent = buildManualReminderBody(schedule, timeZone);
 
           await sendAdminEmail({
             to: emailContent.to,
@@ -225,7 +233,8 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
     const experimenters = await getExperimenterReminderData(labId);
 
     for (const experimenter of experimenters) {
-      const htmlBody = buildExperimenterReminderBody(experimenter);
+      const timeZone = await getEffectiveTimezone(experimenter.Lab.id);
+      const htmlBody = buildExperimenterReminderBody(experimenter, timeZone);
 
       const oAuth2Client = getLabOAuth2Client(experimenter.Lab.id);
 
