@@ -1,5 +1,6 @@
 const model = require("../models/DRDB");
-const { listScheduledJobs, updateScheduledJob, getEffectiveTimezone } = require("../../jobs/scheduler");
+const { listScheduledJobs, updateScheduledJob } = require("../../jobs/scheduler");
+const { getEffectiveTimezone } = require("../services/timezoneService");
 
 const ALLOWED_ROLES = new Set(["Admin", "PI", "Lab manager"]);
 

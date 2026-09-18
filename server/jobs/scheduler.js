@@ -15,19 +15,13 @@ const ChildController = require("../api/controllers/child");
 const autoCancelController = require("../api/controllers/autoCancellation");
 const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
+const {
+  getEffectiveTimezone,
+  getLabModel,
+} = require("../api/services/timezoneService");
 
 let scheduledJobPersistenceEnabled = true;
 let migrationPaused = false;
-
-function getLabModel() {
-  return (
-    model.lab ||
-    model.Lab ||
-    model?.sequelize?.models?.Lab ||
-    model?.sequelize?.models?.lab ||
-    null
-  );
-}
 
 function getPersonnelModel() {
   return (
@@ -49,35 +43,6 @@ function getScheduledJobSettingModel() {
   );
 }
 
-const DEFAULT_TIMEZONE = process.env.TIMEZONE || "America/Toronto";
-
-async function getGeneralTimezone() {
-  const SystemSettingModel = model.systemSetting || model?.sequelize?.models?.SystemSetting;
-  if (!SystemSettingModel) return DEFAULT_TIMEZONE;
-
-  try {
-    const setting = await SystemSettingModel.findOne({
-      where: { SettingKey: "GeneralTimezone" },
-    });
-    return setting?.SettingValue || DEFAULT_TIMEZONE;
-  } catch (error) {
-    return DEFAULT_TIMEZONE;
-  }
-}
-
-async function getEffectiveTimezone(labId) {
-  if (!labId) return await getGeneralTimezone();
-
-  const LabModel = getLabModel();
-  if (!LabModel) return await getGeneralTimezone();
-
-  try {
-    const lab = await LabModel.findByPk(labId, { attributes: ["Timezone"] });
-    return lab?.Timezone || (await getGeneralTimezone());
-  } catch (error) {
-    return await getGeneralTimezone();
-  }
-}
 const EDITABLE_JOB_IDS = new Set([
   "family-reminders",
   "experimenter-reminders",

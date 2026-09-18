@@ -2,7 +2,7 @@ const asyncHandler = require("express-async-handler");
 const model = require("../models/DRDB");
 
 const calendarService = require("../services/googleCalendarService");
-const { getEffectiveTimezone } = require("../../jobs/scheduler");
+const { getEffectiveTimezone } = require("../services/timezoneService");
 
 // a new calendar event creation function to generate a list of events for each appointment, and then send the output back to frontend.
 exports.create = asyncHandler(async (req, res) => {

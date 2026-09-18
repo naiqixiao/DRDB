@@ -5,7 +5,7 @@
  * Extracted from controllers/reminder.js for maintainability.
  */
 
-const moment = require("moment");
+const { formatDateInTimezone } = require("./dateTime");
 
 // ─── Shared table styles ───────────────────────────────────────────
 const TRO =
@@ -66,7 +66,7 @@ function PhoneFormated(Phone) {
  * Build the family reminder email content (sent to parents).
  * Returns { from, to, subject, body }.
  */
-function buildFamilyReminderBody(schedule) {
+function buildFamilyReminderBody(schedule, timeZone) {
   const emailSubject =
     "Reminder for your study appointment with " +
     childNames(schedule.Appointments);
@@ -91,7 +91,11 @@ function buildFamilyReminderBody(schedule) {
       schedule.Appointments[0].Study.Lab.LabName +
       " with <b>" +
       childNames(schedule.Appointments) +
-      moment(schedule.AppointmentTime).format(" [tomorrow at] h:mma") +
+      formatDateInTimezone(
+        schedule.AppointmentTime,
+        " [tomorrow at] h:mma",
+        timeZone
+      ) +
       "</b>.</p>" +
       schedule.Appointments[0].Study.Lab.TransportationInstructions;
   } else {
@@ -104,7 +108,11 @@ function buildFamilyReminderBody(schedule) {
       ". Just a reminder that you and " +
       childNames(schedule.Appointments) +
       " will participate in our online study " +
-      moment(schedule.AppointmentTime).format(" [tomorrow at] h:mma") +
+      formatDateInTimezone(
+        schedule.AppointmentTime,
+        " [tomorrow at] h:mma",
+        timeZone
+      ) +
       "</b>.</p>";
   }
 
@@ -168,7 +176,7 @@ function buildFamilyReminderBody(schedule) {
  * Build the manual reminder body (sent to the lab when the family has no email).
  * Returns { to, subject, body }.
  */
-function buildManualReminderBody(schedule) {
+function buildManualReminderBody(schedule, timeZone) {
   if (!schedule.Family.NamePrimary) {
     schedule.Family.NamePrimary = "";
   }
@@ -190,8 +198,10 @@ function buildManualReminderBody(schedule) {
     " and their child(ren), " +
     childNames(schedule.Appointments) +
     " are coming for a study tomorrow, " +
-    moment(schedule.AppointmentTime).format(
-      " [on] dddd [(]MMM Do[)] [at] h:mma"
+    formatDateInTimezone(
+      schedule.AppointmentTime,
+      " [on] dddd [(]MMM Do[)] [at] h:mma",
+      timeZone
     ) +
     "</p><p>" +
     "However, there is no email in the system to remind them over email. Please give them a call ASAP.</p>" +
@@ -213,7 +223,7 @@ function buildManualReminderBody(schedule) {
  * Build the auto-completion reminder email body (olive table).
  * Sent to experimenters asking them to confirm yesterday's study completions.
  */
-function buildCompletionReminderBody(experimenterName, scheduleList) {
+function buildCompletionReminderBody(experimenterName, scheduleList, timeZone) {
   const TH =
     "style = 'background: olive; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18; color: white;'";
 
@@ -244,7 +254,11 @@ function buildCompletionReminderBody(experimenterName, scheduleList) {
     body += "<tr>";
     body +=
       style +
-      moment(schedule.AppointmentTime).format("MMM Do [at] h:mma") +
+      formatDateInTimezone(
+        schedule.AppointmentTime,
+        "MMM Do [at] h:mma",
+        timeZone
+      ) +
       "</td>";
     body += style + schedule.StudyName + "</td>";
     body += style + schedule.Name + "</td>";
@@ -263,7 +277,7 @@ function buildCompletionReminderBody(experimenterName, scheduleList) {
  * Build the auto-rejection/follow-up reminder email body (tomato/red table).
  * Sent to researchers about unresolved tentative/rescheduling/no-show appointments.
  */
-function buildRejectionReminderBody(researcherName, scheduleList) {
+function buildRejectionReminderBody(researcherName, scheduleList, timeZone) {
   const TH =
     "style = 'background: tomato; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
 
@@ -300,7 +314,11 @@ function buildRejectionReminderBody(researcherName, scheduleList) {
     body += style + schedule.Status + "</td>";
     body +=
       style +
-      moment(schedule.updatedAt).format("MMM Do [at] h:mma") +
+      formatDateInTimezone(
+        schedule.updatedAt,
+        "MMM Do [at] h:mma",
+        timeZone
+      ) +
       "</td>";
     body += "</tr>";
   });
@@ -316,7 +334,7 @@ function buildRejectionReminderBody(researcherName, scheduleList) {
  * Build the experimenter reminder email body (blue primary + green secondary tables).
  * Sent to experimenters about their studies tomorrow.
  */
-function buildExperimenterReminderBody(experimenter) {
+function buildExperimenterReminderBody(experimenter, timeZone) {
   const TH =
     "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
   const TH2nd =
@@ -394,8 +412,10 @@ function buildExperimenterReminderBody(experimenter) {
       body += "<tr>";
       body +=
         style +
-        moment(appointmentPri.Schedule.AppointmentTime).format(
-          "MMM Do [at] h:mma"
+        formatDateInTimezone(
+          appointmentPri.Schedule.AppointmentTime,
+          "MMM Do [at] h:mma",
+          timeZone
         ) +
         "</td>";
       body += style + appointmentPri.Study.StudyName + "</td>";
@@ -470,8 +490,10 @@ function buildExperimenterReminderBody(experimenter) {
       body += "<tr>";
       body +=
         style +
-        moment(appointmentSec.Schedule.AppointmentTime).format(
-          "MMM Do [at] h:mma"
+        formatDateInTimezone(
+          appointmentSec.Schedule.AppointmentTime,
+          "MMM Do [at] h:mma",
+          timeZone
         ) +
         "</td>";
       body += style + appointmentSec.Study.StudyName + "</td>";
