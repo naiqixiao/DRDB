@@ -1,138 +1,28 @@
 const model = require("../models/DRDB");
+const { AiServiceError, stripHtml, limitText, callProvider, currentProviderInfo } = require("./aiProvider");
+const {
+  meaningfulWords,
+  findSimilarStudy,
+  buildParticipationProfile,
+} = require("./participationProfile");
 
 const ALLOWED_EMAIL_TYPES = new Set(["Introduction", "Follow-up", "ThankYou"]);
-const STOP_WORDS = new Set([
-  "about", "after", "and", "are", "been", "being", "for", "from",
-  "have", "into", "that", "the", "their", "there", "this", "with",
-  "your", "will", "you", "study", "research",
-]);
 
-class AiEmailError extends Error {
-  constructor(message, statusCode = 503, code = "AI_UNAVAILABLE") {
-    super(message);
-    this.name = "AiEmailError";
-    this.statusCode = statusCode;
-    this.code = code;
-  }
-}
+// Kept as a distinct name for backward compatibility with existing imports
+// (server/api/controllers/ai.js, tests); it is the same error class used by
+// every AI feature.
+const AiEmailError = AiServiceError;
 
-function stripHtml(value) {
-  return String(value || "")
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+const FIELD_SPECS = [
+  { key: "personalizationText", maxLength: 600 },
+  { key: "subjectSuggestion", maxLength: 160 },
+];
 
-function limitText(value, maxLength) {
-  return String(value || "").trim().slice(0, maxLength);
-}
-
-function meaningfulWords(value) {
-  return new Set(
-    stripHtml(value)
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, " ")
-      .split(/\s+/)
-      .map((word) => word.replace(/^-+|-+$/g, ""))
-      .filter((word) => word.length >= 4 && !STOP_WORDS.has(word))
-  );
-}
-
-function isCompletedSchedule(schedule) {
-  return schedule && schedule.Status === "Confirmed" &&
-    (schedule.Completed === 1 || schedule.Completed === true || schedule.Completed === "1");
-}
-
-function scheduleDate(schedule) {
-  const value = schedule && (schedule.AppointmentTime || schedule.updatedAt || schedule.createdAt);
-  const date = value ? new Date(value) : null;
-  return date && !Number.isNaN(date.getTime()) ? date : null;
-}
-
-function daysSince(date, now = new Date()) {
-  if (!date) return null;
-  return Math.max(0, Math.floor((now.getTime() - date.getTime()) / 86400000));
-}
-
-function findSimilarStudy(currentStudy, historicalAppointments, now = new Date()) {
-  if (!currentStudy) return null;
-  const currentWords = meaningfulWords((currentStudy.StudyName || "") + " " + (currentStudy.Description || ""));
-  if (currentWords.size < 2) return null;
-
-  let bestMatch = null;
-  for (const appointment of historicalAppointments) {
-    const schedule = appointment.Schedule;
-    const date = scheduleDate(schedule);
-    if (!isCompletedSchedule(schedule) || !date || daysSince(date, now) > 180) continue;
-    if (currentStudy.StudyType && appointment.Study && appointment.Study.StudyType !== currentStudy.StudyType) continue;
-
-    const historicalWords = meaningfulWords(
-      ((appointment.Study && appointment.Study.StudyName) || "") + " " +
-      ((appointment.Study && appointment.Study.Description) || "")
-    );
-    const sharedWords = [...currentWords].filter((word) => historicalWords.has(word));
-    const unionSize = new Set([...currentWords, ...historicalWords]).size;
-    const score = unionSize ? sharedWords.length / unionSize : 0;
-
-    if (sharedWords.length >= 2 && score >= 0.18 && (!bestMatch || score > bestMatch.score)) {
-      bestMatch = {
-        studyName: (appointment.Study && appointment.Study.StudyName) || "a similar study",
-        daysAgo: daysSince(date, now),
-        score,
-        description: (appointment.Study && appointment.Study.Description) || "",
-      };
-    }
-  }
-  return bestMatch;
-}
-
-function buildParticipationProfile(schedules, conversations, currentAppointmentIds, now = new Date()) {
-  const currentIds = new Set(currentAppointmentIds.map(Number));
-  const historicalAppointments = [];
-  const successfulScheduleIds = new Set();
-  const noShowScheduleIds = new Set();
-  const cancelledScheduleIds = new Set();
-
-  for (const schedule of schedules) {
-    const appointments = Array.isArray(schedule.Appointments) ? schedule.Appointments : [];
-    const isCurrentSchedule = appointments.some((appointment) => currentIds.has(Number(appointment.id)));
-    for (const appointment of appointments) {
-      if (!isCurrentSchedule) {
-        historicalAppointments.push({ ...appointment, Schedule: schedule });
-      }
-    }
-    if (!isCurrentSchedule && isCompletedSchedule(schedule)) successfulScheduleIds.add(schedule.id);
-    if (!isCurrentSchedule && schedule.Status === "No Show") noShowScheduleIds.add(schedule.id);
-    if (!isCurrentSchedule && schedule.Status === "Cancelled") cancelledScheduleIds.add(schedule.id);
-  }
-
-  const recentCount = (ids) => [...ids].filter((id) => {
-    const date = scheduleDate(schedules.find((item) => item.id === id));
-    return date && daysSince(date, now) <= 365;
-  }).length;
-  const lastContact = [...(conversations || [])]
-    .map((conversation) => new Date(conversation.Time || conversation.createdAt))
-    .filter((date) => !Number.isNaN(date.getTime()))
-    .sort((a, b) => b - a)[0] || null;
-  const completedSessionCount = successfulScheduleIds.size;
-  const recentNoShowCount = recentCount(noShowScheduleIds);
-
-  return {
-    completedSessionCount,
-    recentNoShowCount,
-    recentCancellationCount: recentCount(cancelledScheduleIds),
-    contactAttemptCount: (conversations || []).length,
-    daysSinceLastContact: daysSince(lastContact, now),
-    tone: completedSessionCount >= 3 && recentNoShowCount === 0
-      ? "engaged"
-      : completedSessionCount > 0
-        ? "returning"
-        : "new",
-    historicalAppointments,
-  };
-}
+const POLISH_ALLOWED_TAGS = "p, br, strong, b, em, i, u, ul, ol, li, a";
+const POLISH_FIELD_SPECS = [
+  { key: "polishedSubject", maxLength: 200 },
+  { key: "polishedBody", maxLength: 8000, preserveHtml: true },
+];
 
 function buildPrompt(context) {
   return [
@@ -153,110 +43,90 @@ function buildPrompt(context) {
   ].join("\n");
 }
 
-function cleanModelText(value, maxLength) {
-  return limitText(stripHtml(value).replace(/[\r\n]+/g, " "), maxLength);
+function buildPolishPrompt({ emailType, subjectText, bodyHtml }) {
+  return [
+    "Polish the wording of this research-lab email while preserving its meaning and structure exactly.",
+    "Return JSON only with this exact shape: {\"polishedSubject\":\"\",\"polishedBody\":\"\"}.",
+    "polishedBody must be valid HTML using only these tags: " + POLISH_ALLOWED_TAGS + ".",
+    "Keep every existing <a href=\"...\"> link with its original href attribute completely unchanged; only its visible link text may be lightly reworded.",
+    "Do not add, remove, or change any fact, name, date, time, link URL, phone number, or template placeholder. Only improve grammar, clarity, and tone.",
+    "Do not add a greeting or signature beyond what is already present, and do not add new sentences that introduce new information.",
+    "If the subject does not need improvement, return it unchanged rather than inventing a new one.",
+    "Email type: " + emailType,
+    "Current subject: " + subjectText,
+    "Current body (HTML):",
+    bodyHtml,
+  ].join("\n");
 }
 
-function parseModelJson(content) {
-  const text = String(content || "").trim();
-  try {
-    const parsed = JSON.parse(text);
-    return {
-      personalizationText: cleanModelText(parsed.personalizationText, 600),
-      subjectSuggestion: cleanModelText(parsed.subjectSuggestion, 160),
-    };
-  } catch (error) {
-    throw new AiEmailError("The AI provider returned an invalid draft.", 502, "AI_INVALID_RESPONSE");
+async function verifyFamilyAppointmentScope({ familyId, appointmentIds, labId }) {
+  const family = await model.family.findByPk(familyId, {
+    attributes: ["id", "AssignedLab", "TrainingSet"],
+  });
+  if (!family) throw new AiServiceError("Family not found.", 404, "FAMILY_NOT_FOUND");
+  if (process.env.AI_EMAIL_ALLOW_REAL_DATA !== "true" && !family.TrainingSet) {
+    throw new AiServiceError("AI testing is limited to training-set or de-identified families until real-data processing is approved.", 403, "AI_TRAINING_DATA_ONLY");
   }
+
+  const schedules = await model.schedule.findAll({
+    where: { FK_Family: familyId },
+    include: [{
+      model: model.appointment,
+      include: [{ model: model.study, attributes: ["id", "FK_Lab"] }],
+    }],
+  });
+
+  const requestedIds = appointmentIds.map(Number);
+  const allAppointments = schedules.flatMap((schedule) => schedule.Appointments || []);
+  const currentAppointments = allAppointments.filter((appointment) => requestedIds.includes(Number(appointment.id)));
+  if (currentAppointments.length !== new Set(requestedIds).size) {
+    throw new AiServiceError("One or more appointments do not belong to this family.", 403, "AI_SCOPE_ERROR");
+  }
+
+  const labIds = new Set(currentAppointments.map((appointment) => Number(appointment.Study && appointment.Study.FK_Lab)).filter(Boolean));
+  if (family.AssignedLab && labIds.size > 0 && !labIds.has(Number(family.AssignedLab))) {
+    throw new AiServiceError("This family is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
+  }
+  if (labId && labIds.size > 0 && !labIds.has(Number(labId))) {
+    throw new AiServiceError("This appointment is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
+  }
+
+  return { family };
 }
 
-async function fetchWithTimeout(url, options, timeoutMs) {
-  if (typeof fetch !== "function") {
-    throw new AiEmailError("This Node.js runtime does not provide fetch; upgrade Node.js to use AI email drafts.");
+async function polishEmailDraft({ familyId, appointmentIds, emailType, labId, subject, body }) {
+  if (process.env.AI_EMAIL_ENABLED !== "true") {
+    throw new AiServiceError("AI email drafts are disabled. Set AI_EMAIL_ENABLED=true on the server.", 503, "AI_DISABLED");
   }
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new AiEmailError("The AI provider timed out. Your original email draft is still available.", 504, "AI_TIMEOUT");
-    }
-    throw new AiEmailError("The AI provider could not be reached.", 503, "AI_NETWORK_ERROR");
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-async function callProvider(prompt) {
-  const provider = (process.env.AI_EMAIL_PROVIDER || "groq").toLowerCase();
-  const timeoutMs = Math.max(1000, Number(process.env.AI_EMAIL_TIMEOUT_MS || 15000));
-
-  if (provider === "ollama") {
-    const response = await fetchWithTimeout(
-      process.env.OLLAMA_URL || "http://127.0.0.1:11434/api/chat",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: process.env.OLLAMA_MODEL || "gemma3",
-          stream: false,
-          format: "json",
-          messages: [
-            { role: "system", content: "You return strict JSON and follow safety instructions." },
-            { role: "user", content: prompt },
-          ],
-          options: { temperature: 0.4 },
-        }),
-      },
-      timeoutMs
-    );
-    if (!response.ok) throw new AiEmailError("Ollama returned HTTP " + response.status + ".", 502, "AI_PROVIDER_ERROR");
-    const data = await response.json();
-    return parseModelJson(data.message && data.message.content);
+  if (!String(body || "").trim()) {
+    throw new AiServiceError("There is no draft content to polish yet.", 400, "AI_EMPTY_DRAFT");
   }
 
-  if (provider !== "groq") {
-    throw new AiEmailError("Unsupported AI_EMAIL_PROVIDER: " + provider + ".", 500, "AI_CONFIGURATION_ERROR");
-  }
-  if (!process.env.GROQ_API_KEY) {
-    throw new AiEmailError("AI email drafts are not configured. Set GROQ_API_KEY on the server.", 503, "AI_NOT_CONFIGURED");
-  }
+  await verifyFamilyAppointmentScope({ familyId, appointmentIds, labId });
 
-  const response = await fetchWithTimeout(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + process.env.GROQ_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
-        temperature: 0.4,
-        max_tokens: 250,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: "You return strict JSON and follow safety instructions." },
-          { role: "user", content: prompt },
-        ],
-      }),
-    },
-    timeoutMs
-  );
-  if (response.status === 429) throw new AiEmailError("The AI provider quota was reached. Try again later.", 429, "AI_RATE_LIMITED");
-  if (!response.ok) throw new AiEmailError("Groq returned HTTP " + response.status + ".", 502, "AI_PROVIDER_ERROR");
-  const data = await response.json();
-  return parseModelJson(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content);
+  const prompt = buildPolishPrompt({
+    emailType,
+    subjectText: limitText(String(subject || ""), 200),
+    bodyHtml: limitText(String(body || ""), 6000),
+  });
+  const provider = process.env.AI_EMAIL_PROVIDER || process.env.AI_PROVIDER || "ninfer";
+  const draft = await callProvider(prompt, POLISH_FIELD_SPECS, provider, { maxTokens: 1600 });
+  const providerInfo = currentProviderInfo(provider);
+  return {
+    polishedSubject: draft.polishedSubject,
+    polishedBody: draft.polishedBody,
+    provider: providerInfo.provider,
+    model: providerInfo.model,
+  };
 }
 
 async function loadContext({ familyId, appointmentIds, labId, emailType }) {
   const family = await model.family.findByPk(familyId, {
     attributes: ["id", "AssignedLab", "TrainingSet"],
   });
-  if (!family) throw new AiEmailError("Family not found.", 404, "FAMILY_NOT_FOUND");
+  if (!family) throw new AiServiceError("Family not found.", 404, "FAMILY_NOT_FOUND");
   if (process.env.AI_EMAIL_ALLOW_REAL_DATA !== "true" && !family.TrainingSet) {
-    throw new AiEmailError("AI testing is limited to training-set or de-identified families until real-data processing is approved.", 403, "AI_TRAINING_DATA_ONLY");
+    throw new AiServiceError("AI testing is limited to training-set or de-identified families until real-data processing is approved.", 403, "AI_TRAINING_DATA_ONLY");
   }
 
   const schedules = await model.schedule.findAll({
@@ -282,15 +152,15 @@ async function loadContext({ familyId, appointmentIds, labId, emailType }) {
   );
   const currentAppointments = allAppointments.filter((appointment) => requestedIds.includes(Number(appointment.id)));
   if (currentAppointments.length !== new Set(requestedIds).size) {
-    throw new AiEmailError("One or more appointments do not belong to this family.", 403, "AI_SCOPE_ERROR");
+    throw new AiServiceError("One or more appointments do not belong to this family.", 403, "AI_SCOPE_ERROR");
   }
 
   const labIds = new Set(currentAppointments.map((appointment) => Number(appointment.Study && appointment.Study.FK_Lab)).filter(Boolean));
   if (family.AssignedLab && labIds.size > 0 && !labIds.has(Number(family.AssignedLab))) {
-    throw new AiEmailError("This family is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
+    throw new AiServiceError("This family is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
   }
   if (labId && labIds.size > 0 && !labIds.has(Number(labId))) {
-    throw new AiEmailError("This appointment is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
+    throw new AiServiceError("This appointment is outside the current lab scope.", 403, "AI_SCOPE_ERROR");
   }
 
   const profile = buildParticipationProfile(schedules, conversations, requestedIds);
@@ -313,15 +183,16 @@ async function loadContext({ familyId, appointmentIds, labId, emailType }) {
 
 async function generateEmailPersonalization({ familyId, appointmentIds, emailType, labId }) {
   if (process.env.AI_EMAIL_ENABLED !== "true") {
-    throw new AiEmailError("AI email drafts are disabled. Set AI_EMAIL_ENABLED=true on the server.", 503, "AI_DISABLED");
+    throw new AiServiceError("AI email drafts are disabled. Set AI_EMAIL_ENABLED=true on the server.", 503, "AI_DISABLED");
   }
   if (!ALLOWED_EMAIL_TYPES.has(emailType)) {
-    throw new AiEmailError("AI personalization is available for Introduction, Follow-up, and ThankYou emails.", 400, "AI_EMAIL_TYPE_NOT_SUPPORTED");
+    throw new AiServiceError("AI personalization is available for Introduction, Follow-up, and ThankYou emails.", 400, "AI_EMAIL_TYPE_NOT_SUPPORTED");
   }
 
   const loaded = await loadContext({ familyId, appointmentIds, labId, emailType });
-  const draft = await callProvider(buildPrompt(loaded.context));
-  const provider = (process.env.AI_EMAIL_PROVIDER || "groq").toLowerCase();
+  const provider = process.env.AI_EMAIL_PROVIDER || process.env.AI_PROVIDER || "ninfer";
+  const draft = await callProvider(buildPrompt(loaded.context), FIELD_SPECS, provider);
+  const providerInfo = currentProviderInfo(provider);
   return {
     ...draft,
     tone: loaded.context.tone,
@@ -329,9 +200,8 @@ async function generateEmailPersonalization({ familyId, appointmentIds, emailTyp
       recentSimilarStudy: Boolean(loaded.similarStudy),
       repeatParticipant: loaded.context.completedSessionCount > 0,
     },
-    provider,
-    model: process.env[provider === "ollama" ? "OLLAMA_MODEL" : "GROQ_MODEL"] ||
-      (provider === "ollama" ? "gemma3" : "openai/gpt-oss-20b"),
+    provider: providerInfo.provider,
+    model: providerInfo.model,
   };
 }
 
@@ -342,4 +212,5 @@ module.exports = {
   findSimilarStudy,
   meaningfulWords,
   generateEmailPersonalization,
+  polishEmailDraft,
 };

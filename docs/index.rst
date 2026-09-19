@@ -18,4 +18,5 @@ This is an open source system to manage participant database, study, study sched
    Frontend
    Email Template
    AI_Email_Personalization
+   AI_Family_Participation_Summary
    Role-based Rules

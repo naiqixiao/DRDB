@@ -4,58 +4,85 @@ AI-assisted Email Personalization
 Purpose
 -------
 
-DRDB includes an optional AI assistant for creating short, human-reviewed
-personalization suggestions in the existing email composer. The assistant does
-not send email automatically and does not replace the existing study templates,
-appointment details, transportation instructions, or Gmail delivery flow.
+DRDB includes two optional, human-reviewed AI assistants in the existing
+email composer. Neither sends email automatically, and neither replaces the
+existing study templates, appointment details, transportation instructions,
+or Gmail delivery flow. Every suggestion is opt-in: staff choose whether and
+how to use it, and nothing is applied to the draft without an explicit click.
 
-The first version is available for these email types:
+* **Suggest personalization** — generates a short additional paragraph (and
+  optional subject) from the family's participation history. Available for
+  Introduction, Follow-up, and ThankYou emails only; Confirmation,
+  ScheduleUpdate, and Reminder emails remain fully deterministic because they
+  contain important scheduling and logistics information.
+* **Polish with AI** — rewrites the wording of whatever is currently in the
+  subject/body fields (including staff edits), while preserving every fact,
+  link, and placeholder. Available for any email type, since it only rewords
+  what is already there rather than adding new claims.
 
-* Introduction
-* Follow-up
-* ThankYou
-
-Confirmation, ScheduleUpdate, and Reminder emails remain deterministic because
-they contain important scheduling and logistics information.
+Both show a preview card the user must explicitly accept before it changes
+the draft; dismissing or ignoring the preview leaves the original draft
+untouched.
 
 Provider configuration
-----------------------
+-----------------------
 
-The default provider is Groq. The implementation also supports a local Ollama
-endpoint.
+AI email personalization shares its provider configuration with every AI
+feature in DRDB (see AI_Family_Participation_Summary). The default and
+recommended provider is the lab's local NInfer server (an OpenAI-compatible
+endpoint running on the local network), so participant context never leaves
+the network. Ollama and the Groq cloud provider remain available as
+alternatives, mainly for testing.
 
-Groq is suitable for testing with training-set or de-identified data:
-
-::
-
-   AI_EMAIL_ENABLED=true
-   AI_EMAIL_PROVIDER=groq
-   AI_EMAIL_ALLOW_REAL_DATA=false
-   AI_EMAIL_TIMEOUT_MS=15000
-   GROQ_API_KEY=replace-with-your-key
-   GROQ_MODEL=openai/gpt-oss-20b
-
-The API key must be configured in server/.env and must never be placed in
-the Vue client or committed to Git.
-
-For local inference with Ollama:
+Local inference with NInfer (default/priority):
 
 ::
 
    AI_EMAIL_ENABLED=true
-   AI_EMAIL_PROVIDER=ollama
+   AI_PROVIDER=ninfer
+   AI_EMAIL_ALLOW_REAL_DATA=true
+   NINFER_URL=http://<host>:8080/v1/chat/completions
+   NINFER_MODEL=Qwen3.8-27B
+   NINFER_ENABLE_THINKING=false
+
+NINFER_ENABLE_THINKING is false by default; this feature only needs a short,
+direct JSON reply, not the model's chain-of-thought/reasoning output.
+
+For local inference with Ollama instead:
+
+::
+
+   AI_EMAIL_ENABLED=true
+   AI_PROVIDER=ollama
    AI_EMAIL_ALLOW_REAL_DATA=true
    OLLAMA_URL=http://127.0.0.1:11434/api/chat
    OLLAMA_MODEL=gemma3
 
+Groq is suitable for testing with training-set or de-identified data only:
+
+::
+
+   AI_EMAIL_ENABLED=true
+   AI_PROVIDER=groq
+   AI_EMAIL_ALLOW_REAL_DATA=false
+   GROQ_API_KEY=replace-with-your-key
+   GROQ_MODEL=openai/gpt-oss-20b
+
+The Groq API key must be configured in server/.env and must never be placed
+in the Vue client or committed to Git.
+
+Set AI_EMAIL_PROVIDER instead of AI_PROVIDER to use a different provider for
+this feature only, without changing the provider used by other AI features.
+
 The AI_EMAIL_ALLOW_REAL_DATA setting is false by default. When false,
 the endpoint accepts only families marked as training-set records. Enable it
 for real participant data only after the lab has approved the selected
-provider and its data-processing terms. Ollama is the preferred option when
-participant context must remain on the DRDB machine.
+provider and its data-processing terms.
 
 User workflow
 -------------
+
+Suggest personalization:
 
 1. Open an Introduction, Follow-up, or ThankYou email in the existing composer.
 2. Select Suggest personalization.
@@ -63,14 +90,26 @@ User workflow
 4. Select Insert paragraph, Use subject, or Dismiss.
 5. Edit the email as needed and send it through the existing Gmail workflow.
 
+Polish with AI:
+
+1. Draft or edit the email body/subject as usual, in any email type.
+2. Select Polish with AI.
+3. Review the polished preview (rendered, not raw HTML) alongside a
+   suggested subject if one was returned.
+4. Select Replace draft to overwrite the current subject/body, or Discard to
+   keep the original untouched.
+5. Edit the email as needed and send it through the existing Gmail workflow.
+
 The original email body remains unchanged if the provider is disabled,
-unconfigured, rate-limited, unreachable, times out, or returns invalid JSON.
+unconfigured, rate-limited, unreachable, times out, or returns invalid JSON,
+and in every case the user must explicitly accept the suggestion before it
+touches the draft.
 
 API
 ---
 
-Endpoint
-~~~~~~~~
+Suggest personalization endpoint
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 POST /api/ai/email-personalization
 
@@ -107,6 +146,54 @@ Supported error codes include AI_DISABLED, AI_NOT_CONFIGURED,
 AI_TRAINING_DATA_ONLY, AI_SCOPE_ERROR, AI_RATE_LIMITED, AI_TIMEOUT, and
 AI_INVALID_RESPONSE.
 
+Polish with AI endpoint
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+POST /api/ai/email-polish
+
+Unlike the personalization endpoint, this one sends the actual current
+subject and HTML body — whatever the user has typed or left from the
+template, which may include the family's name, child's name, appointment
+details, and links — to the configured AI provider. It is gated by the same
+family/appointment/lab scope checks and AI_EMAIL_ALLOW_REAL_DATA flag as
+personalization, but because it forwards real drafted content rather than
+aggregate statistics, the local NInfer/Ollama providers are strongly
+preferred for it; reserve Groq for training-set/de-identified testing.
+
+Request:
+
+::
+
+   {
+     "familyId": 123,
+     "appointmentIds": [456],
+     "emailType": "Introduction",
+     "subject": "An eligible study for Alex",
+     "body": "<p>Dear Alex's caregiver,</p><p>We would love to have...</p>"
+   }
+
+Successful response:
+
+::
+
+   {
+     "polishedSubject": "An eligible study for Alex",
+     "polishedBody": "<p>Dear Alex's caregiver,</p><p>We would be delighted to have...</p>",
+     "provider": "ninfer",
+     "model": "Qwen3.8-27B"
+   }
+
+polishedBody is restricted to a small allow-list of tags (p, br, strong, b,
+em, i, u, ul, ol, li, a) and every link href must be left unchanged by the
+model. The client re-sanitizes the returned HTML with DOMPurify (using the
+same allow-list) before rendering the preview or writing it into the rich
+text editor — the server-side prompt constraint is not treated as a
+sufficient safeguard on its own.
+
+Supported error codes include AI_DISABLED, AI_NOT_CONFIGURED,
+AI_TRAINING_DATA_ONLY, AI_SCOPE_ERROR, AI_EMPTY_DRAFT, AI_RATE_LIMITED,
+AI_TIMEOUT, and AI_INVALID_RESPONSE.
+
 Context and personalization rules
 ----------------------------------
 
@@ -134,14 +221,31 @@ facts, make medical or developmental inferences, mention internal notes, use
 pressure or guilt, include exact dates, or include names and contact details.
 The client escapes generated text before inserting it into the HTML editor.
 
+Polishing works differently: it is explicitly given the current subject and
+body (so it necessarily sees whatever real content is already in them) and is
+instructed to change wording only — never add, remove, or alter a fact, name,
+date, time, link URL, phone number, or template placeholder, and never add a
+greeting/signature or new information beyond what's already there. This is an
+instruction to the model, not a guarantee; that is why the preview-before-
+replace step exists, so staff can catch anything altered incorrectly before
+it reaches the draft.
+
 Security and privacy
 --------------------
 
 * AI requests are authenticated and checked against the family and current lab
   scope.
 * Provider credentials are server-side environment variables.
-* AI output is never sent automatically.
+* AI output is never sent automatically; both features require an explicit
+  user action (Insert/Use subject, or Replace draft) before touching the
+  email draft, and sending the email is still a separate, manual step.
 * Prompts and generated suggestions are not persisted in a new DRDB table.
+* Suggest personalization only ever sends aggregate participation statistics
+  to the provider, never conversation text or the drafted email itself.
+  Polish with AI sends the actual current draft, which may contain the
+  family's and child's names and appointment details — treat it as real
+  participant data for provider-choice purposes even when personalization
+  alone would be safe to test on Groq.
 * Cloud testing should use training-set or de-identified records.
 * Do not enable real-data processing until the lab approves the provider,
   retention, transfer, and consent requirements.
@@ -170,20 +274,31 @@ Build the client:
    cd client
    npm run build
 
-The tests cover meaningful-term extraction, recent same-type study matching,
-new/returning/engaged tone selection, no-show handling, and exclusion of the
-current appointment from historical participation.
+The aiEmailService tests cover meaningful-term extraction, recent same-type
+study matching, new/returning/engaged tone selection, no-show handling, and
+exclusion of the current appointment from historical participation. The
+aiProvider tests cover strict-JSON parsing, enum fallback for out-of-set
+values, and that preserveHtml fields (used by polishedBody) keep their markup
+instead of being stripped like every other field.
 
 Implementation locations
 ------------------------
 
-* server/api/services/aiEmailService.js contains provider calls, context
-  construction, similarity scoring, tone derivation, prompt rules, and output
-  validation.
+* server/api/services/aiProvider.js contains the shared provider client
+  (NInfer, Ollama, Groq), timeout handling, and strict-JSON output validation
+  used by every AI feature.
+* server/api/services/participationProfile.js contains the shared scheduling
+  history aggregation (tone, completed/no-show/cancelled counts, similar-study
+  matching) used by every AI feature.
+* server/api/services/aiEmailService.js contains the email-specific context
+  construction and prompt rules for this feature.
 * server/api/controllers/ai.js and server/api/routes/ai.js expose the
   authenticated backend endpoint.
 * client/src/services/ai.js is the frontend API wrapper.
 * client/src/components/emailComponent.vue contains the opt-in controls,
-  preview, acceptance, dismissal, and safe HTML insertion.
-* server/__tests__/aiEmailService.test.js contains the isolated unit tests.
+  preview, acceptance, dismissal, and safe HTML insertion for both features.
+  It sanitizes the polished HTML preview with the dompurify package before
+  rendering it or writing it into the rich text editor.
+* server/__tests__/aiEmailService.test.js and
+  server/__tests__/aiProvider.test.js contain the isolated unit tests.
 

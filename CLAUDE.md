@@ -80,6 +80,7 @@ Timezone resolution order: `Lab.Timezone` > `SystemSetting.GeneralTimezone` > `p
 /api/systemSetting     — system-wide settings
 /api/emailTest         — email diagnostic tool
 /api/calendarTest      — calendar diagnostic tool
+/api/ai                — AI-assisted email personalization + family participation summary
 ```
 
 ### Key Data Relationships
@@ -130,7 +131,7 @@ Timezone resolution order: `Lab.Timezone` > `SystemSetting.GeneralTimezone` > `p
 
 ## Key Environment Variables (server/.env)
 
-There is no `.env.example` file. Create `server/.env` manually with the variables below. The seeder (see below) reads `TIMEZONE` (with `TZ` as fallback).
+See `server/.env.example` for the full list with defaults. Core variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -146,6 +147,14 @@ There is no `.env.example` file. Create `server/.env` manually with the variable
 | `DB_POOL_MAX` | `'40'` | DB connection pool max |
 | `FRONTEND_URL` | `'example URL'` | CORS allowed origins (comma-separated) |
 | `port` | `3000` | Server listen port |
+
+AI feature variables (`AI_PROVIDER`, `NINFER_URL`/`NINFER_MODEL`, `AI_EMAIL_ENABLED`,
+`AI_FAMILY_SUMMARY_ENABLED`, etc.) are documented separately in
+`docs/AI_Email_Personalization.rst` and `docs/AI_Family_Participation_Summary.rst`,
+since they're optional and shared across `server/api/services/aiProvider.js`,
+`aiEmailService.js`, and `aiFamilySummaryService.js`. In Docker deployments these
+are set in the root `.env` (not `server/.env`) and passed through by
+`docker-compose.yml`'s `backend` service.
 
 ## Testing
 

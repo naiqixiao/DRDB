@@ -38,6 +38,43 @@
       </div>
     </div>
 
+    <div v-if="canPolish" class="ai-personalization-bar">
+      <div class="ai-personalization-actions">
+        <v-btn
+          size="small"
+          variant="tonal"
+          color="secondary"
+          prepend-icon="mdi-creation"
+          :loading="polishLoading"
+          @click="generatePolish"
+        >
+          Polish with AI
+        </v-btn>
+        <v-chip size="small" variant="text" prepend-icon="mdi-shield-check-outline">
+          Rewrites wording only — review before replacing
+        </v-chip>
+      </div>
+      <v-alert v-if="polishError" type="warning" variant="tonal" density="compact" class="mt-2">
+        {{ polishError }}
+      </v-alert>
+      <v-card v-if="polishDraft" variant="outlined" class="ai-personalization-card mt-2">
+        <div class="ai-personalization-label">
+          <v-icon size="16">mdi-creation</v-icon>
+          Polished preview
+        </div>
+        <p v-if="polishDraft.polishedSubject && polishDraft.polishedSubject !== emailSubject" class="ai-subject-suggestion">
+          Suggested subject: {{ polishDraft.polishedSubject }}
+        </p>
+        <div class="ai-polish-preview" v-html="sanitizedPolishedBody"></div>
+        <div class="ai-personalization-card-actions">
+          <v-btn size="small" color="primary" variant="flat" @click="acceptPolish">
+            Replace draft
+          </v-btn>
+          <v-btn size="small" variant="text" @click="dismissPolish">Discard</v-btn>
+        </div>
+      </v-card>
+    </div>
+
     <div v-if="canPersonalize" class="ai-personalization-bar">
       <div class="ai-personalization-actions">
         <v-btn
@@ -98,8 +135,12 @@ import email from "@/services/email";
 import family from "@/services/family";
 import ai from "@/services/ai";
 import moment from "moment";
+import DOMPurify from "dompurify";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+
+const POLISH_ALLOWED_TAGS = ["p", "br", "strong", "b", "em", "i", "u", "ul", "ol", "li", "a"];
+const POLISH_ALLOWED_ATTR = ["href", "target", "rel"];
 
 import { useMainStore } from "@/stores/mainStore";
 
@@ -135,7 +176,9 @@ export default {
       personalizationLoading: false,
       personalizationError: "",
       personalizationDraft: null,
-
+      polishLoading: false,
+      polishError: "",
+      polishDraft: null,
     };
   },
   methods: {
@@ -166,6 +209,7 @@ export default {
 
     initializeEmail() {
       this.resetPersonalization();
+      this.resetPolish();
       this.emailBody = this.generateEmailBody();
 
       switch (this.emailType) {
@@ -199,6 +243,12 @@ export default {
       this.personalizationLoading = false;
       this.personalizationError = "";
       this.personalizationDraft = null;
+    },
+
+    resetPolish() {
+      this.polishLoading = false;
+      this.polishError = "";
+      this.polishDraft = null;
     },
 
     async generatePersonalization() {
@@ -247,6 +297,47 @@ export default {
     dismissPersonalization() {
       this.personalizationDraft = null;
       this.personalizationError = "";
+    },
+
+    async generatePolish() {
+      this.polishLoading = true;
+      this.polishError = "";
+      this.polishDraft = null;
+      try {
+        const appointmentIds = this.appointments.map((appointment) => appointment.id).filter(Boolean);
+        const result = await ai.polishEmail({
+          familyId: this.familyInfo.id,
+          appointmentIds,
+          emailType: this.emailType,
+          subject: this.emailSubject,
+          body: this.emailBody,
+        });
+        if (!result.data.polishedBody) {
+          this.polishError = "The AI provider did not return a polished draft. Your current draft is unchanged.";
+        } else {
+          this.polishDraft = result.data;
+        }
+      } catch (error) {
+        this.polishError = error.response?.data?.error ||
+          "Polishing is unavailable. Your current draft is unchanged.";
+      } finally {
+        this.polishLoading = false;
+      }
+    },
+
+    acceptPolish() {
+      if (!this.polishDraft?.polishedBody) return;
+      this.emailBody = this.sanitizedPolishedBody;
+      if (this.polishDraft.polishedSubject) {
+        this.emailSubject = this.polishDraft.polishedSubject;
+      }
+      this.polishDraft = null;
+      this.polishError = "Polished draft applied. Please review it before sending.";
+    },
+
+    dismissPolish() {
+      this.polishDraft = null;
+      this.polishError = "";
     },
 
     escapeHtml(value) {
@@ -544,6 +635,18 @@ export default {
         this.appointments.length > 0 &&
         Boolean(this.familyInfo.id);
     },
+    canPolish() {
+      return this.appointments.length > 0 &&
+        Boolean(this.familyInfo.id) &&
+        Boolean(this.emailBody && this.emailBody.trim());
+    },
+    sanitizedPolishedBody() {
+      if (!this.polishDraft?.polishedBody) return "";
+      return DOMPurify.sanitize(this.polishDraft.polishedBody, {
+        ALLOWED_TAGS: POLISH_ALLOWED_TAGS,
+        ALLOWED_ATTR: POLISH_ALLOWED_ATTR,
+      });
+    },
   },
   watch: {
     dialog(val) {
@@ -553,6 +656,7 @@ export default {
         this.emailBody = "";
         this.emailSubject = "";
         this.resetPersonalization();
+        this.resetPolish();
       }
     },
     emailType(val) {
@@ -562,6 +666,7 @@ export default {
         this.emailBody = "";
         this.emailSubject = "";
         this.resetPersonalization();
+        this.resetPolish();
       }
     },
     familyInfo(newVal) {
@@ -634,6 +739,23 @@ export default {
   margin: 0 0 10px;
   color: #64748b;
   font-size: 0.85rem;
+}
+
+.ai-polish-preview {
+  margin: 10px 0;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  color: #1e293b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ai-polish-preview p {
+  margin: 0 0 0.75em 0;
 }
 
 /* Header section (TO / SUBJECT) */

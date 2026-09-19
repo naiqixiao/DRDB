@@ -8,4 +8,18 @@ export default {
       emailType,
     });
   },
+  polishEmail({ familyId, appointmentIds, emailType, subject, body }) {
+    return api().post("ai/email-polish", {
+      familyId,
+      appointmentIds,
+      emailType,
+      subject,
+      body,
+    });
+  },
+  familySummary({ familyId }) {
+    return api().post("ai/family-summary", {
+      familyId,
+    });
+  },
 };
