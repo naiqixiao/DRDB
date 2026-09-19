@@ -42,12 +42,16 @@ services:
       TZ: ${TIMEZONE:-America/Toronto}
       STATS_OUTPUT_PATH: /app/data/stats
       # Shared AI provider config (used by every AI feature unless a
-      # feature-level *_PROVIDER override is set below).
-      AI_PROVIDER: ${AI_PROVIDER:-ninfer}
+      # feature-level *_PROVIDER override is set below). Defaults point at
+      # the lab's NInfer server; override LOCAL_LLM_* for any other
+      # OpenAI-compatible endpoint.
+      AI_PROVIDER: ${AI_PROVIDER:-local}
       AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-15000}
-      NINFER_URL: ${NINFER_URL:-http://130.113.218.247:8080/v1/chat/completions}
-      NINFER_MODEL: ${NINFER_MODEL:-Qwen3.8-27B}
-      NINFER_ENABLE_THINKING: ${NINFER_ENABLE_THINKING:-false}
+      LOCAL_LLM_BASE_URL: ${LOCAL_LLM_BASE_URL:-http://130.113.218.247:8080/v1}
+      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-Qwen3.8-27B}
+      LOCAL_LLM_API_KEY: ${LOCAL_LLM_API_KEY:-}
+      LOCAL_LLM_JSON_MODE: ${LOCAL_LLM_JSON_MODE:-false}
+      LOCAL_LLM_ENABLE_THINKING: ${LOCAL_LLM_ENABLE_THINKING:-false}
       OLLAMA_URL: ${OLLAMA_URL:-http://127.0.0.1:11434/api/chat}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3}
       GROQ_API_KEY: ${GROQ_API_KEY:-}

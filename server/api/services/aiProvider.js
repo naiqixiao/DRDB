@@ -79,45 +79,79 @@ function resolveTimeoutMs() {
 }
 
 function resolveProvider(explicitProvider) {
-  return (explicitProvider || process.env.AI_PROVIDER || "ninfer").toLowerCase();
+  return (explicitProvider || process.env.AI_PROVIDER || "local").toLowerCase();
+}
+
+function openAICompatibleUrl(baseUrl) {
+  return String(baseUrl || "").replace(/\/+$/, "") + "/chat/completions";
+}
+
+async function callOpenAICompatibleProvider({ baseUrl, apiKey, modelName, messages, timeoutMs, providerName, jsonMode, maxTokens, extraBody, fieldSpecs }) {
+  if (!baseUrl || !modelName) {
+    throw new AiServiceError(
+      providerName + " is not configured. Set its base URL and model name on the server.",
+      503,
+      "AI_NOT_CONFIGURED"
+    );
+  }
+
+  const headers = { "Content-Type": "application/json" };
+  if (apiKey) headers.Authorization = "Bearer " + apiKey;
+  const body = {
+    model: modelName,
+    temperature: 0.4,
+    max_tokens: maxTokens,
+    messages,
+    ...(extraBody || {}),
+  };
+  if (jsonMode) body.response_format = { type: "json_object" };
+
+  const response = await fetchWithTimeout(
+    openAICompatibleUrl(baseUrl),
+    { method: "POST", headers, body: JSON.stringify(body) },
+    timeoutMs
+  );
+  if (response.status === 429) {
+    throw new AiServiceError(providerName + " is busy or rate-limited. Try again later.", 429, "AI_RATE_LIMITED");
+  }
+  if (!response.ok) {
+    throw new AiServiceError(providerName + " returned HTTP " + response.status + ".", 502, "AI_PROVIDER_ERROR");
+  }
+  const data = await response.json();
+  return parseModelJson(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content, fieldSpecs);
 }
 
 /**
  * Calls the configured LLM provider with a strict-JSON prompt and parses the
- * response against fieldSpecs. Supported providers:
- *  - ninfer: local, OpenAI-compatible inference server (default/priority)
+ * response against fieldSpecs. `messages` is a full chat messages array
+ * (system + user); callers own their own system prompt. Supported providers:
+ *  - local:  lab-hosted, OpenAI-compatible endpoint (default/priority) —
+ *            defaults to the lab's NInfer server so it works out of the box,
+ *            but LOCAL_LLM_* env vars can point it at any OpenAI-compatible
+ *            server.
  *  - ollama: local Ollama chat endpoint
  *  - groq:   cloud provider, kept available for training-set testing
  */
-async function callProvider(prompt, fieldSpecs, explicitProvider, options = {}) {
+async function callProvider(messages, fieldSpecs, explicitProvider, options = {}) {
   const provider = resolveProvider(explicitProvider);
   const timeoutMs = resolveTimeoutMs();
   const maxTokens = options.maxTokens || 400;
-  const systemMessage = { role: "system", content: "You return strict JSON and follow safety instructions." };
-  const userMessage = { role: "user", content: prompt };
 
-  if (provider === "ninfer") {
-    const url = process.env.NINFER_URL || "http://130.113.218.247:8080/v1/chat/completions";
-    const enableThinking = process.env.NINFER_ENABLE_THINKING === "true";
-    const response = await fetchWithTimeout(
-      url,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: process.env.NINFER_MODEL || "Qwen3.8-27B",
-          temperature: 0.4,
-          max_tokens: maxTokens,
-          response_format: { type: "json_object" },
-          chat_template_kwargs: { enable_thinking: enableThinking },
-          messages: [systemMessage, userMessage],
-        }),
-      },
-      timeoutMs
-    );
-    if (!response.ok) throw new AiServiceError("The local AI server returned HTTP " + response.status + ".", 502, "AI_PROVIDER_ERROR");
-    const data = await response.json();
-    return parseModelJson(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content, fieldSpecs);
+  if (provider === "local") {
+    return callOpenAICompatibleProvider({
+      baseUrl: process.env.LOCAL_LLM_BASE_URL || "http://130.113.218.247:8080/v1",
+      apiKey: process.env.LOCAL_LLM_API_KEY,
+      modelName: process.env.LOCAL_LLM_MODEL || "Qwen3.8-27B",
+      messages,
+      timeoutMs,
+      providerName: "Local LLM",
+      jsonMode: process.env.LOCAL_LLM_JSON_MODE === "true",
+      maxTokens,
+      // Qwen3-style servers (e.g. vLLM) accept this to disable chain-of-thought
+      // output; harmless extra field for servers that don't recognize it.
+      extraBody: { chat_template_kwargs: { enable_thinking: process.env.LOCAL_LLM_ENABLE_THINKING === "true" } },
+      fieldSpecs,
+    });
   }
 
   if (provider === "ollama") {
@@ -130,7 +164,7 @@ async function callProvider(prompt, fieldSpecs, explicitProvider, options = {}) 
           model: process.env.OLLAMA_MODEL || "gemma3",
           stream: false,
           format: "json",
-          messages: [systemMessage, userMessage],
+          messages,
           options: { temperature: 0.4, num_predict: maxTokens },
         }),
       },
@@ -148,35 +182,27 @@ async function callProvider(prompt, fieldSpecs, explicitProvider, options = {}) 
     throw new AiServiceError("AI features are not configured. Set GROQ_API_KEY on the server.", 503, "AI_NOT_CONFIGURED");
   }
 
-  const response = await fetchWithTimeout(
-    "https://api.groq.com/openai/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + process.env.GROQ_API_KEY,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
-        temperature: 0.4,
-        max_tokens: maxTokens,
-        response_format: { type: "json_object" },
-        messages: [systemMessage, userMessage],
-      }),
-    },
-    timeoutMs
-  );
-  if (response.status === 429) throw new AiServiceError("The AI provider quota was reached. Try again later.", 429, "AI_RATE_LIMITED");
-  if (!response.ok) throw new AiServiceError("Groq returned HTTP " + response.status + ".", 502, "AI_PROVIDER_ERROR");
-  const data = await response.json();
-  return parseModelJson(data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content, fieldSpecs);
+  return callOpenAICompatibleProvider({
+    baseUrl: "https://api.groq.com/openai/v1",
+    apiKey: process.env.GROQ_API_KEY,
+    modelName: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+    messages,
+    timeoutMs,
+    providerName: "Groq",
+    jsonMode: true,
+    maxTokens,
+    fieldSpecs,
+  });
 }
 
 function currentProviderInfo(explicitProvider) {
   const provider = resolveProvider(explicitProvider);
-  const modelEnvKey = provider === "ollama" ? "OLLAMA_MODEL" : provider === "groq" ? "GROQ_MODEL" : "NINFER_MODEL";
-  const modelDefault = provider === "ollama" ? "gemma3" : provider === "groq" ? "openai/gpt-oss-20b" : "Qwen3.8-27B";
-  return { provider, model: process.env[modelEnvKey] || modelDefault };
+  const modelEnvByProvider = { local: "LOCAL_LLM_MODEL", ollama: "OLLAMA_MODEL", groq: "GROQ_MODEL" };
+  const defaultModelByProvider = { local: "Qwen3.8-27B", ollama: "gemma3", groq: "openai/gpt-oss-20b" };
+  return {
+    provider,
+    model: process.env[modelEnvByProvider[provider]] || defaultModelByProvider[provider] || "unknown",
+  };
 }
 
 module.exports = {

@@ -171,11 +171,11 @@ explicitly enabled after the lab approves the provider's data-processing
 terms. Every AI feature shares one provider config:
 
 ```env
-AI_PROVIDER=ninfer               # default/recommended: local NInfer server
+AI_PROVIDER=local                # default/recommended: lab's OpenAI-compatible NInfer server
 AI_TIMEOUT_MS=15000
-NINFER_URL=http://<host>:8080/v1/chat/completions
-NINFER_MODEL=Qwen3.8-27B
-NINFER_ENABLE_THINKING=false
+LOCAL_LLM_BASE_URL=http://<host>:8080/v1
+LOCAL_LLM_MODEL=Qwen3.8-27B
+LOCAL_LLM_ENABLE_THINKING=false
 
 AI_EMAIL_ENABLED=false
 AI_EMAIL_ALLOW_REAL_DATA=false
@@ -183,7 +183,7 @@ AI_EMAIL_ALLOW_REAL_DATA=false
 AI_FAMILY_SUMMARY_ENABLED=false
 AI_FAMILY_SUMMARY_ALLOW_REAL_DATA=false
 
-# For Ollama or Groq instead of NInfer, see server/.env.example.
+# For Ollama or Groq instead of the local NInfer server, see server/.env.example.
 ```
 
 Set `AI_EMAIL_PROVIDER` or `AI_FAMILY_SUMMARY_PROVIDER` to override the
@@ -215,7 +215,7 @@ backend.
    `https://` URL when a TLS reverse proxy is in front of DRDB).
 
    > [!NOTE]
-   > The AI feature variables (`AI_PROVIDER`, `NINFER_URL`, `AI_EMAIL_ENABLED`,
+   > The AI feature variables (`AI_PROVIDER`, `LOCAL_LLM_BASE_URL`, `AI_EMAIL_ENABLED`,
    > `AI_FAMILY_SUMMARY_ENABLED`, etc.) are passed through to the `backend`
    > service in `docker-compose.yml` the same way `DB_PASS`/`JWT_KEY` are —
    > set them in this root `.env`, not `server/.env` (the backend container

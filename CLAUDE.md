@@ -148,7 +148,7 @@ See `server/.env.example` for the full list with defaults. Core variables:
 | `FRONTEND_URL` | `'example URL'` | CORS allowed origins (comma-separated) |
 | `port` | `3000` | Server listen port |
 
-AI feature variables (`AI_PROVIDER`, `NINFER_URL`/`NINFER_MODEL`, `AI_EMAIL_ENABLED`,
+AI feature variables (`AI_PROVIDER`, `LOCAL_LLM_BASE_URL`/`LOCAL_LLM_MODEL`, `AI_EMAIL_ENABLED`,
 `AI_FAMILY_SUMMARY_ENABLED`, etc.) are documented separately in
 `docs/AI_Email_Personalization.rst` and `docs/AI_Family_Participation_Summary.rst`,
 since they're optional and shared across `server/api/services/aiProvider.js`,

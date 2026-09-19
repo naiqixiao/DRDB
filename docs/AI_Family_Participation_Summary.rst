@@ -29,17 +29,17 @@ Provider configuration
 
 This feature shares its provider configuration with AI email personalization
 (see AI_Email_Personalization). The default and recommended provider is the
-lab's local NInfer server, since a family summary aggregates more history
-than a single email draft:
+lab's OpenAI-compatible NInfer server, since a family summary aggregates more
+history than a single email draft:
 
 ::
 
    AI_FAMILY_SUMMARY_ENABLED=true
-   AI_PROVIDER=ninfer
+   AI_PROVIDER=local
    AI_FAMILY_SUMMARY_ALLOW_REAL_DATA=true
-   NINFER_URL=http://<host>:8080/v1/chat/completions
-   NINFER_MODEL=Qwen3.8-27B
-   NINFER_ENABLE_THINKING=false
+   LOCAL_LLM_BASE_URL=http://<host>:8080/v1
+   LOCAL_LLM_MODEL=Qwen3.8-27B
+   LOCAL_LLM_ENABLE_THINKING=false
 
 Set AI_FAMILY_SUMMARY_PROVIDER instead of AI_PROVIDER to use a different
 provider for this feature only. Ollama and Groq are supported the same way
@@ -109,7 +109,7 @@ Successful response:
        "distinctStudyCount": 2,
        "studyTypes": ["Behavioural"]
      },
-     "provider": "ninfer",
+     "provider": "local",
      "model": "Qwen3.8-27B"
    }
 
@@ -146,7 +146,7 @@ Security and privacy
 * Provider credentials/URLs are server-side environment variables.
 * AI output is never persisted and never triggers an automatic action.
 * Cloud (Groq) testing should use training-set or de-identified records; the
-  local NInfer/Ollama providers are preferred for real participant data.
+  local/Ollama providers are preferred for real participant data.
 
 Testing and verification
 -------------------------

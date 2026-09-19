@@ -29,24 +29,31 @@ Provider configuration
 
 AI email personalization shares its provider configuration with every AI
 feature in DRDB (see AI_Family_Participation_Summary). The default and
-recommended provider is the lab's local NInfer server (an OpenAI-compatible
-endpoint running on the local network), so participant context never leaves
-the network. Ollama and the Groq cloud provider remain available as
-alternatives, mainly for testing.
+recommended provider is a lab-hosted OpenAI-compatible endpoint (the
+LOCAL_LLM_* variables below default to the lab's NInfer server, so it works
+out of the box on the lab network). Ollama and the Groq cloud provider remain
+available as alternatives, mainly for testing.
 
-Local inference with NInfer (default/priority):
+To point the local provider at a different OpenAI-compatible endpoint, first
+obtain the model identifier from ``/v1/models`` while connected to that
+network or VPN, then configure the server:
 
 ::
 
    AI_EMAIL_ENABLED=true
-   AI_PROVIDER=ninfer
+   AI_PROVIDER=local
    AI_EMAIL_ALLOW_REAL_DATA=true
-   NINFER_URL=http://<host>:8080/v1/chat/completions
-   NINFER_MODEL=Qwen3.8-27B
-   NINFER_ENABLE_THINKING=false
+   LOCAL_LLM_BASE_URL=http://<host>:8080/v1
+   LOCAL_LLM_MODEL=replace-with-model-id-from-v1-models
+   LOCAL_LLM_JSON_MODE=false
+   LOCAL_LLM_ENABLE_THINKING=false
 
-NINFER_ENABLE_THINKING is false by default; this feature only needs a short,
-direct JSON reply, not the model's chain-of-thought/reasoning output.
+``LOCAL_LLM_API_KEY`` is optional and should be set only when the endpoint
+requires bearer authentication. Enable ``LOCAL_LLM_JSON_MODE`` only after
+confirming that the server accepts ``response_format`` with ``json_object``.
+``LOCAL_LLM_ENABLE_THINKING`` is false by default; this feature only needs a
+short, direct JSON reply, not a Qwen3-style model's chain-of-thought/reasoning
+output (enable it only if a different local model requires it).
 
 For local inference with Ollama instead:
 
@@ -78,6 +85,11 @@ The AI_EMAIL_ALLOW_REAL_DATA setting is false by default. When false,
 the endpoint accepts only families marked as training-set records. Enable it
 for real participant data only after the lab has approved the selected
 provider and its data-processing terms.
+
+The lab endpoint currently uses plain HTTP. Deployments sending participant
+context should reach it only over a trusted private network or VPN, or place it
+behind HTTPS with access control. OpenAI API compatibility does not itself
+provide encryption or authentication.
 
 User workflow
 -------------
@@ -157,8 +169,8 @@ template, which may include the family's name, child's name, appointment
 details, and links — to the configured AI provider. It is gated by the same
 family/appointment/lab scope checks and AI_EMAIL_ALLOW_REAL_DATA flag as
 personalization, but because it forwards real drafted content rather than
-aggregate statistics, the local NInfer/Ollama providers are strongly
-preferred for it; reserve Groq for training-set/de-identified testing.
+aggregate statistics, the local/Ollama providers are strongly preferred for
+it; reserve Groq for training-set/de-identified testing.
 
 Request:
 
@@ -179,7 +191,7 @@ Successful response:
    {
      "polishedSubject": "An eligible study for Alex",
      "polishedBody": "<p>Dear Alex's caregiver,</p><p>We would be delighted to have...</p>",
-     "provider": "ninfer",
+     "provider": "local",
      "model": "Qwen3.8-27B"
    }
 
@@ -213,8 +225,13 @@ studies, and structured conversation timestamps.
   no-show.
 * Contact history is represented by conversation count and days since the most
   recent contact. Conversation text is not sent to the cloud provider.
-* Study descriptions are HTML-stripped and capped before being included in the
-  provider prompt.
+* Study descriptions are HTML-stripped, length-capped, and delimiter-escaped
+  before being included in the provider prompt.
+
+Prompts use a stable system message for privacy, safety, and output rules, plus
+task-specific user instructions for Introduction, Follow-up, and ThankYou
+emails. Runtime context is placed in delimited fields so that instructions and
+data remain distinct.
 
 The model is instructed to return plain text JSON only. It must not invent
 facts, make medical or developmental inferences, mention internal notes, use
@@ -285,8 +302,9 @@ Implementation locations
 ------------------------
 
 * server/api/services/aiProvider.js contains the shared provider client
-  (NInfer, Ollama, Groq), timeout handling, and strict-JSON output validation
-  used by every AI feature.
+  (local/OpenAI-compatible — defaulting to the lab's NInfer server — plus
+  Ollama and Groq), timeout handling, and strict-JSON output validation used
+  by every AI feature.
 * server/api/services/participationProfile.js contains the shared scheduling
   history aggregation (tone, completed/no-show/cancelled counts, similar-study
   matching) used by every AI feature.
@@ -301,4 +319,3 @@ Implementation locations
   rendering it or writing it into the rich text editor.
 * server/__tests__/aiEmailService.test.js and
   server/__tests__/aiProvider.test.js contain the isolated unit tests.
-

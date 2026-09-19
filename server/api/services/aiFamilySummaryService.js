@@ -51,16 +51,21 @@ function distinctStudyCount(historicalAppointments) {
   ).size;
 }
 
+const FAMILY_SUMMARY_SYSTEM_PROMPT = [
+  "You summarize a research-lab family's participation history for lab staff and give an advisory intention-to-participate assessment.",
+  "Use only facts supplied in the user message. Never invent details or make medical, developmental, or personal-character judgments.",
+  "This assessment is advisory only and will be reviewed by staff before any decision is made; never present it as certain.",
+  "Return JSON only with exactly these string fields: participationSummary, intentionAssessment, intentionRationale.",
+  "intentionAssessment must be exactly one of: Likely, Uncertain, Unlikely.",
+].join("\n");
+
 function buildPrompt(context) {
   return [
-    "Summarize a research-lab family's participation history and give an advisory intention-to-participate assessment.",
-    "Return JSON only with this exact shape: {\"participationSummary\":\"\",\"intentionAssessment\":\"\",\"intentionRationale\":\"\"}.",
-    "intentionAssessment must be exactly one of: Likely, Uncertain, Unlikely.",
-    "Use only the supplied facts. Do not invent details, and do not make medical, developmental, or personal-character judgments about the child or family.",
-    "This assessment is advisory only and will be reviewed by lab staff before any decision is made; do not present it as certain.",
+    "Summarize this family's participation history in 2-4 neutral, factual sentences a staff member could read before contacting the family.",
     "When data is sparse (few sessions, no recent contact), prefer Uncertain over a confident guess.",
-    "participationSummary should be 2-4 neutral, factual sentences a staff member could read before contacting the family.",
     "Do not include HTML, names, email addresses, phone numbers, or exact calendar dates.",
+    "",
+    "# Context",
     "Children associated with this family: " + context.childCount,
     "Distinct studies completed: " + context.distinctStudyCount,
     "Study types previously completed: " + (context.studyTypes.length ? context.studyTypes.join(", ") : "none"),
@@ -71,7 +76,17 @@ function buildPrompt(context) {
     "Days since last contact: " + (context.daysSinceLastContact == null ? "unknown" : context.daysSinceLastContact),
     "Most recently completed study: " + (context.mostRecentStudy ? context.mostRecentStudy.studyName + " (" + context.mostRecentStudy.daysAgo + " days ago)" : "none on record"),
     "Participation tone classification: " + context.tone,
+    "",
+    "# Output",
+    '{"participationSummary":"","intentionAssessment":"","intentionRationale":""}',
   ].join("\n");
+}
+
+function buildPromptMessages(context) {
+  return [
+    { role: "system", content: FAMILY_SUMMARY_SYSTEM_PROMPT },
+    { role: "user", content: buildPrompt(context) },
+  ];
 }
 
 async function loadFamilySummaryContext({ familyId, labId }, now = new Date()) {
@@ -152,8 +167,8 @@ async function generateFamilySummary({ familyId, labId }) {
     return emptyHistoryResult(loaded.context);
   }
 
-  const provider = process.env.AI_FAMILY_SUMMARY_PROVIDER || process.env.AI_PROVIDER || "ninfer";
-  const draft = await callProvider(buildPrompt(loaded.context), FIELD_SPECS, provider);
+  const provider = process.env.AI_FAMILY_SUMMARY_PROVIDER || process.env.AI_PROVIDER || "local";
+  const draft = await callProvider(buildPromptMessages(loaded.context), FIELD_SPECS, provider);
   const providerInfo = currentProviderInfo(provider);
   return {
     ...draft,
