@@ -21,8 +21,25 @@ they contain important scheduling and logistics information.
 Provider configuration
 ----------------------
 
-The default provider is Groq. The implementation also supports a local Ollama
-endpoint.
+The preferred provider is a lab-hosted OpenAI-compatible endpoint. The
+implementation also supports Groq and a local Ollama endpoint.
+
+For the lab-hosted model, first obtain the model identifier from ``/v1/models``
+while connected to the lab network or VPN. Then configure the server:
+
+::
+
+   AI_EMAIL_ENABLED=true
+   AI_EMAIL_PROVIDER=local
+   AI_EMAIL_ALLOW_REAL_DATA=false
+   AI_EMAIL_TIMEOUT_MS=15000
+   LOCAL_LLM_BASE_URL=http://130.113.218.247:8080/v1
+   LOCAL_LLM_MODEL=replace-with-model-id-from-v1-models
+   LOCAL_LLM_JSON_MODE=false
+
+``LOCAL_LLM_API_KEY`` is optional and should be set only when the endpoint
+requires bearer authentication. Enable ``LOCAL_LLM_JSON_MODE`` only after
+confirming that the server accepts ``response_format`` with ``json_object``.
 
 Groq is suitable for testing with training-set or de-identified data:
 
@@ -53,6 +70,11 @@ the endpoint accepts only families marked as training-set records. Enable it
 for real participant data only after the lab has approved the selected
 provider and its data-processing terms. Ollama is the preferred option when
 participant context must remain on the DRDB machine.
+
+The lab endpoint currently uses plain HTTP. Deployments sending participant
+context should reach it only over a trusted private network or VPN, or place it
+behind HTTPS with access control. OpenAI API compatibility does not itself
+provide encryption or authentication.
 
 User workflow
 -------------
@@ -126,8 +148,13 @@ studies, and structured conversation timestamps.
   no-show.
 * Contact history is represented by conversation count and days since the most
   recent contact. Conversation text is not sent to the cloud provider.
-* Study descriptions are HTML-stripped and capped before being included in the
-  provider prompt.
+* Study descriptions are HTML-stripped, length-capped, and delimiter-escaped
+  before being included in the provider prompt.
+
+Prompts use a stable system message for privacy, safety, and output rules, plus
+task-specific user instructions for Introduction, Follow-up, and ThankYou
+emails. Runtime context is placed in delimited fields so that instructions and
+data remain distinct.
 
 The model is instructed to return plain text JSON only. It must not invent
 facts, make medical or developmental inferences, mention internal notes, use
@@ -186,4 +213,3 @@ Implementation locations
 * client/src/components/emailComponent.vue contains the opt-in controls,
   preview, acceptance, dismissal, and safe HTML insertion.
 * server/__tests__/aiEmailService.test.js contains the isolated unit tests.
-
