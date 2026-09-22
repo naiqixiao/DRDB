@@ -56,6 +56,7 @@ const { isMaintenanceMode } = require("./api/services/systemMigrationService");
 
 const emailTestRoutes = require("./api/routes/emailTest");
 const calendarTestRoutes = require("./api/routes/calendarTest");
+const aiRoutes = require("./api/routes/ai");
 
 const auto = require("./api/routes/auto");
 
@@ -100,6 +101,7 @@ app.use("/api/systemMigration", systemMigrationRoutes);
 
 app.use("/api/emailTest", emailTestRoutes);
 app.use("/api/calendarTest", calendarTestRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Error handling
 app.use((req, res, next) => {

@@ -1,6 +1,13 @@
 ### Release v3.1.0
 
-DRDB 3.1.0 introduces secure, Administrator-only full-system migration for moving an existing installation into a new Docker deployment.
+DRDB 3.1.0 introduces two optional, human-reviewed AI assistants in the email workflow, plus secure Administrator-only full-system migration for moving an existing installation into a new Docker deployment.
+
+#### AI-Assisted Email & Participation Insights
+* **Suggest Personalization:** The email composer can generate a short, human-reviewed personalization paragraph and subject line for Introduction, Follow-up, and Thank You emails, based on a family's participation history.
+* **Polish with AI:** Any email draft, of any type, can be reworded for clarity and tone with one click. The AI is instructed to change wording only — never facts, links, dates, or placeholders — and you always preview the result and choose to replace or discard it before it touches your draft.
+* **Family Participation Summary:** Family Details now has an on-demand AI summary of a family's participation history, plus an advisory Likely / Uncertain / Unlikely assessment of their intention to participate, to help prioritize outreach.
+* **Local-First AI:** Every AI feature defaults to a lab-hosted, OpenAI-compatible local model so participant data stays on the network. Cloud providers remain available but are restricted to training-set or de-identified data until explicitly approved.
+* **Opt-in and Reversible:** Every suggestion requires an explicit accept before it changes a draft; nothing is sent automatically, nothing is persisted, and the original draft is always preserved if you dismiss a suggestion.
 
 #### System Migration
 * **Encrypted export:** Administrators can download a passphrase-protected `.drdb-migration` archive directly from Settings.
@@ -12,11 +19,13 @@ DRDB 3.1.0 introduces secure, Administrator-only full-system migration for movin
 * **Persistent-state aware:** Migration works with the existing MariaDB and backend runtime volumes; no Docker socket access is required.
 * **Database tooling included:** The backend image now includes the MariaDB command-line client used for consistent database export and restore.
 * **Upgrade guidance:** Docker deployment documentation now describes rebuilding the backend image and handling migration archives securely.
+* **AI configuration wiring:** AI feature settings (provider, endpoint, enablement) are now passed through to the backend service in `docker-compose.yml` alongside the existing database and auth configuration.
 
 #### Security Notes
 * Migration actions are authorized on the server using the current database role; hiding the Settings controls alone is not relied upon.
 * Archives contain sensitive participant data, password hashes, and Google credentials. Store the archive and its passphrase separately in approved secure storage.
 * Google may require reauthorization after import if the destination uses a different public URL.
+* AI prompts and generated suggestions are never persisted, and real participant data is not sent to an AI provider until a lab explicitly enables it.
 
 #### Verification
 * Frontend production build completed successfully.

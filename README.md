@@ -7,6 +7,8 @@ Built with a robust Vue 3 frontend and a Node.js/MySQL backend, DRDB eliminates 
 
 - **Demo Videos & Instructions (v2, to be updated):** [System Overview](https://mcmaster-baby-lab.github.io/handbook/DRDB)
 - **Documentation (v1, obsolete):** [drdb.readthedocs.io](https://drdb.readthedocs.io)
+- **AI email personalization:** [implementation guide](docs/AI_Email_Personalization.rst)
+- **AI family participation summary:** [implementation guide](docs/AI_Family_Participation_Summary.rst)
 
 ---
 
@@ -158,6 +160,35 @@ TIMEZONE=America/Toronto
 FRONTEND_URL=https://yourdomain.com
 ```
 
+DRDB includes two optional, human-reviewed AI assistants — email
+personalization/polishing and a family participation summary — both opt-in
+and both requiring an explicit accept before anything changes. See
+[AI email personalization](docs/AI_Email_Personalization.rst) and
+[AI family participation summary](docs/AI_Family_Participation_Summary.rst)
+for full details. Cloud testing (Groq) is restricted to training-set or
+de-identified families unless the relevant `*_ALLOW_REAL_DATA=true` flag is
+explicitly enabled after the lab approves the provider's data-processing
+terms. Every AI feature shares one provider config:
+
+```env
+AI_PROVIDER=local                # default/recommended: lab's OpenAI-compatible NInfer server
+AI_TIMEOUT_MS=15000
+LOCAL_LLM_BASE_URL=http://<host>:8080/v1
+LOCAL_LLM_MODEL=Qwen3.8-27B
+LOCAL_LLM_ENABLE_THINKING=false
+
+AI_EMAIL_ENABLED=false
+AI_EMAIL_ALLOW_REAL_DATA=false
+
+AI_FAMILY_SUMMARY_ENABLED=false
+AI_FAMILY_SUMMARY_ALLOW_REAL_DATA=false
+
+# For Ollama or Groq instead of the local NInfer server, see server/.env.example.
+```
+
+Set `AI_EMAIL_PROVIDER` or `AI_FAMILY_SUMMARY_PROVIDER` to override the
+provider for just that one feature without changing `AI_PROVIDER` globally.
+
 > [!NOTE]
 > `FRONTEND_URL` controls the CORS allowed origins. Set it to your production domain. Multiple origins can be comma-separated (e.g., `https://yourdomain.com,http://localhost:5173`).
 
@@ -182,6 +213,15 @@ backend.
 
    Set `FRONTEND_URL` and `URL` to the public address users will visit (use an
    `https://` URL when a TLS reverse proxy is in front of DRDB).
+
+   > [!NOTE]
+   > The AI feature variables (`AI_PROVIDER`, `LOCAL_LLM_BASE_URL`, `AI_EMAIL_ENABLED`,
+   > `AI_FAMILY_SUMMARY_ENABLED`, etc.) are passed through to the `backend`
+   > service in `docker-compose.yml` the same way `DB_PASS`/`JWT_KEY` are —
+   > set them in this root `.env`, not `server/.env` (the backend container
+   > never sees `server/.env`; it's excluded from the build via
+   > `server/.dockerignore`). They all default to disabled/local-NInfer if
+   > left unset.
 3. Build and start all services:
 
    ```bash

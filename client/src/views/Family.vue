@@ -81,6 +81,8 @@
           Add Child
         </v-btn>
 
+        <AIFamilySummaryButton :family="currentFamily" variant="outlined" />
+
         <v-spacer></v-spacer>
 
         <div class="d-flex align-center bg-grey-lighten-4 rounded px-2 py-1">
@@ -1324,6 +1326,7 @@ import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import TimelineCard from "@/components/TimelineCard.vue";
 import NotesConversation from "@/components/NotesConversation.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import AIFamilySummaryButton from "@/components/AIFamilySummaryButton.vue";
 import child from "@/services/child";
 import family from "@/services/family";
 import scheduleService from "@/services/schedule";
@@ -1341,6 +1344,7 @@ export default {
     TimelineCard,
     NotesConversation,
     ConfirmDlg,
+    AIFamilySummaryButton,
   },
   setup() {
     const store = useMainStore();

@@ -62,7 +62,7 @@ function dbArgs() {
 }
 
 async function dumpDatabase(destination) {
-  const args = ["--single-transaction", "--routines", "--events", "--triggers", "--hex-blob", "--add-drop-table", "--add-drop-trigger", "--default-character-set=utf8mb4", ...dbArgs()];
+  const args = ["--single-transaction", "--routines", "--events", "--triggers", "--hex-blob", "--add-drop-table", "--default-character-set=utf8mb4", ...dbArgs()];
   const child = spawn("mariadb-dump", args, { env: { ...process.env, MARIADB_PWD: process.env.DB_PASS || "" }, stdio: ["ignore", "pipe", "pipe"] });
   const output = fs.createWriteStream(destination, { mode: 0o600 });
   let stderr = "";

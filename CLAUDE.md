@@ -25,15 +25,15 @@ DRDB (Developmental Research Database) is a laboratory management system for dev
 
 No project-level linting or formatting configs exist. Prettier is a server devDependency but has no config file or script entry.
 
-**Note:** There are two timezone env vars: `TZ` (read by `config/general.js` for DB connection) and `TIMEZONE` (read by `jobs/scheduler.js` as cron job fallback). The README only shows `TIMEZONE`. For consistency, set both to the same value.
+**Note:** There are two timezone env vars: `TZ` (read by `config/general.js` for DB connection) and `TIMEZONE` (read by `jobs/scheduler.js` as cron job fallback). For consistency, set both to the same value.
 
 ## Backend Architecture
 
-**Entry point:** `server/server.js` creates the HTTP server, registers cron jobs from `server/jobs/scheduler.js`, and handles graceful shutdown (SIGTERM/SIGINT: drain connections, force-close after 10s).
+**Entry point:** `server/server.js` loads `dotenv`, creates the HTTP server, registers cron jobs from `server/jobs/scheduler.js`, and handles graceful shutdown (SIGTERM/SIGINT: drain connections, force-close after 10s).
 
 **App setup:** `server/app.js` configures Express middleware (CORS, body-parser, Morgan, Swagger) and mounts all route handlers under `/api/*`.
 
-**Route → Controller → Model pattern:**
+**Route -> Controller -> Model pattern:**
 - Routes: `server/api/routes/*.js` — define REST endpoints
 - Controllers: `server/api/controllers/*.js` — business logic
 - Models: `server/api/models/DRDB.js` — defines all Sequelize associations; auto-generated model files in `server/api/models/SequelizeAuto/` (17 entities: Appointment, Child, Conversations, Experimenter, ExperimenterAssignment, Family, Feedback, Lab, Personnel, Schedule, ScheduledJobSetting, SecondExperimenterAssignment, Sibling, Study, StudyAgeGroup, SystemSetting, TestingRoom)
@@ -57,29 +57,30 @@ Timezone resolution order: `Lab.Timezone` > `SystemSetting.GeneralTimezone` > `p
 
 **API route registry** (mounted in `app.js`):
 ```
-/api/user            — auth, login, user profile
-/api/family           — family CRUD
-/api/child            — child CRUD
-/api/conversation     — recruitment conversations
-/api/study            — study definitions
-/api/personnel        — lab personnel
-/api/lab              — lab configuration
-/api/experimenter     — study-experimenter assignments
-/api/appointment      — appointment scheduling
+/api/user             — auth, login, user profile
+/api/family            — family CRUD
+/api/child             — child CRUD
+/api/conversation      — recruitment conversations
+/api/study             — study definitions
+/api/personnel         — lab personnel
+/api/lab               — lab configuration
+/api/experimenter      — study-experimenter assignments
+/api/appointment       — appointment scheduling
 /api/experimentAssignment — experimenter assignments for appointments (1st + 2nd)
-/api/schedule         — family study schedules
-/api/auto             — autocomplete suggestions
-/api/cal              — Google Calendar integration
-/api/gmail            — Gmail integration
-/api/extAPIs          — external API proxies
-/api/feedback         — feedback submissions
-/api/reminder         — email reminders
-/api/RTU              — real-time update counters
-/api/jobs             — scheduled job management (enable/disable)
-/api/TestingRoom      — testing room config + calendar links
-/api/systemSetting    — system-wide settings
-/api/emailTest        — email diagnostic tool
-/api/calendarTest     — calendar diagnostic tool
+/api/schedule          — family study schedules
+/api/auto              — autocomplete suggestions
+/api/cal               — Google Calendar integration
+/api/gmail             — Gmail integration
+/api/extAPIs           — external API proxies
+/api/feedback          — feedback submissions
+/api/reminder          — email reminders
+/api/RTU               — real-time update counters
+/api/jobs              — scheduled job management (enable/disable)
+/api/TestingRoom       — testing room config + calendar links
+/api/systemSetting     — system-wide settings
+/api/emailTest         — email diagnostic tool
+/api/calendarTest      — calendar diagnostic tool
+/api/ai                — AI-assisted email personalization + family participation summary
 ```
 
 ### Key Data Relationships
@@ -91,6 +92,12 @@ Timezone resolution order: `Lab.Timezone` > `SystemSetting.GeneralTimezone` > `p
 - Child M:N Child (through Sibling)
 - Appointment M:N Personnel (through ExperimenterAssignment and SecondExperimenterAssignment)
 - Study 1:N StudyAgeGroup
+
+### Key Business Rules (from README)
+
+- **Locking:** When a family is scheduled for a study, they are locked to that lab to prevent double-booking across labs.
+- **Auto-Release:** Families are automatically released when their confirmed appointment has passed and is marked completed, or when a tentative schedule has no update for 2 weeks (auto-rejected).
+- **Completion:** Schedules move to "Completed" status automatically based on appointment time and confirmation status.
 
 ## Frontend Architecture
 
@@ -118,19 +125,20 @@ Timezone resolution order: `Lab.Timezone` > `SystemSetting.GeneralTimezone` > `p
 
 **Path alias:** `@` maps to `client/src/` (configured in `vite.config.js`).
 
-**Vite proxy:** `/api` requests proxied to `http://localhost:3000` (configured in `vite.config.js`). No separate CORS config needed for local dev.
+**Vite proxy:** `/api` requests proxied to `http://localhost:3000` (configured in `vite.config.js`). No separate CORS config needed for local dev. Note: `host: true` in Vite config exposes the dev server to the network.
 
 **Frontend customization:** See `client/README.md` for theme, logo, font, and app name changes.
 
 ## Key Environment Variables (server/.env)
 
-There is no `.env.example` file. Create `server/.env` manually with the variables below.
+See `server/.env.example` for the full list with defaults. Core variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
 | `JWT_KEY` | *(required)* | Secret for signing JWT tokens |
 | `APP_URL` | `'URL of the system'` | System URL |
-| `TZ` | `'America/Toronto'` | Timezone for DB and cron jobs |
+| `TZ` | `'America/Toronto'` | Timezone for DB connection |
+| `TIMEZONE` | *(falls back to `TZ`)* | Timezone for cron jobs |
 | `DB_NAME` | `'DRDB'` | Database name |
 | `DB_USER` | `'root'` | Database user |
 | `DB_PASS` | `''` | Database password |
@@ -139,6 +147,14 @@ There is no `.env.example` file. Create `server/.env` manually with the variable
 | `DB_POOL_MAX` | `'40'` | DB connection pool max |
 | `FRONTEND_URL` | `'example URL'` | CORS allowed origins (comma-separated) |
 | `port` | `3000` | Server listen port |
+
+AI feature variables (`AI_PROVIDER`, `LOCAL_LLM_BASE_URL`/`LOCAL_LLM_MODEL`, `AI_EMAIL_ENABLED`,
+`AI_FAMILY_SUMMARY_ENABLED`, etc.) are documented separately in
+`docs/AI_Email_Personalization.rst` and `docs/AI_Family_Participation_Summary.rst`,
+since they're optional and shared across `server/api/services/aiProvider.js`,
+`aiEmailService.js`, and `aiFamilySummaryService.js`. In Docker deployments these
+are set in the root `.env` (not `server/.env`) and passed through by
+`docker-compose.yml`'s `backend` service.
 
 ## Testing
 
@@ -156,4 +172,4 @@ cd server && npx jest path/to/file  # run a single test file
 
 SQL migration scripts are in `MySQL/`. Key patches for V3 migration: `databasePatch1.01.sql`, `migrate_age_groups.sql`, `v3_patch.sql`, `v3_child_patch.sql`. Full migration guide: `migration_guide_v2_to_v3.md`. Always backup the database before running patches.
 
-**Auto-seeding:** On startup (`server/api/models/DRDB.js`), if the `Personnel` table is empty, the seeder (`server/api/utils/seeder.js`) creates a default Lab, a default Admin (email: `admin@example.com`, password: `admin`, `temporaryPassword: true`), and sets `SystemSetting.isFirstRun = true`. This triggers the frontend setup wizard on first login.
+**Auto-seeding:** On startup (`server/api/models/DRDB.js`), if the `Personnel` table is empty, the seeder (`server/api/utils/seeder.js`) creates a default Lab, a default Admin (email: `admin@example.com`, password: `admin`, `temporaryPassword: 1`), and sets `SystemSetting.isFirstRun = true`. This triggers the frontend setup wizard on first login.
