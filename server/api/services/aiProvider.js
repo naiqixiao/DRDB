@@ -56,14 +56,16 @@ function parseModelJson(content, fieldSpecs) {
   return result;
 }
 
+// Node 18+ provides fetch as a global; older runtimes (e.g. Node 16 on
+// locked-down deployment hosts where upgrading Node isn't an option) fall
+// back to node-fetch, which implements the same interface.
+const fetchImpl = typeof fetch === "function" ? fetch : require("node-fetch");
+
 async function fetchWithTimeout(url, options, timeoutMs) {
-  if (typeof fetch !== "function") {
-    throw new AiServiceError("This Node.js runtime does not provide fetch; upgrade Node.js to use AI features.");
-  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...options, signal: controller.signal });
+    return await fetchImpl(url, { ...options, signal: controller.signal });
   } catch (error) {
     if (error.name === "AbortError") {
       throw new AiServiceError("The AI provider timed out.", 504, "AI_TIMEOUT");
