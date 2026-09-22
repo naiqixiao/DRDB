@@ -84,3 +84,6 @@ server/.env
 server/data/
 client/dist/
 server/.env
+._*
+server/pm2_dump.log
+server/env
