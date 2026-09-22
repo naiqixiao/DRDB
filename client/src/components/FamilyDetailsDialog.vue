@@ -181,7 +181,7 @@
               <v-chip size="small" variant="outlined">{{ summaryResult.tone }} family</v-chip>
             </div>
 
-            <p class="text-body-2 mb-2" style="line-height: 1.5;">{{ summaryResult.participationSummary }}</p>
+            <p class="text-body-1 mb-2" style="line-height: 1.6;">{{ summaryResult.participationSummary }}</p>
             <p v-if="summaryResult.intentionRationale" class="text-caption text-muted mb-3" style="line-height: 1.4;">
               {{ summaryResult.intentionRationale }}
             </p>
@@ -196,7 +196,7 @@
               </span>
             </div>
 
-            <v-alert type="info" variant="text" density="compact" class="mt-3 pa-0">
+            <v-alert type="info" variant="text" density="compact" class="mt-3 pa-0 text-caption" style="font-size: 0.7rem !important;">
               Advisory only, generated from scheduling history — not stored. Review before acting on it.
             </v-alert>
           </div>

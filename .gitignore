@@ -83,3 +83,4 @@ server/.env
 !server/config/general.js
 server/data/
 client/dist/
+server/.env

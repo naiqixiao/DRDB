@@ -141,6 +141,7 @@
                   @click.stop="addNewChild" :disabled="!currentFamily.id">
                   Add Child
                 </v-btn>
+                <AIFamilySummaryButton :family="currentFamily" width="130" />
               </v-col>
             </v-row>
 
@@ -659,6 +660,7 @@ import AppointmentTableBrief from "@/components/AppointmentTableBrief.vue";
 import TimelineCard from "@/components/TimelineCard.vue";
 import Page from "@/components/Page.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import AIFamilySummaryButton from "@/components/AIFamilySummaryButton.vue";
 import login from "@/services/login";
 import { useMainStore } from "@/stores/mainStore";
 
@@ -672,6 +674,7 @@ export default {
     AppointmentTableBrief,
     TimelineCard,
     ConfirmDlg,
+    AIFamilySummaryButton,
   },
   setup() {
     const store = useMainStore();
