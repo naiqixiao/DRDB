@@ -38,94 +38,103 @@
       </div>
     </div>
 
-    <div v-if="canPolish" class="ai-personalization-bar">
-      <div class="ai-personalization-actions">
+    <!-- Email body editor with floating AI tools -->
+    <div class="email-editor-area">
+      <div class="email-body-wrapper">
+        <RichTextEditor v-model="emailBody" />
+      </div>
+
+      <div
+        v-if="hasAiResults"
+        class="ai-float-panel"
+      >
         <v-btn
+          icon="mdi-close"
+          size="x-small"
+          variant="text"
+          class="ai-float-close"
+          @click="closeAiPanel"
+        ></v-btn>
+        <v-alert v-if="polishError" type="warning" variant="tonal" density="compact" class="mt-2">
+          {{ polishError }}
+        </v-alert>
+        <v-card v-if="polishDraft" variant="outlined" class="ai-personalization-card mt-2">
+          <div class="ai-personalization-label">
+            <v-icon size="16">mdi-creation</v-icon>
+            Polished preview
+          </div>
+          <p v-if="polishDraft.polishedSubject && polishDraft.polishedSubject !== emailSubject" class="ai-subject-suggestion">
+            Suggested subject: {{ polishDraft.polishedSubject }}
+          </p>
+          <div class="ai-polish-preview" v-html="sanitizedPolishedBody"></div>
+          <div class="ai-personalization-card-actions">
+            <v-btn size="small" color="primary" variant="flat" @click="acceptPolish">
+              Replace draft
+            </v-btn>
+            <v-btn size="small" variant="text" @click="dismissPolish">Discard</v-btn>
+          </div>
+        </v-card>
+
+        <v-alert v-if="personalizationError" type="warning" variant="tonal" density="compact" class="mt-2">
+          {{ personalizationError }}
+        </v-alert>
+        <v-card v-if="personalizationDraft" variant="outlined" class="ai-personalization-card mt-2">
+          <div class="ai-personalization-label">
+            <v-icon size="16">mdi-creation</v-icon>
+            AI suggestion · {{ personalizationDraft.tone }} tone
+          </div>
+          <p v-if="personalizationDraft.personalizationText" class="ai-personalization-text">
+            {{ personalizationDraft.personalizationText }}
+          </p>
+          <p v-if="personalizationDraft.subjectSuggestion" class="ai-subject-suggestion">
+            Suggested subject: {{ personalizationDraft.subjectSuggestion }}
+          </p>
+          <div class="ai-personalization-card-actions">
+            <v-btn size="small" color="primary" variant="flat" @click="acceptPersonalization">
+              Insert paragraph
+            </v-btn>
+            <v-btn
+              v-if="personalizationDraft.subjectSuggestion"
+              size="small"
+              color="primary"
+              variant="text"
+              @click="useSubjectSuggestion"
+            >
+              Use subject
+            </v-btn>
+            <v-btn size="small" variant="text" @click="dismissPersonalization">Dismiss</v-btn>
+          </div>
+        </v-card>
+      </div>
+
+      <div v-if="canPolish || canPersonalize" class="ai-fab-group">
+        <v-btn
+          v-if="canPolish"
+          rounded="pill"
           size="small"
-          variant="tonal"
           color="secondary"
+          elevation="4"
           prepend-icon="mdi-creation"
           :loading="polishLoading"
+          title="Rewrites wording only — review before replacing"
           @click="generatePolish"
         >
-          Polish with AI
+          Polish
         </v-btn>
-        <v-chip size="small" variant="text" prepend-icon="mdi-shield-check-outline">
-          Rewrites wording only — review before replacing
-        </v-chip>
-      </div>
-      <v-alert v-if="polishError" type="warning" variant="tonal" density="compact" class="mt-2">
-        {{ polishError }}
-      </v-alert>
-      <v-card v-if="polishDraft" variant="outlined" class="ai-personalization-card mt-2">
-        <div class="ai-personalization-label">
-          <v-icon size="16">mdi-creation</v-icon>
-          Polished preview
-        </div>
-        <p v-if="polishDraft.polishedSubject && polishDraft.polishedSubject !== emailSubject" class="ai-subject-suggestion">
-          Suggested subject: {{ polishDraft.polishedSubject }}
-        </p>
-        <div class="ai-polish-preview" v-html="sanitizedPolishedBody"></div>
-        <div class="ai-personalization-card-actions">
-          <v-btn size="small" color="primary" variant="flat" @click="acceptPolish">
-            Replace draft
-          </v-btn>
-          <v-btn size="small" variant="text" @click="dismissPolish">Discard</v-btn>
-        </div>
-      </v-card>
-    </div>
-
-    <div v-if="canPersonalize" class="ai-personalization-bar">
-      <div class="ai-personalization-actions">
         <v-btn
+          v-if="canPersonalize"
+          rounded="pill"
           size="small"
-          variant="tonal"
           color="primary"
+          elevation="4"
           prepend-icon="mdi-auto-fix"
           :loading="personalizationLoading"
+          title="Draft only — review before sending"
           @click="generatePersonalization"
         >
-          Suggest personalization
+          Personalize
         </v-btn>
-        <v-chip size="small" variant="text" prepend-icon="mdi-shield-check-outline">
-          Draft only — review before sending
-        </v-chip>
       </div>
-      <v-alert v-if="personalizationError" type="warning" variant="tonal" density="compact" class="mt-2">
-        {{ personalizationError }}
-      </v-alert>
-      <v-card v-if="personalizationDraft" variant="outlined" class="ai-personalization-card mt-2">
-        <div class="ai-personalization-label">
-          <v-icon size="16">mdi-creation</v-icon>
-          AI suggestion · {{ personalizationDraft.tone }} tone
-        </div>
-        <p v-if="personalizationDraft.personalizationText" class="ai-personalization-text">
-          {{ personalizationDraft.personalizationText }}
-        </p>
-        <p v-if="personalizationDraft.subjectSuggestion" class="ai-subject-suggestion">
-          Suggested subject: {{ personalizationDraft.subjectSuggestion }}
-        </p>
-        <div class="ai-personalization-card-actions">
-          <v-btn size="small" color="primary" variant="flat" @click="acceptPersonalization">
-            Insert paragraph
-          </v-btn>
-          <v-btn
-            v-if="personalizationDraft.subjectSuggestion"
-            size="small"
-            color="primary"
-            variant="text"
-            @click="useSubjectSuggestion"
-          >
-            Use subject
-          </v-btn>
-          <v-btn size="small" variant="text" @click="dismissPersonalization">Dismiss</v-btn>
-        </div>
-      </v-card>
-    </div>
-
-    <!-- Email body editor -->
-    <div class="email-body-wrapper">
-      <RichTextEditor v-model="emailBody" />
     </div>
   </div>
 </template>
@@ -333,6 +342,11 @@ export default {
       }
       this.polishDraft = null;
       this.polishError = "Polished draft applied. Please review it before sending.";
+    },
+
+    closeAiPanel() {
+      this.dismissPolish();
+      this.dismissPersonalization();
     },
 
     dismissPolish() {
@@ -640,6 +654,14 @@ export default {
         Boolean(this.familyInfo.id) &&
         Boolean(this.emailBody && this.emailBody.trim());
     },
+    hasAiResults() {
+      return Boolean(
+        this.polishError ||
+          this.polishDraft ||
+          this.personalizationError ||
+          this.personalizationDraft
+      );
+    },
     sanitizedPolishedBody() {
       if (!this.polishDraft?.polishedBody) return "";
       return DOMPurify.sanitize(this.polishDraft.polishedBody, {
@@ -696,14 +718,53 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0;
+  height: 100%;
+  min-height: 0;
 }
 
-.ai-personalization-bar {
+.email-compose > * {
+  flex-shrink: 0;
+}
+
+.email-editor-area {
+  position: relative;
+  flex: 1 1 auto !important;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-fab-group {
+  position: absolute;
+  right: 28px;
+  bottom: 14px;
+  display: flex;
+  gap: 8px;
+  z-index: 5;
+}
+
+.ai-float-panel {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 56px;
+  max-width: 560px;
+  margin-left: auto;
+  max-height: min(340px, 60%);
+  overflow-y: auto;
   padding: 10px 12px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  margin: 10px 0;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+  z-index: 6;
+}
+
+.ai-float-close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
 }
 
 .ai-personalization-actions,
@@ -750,7 +811,7 @@ export default {
   color: #1e293b;
   font-size: 0.9rem;
   line-height: 1.5;
-  max-height: 300px;
+  max-height: 180px;
   overflow-y: auto;
 }
 
@@ -795,6 +856,10 @@ export default {
 
 /* Editor wrapper */
 .email-body-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid rgba(var(--v-border-color), 0.12);
   border-top: none;
   border-radius: 0 0 8px 8px;
@@ -803,6 +868,10 @@ export default {
 
 /* RichTextEditor overrides for email compose */
 .email-body-wrapper .rich-text-editor {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   border: none !important;
   border-radius: 0 0 8px 8px !important;
 }
@@ -811,8 +880,17 @@ export default {
   border-top: 1px solid rgba(var(--v-border-color), 0.08);
 }
 
+.email-body-wrapper .editor-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .email-body-wrapper .editor-content .tiptap {
-  min-height: 350px;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
 }
 
 /* Prefix styling override */

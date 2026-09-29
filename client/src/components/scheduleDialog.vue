@@ -13,13 +13,13 @@
         <v-stepper-window>
           <!-- Step 1, choose appointment time, studies, experimenters, and leave a note. -->
           <v-stepper-window-item value="1">
-            <v-card elevation="0">
+            <v-card elevation="0" class="dialog-step-card">
               <v-card-title class="d-flex justify-space-between align-center">
                 Create / Update Study Schedule
                 <v-btn icon="mdi-close" variant="text" @click="close"></v-btn>
               </v-card-title>
 
-              <v-container class="pa-0">
+              <v-container class="pa-0 dialog-step-body">
                 <v-card-text class="pa-2">
                   <!-- Section 1: Schedule Date & Time (collapsible) -->
                   <div class="section-header" @click="section1Open = !section1Open">
@@ -128,7 +128,7 @@
 
           <!-- Step 2 -->
           <v-stepper-window-item value="2">
-            <v-card elevation="0">
+            <v-card elevation="0" class="dialog-step-card">
               <!-- Header toolbar -->
               <div class="d-flex align-center px-4 pt-3 pb-1" style="gap: 12px;">
                 <v-icon size="20" color="primary">mdi-email-edit-outline</v-icon>
@@ -149,7 +149,7 @@
               </div>
 
               <!-- Email component -->
-              <v-card-text class="pt-2 pb-2">
+              <v-card-text class="pt-2 pb-2 dialog-step-body">
                 <emailComponent 
                   ref="emailComponentRef" 
                   :dialog="emailDialog" 
@@ -208,7 +208,7 @@
 
           <!-- Step 3 -->
           <v-stepper-window-item value="3">
-            <v-card elevation="0">
+            <v-card elevation="0" class="dialog-step-card">
               <!-- Header toolbar (matches Step 2 pattern) -->
               <div class="d-flex align-center px-4 pt-3 pb-1" style="gap: 12px;">
                 <v-icon size="20" color="primary">mdi-calendar-clock-outline</v-icon>
@@ -220,7 +220,7 @@
                 <v-btn icon="mdi-close" variant="text" size="small" @click="close"></v-btn>
               </div>
 
-              <v-container class="pa-0">
+              <v-container class="pa-0 dialog-step-body">
                 <v-card-text class="pa-2">
                   <!-- Instructional hint -->
                   <div class="text-caption text-muted px-1 mb-2" style="line-height: 1.4">
@@ -1166,8 +1166,25 @@ export default {
 
 <style>
 .schedule-dialog-overlay {
-  max-height: 90vh !important;
+  max-height: 96vh !important;
   overflow-y: auto !important;
+}
+
+/* All steps share one height; the body scrolls/flexes and the action bar stays visible */
+.dialog-step-card {
+  display: flex;
+  flex-direction: column;
+  height: min(calc(96vh - 110px), 900px);
+}
+
+.dialog-step-card > * {
+  flex-shrink: 0;
+}
+
+.dialog-step-card > .dialog-step-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 </style>
 
