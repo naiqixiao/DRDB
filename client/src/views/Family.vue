@@ -329,6 +329,33 @@
               </v-col>
             </v-row>
 
+            <v-sheet color="amber-lighten-5" border rounded
+              class="mt-4 px-3 py-1 d-flex flex-wrap align-center" style="gap: 4px 8px;">
+              <span class="text-caption font-weight-bold text-uppercase">Participation availability</span>
+              <v-checkbox
+                :model-value="currentFamily.OnlineStudyOnly === 1"
+                label="Online studies only"
+                color="warning"
+                density="compact"
+                hide-details
+                class="flex-grow-0"
+                :disabled="savingOnlineStudyOnly"
+                @update:model-value="saveOnlineStudyOnly"
+              ></v-checkbox>
+              <v-tooltip location="top" max-width="280">
+                <template #activator="{ props }">
+                  <v-icon v-bind="props" icon="mdi-information-outline" size="small" color="medium-emphasis"
+                    tabindex="0" aria-label="About online studies only"></v-icon>
+                </template>
+                Check if this family can only participate online. They will be excluded from recruitment for all in-person studies.
+              </v-tooltip>
+              <span v-if="savingOnlineStudyOnly" role="status" class="text-caption">Saving…</span>
+              <span v-else-if="onlineStudyOnlyStatus.familyId === currentFamily.id"
+                :role="onlineStudyOnlyStatus.error ? 'alert' : 'status'"
+                :class="onlineStudyOnlyStatus.error ? 'text-error' : 'text-success'"
+                class="text-caption">{{ onlineStudyOnlyStatus.message }}</span>
+            </v-sheet>
+
             <v-divider class="my-4"></v-divider>
 
             <!-- Duplicate Children Warning -->
@@ -593,9 +620,12 @@
                 </v-row>
               </div>
 
-              <v-checkbox v-model="editedItem.OnlineStudyOnly" :true-value="1" :false-value="0"
-                label="Online studies only" color="primary" hide-details></v-checkbox>
-              <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
+              <!-- Existing families toggle this on the family page; only new families set it here. -->
+              <template v-if="editedIndex === -1">
+                <v-checkbox v-model="editedItem.OnlineStudyOnly" :true-value="1" :false-value="0"
+                  label="Online studies only" color="primary" hide-details></v-checkbox>
+                <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
+              </template>
 
               <div class="mb-4">
                 <div
@@ -1361,6 +1391,9 @@ export default {
   },
   data() {
     return {
+      savingOnlineStudyOnly: false,
+      onlineStudyOnlyStatus: {},
+      onlineStudyOnlyStatusTimer: null,
       duplicateDialog: false,
       loadingDuplicates: false,
       duplicateGroups: [],
@@ -1596,6 +1629,9 @@ export default {
     };
   },
 
+  beforeUnmount() {
+    clearTimeout(this.onlineStudyOnlyStatusTimer);
+  },
   methods: {
     copyToClipboard(text) {
       if (!text) return;
@@ -1761,6 +1797,43 @@ export default {
         });
       }
       this.store.setLoadingStatus(false);
+    },
+
+    async saveOnlineStudyOnly(checked) {
+      if (!this.currentFamily.id || this.savingOnlineStudyOnly) return;
+      const familyRecord = this.currentFamily;
+      const OnlineStudyOnly = checked ? 1 : 0;
+      clearTimeout(this.onlineStudyOnlyStatusTimer);
+      this.savingOnlineStudyOnly = true;
+      this.onlineStudyOnlyStatus = {};
+      try {
+        await family.update({
+          id: familyRecord.id,
+          OnlineStudyOnly,
+          UpdatedBy: this.store.userID,
+        });
+        // Update the captured record even if the researcher changed families while saving.
+        const matchingRecords = [familyRecord, this.currentFamily, ...this.Families]
+          .filter((record) => record?.id === familyRecord.id);
+        matchingRecords.forEach((record) => {
+          record.OnlineStudyOnly = OnlineStudyOnly;
+          (record.Children || []).forEach((childRecord) => {
+            if (childRecord.Family) childRecord.Family.OnlineStudyOnly = OnlineStudyOnly;
+          });
+        });
+        this.onlineStudyOnlyStatus = { familyId: familyRecord.id, message: "Saved.", error: false };
+        this.onlineStudyOnlyStatusTimer = setTimeout(() => {
+          this.onlineStudyOnlyStatus = {};
+        }, 3000);
+      } catch (error) {
+        this.onlineStudyOnlyStatus = {
+          familyId: familyRecord.id,
+          message: "Could not save participation availability. Please try again.",
+          error: true,
+        };
+      } finally {
+        this.savingOnlineStudyOnly = false;
+      }
     },
 
     async updateFamilyAppointment() {
