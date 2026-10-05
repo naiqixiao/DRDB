@@ -78,6 +78,7 @@ function buildSlimChildInclude() {
         "CellPhone",
         "Email",
         "AutismHistory",
+        "OnlineStudyOnly",
         "NextContactDate",
         "NoMoreContact",
         "Note",
@@ -396,6 +397,15 @@ exports.search = asyncHandler(async (req, res) => {
         },
       ],
     });
+
+    if (!studyInfo) {
+      return res.status(404).json({ error: "Study not found." });
+    }
+
+    // Use the stored study format so every recruitment client gets this protection.
+    if (studyInfo.StudyType !== "Online") {
+      queryString["$Family.OnlineStudyOnly$"] = 0;
+    }
 
     const pastParticipants = studyInfo.Appointments.map((appointment) => {
       return appointment.FK_Child;

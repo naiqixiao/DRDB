@@ -237,6 +237,12 @@ exports.search = asyncHandler(async (req, res) => {
     queryString.AssignedLab = req.query.AssignedLab;
   }
 
+  if (req.query.ParticipationAvailability === "In person") {
+    queryString.OnlineStudyOnly = 0;
+  } else if (req.query.ParticipationAvailability === "Online studies only") {
+    queryString.OnlineStudyOnly = 1;
+  }
+
   // queryString.NoMoreContact = 0;
 
   if (req.query.childName) {

@@ -2,6 +2,8 @@
   <div>
     <SectionHeader title="Family Information" icon="mdi-account-group" />
 
+    <v-chip v-if="currentFamily?.OnlineStudyOnly === 1" color="warning" size="small" class="mb-3">Online studies only</v-chip>
+
     <div class="info-grid info-grid--2">
       <InfoField label="Family ID" :value="currentFamily?.id" icon="mdi-identifier" highlight />
       <InfoField label="Email" :value="currentFamily?.Email" type="email" icon="mdi-email-outline" />
@@ -89,6 +91,9 @@
                 </div>
               </v-col>
             </v-row>
+            <v-checkbox v-model="editedItem.OnlineStudyOnly" :true-value="1" :false-value="0"
+                  label="Online studies only" color="primary" hide-details></v-checkbox>
+                <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
           </v-form>
         </v-card-text>
         <v-card-actions style="padding: 16px">
@@ -152,6 +157,7 @@ export default {
         RaceSecondary: null,
         Vehicle: null,
         RecruitmentMethod: null,
+        OnlineStudyOnly: 0,
       },
       familyTemplate: {
         id: null,
@@ -167,6 +173,7 @@ export default {
         RaceSecondary: null,
         Vehicle: null,
         RecruitmentMethod: null,
+        OnlineStudyOnly: 0,
       },
       searchingFields: [
         { label: "Family ID", field: "id" },

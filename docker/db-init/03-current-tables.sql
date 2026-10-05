@@ -26,3 +26,6 @@ CREATE TABLE IF NOT EXISTS `ScheduledJobSetting` (
     FOREIGN KEY (`FK_Lab`) REFERENCES `Lab` (`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Family participation availability (baseline imports predate this field).
+ALTER TABLE `Family` ADD COLUMN IF NOT EXISTS `OnlineStudyOnly` INT NOT NULL DEFAULT 0;

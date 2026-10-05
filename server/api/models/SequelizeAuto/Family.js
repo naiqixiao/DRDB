@@ -112,6 +112,12 @@ module.exports = function(sequelize, DataTypes) {
 				key: 'id'
 			}
 		},
+		OnlineStudyOnly: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			defaultValue: 0,
+			validate: { isIn: [[0, 1]] }
+		},
 		NoMoreContact: {
 			type: DataTypes.INTEGER,
 			allowNull: true,

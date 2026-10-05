@@ -347,10 +347,24 @@ async function patchLegacyPersonnelSchemaIfNeeded() {
   }
 }
 
+async function patchLegacyFamilySchemaIfNeeded() {
+  const queryInterface = sequelize.getQueryInterface();
+  const columns = await queryInterface.describeTable("Family");
+  if (!Object.prototype.hasOwnProperty.call(columns, "OnlineStudyOnly")) {
+    await queryInterface.addColumn("Family", "OnlineStudyOnly", {
+      type: require("sequelize").INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    });
+    console.log("Patched legacy Family table: added OnlineStudyOnly.");
+  }
+}
+
 // Synchronize with database (tables created/updated in background)
 sequelize.sync({ force: false }).then(async () => {
   
   try {
+    await patchLegacyFamilySchemaIfNeeded();
     await relaxLegacyStudyAgeConstraintsIfNeeded();
     await patchLegacyPersonnelSchemaIfNeeded();
     await seedPersonnelHistoryBaseline(exports);

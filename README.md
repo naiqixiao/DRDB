@@ -339,3 +339,21 @@ Cron jobs are defined in `server/jobs/scheduler.js` and registered from `server/
   - Their confirmed appointment has passed and is marked completed.
   - A tentative schedule has had no update for 2 weeks (auto-rejected).
 - **Completion:** Schedules move to "Completed" status automatically based on appointment time and confirmation status.
+
+## Family participation availability
+
+Select **Online studies only** when adding or editing a family that cannot attend
+in-person studies. The flag appears in family details and recruitment, and applies
+to all children in that family. Recruitment searches automatically exclude flagged
+families for every study type except **Online**. Online searches include both flagged
+and unflagged families. Eligible study suggestions apply the same rule.
+
+Family search also has a **Participation availability** filter: **In person** excludes
+flagged families, **Online studies only** finds flagged families, and a blank filter
+includes all families.
+
+Existing families default to an unchecked flag; notes are not converted automatically.
+The server adds the `Family.OnlineStudyOnly` column on startup if it is missing.
+If the database user cannot alter tables, apply
+[`MySQL/migrate_online_study_only.sql`](MySQL/migrate_online_study_only.sql) once before
+starting the updated server. New Docker databases include the column automatically.

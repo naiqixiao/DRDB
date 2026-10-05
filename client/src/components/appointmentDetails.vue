@@ -245,6 +245,7 @@ export default {
     },
 
     studyElegibility(study, child) {
+      if (child.Family?.OnlineStudyOnly === 1 && study.StudyType !== "Online") return false;
       if (!child.DoB) return false;
 
       const Age = Math.floor(

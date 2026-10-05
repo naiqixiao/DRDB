@@ -28,7 +28,7 @@ function childInclude() {
       },
       {
         model: model.family,
-        attributes: ["AutismHistory"],
+        attributes: ["AutismHistory", "OnlineStudyOnly"],
       },
     ],
     order: [["id", "DESC"]],
@@ -53,7 +53,7 @@ function appointmentInclude() {
           },
           {
             model: model.family,
-            attributes: ["AutismHistory"],
+            attributes: ["AutismHistory", "OnlineStudyOnly"],
           },
         ],
       },
@@ -122,7 +122,7 @@ function scheduleInclude(separateSchedule = true) {
               },
               {
                 model: model.family,
-                attributes: ["AutismHistory"],
+                attributes: ["AutismHistory", "OnlineStudyOnly"],
               },
             ],
           },

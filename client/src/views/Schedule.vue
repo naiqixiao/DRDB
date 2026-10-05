@@ -105,6 +105,8 @@
                   </div>
                 </div>
 
+        <v-chip v-if="currentFamily.OnlineStudyOnly === 1" color="warning" size="small" class="mb-3">Online studies only</v-chip>
+
                 <!-- Participation Stats Chips — always rendered so card height is consistent -->
                 <div class="d-flex flex-wrap align-center justify-center justify-sm-start mt-3" style="gap: 4px; min-height: 24px;">
                   <template v-if="participationStats.Total > 0">
@@ -449,6 +451,10 @@
                 </v-col>
               </v-row>
             </div>
+
+            <v-checkbox v-model="editedFamily.OnlineStudyOnly" :true-value="1" :false-value="0"
+              label="Online studies only" color="primary" hide-details></v-checkbox>
+            <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
 
             <!-- Contact Information Section -->
             <div class="mb-6">

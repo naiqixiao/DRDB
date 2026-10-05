@@ -24,6 +24,8 @@
           </div>
         </div>
 
+        <v-chip v-if="family?.OnlineStudyOnly === 1" color="warning" size="small" class="mb-3">Online studies only</v-chip>
+
         <v-divider class="mb-4"></v-divider>
 
         <v-list density="compact" class="text-left px-0">
