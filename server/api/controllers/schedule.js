@@ -204,6 +204,8 @@ exports.searchFollowUps = asyncHandler(async (req, res) => {
     Status: { [Op.in]: ["TBD", "Rescheduling", "No Show"] },
     "$Family.TrainingSet$": req.query.trainingMode === "true",
   };
+  // OnlineStudyOnly is intentionally not filtered here: these families already have a
+  // schedule for a specific study, so follow-up must reach them whatever the study format.
   // Filter by lab via the appointment's study, not AssignedLab.
   // Families that "No Showed" have AssignedLab cleared by updateSchedule,
   // so using AssignedLab here would exclude all the families that need follow-up.

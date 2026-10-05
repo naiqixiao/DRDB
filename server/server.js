@@ -4,25 +4,33 @@ const app = require("./app");
 
 const port = process.env.PORT || process.env.port || 3000;
 
-const server = http.createServer(app);
+const { schemaReady } = require("./api/models/DRDB");
 
-const Server = server.listen(port, function () {
-  console.log("Listening to port " + port);
-});
+const server = http.createServer(app);
 
 process.on('SIGTERM', shutDown);
 process.on('SIGINT', shutDown);
 
 let connections = [];
 
-Server.on('connection', connection => {
+server.on('connection', connection => {
   connections.push(connection);
   connection.on('close', () => connections = connections.filter(curr => curr !== connection));
 });
 
+// Wait for startup schema patches so no request selects a column that is not there yet.
+// Listen even if sync fails, matching the previous behaviour; errors are logged.
+schemaReady
+  .catch((error) => console.error("Database sync failed:", error))
+  .then(() => {
+    server.listen(port, function () {
+      console.log("Listening to port " + port);
+    });
+  });
+
 function shutDown() {
   console.log('Received kill signal, shutting down gracefully');
-  Server.close(() => {
+  server.close(() => {
     console.log('Closed out remaining connections');
     process.exit(0);
   });

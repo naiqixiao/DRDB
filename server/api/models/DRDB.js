@@ -273,6 +273,7 @@ exports.personnelHistory = PersonnelHistory;
 exports.sequelize = sequelize;
 
 const { seedDatabase } = require("../utils/seeder");
+const { patchLegacyFamilySchemaIfNeeded } = require("../utils/familySchemaPatch");
 const { seedPersonnelHistoryBaseline, reconcilePersonnelRoles } = require("../services/personnelHistoryService");
 
 async function relaxLegacyStudyAgeConstraintsIfNeeded() {
@@ -347,24 +348,16 @@ async function patchLegacyPersonnelSchemaIfNeeded() {
   }
 }
 
-async function patchLegacyFamilySchemaIfNeeded() {
-  const queryInterface = sequelize.getQueryInterface();
-  const columns = await queryInterface.describeTable("Family");
-  if (!Object.prototype.hasOwnProperty.call(columns, "OnlineStudyOnly")) {
-    await queryInterface.addColumn("Family", "OnlineStudyOnly", {
-      type: require("sequelize").INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    });
-    console.log("Patched legacy Family table: added OnlineStudyOnly.");
-  }
-}
+// Synchronize with database, then add columns every request may select.
+// server.js waits on this before listening so no query hits a missing column.
+exports.schemaReady = sequelize
+  .sync({ force: false })
+  .then(() => patchLegacyFamilySchemaIfNeeded(sequelize.getQueryInterface()));
 
-// Synchronize with database (tables created/updated in background)
-sequelize.sync({ force: false }).then(async () => {
+// Remaining patches and seeding continue in the background.
+exports.schemaReady.then(async () => {
   
   try {
-    await patchLegacyFamilySchemaIfNeeded();
     await relaxLegacyStudyAgeConstraintsIfNeeded();
     await patchLegacyPersonnelSchemaIfNeeded();
     await seedPersonnelHistoryBaseline(exports);

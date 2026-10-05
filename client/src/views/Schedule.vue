@@ -95,6 +95,7 @@
                   <div class="text-center text-sm-left">
                     <h2 class="text-h6 font-weight-bold mb-1" style="font-family: var(--ds-font-family-heading)">
                       {{ currentFamily.NamePrimary || 'Unknown Family' }}
+                      <v-chip v-if="currentFamily.OnlineStudyOnly === 1" color="warning" size="small" class="ml-2">Online studies only</v-chip>
                     </h2>
                     <div class="text-subtitle-2 text-muted d-flex align-center" style="gap: 4px;">
                       Family ID: {{ currentFamily.id || '—' }}
@@ -104,8 +105,6 @@
                     </div>
                   </div>
                 </div>
-
-        <v-chip v-if="currentFamily.OnlineStudyOnly === 1" color="warning" size="small" class="mb-3">Online studies only</v-chip>
 
                 <!-- Participation Stats Chips — always rendered so card height is consistent -->
                 <div class="d-flex flex-wrap align-center justify-center justify-sm-start mt-3" style="gap: 4px; min-height: 24px;">

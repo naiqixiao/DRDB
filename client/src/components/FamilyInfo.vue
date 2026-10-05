@@ -92,8 +92,8 @@
               </v-col>
             </v-row>
             <v-checkbox v-model="editedItem.OnlineStudyOnly" :true-value="1" :false-value="0"
-                  label="Online studies only" color="primary" hide-details></v-checkbox>
-                <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
+              label="Online studies only" color="primary" hide-details></v-checkbox>
+            <div class="text-caption text-muted mb-3">Exclude this family from recruitment searches for in-person studies.</div>
           </v-form>
         </v-card-text>
         <v-card-actions style="padding: 16px">
