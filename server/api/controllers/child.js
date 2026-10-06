@@ -375,7 +375,10 @@ exports.search = asyncHandler(async (req, res) => {
   }
 
   if (req.query.ASDParticipant != null) {
-    queryString["$Family.AutismHistory$"] = req.query.ASDParticipant;
+    queryString.ASD = req.query.ASDParticipant;
+    if (Number(req.query.ASDParticipant) === 0) {
+      queryString["$Family.AutismHistory$"] = { [Op.or]: [0, null] };
+    }
   }
 
   if (req.query.studyID) {
@@ -400,6 +403,17 @@ exports.search = asyncHandler(async (req, res) => {
 
     if (!studyInfo) {
       return res.status(404).json({ error: "Study not found." });
+    }
+
+    // ASD exclusion covers both child diagnosis and positive family history.
+    // Enforce the saved criterion even if a client omits or overrides its filter.
+    delete queryString.ASD;
+    delete queryString["$Family.AutismHistory$"];
+    if (studyInfo.ASDParticipant === "Exclude") {
+      queryString.ASD = 0;
+      queryString["$Family.AutismHistory$"] = { [Op.or]: [0, null] };
+    } else if (studyInfo.ASDParticipant === "Only") {
+      queryString.ASD = 1;
     }
 
     // Use the stored study format so every recruitment client gets this protection.

@@ -382,10 +382,10 @@ export default {
       var asd = false;
       switch (study.ASDParticipant) {
         case "Only":
-          child.Family.AutismHistory ? (asd = true) : (asd = false);
+          Number(child.ASD) === 1 ? (asd = true) : (asd = false);
           break;
         case "Exclude":
-          child.Family.AutismHistory ? (asd = false) : (asd = true);
+          (Number(child.ASD) === 1 || Number(child.Family?.AutismHistory) === 1) ? (asd = false) : (asd = true);
           break;
         case "Include":
           asd = true;
