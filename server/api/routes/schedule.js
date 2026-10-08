@@ -145,6 +145,19 @@ router.get("/upcoming", checkAuth, ScheduleController.upcoming);
 
 /**
  * @swagger
+ * /api/schedule/parkingBoard:
+ *   get:
+ *     summary: Public list of confirmed in-person visits for the next 7 days (login page parking board)
+ *     description: Unauthenticated. Caregiver names are masked to first name + last initial; only study, lab and staff contacts are returned. Labs named in PARKING_EXCLUDED_LABS are flagged countsForParking=false.
+ *     tags: [Schedule]
+ *     responses:
+ *       200:
+ *         description: "{ timeZone, labs: [{ id, name, countsForParking }], visits: [{ id, time, caregiver, studies: [{ studyName, studyType, labId, lab, lead, experimenter }] }] }"
+ */
+router.get("/parkingBoard", ScheduleController.parkingBoard);
+
+/**
+ * @swagger
  * /api/schedule:
  *   post:
  *     summary: Update an existing schedule

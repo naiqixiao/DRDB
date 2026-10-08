@@ -52,6 +52,10 @@ export default {
       },
     });
   },
+  // Public: used on the login page, no auth required.
+  parkingBoard() {
+    return api().get("schedule/parkingBoard");
+  },
   update(schedule) {
     schedule.User = {
       

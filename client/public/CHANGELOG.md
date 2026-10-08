@@ -1,3 +1,26 @@
+### Release v3.1.1
+
+DRDB 3.1.1 adds a department-wide board of upcoming in-person visits to the login page, to help coordinate the shared participant parking spots across labs.
+
+#### Upcoming In-Person Visits (Login Page)
+* **All labs at a glance:** The login page now lists confirmed, in-person visits for the next 7 days across every lab. Online studies are left out, since they don't need parking.
+* **Organized by day and time slot:** Day chips show how many visits each day has; within a day, visits are grouped by start time, one card per family visit.
+* **Opens at the current time:** The board has a fixed height and scrolls on its own. On today's view, a "Now" line marks the current time and the list opens at the next upcoming slot. Earlier slots stay available by scrolling up and are shown faded.
+* **Parking spot count:** Each time slot shows how many families are arriving against the 3 available spots, and turns red when a slot is over capacity.
+* **Who to contact:** Each card shows the study, its lab, and the email and phone number of the primary experimenter and the study lead.
+* **Lab filter and colours:** Lab chips let you show or hide each lab's visits, and each lab has its own colour on the cards. Hidden labs still count toward the parking total, because hiding a lab doesn't free up its parking.
+* **Labs with their own parking:** Labs named in the new `PARKING_EXCLUDED_LABS` setting (comma-separated lab names in `.env`) still appear on the board, but their visits are marked "no parking" and not counted toward the spots.
+
+#### Privacy
+* The board can be seen without signing in, so it shares as little as possible: caregivers appear as first name and last initial only (e.g. "Sarah K."). Family contact details, child information, and full surnames are never sent to the login page.
+
+#### Configuration
+* New optional variable `PARKING_EXCLUDED_LABS`, documented in both `.env.example` files and passed through to the backend in `docker-compose.yml`.
+
+#### Verification
+* Frontend production build completed successfully.
+* Backend test suite completed successfully, including new tests for name masking, the in-person filter, and excluded labs.
+
 ### Release v3.1.0
 
 DRDB 3.1.0 introduces two optional, human-reviewed AI assistants in the email workflow, plus secure Administrator-only full-system migration for moving an existing installation into a new Docker deployment.

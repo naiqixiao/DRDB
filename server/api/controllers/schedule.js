@@ -2,7 +2,8 @@ const { Op } = require("sequelize");
 const moment = require("moment");
 const log = require("../controllers/log");
 const scheduleService = require("../services/scheduleService");
-const { getEffectiveTimezone } = require("../services/timezoneService");
+const momentTz = require("moment-timezone");
+const { getEffectiveTimezone, getGeneralTimezone } = require("../services/timezoneService");
 const model = require("../models/DRDB");
 
 async function getLabSettings(labId) {
@@ -247,6 +248,109 @@ exports.upcoming = asyncHandler(async (req, res) => {
   });
 
   res.status(200).send(schedules);
+});
+
+// Public (unauthenticated) board shown on the login page so the department can
+// allocate its participant parking spots. Only the minimum is exposed: caregiver
+// first name + last initial, study/lab, and staff contacts. Online visits are
+// dropped because they don't need parking.
+const PARKING_BOARD_DAYS = 7;
+
+function maskCaregiverName(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Participant family";
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
+}
+
+function staffContact(person) {
+  if (!person) return null;
+  return { name: person.Name || null, email: person.Email || null, phone: person.Phone || null };
+}
+
+function toParkingVisits(schedules) {
+  return schedules
+    .map((schedule) => {
+      const studies = (schedule.Appointments || [])
+        .filter((appt) => appt.Study && appt.Study.StudyType !== "Online")
+        .map((appt) => ({
+          studyName: appt.Study.StudyName,
+          studyType: appt.Study.StudyType,
+          labId: appt.Study.Lab ? appt.Study.Lab.id : null,
+          lab: appt.Study.Lab ? appt.Study.Lab.LabName : null,
+          lead: staffContact(appt.Study.PointofContact),
+          experimenter: staffContact((appt.PrimaryExperimenter || [])[0]),
+        }));
+      return {
+        id: schedule.id,
+        time: schedule.AppointmentTime,
+        caregiver: maskCaregiverName(schedule.Family && schedule.Family.NamePrimary),
+        studies,
+      };
+    })
+    .filter((visit) => visit.studies.length > 0);
+}
+
+// PARKING_EXCLUDED_LABS: comma-separated lab names whose visits are shown on the
+// board but don't use the shared participant parking (matched case-insensitively).
+function parkingExcludedLabNames() {
+  return (process.env.PARKING_EXCLUDED_LABS || "")
+    .split(",")
+    .map((name) => name.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function toParkingLabs(labs) {
+  const excluded = parkingExcludedLabNames();
+  return labs.map((lab) => ({
+    id: lab.id,
+    name: lab.LabName,
+    countsForParking: !excluded.includes(String(lab.LabName || "").trim().toLowerCase()),
+  }));
+}
+
+exports.maskCaregiverName = maskCaregiverName;
+exports.toParkingVisits = toParkingVisits;
+exports.toParkingLabs = toParkingLabs;
+
+exports.parkingBoard = asyncHandler(async (req, res) => {
+  const timeZone = await getGeneralTimezone();
+  const start = momentTz.tz(timeZone).startOf("day");
+  const end = start.clone().add(PARKING_BOARD_DAYS - 1, "days").endOf("day");
+  const contactAttrs = ["id", "Name", "Email", "Phone"];
+
+  const schedules = await model.schedule.findAll({
+    where: {
+      AppointmentTime: { [Op.between]: [start.toDate(), end.toDate()] },
+      Status: "Confirmed",
+      Completed: false,
+      "$Family.TrainingSet$": false,
+    },
+    subQuery: false,
+    include: [
+      {
+        model: model.appointment,
+        attributes: ["id"],
+        include: [
+          {
+            model: model.study,
+            attributes: ["id", "StudyName", "StudyType"],
+            include: [
+              { model: model.lab, attributes: ["id", "LabName"] },
+              { model: model.personnel, as: "PointofContact", attributes: contactAttrs },
+            ],
+          },
+          { model: model.personnel, as: "PrimaryExperimenter", through: { attributes: [] }, attributes: contactAttrs },
+        ],
+      },
+      { model: model.family, attributes: ["id", "NamePrimary"] },
+    ],
+    order: [["AppointmentTime", "ASC"]],
+  });
+
+  const labs = await model.lab.findAll({ attributes: ["id", "LabName"], order: [["id", "ASC"]] });
+
+  res.status(200).send({ timeZone, labs: toParkingLabs(labs), visits: toParkingVisits(schedules) });
 });
 
 exports.remind = asyncHandler(async (req, res) => {

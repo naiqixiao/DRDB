@@ -77,7 +77,7 @@
               Supported by the Canada Foundation for Innovation (CFI), Natural Sciences and Engineering Research Council of Canada (NSERC), Social Sciences and Humanities Research Council (SSHRC), and McMaster University
             </p>
             <p class="text-caption text-muted" style="font-size: 0.75rem !important;">
-              Version 3.1.0
+              Version 3.1.1
             </p>
           </div>
         </div>
@@ -88,6 +88,18 @@
           <h2 class="text-h5 font-weight-bold mb-6 text-primary" style="font-family: var(--ds-font-family-heading);">System Overview</h2>
           
           <v-row>
+            <v-col cols="12">
+              <v-card class="ds-card mb-6" variant="flat">
+                <v-toolbar color="transparent" density="compact" class="px-2 border-bottom">
+                  <v-icon class="mr-2" color="primary">mdi-car-clock</v-icon>
+                  <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">Upcoming In-Person Visits (All Labs)</span>
+                </v-toolbar>
+                <v-card-text>
+                  <ParkingBoard />
+                </v-card-text>
+              </v-card>
+            </v-col>
+
             <v-col cols="12">
               <v-card class="ds-card mb-6" variant="flat">
                 <v-toolbar color="transparent" density="compact" class="px-2 border-bottom">
@@ -155,12 +167,13 @@ import testingRoom from "@/services/testingRoom";
 import externalAPIs from "@/services/externalAPIs";
 import HistogramChart from '@/components/HistogramChart.vue';
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
+import ParkingBoard from "@/components/ParkingBoard.vue";
 import { useMainStore } from "@/stores/mainStore";
 import { marked } from "marked";
 import brandingService, { DEFAULT_BRANDING } from "@/services/branding";
 
 export default {
-  components: { HistogramChart, ConfirmDlg },
+  components: { HistogramChart, ConfirmDlg, ParkingBoard },
   setup() {
     const store = useMainStore();
     return { store };

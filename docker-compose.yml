@@ -41,6 +41,7 @@ services:
       TIMEZONE: ${TIMEZONE:-America/Toronto}
       TZ: ${TIMEZONE:-America/Toronto}
       STATS_OUTPUT_PATH: /app/data/stats
+      PARKING_EXCLUDED_LABS: ${PARKING_EXCLUDED_LABS:-}
       # Shared AI provider config (used by every AI feature unless a
       # feature-level *_PROVIDER override is set below). Defaults point at
       # the lab's NInfer server; override LOCAL_LLM_* for any other
