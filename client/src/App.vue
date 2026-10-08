@@ -197,6 +197,39 @@
     >
       <router-view :training="store.trainingMode" />
     </v-main>
+
+    <!-- Parking board shortcut, available on every page except login -->
+    <template v-if="!isLoginRoute">
+      <v-btn
+        class="parking-fab"
+        icon
+        size="large"
+        color="primary"
+        elevation="6"
+        aria-label="Show upcoming in-person visits"
+        @click="parkingDialog = true"
+      >
+        <v-icon>mdi-car-clock</v-icon>
+        <v-tooltip activator="parent" location="left">Upcoming in-person visits (parking)</v-tooltip>
+      </v-btn>
+
+      <v-dialog v-model="parkingDialog" max-width="960" scrollable>
+        <v-card class="ds-card" variant="flat">
+          <v-toolbar color="transparent" density="compact" class="px-2 parking-dialog-header">
+            <v-icon class="mr-2" color="primary">mdi-car-clock</v-icon>
+            <span class="text-subtitle-1 font-weight-bold" style="font-family: var(--ds-font-family-heading); color: rgb(var(--v-theme-primary))">
+              Upcoming In-Person Visits (All Labs)
+            </span>
+            <v-spacer></v-spacer>
+            <v-btn icon="mdi-close" variant="text" aria-label="Close" @click="parkingDialog = false"></v-btn>
+          </v-toolbar>
+          <v-card-text>
+            <!-- v-if remounts the board on each open so it reloads and scrolls to now -->
+            <ParkingBoard v-if="parkingDialog" :height="520" />
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+    </template>
   </v-app>
 </template>
 
@@ -205,9 +238,11 @@ import feedback from "@/services/feedback";
 import login from "@/services/login";
 import { useMainStore } from "@/stores/mainStore";
 import brandingService from "@/services/branding";
+import ParkingBoard from "@/components/ParkingBoard.vue";
 
 export default {
   name: "App",
+  components: { ParkingBoard },
   setup() {
     const store = useMainStore();
     return { store };
@@ -216,6 +251,7 @@ export default {
     return {
       drawer: false,
       feedbackDialog: false,
+      parkingDialog: false,
       currentFeedback: {
         Title: "",
         Content: "",
@@ -553,6 +589,17 @@ export default {
 .active-nav-item {
   background-color: rgba(var(--v-theme-primary-darken-1), 0.08) !important;
   border-left: 3px solid var(--v-theme-primary) !important;
+}
+
+.parking-fab {
+  position: fixed !important;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1005;
+}
+
+.parking-dialog-header {
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
 }
 
 /* The login overview owns its own right-side scroll area. Keeping the app

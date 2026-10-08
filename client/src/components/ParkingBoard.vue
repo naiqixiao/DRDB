@@ -123,6 +123,7 @@ import schedule from "@/services/schedule";
 import moment from "moment-timezone";
 
 const DAYS_SHOWN = 7;
+const REFRESH_MS = 5 * 60 * 1000;
 // Distinct, readable lab colours (red is reserved for the over-capacity warning).
 const LAB_PALETTE = ["#2563EB", "#059669", "#D97706", "#7C3AED", "#DB2777", "#0891B2", "#65A30D", "#475569"];
 
@@ -209,30 +210,67 @@ export default {
   },
   mounted() {
     this.fetchBoard();
-    // Keep the past/now split current while the login page stays open.
-    this.clock = setInterval(() => { this.now = moment(); }, 60 * 1000);
+    this.startClock();
+    // Pick up newly booked or cancelled visits while the login page stays open.
+    this.refreshTimer = setInterval(() => this.fetchBoard({ silent: true }), REFRESH_MS);
+    // Background tabs throttle timers; catch up as soon as the page is visible again.
+    this.onVisible = () => {
+      if (document.visibilityState !== "visible") return;
+      this.now = moment();
+      this.fetchBoard({ silent: true });
+    };
+    document.addEventListener("visibilitychange", this.onVisible);
   },
   beforeUnmount() {
+    clearTimeout(this.clockAlign);
     clearInterval(this.clock);
+    clearInterval(this.refreshTimer);
+    document.removeEventListener("visibilitychange", this.onVisible);
   },
   methods: {
-    async fetchBoard() {
-      this.loading = true;
-      this.error = false;
+    // Tick on each minute boundary so the "Now" label changes with the clock.
+    startClock() {
+      this.now = moment();
+      const msToNextMinute = 60000 - (Date.now() % 60000);
+      this.clockAlign = setTimeout(() => {
+        this.now = moment();
+        this.clock = setInterval(() => { this.now = moment(); }, 60000);
+      }, msToNextMinute);
+    },
+    // silent: background refresh that keeps the selected day, lab filter and scroll position.
+    async fetchBoard({ silent = false } = {}) {
+      if (!silent) {
+        this.loading = true;
+        this.error = false;
+      }
       try {
         const { data } = await schedule.parkingBoard();
+        const knownLabs = new Set(this.labs.map((lab) => lab.id));
         this.timeZone = data.timeZone || this.timeZone;
         this.labs = data.labs || [];
-        this.selectedLabs = this.labs.map((lab) => lab.id);
         this.visits = data.visits || [];
-        const firstBusy = this.days.find((d) => d.count > 0);
-        this.selectedDay = (firstBusy || this.days[0]).key;
+        if (silent) {
+          // Keep the user's filter; show any lab that appeared since the last load.
+          const newLabs = this.labs.filter((lab) => !knownLabs.has(lab.id)).map((lab) => lab.id);
+          const kept = this.selectedLabs.filter((id) => this.labsById[id]);
+          // Only reassign on a real change: the selectedLabs watcher scrolls the list.
+          if (newLabs.length || kept.length !== this.selectedLabs.length) this.selectedLabs = [...kept, ...newLabs];
+          if (!this.days.some((d) => d.key === this.selectedDay)) this.selectedDay = this.days[0].key;
+        } else {
+          this.selectedLabs = this.labs.map((lab) => lab.id);
+          const firstBusy = this.days.find((d) => d.count > 0);
+          this.selectedDay = (firstBusy || this.days[0]).key;
+        }
+        this.error = false;
       } catch (e) {
         console.error("Failed to load parking board:", e);
-        this.error = true;
+        // A failed background refresh keeps showing the last good data.
+        if (!silent) this.error = true;
       }
-      this.loading = false;
-      this.scrollToNow();
+      if (!silent) {
+        this.loading = false;
+        this.scrollToNow();
+      }
     },
     setSlotRef(key, el) {
       if (el) this.slotRefs[key] = el;

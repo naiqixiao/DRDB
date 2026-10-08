@@ -10,6 +10,8 @@ DRDB 3.1.1 adds a department-wide board of upcoming in-person visits to the logi
 * **Who to contact:** Each card shows the study, its lab, and the email and phone number of the primary experimenter and the study lead.
 * **Lab filter and colours:** Lab chips let you show or hide each lab's visits, and each lab has its own colour on the cards. Hidden labs still count toward the parking total, because hiding a lab doesn't free up its parking.
 * **Labs with their own parking:** Labs named in the new `PARKING_EXCLUDED_LABS` setting (comma-separated lab names in `.env`) still appear on the board, but their visits are marked "no parking" and not counted toward the spots.
+* **Stays up to date:** The "Now" line moves with the clock, and the list of visits refreshes every 5 minutes, so a screen left on the login page keeps showing current bookings. Refreshes keep your selected day, lab filter, and scroll position.
+* **Available from every page:** After signing in, a car button in the bottom-right corner of every page opens the same board in a pop-up. Close it with the X, the Esc key, or by clicking outside it.
 
 #### Privacy
 * The board can be seen without signing in, so it shares as little as possible: caregivers appear as first name and last initial only (e.g. "Sarah K."). Family contact details, child information, and full surnames are never sent to the login page.
