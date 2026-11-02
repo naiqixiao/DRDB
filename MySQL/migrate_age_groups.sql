@@ -35,12 +35,18 @@ CREATE TABLE IF NOT EXISTS `StudyAgeGroup` (
 --    (only for rows that have valid, non-zero values)
 -- -------------------------------------------------------
 INSERT INTO `StudyAgeGroup` (`FK_Study`, `MinAge`, `MaxAge`)
-SELECT `id`, `MinAge`, `MaxAge`
-FROM   `Study`
-WHERE  `MinAge` IS NOT NULL
-  AND  `MaxAge` IS NOT NULL
-  AND  `MinAge` > 0
-  AND  `MaxAge` > 0;
+SELECT s.`id`, s.`MinAge`, s.`MaxAge`
+FROM   `Study` s
+WHERE  s.`MinAge` IS NOT NULL
+  AND  s.`MaxAge` IS NOT NULL
+  AND  s.`MinAge` > 0
+  AND  s.`MaxAge` > 0
+  AND NOT EXISTS (
+    SELECT 1 FROM `StudyAgeGroup` ag
+    WHERE ag.`FK_Study` = s.`id`
+      AND ag.`MinAge` = s.`MinAge`
+      AND ag.`MaxAge` = s.`MaxAge`
+  );
 
 -- -------------------------------------------------------
 -- 3. Create prerequisite junction table

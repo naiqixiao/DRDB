@@ -141,9 +141,9 @@
                     <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
                     <span class="text-body-1 text-muted">
                       <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
-                        <span v-for="(group, i) in study.AgeGroups" :key="i"
+                        <span v-for="(group, i) in uniqueAgeGroups(study.AgeGroups)" :key="i"
                           >{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge)
-                          }}<span v-if="i < study.AgeGroups.length - 1">, </span></span
+                          }}<span v-if="i < uniqueAgeGroups(study.AgeGroups).length - 1">, </span></span
                         >
                       </template>
                       <template v-else>Age range not set</template>
@@ -244,9 +244,9 @@
                   <v-icon size="18" class="mr-3" color="grey">mdi-human-child</v-icon>
                   <span class="text-body-1 text-muted">
                     <template v-if="study.AgeGroups && study.AgeGroups.length > 0">
-                      <span v-for="(group, i) in study.AgeGroups" :key="i"
+                      <span v-for="(group, i) in uniqueAgeGroups(study.AgeGroups)" :key="i"
                         >{{ AgeFormated(group.MinAge) }}–{{ AgeFormated(group.MaxAge)
-                        }}<span v-if="i < study.AgeGroups.length - 1">, </span></span
+                        }}<span v-if="i < uniqueAgeGroups(study.AgeGroups).length - 1">, </span></span
                       >
                     </template>
                     <template v-else>Age range not set</template>
@@ -475,7 +475,7 @@
                     style="gap: 8px"
                   >
                     <v-chip
-                      v-for="(group, i) in currentStudy.AgeGroups"
+                      v-for="(group, i) in uniqueAgeGroups(currentStudy.AgeGroups)"
                       :key="i"
                       color="primary"
                       variant="tonal"
@@ -487,50 +487,18 @@
                   <span v-else class="text-body-1 text-muted">—</span>
                 </div>
 
-                <div
-                  v-if="
-                    currentStudy.Prerequisites && currentStudy.Prerequisites.length > 0
-                  "
-                  class="mb-6"
-                >
-                  <div
-                    class="text-body-2 font-weight-bold text-uppercase text-muted mb-2"
-                  >
-                    Prerequisites
-                  </div>
-                  <div class="d-flex flex-wrap gap-2" style="gap: 8px">
-                    <v-chip
-                      v-for="p in currentStudy.Prerequisites"
-                      :key="p.id"
-                      color="success"
-                      variant="tonal"
-                    >
-                      <v-icon start size="16">mdi-check-circle-outline</v-icon
-                      >{{ p.StudyName }}
-                    </v-chip>
-                  </div>
-                </div>
-
-                <div
-                  v-if="currentStudy.Exclusions && currentStudy.Exclusions.length > 0"
-                  class="mb-6"
-                >
-                  <div
-                    class="text-body-2 font-weight-bold text-uppercase text-muted mb-2"
-                  >
-                    Exclusions
-                  </div>
-                  <div class="d-flex flex-wrap gap-2" style="gap: 8px">
-                    <v-chip
-                      v-for="e in currentStudy.Exclusions"
-                      :key="e.id"
-                      color="error"
-                      variant="tonal"
-                    >
-                      <v-icon start size="16">mdi-close-circle-outline</v-icon
-                      >{{ e.StudyName }}
-                    </v-chip>
-                  </div>
+                <div class="mb-6">
+                  <div class="text-body-2 font-weight-bold text-uppercase text-muted mb-2">Participation Requirements</div>
+                  <div v-if="!participationGroups(currentStudy).length" class="text-muted">No participation requirements</div>
+                  <template v-for="(group, index) in participationGroups(currentStudy)" :key="index">
+                    <div v-if="index" class="text-caption font-weight-bold my-2">AND</div>
+                    <div class="text-body-2 mb-1">{{ participationOperatorLabel(group.operator) }}</div>
+                    <div class="d-flex flex-wrap" style="gap: 8px">
+                      <v-chip v-for="id in group.studyIds" :key="id" :color="group.operator === 'NONE' ? 'error' : 'success'" variant="tonal">
+                        {{ participationStudyName(id) }}
+                      </v-chip>
+                    </div>
+                  </template>
                 </div>
 
                 <div>
@@ -1324,45 +1292,25 @@
                   </v-card>
 
                   <v-card class="ds-card pa-6 mb-6" variant="flat">
-                    <h3 class="text-h6 mb-4">Study Requirements</h3>
-                    <v-row dense>
-                      <v-col cols="12" md="6">
-                        <div
-                          class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1"
-                        >
-                          Prerequisite Studies
-                        </div>
-                        <v-select
-                          v-model="editedStudy.PrerequisiteIds"
-                          :items="Studies.filter((s) => s.id !== editedStudy.id)"
-                          item-title="StudyName"
-                          item-value="id"
-                          placeholder="Must have completed..."
-                          multiple
-                          chips
-                          variant="outlined"
-                          density="compact"
-                        ></v-select>
-                      </v-col>
-                      <v-col cols="12" md="6">
-                        <div
-                          class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1"
-                        >
-                          Excluded Studies
-                        </div>
-                        <v-select
-                          v-model="editedStudy.ExclusionIds"
-                          :items="Studies.filter((s) => s.id !== editedStudy.id)"
-                          item-title="StudyName"
-                          item-value="id"
-                          placeholder="Must NOT have participated..."
-                          multiple
-                          chips
-                          variant="outlined"
-                          density="compact"
-                        ></v-select>
-                      </v-col>
-                    </v-row>
+                    <h3 class="text-h6 mb-2">Participation Requirements</h3>
+                    <p class="text-body-2 text-muted mb-4">Participants must satisfy every group (AND). Each group checks participation in ANY, ALL, or NONE of its selected studies.</p>
+                    <p v-if="!editedStudy.ParticipationRules?.length" class="text-body-2 mb-4">No participation requirements. Add a group to require or exclude previous studies.</p>
+                    <template v-for="(group, index) in editedStudy.ParticipationRules" :key="index">
+                      <div v-if="index" class="text-caption font-weight-bold my-3">AND</div>
+                      <v-row dense align="start">
+                        <v-col cols="12" md="4">
+                          <v-select v-model="group.operator" label="Participation in" :items="participationOperators" item-title="title" item-value="value" variant="outlined" density="compact" />
+                        </v-col>
+                        <v-col cols="10" md="7">
+                          <v-select v-model="group.studyIds" label="Studies" :items="Studies.filter(s => s.id !== editedStudy.id)" item-title="StudyName" item-value="id" multiple chips variant="outlined" density="compact" :rules="[ids => !!ids?.length || 'Select at least one study']" />
+                        </v-col>
+                        <v-col cols="2" md="1">
+                          <v-btn icon="mdi-delete-outline" variant="text" color="error" :aria-label="'Remove participation group ' + (index + 1)" @click="editedStudy.ParticipationRules.splice(index, 1)" />
+                        </v-col>
+                      </v-row>
+                    </template>
+                    <v-btn variant="tonal" color="primary" prepend-icon="mdi-plus" @click="editedStudy.ParticipationRules.push({ operator: 'ANY', studyIds: [] })">Add group</v-btn>
+
                   </v-card>
 
                   <v-card class="ds-card pa-6" variant="flat">
@@ -1669,6 +1617,8 @@
 
 <script>
 import moment from "moment";
+import { uniqueAgeGroups } from "@/assets/JS/ageGroups";
+import { getParticipationGroups, validateParticipationGroups } from "@/assets/JS/participationRules";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 
 import AssignedExperimenters from "@/components/AssignedExperimenters.vue";
@@ -1770,6 +1720,9 @@ export default {
   },
 
   computed: {
+    participationOperators() {
+      return [{ title: 'ANY (OR)', value: 'ANY' }, { title: 'ALL (AND)', value: 'ALL' }, { title: 'NONE (NOT)', value: 'NONE' }];
+    },
     filteredStudies() {
       let result = this.Studies;
       if (this.inProgressStudyFilter) {
@@ -1898,6 +1851,14 @@ export default {
   },
 
   methods: {
+    uniqueAgeGroups,
+    participationGroups: getParticipationGroups,
+    participationOperatorLabel(operator) {
+      return { ANY: 'Participated in any one of:', ALL: 'Participated in all of:', NONE: 'Must not have participated in any of:' }[operator];
+    },
+    participationStudyName(id) {
+      return this.Studies.find(study => Number(study.id) === Number(id))?.StudyName || `Study #${id}`;
+    },
     highlightKeywords(template) {
       const hl = (text) => `<span style="font-weight:700;color:#0D9488">${text}</span>`;
       let email = template;
@@ -2061,10 +2022,11 @@ export default {
     editStudy() {
       this.editedStudy = {
         ...this.currentStudy,
-        AgeGroups: (this.currentStudy.AgeGroups || []).map((g) => ({
+        AgeGroups: uniqueAgeGroups(this.currentStudy.AgeGroups).map((g) => ({
           MinAge: g.MinAge,
           MaxAge: g.MaxAge,
         })),
+        ParticipationRules: JSON.parse(JSON.stringify(getParticipationGroups(this.currentStudy))),
         PrerequisiteIds: (this.currentStudy.Prerequisites || []).map((p) => p.id),
         ExclusionIds: (this.currentStudy.Exclusions || []).map((e) => e.id),
       };
@@ -2096,6 +2058,7 @@ export default {
         ReminderTemplate: "",
         FollowUPEmailSnippet: "",
         AgeGroups: [],
+        ParticipationRules: [],
         PrerequisiteIds: [],
         ExclusionIds: [],
         ASDParticipant: "Include",
@@ -2131,12 +2094,13 @@ export default {
         Completed: false, // Ensure the duplicate starts as "In Progress"
 
         // Strip the internal DB IDs from Age Groups so they are created fresh
-        AgeGroups: (this.currentStudy.AgeGroups || []).map((g) => ({
+        AgeGroups: uniqueAgeGroups(this.currentStudy.AgeGroups).map((g) => ({
           MinAge: g.MinAge,
           MaxAge: g.MaxAge,
         })),
 
         // Map relational tables back to simple arrays for the creation endpoint
+        ParticipationRules: JSON.parse(JSON.stringify(getParticipationGroups(this.currentStudy))),
         PrerequisiteIds: (this.currentStudy.Prerequisites || []).map((p) => p.id),
         ExclusionIds: (this.currentStudy.Exclusions || []).map((e) => e.id),
       };
@@ -2154,6 +2118,11 @@ export default {
     },
 
     async save() {
+      if (!validateParticipationGroups(this.editedStudy.ParticipationRules)) {
+        this.studyStepper = 2;
+        this.$refs.confirmD.open('Participation Requirements', 'Each group needs ANY, ALL, or NONE and at least one selected study. Remove unused groups before saving.', { color: 'warning', noconfirm: true });
+        return;
+      }
       const { valid } = await this.$refs.form.validate();
       if (!valid) {
         this.$refs.confirmD.open(

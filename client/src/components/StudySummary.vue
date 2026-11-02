@@ -56,35 +56,19 @@
         </v-chip>
       </div>
 
-      <!-- Prerequisites & Exclusions in two columns -->
-      <div class="mb-3 d-flex" style="gap: 12px;"
-        v-if="(selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0) || (selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0)">
-        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Prerequisites && selectedStudy.Prerequisites.length > 0">
-          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Prerequisites</div>
+      <div v-if="selectedStudy?.id" class="mb-4">
+        <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Participation Requirements</div>
+        <div v-if="!participationGroups.length" class="text-caption text-muted px-1">No participation requirements</div>
+        <template v-for="(group, index) in participationGroups" :key="index">
+          <div v-if="index" class="text-caption font-weight-bold my-2 px-1">AND</div>
+          <div class="text-caption mb-1 px-1">{{ operatorLabel(group.operator) }}</div>
           <div class="d-flex flex-wrap" style="gap: 4px;">
-            <v-chip
-              v-for="prereq in selectedStudy.Prerequisites"
-              :key="prereq.id"
-              size="x-small"
-              variant="tonal"
-              color="success"
-              prepend-icon="mdi-check-circle-outline"
-            >{{ prereq.StudyName }}</v-chip>
+            <v-chip v-for="id in group.studyIds" :key="id" size="small" variant="tonal"
+              :color="group.operator === 'NONE' ? 'error' : 'success'">
+              {{ studyName(id) }}
+            </v-chip>
           </div>
-        </div>
-        <div class="flex-1" style="flex: 1; min-width: 0;" v-if="selectedStudy?.Exclusions && selectedStudy.Exclusions.length > 0">
-          <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Exclusions</div>
-          <div class="d-flex flex-wrap" style="gap: 4px;">
-            <v-chip
-              v-for="excl in selectedStudy.Exclusions"
-              :key="excl.id"
-              size="x-small"
-              variant="tonal"
-              color="error"
-              prepend-icon="mdi-close-circle-outline"
-            >{{ excl.StudyName }}</v-chip>
-          </div>
-        </div>
+        </template>
       </div>
 
       <!-- Exclusion / Inclusion Criteria -->
@@ -159,9 +143,11 @@
 </template>
 
 <script>
+import { getParticipationGroups } from "@/assets/JS/participationRules";
 export default {
   name: "StudySummary",
   props: {
+    studies: { type: Array, default: () => [] },
     selectedStudy: {
       type: Object,
       default: () => ({})
@@ -181,6 +167,9 @@ export default {
     },
   },
   computed: {
+    participationGroups() {
+      return getParticipationGroups(this.selectedStudy || {});
+    },
     hasCriteriaChips() {
       const s = this.selectedStudy;
       if (!s) return false;
@@ -189,6 +178,13 @@ export default {
     },
   },
   methods: {
+    operatorLabel(operator) {
+      return { ANY: 'ANY (OR): participated in at least one', ALL: 'ALL (AND): participated in every study', NONE: 'NONE (NOT): must not have participated in any' }[operator];
+    },
+    studyName(id) {
+      const studies = [...this.studies, ...(this.selectedStudy?.Prerequisites || []), ...(this.selectedStudy?.Exclusions || [])];
+      return studies.find(study => Number(study.id) === Number(id))?.StudyName || `Study #${id}`;
+    },
     isGroupSelected(i) {
       if (!this.selectedStudy || this.selectedStudy.AgeGroups.length === 1) return true;
       return this.selectedAgeGroupIndex === i;

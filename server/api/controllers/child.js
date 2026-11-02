@@ -1,3 +1,4 @@
+const { matchesParticipationRules } = require("../utils/participationRules");
 const model = require("../models/DRDB");
 const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -115,21 +116,12 @@ function isChildEligibleForSlimSearch(childRecord, eligibility) {
     }
   }
 
-  const pastStudyIds = new Set((childRecord.Appointments || []).map((appointment) => appointment.FK_Study));
-
-  if (prerequisiteStudyIds.length > 0) {
-    const hasAllPrerequisites = prerequisiteStudyIds.every((studyId) => pastStudyIds.has(studyId));
-    if (!hasAllPrerequisites) {
-      return false;
-    }
-  }
-
-  if (exclusionStudyIds.length > 0) {
-    const hasExcludedStudy = exclusionStudyIds.some((studyId) => pastStudyIds.has(studyId));
-    if (hasExcludedStudy) {
-      return false;
-    }
-  }
+  const history = (childRecord.Appointments || []).map(appointment => appointment.FK_Study);
+  if (!matchesParticipationRules({
+    ParticipationRules: eligibility.participationRules,
+    Prerequisites: prerequisiteStudyIds.map(id => ({ id })),
+    Exclusions: exclusionStudyIds.map(id => ({ id })),
+  }, history)) return false;
 
   return true;
 }
@@ -381,6 +373,7 @@ exports.search = asyncHandler(async (req, res) => {
     }
   }
 
+  let savedParticipationRules;
   if (req.query.studyID) {
     const studyInfo = await model.study.findOne({
       where: { id: req.query.studyID },
@@ -404,6 +397,8 @@ exports.search = asyncHandler(async (req, res) => {
     if (!studyInfo) {
       return res.status(404).json({ error: "Study not found." });
     }
+
+    savedParticipationRules = studyInfo.ParticipationRules;
 
     // ASD exclusion covers both child diagnosis and positive family history.
     // Enforce the saved criterion even if a client omits or overrides its filter.
@@ -433,6 +428,7 @@ exports.search = asyncHandler(async (req, res) => {
 
   if (isSlim) {
     const eligibility = {
+      participationRules: savedParticipationRules,
       ageGroups: parseArrayQueryParam(req.query.eligibilityAgeGroups),
       prerequisiteStudyIds: parseArrayQueryParam(req.query.prerequisiteStudyIds)
         .map((value) => Number(value))

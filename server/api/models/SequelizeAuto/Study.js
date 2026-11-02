@@ -8,6 +8,10 @@ module.exports = function (sequelize, DataTypes) {
 			allowNull: false,
 			primaryKey: true
 		},
+		ParticipationRules: {
+			type: DataTypes.JSON,
+			allowNull: true
+		},
 		StudyName: {
 			type: DataTypes.STRING(45),
 			allowNull: false

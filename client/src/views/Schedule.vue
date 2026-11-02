@@ -28,7 +28,7 @@
     <v-row justify="space-around" align="stretch">
       <!-- LEFT COLUMN: Study Summary -->
       <v-col cols="12" md="5" class="d-flex flex-column">
-        <StudySummary :selectedStudy="selectedStudy" class="flex-grow-1 h-100" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
+        <StudySummary :selectedStudy="selectedStudy" :studies="studies || []" class="flex-grow-1 h-100" @ageGroupFilter="onAgeGroupFilter"></StudySummary>
       </v-col>
 
       <!-- CENTER COLUMN: Choose Study + Family & Child Info -->
@@ -1083,6 +1083,8 @@ export default {
         trainingMode: this.store.trainingMode,
         slim: true,  // fetch minimal data for the list; full data loaded on selection
         eligibilityAgeGroups: JSON.stringify(this.activeAgeGroup ? [this.activeAgeGroup] : (this.selectedStudy.AgeGroups || [])),
+        // Grouped participation rules are read from the saved study on the server.
+        // Keep these legacy filters for studies that have not adopted grouped rules.
         prerequisiteStudyIds: JSON.stringify((this.selectedStudy.Prerequisites || []).map((study) => study.id)),
         exclusionStudyIds: JSON.stringify((this.selectedStudy.Exclusions || []).map((study) => study.id)),
       };

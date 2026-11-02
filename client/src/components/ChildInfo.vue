@@ -198,6 +198,7 @@
 </template>
 
 <script>
+import { matchesParticipationRules } from "@/assets/JS/participationRules";
 import child from "@/services/child";
 // import schedule from "@/services/schedule";
 // import calendar from "@/services/calendar";
@@ -363,21 +364,8 @@ export default {
         ? child.Appointments.map((app) => app.FK_Study)
         : [];
 
-      // 2. Prerequisite Check (child MUST HAVE participated in ALL prerequisites)
-      let meetsPrereqs = true;
-      if (study.Prerequisites && study.Prerequisites.length > 0) {
-        meetsPrereqs = study.Prerequisites.every((prereq) =>
-          pastStudyIds.includes(prereq.id)
-        );
-      }
-
-      // 3. Exclusion Check (child MUST NOT have participated in ANY exclusions)
-      let meetsExclusions = true;
-      if (study.Exclusions && study.Exclusions.length > 0) {
-        meetsExclusions = !study.Exclusions.some((excl) =>
-          pastStudyIds.includes(excl.id)
-        );
-      }
+      const meetsPrereqs = matchesParticipationRules(study, pastStudyIds);
+      const meetsExclusions = true; // Included in the participation rule evaluation.
 
       var asd = false;
       switch (study.ASDParticipant) {

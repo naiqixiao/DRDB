@@ -1,3 +1,13 @@
+### Release v3.1.2
+
+#### Fixes
+* Study recruitment criteria and cards show each distinct age range once, including when duplicate records use different numeric formats. Editing or duplicating a study also starts with distinct age groups.
+
+#### Study Participation Requirements
+* Build multiple participation groups joined by **AND**. Within each group, choose **ANY (OR)**, **ALL (AND)**, or **NONE (NOT)** of the selected studies.
+* Existing prerequisites become an ANY group and existing exclusions become a NONE group when editing. Removing every group removes participation requirements.
+* Recruitment searches and participant eligibility displays use the same rule semantics. Participation continues to mean an appointment record, regardless of status.
+
 ### Release v3.1.1
 
 DRDB 3.1.1 adds a department-wide board of upcoming in-person visits to the login page, to help coordinate the shared participant parking spots across labs.

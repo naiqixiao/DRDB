@@ -54,7 +54,7 @@ describe.each(['ChildInfo.vue', 'appointmentDetails.vue'])('%s study eligibility
   const source = fs.readFileSync(path.join(__dirname, '../../client/src/components', component), 'utf8');
   const start = source.indexOf('studyElegibility(study, child) {');
   const end = source.indexOf('\n    },', start);
-  const method = new Function(`return ({${source.slice(start, end)}\n}}).studyElegibility`)();
+  const method = new Function("matchesParticipationRules", `return ({${source.slice(start, end)}\n}}).studyElegibility`)(new Function(fs.readFileSync(path.join(__dirname, "../../client/src/assets/JS/participationRules.js"), "utf8").replace(/export \{[^}]+\};/, "") + "\nreturn matchesParticipationRules;")());
   const study = {
     StudyType: 'Online', AgeGroups: [], Prerequisites: [], Exclusions: [],
     HearingLossParticipant: 'Include', VisionLossParticipant: 'Include',

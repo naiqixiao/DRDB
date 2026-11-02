@@ -3,6 +3,7 @@ const { Op } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
+const { validateParticipationGroups } = require("../utils/participationRules");
 
 const log = require("../controllers/log");
 const config = require("../../config/general");
@@ -43,6 +44,9 @@ function getMissingRequiredFields(payload, requiredKeys) {
 exports.create = asyncHandler(async (req, res) => {
   const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const newStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+  if (newStudyInfo.ParticipationRules != null && !validateParticipationGroups(newStudyInfo.ParticipationRules)) {
+    return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
+  }
 
   const missingFields = getMissingRequiredFields(newStudyInfo, [
     "StudyName",
@@ -161,6 +165,9 @@ exports.update = asyncHandler(async (req, res) => {
   const ID = req.body.id;
   const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const updatedStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+  if (updatedStudyInfo.ParticipationRules != null && !validateParticipationGroups(updatedStudyInfo.ParticipationRules)) {
+    return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
+  }
 
   const missingFields = getMissingRequiredFields(updatedStudyInfo, [
     "StudyName",
