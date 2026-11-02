@@ -33,30 +33,39 @@
 
       <!-- CENTER COLUMN: Choose Study + Family & Child Info -->
       <v-col cols="12" md="4" class="d-flex flex-column">
-        <!-- Row 1: Study select + Warning + Page numbers -->
-        <v-row dense align="center" class="mb-2">
-          <v-col>
-            <v-select 
-              class="selection font-weight-bold text-primary elevation-1 rounded" 
-              :items="studies" 
-              item-value="id" 
-              item-title="StudyName"
-              v-model="selectedStudy" 
-              return-object 
-              label="Select Study Active in View" 
-              @update:model-value="onStudyChange"
-              bg-color="white" 
-              hide-details 
-              variant="outlined" 
-            ></v-select>
-          </v-col>
-          <v-col cols="auto" class="d-flex align-center" style="gap: 8px;">
-            <h2 v-show="contactedByOthers" style="color: red; font-size: 14px; white-space: nowrap;">
-              You're late. Someone just called this family...
-            </h2>
+        <!-- Study selection and recruitment controls -->
+        <div class="schedule-controls mb-3">
+          <v-select
+            class="selection font-weight-bold text-primary"
+            :items="studies"
+            item-value="id"
+            item-title="StudyName"
+            v-model="selectedStudy"
+            return-object
+            label="Select Study Active in View"
+            @update:model-value="onStudyChange"
+            bg-color="white"
+            hide-details
+            variant="outlined"
+          ></v-select>
+
+          <div class="schedule-controls__toolbar">
+            <v-switch
+              v-model="hidePhoneOnly"
+              label="Hide phone-only families (no email)"
+              color="primary"
+              density="compact"
+              hide-details
+              class="schedule-controls__filter"
+              @update:model-value="onContactFilterChange"
+            ></v-switch>
             <Page :page="page" :NofPages="Children ? Children.length : 0" @nextPage="nextPage" @previousPage="previousPage"></Page>
-          </v-col>
-        </v-row>
+          </div>
+
+          <v-alert v-if="contactedByOthers" type="warning" variant="tonal" density="compact" role="status">
+            Someone just contacted this family.
+          </v-alert>
+        </div>
 
         <div v-if="showEligibleChildSearchPagination" class="d-flex align-center justify-end flex-wrap mb-2" style="gap: 8px;">
           <v-chip size="small" variant="tonal" color="primary">
@@ -700,6 +709,7 @@ export default {
       historyTab: 'timeline',
       studies: [],
       activeAgeGroup: null,
+      hidePhoneOnly: false,
       selectedStudy: {
         StudyName: null,
         FK_Lab: this.store.lab,
@@ -982,6 +992,10 @@ export default {
       this.searchChild();
     },
 
+    onContactFilterChange() {
+      if (this.selectedStudy.id) this.searchChild();
+    },
+
     resetEligibleChildSearchState() {
       this.eligibleChildSearchLimit = 100;
       this.eligibleChildSearchOffset = 0;
@@ -1080,6 +1094,7 @@ export default {
         minAge,
         maxAge,
         studyID: this.selectedStudy.id,
+        hidePhoneOnly: this.hidePhoneOnly,
         trainingMode: this.store.trainingMode,
         slim: true,  // fetch minimal data for the list; full data loaded on selection
         eligibilityAgeGroups: JSON.stringify(this.activeAgeGroup ? [this.activeAgeGroup] : (this.selectedStudy.AgeGroups || [])),
@@ -1556,4 +1571,27 @@ export default {
 </script>
 
 <style scoped>
+.schedule-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-controls__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.schedule-controls__filter {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+
+.schedule-controls__toolbar > :last-child {
+  margin-left: auto;
+  flex-shrink: 0;
+}
 </style>

@@ -1,6 +1,6 @@
 const { matchesParticipationRules } = require("../utils/participationRules");
 const model = require("../models/DRDB");
-const { Op } = require("sequelize");
+const { Op, fn, col, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 // const fs = require("fs");
@@ -305,6 +305,21 @@ exports.search = asyncHandler(async (req, res) => {
 
   if (req.query.Email) {
     queryString["$Family.Email$"] = { [Op.like]: `${req.query.Email}%` };
+  }
+  if (req.query.hidePhoneOnly === "true") {
+    // Keep families with email, or with neither phone number. Treat whitespace as blank.
+    const contactValue = (field) => fn("TRIM", fn("COALESCE", col(`Family.${field}`), ""));
+    queryString[Op.and] = [{
+      [Op.or]: [
+        where(contactValue("Email"), { [Op.ne]: "" }),
+        {
+          [Op.and]: [
+            where(contactValue("Phone"), ""),
+            where(contactValue("CellPhone"), ""),
+          ],
+        },
+      ],
+    }];
   }
   if (req.query.NamePrimary) {
     queryString["$Family.NamePrimary$"] = {
