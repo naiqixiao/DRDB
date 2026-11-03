@@ -72,8 +72,10 @@ exports.autoCompletionReminder = asyncHandler(async (req, res) => {
       await sendLabEmail(oAuth2Client, {
         from: `${reminder.scheduleList[0].LabName}<${reminder.scheduleList[0].LabEmail}>`,
         to: `${reminder.experimenterName}<${reminder.experimenterEmail}>`,
-        subject: "[DRDB] Study confirmation reminder",
+        subject: "Study confirmation reminder",
         htmlBody,
+        lab: { id: reminder.scheduleList[0].LabID, LabName: reminder.scheduleList[0].LabName, Email: reminder.scheduleList[0].LabEmail },
+        layout: { wide: true, category: "Staff reminder" },
         labelNames: ["Reminder-email"],
       });
 
@@ -119,8 +121,10 @@ exports.autoRejectionReminder = asyncHandler(async (req, res) => {
       await sendLabEmail(oAuth2Client, {
         from: `${reminder.scheduleList[0].LabName}<${reminder.scheduleList[0].LabEmail}>`,
         to: `${reminder.researcherName}<${reminder.researcherEmail}>`,
-        subject: "[DRDB] Study follow-up reminder",
+        subject: "Study follow-up reminder",
         htmlBody,
+        lab: { id: reminder.scheduleList[0].LabID, LabName: reminder.scheduleList[0].LabName, Email: reminder.scheduleList[0].LabEmail },
+        layout: { wide: true, category: "Staff reminder" },
         labelNames: ["Reminder-email"],
       });
 
@@ -176,6 +180,7 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
             from: emailContent.from,
             subject: emailContent.subject,
             htmlBody: emailContent.body,
+            lab: schedule.Appointments[0].Study.Lab,
             labelNames: labels,
           });
 
@@ -201,6 +206,8 @@ exports.reminderEmail = asyncHandler(async (req, res) => {
             to: emailContent.to,
             subject: emailContent.subject,
             htmlBody: emailContent.body,
+            lab: schedule.Appointments[0].Study.Lab,
+            layout: { category: "Staff reminder", reason: "Please contact this family by phone to remind them about their appointment." },
           });
 
           await log.createLog(
@@ -241,8 +248,10 @@ exports.reminderEmailforExperimenters = asyncHandler(async (req, res) => {
       await sendLabEmail(oAuth2Client, {
         from: `${experimenter.Lab.LabName}<${experimenter.Lab.Email}>`,
         to: `${experimenter.Name}<${experimenter.Email}>`,
-        subject: "[DRDB] Reminder for upcoming studies",
+        subject: "Reminder for upcoming studies",
         htmlBody,
+        lab: experimenter.Lab,
+        layout: { wide: true, category: "Staff reminder" },
         labelNames: ["Reminder-email"],
       });
 

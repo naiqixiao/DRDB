@@ -4,6 +4,8 @@ const { reloadAllJobs } = require("../../jobs/scheduler");
 const { Op } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
+const emailBranding = require("../services/emailBrandingService");
 
 const BRANDING_DEFAULTS = {
   appTitle: "DRDB - Developmental Research Database",
@@ -151,7 +153,7 @@ function collectReferencedBrandingFiles(rows) {
       return;
     }
 
-    if (row.SettingKey.startsWith("LabBranding_")) {
+    if (row.SettingKey.startsWith("LabBranding_") || row.SettingKey.startsWith("LabEmailBranding_")) {
       try {
         const parsed = JSON.parse(row.SettingValue || "{}");
         const logoFile = extractAssetFileName(parsed.logoUrl);
@@ -176,6 +178,7 @@ async function cleanupUnusedBrandingAssets() {
         { SettingKey: BRANDING_SETTING_KEYS.LOGO_URL },
         { SettingKey: BRANDING_SETTING_KEYS.FAVICON_URL },
         { SettingKey: { [Op.like]: "LabBranding_%" } },
+        { SettingKey: { [Op.like]: "LabEmailBranding_%" } },
       ],
     },
   });
@@ -333,8 +336,8 @@ exports.getBrandingAsset = asyncHandler(async (req, res) => {
 exports.uploadBrandingAsset = asyncHandler(async (req, res) => {
   const { assetType, scope = "global", labId, fileName = "", fileContentBase64 } = req.body || {};
 
-  if (!["logo", "favicon"].includes(assetType)) {
-    return res.status(400).json({ message: "assetType must be 'logo' or 'favicon'." });
+  if (!["logo", "favicon", "email-logo"].includes(assetType)) {
+    return res.status(400).json({ message: "assetType must be logo, favicon, or email-logo." });
   }
 
   if (!["global", "lab"].includes(scope)) {
@@ -356,11 +359,20 @@ exports.uploadBrandingAsset = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid image payload. Upload a base64 image <= 2MB." });
   }
 
-  const extension = resolveExtension(decoded.mimeType, fileName);
+  if (assetType === "email-logo" && scope !== "lab") {
+    return res.status(400).json({ message: "Email logos must belong to a lab." });
+  }
+  let extension = resolveExtension(decoded.mimeType, fileName);
+  if (assetType === "email-logo") {
+    const png = decoded.mimeType === "image/png" && decoded.buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
+    const jpeg = decoded.mimeType === "image/jpeg" && decoded.buffer[0] === 255 && decoded.buffer[1] === 216 && decoded.buffer[2] === 255;
+    if (!png && !jpeg) return res.status(400).json({ message: "Please upload a PNG or JPEG logo (up to 2 MB)." });
+    extension = png ? "png" : "jpg";
+  }
   ensureBrandingUploadDir();
 
   const scopePart = scope === "lab" ? `lab-${targetLabId}` : "global";
-  const generatedName = `${scopePart}-${assetType}-${Date.now()}.${extension}`;
+  const generatedName = `${scopePart}-${assetType}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}.${extension}`;
   const fullPath = path.join(BRANDING_UPLOAD_DIR, generatedName);
 
   fs.writeFileSync(fullPath, decoded.buffer);
@@ -371,10 +383,28 @@ exports.uploadBrandingAsset = asyncHandler(async (req, res) => {
 
 // Upsert a system setting
 exports.updateSetting = asyncHandler(async (req, res) => {
-  const { SettingKey, SettingValue } = req.body;
+  const { SettingKey } = req.body;
+  let { SettingValue } = req.body;
   
-  if (!SettingKey) {
+  if (typeof SettingKey !== "string" || !SettingKey) {
     return res.status(400).json({ message: "SettingKey is required." });
+  }
+
+  if (/^LabEmailBranding_/i.test(SettingKey)) {
+    const labId = parsePositiveInt(SettingKey.slice("LabEmailBranding_".length));
+    if (!labId || SettingKey !== emailBranding.settingKey(labId) || !await canWriteBranding(req, "lab", labId)) {
+      return res.status(403).json({ message: "You do not have permission to update this lab’s email appearance." });
+    }
+    let value;
+    try { value = JSON.parse(SettingValue); } catch { return res.status(400).json({ message: "Invalid email appearance settings." }); }
+    if (!value || !emailBranding.THEMES.some(theme => theme.id === value.theme)) {
+      return res.status(400).json({ message: "Choose one of the available email themes." });
+    }
+    const normalized = emailBranding.normalizeBranding(value, labId);
+    if (value.logoUrl && normalized.logoUrl !== value.logoUrl) {
+      return res.status(400).json({ message: "Choose a logo uploaded for this lab." });
+    }
+    SettingValue = JSON.stringify(normalized);
   }
 
   const [setting, created] = await model.systemSetting.findOrCreate({
@@ -395,10 +425,33 @@ exports.updateSetting = asyncHandler(async (req, res) => {
   const isBrandingSetting =
     SettingKey === BRANDING_SETTING_KEYS.LOGO_URL ||
     SettingKey === BRANDING_SETTING_KEYS.FAVICON_URL ||
-    SettingKey.startsWith("LabBranding_");
+    (SettingKey.startsWith("LabBranding_") || SettingKey.startsWith("LabEmailBranding_"));
   if (isBrandingSetting) {
     await cleanupUnusedBrandingAssets();
   }
 
   res.status(200).json(setting);
+});
+
+exports.getEmailBranding = asyncHandler(async (req, res) => {
+  const labId = parsePositiveInt(req.params.labId);
+  if (!labId || !await canWriteBranding(req, "lab", labId)) {
+    return res.status(403).json({ message: "You do not have permission to manage this lab’s email appearance." });
+  }
+  res.json({ ...await emailBranding.loadBranding(labId), themes: emailBranding.THEMES });
+});
+
+exports.previewEmailBranding = asyncHandler(async (req, res) => {
+  const labId = parsePositiveInt(req.params.labId);
+  if (!labId || !await canWriteBranding(req, "lab", labId)) {
+    return res.status(403).json({ message: "You do not have permission to manage this lab’s email appearance." });
+  }
+  const lab = await model.lab.findByPk(labId);
+  if (!lab) return res.status(404).json({ message: "Lab not found." });
+  const { htmlBody } = await emailBranding.prepareEmail({
+    lab, title: "We look forward to seeing you.", category: "Study reminder",
+    htmlBody: "<p>Dear Caregiver,</p><p>Thank you for taking part in our research. Your study-specific message and instructions will appear here.</p><p>Please reply if you have any questions.</p><p>Best,<br>Your research team</p>",
+    details: [{ label: "When", value: "Your appointment date and time" }, { label: "Where", value: lab.Location || "Your study location" }],
+  }, { preview: true, branding: req.body });
+  res.json({ htmlBody });
 });

@@ -101,7 +101,7 @@
 
                 <div v-if="showCodeInput">
                   <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">Paste Authorization Code</div>
-                  <v-textarea v-model="form3.authCode" rows="2" no-resize variant="outlined" density="compact" placeholder="Paste the code you received from Google here"></v-textarea>
+                  <v-textarea v-model="form3.authCode" rows="2" no-resize variant="outlined" density="compact" placeholder="Paste the code, or the full address of the page Google redirected you to"></v-textarea>
                   
                   <div class="d-flex justify-end align-center mt-4">
                     <v-btn variant="text" color="grey" class="me-4 text-none" @click="skipGoogleStep">Skip for now, I'll do this later</v-btn>

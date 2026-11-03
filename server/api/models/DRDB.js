@@ -352,6 +352,7 @@ async function patchLegacyPersonnelSchemaIfNeeded() {
 // server.js waits on this before listening so no query hits a missing column.
 exports.schemaReady = sequelize
   .sync({ force: false })
+  .then(() => require("../utils/labSchemaPatch").patchLabTimezoneSchema(sequelize.getQueryInterface()))
   .then(() => patchLegacyFamilySchemaIfNeeded(sequelize.getQueryInterface()))
   .then(() => require('../utils/studySchemaPatch').patchStudyParticipationSchema(sequelize.getQueryInterface()));
 

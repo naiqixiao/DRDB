@@ -17,6 +17,7 @@
   - [Full system migration](#full-system-migration)
 - [Recent updates](#recent-updates)
 - [Tech stack](#tech-stack)
+- [Email template customization](#email-template-customization)
 - [V2 to V3 migration](#v2-to-v3-migration)
 - [Google OAuth setup](#google-oauth-setup)
 - [Backend environment variables](#backend-environment-variables)
@@ -55,6 +56,80 @@ Built with a robust Vue 3 frontend and a Node.js/MySQL backend, DRDB eliminates 
 
 ### Frontend Customization
 A guide on changing colors, logo, and fonts is available in [`client/README.md`](client/README.md).
+
+## Email Template Customization
+
+### Change a lab's colors, logo, or message content
+
+For everyday changes, use the app:
+
+1. As an **Admin, PI, or Lab manager**, open **Settings → Lab Email Appearance**.
+   Choose Forest, Ocean, Plum, Burgundy, or Slate, optionally upload a PNG/JPEG
+   footer logo (up to 2 MB), and click **Save email appearance**. These settings
+   apply to the selected lab's emails. The uploaded logo is embedded in sent emails.
+2. Edit study-specific text under **Study → Communications**, then click
+   **Save All Changes**. Confirmation, Reminder, and Follow-up snippets are the
+   message content inside the shared layout. Keep placeholder keywords such as
+   `${{childName}}` and `${{ZoomLink}}` where substitutions are needed.
+3. Edit lab-wide closing text and transportation instructions in **Settings →
+   Update Lab Profile**. The lab's name, contact email, and location supply the shared branding.
+
+Appointment cards are added by the system using the scheduled date/time, study,
+location, and child names; they do not need to be copied into a study snippet.
+Account notifications use the shared layout with DRDB identity.
+
+### Try a different email layout in code
+
+The shared email renderer lives on the backend. Editing a Vue preview's CSS alone
+does not change the appearance of delivered emails.
+
+| What to change | Source file |
+| --- | --- |
+| Header, footer, fonts, spacing, email width, and appointment-card markup | [`server/api/utils/emailLayout.js`](server/api/utils/emailLayout.js), in `renderEmail()` |
+| Available lab themes and embedded footer logo | [`server/api/services/emailBrandingService.js`](server/api/services/emailBrandingService.js), in `THEMES` and `prepareEmail()` |
+| Confirmation/update card fields and timezone formatting | [`server/api/services/emailMessageService.js`](server/api/services/emailMessageService.js) |
+| Automatic parent reminders and compact staff schedule tables | [`server/api/utils/reminderTemplates.js`](server/api/utils/reminderTemplates.js) |
+| Confirmation greeting shared by the composer and Study preview | [`client/src/assets/JS/emailOpenings.js`](client/src/assets/JS/emailOpenings.js) |
+| Account notification text | [`server/api/utils/userTemplates.js`](server/api/utils/userTemplates.js) |
+
+To add another color option, add an entry to `THEMES`, for example:
+
+```js
+{ id: "navy", name: "Navy", accent: "#23405c", tint: "#f0f4f8", border: "#d5dfe8" },
+```
+
+The Settings theme selector loads these options from the backend. The renderer
+uses `#245c54`, `#eef4f1`, and `#d5e2dc` as its base accent, tint, and border;
+`prepareEmail()` replaces them with the selected theme's colors. Preserve those
+base tokens when editing layout markup, or update the replacement logic too.
+
+Keep email styles inline where possible, use presentation tables for layout,
+and retain the `<!--drdb-email-logo-->` footer placeholder so uploaded logos can
+be inserted. The shared renderer already handles escaping appointment details,
+while the sending utility supplies HTML and plain-text alternatives.
+
+After changing backend code, stop the existing backend and restart it with
+`npm start` from `server/`. If you also changed frontend code, rebuild the client
+for production (`npm run build` from `client/`); Vite development mode updates it
+automatically. Docker installations can rebuild the affected services from the
+repository root with `docker compose up -d --build backend frontend`.
+
+### Preview and send a test
+
+- **Study → Communications:** preview the current snippet with sample names.
+  Confirmation and Reminder previews include a sample appointment card. Enter a
+  test recipient and click **Send test email** to check the current edits, including
+  unsaved snippet changes.
+- **Scheduling dialog → Email → Preview email:** open the complete message with
+  the actual appointment details and current draft before sending to the parent.
+- **Settings → Reminder Email Tests:** choose a parent or staff reminder type,
+  optionally select a saved study, and preview linked fictional family/appointment
+  records with the lab's saved branding. Enter a test recipient to send a copy.
+
+Test sends require the lab's Google email connection and use a `[TEST]` subject.
+They go only to the address entered and do not create or update appointments.
+Check delivery on desktop and mobile, including the email clients your lab uses.
+If a preview reports an older renderer, restart the backend and retry.
 
 ---
 

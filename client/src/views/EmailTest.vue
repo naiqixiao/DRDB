@@ -161,7 +161,13 @@
             <div v-if="adminEmail.cc"><strong>CC:</strong> {{ adminEmail.cc }}</div>
             <div><strong>Subject:</strong> {{ adminEmail.subject }}</div>
           </div>
-          <div v-html="adminEmail.htmlBody"></div>
+          <!-- Rendered emails are full documents with their own <style>; isolate them from the app. -->
+          <iframe
+            title="Email preview"
+            sandbox=""
+            :srcdoc="adminEmail.htmlBody"
+            style="display: block; width: 100%; height: 520px; border: 0"
+          ></iframe>
         </div>
       </div>
 

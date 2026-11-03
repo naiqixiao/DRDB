@@ -145,13 +145,15 @@
                   @update:model-value="emailTypeChange($event)"
                   style="max-width: 280px;"
                 ></v-select>
+                <v-btn variant="tonal" color="primary" size="small" prepend-icon="mdi-eye-outline" :loading="emailQuickPreviewLoading" :disabled="loadingStatus" @click="previewScheduleEmail">Preview email</v-btn>
                 <v-btn icon="mdi-close" variant="text" size="small" @click="close"></v-btn>
               </div>
 
               <!-- Email component -->
               <v-card-text class="pt-2 pb-2 dialog-step-body">
                 <emailComponent 
-                  ref="emailComponentRef" 
+                  ref="emailComponentRef"
+                  hide-preview-button
                   :dialog="emailDialog" 
                   :emailType="emailType"
                   :appointments="emailAppointments" 
@@ -411,6 +413,7 @@ export default {
     emailBody: "",
     emailSubject: "",
     skipConfirmationEmailStatus: false,
+    emailQuickPreviewLoading: false,
     emailType: "",
     emailOptions: ['Confirmation', 'ScheduleUpdate', 'Reminder', 'Follow-up', 'ThankYou'],
     contactType: "",
@@ -982,6 +985,12 @@ export default {
       this.loadingStatus = false;
       this.confirmCancelDialog = false;
       this.$emit('close-dialog');
+    },
+
+    async previewScheduleEmail() {
+      this.emailQuickPreviewLoading = true;
+      try { await this.$refs.emailComponentRef?.previewEmail(); }
+      finally { this.emailQuickPreviewLoading = false; }
     },
 
     async sendEmail() {

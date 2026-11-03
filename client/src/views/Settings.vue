@@ -515,6 +515,9 @@
           </v-expand-transition>
         </v-card>
 
+        <LabEmailAppearance v-if="canViewScheduledJobs && store.lab" :key="store.lab" :lab-id="store.lab" :lab-name="store.labName" @saved="emailAppearanceVersion++" />
+        <LabReminderTests v-if="canViewScheduledJobs && store.lab" :key="'reminder-tests-' + store.lab" :lab-id="store.lab" :branding-version="emailAppearanceVersion" />
+
         <v-card class="ds-card mb-6" variant="flat" v-if="canViewScheduledJobs">
           <v-toolbar color="transparent" density="compact" class="px-2">
             <v-icon class="mr-2" color="primary">mdi-cog-outline</v-icon>
@@ -958,6 +961,11 @@
           <div class="text-caption font-weight-bold text-uppercase text-muted mb-1 px-1">
             Paste Sign-in Code
           </div>
+          <div class="text-caption text-muted mb-2 px-1">
+            The code is filled in automatically after you approve access in the Google
+            window. If that window ends on a page that won't load, copy its full address
+            from the address bar and paste it here.
+          </div>
           <v-textarea
             variant="outlined"
             no-resize
@@ -1209,6 +1217,8 @@ import family from "@/services/family";
 import externalAPIs from "@/services/externalAPIs";
 import jobsService from "@/services/jobs";
 import systemSetting from "@/services/systemSetting";
+import LabReminderTests from "@/components/LabReminderTests.vue";
+import LabEmailAppearance from "@/components/LabEmailAppearance.vue";
 import brandingService, { DEFAULT_BRANDING } from "@/services/branding";
 import systemMigration from "@/services/systemMigration";
 import TestingRooms from "@/components/testingRooms.vue";
@@ -1217,7 +1227,8 @@ import moment from "moment";
 import { useMainStore } from "@/stores/mainStore";
 
 export default {
-  components: { TestingRooms, ConfirmDlg },
+  components: {
+    LabEmailAppearance, LabReminderTests, TestingRooms, ConfirmDlg },
   setup() {
     const store = useMainStore();
     return { store };
@@ -1280,6 +1291,7 @@ export default {
       generalSettingLoading: false,
       brandingConfig: { ...DEFAULT_BRANDING },
       brandingSettingLoading: false,
+      emailAppearanceVersion: 0,
       brandingUploadLoading: {
         globalLogo: false,
         globalFavicon: false,

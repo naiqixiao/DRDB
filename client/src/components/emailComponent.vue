@@ -38,6 +38,16 @@
       </div>
     </div>
 
+    <div v-if="!hidePreviewButton" class="d-flex justify-end mb-2">
+      <v-btn variant="text" size="small" prepend-icon="mdi-email-outline" :loading="emailPreviewLoading" @click="previewEmail">Preview email</v-btn>
+    </div>
+    <v-dialog v-model="emailPreviewOpen" max-width="760">
+      <v-card>
+        <v-card-title class="d-flex align-center">Email preview<v-spacer /><v-btn icon="mdi-close" variant="text" aria-label="Close email preview" @click="emailPreviewOpen = false" /></v-card-title>
+        <iframe title="Outgoing email preview" sandbox="" :srcdoc="emailPreviewHtml" style="width:100%;height:70vh;border:0;"></iframe>
+      </v-card>
+    </v-dialog>
+
     <!-- Email body editor with floating AI tools -->
     <div class="email-editor-area">
       <div class="email-body-wrapper">
@@ -144,6 +154,7 @@ import email from "@/services/email";
 import family from "@/services/family";
 import ai from "@/services/ai";
 import moment from "moment";
+import { buildConfirmationOpening } from "@/assets/JS/emailOpenings";
 import DOMPurify from "dompurify";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 import ConfirmDlg from "@/components/ConfirmDialog.vue";
@@ -175,9 +186,13 @@ export default {
       default: () => []
     },
     dialog: Boolean,
+    hidePreviewButton: Boolean,
   },
   data() {
     return {
+      emailPreviewOpen: false,
+      emailPreviewLoading: false,
+      emailPreviewHtml: "",
       emailAddress: "",
       emailUpdate: false,
       emailBody: "",
@@ -415,13 +430,13 @@ export default {
 
         switch (this.emailType) {
           case "Confirmation":
-            opening = "<p>Dear " + parentName + ",</p><p>Thanks for your support to our research! This is a confirmation for your participation in our study with <strong>" + this.childNames() + moment(this.appointmentTime).format(" [on] dddd [(]MMM Do[)] [at] h:mma") + "</strong>.</p>";
+            opening = buildConfirmationOpening({ parentName, childNames: this.childNames() });
             break;
           case "ScheduleUpdate":
-            opening = "<p>Dear " + parentName + ",</p><p>This is an update on your visit with <strong>" + this.childNames() + moment(this.appointmentTime).format(" [on] dddd [(]MMM Do[)] [at] h:mma") + "</strong>.</p>";
+            opening = "<p>Dear " + this.escapeHtml(parentName) + ",</p><p>This is an update on your visit with <strong>" + this.escapeHtml(this.childNames()) + "</strong>. Your updated appointment details are included here.</p>";
             break;
           case "Introduction":
-            opening = "<p>Dear " + parentName + ",</p><p>We are " + this.store.labName + ". We would love to have you and " + this.childNames() + " to participate in our study.</p>Here is the information about the study:</p>";
+            opening = "<p>Dear " + parentName + ",</p><p>We are " + this.store.labName + ". We would love to have you and " + this.childNames() + " to participate in our study.</p><p>Here is the information about the study:</p>";
             break;
           case "Reschedule":
             opening = "<p>Dear " + parentName + ",</p><p>I'm happy to schedule another visit for you and " + this.childNames() + ".</p><p>We would appreciate it if you could provide us with your availability by replying to this email. We will do our best to find a time that works for you.</p>";
@@ -593,7 +608,20 @@ export default {
       return emails.join(", ");
     },
 
-    async sendEmail() {
+    async previewEmail() {
+      this.emailPreviewLoading = true;
+      try {
+        const { data } = await email.preview(this.outgoingEmail());
+        this.emailPreviewHtml = data.htmlBody;
+        this.emailPreviewOpen = true;
+      } catch (error) {
+        this.$refs.confirmD.open('Preview unavailable', 'Unable to load the email preview. Please try again.', { color: 'error', noconfirm: true });
+      } finally {
+        this.emailPreviewLoading = false;
+      }
+    },
+
+    outgoingEmail() {
       let formattedEmail = this.emailBody;
       formattedEmail = formattedEmail.replace(/<p>/g, "<p style='margin: 0 0 1em 0; padding: 0; font-size: 12pt;'>");
 
@@ -601,15 +629,26 @@ export default {
 
       formattedEmail = formattedEmail + studyLabel;
 
-      const emailContent = {
+      return {
         to: this.familyInfo.NamePrimary + " <" + this.emailAddress + ">",
         subject: this.emailSubject,
         body: formattedEmail,
         labelNames: gmailLabels,
+        ...(["Confirmation", "ScheduleUpdate", "Reminder"].includes(this.emailType) && this.appointmentTime ? {
+          appointment: {
+            time: this.appointmentTime,
+            studies: this.appointments.map(appointment => appointment.Study?.StudyName).filter(Boolean),
+            children: this.appointments.map(appointment => appointment.Child?.Name?.split(" ")[0]).filter(Boolean),
+            online: this.appointments.length > 0 && this.appointments.every(appointment => appointment.Study?.StudyType === "Online"),
+          },
+        } : {}),
       };
 
+    },
+
+    async sendEmail() {
       try {
-        await email.send(emailContent);
+        await email.send(this.outgoingEmail());
 
         if (this.emailUpdate) {
           let editedFamilyInfo = JSON.parse(JSON.stringify(this.familyInfo));

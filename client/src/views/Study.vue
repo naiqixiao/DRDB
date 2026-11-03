@@ -917,17 +917,13 @@
                           >Live Preview</span
                         >
                       </div>
-                      <div
-                        class="template-preview pa-4 rounded bg-white"
-                        v-html="confirmationPreview"
-                        style="
-                          max-height: 400px;
-                          overflow-y: auto;
-                          border: 1px solid #e2e8f0;
-                          font-size: 1rem;
-                          line-height: 1.6;
-                        "
-                      ></div>
+                      <EmailLayoutPreview
+                        :body="confirmationPreview"
+                        subject="Study confirmation"
+                        :appointment="confirmationAppointment"
+                        :lab-id="currentStudy.FK_Lab || store.lab"
+                        :active="studyTab === 'communications' && commTab === 'confirm'"
+                      />
                     </v-col>
                   </v-row>
                 </v-window-item>
@@ -989,17 +985,13 @@
                           >Live Preview</span
                         >
                       </div>
-                      <div
-                        class="template-preview pa-4 rounded bg-white"
-                        v-html="reminderPreview"
-                        style="
-                          max-height: 400px;
-                          overflow-y: auto;
-                          border: 1px solid #e2e8f0;
-                          font-size: 1rem;
-                          line-height: 1.6;
-                        "
-                      ></div>
+                      <EmailLayoutPreview
+                        :body="reminderPreview"
+                        subject="Study reminder"
+                        :appointment="confirmationAppointment"
+                        :lab-id="currentStudy.FK_Lab || store.lab"
+                        :active="studyTab === 'communications' && commTab === 'remind'"
+                      />
                     </v-col>
                   </v-row>
                 </v-window-item>
@@ -1062,17 +1054,12 @@
                           >Live Preview</span
                         >
                       </div>
-                      <div
-                        class="template-preview pa-4 rounded bg-white"
-                        v-html="followupPreview"
-                        style="
-                          max-height: 400px;
-                          overflow-y: auto;
-                          border: 1px solid #e2e8f0;
-                          font-size: 1rem;
-                          line-height: 1.6;
-                        "
-                      ></div>
+                      <EmailLayoutPreview
+                        :body="followupPreview"
+                        subject="Study thank-you"
+                        :lab-id="currentStudy.FK_Lab || store.lab"
+                        :active="studyTab === 'communications' && commTab === 'follow'"
+                      />
                     </v-col>
                   </v-row>
                 </v-window-item>
@@ -1617,8 +1604,10 @@
 
 <script>
 import moment from "moment";
+import { buildConfirmationOpening } from "@/assets/JS/emailOpenings";
 import { uniqueAgeGroups } from "@/assets/JS/ageGroups";
 import { getParticipationGroups, validateParticipationGroups } from "@/assets/JS/participationRules";
+import EmailLayoutPreview from "@/components/EmailLayoutPreview.vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 
 import AssignedExperimenters from "@/components/AssignedExperimenters.vue";
@@ -1644,6 +1633,7 @@ export default {
     InfoField,
     SectionHeader,
     RichTextEditor,
+    EmailLayoutPreview,
     studyProgressChart,
     recruitmentProgressChart,
     experimenterStatsChart,
@@ -1694,6 +1684,7 @@ export default {
       selectedRoomId: null,
       studyTab: "overview",
       commTab: "confirm",
+      sampleConfirmationTime: moment().add(1, "day").hour(10).minute(30).second(0).millisecond(0).toISOString(),
       studyStepper: 1,
       emailTemplateTab: "phone",
       studyStatsLoaded: false,
@@ -1834,10 +1825,19 @@ export default {
       return Math.round((dropoffs / this.kpiTotalRecruited) * 100);
     },
 
-    // Highlight replaced keywords with bold + color so they stand out
+    // Replace keywords with sample values for the branded preview.
+    confirmationAppointment() {
+      return { time: this.sampleConfirmationTime, studies: [this.currentStudy.StudyName || "Example study"],
+        children: ["Emma"], online: this.currentStudy.StudyType === "Online" };
+    },
     confirmationPreview() {
-      if (!this.currentStudy.EmailTemplate) return "<p>Email template not set.</p>";
-      return this.highlightKeywords(this.currentStudy.EmailTemplate);
+      const opening = buildConfirmationOpening({
+        parentName: "Lisa", childNames: "Emma",
+      });
+      const snippet = this.currentStudy.EmailTemplate
+        ? this.highlightKeywords(this.currentStudy.EmailTemplate, false)
+        : "<p>Email template not set.</p>";
+      return opening + snippet;
     },
     reminderPreview() {
       if (!this.currentStudy.ReminderTemplate) return "<p>Reminder template not set.</p>";
@@ -1859,8 +1859,8 @@ export default {
     participationStudyName(id) {
       return this.Studies.find(study => Number(study.id) === Number(id))?.StudyName || `Study #${id}`;
     },
-    highlightKeywords(template) {
-      const hl = (text) => `<span style="font-weight:700;color:#0D9488">${text}</span>`;
+    highlightKeywords(template, includeGreeting = true) {
+      const hl = (text) => `<strong>${text}</strong>`;
       let email = template;
       email = email.replace(/\${{childName}}/g, hl("Emma"));
       email = email.replace(/\${{he\/she}}/g, hl("she"));
@@ -1868,9 +1868,9 @@ export default {
       email = email.replace(/\${{his\/her}}/g, hl("her"));
       email = email.replace(
         /\${{ZoomLink}}/g,
-        '<a href="#" style="font-weight:700;color:#0D9488">Zoom Link</a>'
+        '<a href="#" style="font-weight:700">Zoom Link</a>'
       );
-      return `<p>Dear Lisa,</p><div>${email}</div>`;
+      return `${includeGreeting ? "<p>Dear Lisa,</p>" : ""}<div>${email}</div>`;
     },
 
     getRoomName(roomId) {

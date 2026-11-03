@@ -5,6 +5,46 @@ const model = require("../models/DRDB");
 const { google } = require("googleapis");
 const { OAuth2 } = google.auth;
 
+const LOOPBACK_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
+
+// Origin of the page that started the OAuth flow. Same-origin GETs carry no
+// Origin header, so the client passes it explicitly; Referer is a fallback.
+function requestOrigin(req) {
+  const candidates = [req.body?.origin, req.query?.origin, req.get("origin"), req.get("referer")];
+  for (const value of candidates) {
+    if (!value) continue;
+    try {
+      return new URL(value).origin;
+    } catch (e) {
+      // ignore malformed values
+    }
+  }
+  return "http://localhost:5173";
+}
+
+// The auth URL and the token exchange must use the same redirect URI.
+// Desktop ("installed") clients accept any loopback port/path, so a local
+// origin can always use its own /oauth/callback page; web clients need the
+// exact URI registered in Google Cloud Console.
+function resolveRedirectUri(req, parsedCredentials) {
+  const config = parsedCredentials.installed || parsedCredentials.web;
+  const redirect_uris = config.redirect_uris || [];
+  const origin = requestOrigin(req);
+  const redirect_uri = `${origin}/oauth/callback`;
+
+  if (redirect_uris.includes(redirect_uri)) return redirect_uri;
+  if (parsedCredentials.installed && LOOPBACK_HOSTS.includes(new URL(origin).hostname)) {
+    return redirect_uri;
+  }
+
+  console.warn(
+    `[Google OAuth] Redirect URI "${redirect_uri}" is not registered for this OAuth client; ` +
+      `falling back to "${redirect_uris[0]}". The sign-in code will not be returned to DRDB automatically. ` +
+      `Add "${redirect_uri}" to the client's Authorized redirect URIs in Google Cloud Console.`
+  );
+  return redirect_uris[0];
+}
+
 async function resolveGmailAddress(gmailClient) {
   try {
     const sendAs = await gmailClient.users.settings.sendAs.list({ userId: "me" });
@@ -52,16 +92,8 @@ exports.googleCredentialsURL = asyncHandler(async (req, res) => {
     const credentials = fs.readFileSync(credentialsPath);
     const parsedCredentials = JSON.parse(credentials);
     const config = parsedCredentials.installed || parsedCredentials.web;
-    const { client_secret, client_id, redirect_uris } = config;
-
-    // Determine the redirect URI based on the request's origin
-    const origin = req.get('origin') || "http://localhost:5173";
-    const redirect_uri = `${origin}/oauth/callback`;
-    
-    // Check if the current origin's redirect URI is in the authorized list
-    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
-      ? redirect_uri 
-      : redirect_uris[0];
+    const { client_secret, client_id } = config;
+    const valid_redirect_uri = resolveRedirectUri(req, parsedCredentials);
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
@@ -110,13 +142,8 @@ exports.googleToken = asyncHandler(async (req, res) => {
     const credentials = fs.readFileSync(credentialsPath);
     const parsedCredentials = JSON.parse(credentials);
     const config = parsedCredentials.installed || parsedCredentials.web;
-    const { client_secret, client_id, redirect_uris } = config;
-
-    const origin = req.get('origin') || "http://localhost:5173";
-    const redirect_uri = `${origin}/oauth/callback`;
-    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
-      ? redirect_uri 
-      : redirect_uris[0];
+    const { client_secret, client_id } = config;
+    const valid_redirect_uri = resolveRedirectUri(req, parsedCredentials);
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 
@@ -186,13 +213,8 @@ exports.adminToken = asyncHandler(async (req, res) => {
     const credentials = fs.readFileSync(credentialsPath);
     const parsedCredentials = JSON.parse(credentials);
     const config = parsedCredentials.installed || parsedCredentials.web;
-    const { client_secret, client_id, redirect_uris } = config;
-
-    const origin = req.get('origin') || "http://localhost:5173";
-    const redirect_uri = `${origin}/oauth/callback`;
-    const valid_redirect_uri = redirect_uris.includes(redirect_uri) 
-      ? redirect_uri 
-      : redirect_uris[0];
+    const { client_secret, client_id } = config;
+    const valid_redirect_uri = resolveRedirectUri(req, parsedCredentials);
 
     const oAuth2Client = new OAuth2(client_id, client_secret, valid_redirect_uri);
 

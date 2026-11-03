@@ -5,13 +5,14 @@
  * Extracted from controllers/reminder.js for maintainability.
  */
 
+const { renderEmail, escapeHtml } = require("./emailLayout");
 const { formatDateInTimezone } = require("./dateTime");
 
 // ─── Shared table styles ───────────────────────────────────────────
 const TRO =
-  "<td style = 'background: white !important; border: 1px solid #999; padding: 0.5rem; text-align: center; '>";
+  "<td style = 'background: white !important; border: 1px solid #d5e2dc; padding: 0.5rem; text-align: center; '>";
 const TRE =
-  "<td style = 'background: #e8e7e1 !important; border: 1px solid #999; padding: 0.5rem; text-align: center;'>";
+  "<td style = 'background: #eef4f1 !important; border: 1px solid #d5e2dc; padding: 0.5rem; text-align: center;'>";
 
 function rowStyle(index) {
   return index % 2 === 1 ? TRE : TRO;
@@ -168,7 +169,19 @@ function buildFamilyReminderBody(schedule, timeZone) {
       ">",
     to: schedule.Family.NamePrimary + "<" + schedule.Family.Email + ">",
     subject: emailSubject,
-    body: formatedBody(opening + body + closing),
+    body: renderEmail({
+      htmlBody: formatedBody(opening + body + closing),
+      lab: schedule.Appointments[0].Study.Lab,
+      title: "We look forward to seeing you.",
+      category: "Study reminder",
+      preheader: "A quick reminder about your upcoming study appointment. Details are inside.",
+      reason: "You’re receiving this reminder because you have a study appointment with our lab.",
+      details: [
+        { label: "When", value: formatDateInTimezone(schedule.AppointmentTime, "dddd, MMMM D, YYYY [at] h:mm A z", timeZone) },
+        { label: "Study", value: schedule.Appointments.map(a => a.Study.StudyName).filter(Boolean).join(", ") },
+        { label: "Where", value: schedule.Appointments[0].Study.StudyType === "Online" ? "Online — joining details below" : schedule.Appointments[0].Study.Lab.Location || "See visit instructions below" },
+      ],
+    }),
   };
 }
 
@@ -220,12 +233,12 @@ function buildManualReminderBody(schedule, timeZone) {
 }
 
 /**
- * Build the auto-completion reminder email body (olive table).
+ * Build the auto-completion reminder email body (shared lab table style).
  * Sent to experimenters asking them to confirm yesterday's study completions.
  */
 function buildCompletionReminderBody(experimenterName, scheduleList, timeZone) {
   const TH =
-    "style = 'background: olive; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18; color: white;'";
+    "style = 'background: #245c54; border: 1px solid #d5e2dc; padding: 0.5rem; text-align: center; font-size: 14px; color: white;'";
 
   var body = "<!DOCTYPE html><html><head>";
   body += "</head><body>Hi " + experimenterName + ",<br><br>";
@@ -234,11 +247,11 @@ function buildCompletionReminderBody(experimenterName, scheduleList, timeZone) {
     "<p><strong>According to the system, you were the primary experimenter for the following studies yesterday. How did it go?</strong></p>" +
     "<p>If any of the families below failed to show up or requested rescheduling, please update the appointment status accordingly. Otherwise, the system will mark the study as completed tomorrow, and the families will be available for other studies.</p>";
 
-  body += '<table style="width:90%; border-collapse: collapse !important;">';
+  body += '<table style="width:100%; border-collapse: collapse !important;">';
   body +=
     "<tr><th width='15%'" +
     TH +
-    ">Study time (EST)</th>" +
+    ">Study time (" + (timeZone || "local timezone") + ")</th>" +
     "<th width='15%' " +
     TH +
     ">Study name</th>" +
@@ -274,12 +287,12 @@ function buildCompletionReminderBody(experimenterName, scheduleList, timeZone) {
 }
 
 /**
- * Build the auto-rejection/follow-up reminder email body (tomato/red table).
+ * Build the auto-rejection/follow-up reminder email body (shared lab table style).
  * Sent to researchers about unresolved tentative/rescheduling/no-show appointments.
  */
 function buildRejectionReminderBody(researcherName, scheduleList, timeZone) {
   const TH =
-    "style = 'background: tomato; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
+    "style = 'background: #245c54; color: white; border: 1px solid #d5e2dc; padding: 0.5rem; text-align: center; font-size: 14px;'";
 
   var body = "<!DOCTYPE html><html><head>";
   body += "</head><body>Hi " + researcherName + ",<br><br>";
@@ -287,7 +300,7 @@ function buildRejectionReminderBody(researcherName, scheduleList, timeZone) {
   body +=
     "<p><strong>You attempted to schedule the following appointments a week ago, but the families have not responded yet. Would you like to follow up with them again? If not, the system will mark these schedules as rejected a week from today, and the families will be available for other studies.</strong></p>";
 
-  body += '<table style="width:90%; border-collapse: collapse !important;">';
+  body += '<table style="width:100%; border-collapse: collapse !important;">';
   body +=
     "<tr><th width='15%'" +
     TH +
@@ -331,14 +344,23 @@ function buildRejectionReminderBody(researcherName, scheduleList, timeZone) {
 }
 
 /**
- * Build the experimenter reminder email body (blue primary + green secondary tables).
+ * Build the experimenter reminder email body (shared primary and secondary tables).
  * Sent to experimenters about their studies tomorrow.
  */
 function buildExperimenterReminderBody(experimenter, timeZone) {
-  const TH =
-    "style = 'background: lightblue; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
-  const TH2nd =
-    "style = 'background: lightgreen; border: 1px solid #999; padding: 0.5rem; text-align: center; font-size: 18;'";
+  const TH = "style='background:#245c54;color:white;border:1px solid #d5e2dc;padding:6px;text-align:left;vertical-align:top;font-size:12px;line-height:16px;word-break:normal;'";
+  const tableHeader = (partnerLabel) =>
+    '<table cellpadding="0" cellspacing="0" style="width:100%;table-layout:fixed;border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:17px;">' +
+    "<tr>" + [[14, "Time"], [20, "Study"], [24, "Parent"], [12, "Child"], [20, partnerLabel], [10, "Zoom"]]
+      .map(([width, label]) => `<th scope="col" width="${width}%" ${TH}>${label}</th>`).join("") + "</tr>";
+  const cellStyle = (index) => `<td style="background:${index % 2 ? '#eef4f1' : '#ffffff'};border:1px solid #d5e2dc;padding:6px;text-align:left;vertical-align:top;font-size:12px;line-height:17px;overflow-wrap:anywhere;">`;
+  const zoomLink = (value) => {
+    try {
+      const url = new URL(value);
+      if (!["https:", "http:"].includes(url.protocol)) return "Not available";
+      return `<a href="${escapeHtml(url.href)}" style="color:#245c54;text-decoration:underline;white-space:nowrap;">Join</a>`;
+    } catch { return "Not available"; }
+  };
 
   var body = "<!DOCTYPE html><html><head>";
   body += "</head><body>Hi ";
@@ -357,22 +379,16 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
       ",<br><br>The following is your study tomorrow! Good luck! :)<br><br>";
   }
 
+  body += `<p style="margin:0 0 12px;font-size:12px;line-height:17px;">All study times: ${escapeHtml(timeZone || "local timezone")}</p>`;
+
   // Primary experimenter table
   if (experimenter.PrimaryExperimenterof.length > 0) {
-    body += "<h2>Studies that you are the primary experimenter: </h2>";
-
-    body += '<table style="width:90%; border-collapse: collapse !important;">';
-    body +=
-      "<tr><th width='15%'" + TH + ">Study time (EST)</th>" +
-      "<th width='15%' " + TH + ">Study name</th>" +
-      "<th width='18%' " + TH + ">Parent</th>" +
-      "<th width='7%' " + TH + ">Child</th>" +
-      "<th width='20%' " + TH + ">Partner (E2)</th>" +
-      "<th width='25%' " + TH + ">Zoom link</th></tr>";
+    body += '<h2 style="font-size:18px;line-height:24px;margin:20px 0 12px;">Primary experimenter</h2>';
+    body += tableHeader("Partner (E2)");
 
     experimenter.PrimaryExperimenterof.forEach((appointmentPri, index) => {
       var E2 = appointmentPri.SecondaryExperimenter.map((e2) => {
-        return e2.Name + " (" + e2.Email + ")";
+        return escapeHtml(e2.Name) + "<br>" + escapeHtml(e2.Email);
       });
 
       var E22 = "";
@@ -398,11 +414,9 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
         "<br>" +
         appointmentPri.Child.Family.Email;
 
-      const ZoomLink = experimenter.ZoomLink
-        ? experimenter.ZoomLink
-        : "not available";
+      const ZoomLink = zoomLink(experimenter.ZoomLink);
 
-      const style = rowStyle(index);
+      const style = cellStyle(index);
 
       var childName = "Child name N/A";
       if (appointmentPri.Child.Name) {
@@ -414,7 +428,7 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
         style +
         formatDateInTimezone(
           appointmentPri.Schedule.AppointmentTime,
-          "MMM Do [at] h:mma",
+          "MMM D[<br>]h:mm A",
           timeZone
         ) +
         "</td>";
@@ -431,25 +445,17 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
 
   // Secondary experimenter table
   if (experimenter.SecondaryExperimenterof.length > 0) {
-    body += "<h2>Studies that you are the secondary experimenter:</h2>";
-
-    body += '<table style="width:90%; border-collapse: collapse !important;">';
-    body +=
-      "<tr><th width='15%'" + TH2nd + ">Study time (EST)</th>" +
-      "<th width='15%' " + TH2nd + ">Study name</th>" +
-      "<th width='18%' " + TH2nd + ">Parent</th>" +
-      "<th width='7%' " + TH2nd + ">Child</th>" +
-      "<th width='20%' " + TH2nd + ">Partner(s)</th>" +
-      "<th width='25%' " + TH2nd + ">Zoom link</th></tr>";
+    body += '<h2 style="font-size:18px;line-height:24px;margin:20px 0 12px;">Secondary experimenter</h2>';
+    body += tableHeader("Partner(s)");
 
     experimenter.SecondaryExperimenterof.forEach((appointmentSec, index) => {
       var E1 = appointmentSec.PrimaryExperimenter.map((e1) => {
-        return e1.Name + " (" + e1.Email + ")";
+        return escapeHtml(e1.Name) + "<br>" + escapeHtml(e1.Email);
       });
 
       var E2 = appointmentSec.SecondaryExperimenter.map((e2) => {
         if (e2.Email !== experimenter.Email) {
-          return e2.Name + " (" + e2.Email + ")";
+          return escapeHtml(e2.Name) + "<br>" + escapeHtml(e2.Email);
         }
       });
 
@@ -476,11 +482,9 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
         "<br>" +
         appointmentSec.Child.Family.Email;
 
-      const ZoomLink = appointmentSec.PrimaryExperimenter[0].ZoomLink
-        ? appointmentSec.PrimaryExperimenter[0].ZoomLink
-        : "not available";
+      const ZoomLink = zoomLink(appointmentSec.PrimaryExperimenter[0]?.ZoomLink);
 
-      const style = rowStyle(index);
+      const style = cellStyle(index);
 
       var childName = "Child name N/A";
       if (appointmentSec.Child.Name) {
@@ -492,7 +496,7 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
         style +
         formatDateInTimezone(
           appointmentSec.Schedule.AppointmentTime,
-          "MMM Do [at] h:mma",
+          "MMM D[<br>]h:mm A",
           timeZone
         ) +
         "</td>";
@@ -503,9 +507,10 @@ function buildExperimenterReminderBody(experimenter, timeZone) {
       body += style + ZoomLink + "</td>";
       body += "</tr>";
     });
+    body += "</table>";
   }
 
-  body += "</table><br><br>";
+  body += "<br><br>";
   body += "Best,<br>" + experimenter.Lab.LabName;
   body += "</body></html>";
 

@@ -27,7 +27,7 @@ function buildWelcomeEmail(name, email, role, password) {
       "<p>Welcome to the developmental research management system!<br>" +
       "Your role is <b>" + role + "</b>, and your temporary password is <b><em>" + password + "</em></b>. " +
       "Please login with your email and temporary password at <a href=" + config.URL + ">" + config.URL + "</a> to set your password" + config.otherRequirement + "." +
-      "<br><b>If you're the lab manager, please update your lab email template in the Settings page.</p> " +
+      "<br><b>If you're the lab manager, please update your lab email template in the Settings page.</b></p> " +
       "<p>" + MANUAL_LINK + "<br>" + GOOGLE_SETUP_LINK + "</p>" +
       "<p> </p>" +
       "<p>Thank you! <br>" +

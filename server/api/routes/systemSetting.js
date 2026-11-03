@@ -3,6 +3,9 @@ const router = express.Router();
 const checkAuth = require("../middleware/check-auth");
 const SystemSettingController = require("../controllers/systemSetting");
 
+router.get("/email-branding/:labId", checkAuth, SystemSettingController.getEmailBranding);
+router.post("/email-branding/:labId/preview", checkAuth, SystemSettingController.previewEmailBranding);
+
 router.get("/public-branding", SystemSettingController.getPublicBranding);
 router.get("/branding-assets/:fileName", SystemSettingController.getBrandingAsset);
 router.post("/branding-asset", checkAuth, SystemSettingController.uploadBrandingAsset);

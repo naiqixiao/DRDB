@@ -1,3 +1,23 @@
+### Release v3.2.0
+
+#### Consistent Lab Emails
+* Confirmation and schedule-update emails display appointment details in the shared themed card. The scheduling dialog includes a quick preview popup showing the final email.
+* Study confirmation previews and test emails include a sample appointment date and time using the same opening as actual parent confirmations.
+* Tomorrow’s staff study reminders use compact table typography, wider child/contact columns, and short joining links for improved readability.
+* Settings includes complete parent and staff reminder previews with linked fictional records, an optional saved study snippet, and test sends to an entered address.
+* Send sample emails from Study Communications to an entered test recipient, using the current snippet and saved lab theme/logo.
+* Study Communications previews now show the saved lab email theme and footer logo, updating as snippets are edited.
+* Lab administrators can choose from five email themes in Settings, upload a PNG/JPEG footer logo, preview changes, and remove the logo. Logos are embedded in sent emails.
+* Lab messages share a consistent layout with the lab’s name, email, and location. Account notifications use the same layout with DRDB branding.
+* Family reminders highlight appointment details, and staff reminder tables use consistent colors.
+* Use **Preview email** in the composer to see the final layout before sending. Emails also include a plain-text alternative.
+
+#### Fixes
+* Older databases automatically receive the missing lab timezone column during startup, preventing a login error after upgrading.
+* Emails from labs or to families whose names contain commas, quotes, or accented characters now have valid sender and recipient headers.
+* The introduction email to eligible families now formats its study-information line as a proper paragraph.
+* The Email Test console previews rendered emails in an isolated frame, so their styles no longer affect the rest of the app.
+
 ### Release v3.1.2
 
 #### Fixes
