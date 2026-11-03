@@ -62,7 +62,7 @@ async function seedDatabase(models) {
       { SettingKey: "BrandingLoginHeading", SettingValue: "DRDB" },
       { SettingKey: "BrandingLoginSubheading", SettingValue: "Developmental Research Database System" },
       { SettingKey: "BrandingLogoUrl", SettingValue: "/logo.png" },
-      { SettingKey: "BrandingFaviconUrl", SettingValue: "/logo.png" }
+      { SettingKey: "BrandingFaviconUrl", SettingValue: "/favicon.png" }
     ];
 
     for (const setting of defaultSettings) {
