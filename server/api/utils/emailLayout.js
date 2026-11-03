@@ -25,7 +25,7 @@ function renderEmail({ htmlBody, subject = "", lab, category, title, reason, wid
   reason = reason || (lab?.LabName
     ? "A message from your research team. Please reply if you have any questions."
     : "This notification was sent by the Developmental Research Management System.");
-  const width = wide ? 800 : 600;
+  const width = wide ? 900 : 720;
   // Use only a validated mailbox in href. Display-only location is escaped as text.
   const email = lab?.Email && /^[^\s<>@"'?:]+@[^\s<>@"'?:]+\.[^\s<>@"'?:]+$/.test(lab.Email) ? lab.Email : "";
   const contactLines = [
@@ -44,7 +44,7 @@ function renderEmail({ htmlBody, subject = "", lab, category, title, reason, wid
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <style>
-@media screen and (max-width:640px){.outer{padding:16px 8px!important}.content{padding:24px!important}.headline{font-size:28px!important}}
+@media screen and (max-width:760px){.outer{padding:16px 8px!important}.content{padding:24px!important}.headline{font-size:28px!important}}
 a{color:#245c54} table{max-width:100%} td,th{overflow-wrap:anywhere}
 </style></head>
 <body style="margin:0;background:#f3f4f2;color:#243536;font-family:Arial,Helvetica,sans-serif;">

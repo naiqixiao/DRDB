@@ -17,7 +17,7 @@ test('extracts legacy document bodies and defaults missing lab details', () => {
   expect(html.match(/<!doctype html>/gi)).toHaveLength(1);
   expect(html.match(/<html\b/gi)).toHaveLength(1);
   expect(html).toContain('Developmental Research Management System');
-  expect(html).toContain('max-width:800px');
+  expect(html).toContain('max-width:900px');
   expect(html).toContain('<td>Study A</td>');
   expect(html).not.toContain('undefined');
   expect(html).not.toContain('mailto:');
