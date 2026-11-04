@@ -1,3 +1,8 @@
+### Release v3.2.1
+
+#### Improvements
+* Loading overlays on the Schedule, Family, and Appointments pages show when operations are in progress. Scheduling clears previous participant results before a new search.
+
 ### Release v3.2.0
 
 #### Consistent Lab Emails

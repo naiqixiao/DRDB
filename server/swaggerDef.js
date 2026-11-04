@@ -5,7 +5,7 @@ const options = {
     openapi: '3.0.0',
     info: {
       title: 'DRDB API Documentation',
-      version: '3.1.1',
+      version: '3.2.1',
       description: 'API documentation for the Developmental Research Management System',
     },
     servers: [
