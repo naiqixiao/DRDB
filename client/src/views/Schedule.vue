@@ -213,7 +213,7 @@
                 <v-icon start size="x-small">mdi-check-circle</v-icon>
                 {{ childCompletedCount }} Completed
               </v-chip>
-              <span v-else-if="!currentChild.PrematureBirth && !currentChild.ASD && !currentChild.HearingLoss && !currentChild.VisionLoss" class="text-caption text-muted">
+              <span v-else-if="currentFamily.Appointments && childAppointments.length === 0" class="text-caption text-muted">
                 <v-icon size="x-small" class="mr-1">mdi-information-outline</v-icon>
                 No participation history
               </span>
@@ -296,13 +296,10 @@
               <v-select 
                 :items="Responses" 
                 v-model="response" 
-                :label="currentChild.scheduled || contactedByOthers
+                :label="hasSelectedStudyAppointment ? 'Already has a record for this study' : currentChild.scheduled || contactedByOthers
                 ? 'Already scheduled'
                 : 'Parents\' response'" 
-                :disabled="!currentChild.id ||
-                currentChild.scheduled ||
-                !store.labEmailStatus ||
-                contactedByOthers" 
+                :disabled="!canScheduleCurrentChild"
                 class="mb-3" 
                 bg-color="textbackground" 
                 hide-details 
@@ -314,7 +311,7 @@
                 <template v-slot:activator="{ props }">
                   <div v-bind="props">
                     <v-btn color="#F59E0B" variant="flat" class="text-white font-weight-bold" block size="large"
-                      @click.stop="scheduleChild" :disabled="response == null">
+                      @click.stop="scheduleChild" :disabled="!canScheduleCurrentChild || response == null">
                       {{ response === "Rejected" ? "¯\\\\_(ツ)_/¯" : "" }}
                       <v-icon start v-if="scheduleButtonIcon">{{ scheduleButtonIcon }}</v-icon>
                     </v-btn>
@@ -868,18 +865,33 @@ export default {
       return stats;
     },
 
+    childAppointments() {
+      if (!this.currentChild.id) return [];
+      return this.flatAppointments.filter(app => String(app.FK_Child) === String(this.currentChild.id));
+    },
+
     childCompletedCount() {
-      if (!this.currentChild || !this.currentFamily || !this.currentFamily.Appointments) return 0;
-      const childScheduleIds = new Set();
-      this.currentFamily.Appointments.forEach(app => {
-        if (app.FK_Child === this.currentChild.id && app.Schedule) {
-          const status = app.Schedule.Status;
-          if ((status === 'Confirmed' && app.Schedule.Completed) || status === 'Completed') {
-            childScheduleIds.add(app.FK_Schedule);
-          }
-        }
-      });
-      return childScheduleIds.size;
+      const completed = this.childAppointments.filter(({ Schedule }) =>
+        Schedule?.Status === 'Completed' || (Schedule?.Status === 'Confirmed' && Schedule.Completed)
+      );
+      return new Set(completed.map(app => String(app.FK_Schedule))).size;
+    },
+
+    hasSelectedStudyAppointment() {
+      return this.selectedStudy.id && this.childAppointments.some(app =>
+        String(app.FK_Study) === String(this.selectedStudy.id)
+      );
+    },
+
+    canScheduleCurrentChild() {
+      return this.currentChild.id &&
+        this.currentFamily.Appointments &&
+        this.eligibleChildSearchActive &&
+        this.lastEligibleChildQuery?.studyID === this.selectedStudy.id &&
+        !this.hasSelectedStudyAppointment &&
+        !this.currentChild.scheduled &&
+        !this.contactedByOthers &&
+        this.store.labEmailStatus;
     },
 
     familyChildrenCount() {
@@ -1036,11 +1048,14 @@ export default {
 
     async loadEligibleChildPage(offset = 0, options = {}) {
       const { showReminder = false } = options;
+      const query = this.lastEligibleChildQuery;
+      if (!query) return;
       const result = await child.search({
-        ...this.lastEligibleChildQuery,
+        ...query,
         limit: this.eligibleChildSearchLimit,
         offset,
       });
+      if (query !== this.lastEligibleChildQuery || query.studyID !== this.selectedStudy.id) return;
 
       const payload = result.data || {};
       const eligibleChildren = payload.children || [];
@@ -1055,16 +1070,17 @@ export default {
         this.Children = eligibleChildren;
         await this.activateCurrentChild(this.Children[0], { showReminder });
       } else {
-        await this.$refs.confirmD.open('No Results', 'No child is eligible for the selected study. :(', { color: 'warning', noconfirm: true });
         this.page = 0;
         this.Children = [];
         this.currentChild = Object.assign({}, this.defaultItem);
         this.contactedByOthers = false;
+        await this.$refs.confirmD.open('No Results', 'No child is eligible for the selected study. :(', { color: 'warning', noconfirm: true });
       }
     },
 
     async searchChild() {
       this.store.setLoadingStatus(true);
+      this.resetEligibleChildSearchState();
 
       await this.releaseCurrentChildVisitLock();
 
@@ -1319,6 +1335,7 @@ export default {
     async scheduleChild() {
       try {
         await login.check_login();
+        if (!this.canScheduleCurrentChild || this.response == null) return;
 
         this.editedIndex = this.Children.indexOf(this.currentChild);
         this.editedChild = Object.assign({}, this.currentChild);
