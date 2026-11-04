@@ -1,4 +1,4 @@
-const { matchesParticipationRules } = require("../utils/participationRules");
+const { getParticipationGroups, matchesParticipationRules, validateParticipationGroups } = require("../utils/participationRules");
 const model = require("../models/DRDB");
 const { Op, fn, col, where } = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -91,9 +91,7 @@ function buildSlimChildInclude() {
   ];
 }
 
-function isChildEligibleForSlimSearch(childRecord, eligibility) {
-  const { ageGroups, prerequisiteStudyIds, exclusionStudyIds } = eligibility;
-
+function isChildEligibleForSlimSearch(childRecord, ageGroups, participationGroups) {
   if (ageGroups.length > 0) {
     if (!childRecord.DoB) {
       return false;
@@ -116,18 +114,35 @@ function isChildEligibleForSlimSearch(childRecord, eligibility) {
     }
   }
 
+  if (participationGroups.length === 0) return true;
   const history = (childRecord.Appointments || []).map(appointment => appointment.FK_Study);
-  if (!matchesParticipationRules({
-    ParticipationRules: eligibility.participationRules,
-    Prerequisites: prerequisiteStudyIds.map(id => ({ id })),
-    Exclusions: exclusionStudyIds.map(id => ({ id })),
-  }, history)) return false;
-
-  return true;
+  return matchesParticipationRules({ ParticipationRules: participationGroups }, history);
 }
 
 async function searchSlimChildrenWithPagination(queryString, pagination, eligibility) {
   const { limit, offset } = pagination;
+  const { ageGroups, participationRules, prerequisiteStudyIds, exclusionStudyIds } = eligibility;
+  const participationGroups = getParticipationGroups({
+    ParticipationRules: participationRules,
+    Prerequisites: prerequisiteStudyIds.map(id => ({ id })),
+    Exclusions: exclusionStudyIds.map(id => ({ id })),
+  });
+  if (!validateParticipationGroups(participationGroups)) {
+    return { children: [], pagination: { limit, offset, total: 0, hasMore: false } };
+  }
+
+  // Fetch full child and family details only for the IDs on the requested page.
+  const scanInclude = [{ model: model.family, required: true, attributes: [] }];
+  const ruleStudyIds = [...new Set(participationGroups.flatMap(group => group.studyIds))];
+  if (ruleStudyIds.length > 0) {
+    scanInclude.push({
+      model: model.appointment,
+      separate: true,
+      attributes: ["FK_Study"],
+      where: { FK_Study: { [Op.in]: ruleStudyIds } },
+    });
+  }
+
   const batchSize = Math.max(limit, 200);
   const eligibleChildIds = [];
   let scannedOffset = 0;
@@ -135,7 +150,8 @@ async function searchSlimChildrenWithPagination(queryString, pagination, eligibi
   while (true) {
     const batch = await model.child.findAll({
       where: queryString,
-      include: buildSlimChildInclude(),
+      attributes: ageGroups.length > 0 ? ["id", "DoB"] : ["id"],
+      include: scanInclude,
       order: [["id", "DESC"]],
       limit: batchSize,
       offset: scannedOffset,
@@ -146,7 +162,7 @@ async function searchSlimChildrenWithPagination(queryString, pagination, eligibi
     }
 
     for (const childRecord of batch) {
-      if (!isChildEligibleForSlimSearch(childRecord, eligibility)) {
+      if (!isChildEligibleForSlimSearch(childRecord, ageGroups, participationGroups)) {
         continue;
       }
 

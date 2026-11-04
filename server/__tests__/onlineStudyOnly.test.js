@@ -6,6 +6,7 @@ jest.mock('../api/models/DRDB', () => ({
 jest.mock('../api/controllers/log', () => ({ createLog: jest.fn() }));
 
 const model = require('../api/models/DRDB');
+const { Op } = require('sequelize');
 const childController = require('../api/controllers/child');
 const familyController = require('../api/controllers/family');
 
@@ -28,11 +29,39 @@ describe('Recruitment participation availability', () => {
   test.each(['true', 'false'])('excludes online-only families in slim=%s searches for every in-person format', async (slim) => {
     for (const StudyType of ['Behavioural', 'EEG/ERP', 'EyeTracking', 'fNIRS']) {
       model.study.findOne.mockResolvedValue({ StudyType, Appointments: [] });
+      model.child.findAll.mockClear();
+      if (slim === 'true') {
+        model.child.findAll.mockResolvedValueOnce([{ id: 2 }]).mockResolvedValueOnce([{ id: 2 }]);
+      }
       await invoke(childController.search, { studyID: '1', minAge: '1', maxAge: '24', slim, StudyType: 'Online' });
-      const options = model.child.findAll.mock.calls.at(-1)[0];
+      const options = model.child.findAll.mock.calls[0][0];
       expect(options.where['$Family.OnlineStudyOnly$']).toBe(0);
-      if (slim === 'true') expect(options.include[1].attributes).toContain('OnlineStudyOnly');
+      if (slim === 'true') {
+        expect(options.attributes).toEqual(['id']);
+        expect(options.include).toHaveLength(1);
+        expect(model.child.findAll.mock.calls[1][0].include[1].attributes).toContain('OnlineStudyOnly');
+      }
     }
+  });
+  test('loads only the appointment studies used by participation rules', async () => {
+    model.study.findOne.mockResolvedValue({
+      StudyType: 'Online',
+      Appointments: [{ FK_Child: 4 }],
+      ParticipationRules: [{ operator: 'ALL', studyIds: [10] }, { operator: 'NONE', studyIds: [11] }],
+    });
+    model.child.findAll.mockResolvedValueOnce([
+      { id: 1, Appointments: [{ FK_Study: 10 }] },
+      { id: 2, Appointments: [{ FK_Study: 10 }, { FK_Study: 11 }] },
+      { id: 3, Appointments: [] },
+    ]).mockResolvedValueOnce([{ id: 1 }]);
+    const res = await invoke(childController.search, { studyID: '1', minAge: '1', maxAge: '24', slim: 'true' });
+    const scan = model.child.findAll.mock.calls[0][0];
+    expect(scan.where.id).toEqual({ [Op.notIn]: [4] });
+    expect(scan.include[1].where.FK_Study).toEqual({ [Op.in]: [10, 11] });
+    expect(res.json).toHaveBeenCalledWith({
+      children: [{ id: 1 }],
+      pagination: { limit: 100, offset: 0, total: 1, hasMore: false },
+    });
   });
   test.each(['true', 'false'])('includes online-only families for online studies in slim=%s', async (slim) => {
     model.study.findOne.mockResolvedValue({ StudyType: 'Online', Appointments: [] });
