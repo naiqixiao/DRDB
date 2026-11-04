@@ -1,5 +1,12 @@
 <template>
   <v-container fluid>
+    <v-overlay :model-value="store.loadingStatus" persistent class="align-center justify-center">
+      <div class="text-center text-white" role="status" aria-live="polite">
+        <v-progress-circular indeterminate size="48" class="mb-4"></v-progress-circular>
+        <div>Loading appointments...</div>
+      </div>
+    </v-overlay>
+
     <AlertBanner :showAdminEmail="true" />
     <ConfirmDlg ref="confirmD" />
 

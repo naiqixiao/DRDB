@@ -1,65 +1,19 @@
 <claude-mem-context>
 # Memory Context
 
-# [DRDB] recent context, 2026-10-11 5:08am EDT
+# [DRDB] recent context, 2026-11-04 6:12pm EST
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision 🚨security_alert 🔐security_note
 Format: ID TIME TYPE TITLE
 Fetch details: get_observations([IDs]) | Search: mem-search skill
 
-Stats: 50 obs (17,004t read) | 600,202t work | 97% savings
+Stats: 50 obs (17,871t read) | 758,973t work | 98% savings
 
 ### Oct 8, 2026
-482 9:12a 🔵 MySQL Family Deletion by Email/Phone Lookup
-483 " 🔵 DRDB Family Delete Controller Has Cascade Logic
-484 9:13a 🔵 DRDB Family Delete is Simple Single-Row Destroy, Not Multi-Step
-485 10:53a 🔵 GitHub Release Pinning for Version Downloads
-S115 Docker + Tailscale deployment architecture for lab computers — feasibility and guidance (Oct 8 at 10:54 AM)
-486 11:05a ⚖️ Docker + Tailscale Architecture for Lab Computer Deployment
-S116 Add a public parking coordination dashboard to the DRDB login page showing upcoming in-person study visits across all labs (Oct 8 at 11:05 AM)
-487 12:48p 🟣 Upcoming Studies Dashboard on Login Page for Parking Coordination
-488 " 🔵 Login.vue Current Structure: Two-Column Layout with Right Panel
-489 12:49p 🔵 Existing UpcomingAppointments.vue Requires Auth; New Public Endpoint Needed
-490 " 🔵 Existing schedule.upcoming Controller Structure and Data Model for New Public Endpoint
-491 12:50p 🔵 timezoneService Works Without Auth; Client schedule.js Always Uses Authenticated api()
-492 " 🟣 parkingBoard Controller Added to schedule.js
-493 " 🔵 moment-timezone Available Server-Side; No New Dependencies Needed
-494 12:51p 🔴 Fixed moment-timezone Import and getGeneralTimezone Hoisting in schedule.js
-495 " 🔴 Cleaned Up Stale Inline require and Fixed moment.tz() Call in parkingBoard
-496 " 🟣 Public /api/schedule/parkingBoard Route Registered Without checkAuth
-497 " 🟣 Unit Tests Created for parkingBoard Controller
-498 " 🔴 Fixed Test Extraction of Sequelize Op.between Value
-499 " 🟣 All 69 Server Tests Passing After parkingBoard Addition
-500 12:52p 🟣 parkingBoard() Client Service Method Added to schedule.js
-501 " 🟣 parkingBoard() Method Added to Client Schedule Service
-502 " 🟣 ParkingBoard.vue Component Created
-503 " 🟣 ParkingBoard Integrated into Login.vue Right Panel
-504 " 🟣 Login.vue Script Registration of ParkingBoard Complete
-505 12:53p 🔵 api() Sends Bearer Token Only When store.token Exists; Build Passes Clean
-S117 Parking coordination dashboard on DRDB login page — visual browser verification of completed feature (Oct 8 at 12:53 PM)
-506 12:55p 🟣 Mock Backend Server Created for Live ParkingBoard Preview
-507 12:56p 🟣 ParkingBoard Rendered Successfully in Browser Against Mock Backend
-S118 ParkingBoard UI/UX improvements: fixed height scrollable panel, lab filter chips, excluded labs via .env, and per-lab card colors (Oct 8 at 12:57 PM)
-508 1:02p 🟣 Dashboard UI Enhancements: Lab Filtering, Visit Panel Scroll, and Lab Card Colors
-509 " 🟣 Parking Board API Now Exposes `labId` per Appointment
-510 " 🟣 Parking Board API: Env-Configured Lab Exclusion List and Lab Metadata in Response
-511 1:03p 🟣 Parking Board Tests Updated and All 71 Tests Passing
-512 " ✅ `PARKING_EXCLUDED_LABS` Documented in Both `.env.example` Files
-513 " ✅ `PARKING_EXCLUDED_LABS` Wired into Docker Compose Backend Environment
-514 " 🟣 ParkingBoard.vue Overhauled: Fixed-Height Scroll, Lab Filter, Per-Lab Colors, Now Marker
-515 1:04p 🟣 Mock Server Updated and ParkingBoard UI Verified in Browser with Multi-Lab Data
-516 " 🔵 ParkingBoard Component Bug: `labs` Array Not Populating Despite Correct API Response
-517 1:06p 🔵 Mock Server Patched with Cache-Control: no-store Header
-S119 Add v3.1.1 release notes to client/public/CHANGELOG.md covering the new login-page parking board feature (Oct 8 at 1:06 PM)
-518 1:10p ✅ CHANGELOG.md Updated with Version 3.1.1 Entry
-519 " 🔵 DRDB CHANGELOG.md Structure and v3.1.0 Feature Set Confirmed
-S120 Add v3.1.1 CHANGELOG entry and bump version strings across the DRDB codebase (Oct 8 at 1:10 PM)
+519 1:10p 🔵 DRDB CHANGELOG.md Structure and v3.1.0 Feature Set Confirmed
 520 1:11p ✅ DRDB Version Bumped from 3.1.0 to 3.1.1 Across All Version Files
-S121 How to configure PARKING_EXCLUDED_LABS env var with multiple lab names (Oct 8 at 1:11 PM)
-S122 Validating PARKING_EXCLUDED_LABS comma-separated format and debugging lab name exclusion logic in DRDB parking system (Oct 8 at 1:11 PM)
 521 1:21p 🔵 PARKING_EXCLUDED_LABS Comma-Separated Format Inquiry
 522 1:22p 🔵 PARKING_EXCLUDED_LABS Comma-Separated Format Works, But Duplicate Lab Bug Found
-S123 Auto-update the "Now · 1:27 PM" time display in DRDB ParkingBoard to refresh in real time (Oct 8 at 1:22 PM)
 523 1:28p 🟣 Auto-Updating Current Time Display Requested
 524 " 🔵 DRDB Now-Marker Time Display Is Static (Stale by ~1 Minute)
 525 " 🟣 ParkingBoard Now-Marker: Minute-Aligned Clock + Silent Background Refresh
@@ -69,22 +23,67 @@ S123 Auto-update the "Now · 1:27 PM" time display in DRDB ParkingBoard to refre
 529 1:31p 🔵 DRDB App.vue Shell Architecture: Login-Route Fixed Layout and Per-Route Color Theming
 530 " 🟣 Global Parking Board FAB Added to App Shell in DRDB
 531 " 🔵 Parking Board FAB and Dialog Verified: All Close Methods and Login Route Hiding Work Correctly
-S124 Auto-updating "Now" clock and global ParkingBoard FAB in DRDB — CHANGELOG updated with new feature bullets (Oct 8 at 1:33 PM)
-**Investigated**: The CHANGELOG.md at client/public/CHANGELOG.md was examined to identify where to add documentation for the two new features implemented in this session.
+S140 Fix Google Sign-In Code page not showing in Settings.vue when setting up lab or system admin email accounts (Oct 8 at 1:33 PM)
+### Nov 2, 2026
+565 7:29p 🔵 Google Sign-In Code Page Not Displaying in Settings Email Setup
+566 " 🔵 Settings.vue Missing postMessage Listener for Google OAuth Code Auto-Fill
+567 " 🔵 Root Cause: credentials.json Uses `installed` Type with Wrong redirect_uri
+568 7:30p 🔴 Fixed Google OAuth Redirect URI Resolution for `installed`-Type Credentials
+569 " 🔴 Client-Side Fixes: Origin Forwarding, URL Code Extraction, and UX Guidance
+S141 Google OAuth auto-fill not working on localhost — verifying it will work on production drdb.mcmaster.ca (Nov 2 at 7:31 PM)
+570 7:39p 🔵 Auto-fill Credential Issue Specific to localhost Testing Environment
+571 " 🔵 DRDB Nginx Configuration for Production Deployment
+S142 Overarching examination of major email template system update in DRDB — checking for missing pieces or flaws after extensive changes enabling per-lab themed email customization (Nov 2 at 7:39 PM)
+572 7:43p 🟣 Email Template System Major Overhaul with Theme Customization
+573 7:44p 🟣 Per-Lab Email Branding System with Theme Customization
+574 " 🟣 Email Layout Renderer and Themed HTML Pipeline
+575 " 🟣 Reminder Preview and Test Send Infrastructure
+576 " 🔄 Google OAuth Redirect URI Resolution Centralized
+577 " ✅ Lab Timezone Column Schema Migration Added to Startup
+578 " ✅ Comprehensive Test Suite Added for Email Branding System
+579 7:45p 🔵 Full Test Suite Passes: 16 Suites, 127 Tests in 1.16s
+580 " 🔴 Email MIME Encoding Completely Rewritten for RFC Compliance and Inline Images
+581 " 🔴 Reminder Email Tables: Hardcoded "EST" Timezone and Olive/Tomato Colors Fixed
+582 " 🔵 Potential Gap: reminderService Lab Query Missing Location/ZoomLink/TransportationInstructions
+583 " 🟣 Client-Side Email Preview with Inline Appointment Card
+584 " 🟣 Study Communications Tab Now Uses Themed EmailLayoutPreview Component
+585 " 🔴 Google OAuth Sign-In Code Now Accepts Full Redirect URL
+S143 Fix two medium issues found during email template system examination: EmailTest.vue CSS leakage via v-html, and malformed From/To headers for lab names with special characters (Nov 2 at 7:46 PM)
+586 7:49p 🔴 EmailTest.vue v-html Causes App-Wide Style Leakage — Fix In Progress
+587 " 🔴 EmailTest.vue v-html Replaced with Sandboxed iframe
+588 " 🔴 From Header Display Name Encoding Fix Being Applied to encodeMessage()
+589 " 🔴 RFC 2822 From/To Display Name Encoding Fixed in encodeMessage()
+S144 Investigation of tentative-family "eligible study" emails — confirmed no date regression, found pre-existing stray closing tag in Introduction opening (Nov 2 at 7:50 PM)
+590 7:51p 🔵 ScheduleUpdate Email Opening Promises Appointment Details That May Not Be Present
+S145 Fixed pre-existing stray closing tag in Introduction email opening; confirmed client build passes; all session changes remain uncommitted (Nov 2 at 7:51 PM)
+591 7:52p 🔴 Fixed Stray Closing Tag in Introduction Email Opening
+S146 Version bump to 3.2.0 and CHANGELOG restructuring for the email template system overhaul release (Nov 2 at 7:52 PM)
+592 7:54p ✅ Version Bump to 3.2.0 Initiated
+593 " ✅ Version String Locations Identified for 3.1.2 → 3.2.0 Bump
+594 " ✅ DRDB Bumped to Version 3.2.0 — All Files Updated
+S147 User chose "Not yet" — all v3.2.0 changes remain uncommitted in working tree, awaiting user's commit decision (Nov 2 at 7:55 PM)
+S148 User asked about the app favicon — where it's set, how to change it, and why it looks squashed in browser tabs (Nov 2 at 7:55 PM)
+595 7:57p 🔵 Favicon System: Dynamic Override via Branding Settings, Static Fallback to logo.png
+596 7:58p 🔵 Logo File Recently Updated Intentionally — Same File Serves as Both App Logo and Favicon
+### Nov 3, 2026
+630 12:05p ✅ Email Layout Width Adjustment Requested
+631 " ✅ Email Width Widening Plan Initiated
+632 " 🔵 Email Layout Width Logic Found in emailLayout.js
+633 " ✅ Email Layout Widened: 800→900px wide, 600→720px standard, breakpoint 640→760px
+634 " ✅ Email Width Changes Complete — Pending Commit and Backend Restart
+S155 Widen email layouts in DRDB — increase max-width for all email variants (Nov 3 at 12:05 PM)
+**Investigated**: Searched server/api/utils/emailLayout.js and related test files for width values. Found a `wide` boolean parameter controlling two width variants (800px wide, 600px standard) applied as inline max-width on the email table element. Also found a responsive mobile breakpoint at 640px and a test asserting 'max-width:800px'.
 
-**Learned**: The 3.1.1 changelog entry already documented the ParkingBoard login-page feature but was missing entries for the auto-updating clock and the global FAB. The CHANGELOG uses a bullet-list format under named subsections within each release.
+**Learned**: The shared email layout in DRDB uses a single function with a `wide` flag: `const width = wide ? 800 : 600`. Width is applied as `max-width:${width}px` inline on the outer presentation table. Staff schedule reminders use the wide variant (800px); parent messages and account notifications use the standard variant (600px). The responsive breakpoint controls when the compact phone layout activates.
 
-**Completed**: 1. Auto-updating "Now" clock in ParkingBoard.vue — minute-boundary-aligned setInterval with visibilitychange catch-up for background tabs.
-    2. 5-minute silent background data refresh in ParkingBoard.vue — preserves selected day, lab filter, and scroll position across refresh cycles.
-    3. Global floating action button (FAB) in App.vue — round blue car icon fixed to bottom-right corner on all authenticated pages; opens ParkingBoard in a dialog; hidden on the login route.
-    4. Dialog verified: closes via Escape key, X button, and outside-click; remounts fresh on each open via v-if.
-    5. Production build verified clean (✓ built in 2.23s).
-    6. CHANGELOG.md updated with two new bullets under the v3.1.1 "Upcoming In-Person Visits" section:
-       - "Stays up to date" — describes the moving Now line and 5-minute refresh with preserved state.
-       - "Available from every page" — describes the car FAB and its three close methods.
+**Completed**: - server/api/utils/emailLayout.js line 28: wide email max-width increased 800px → 900px, standard 600px → 720px
+    - server/api/utils/emailLayout.js line 47: responsive mobile breakpoint updated 640px → 760px (to avoid squeezed desktop padding at intermediate widths)
+    - server/__tests__/emailLayout.test.js line 20: test assertion updated 'max-width:800px' → 'max-width:900px'
+    - Sample email rendered to HTML and opened in preview pane for visual verification
+    - All 128 tests pass after changes
 
-**Next Steps**: No pending tasks. All requested work (auto-updating clock, global ParkingBoard FAB, and changelog documentation) is complete. The session is awaiting any new user requests.
+**Next Steps**: Changes are complete but not yet committed to git. Backend server needs a restart for new widths to take effect. User can verify visually via Settings → Lab Email Appearance or Reminder Email Tests after restart.
 
 
-Access 600k tokens of past work via get_observations([IDs]) or mem-search skill.
+Access 759k tokens of past work via get_observations([IDs]) or mem-search skill.
 </claude-mem-context>

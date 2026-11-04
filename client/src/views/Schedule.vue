@@ -23,6 +23,13 @@
       </v-alert>
     </div>
 
+    <v-overlay :model-value="isSearchingEligibleParticipants" persistent class="align-center justify-center">
+      <div class="text-center text-white" role="status" aria-live="polite">
+        <v-progress-circular indeterminate size="48" class="mb-4"></v-progress-circular>
+        <div>Searching eligible participants...</div>
+      </div>
+    </v-overlay>
+
     <ConfirmDlg ref="confirmD" />
 
     <v-row justify="space-around" align="stretch">
@@ -725,6 +732,7 @@ export default {
       Children: [],
       pages: 0,
       page: 0,
+      isSearchingEligibleParticipants: false,
       eligibleChildSearchLimit: 100,
       eligibleChildSearchOffset: 0,
       eligibleChildSearchTotal: 0,
@@ -1042,6 +1050,7 @@ export default {
       }
 
       if (showReminder) {
+        this.isSearchingEligibleParticipants = false;
         await this.$refs.confirmD.open('Reminder', 'Make sure to confirm with parents about their email address and child\'s information.<br><br>Use the <b>Edit Info</b> button to update family and/or child information.<br><br>Your little effort will benefit everyone in the future!<br><br>Thanks! :)', { color: 'primary', noconfirm: true });
       }
     },
@@ -1074,100 +1083,114 @@ export default {
         this.Children = [];
         this.currentChild = Object.assign({}, this.defaultItem);
         this.contactedByOthers = false;
+        this.isSearchingEligibleParticipants = false;
         await this.$refs.confirmD.open('No Results', 'No child is eligible for the selected study. :(', { color: 'warning', noconfirm: true });
       }
     },
 
     async searchChild() {
+      this.isSearchingEligibleParticipants = true;
       this.store.setLoadingStatus(true);
       this.resetEligibleChildSearchState();
 
-      await this.releaseCurrentChildVisitLock();
-
-      // Compute age range: use actively selected group or overall min/max across all groups
-      const groups = this.selectedStudy.AgeGroups || [];
-      let minAge, maxAge;
-      if (this.activeAgeGroup) {
-        minAge = this.activeAgeGroup.MinAge;
-        maxAge = this.activeAgeGroup.MaxAge;
-      } else if (groups.length > 0) {
-        minAge = Math.min(...groups.map(g => g.MinAge));
-        maxAge = Math.max(...groups.map(g => g.MaxAge));
-      }
-
-      // Guard: require age range to prevent unfiltered queries returning massive datasets
-      if (minAge == null || maxAge == null) {
-        this.store.setLoadingStatus(false);
-        await this.$refs.confirmD.open(
-          'No Age Groups',
-          'This study has no age groups configured. Please add age groups to the study before searching for eligible children.',
-          { color: 'warning', noconfirm: true }
-        );
-        return;
-      }
-
-      const queryString = {
-        minAge,
-        maxAge,
-        studyID: this.selectedStudy.id,
-        hidePhoneOnly: this.hidePhoneOnly,
-        trainingMode: this.store.trainingMode,
-        slim: true,  // fetch minimal data for the list; full data loaded on selection
-        eligibilityAgeGroups: JSON.stringify(this.activeAgeGroup ? [this.activeAgeGroup] : (this.selectedStudy.AgeGroups || [])),
-        // Grouped participation rules are read from the saved study on the server.
-        // Keep these legacy filters for studies that have not adopted grouped rules.
-        prerequisiteStudyIds: JSON.stringify((this.selectedStudy.Prerequisites || []).map((study) => study.id)),
-        exclusionStudyIds: JSON.stringify((this.selectedStudy.Exclusions || []).map((study) => study.id)),
-      };
-
-      if (this.selectedStudy.ASDParticipant === "Exclude") queryString.ASDParticipant = 0;
-      else if (this.selectedStudy.ASDParticipant === "Only") queryString.ASDParticipant = 1;
-
-      if (this.selectedStudy.PrematureParticipant === "Exclude") queryString.PrematureParticipant = 0;
-      else if (this.selectedStudy.PrematureParticipant === "Only") queryString.PrematureParticipant = 1;
-
-      if (this.selectedStudy.IllParticipant === "Exclude") queryString.IllParticipant = 0;
-      else if (this.selectedStudy.IllParticipant === "Only") queryString.IllParticipant = 1;
-
-      if (this.selectedStudy.VisionLossParticipant === "Exclude") queryString.VisionLossParticipant = 0;
-      else if (this.selectedStudy.VisionLossParticipant === "Only") queryString.VisionLossParticipant = 1;
-
-      if (this.selectedStudy.HearingLossParticipant === "Exclude") queryString.HearingLossParticipant = 0;
-      else if (this.selectedStudy.HearingLossParticipant === "Only") queryString.HearingLossParticipant = 1;
-
       try {
+        const releaseLock = this.releaseCurrentChildVisitLock();
+        this.Children = [];
+        this.page = 0;
+        this.currentChild = Object.assign({}, this.defaultItem);
+        this.contactedByOthers = false;
+        this.response = null;
+        await releaseLock;
+
+        // Compute age range: use actively selected group or overall min/max across all groups
+        const groups = this.selectedStudy.AgeGroups || [];
+        let minAge, maxAge;
+        if (this.activeAgeGroup) {
+          minAge = this.activeAgeGroup.MinAge;
+          maxAge = this.activeAgeGroup.MaxAge;
+        } else if (groups.length > 0) {
+          minAge = Math.min(...groups.map(g => g.MinAge));
+          maxAge = Math.max(...groups.map(g => g.MaxAge));
+        }
+
+        // Guard: require age range to prevent unfiltered queries returning massive datasets
+        if (minAge == null || maxAge == null) {
+          this.isSearchingEligibleParticipants = false;
+          await this.$refs.confirmD.open(
+            'No Age Groups',
+            'This study has no age groups configured. Please add age groups to the study before searching for eligible children.',
+            { color: 'warning', noconfirm: true }
+          );
+          return;
+        }
+
+        const queryString = {
+          minAge,
+          maxAge,
+          studyID: this.selectedStudy.id,
+          hidePhoneOnly: this.hidePhoneOnly,
+          trainingMode: this.store.trainingMode,
+          slim: true,  // fetch minimal data for the list; full data loaded on selection
+          eligibilityAgeGroups: JSON.stringify(this.activeAgeGroup ? [this.activeAgeGroup] : (this.selectedStudy.AgeGroups || [])),
+          // Grouped participation rules are read from the saved study on the server.
+          // Keep these legacy filters for studies that have not adopted grouped rules.
+          prerequisiteStudyIds: JSON.stringify((this.selectedStudy.Prerequisites || []).map((study) => study.id)),
+          exclusionStudyIds: JSON.stringify((this.selectedStudy.Exclusions || []).map((study) => study.id)),
+        };
+
+        if (this.selectedStudy.ASDParticipant === "Exclude") queryString.ASDParticipant = 0;
+        else if (this.selectedStudy.ASDParticipant === "Only") queryString.ASDParticipant = 1;
+
+        if (this.selectedStudy.PrematureParticipant === "Exclude") queryString.PrematureParticipant = 0;
+        else if (this.selectedStudy.PrematureParticipant === "Only") queryString.PrematureParticipant = 1;
+
+        if (this.selectedStudy.IllParticipant === "Exclude") queryString.IllParticipant = 0;
+        else if (this.selectedStudy.IllParticipant === "Only") queryString.IllParticipant = 1;
+
+        if (this.selectedStudy.VisionLossParticipant === "Exclude") queryString.VisionLossParticipant = 0;
+        else if (this.selectedStudy.VisionLossParticipant === "Only") queryString.VisionLossParticipant = 1;
+
+        if (this.selectedStudy.HearingLossParticipant === "Exclude") queryString.HearingLossParticipant = 0;
+        else if (this.selectedStudy.HearingLossParticipant === "Only") queryString.HearingLossParticipant = 1;
+
         this.lastEligibleChildQuery = queryString;
         await this.loadEligibleChildPage(0, { showReminder: true });
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
+      } finally {
+        this.isSearchingEligibleParticipants = false;
+        this.store.setLoadingStatus(false);
       }
-
-      this.response = null;
-      setTimeout(() => this.store.setLoadingStatus(false), 500);
     },
 
     async nextEligibleChildResultsPage() {
       if (!this.hasNextEligibleChildResultsPage) return;
+      this.isSearchingEligibleParticipants = true;
       this.store.setLoadingStatus(true);
-      await this.releaseCurrentChildVisitLock();
       try {
+        await this.releaseCurrentChildVisitLock();
         await this.loadEligibleChildPage(this.eligibleChildSearchOffset + this.eligibleChildSearchLimit);
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
+      } finally {
+        this.isSearchingEligibleParticipants = false;
+        this.store.setLoadingStatus(false);
       }
-      setTimeout(() => this.store.setLoadingStatus(false), 500);
     },
 
     async previousEligibleChildResultsPage() {
       if (!this.hasPreviousEligibleChildResultsPage) return;
+      this.isSearchingEligibleParticipants = true;
       this.store.setLoadingStatus(true);
-      await this.releaseCurrentChildVisitLock();
       try {
+        await this.releaseCurrentChildVisitLock();
         await this.loadEligibleChildPage(Math.max(0, this.eligibleChildSearchOffset - this.eligibleChildSearchLimit));
       } catch (error) {
         if (error.response?.status !== 401) console.error(error);
+      } finally {
+        this.isSearchingEligibleParticipants = false;
+        this.store.setLoadingStatus(false);
       }
-      setTimeout(() => this.store.setLoadingStatus(false), 500);
     },
 
     editFamilyAndChild() {
