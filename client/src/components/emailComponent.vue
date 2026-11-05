@@ -39,6 +39,7 @@
     </div>
 
     <v-select v-if="emailType === 'Introduction' && introductionSubjectChoices.length > 1"
+      :model-value="emailSubject"
       :items="introductionSubjectChoices" label="Choose a suggested subject"
       variant="outlined" density="compact" class="mt-3" hide-details
       @update:model-value="emailSubject = $event" />

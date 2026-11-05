@@ -841,8 +841,9 @@
 
               <v-window v-model="commTab">
                 <v-window-item value="introduction" class="pa-5">
-                  <v-text-field v-model="currentStudy.IntroductionEmailSubject" label="Eligible-family email subject"
-                    variant="outlined" maxlength="255" counter hint="Leave blank to use the system default." persistent-hint />
+                  <v-text-field v-model="currentStudy.IntroductionEmailSubject" label="Study invitation subject"
+                    :rules="[validateIntroductionSubject]"
+                    variant="outlined" maxlength="255" counter hint="Used for eligible-family invitations and tentative schedule updates. Leave blank for the default; custom subjects use plain text." persistent-hint />
                   <div class="mt-4 text-body-2"><strong>Subject preview:</strong> {{ currentStudy.IntroductionEmailSubject?.trim() || 'An eligible study for Emma' }}</div>
                   <div class="text-caption text-medium-emphasis">Emma is an example child name for the default subject.</div>
                 </v-window-item>
@@ -1463,8 +1464,9 @@
 
                     <v-window v-model="emailTemplateTab" class="pa-6">
                       <v-window-item value="introduction">
-                        <v-text-field v-model="editedStudy.IntroductionEmailSubject" label="Eligible-family email subject"
-                          variant="outlined" maxlength="255" counter hint="Leave blank to use the system default." persistent-hint />
+                        <v-text-field v-model="editedStudy.IntroductionEmailSubject" label="Study invitation subject"
+                    :rules="[validateIntroductionSubject]"
+                          variant="outlined" maxlength="255" counter hint="Used for eligible-family invitations and tentative schedule updates. Leave blank for the default; custom subjects use plain text." persistent-hint />
                         <div class="mt-4 text-body-2"><strong>Subject preview:</strong> {{ editedStudy.IntroductionEmailSubject?.trim() || 'An eligible study for Emma' }}</div>
                         <div class="text-caption text-medium-emphasis">Emma is an example child name for the default subject.</div>
                       </v-window-item>
@@ -1928,7 +1930,16 @@ export default {
       }
     },
 
+    validateIntroductionSubject(value) {
+      return value == null || (typeof value === "string" && value.length <= 255 && !/[\r\n]/.test(value))
+        || "Use a single line of at most 255 characters.";
+    },
+
     async saveEmailTemplates() {
+      if (this.validateIntroductionSubject(this.currentStudy.IntroductionEmailSubject) !== true) {
+        this.commTab = "introduction";
+        return;
+      }
       this.savingTemplates = true;
       try {
         await studyApi.update(this.currentStudy);
@@ -2133,6 +2144,11 @@ export default {
     },
 
     async save() {
+      if (this.validateIntroductionSubject(this.editedStudy.IntroductionEmailSubject) !== true) {
+        this.studyStepper = 4;
+        this.emailTemplateTab = "introduction";
+        return;
+      }
       if (!validateParticipationGroups(this.editedStudy.ParticipationRules)) {
         this.studyStepper = 2;
         this.$refs.confirmD.open('Participation Requirements', 'Each group needs ANY, ALL, or NONE and at least one selected study. Remove unused groups before saving.', { color: 'warning', noconfirm: true });
