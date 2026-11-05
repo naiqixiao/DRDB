@@ -8,6 +8,7 @@ const COLUMNS = [
 async function addStudyColumn(queryInterface, { name, options, sql }) {
   try {
     await queryInterface.addColumn('Study', name, options);
+    console.log(`Patched legacy Study table: added ${name}.`);
   } catch (error) {
     // Another server process may have added it after our describeTable call.
     if (error.original?.errno === 1060 || error.parent?.errno === 1060) {

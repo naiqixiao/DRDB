@@ -4,12 +4,14 @@ const vm = require('vm');
 const { createRequire } = require('module');
 
 // Execute the real startup gate against an older schema, without a live database.
-async function startWithLabColumns(labColumns, addColumnError, studyColumns = { ParticipationRules: {}, IntroductionEmailSubject: {} }) {
+async function startWithLabColumns(labColumns, addColumnError, studyColumns = { ParticipationRules: {}, IntroductionEmailSubject: {} }, syncError, observeTables) {
   const tables = { Lab: { ...labColumns }, Family: { OnlineStudyOnly: {} }, Study: { ...studyColumns } };
+  if (observeTables) observeTables(tables);
   const qi = {
     describeTable: jest.fn(async table => tables[table]),
     addColumn: jest.fn(async (table, column, options) => {
-      if (addColumnError) throw addColumnError;
+      if (typeof addColumnError === "function") addColumnError(table);
+      else if (addColumnError) throw addColumnError;
       tables[table][column] = options;
     }),
   };
@@ -18,7 +20,7 @@ async function startWithLabColumns(labColumns, addColumnError, studyColumns = { 
   const gate = source.slice(source.indexOf('exports.schemaReady ='), source.indexOf('// Remaining patches'));
   const context = {
     exports: {}, require: createRequire(modelFile),
-    sequelize: { sync: jest.fn().mockResolvedValue(), getQueryInterface: () => qi },
+    sequelize: { sync: syncError ? jest.fn().mockRejectedValue(syncError) : jest.fn().mockResolvedValue(), getQueryInterface: () => qi },
     patchLegacyFamilySchemaIfNeeded: require('../api/utils/familySchemaPatch').patchLegacyFamilySchemaIfNeeded,
   };
   vm.runInNewContext(gate, context);
@@ -61,5 +63,23 @@ test('tolerates a concurrent process adding the same column', async () => {
 
 test('startup adds Study.IntroductionEmailSubject to an older database before listening', async () => {
   const { tables } = await startWithLabColumns({ id: {}, Timezone: {} }, undefined, { ParticipationRules: {} });
+  expect(tables.Study).toHaveProperty('IntroductionEmailSubject');
+});
+
+
+test('a failed sync does not skip the study subject migration', async () => {
+  let tables;
+  await expect(startWithLabColumns({ Timezone: {} }, undefined,
+    { ParticipationRules: {} }, new Error('index creation failed'), value => { tables = value; }))
+    .rejects.toThrow('Database synchronization: index creation failed');
+  expect(tables.Study).toHaveProperty('IntroductionEmailSubject');
+});
+
+test('a failed lab patch does not skip the study subject migration', async () => {
+  let tables;
+  await expect(startWithLabColumns({}, table => {
+    if (table === 'Lab') throw new Error('Lab ALTER denied');
+  }, { ParticipationRules: {} }, undefined, value => { tables = value; }))
+    .rejects.toThrow('Lab timezone migration');
   expect(tables.Study).toHaveProperty('IntroductionEmailSubject');
 });

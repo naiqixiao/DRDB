@@ -348,13 +348,30 @@ async function patchLegacyPersonnelSchemaIfNeeded() {
   }
 }
 
-// Synchronize with database, then add columns every request may select.
-// server.js waits on this before listening so no query hits a missing column.
-exports.schemaReady = sequelize
-  .sync({ force: false })
-  .then(() => require("../utils/labSchemaPatch").patchLabTimezoneSchema(sequelize.getQueryInterface()))
-  .then(() => patchLegacyFamilySchemaIfNeeded(sequelize.getQueryInterface()))
-  .then(() => require('../utils/studySchemaPatch').patchStudyParticipationSchema(sequelize.getQueryInterface()));
+// Attempt each patch even if another startup step fails. On an existing
+// database a sync/index error must not prevent unrelated column migrations.
+// Reject the gate after all attempts so HTTP traffic cannot use a partial schema.
+exports.schemaReady = (async () => {
+  const failures = [];
+  const steps = [
+    ["Database synchronization", () => sequelize.sync({ force: false })],
+    ["Lab timezone migration", () => require("../utils/labSchemaPatch").patchLabTimezoneSchema(sequelize.getQueryInterface())],
+    ["Family schema migration", () => patchLegacyFamilySchemaIfNeeded(sequelize.getQueryInterface())],
+    ["Study schema migration", () => require("../utils/studySchemaPatch").patchStudyParticipationSchema(sequelize.getQueryInterface())],
+  ];
+  for (const [name, run] of steps) {
+    try {
+      const result = await run();
+      if (result === false) throw new Error("See the migration error logged above.");
+    } catch (error) {
+      console.error(`[Startup] ${name} failed:`, error);
+      failures.push(new Error(`${name}: ${error.message}`));
+    }
+  }
+  if (failures.length) {
+    throw new AggregateError(failures, failures.map(error => error.message).join("; "));
+  }
+})();
 
 // Remaining patches and seeding continue in the background.
 exports.schemaReady.then(async () => {
@@ -381,4 +398,6 @@ exports.schemaReady.then(async () => {
     console.error("❌ Error during startup sync/seeding:", error);
   }
 
+}, () => {
+  // server.js handles the failed schema gate; do not seed a partial schema.
 });
