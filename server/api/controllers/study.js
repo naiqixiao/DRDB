@@ -222,13 +222,15 @@ exports.update = asyncHandler(async (req, res) => {
       await studyInstance.setExclusions(ExclusionIds || []);
     }
 
+    // Do not join appointments here: a study can have thousands, and joining them
+    // beside the other to-many includes builds a cross product that exhausted the
+    // heap. The client list is loaded without appointments (includeScheules=false).
     const study = await model.study.findOne({
       where: { id: ID },
       include: [
-        { model: model.studyAgeGroup, as: "AgeGroups" },
+        { model: model.studyAgeGroup, as: "AgeGroups", separate: true },
         { model: model.study, as: "Prerequisites", attributes: ["id", "StudyName"] },
         { model: model.study, as: "Exclusions", attributes: ["id", "StudyName"] },
-        model.appointment,
         model.lab,
         { model: model.personnel, as: "PointofContact" },
         {
