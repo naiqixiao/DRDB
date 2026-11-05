@@ -58,7 +58,7 @@ test('tolerates a concurrent process adding the same column', async () => {
     addColumn: jest.fn().mockRejectedValue({ original: { errno: 1060 } }),
   };
   await expect(patchLabTimezoneSchema(qi)).resolves.toBeUndefined();
-  expect(qi.describeTable).toHaveBeenCalledTimes(2);
+  expect(qi.describeTable).toHaveBeenCalledTimes(1);
 });
 
 test('startup adds Study.IntroductionEmailSubject to an older database before listening', async () => {
@@ -82,4 +82,19 @@ test('a failed lab patch does not skip the study subject migration', async () =>
   }, { ParticipationRules: {} }, undefined, value => { tables = value; }))
     .rejects.toThrow('Lab timezone migration');
   expect(tables.Study).toHaveProperty('IntroductionEmailSubject');
+});
+
+
+test('preserves an existing timezone column with different casing', async () => {
+  const { qi, tables } = await startWithLabColumns({ timezone: { defaultValue: 'America/Toronto' } });
+  expect(qi.addColumn).not.toHaveBeenCalled();
+  expect(tables.Lab.timezone.defaultValue).toBe('America/Toronto');
+});
+
+test.each([
+  { original: { errno: '1060' } },
+  { parent: { code: 'ER_DUP_FIELDNAME' } },
+  { errno: 1060 },
+])('duplicate column errors do not block startup: %j', async error => {
+  await expect(startWithLabColumns({}, error)).resolves.toBeDefined();
 });

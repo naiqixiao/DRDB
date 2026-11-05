@@ -31,3 +31,19 @@ test('a failed ALTER names the manual SQL fallback', async () => {
   const qi = { describeTable: jest.fn().mockResolvedValue({ ParticipationRules: {} }), addColumn: jest.fn().mockRejectedValue(new Error('ALTER command denied')) };
   await expect(patchStudyParticipationSchema(qi)).rejects.toThrow('MySQL/migrate_study_introduction_subject.sql');
 });
+
+
+test('recognizes existing study columns regardless of casing', async () => {
+  const qi = { describeTable: jest.fn().mockResolvedValue({ participationrules: {}, introductionemailsubject: {} }), addColumn: jest.fn() };
+  await patchStudyParticipationSchema(qi);
+  expect(qi.addColumn).not.toHaveBeenCalled();
+});
+
+test('continues to the next study column after a driver duplicate-column error', async () => {
+  const qi = {
+    describeTable: jest.fn().mockResolvedValue({}),
+    addColumn: jest.fn().mockRejectedValueOnce({ original: { errno: '1060', code: 'ER_DUP_FIELDNAME' } }).mockResolvedValueOnce(),
+  };
+  await expect(patchStudyParticipationSchema(qi)).resolves.toBeUndefined();
+  expect(qi.addColumn.mock.calls.map(call => call[1])).toEqual(['IntroductionEmailSubject', 'ParticipationRules']);
+});

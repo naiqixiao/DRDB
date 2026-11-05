@@ -41,3 +41,16 @@ describe('Family OnlineStudyOnly startup patch', () => {
     await expect(patchLegacyFamilySchemaIfNeeded(qi)).resolves.toBe(false);
   });
 });
+
+
+test('recognizes an existing family column regardless of casing', async () => {
+  const qi = fakeQueryInterface({ onlinestudyonly: {} });
+  await expect(patchLegacyFamilySchemaIfNeeded(qi)).resolves.toBe(true);
+  expect(qi.addColumn).not.toHaveBeenCalled();
+});
+
+test('a duplicate family column is already migrated', async () => {
+  const qi = fakeQueryInterface({});
+  qi.addColumn.mockRejectedValue({ original: { errno: '1060' } });
+  await expect(patchLegacyFamilySchemaIfNeeded(qi)).resolves.toBe(true);
+});

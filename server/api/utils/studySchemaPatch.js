@@ -1,3 +1,4 @@
+const { hasColumn, isDuplicateColumn } = require("./schemaColumns");
 const { DataTypes } = require('sequelize');
 
 const COLUMNS = [
@@ -10,11 +11,9 @@ async function addStudyColumn(queryInterface, { name, options, sql }) {
     await queryInterface.addColumn('Study', name, options);
     console.log(`Patched legacy Study table: added ${name}.`);
   } catch (error) {
-    // Another server process may have added it after our describeTable call.
-    if (error.original?.errno === 1060 || error.parent?.errno === 1060) {
-      const current = await queryInterface.describeTable('Study');
-      if (Object.prototype.hasOwnProperty.call(current, name)) return;
-    }
+    // The database confirms the column exists, including when its metadata
+    // uses different casing or another process added it concurrently.
+    if (isDuplicateColumn(error)) return;
     throw new Error(`Could not add Study.${name}. Apply ${sql} to the application database, then restart the backend. ${error.message}`);
   }
 }
@@ -24,7 +23,7 @@ async function addStudyColumn(queryInterface, { name, options, sql }) {
 async function patchStudyParticipationSchema(queryInterface) {
   const columns = await queryInterface.describeTable('Study');
   for (const column of COLUMNS) {
-    if (!Object.prototype.hasOwnProperty.call(columns, column.name)) await addStudyColumn(queryInterface, column);
+    if (!hasColumn(columns, column.name)) await addStudyColumn(queryInterface, column);
   }
 }
 

@@ -1,3 +1,4 @@
+const { hasColumn, isDuplicateColumn } = require("./schemaColumns");
 const { DataTypes } = require("sequelize");
 
 /**
@@ -9,7 +10,7 @@ const { DataTypes } = require("sequelize");
 async function patchLegacyFamilySchemaIfNeeded(queryInterface) {
   try {
     const columns = await queryInterface.describeTable("Family");
-    if (Object.prototype.hasOwnProperty.call(columns, "OnlineStudyOnly")) {
+    if (hasColumn(columns, "OnlineStudyOnly")) {
       return true;
     }
     await queryInterface.addColumn("Family", "OnlineStudyOnly", {
@@ -20,6 +21,7 @@ async function patchLegacyFamilySchemaIfNeeded(queryInterface) {
     console.log("Patched legacy Family table: added OnlineStudyOnly.");
     return true;
   } catch (error) {
+    if (isDuplicateColumn(error)) return true;
     console.warn(
       "Could not auto-patch legacy Family schema. " +
         "Please apply MySQL/migrate_online_study_only.sql manually:",
