@@ -4,8 +4,8 @@ const vm = require('vm');
 const { createRequire } = require('module');
 
 // Execute the real startup gate against an older schema, without a live database.
-async function startWithLabColumns(labColumns, addColumnError) {
-  const tables = { Lab: { ...labColumns }, Family: { OnlineStudyOnly: {} }, Study: { ParticipationRules: {} } };
+async function startWithLabColumns(labColumns, addColumnError, studyColumns = { ParticipationRules: {}, IntroductionEmailSubject: {} }) {
+  const tables = { Lab: { ...labColumns }, Family: { OnlineStudyOnly: {} }, Study: { ...studyColumns } };
   const qi = {
     describeTable: jest.fn(async table => tables[table]),
     addColumn: jest.fn(async (table, column, options) => {
@@ -57,4 +57,9 @@ test('tolerates a concurrent process adding the same column', async () => {
   };
   await expect(patchLabTimezoneSchema(qi)).resolves.toBeUndefined();
   expect(qi.describeTable).toHaveBeenCalledTimes(2);
+});
+
+test('startup adds Study.IntroductionEmailSubject to an older database before listening', async () => {
+  const { tables } = await startWithLabColumns({ id: {}, Timezone: {} }, undefined, { ParticipationRules: {} });
+  expect(tables.Study).toHaveProperty('IntroductionEmailSubject');
 });

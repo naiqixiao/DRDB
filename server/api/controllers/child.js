@@ -498,7 +498,7 @@ exports.search = asyncHandler(async (req, res) => {
               { model: model.child, attributes: ["Name", "DoB"] },
               {
                 model: model.study,
-                attributes: ["StudyName", "EmailTemplate", "ReminderTemplate",
+                attributes: ["StudyName", "EmailTemplate", "IntroductionEmailSubject", "ReminderTemplate",
                              "FollowUPEmailSnippet", "StudyType", "FK_Lab"],
                 include: [model.lab],
               },

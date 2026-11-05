@@ -36,6 +36,10 @@ function normalizeStudyWritePayload(payload = {}) {
   };
 }
 
+function validIntroductionSubject(value) {
+  return value == null || (typeof value === "string" && value.length <= 255 && !/[\r\n]/.test(value));
+}
+
 function getMissingRequiredFields(payload, requiredKeys) {
   return requiredKeys.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
 }
@@ -44,6 +48,7 @@ function getMissingRequiredFields(payload, requiredKeys) {
 exports.create = asyncHandler(async (req, res) => {
   const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const newStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+  if (!validIntroductionSubject(incomingStudyInfo.IntroductionEmailSubject)) return res.status(400).json({ error: "Introduction email subject must be a single line of at most 255 characters." });
   if (newStudyInfo.ParticipationRules != null && !validateParticipationGroups(newStudyInfo.ParticipationRules)) {
     return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
   }
@@ -165,6 +170,7 @@ exports.update = asyncHandler(async (req, res) => {
   const ID = req.body.id;
   const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const updatedStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
+  if (!validIntroductionSubject(incomingStudyInfo.IntroductionEmailSubject)) return res.status(400).json({ error: "Introduction email subject must be a single line of at most 255 characters." });
   if (updatedStudyInfo.ParticipationRules != null && !validateParticipationGroups(updatedStudyInfo.ParticipationRules)) {
     return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
   }

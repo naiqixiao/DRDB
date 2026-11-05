@@ -827,6 +827,7 @@
                 <v-tab value="phone" class="text-none" style="font-size: 0.95rem">
                   <v-icon start size="18">mdi-phone-outline</v-icon>Phone Script
                 </v-tab>
+                <v-tab value="introduction" class="text-none"><v-icon start size="18">mdi-email-outline</v-icon>Eligible Family</v-tab>
                 <v-tab value="confirm" class="text-none" style="font-size: 0.95rem">
                   <v-icon start size="18">mdi-email-check-outline</v-icon>Confirmation
                 </v-tab>
@@ -839,6 +840,12 @@
               </v-tabs>
 
               <v-window v-model="commTab">
+                <v-window-item value="introduction" class="pa-5">
+                  <v-text-field v-model="currentStudy.IntroductionEmailSubject" label="Eligible-family email subject"
+                    variant="outlined" maxlength="255" counter hint="Leave blank to use the system default." persistent-hint />
+                  <div class="mt-4 text-body-2"><strong>Subject preview:</strong> {{ currentStudy.IntroductionEmailSubject?.trim() || 'An eligible study for Emma' }}</div>
+                  <div class="text-caption text-medium-emphasis">Emma is an example child name for the default subject.</div>
+                </v-window-item>
                 <!-- Phone Script (no preview needed) -->
                 <v-window-item value="phone">
                   <div class="pa-5">
@@ -1440,6 +1447,7 @@
                       <v-tab value="phone"
                         ><v-icon start>mdi-phone-outline</v-icon>Phone Script</v-tab
                       >
+                      <v-tab value="introduction"><v-icon start>mdi-email-outline</v-icon>Eligible Family</v-tab>
                       <v-tab value="confirm"
                         ><v-icon start>mdi-email-check-outline</v-icon>Confirmation</v-tab
                       >
@@ -1454,6 +1462,12 @@
                     <v-divider></v-divider>
 
                     <v-window v-model="emailTemplateTab" class="pa-6">
+                      <v-window-item value="introduction">
+                        <v-text-field v-model="editedStudy.IntroductionEmailSubject" label="Eligible-family email subject"
+                          variant="outlined" maxlength="255" counter hint="Leave blank to use the system default." persistent-hint />
+                        <div class="mt-4 text-body-2"><strong>Subject preview:</strong> {{ editedStudy.IntroductionEmailSubject?.trim() || 'An eligible study for Emma' }}</div>
+                        <div class="text-caption text-medium-emphasis">Emma is an example child name for the default subject.</div>
+                      </v-window-item>
                       <v-window-item value="phone">
                         <h3 class="text-h6 mb-2">Phone Recruitment Script</h3>
                         <p class="text-caption text-muted mb-4">
@@ -2055,6 +2069,7 @@ export default {
         Description: "",
         PhoneScript: "",
         EmailTemplate: "",
+        IntroductionEmailSubject: "",
         ReminderTemplate: "",
         FollowUPEmailSnippet: "",
         AgeGroups: [],

@@ -24,6 +24,10 @@ module.exports = function (sequelize, DataTypes) {
 			type: DataTypes.TEXT,
 			allowNull: false
 		},
+		IntroductionEmailSubject: {
+			type: DataTypes.STRING(255),
+			allowNull: true
+		},
 		EmailTemplate: {
 			type: DataTypes.TEXT,
 			allowNull: false

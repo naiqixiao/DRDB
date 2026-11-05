@@ -527,6 +527,7 @@ CREATE TABLE `Study` (
   `PhoneScript` text NOT NULL,
   `Description` text NOT NULL,
   `EmailTemplate` text NOT NULL,
+  `IntroductionEmailSubject` varchar(255) DEFAULT NULL,
   `ReminderTemplate` text NOT NULL,
   `Completed` int NOT NULL DEFAULT '0',
   `FK_Lab` int NOT NULL,

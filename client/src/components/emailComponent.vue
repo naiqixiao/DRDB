@@ -38,6 +38,11 @@
       </div>
     </div>
 
+    <v-select v-if="emailType === 'Introduction' && introductionSubjectChoices.length > 1"
+      :items="introductionSubjectChoices" label="Choose a suggested subject"
+      variant="outlined" density="compact" class="mt-3" hide-details
+      @update:model-value="emailSubject = $event" />
+
     <div v-if="!hidePreviewButton" class="d-flex justify-end mb-2">
       <v-btn variant="text" size="small" prepend-icon="mdi-email-outline" :loading="emailPreviewLoading" @click="previewEmail">Preview email</v-btn>
     </div>
@@ -244,7 +249,7 @@ export default {
           this.emailSubject = "An update on your visit on " + moment(this.appointmentTime).format("MMM D (ddd), [at] h:mma");
           break;
         case "Introduction":
-          this.emailSubject = "An eligible study for " + this.childNames();
+          this.emailSubject = this.introductionSubjectChoices[1]?.value || this.defaultIntroductionSubject;
           break;
         case "Reschedule":
         case "cancelledReminder":
@@ -683,6 +688,23 @@ export default {
     }
   },
   computed: {
+    defaultIntroductionSubject() {
+      return "An eligible study for " + this.childNames();
+    },
+    introductionSubjectChoices() {
+      const choices = [{ title: "System default: " + this.defaultIntroductionSubject, value: this.defaultIntroductionSubject }];
+      const seen = new Set();
+      for (const appointment of this.appointments || []) {
+        const study = appointment.Study || {};
+        const subject = typeof study.IntroductionEmailSubject === "string" ? study.IntroductionEmailSubject.trim() : "";
+        const key = appointment.FK_Study ?? study.id ?? study.StudyName;
+        if (subject && !seen.has(key)) {
+          seen.add(key);
+          choices.push({ title: (study.StudyName || "Study") + ": " + subject, value: subject });
+        }
+      }
+      return choices;
+    },
     canPersonalize() {
       return ["Introduction", "Follow-up", "ThankYou"].includes(this.emailType) &&
         this.appointments.length > 0 &&

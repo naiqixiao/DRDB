@@ -235,7 +235,7 @@ exports.upcoming = asyncHandler(async (req, res) => {
           { model: model.child, attributes: ["id", "Name", "DoB", "Age", "Sex"] },
           {
             model: model.study,
-            attributes: ["id", "StudyName", "FK_TestingRoom", "StudyType", "EmailTemplate", "ReminderTemplate"],
+            attributes: ["id", "StudyName", "FK_TestingRoom", "StudyType", "EmailTemplate", "IntroductionEmailSubject", "ReminderTemplate"],
           },
           { model: model.personnel, as: "PrimaryExperimenter", through: { model: model.experimenterAssignment }, attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"] },
           { model: model.personnel, as: "SecondaryExperimenter", through: { model: model.experimenterAssignment_2nd }, attributes: ["id", "Name", "Email", "Calendar", "ZoomLink", "Initial"] },

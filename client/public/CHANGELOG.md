@@ -1,3 +1,9 @@
+### Release v3.2.2
+
+#### Improvements
+* Studies can have a custom subject for eligible-family (introduction) emails, edited and previewed in Study Communications and the study form. Blank uses the system default. When emailing families about several studies, the composer offers each study's subject and the default.
+* Upgrades add the new study column automatically at startup; no manual database change is needed.
+
 ### Release v3.2.1
 
 #### Improvements
