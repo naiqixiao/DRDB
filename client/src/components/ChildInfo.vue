@@ -198,8 +198,9 @@
 </template>
 
 <script>
-import { matchesParticipationRules } from "@/assets/JS/participationRules";
+import { isChildEligibleForStudy } from "@/assets/JS/studyEligibility";
 import child from "@/services/child";
+import studyService from "@/services/study";
 // import schedule from "@/services/schedule";
 // import calendar from "@/services/calendar";
 import moment from "moment-timezone";
@@ -280,6 +281,11 @@ export default {
     }
   },
 
+  mounted() {
+    // Keep the cached study list (used for the Schedule Study button) fresh.
+    studyService.refreshStoreStudies();
+  },
+
   methods: {
     childAge,
 
@@ -342,97 +348,7 @@ export default {
     },
 
     studyElegibility(study, child) {
-      if ((this.currentFamily?.OnlineStudyOnly === 1 || child.Family?.OnlineStudyOnly === 1) && study.StudyType !== "Online") return false;
-      if (!child.DoB) return false;
-
-      const Age = Math.floor(
-        (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
-      );
-
-      // 1. Age Group Check (child must fit into AT LEAST ONE age group)
-      let ageEligible = false;
-      if (study.AgeGroups && study.AgeGroups.length > 0) {
-        ageEligible = study.AgeGroups.some(
-          (group) => Age >= group.MinAge * 30.5 - 1 && Age <= group.MaxAge * 30.5 - 1
-        );
-      } else {
-        ageEligible = true; // fallback if no age groups defined
-      }
-
-      // Past participated study IDs
-      const pastStudyIds = child.Appointments
-        ? child.Appointments.map((app) => app.FK_Study)
-        : [];
-
-      const meetsPrereqs = matchesParticipationRules(study, pastStudyIds);
-      const meetsExclusions = true; // Included in the participation rule evaluation.
-
-      var asd = false;
-      switch (study.ASDParticipant) {
-        case "Only":
-          Number(child.ASD) === 1 ? (asd = true) : (asd = false);
-          break;
-        case "Exclude":
-          (Number(child.ASD) === 1 || Number(child.Family?.AutismHistory) === 1) ? (asd = false) : (asd = true);
-          break;
-        case "Include":
-          asd = true;
-          break;
-      }
-
-      var hearing = false;
-      switch (study.HearingLossParticipant) {
-        case "Only":
-          child.HearingLoss ? (hearing = true) : (hearing = false);
-          break;
-        case "Exclude":
-          child.HearingLoss ? (hearing = false) : (hearing = true);
-          break;
-        case "Include":
-          hearing = true;
-          break;
-      }
-
-      var vision = false;
-      switch (study.VisionLossParticipant) {
-        case "Only":
-          child.VisionLoss ? (vision = true) : (vision = false);
-          break;
-        case "Exclude":
-          child.VisionLoss ? (vision = false) : (vision = true);
-          break;
-        case "Include":
-          vision = true;
-          break;
-      }
-
-      var premature = false;
-      switch (study.PrematureParticipant) {
-        case "Only":
-          child.PrematureBirth ? (premature = true) : (premature = false);
-          break;
-        case "Exclude":
-          child.PrematureBirth ? (premature = false) : (premature = true);
-          break;
-        case "Include":
-          premature = true;
-          break;
-      }
-
-      var illness = false;
-      switch (study.IllParticipant) {
-        case "Only":
-          child.Illness ? (illness = true) : (illness = false);
-          break;
-        case "Exclude":
-          child.Illness ? (illness = false) : (illness = true);
-          break;
-        case "Include":
-          illness = true;
-          break;
-      }
-
-      return ageEligible && meetsPrereqs && meetsExclusions && asd && hearing && vision && premature && illness;
+      return isChildEligibleForStudy(study, child, this.currentFamily);
     },
 
     editChild(item, index) {

@@ -56,10 +56,11 @@
                       <appointmentDetails 
                         ref="appointmentDetailsRef" 
                         :Appointments="currentSchedule?.Appointments"
-                        :Children="currentFamily?.Children" 
+                        :Children="currentFamily?.Children"
+                        :family="currentFamily"
                         :scheduleType="scheduleType"
                         :parentResponse="parentResponse"
-                        :showAdditionalAppointments="scheduleEnable && hasRecruitableChildrenFlag"
+                        :showAdditionalAppointments="hasRecruitableChildrenFlag"
                         @dateTimePickerDisableUpdate="dateTimePickerDisableUpdate"
                         @newAppointment="addAppointment" 
                         @deleteCurrentAppointment="deleteCurrentAppointment"
@@ -370,6 +371,7 @@ import family from "@/services/family";
 import schedule from "@/services/schedule";
 import calendar from "@/services/calendar";
 import appointment from "@/services/appointment";
+import studyService from "@/services/study";
 
 import { useMainStore } from "@/stores/mainStore";
 
@@ -1114,6 +1116,10 @@ export default {
   },
   watch: {
     dialog(val) {
+      if (val) {
+        // Eligibility for additional studies depends on the current study list.
+        studyService.refreshStoreStudies();
+      }
       if (!val) {
         if (this.$refs.dateTimePickerComp) this.$refs.dateTimePickerComp.resetDateTime();
         if (this.$refs.appointmentDetailsRef) this.$refs.appointmentDetailsRef.resetVariables();

@@ -23,7 +23,7 @@
           <v-select 
             variant="outlined" 
             density="compact" 
-            :items="potentialStudies(item.Child, item.FK_Study).potentialStudyList" 
+            :items="potentialStudies(item.Child, item.FK_Study, index).potentialStudyList" 
             item-value="id"
             item-title="StudyName" 
             v-model="selectedStudies[index]" 
@@ -145,11 +145,29 @@
       </v-col>
     </v-row>
     </template>
+    <!-- why is a study not listed? -->
+    <div class="px-4 pb-2">
+      <v-btn variant="text" size="small" color="primary" prepend-icon="mdi-help-circle-outline"
+        @click="showIneligibleReasons = !showIneligibleReasons">
+        Why isn't a study listed?
+      </v-btn>
+      <v-expand-transition>
+        <div v-show="showIneligibleReasons" class="text-caption" style="max-height: 220px; overflow-y: auto">
+          <div v-for="entry in ineligibilityReport" :key="entry.childId" class="mb-2">
+            <strong>{{ entry.childName }}</strong>
+            <div v-if="entry.rows.length === 0">Eligible for every study in the list.</div>
+            <div v-for="row in entry.rows" :key="row.studyId">
+              {{ row.studyName }}: {{ row.reasons.join("; ") }}
+            </div>
+          </div>
+        </div>
+      </v-expand-transition>
+    </div>
   </v-container>
 </template>
 
 <script>
-import { matchesParticipationRules } from "@/assets/JS/participationRules";
+import { isChildEligibleForStudy, explainIneligibility } from "@/assets/JS/studyEligibility";
 import moment from "moment";
 import { childAge } from '@/assets/JS/displayFunctions.js';
 
@@ -165,6 +183,9 @@ export default {
     Appointments: Array,
     Children: Array,
     targetChild: Object,
+    // Full family record. Family.Children entries only carry a partial Family
+    // (no OnlineStudyOnly), so eligibility needs the real one.
+    family: Object,
     scheduleType: String,
     parentResponse: String,
     showAdditionalAppointments: {
@@ -192,17 +213,32 @@ export default {
       nSelectableStudies: [],
       deletedAppointments: [],
       additionalStudyButtonDisable: false,
+      showIneligibleReasons: false,
     }
   },
   methods: {
     childAge,
 
-    potentialStudies(child, bookedStudy) {
+    // Retired personnel stay linked to the study but must not be offered as E1/E2.
+    activeExperimenters(study) {
+      return (study?.Experimenters || []).filter((experimenter) => !experimenter.Retired);
+    },
+
+    updateSelectableStudies() {
+      if (!this.Children) return;
+      this.nSelectableStudies = this.Children.map(child => {
+        return this.potentialStudies(child).selectableStudies.length;
+      });
+      this.$emit("hasRecruitableChildren", this.nSelectableStudies.some(n => n > 0));
+    },
+
+    potentialStudies(child, bookedStudy, rowIndex) {
       if (!child) return { potentialStudyList: [], selectableStudies: [] };
       
       let eligibleStudies = [];
+      const allStudies = this.store.studies || [];
 
-      this.store.studies.forEach((study) => {
+      allStudies.forEach((study) => {
         if (this.studyElegibility(study, child) && !study.Completed) {
           eligibleStudies.push(study.id);
         }
@@ -226,17 +262,28 @@ export default {
         (study) => !uniquePreviousStudies.includes(study)
       );
 
-      let currentSelectedStudies = [];
-      this.editedAppointments.forEach((appointment) => {
-        if (appointment.FK_Child === child.id) { currentSelectedStudies.push(appointment.FK_Study) }
-      })
+      // Studies this child already has selected, per row. The selection can live in
+      // selectedStudies (dropdown) even when FK_Study has not been synced yet.
+      const selectedByRow = [];
+      this.editedAppointments.forEach((appointment, i) => {
+        if (String(appointment.FK_Child) !== String(child.id)) return;
+        const studyId = appointment.FK_Study ?? this.selectedStudies[i]?.id ?? null;
+        if (studyId != null) selectedByRow.push({ row: i, studyId });
+      });
+      const currentSelectedStudies = selectedByRow.map((entry) => entry.studyId);
 
       let selectableStudies = potentialStudiesIds.filter(
         (study) => !currentSelectedStudies.includes(study)
       );
 
-      let potentialStudyList = this.store.studies.filter((study) =>
-        potentialStudiesIds.includes(study.id)
+      // A row's picker must not offer a study this child already has in ANOTHER row
+      // (its own selection stays so the select can still display it).
+      const studiesInOtherRows = selectedByRow
+        .filter((entry) => entry.row !== rowIndex)
+        .map((entry) => entry.studyId);
+
+      let potentialStudyList = allStudies.filter((study) =>
+        potentialStudiesIds.includes(study.id) && !studiesInOtherRows.includes(study.id)
       );
 
       return {
@@ -246,97 +293,7 @@ export default {
     },
 
     studyElegibility(study, child) {
-      if (child.Family?.OnlineStudyOnly === 1 && study.StudyType !== "Online") return false;
-      if (!child.DoB) return false;
-
-      const Age = Math.floor(
-        (new Date() - new Date(child.DoB)) / (1000 * 60 * 60 * 24)
-      );
-
-      // 1. Age Group Check (child must fit into AT LEAST ONE age group)
-      let ageEligible = false;
-      if (study.AgeGroups && study.AgeGroups.length > 0) {
-        ageEligible = study.AgeGroups.some(
-          (group) => Age >= group.MinAge * 30.5 - 1 && Age <= group.MaxAge * 30.5 - 1
-        );
-      } else {
-        ageEligible = true; // fallback if no age groups defined
-      }
-
-      // Past participated study IDs
-      const pastStudyIds = child.Appointments
-        ? child.Appointments.map((app) => app.FK_Study)
-        : [];
-
-      const meetsPrereqs = matchesParticipationRules(study, pastStudyIds);
-      const meetsExclusions = true; // Included in the participation rule evaluation.
-
-      let asd = false;
-      switch (study.ASDParticipant) {
-        case "Only":
-          Number(child.ASD) === 1 ? (asd = true) : (asd = false);
-          break;
-        case "Exclude":
-          (Number(child.ASD) === 1 || Number(child.Family?.AutismHistory) === 1) ? (asd = false) : (asd = true);
-          break;
-        case "Include":
-          asd = true;
-          break;
-      }
-
-      let hearing = false;
-      switch (study.HearingLossParticipant) {
-        case "Only":
-          child.HearingLoss ? (hearing = true) : (hearing = false);
-          break;
-        case "Exclude":
-          child.HearingLoss ? (hearing = false) : (hearing = true);
-          break;
-        case "Include":
-          hearing = true;
-          break;
-      }
-
-      let vision = false;
-      switch (study.VisionLossParticipant) {
-        case "Only":
-          child.VisionLoss ? (vision = true) : (vision = false);
-          break;
-        case "Exclude":
-          child.VisionLoss ? (vision = false) : (vision = true);
-          break;
-        case "Include":
-          vision = true;
-          break;
-      }
-
-      let premature = false;
-      switch (study.PrematureParticipant) {
-        case "Only":
-          child.PrematureBirth ? (premature = true) : (premature = false);
-          break;
-        case "Exclude":
-          child.PrematureBirth ? (premature = false) : (premature = true);
-          break;
-        case "Include":
-          premature = true;
-          break;
-      }
-
-      let illness = false;
-      switch (study.IllParticipant) {
-        case "Only":
-          child.Illness ? (illness = true) : (illness = false);
-          break;
-        case "Exclude":
-          child.Illness ? (illness = false) : (illness = true);
-          break;
-        case "Include":
-          illness = true;
-          break;
-      }
-
-      return ageEligible && meetsPrereqs && meetsExclusions && asd && hearing && vision && premature && illness;
+      return isChildEligibleForStudy(study, child, this.family);
     },
 
     optionChangedStatus(newVal, changedItem) {
@@ -402,14 +359,14 @@ export default {
 
     optionChangedStudy(newVal, index) {
       if (!newVal) return;
-      this.optionsE1[index] = newVal.Experimenters || [];
-      this.optionsE2[index] = newVal.Experimenters || [];
+      this.optionsE1[index] = this.activeExperimenters(newVal);
+      this.optionsE2[index] = this.activeExperimenters(newVal);
 
       if (this.selectedExperimenters[index]) {
-        this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => this.selectedExperimenters[index].id !== experimenter.id);
+        this.optionsE2[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => this.selectedExperimenters[index].id !== experimenter.id);
       }
       if (this.selectedExperimenters_2nd[index]) {
-        this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !this.selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
+        this.optionsE1[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => !this.selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
       }
 
       this.editedAppointments[index].FK_Study = newVal.id;
@@ -422,14 +379,14 @@ export default {
 
     optionChangedE1(newVal, index) {
       if (newVal && this.selectedStudies[index] && this.selectedStudies[index].Experimenters) {
-        this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => newVal.id !== experimenter.id);
+        this.optionsE2[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => newVal.id !== experimenter.id);
       }
       this.readyToCreateSchedule();
     },
 
     optionChangedE2(newVal, index) {
       if (newVal && this.selectedStudies[index] && this.selectedStudies[index].Experimenters) {
-        this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !newVal.some(experimenter2nd => experimenter2nd.id === experimenter.id));
+        this.optionsE1[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => !newVal.some(experimenter2nd => experimenter2nd.id === experimenter.id));
       }
       this.readyToCreateSchedule();
     },
@@ -590,8 +547,8 @@ export default {
 
         if (this.selectedStudies[index] && Object.keys(this.selectedStudies[index]).length > 0 && this.selectedStudies[index].Experimenters) {
           const e1Id = this.selectedExperimenters[index] ? this.selectedExperimenters[index].id : null;
-          this.optionsE2[index] = this.selectedStudies[index].Experimenters.filter(experimenter => e1Id !== experimenter.id);
-          this.optionsE1[index] = this.selectedStudies[index].Experimenters.filter(experimenter => !this.selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
+          this.optionsE2[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => e1Id !== experimenter.id);
+          this.optionsE1[index] = this.activeExperimenters(this.selectedStudies[index]).filter(experimenter => !this.selectedExperimenters_2nd[index].some(experimenter2nd => experimenter2nd.id === experimenter.id));
         } else {
           this.optionsE1[index] = [];
           this.optionsE2[index] = [];
@@ -649,6 +606,22 @@ export default {
   },
 
   computed: {
+    // For each child, the studies they cannot be offered and why (age groups, history, rules, ...).
+    ineligibilityReport() {
+      const studies = this.store.studies || [];
+      return (this.Children || []).map((child) => {
+        const history = new Set((child.Appointments || []).map((app) => Number(app.FK_Study)));
+        const rows = [];
+        studies.forEach((study) => {
+          const reasons = [];
+          if (study.Completed) reasons.push("Study is marked completed");
+          if (history.has(Number(study.id))) reasons.push("Child already has an appointment for this study");
+          reasons.push(...explainIneligibility(study, child, this.family));
+          if (reasons.length) rows.push({ studyId: study.id, studyName: study.StudyName, reasons });
+        });
+        return { childId: child.id, childName: child.Name ? child.Name.split(" ")[0] : "Child", rows };
+      });
+    },
     statusOptions() {
       let statusOptions = [];
       switch (this.scheduleType) {
@@ -678,15 +651,10 @@ export default {
     },
     editedAppointments: {
       deep: true,
-      handler() {
-        if (this.Children) {
-          this.nSelectableStudies = this.Children.map(child => {
-            return this.potentialStudies(child).selectableStudies.length;
-          });
-          this.$emit("hasRecruitableChildren", this.nSelectableStudies.some(n => n > 0));
-        }
-      }
-    }
+      handler() { this.updateSelectableStudies(); }
+    },
+    // The study list can be refreshed from the server while this is open.
+    "store.studies"() { this.updateSelectableStudies(); }
   },
 
   mounted() {
