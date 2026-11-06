@@ -153,11 +153,20 @@
       </v-btn>
       <v-sheet v-if="showIneligibleReasons" border rounded class="mt-2 pa-3 reasons-sheet">
         <div v-for="entry in ineligibilityReport" :key="entry.childId" class="mb-4">
-          <div class="text-subtitle-2 font-weight-bold mb-1">
-            {{ entry.childName }}
-            <span class="text-caption text-medium-emphasis ml-2">{{ entry.ageLabel }}</span>
+          <div class="reasons-child-header" role="button" tabindex="0"
+            :aria-expanded="!collapsedChildren[entry.childId]"
+            @click="toggleChildReasons(entry.childId)"
+            @keydown.enter.prevent="toggleChildReasons(entry.childId)"
+            @keydown.space.prevent="toggleChildReasons(entry.childId)">
+            <v-icon size="18">{{ collapsedChildren[entry.childId] ? "mdi-chevron-right" : "mdi-chevron-down" }}</v-icon>
+            <span class="text-subtitle-2 font-weight-bold">{{ entry.childName }}</span>
+            <span class="text-caption text-medium-emphasis">{{ entry.ageLabel }}</span>
+            <v-chip size="x-small" variant="tonal" :color="entry.rows.length ? 'warning' : 'success'" class="ml-1">
+              {{ entry.rows.length ? entry.rows.length + " not listed" : "all listed" }}
+            </v-chip>
           </div>
-          <div v-if="entry.rows.length === 0" class="text-caption">Eligible for every study in the list.</div>
+          <template v-if="!collapsedChildren[entry.childId]">
+          <div v-if="entry.rows.length === 0" class="text-caption mt-1">Eligible for every active study.</div>
           <v-table v-else density="compact" class="reasons-table">
             <tbody>
               <tr v-for="row in entry.rows" :key="row.studyId">
@@ -169,6 +178,7 @@
               </tr>
             </tbody>
           </v-table>
+          </template>
         </div>
       </v-sheet>
     </div>
@@ -223,6 +233,7 @@ export default {
       deletedAppointments: [],
       additionalStudyButtonDisable: false,
       showIneligibleReasons: false,
+      collapsedChildren: {},
     }
   },
   methods: {
@@ -231,6 +242,10 @@ export default {
     // Retired personnel stay linked to the study but must not be offered as E1/E2.
     activeExperimenters(study) {
       return (study?.Experimenters || []).filter((experimenter) => !experimenter.Retired);
+    },
+
+    toggleChildReasons(childId) {
+      this.collapsedChildren = { ...this.collapsedChildren, [childId]: !this.collapsedChildren[childId] };
     },
 
     updateSelectableStudies() {
@@ -622,8 +637,8 @@ export default {
         const history = new Set((child.Appointments || []).map((app) => Number(app.FK_Study)));
         const rows = [];
         studies.forEach((study) => {
+          if (study.Completed) return; // completed studies are never recruiting
           const reasons = [];
-          if (study.Completed) reasons.push("Study is marked completed");
           if (history.has(Number(study.id))) reasons.push("Child already has an appointment for this study");
           reasons.push(...explainIneligibility(study, child, this.family));
           if (reasons.length) rows.push({ studyId: study.id, studyName: study.StudyName, reasons });
@@ -676,6 +691,14 @@ export default {
 .reasons-sheet {
   max-height: 280px;
   overflow-y: auto;
+}
+.reasons-child-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
 }
 .reasons-table {
   background: transparent;

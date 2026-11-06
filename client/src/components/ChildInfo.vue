@@ -86,7 +86,7 @@
               {{ whyOpen[child.id] ? 'Hide' : 'Why isn\'t a study listed?' }}
             </v-btn>
             <div v-if="whyOpen[child.id]" class="text-caption mt-1" style="max-height: 200px; overflow-y: auto">
-              <div v-if="ineligibilityList(child).length === 0">Eligible for every study in the list.</div>
+              <div v-if="ineligibilityList(child).length === 0">Eligible for every active study.</div>
               <div v-for="row in ineligibilityList(child)" :key="row.studyId">
                 <strong>{{ row.studyName }}</strong>: {{ row.reasons.join('; ') }}
               </div>
@@ -313,8 +313,8 @@ export default {
       const history = new Set((child.Appointments || []).map((app) => Number(app.FK_Study)));
       const rows = [];
       (this.store.studies || []).forEach((study) => {
+        if (study.Completed) return; // completed studies are never recruiting
         const reasons = [];
-        if (study.Completed) reasons.push("Study is marked completed");
         if (history.has(Number(study.id))) reasons.push("Child already has an appointment for this study");
         reasons.push(...explainIneligibility(study, child, this.currentFamily));
         if (reasons.length) rows.push({ studyId: study.id, studyName: study.StudyName, reasons });
