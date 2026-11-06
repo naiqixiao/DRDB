@@ -1224,62 +1224,67 @@
                   </h2>
 
                   <v-card class="ds-card pa-6 mb-6" variant="flat">
-                    <h3 class="text-h6 mb-4">Age Groups</h3>
-                    <v-row
+                    <h3 class="text-h6 mb-1">Age Groups</h3>
+                    <p class="text-body-2 text-muted mb-4">
+                      A child is eligible when their age falls within any one of the groups.
+                    </p>
+                    <div
                       v-for="(group, index) in editedStudy.AgeGroups"
                       :key="index"
-                      dense
-                      align="center"
+                      class="age-group-row"
                     >
-                      <v-col cols="5">
-                        <v-text-field
-                          v-model.number="group.MinAge"
-                          label="Min Age (months)"
-                          type="number"
-                          variant="outlined"
-                          density="compact"
-                          :rules="[
-                            (v) => (v !== null && v !== '') || 'Required',
-                            (v) => v >= 0 || 'Must be ≥ 0',
-                            (v) =>
-                              group.MaxAge === null ||
-                              group.MaxAge === '' ||
-                              v < group.MaxAge ||
-                              'Must be less than Max Age',
-                          ]"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="5">
-                        <v-text-field
-                          v-model.number="group.MaxAge"
-                          label="Max Age (months)"
-                          type="number"
-                          variant="outlined"
-                          density="compact"
-                          :rules="[
-                            (v) => (v !== null && v !== '') || 'Required',
-                            (v) => v >= 0 || 'Must be ≥ 0',
-                            (v) =>
-                              group.MinAge === null ||
-                              group.MinAge === '' ||
-                              v > group.MinAge ||
-                              'Must be greater than Min Age',
-                          ]"
-                        ></v-text-field>
-                      </v-col>
-                      <v-col cols="2" class="text-center">
-                        <v-btn
-                          icon="mdi-delete-outline"
-                          color="error"
-                          variant="text"
-                          @click="editedStudy.AgeGroups.splice(index, 1)"
-                        ></v-btn>
-                      </v-col>
-                    </v-row>
+                      <span class="age-group-label">Group {{ index + 1 }}</span>
+                      <v-text-field
+                        v-model.number="group.MinAge"
+                        label="Min age (months)"
+                        type="number"
+                        variant="outlined"
+                        density="compact"
+                        hide-details="auto"
+                        class="flex-grow-1"
+                        :rules="[
+                          (v) => (v !== null && v !== '') || 'Required',
+                          (v) => v >= 0 || 'Must be ≥ 0',
+                          (v) =>
+                            group.MaxAge === null ||
+                            group.MaxAge === '' ||
+                            v < group.MaxAge ||
+                            'Must be less than Max Age',
+                        ]"
+                      ></v-text-field>
+                      <span class="age-group-to">to</span>
+                      <v-text-field
+                        v-model.number="group.MaxAge"
+                        label="Max age (months)"
+                        type="number"
+                        variant="outlined"
+                        density="compact"
+                        hide-details="auto"
+                        class="flex-grow-1"
+                        :rules="[
+                          (v) => (v !== null && v !== '') || 'Required',
+                          (v) => v >= 0 || 'Must be ≥ 0',
+                          (v) =>
+                            group.MinAge === null ||
+                            group.MinAge === '' ||
+                            v > group.MinAge ||
+                            'Must be greater than Min Age',
+                        ]"
+                      ></v-text-field>
+                      <v-btn
+                        icon="mdi-delete-outline"
+                        color="error"
+                        variant="text"
+                        density="comfortable"
+                        title="Remove this age group"
+                        @click="editedStudy.AgeGroups.splice(index, 1)"
+                      ></v-btn>
+                    </div>
                     <v-btn
                       variant="tonal"
                       color="primary"
                       prepend-icon="mdi-plus"
+                      class="mt-1"
                       @click="editedStudy.AgeGroups.push({ MinAge: null, MaxAge: null })"
                     >
                       Add Age Group
@@ -2293,6 +2298,28 @@ export default {
 </script>
 
 <style scoped>
+/* Age group rows: inputs, separator and delete button share the 40px control height,
+   so validation messages grow downward without moving the delete button. */
+.age-group-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.age-group-label {
+  flex: 0 0 64px;
+  line-height: 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+}
+.age-group-to {
+  flex: 0 0 auto;
+  line-height: 40px;
+  color: rgba(var(--v-theme-on-surface), 0.6);
+}
 .study-table :deep(tr.v-data-table__selected) {
   background-color: rgb(var(--v-theme-secondary), 0.1) !important;
 }
