@@ -80,7 +80,7 @@
           </v-card-actions>
 
           <!-- Why can't this child be scheduled / which studies are excluded -->
-          <div class="px-4 pb-3" style="position: relative; z-index: 1;">
+          <div class="px-4 pb-3 flex-shrink-0" style="position: relative; z-index: 1;">
             <v-btn variant="text" size="x-small" color="primary" prepend-icon="mdi-help-circle-outline"
               @click.stop="toggleWhy(child.id)">
               {{ whyOpen[child.id] ? 'Hide' : 'Why isn\'t a study listed?' }}

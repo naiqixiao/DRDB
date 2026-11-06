@@ -146,22 +146,31 @@
     </v-row>
     </template>
     <!-- why is a study not listed? -->
-    <div class="px-4 pb-2">
+    <div class="px-4 pb-2 flex-shrink-0">
       <v-btn variant="text" size="small" color="primary" prepend-icon="mdi-help-circle-outline"
         @click="showIneligibleReasons = !showIneligibleReasons">
-        Why isn't a study listed?
+        {{ showIneligibleReasons ? "Hide" : "Why isn't a study listed?" }}
       </v-btn>
-      <v-expand-transition>
-        <div v-show="showIneligibleReasons" class="text-caption" style="max-height: 220px; overflow-y: auto">
-          <div v-for="entry in ineligibilityReport" :key="entry.childId" class="mb-2">
-            <strong>{{ entry.childName }}</strong>
-            <div v-if="entry.rows.length === 0">Eligible for every study in the list.</div>
-            <div v-for="row in entry.rows" :key="row.studyId">
-              {{ row.studyName }}: {{ row.reasons.join("; ") }}
-            </div>
+      <v-sheet v-if="showIneligibleReasons" border rounded class="mt-2 pa-3 reasons-sheet">
+        <div v-for="entry in ineligibilityReport" :key="entry.childId" class="mb-4">
+          <div class="text-subtitle-2 font-weight-bold mb-1">
+            {{ entry.childName }}
+            <span class="text-caption text-medium-emphasis ml-2">{{ entry.ageLabel }}</span>
           </div>
+          <div v-if="entry.rows.length === 0" class="text-caption">Eligible for every study in the list.</div>
+          <v-table v-else density="compact" class="reasons-table">
+            <tbody>
+              <tr v-for="row in entry.rows" :key="row.studyId">
+                <td class="reasons-study font-weight-medium">{{ row.studyName }}</td>
+                <td class="py-1">
+                  <v-chip v-for="(reason, i) in row.reasons" :key="i" size="x-small" label variant="tonal"
+                    color="warning" class="mr-1 my-1 reason-chip">{{ reason }}</v-chip>
+                </td>
+              </tr>
+            </tbody>
+          </v-table>
         </div>
-      </v-expand-transition>
+      </v-sheet>
     </div>
   </v-container>
 </template>
@@ -619,7 +628,7 @@ export default {
           reasons.push(...explainIneligibility(study, child, this.family));
           if (reasons.length) rows.push({ studyId: study.id, studyName: study.StudyName, reasons });
         });
-        return { childId: child.id, childName: child.Name ? child.Name.split(" ")[0] : "Child", rows };
+        return { childId: child.id, childName: child.Name ? child.Name.split(" ")[0] : "Child", ageLabel: this.childAge(child), rows };
       });
     },
     statusOptions() {
@@ -664,4 +673,23 @@ export default {
 </script>
 
 <style scoped>
+.reasons-sheet {
+  max-height: 280px;
+  overflow-y: auto;
+}
+.reasons-table {
+  background: transparent;
+}
+.reasons-study {
+  width: 180px;
+  min-width: 140px;
+  vertical-align: top;
+  padding-top: 8px !important;
+}
+.reason-chip {
+  height: auto !important;
+  white-space: normal;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
 </style>
