@@ -79,6 +79,20 @@
             </v-btn>
           </v-card-actions>
 
+          <!-- Why can't this child be scheduled / which studies are excluded -->
+          <div class="px-4 pb-3" style="position: relative; z-index: 1;">
+            <v-btn variant="text" size="x-small" color="primary" prepend-icon="mdi-help-circle-outline"
+              @click.stop="toggleWhy(child.id)">
+              {{ whyOpen[child.id] ? 'Hide' : 'Why isn\'t a study listed?' }}
+            </v-btn>
+            <div v-if="whyOpen[child.id]" class="text-caption mt-1" style="max-height: 200px; overflow-y: auto">
+              <div v-if="ineligibilityList(child).length === 0">Eligible for every study in the list.</div>
+              <div v-for="row in ineligibilityList(child)" :key="row.studyId">
+                <strong>{{ row.studyName }}</strong>: {{ row.reasons.join('; ') }}
+              </div>
+            </div>
+          </div>
+
         </v-card>
       </v-col>
     </v-row>
@@ -198,7 +212,7 @@
 </template>
 
 <script>
-import { isChildEligibleForStudy } from "@/assets/JS/studyEligibility";
+import { isChildEligibleForStudy, explainIneligibility } from "@/assets/JS/studyEligibility";
 import child from "@/services/child";
 import studyService from "@/services/study";
 // import schedule from "@/services/schedule";
@@ -227,6 +241,7 @@ export default {
   },
   data: () => ({
     dialogSchedule: false,
+    whyOpen: {},
     response: "",
     currentSchedule: {},
     currentChild: {},
@@ -288,6 +303,24 @@ export default {
 
   methods: {
     childAge,
+
+    toggleWhy(childId) {
+      this.whyOpen = { ...this.whyOpen, [childId]: !this.whyOpen[childId] };
+    },
+
+    // Studies this child cannot be offered, with the reasons (age groups, history, rules, ...).
+    ineligibilityList(child) {
+      const history = new Set((child.Appointments || []).map((app) => Number(app.FK_Study)));
+      const rows = [];
+      (this.store.studies || []).forEach((study) => {
+        const reasons = [];
+        if (study.Completed) reasons.push("Study is marked completed");
+        if (history.has(Number(study.id))) reasons.push("Child already has an appointment for this study");
+        reasons.push(...explainIneligibility(study, child, this.currentFamily));
+        if (reasons.length) rows.push({ studyId: study.id, studyName: study.StudyName, reasons });
+      });
+      return rows;
+    },
 
     childStats(child) {
       let completed = 0;

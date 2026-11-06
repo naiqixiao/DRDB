@@ -62,7 +62,8 @@ function buildLabInclude() {
   }
 
   if (StudyAgeGroupModel) {
-    studyInclude.push({ model: StudyAgeGroupModel, as: "AgeGroups" });
+    // separate: avoids a multi-way cross product with the other to-many includes.
+    studyInclude.push({ model: StudyAgeGroupModel, as: "AgeGroups", separate: true });
   }
 
   studyInclude.push({
