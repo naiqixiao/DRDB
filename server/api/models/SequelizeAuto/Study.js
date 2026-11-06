@@ -8,9 +8,29 @@ module.exports = function (sequelize, DataTypes) {
 			allowNull: false,
 			primaryKey: true
 		},
+		// Stored as JSON text (the database column is JSON/LONGTEXT). Declared as TEXT with
+		// an explicit getter/setter because Sequelize's MariaDB driver JSON.parse()s every
+		// JSON-typed column it reads and throws "Unexpected end of JSON input" (failing the
+		// whole study query) when a row holds an empty or invalid value. NULL, '' and
+		// unparsable text all read as null, which means "legacy prerequisites/exclusions".
+		// Included (nested) studies were never parsed by the driver; this also fixes that.
 		ParticipationRules: {
-			type: DataTypes.JSON,
-			allowNull: true
+			type: DataTypes.TEXT('long'),
+			allowNull: true,
+			get() {
+				const raw = this.getDataValue('ParticipationRules');
+				if (raw === null || raw === undefined || raw === '') return null;
+				if (typeof raw !== 'string') return raw;
+				try {
+					return JSON.parse(raw);
+				} catch (error) {
+					console.warn('Study ' + this.getDataValue('id') + ' has invalid ParticipationRules; treating as unset.');
+					return null;
+				}
+			},
+			set(value) {
+				this.setDataValue('ParticipationRules', value === null || value === undefined ? null : JSON.stringify(value));
+			}
 		},
 		StudyName: {
 			type: DataTypes.STRING(45),
