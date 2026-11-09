@@ -1098,6 +1098,8 @@
           <v-btn
             color="primary"
             variant="flat"
+            :loading="saving"
+            :disabled="saving"
             @click="save"
             prepend-icon="mdi-content-save-check"
             class="font-weight-bold text-none mr-2"
@@ -1118,26 +1120,54 @@
             <v-stepper-item
               title="Core Identity"
               :value="1"
-              :complete="studyStepper > 1"
+              :complete="studyStepper > 1 && !stepHasError(1)"
+              :error="stepHasError(1)"
               editable
             ></v-stepper-item>
             <v-divider></v-divider>
             <v-stepper-item
               title="Eligibility Rules"
               :value="2"
-              :complete="studyStepper > 2"
+              :complete="studyStepper > 2 && !stepHasError(2)"
+              :error="stepHasError(2)"
               editable
             ></v-stepper-item>
             <v-divider></v-divider>
             <v-stepper-item
               title="Team Logistics"
               :value="3"
-              :complete="studyStepper > 3"
+              :complete="studyStepper > 3 && !stepHasError(3)"
+              :error="stepHasError(3)"
               editable
             ></v-stepper-item>
             <v-divider></v-divider>
-            <v-stepper-item title="Communications" :value="4" editable></v-stepper-item>
+            <v-stepper-item title="Communications" :value="4" :error="stepHasError(4)" editable></v-stepper-item>
           </v-stepper-header>
+
+          <v-alert
+            v-if="saveErrors.length"
+            type="error"
+            variant="tonal"
+            closable
+            class="mx-6 mt-4 mb-0"
+            density="compact"
+            @click:close="saveErrors = []"
+          >
+            <div class="font-weight-bold mb-1">
+              The study was not saved. Please fix the following:
+            </div>
+            <ul class="pl-4">
+              <li v-for="(err, i) in saveErrors" :key="i">
+                <a
+                  v-if="err.step"
+                  href="#"
+                  class="font-weight-medium"
+                  @click.prevent="studyStepper = err.step"
+                  >{{ STUDY_STEPS[err.step] }}</a
+                ><span v-if="err.step">: </span>{{ err.message }}
+              </li>
+            </ul>
+          </v-alert>
 
           <v-stepper-window
             class="flex-grow-1"
@@ -1163,7 +1193,14 @@
                         v-model="editedStudy.StudyName"
                         variant="outlined"
                         density="compact"
-                        :rules="[(v) => !!v || 'Required']"
+                        :counter="STUDY_NAME_MAX_LENGTH"
+                        :rules="[
+                          (v) => !!(v && String(v).trim()) || 'Required',
+                          (v) =>
+                            !v ||
+                            String(v).trim().length <= STUDY_NAME_MAX_LENGTH ||
+                            `Must be at most ${STUDY_NAME_MAX_LENGTH} characters`,
+                        ]"
                         bg-color="white"
                       ></v-text-field>
                     </v-col>
@@ -1608,6 +1645,8 @@
                       color="success"
                       size="large"
                       variant="flat"
+                      :loading="saving"
+                      :disabled="saving"
                       @click="save"
                       prepend-icon="mdi-content-save-check"
                       >Save & Complete Study</v-btn
@@ -1627,7 +1666,8 @@
 import moment from "moment";
 import { buildConfirmationOpening } from "@/assets/JS/emailOpenings";
 import { uniqueAgeGroups } from "@/assets/JS/ageGroups";
-import { getParticipationGroups, validateParticipationGroups } from "@/assets/JS/participationRules";
+import { getParticipationGroups } from "@/assets/JS/participationRules";
+import { validateStudyDraft, describeSaveError, STUDY_STEPS, STUDY_NAME_MAX_LENGTH } from "@/assets/JS/studyValidation";
 import EmailLayoutPreview from "@/components/EmailLayoutPreview.vue";
 import RichTextEditor from "@/components/RichTextEditor.vue";
 
@@ -1699,6 +1739,9 @@ export default {
       dialogShowEmailPreviews: false,
       dialogStudyProgress: false,
       valid: true,
+      saveErrors: [],
+      saving: false,
+      STUDY_NAME_MAX_LENGTH,
       editedIndex: -1,
       labMembers: [],
       currentTestingRooms: [],
@@ -2148,59 +2191,49 @@ export default {
       this.dialog = true;
     },
 
+    stepHasError(step) {
+      return this.saveErrors.some((e) => e.step === step);
+    },
+
     async save() {
-      if (this.validateIntroductionSubject(this.editedStudy.IntroductionEmailSubject) !== true) {
-        this.studyStepper = 4;
-        this.emailTemplateTab = "introduction";
-        return;
-      }
-      if (!validateParticipationGroups(this.editedStudy.ParticipationRules)) {
-        this.studyStepper = 2;
-        this.$refs.confirmD.open('Participation Requirements', 'Each group needs ANY, ALL, or NONE and at least one selected study. Remove unused groups before saving.', { color: 'warning', noconfirm: true });
-        return;
-      }
-      const { valid } = await this.$refs.form.validate();
-      if (!valid) {
-        this.$refs.confirmD.open(
-          "Validation Error",
-          "Please fill in all required fields and fix any errors before saving.",
-          { color: "warning", noconfirm: true }
-        );
+      if (this.saving) return;
+
+      // Check every step up front: fields on steps the user never opened aren't
+      // mounted, so the form's own validation can't see them.
+      this.saveErrors = validateStudyDraft(
+        { ...this.editedStudy, FK_Lab: this.editedStudy.FK_Lab ?? this.store.lab },
+        this.PointofContact
+      );
+      // Also reveals inline red messages on the fields of steps already visited.
+      await this.$refs.form?.validate();
+      if (this.saveErrors.length) {
+        const current = this.saveErrors.find((e) => e.step === this.studyStepper);
+        this.studyStepper = (current || this.saveErrors.find((e) => e.step) || {}).step || this.studyStepper;
         return;
       }
 
-      if (!this.PointofContact) {
-        this.$refs.confirmD.open(
-          "Validation Error",
-          "Please select a Point of Contact.",
-          { color: "warning", noconfirm: true }
-        );
-        return;
-      }
       this.editedStudy.FK_Personnel = this.PointofContact.id;
-
-      if (this.editedIndex === -1) {
-        // Create
-        try {
+      this.saving = true;
+      try {
+        if (this.editedIndex === -1) {
           const Result = await studyApi.create(this.editedStudy);
           this.Studies.push(Result.data);
           this.store.setStudies(this.Studies);
           this.currentStudy = Result.data;
-          this.close();
-        } catch (error) {
-          console.error(error);
-        }
-      } else {
-        // Update
-        try {
+        } else {
           const Result = await studyApi.update(this.editedStudy);
           Object.assign(this.Studies[this.editedIndex], Result.data);
           this.store.setStudies(this.Studies);
           this.currentStudy = { ...Result.data };
-          this.close();
-        } catch (error) {
-          console.error(error);
         }
+        this.close();
+      } catch (error) {
+        console.error("Saving study failed:", error?.response?.data || error);
+        this.saveErrors = describeSaveError(error);
+        const first = this.saveErrors.find((e) => e.step);
+        if (first) this.studyStepper = first.step;
+      } finally {
+        this.saving = false;
       }
     },
 
@@ -2255,6 +2288,9 @@ export default {
   },
 
   watch: {
+    dialog(open) {
+      if (open) this.saveErrors = [];
+    },
     studyTab(val) {
       if (val === "analytics" && !this.studyStatsLoaded) {
         this.fetchStudyProgress();

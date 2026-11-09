@@ -4,6 +4,7 @@ const { QueryTypes } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const fs = require("fs");
 const { validateParticipationGroups } = require("../utils/participationRules");
+const { validateStudyPayload, describeDbError } = require("../utils/studyValidation");
 
 const log = require("../controllers/log");
 const config = require("../../config/general");
@@ -40,29 +41,44 @@ function validIntroductionSubject(value) {
   return value == null || (typeof value === "string" && value.length <= 255 && !/[\r\n]/.test(value));
 }
 
-function getMissingRequiredFields(payload, requiredKeys) {
-  return requiredKeys.filter((key) => payload[key] === undefined || payload[key] === null || payload[key] === "");
+// Collects every problem with a study payload (not just the first) so the client
+// can show them all, and logs them with enough context to diagnose a report.
+function collectStudyProblems(info, { AgeGroups, lenient = false }) {
+  const problems = validateStudyPayload(info, { AgeGroups, lenient });
+  if (!validIntroductionSubject(info.IntroductionEmailSubject)) {
+    problems.push({ field: "IntroductionEmailSubject", step: 4, message: "Introduction email subject must be a single line of at most 255 characters." });
+  }
+  if (info.ParticipationRules != null && !validateParticipationGroups(info.ParticipationRules)) {
+    problems.push({ field: "ParticipationRules", step: 2, message: "Invalid participation rules. Each group needs ANY, ALL or NONE and at least one study." });
+  }
+  return problems;
+}
+
+function rejectInvalidStudy(req, res, action, problems) {
+  console.warn(
+    `[study.${action}] rejected (400) user=${req.userData?.id ?? "unknown"} ` +
+      `study=${JSON.stringify(req.body?.StudyName)} problems=${JSON.stringify(problems.map((p) => `${p.field}: ${p.message}`))}`
+  );
+  return res.status(400).json({ error: problems.map((p) => p.message).join(" "), details: problems });
+}
+
+function respondStudyError(req, res, action, error) {
+  const { status, message } = describeDbError(error);
+  console.error(
+    `[study.${action}] failed (${status}) user=${req.userData?.id ?? "unknown"} ` +
+      `study=${JSON.stringify(req.body?.StudyName)} lab=${req.body?.FK_Lab} ` +
+      `${error.name}: ${error.message}${error.parent?.sqlMessage ? ` | sql: ${error.parent.sqlMessage}` : ""}`,
+    error.stack
+  );
+  return res.status(status).json({ error: message, details: [{ field: null, step: null, message }] });
 }
 
 // Create and Save a new study
 exports.create = asyncHandler(async (req, res) => {
   const { AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const newStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
-  if (!validIntroductionSubject(incomingStudyInfo.IntroductionEmailSubject)) return res.status(400).json({ error: "Introduction email subject must be a single line of at most 255 characters." });
-  if (newStudyInfo.ParticipationRules != null && !validateParticipationGroups(newStudyInfo.ParticipationRules)) {
-    return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
-  }
-
-  const missingFields = getMissingRequiredFields(newStudyInfo, [
-    "StudyName",
-    "FK_Lab",
-    "FK_Personnel",
-  ]);
-  if (missingFields.length > 0) {
-    return res.status(400).json({
-      error: `Missing required field(s): ${missingFields.join(", ")}`,
-    });
-  }
+  const problems = collectStudyProblems(newStudyInfo, { AgeGroups });
+  if (problems.length > 0) return rejectInvalidStudy(req, res, "create", problems);
 
   try {
     const study = await model.sequelize.transaction(async (transaction) => {
@@ -111,10 +127,10 @@ exports.create = asyncHandler(async (req, res) => {
       "created a study (" + study.StudyName + ")"
     );
 
+    console.log(`[study.create] ok user=${req.userData?.id ?? "unknown"} id=${study.id} name=${JSON.stringify(study.StudyName)}`);
     res.status(200).send(study);
   } catch (error) {
-    console.error("Study create error:", error);
-    res.status(500).json({ error: error.message });
+    respondStudyError(req, res, "create", error);
   }
 });
 
@@ -170,21 +186,8 @@ exports.update = asyncHandler(async (req, res) => {
   const ID = req.body.id;
   const { id, AgeGroups, PrerequisiteIds, ExclusionIds, User, ...incomingStudyInfo } = req.body;
   const updatedStudyInfo = normalizeStudyWritePayload(incomingStudyInfo);
-  if (!validIntroductionSubject(incomingStudyInfo.IntroductionEmailSubject)) return res.status(400).json({ error: "Introduction email subject must be a single line of at most 255 characters." });
-  if (updatedStudyInfo.ParticipationRules != null && !validateParticipationGroups(updatedStudyInfo.ParticipationRules)) {
-    return res.status(400).json({ error: 'Invalid participation rules. Each group needs ANY, ALL, or NONE and at least one study.' });
-  }
-
-  const missingFields = getMissingRequiredFields(updatedStudyInfo, [
-    "StudyName",
-    "FK_Lab",
-    "FK_Personnel",
-  ]);
-  if (missingFields.length > 0) {
-    return res.status(400).json({
-      error: `Missing required field(s): ${missingFields.join(", ")}`,
-    });
-  }
+  const problems = collectStudyProblems(updatedStudyInfo, { AgeGroups, lenient: true });
+  if (problems.length > 0) return rejectInvalidStudy(req, res, "update", problems);
 
   try {
     const previousStudy = await model.study.findByPk(ID);
@@ -203,24 +206,27 @@ exports.update = asyncHandler(async (req, res) => {
           StudyName: updatedStudyInfo.StudyName || previousStudy.StudyName, CreatedBy: req.userData?.id || null,
         }, { transaction });
       }
+
+      // Everything below shares the transaction, so a failure part-way through
+      // rolls back the whole update instead of leaving a half-updated study.
+      // Sync age groups: replace existing with the new set
+      await model.studyAgeGroup.destroy({ where: { FK_Study: ID }, transaction });
+      if (AgeGroups && AgeGroups.length > 0) {
+        await model.studyAgeGroup.bulkCreate(
+          AgeGroups.map((g) => ({ MinAge: g.MinAge, MaxAge: g.MaxAge, FK_Study: ID })),
+          { transaction }
+        );
+      }
+
+      // Sync prerequisites and exclusions via Sequelize mixins
+      const studyInstance = await model.study.findOne({ where: { id: ID }, transaction });
+      if (PrerequisiteIds !== undefined) {
+        await studyInstance.setPrerequisites(PrerequisiteIds || [], { transaction });
+      }
+      if (ExclusionIds !== undefined) {
+        await studyInstance.setExclusions(ExclusionIds || [], { transaction });
+      }
     });
-
-    // Sync age groups: replace existing with the new set
-    await model.studyAgeGroup.destroy({ where: { FK_Study: ID } });
-    if (AgeGroups && AgeGroups.length > 0) {
-      await model.studyAgeGroup.bulkCreate(
-        AgeGroups.map((g) => ({ MinAge: g.MinAge, MaxAge: g.MaxAge, FK_Study: ID }))
-      );
-    }
-
-    // Sync prerequisites and exclusions via Sequelize mixins
-    const studyInstance = await model.study.findOne({ where: { id: ID } });
-    if (PrerequisiteIds !== undefined) {
-      await studyInstance.setPrerequisites(PrerequisiteIds || []);
-    }
-    if (ExclusionIds !== undefined) {
-      await studyInstance.setExclusions(ExclusionIds || []);
-    }
 
     // Do not join appointments here: a study can have thousands, and joining them
     // beside the other to-many includes builds a cross product that exhausted the
@@ -249,8 +255,7 @@ exports.update = asyncHandler(async (req, res) => {
 
     res.status(200).send(study);
   } catch (error) {
-    console.error("Study update error:", error);
-    res.status(500).json({ error: error.message });
+    respondStudyError(req, res, "update", error);
   }
 });
 

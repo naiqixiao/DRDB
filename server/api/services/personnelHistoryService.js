@@ -14,7 +14,11 @@ const PERSONNEL_ROLES = new Set([
 ]);
 
 function dateOrNow(value) {
-  const date = value ? new Date(value) : new Date();
+  // A just-created row can report createdAt as the Sequelize literal
+  // CURRENT_TIMESTAMP (the model's column default) instead of a Date. That is not
+  // a real date, and rejecting it made every study create fail with a 500.
+  const isRealDate = value instanceof Date || typeof value === "string" || typeof value === "number";
+  const date = value && isRealDate ? new Date(value) : new Date();
   if (Number.isNaN(date.getTime())) throw new Error("A valid effective date is required.");
   return date;
 }
