@@ -50,8 +50,11 @@ describe('Recruitment participation availability', () => {
       ParticipationRules: [{ operator: 'ALL', studyIds: [10] }, { operator: 'NONE', studyIds: [11] }],
     });
     model.child.findAll.mockResolvedValueOnce([
-      { id: 1, Appointments: [{ FK_Study: 10 }] },
-      { id: 2, Appointments: [{ FK_Study: 10 }, { FK_Study: 11 }] },
+      { id: 1, Appointments: [{ FK_Study: 10, Schedule: { Status: 'Confirmed', Completed: 1 } }] },
+      { id: 2, Appointments: [{ FK_Study: 10, Schedule: { Status: 'Confirmed', Completed: 1 } }, { FK_Study: 11 }] },
+      { id: 5, Appointments: [{ FK_Study: 10 }] },
+      { id: 6, Appointments: [{ FK_Study: 10, Schedule: { Status: 'Rejected', Completed: 1 } }] },
+      { id: 7, Appointments: [{ FK_Study: 10, Schedule: { Status: 'Confirmed', Completed: 0 } }] },
       { id: 3, Appointments: [] },
     ]).mockResolvedValueOnce([{ id: 1 }]);
     const res = await invoke(childController.search, { studyID: '1', minAge: '1', maxAge: '24', slim: 'true' });

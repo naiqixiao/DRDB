@@ -115,8 +115,7 @@ function isChildEligibleForSlimSearch(childRecord, ageGroups, participationGroup
   }
 
   if (participationGroups.length === 0) return true;
-  const history = (childRecord.Appointments || []).map(appointment => appointment.FK_Study);
-  return matchesParticipationRules({ ParticipationRules: participationGroups }, history);
+  return matchesParticipationRules({ ParticipationRules: participationGroups }, childRecord.Appointments || []);
 }
 
 async function searchSlimChildrenWithPagination(queryString, pagination, eligibility) {
@@ -138,7 +137,8 @@ async function searchSlimChildrenWithPagination(queryString, pagination, eligibi
     scanInclude.push({
       model: model.appointment,
       separate: true,
-      attributes: ["FK_Study"],
+      attributes: ["FK_Study", "FK_Schedule"],
+      include: [{ model: model.schedule, attributes: ["Status", "Completed"] }],
       where: { FK_Study: { [Op.in]: ruleStudyIds } },
     });
   }
@@ -486,7 +486,7 @@ exports.search = asyncHandler(async (req, res) => {
             model: model.child,
             separate: true,
             include: [
-              { model: model.appointment, attributes: ["FK_Study"] },
+              { model: model.appointment, attributes: ["FK_Study", "FK_Schedule"], include: [{ model: model.schedule, attributes: ["Status", "Completed"] }] },
               { model: model.family, attributes: ["AutismHistory"] },
             ],
           },

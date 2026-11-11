@@ -136,7 +136,7 @@ See `server/.env.example` for the full list with defaults. Core variables:
 | Variable | Default | Description |
 | --- | --- | --- |
 | `JWT_KEY` | *(required)* | Secret for signing JWT tokens |
-| `APP_URL` | `'URL of the system'` | System URL |
+| `URL` | `http://localhost:8080` | Public URL included in account emails |
 | `TZ` | `'America/Toronto'` | Timezone for DB connection |
 | `TIMEZONE` | *(falls back to `TZ`)* | Timezone for cron jobs |
 | `DB_NAME` | `'DRDB'` | Database name |

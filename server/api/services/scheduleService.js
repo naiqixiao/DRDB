@@ -37,7 +37,7 @@ function buildScheduleSearchInclude() {
           model: model.child,
           attributes: ["id", "Name", "DoB", "Age", "Sex", "FK_Family", "IdWithinFamily"],
           include: [
-            { model: model.appointment, separate: true, attributes: ["FK_Study"] },
+            { model: model.appointment, separate: true, attributes: ["FK_Study", "FK_Schedule"], include: [{ model: model.schedule, attributes: ["Status", "Completed"] }] },
             { model: model.family, attributes: ["AutismHistory"] },
           ],
         },
@@ -68,7 +68,7 @@ function buildScheduleSearchInclude() {
           model: model.child,
           separate: true,
           include: [
-            { model: model.appointment, separate: true, attributes: ["FK_Study"] },
+            { model: model.appointment, separate: true, attributes: ["FK_Study", "FK_Schedule"], include: [{ model: model.schedule, attributes: ["Status", "Completed"] }] },
             { model: model.family, attributes: ["AutismHistory"] },
           ],
         },

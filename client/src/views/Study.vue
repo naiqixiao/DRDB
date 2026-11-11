@@ -1330,7 +1330,7 @@
 
                   <v-card class="ds-card pa-6 mb-6" variant="flat">
                     <h3 class="text-h6 mb-2">Participation Requirements</h3>
-                    <p class="text-body-2 text-muted mb-4">Participants must satisfy every group (AND). Each group checks participation in ANY, ALL, or NONE of its selected studies.</p>
+                    <p class="text-body-2 text-muted mb-4">Participants must satisfy every group (AND). ANY and ALL require completed studies; NONE excludes children with any appointment for the selected studies.</p>
                     <p v-if="!editedStudy.ParticipationRules?.length" class="text-body-2 mb-4">No participation requirements. Add a group to require or exclude previous studies.</p>
                     <template v-for="(group, index) in editedStudy.ParticipationRules" :key="index">
                       <div v-if="index" class="text-caption font-weight-bold my-3">AND</div>

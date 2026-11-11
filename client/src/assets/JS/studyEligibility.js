@@ -65,8 +65,7 @@ export function explainIneligibility(study, child, family = null) {
     );
   }
 
-  const history = (child.Appointments || []).map((app) => app.FK_Study);
-  if (!matchesParticipationRules(study, history)) reasons.push("Participation rules not met (prerequisites/exclusions)");
+  if (!matchesParticipationRules(study, child.Appointments || [])) reasons.push("Participation rules not met (prerequisites/exclusions)");
 
   const autismInFamily =
     Number(family?.AutismHistory) === 1 || Number(child.Family?.AutismHistory) === 1;

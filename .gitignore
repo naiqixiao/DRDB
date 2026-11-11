@@ -89,4 +89,5 @@ server/pm2_dump.log
 server/env
 
 !docs/study-introduction-subject-plan.md
+!docs/family-reengagement-plan.md
 manuscript/*

@@ -16,15 +16,18 @@ function validateParticipationGroups(groups) {
     && group.studyIds.every(id => Number.isInteger(id) && id > 0));
 }
 
-function matchesParticipationRules(study, history) {
+function matchesParticipationRules(study, appointments) {
   const groups = getParticipationGroups(study);
   // Invalid saved rules must not silently qualify participants.
   if (!validateParticipationGroups(groups)) return false;
-  const ids = new Set(history.map(Number));
+  const contacted = new Set(appointments.map(appointment => Number(appointment.FK_Study)));
+  const completed = new Set(appointments
+    .filter(({ Schedule }) => Schedule && Schedule.Status === "Confirmed" && Number(Schedule.Completed) === 1)
+    .map(appointment => Number(appointment.FK_Study)));
   return groups.every(group => {
-    if (group.operator === 'ALL') return group.studyIds.every(id => ids.has(id));
-    if (group.operator === 'NONE') return !group.studyIds.some(id => ids.has(id));
-    return group.studyIds.some(id => ids.has(id));
+    if (group.operator === 'ALL') return group.studyIds.every(id => completed.has(id));
+    if (group.operator === 'NONE') return !group.studyIds.some(id => contacted.has(id));
+    return group.studyIds.some(id => completed.has(id));
   });
 }
 

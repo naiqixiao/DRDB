@@ -245,7 +245,9 @@ Navigate to **APIs & Services > Library** and enable:
 
 ## Backend Environment Variables
 
-The backend reads configuration from `server/.env`. Key variables (see `server/config/general.js` for defaults):
+For a backend run directly with Node, copy `server/.env.example` to `server/.env` and configure it there. The backend reads this file regardless of the directory it is started from. Existing process environment variables take precedence. For Docker Compose, use the repository root `.env` copied from `.env.example` instead; Compose passes its values to the backend container. These are alternative configurations for different ways of running DRDB, not files that are merged. `server/env` is not read.
+
+Key variables (see `server/config/general.js` for defaults):
 
 ```env
 JWT_KEY=your_jwt_secret
@@ -256,6 +258,7 @@ DB_HOST=localhost
 DB_DIALECT=mariadb
 TIMEZONE=America/Toronto
 FRONTEND_URL=https://yourdomain.com
+URL=https://yourdomain.com
 ```
 
 DRDB includes two optional, human-reviewed AI assistants — email
@@ -288,7 +291,7 @@ Set `AI_EMAIL_PROVIDER` or `AI_FAMILY_SUMMARY_PROVIDER` to override the
 provider for just that one feature without changing `AI_PROVIDER` globally.
 
 > [!NOTE]
-> `FRONTEND_URL` controls the CORS allowed origins. Set it to your production domain. Multiple origins can be comma-separated (e.g., `https://yourdomain.com,http://localhost:5173`).
+> `FRONTEND_URL` controls the CORS allowed origins and can contain multiple comma-separated origins (e.g., `https://yourdomain.com,http://localhost:5173`). `URL` is the single public address included in account emails. Set both for production.
 
 ---
 

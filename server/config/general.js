@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
 
-require("dotenv").config();
+require("dotenv").config({ path: require("path").join(__dirname, "..", ".env") });
 
 const timeZone = process.env.TIMEZONE || "America/Toronto";
 const databaseName = process.env.DB_NAME || "DRDB";

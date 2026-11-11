@@ -80,6 +80,19 @@ describe('shared client study eligibility', () => {
     }
   });
 
+  test('required studies count only completed confirmed appointments; exclusions retain contact history', () => {
+    const rules = { ...study, ASDParticipant: 'Include', ParticipationRules: [
+      { operator: 'ANY', studyIds: [10] }, { operator: 'NONE', studyIds: [11] },
+    ] };
+    const child = { DoB: '2025-01-01', Family: {}, Appointments: [] };
+    for (const Schedule of [null, { Status: 'Confirmed', Completed: 0 }, { Status: 'Rejected', Completed: 1 }]) {
+      expect(isChildEligibleForStudy(rules, { ...child, Appointments: [{ FK_Study: 10, Schedule }] })).toBe(false);
+    }
+    const completed = { FK_Study: 10, Schedule: { Status: 'Confirmed', Completed: 1 } };
+    expect(isChildEligibleForStudy(rules, { ...child, Appointments: [completed] })).toBe(true);
+    expect(isChildEligibleForStudy(rules, { ...child, Appointments: [completed, { FK_Study: 11 }] })).toBe(false);
+  });
+
   describe('multiple age groups', () => {
     // API returns DECIMAL columns as strings.
     const multi = {

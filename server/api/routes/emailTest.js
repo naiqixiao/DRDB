@@ -64,7 +64,7 @@ function mockAccountEmail(type) {
         MOCK.experimenterEmail,
         "Schedule",
         "Calendar button not working on Firefox",
-        "<p>When I click the 'Add to Calendar' button on the Schedule page using Firefox 120, nothing happens.</p>"
+        "When I click the 'Add to Calendar' button on the Schedule page using Firefox 120, nothing happens."
       );
       email.description =
         "Rendered by userTemplates.buildFeedbackEmail() — used by feedback.js.";
