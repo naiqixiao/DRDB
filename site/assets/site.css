@@ -64,7 +64,9 @@ a:hover { text-decoration: underline; }
   padding: 0 var(--gutter);
 }
 
-.prose { max-width: 720px; }
+/* Prose blocks share the figures' left edge; only the line length is capped. */
+.prose > * { max-width: 720px; }
+.prose > .table-scroll { max-width: none; }
 
 section { padding: 48px 0 24px; }
 
@@ -85,10 +87,11 @@ hr.rule {
 }
 
 .topbar-inner {
-  max-width: 1040px;
+  /* same width as .wrap, so the lab logo lines up with the content's right edge */
+  max-width: calc(1040px + 2 * var(--gutter));
   margin: 0 auto;
   padding: 0 var(--gutter);
-  height: 56px;
+  height: 72px;
   display: flex;
   align-items: center;
   gap: 28px;
@@ -107,18 +110,21 @@ hr.rule {
   gap: 10px;
 }
 
-/* ---------- logo ---------- */
+/* ---------- lab logo (top right) ---------- */
 
-.brand-logo,
-.hero-logo,
-.footer-logo {
-  display: block;
-  width: auto;
+.lab {
+  display: flex;
+  align-items: center;
+  flex: none;
 }
+.lab img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+}
+.lab:hover img { outline: 1px solid var(--accent); outline-offset: 2px; }
 
-.brand-logo { height: 20px; }
-.hero-logo { height: 64px; margin: 0 0 24px; }
-.footer-logo { height: 24px; }
 .wordmark:hover { text-decoration: none; color: var(--accent); }
 
 .topbar nav {
@@ -473,57 +479,57 @@ ol.refs li::before {
   font-size: 11px;
   color: var(--accent);
   display: inline-block;
-  width: 40px;
+  width: 44px; /* matches the 44px hanging indent so wrapped lines align */
   text-indent: 0;
 }
 
 ol.refs li a { color: var(--link); }
 
+/* ---------- lab band ---------- */
+
+section.alt {
+  background: var(--paper-2);
+  border-block: 1px solid var(--rule);
+}
+
+section.lab-band-section { padding: 0; margin-top: 72px; }
+
+.labband {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 36px;
+  align-items: center;
+  padding-top: 48px;
+  padding-bottom: 48px;
+}
+
+.labband a.logo { display: block; border-radius: 12px; }
+.labband a.logo:hover { outline: 1px solid var(--accent); outline-offset: 3px; }
+.labband img { display: block; width: 200px; height: auto; border-radius: 12px; }
+.labband .eyebrow { margin-bottom: 8px; }
+.labband h2 { margin-bottom: 10px; }
+.labband .lede { font-size: 17px; color: var(--muted); max-width: 720px; margin-bottom: 0; }
+.labband .actions { margin: 20px 0 0; }
+
 /* ---------- footer ---------- */
 
 footer.site-footer {
-  border-top: 1px solid var(--rule);
-  margin-top: 48px;
-  padding: 32px 0 56px;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-footer.site-footer .cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  max-width: calc(1040px + 2 * var(--gutter));
-  margin: 0 auto;
-  padding: 0 var(--gutter);
-}
-
-footer.site-footer .meta {
-  max-width: calc(1040px + 2 * var(--gutter));
-  margin: 32px auto 0;
-  padding: 0 var(--gutter);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  margin-top: 0; /* the lab band above supplies the rule */
+  padding: 28px 0 56px;
+  font-size: 14px;
+  line-height: 1.7;
   color: var(--soft);
 }
 
-footer.site-footer a { color: var(--ink); }
-
-footer.site-footer .footer-brand {
+footer.site-footer .wrap {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: calc(1040px + 2 * var(--gutter));
-  margin: 0 auto 32px;
-  padding: 0 var(--gutter);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 24px;
 }
+
+footer.site-footer a { color: var(--muted); text-decoration: underline; text-decoration-color: var(--rule-solid); }
+footer.site-footer a:hover { color: var(--accent); }
 
 /* ---------- responsive ---------- */
 
@@ -538,7 +544,10 @@ footer.site-footer .footer-brand {
   h2 { font-size: 26px; }
   .qgrid { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-  footer.site-footer .cols { grid-template-columns: 1fr; gap: 24px; }
+  .lab img { width: 40px; height: 40px; }
+  .labband { grid-template-columns: 1fr; gap: 24px; padding-top: 36px; padding-bottom: 36px; }
+  .labband img { width: 160px; }
+  .topbar-inner { height: 60px; gap: 16px; }
   .topbar nav { gap: 16px; }
 }
 
@@ -632,4 +641,3 @@ pre.cite code {
   color: var(--ink);
 }
 
-footer.site-footer .meta a { color: var(--soft); text-decoration: underline; text-decoration-color: var(--rule-solid); }
