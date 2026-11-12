@@ -12,7 +12,7 @@ const BRANDING_DEFAULTS = {
   loginHeading: "DRDB",
   loginSubheading: "Developmental Research Database System",
   logoUrl: "/logo.png",
-  faviconUrl: "/favicon.png",
+  faviconUrl: "/favicon.svg",
 };
 
 const BRANDING_SETTING_KEYS = {

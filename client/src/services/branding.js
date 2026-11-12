@@ -18,7 +18,7 @@ export const DEFAULT_BRANDING = {
   loginHeading: "DRDB",
   loginSubheading: "Developmental Research Database System",
   logoUrl: "/logo.png",
-  faviconUrl: "/favicon.png",
+  faviconUrl: "/favicon.svg",
 };
 
 let faviconVersionToken = Date.now();

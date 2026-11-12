@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>DRDB</title>
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#f5f5f5" stroke="#2d3142" stroke-width="2"/>
+  <rect x="9" y="12" width="3" height="40" rx="1.5" fill="#bf4520"/>
+  <text x="37" y="30" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="25" font-weight="700" fill="#2d3142">DR</text>
+  <text x="37" y="54" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="25" font-weight="700" fill="#2d3142">DB</text>
+</svg>
