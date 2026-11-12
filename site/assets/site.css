@@ -566,16 +566,70 @@ footer.site-footer .footer-brand {
   section { padding: 24px 0; }
 }
 
-/* App tour: screenshots anchor each research workflow. */
-.tour-list { display: grid; gap: 4rem; margin-top: 3rem; }
-.tour-item { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(220px, 1fr); gap: 2.5rem; align-items: center; margin: 0; }
-.tour-item img { display: block; width: 100%; height: auto; border: 1px solid var(--rule, #d6d6d6); border-radius: 6px; box-shadow: 0 12px 32px rgba(20, 30, 45, .12); }
-.tour-item figcaption span { font-size: .8rem; font-weight: 600; letter-spacing: .04em; }
-.tour-item h3 { margin: .65rem 0; }
-.tour-item p { line-height: 1.6; }
-@media (max-width: 760px) { .tour-item { grid-template-columns: 1fr; gap: 1.25rem; } .tour-list { gap: 3rem; } }
-.workflow-shot { margin: 2.5rem auto 4rem; max-width: 1040px; }
-.workflow-shot img { display: block; width: 100%; height: auto; border: 1px solid var(--rule, #d6d6d6); border-radius: 6px; box-shadow: 0 12px 32px rgba(20, 30, 45, .12); }
-.workflow-shot figcaption { max-width: 75ch; margin-top: 1rem; line-height: 1.6; }
-.workflow-shot figcaption strong { display: block; font-size: 1.1rem; }
-.workflow-shot figcaption span { display: block; font-size: .85rem; opacity: .75; margin-top: .35rem; }
+/* ---------- screenshots ---------- */
+
+figure.shot { margin: 44px 0 56px; }
+
+figure.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule-solid);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+figure.shot figcaption strong { font-weight: 600; color: var(--ink); }
+
+figure.shot .cap-note {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--soft);
+}
+
+/* The app has no dark theme; soften the glare of a light screenshot on a dark page. */
+@media (prefers-color-scheme: dark) {
+  figure.shot img { filter: brightness(0.9); }
+}
+
+/* ---------- get started ---------- */
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--paper-2);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+ol.steps {
+  max-width: 720px;
+  padding-left: 24px;
+  margin-bottom: 18px;
+}
+ol.steps li { margin-bottom: 10px; padding-left: 4px; }
+ol.steps li::marker { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+
+pre.cite {
+  max-width: 720px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule-solid);
+  border-radius: 6px;
+  background: var(--surface);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+pre.cite code {
+  background: none;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+footer.site-footer .meta a { color: var(--soft); text-decoration: underline; text-decoration-color: var(--rule-solid); }

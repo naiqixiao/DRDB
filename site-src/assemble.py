@@ -24,6 +24,10 @@ FIGS = {
         "Eligibility windows on a shared age axis",
         "Five study age windows plotted from birth to sixty months, with markers for two siblings in one family and a vertical line at today.",
     ),
+    "fig2-age-windows-phone": (
+        "Eligibility windows on a shared age axis, narrow",
+        "Five study age windows from birth to five years, with two siblings in one family moving along the axis over six months.",
+    ),
     "fig3-timeline": (
         "DRDB history, March 2020 to November 2026",
         "A timeline in three phases: remote recruitment, return to the lab, and a lab operations platform, with dated milestones.",
@@ -31,6 +35,10 @@ FIGS = {
     "fig4-lifecycle": (
         "The path of one family",
         "Registered, eligible, contacted, scheduled, visited, completed, with an auto-released recovery state and a no-more-contact terminal state.",
+    ),
+    "fig4-lifecycle-phone": (
+        "The path of one family, narrow",
+        "Registered, eligible, contacted, scheduled, visited and completed from top to bottom, with an auto-released recovery state and a no-more-contact terminal state.",
     ),
     "fig5-er": (
         "The main records and how they relate",

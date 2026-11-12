@@ -11,6 +11,11 @@
   <meta property="og:title" content="DRDB — the operations layer of a developmental lab">
   <meta property="og:description" content="Research happens in a changing world. Its infrastructure should keep the science constant.">
   <meta property="og:url" content="https://naiqixiao.github.io/DRDB/">
+  <meta property="og:image" content="https://naiqixiao.github.io/DRDB/assets/og-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="DRDB: Research happens in a changing world. Its infrastructure should keep the science constant.">
+  <meta name="twitter:card" content="summary_large_image">
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/site.css">
 </head>
@@ -24,8 +29,9 @@
         <a href="#history">History</a>
         <a href="#principles">Principles</a>
         <a href="#practice">In practice</a>
-        
         <a href="#training">Training</a>
+        <a href="#in-use">In use</a>
+        <a href="#get-started">Get started</a>
         <a class="gh" href="https://github.com/naiqixiao/DRDB">GitHub</a>
       </nav>
     </div>
@@ -145,7 +151,7 @@
           <div class="qcard">
             <span class="qnum">02</span>
             <h3>Who contacts whom?</h3>
-            <p>Several labs draw on one pool, so one lab's call is another lab's problem <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>. Over-contacted volunteers stop responding, and the order of rows in a shared spreadsheet quietly decides who gets invited at all <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
+            <p>Several labs draw on one pool, so one lab's call is another lab's problem <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>. Over-contacted volunteers stop responding <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>, and the order of rows in a shared spreadsheet quietly decides who gets invited at all.</p>
           </div>
           <div class="qcard">
             <span class="qnum">03</span>
@@ -155,7 +161,7 @@
           <div class="qcard">
             <span class="qnum">04</span>
             <h3>Who does the work?</h3>
-            <p>New assistants arrive every term, and procedural fidelity depends on onboarding. Detailed records of who contacted which family, and when, are what let a lab keep track of its own work <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
+            <p>New assistants arrive every term, and procedural fidelity depends on onboarding <a href="#ref-byers">(<cite>Byers-Heinlein et al., 2020</cite>)</a>. Detailed records of who contacted which family, and when, are what let a lab keep track of its own work <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
           </div>
           <div class="qcard">
             <span class="qnum">05</span>
@@ -183,7 +189,7 @@
       </div>
       <div class="wrap">
         
-      <figure class="figure" id="fig-age-windows">
+      <figure class="figure fig-desk" id="fig-age-windows">
   <div class="fig-eyebrow">Fig. 2 · Eligibility moves</div>
   <div class="figure-scroll">
     <svg viewBox="0 0 1040 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig2-age-windows-title fig2-age-windows-desc">
@@ -250,15 +256,87 @@
   </div>
   <figcaption><span class="cap-key">Fig. 2</span>Studies own eligible age ranges on a shared axis. The accented window is the one this infant enters next; the 3-year-old sibling already sits inside two of them.</figcaption>
 </figure>
+        
+      <figure class="figure fig-phone" id="fig-age-windows-phone">
+  <div class="fig-eyebrow">Fig. 2 · Eligibility moves</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 400 452" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig2-age-windows-phone-title fig2-age-windows-phone-desc">
+      <title id="fig2-age-windows-phone-title">Age-window chart: studies own eligible age ranges on a shared axis; two children move along it over time.</title>
+      <desc id="fig2-age-windows-phone-desc">Five study age windows from birth to five years, with two siblings in one family moving along the axis over six months.</desc>
+      <defs>
+        <marker id="arr-b-p" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+      </defs>
+      <!-- year gridlines -->
+      <line x1="32.0" y1="52" x2="32.0" y2="296" class="s-rule" stroke-width="1"/>
+      <line x1="99.2" y1="52" x2="99.2" y2="296" class="s-rule" stroke-width="1"/>
+      <line x1="166.4" y1="52" x2="166.4" y2="296" class="s-rule" stroke-width="1"/>
+      <line x1="233.6" y1="52" x2="233.6" y2="296" class="s-rule" stroke-width="1"/>
+      <line x1="300.8" y1="52" x2="300.8" y2="296" class="s-rule" stroke-width="1"/>
+      <line x1="368.0" y1="52" x2="368.0" y2="296" class="s-rule" stroke-width="1"/>
+      <!-- age axis -->
+      <text x="32.0" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">0 MO</text>
+      <text x="99.2" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">1 YR</text>
+      <text x="166.4" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">2 YR</text>
+      <text x="233.6" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">3 YR</text>
+      <text x="300.8" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">4 YR</text>
+      <text x="368.0" y="36" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">5 YR</text>
+      <line x1="16" y1="44" x2="384" y2="44" class="s-rulesolid" stroke-width="1"/>
+      <!-- today guides (drawn under the labels and bars) -->
+      <line x1="54.4" y1="52" x2="54.4" y2="296" class="s-muted" stroke-width="1" stroke-dasharray="3 4"/>
+      <line x1="233.6" y1="52" x2="233.6" y2="296" class="s-muted" stroke-width="1" stroke-dasharray="3 4"/>
+      <!-- studies: name above its bar -->
+      <rect x="62.6" y="60" width="124.0" height="15" class="f-paper"/>
+      <text x="65.6" y="71" class="t-node f-ink" font-size="10" font-weight="600">Lab A · eye tracking</text>
+      <rect x="65.6" y="78" width="33.6" height="16" rx="4" class="f-accent s-accent" fill-opacity="0.9" stroke-width="1"/>
+      <rect x="107.4" y="106" width="129.8" height="15" class="f-paper"/>
+      <text x="110.4" y="117" class="t-node f-ink" font-size="10" font-weight="600">Lab B · word learning</text>
+      <rect x="110.4" y="124" width="67.2" height="16" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+      <rect x="185.8" y="152" width="129.8" height="15" class="f-paper"/>
+      <text x="188.8" y="163" class="t-node f-ink" font-size="10" font-weight="600">Lab C · parent report</text>
+      <rect x="188.8" y="170" width="67.2" height="16" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+      <rect x="197.0" y="198" width="112.4" height="15" class="f-paper"/>
+      <text x="200.0" y="209" class="t-node f-ink" font-size="10" font-weight="600">Lab B · motor play</text>
+      <rect x="200.0" y="216" width="67.2" height="16" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+      <rect x="206.6" y="244" width="147.2" height="15" class="f-paper"/>
+      <text x="209.6" y="255" class="t-node f-ink" font-size="10" font-weight="600">Lab C · school readiness</text>
+      <rect x="278.4" y="262" width="78.4" height="16" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+
+      <!-- children row -->
+      <text x="16" y="316" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">CHILDREN</text>
+      <path d="M54.4 336 H87.0" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-b-p)"/>
+      <path d="M233.6 336 H266.2" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-b-p)"/>
+      <circle cx="54.4" cy="336" r="5" class="f-ink"/>
+      <circle cx="233.6" cy="336" r="5" class="f-ink"/>
+      <circle cx="88.0" cy="336" r="5" class="f-paper s-muted" stroke-width="1"/>
+      <circle cx="267.2" cy="336" r="5" class="f-paper s-muted" stroke-width="1"/>
+
+      <text x="16" y="362" class="t-arrow f-muted" font-size="8" letter-spacing="0.8">4 MO TODAY</text>
+      <text x="16" y="376" class="t-arrow f-muted" font-size="8" letter-spacing="0.8">10 MO IN SIX MONTHS</text>
+      <text x="250.4" y="362" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">36 MO TODAY</text>
+      <text x="250.4" y="376" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">42 MO IN SIX MONTHS</text>
+
+      <text x="200" y="424" class="t-title f-ink" font-size="14" font-style="italic" text-anchor="middle">both children move right at the same rate</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 2</span>Studies own eligible age ranges on a shared axis. The accented window is the one this infant enters next; the 3-year-old sibling already sits inside two of them.</figcaption>
+</figure>
+      </div>
+      <div class="wrap shot-pair">
+        <figure class="figure shot" id="shot-rules-age">
+          <img src="assets/screenshots/rules-age-1280.jpg" srcset="assets/screenshots/rules-age-1280.jpg 1280w, assets/screenshots/rules-age.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Study editor for Lab C's school-readiness study, with an age group of 44 to 58 months and a rule requiring a completed parent-report study" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 1</span><strong>Set the age window and participation rules.</strong> Lab C's school-readiness study takes children aged 44–58 months who have already completed its parent-report study. Health criteria are set on the same screen. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
+        <figure class="figure shot" id="shot-rules-exclusion">
+          <img src="assets/screenshots/rules-exclusion-1280.jpg" srcset="assets/screenshots/rules-exclusion-1280.jpg 1280w, assets/screenshots/rules-exclusion.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Family record for a one-year-old who completed Lab A's eye-tracking study, with a note listing why each Lab C study is not offered, including face perception: participation rules not met" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 2</span><strong>See why a study is not offered.</strong> Mia completed Lab A's eye-tracking study, so Lab C's face-perception study, which excludes it, is not offered to her. The other two Lab C studies fail on age. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
       </div>
     </section>
 
     <div class="wrap"><hr class="rule"></div>
 
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/rules-age.jpg" alt="Study eligibility editor showing an age range of 48 to 84 months and a prerequisite study" loading="lazy"><figcaption><strong>Set the age window and participation rules.</strong> A study can require prior participation while excluding other studies. <span>Example data from the test database.</span></figcaption></figure></div>
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/rules-health.jpg" alt="Study eligibility editor showing a study exclusion and participant health criteria" loading="lazy"><figcaption><strong>Add exclusions and health criteria.</strong> The example excludes children with an appointment for Cadmium Study and applies the selected health criteria. <span>Example data from the test database.</span></figcaption></figure></div>
     <!-- ============ 3 · HISTORY ============ -->
     <section id="history">
       <div class="wrap prose">
@@ -352,7 +430,7 @@
             </tr>
             <tr>
               <td class="mono">Testing moves online<br>2020–21</td>
-              <td>Sessions move to video; families are no longer expected to be local.</td>
+              <td>Sessions move to video; families are no longer expected to be local <a href="#ref-sheskin">(<cite>Sheskin et al., 2020</cite>)</a>.</td>
               <td>Zoom links for online studies (Nov 2020); time-zone support (Mar 2021).</td>
             </tr>
             <tr>
@@ -413,12 +491,16 @@
           <li><strong>Privacy by default.</strong> Self-hosted; the optional language model can run on a local deployment so drafting never leaves the institution's hardware.</li>
         </ul>
       </div>
+      <div class="wrap">
+        <figure class="figure shot" id="shot-family">
+          <img src="assets/screenshots/family-1280.jpg" srcset="assets/screenshots/family-1280.jpg 1280w, assets/screenshots/family.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Family record for Daniela Rivera with two children, Leo and Sofia, contact details, a completed study on the timeline and a conversation log" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 3</span><strong>One family record.</strong> Both siblings, their contact details, participation history and every conversation are in one record that every researcher sees. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
+      </div>
     </section>
 
     <div class="wrap"><hr class="rule"></div>
 
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/family.jpg" alt="Example family record with a child, contact preferences and next contact date" loading="lazy"><figcaption><strong>One family record.</strong> Researchers can find the child, contact preferences and next-contact date together; participation history is available below. <span>Example data from the test database.</span></figcaption></figure></div>
     <!-- ============ 5 · IN PRACTICE ============ -->
     <section id="practice">
       <div class="wrap prose">
@@ -429,13 +511,19 @@
         <p>After the visit the session is marked complete and the family is released. At twelve months the infant is eligible for Lab B's study but excluded from Lab C's, because she has already completed a related paradigm.</p>
         <p>The same path fits an adult cohort: an older adult re-invited each year who must be excluded from paradigms they have already seen.</p>
       </div>
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/eligible.jpg" alt="Scheduling screen showing an example study, participation rules, 72 eligible results and a family record" loading="lazy"><figcaption><strong>Find eligible participants.</strong> Select a study to apply its age and participation criteria, see the result count, and optionally hide phone-only families. The search shuffles eligible results. <span>Example data from the test database.</span></figcaption></figure></div>
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/booking.jpg" alt="Booking dialog showing a study date and two selected experimenters" loading="lazy"><figcaption><strong>Plan a visit.</strong> Choose the date, study and researchers in the scheduling flow; the later steps handle email and next contact. <span>Example data from the test database.</span></figcaption></figure></div>
+      <div class="wrap">
+        <figure class="figure shot" id="shot-eligible">
+          <img src="assets/screenshots/eligible-1280.jpg" srcset="assets/screenshots/eligible-1280.jpg 1280w, assets/screenshots/eligible.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Scheduling screen for Lab A's eye-tracking study, with its 6-to-12-month window, a shuffled list of seven eligible children and Sofia Rivera's family record" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 4</span><strong>Find eligible participants.</strong> Choosing a study applies its age window and rules; here seven infants qualify, shown in shuffled order. Phone-only families can be hidden. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
+        <figure class="figure shot" id="shot-booking">
+          <img src="assets/screenshots/booking-1280.jpg" srcset="assets/screenshots/booking-1280.jpg 1280w, assets/screenshots/booking.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Booking dialog for Sofia with the date, study and two experimenters, and chips showing one more eligible study for Sofia and one for her brother Leo" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 5</span><strong>Plan a visit.</strong> While booking Sofia, DRDB shows one more study she could do in the same visit and one that her brother Leo is eligible for. The next steps send the confirmation email and set the next contact date. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
+      </div>
       <div class="wrap">
         
-      <figure class="figure" id="fig-lifecycle">
+      <figure class="figure fig-desk" id="fig-lifecycle">
   <div class="fig-eyebrow">Fig. 4 · One family's path</div>
   <div class="figure-scroll">
     <svg viewBox="0 0 1040 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig4-lifecycle-title fig4-lifecycle-desc">
@@ -518,15 +606,89 @@
   </div>
   <figcaption><span class="cap-key">Fig. 4</span>Booking a family locks it to one lab; a completed visit releases it automatically. A family that asks to stop is never contacted again.</figcaption>
 </figure>
+        
+      <figure class="figure fig-phone" id="fig-lifecycle-phone">
+  <div class="fig-eyebrow">Fig. 4 · One family's path</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 400 524" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig4-lifecycle-phone-title fig4-lifecycle-phone-desc">
+      <title id="fig4-lifecycle-phone-title">Lifecycle phase map from registered to completed, top to bottom, with an auto-released recovery state and a no-more-contact terminal state.</title>
+      <desc id="fig4-lifecycle-phone-desc">Registered, eligible, contacted, scheduled, visited and completed from top to bottom, with an auto-released recovery state and a no-more-contact terminal state.</desc>
+      <defs>
+        <marker id="arr-c-p" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- column eyebrows -->
+      <text x="40" y="40" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PRIMARY PHASES</text>
+      <text x="248" y="188" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">RECOVERY</text>
+      <text x="248" y="404" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">TERMINAL</text>
+
+      <!-- transitions (drawn under the nodes) -->
+      <path d="M110 100 V127" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <path d="M110 172 V199" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <path d="M110 244 V271" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <path d="M110 316 V343" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <path d="M110 388 V415" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <!-- contacted -> auto-released -->
+      <path d="M180 222 H247" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+      <!-- auto-released -> eligible (dashed re-entry) -->
+      <path d="M314 200 V158 Q314 150 306 150 H181" fill="none" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-c-p)"/>
+      <!-- eligible -> no more contact, down the left margin and under the rail -->
+      <path d="M40 150 H24 Q16 150 16 158 V488 Q16 496 24 496 H306 Q314 496 314 488 V461" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c-p)"/>
+
+      <!-- rail labels -->
+      <rect x="116" y="108" width="32" height="12" class="f-paper" opacity="0.92"/>
+      <text x="120" y="117" class="t-arrow f-muted" font-size="7" letter-spacing="1">AGE</text>
+      <rect x="116" y="180" width="32" height="12" class="f-paper" opacity="0.92"/>
+      <text x="120" y="189" class="t-arrow f-muted" font-size="7" letter-spacing="1">CALL</text>
+      <rect x="116" y="252" width="32" height="12" class="f-paper" opacity="0.92"/>
+      <text x="120" y="261" class="t-arrow f-muted" font-size="7" letter-spacing="1">BOOK</text>
+      <rect x="116" y="324" width="32" height="12" class="f-paper" opacity="0.92"/>
+      <text x="120" y="333" class="t-arrow f-muted" font-size="7" letter-spacing="1">VISIT</text>
+      <rect x="116" y="396" width="32" height="12" class="f-paper" opacity="0.92"/>
+      <text x="120" y="405" class="t-arrow f-muted" font-size="7" letter-spacing="1">DONE</text>
+
+      <!-- transition labels -->
+      <rect x="186" y="192" width="56" height="22" class="f-paper" opacity="0.92"/>
+      <text x="214" y="201" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">NO REPLY</text>
+      <text x="214" y="211" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">14 DAYS</text>
+      <rect x="192" y="130" width="104" height="12" class="f-paper" opacity="0.92"/>
+      <text x="244" y="139" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">BACK IN THE POOL</text>
+      <rect x="92" y="476" width="124" height="12" class="f-paper" opacity="0.92"/>
+      <text x="154" y="485" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">FAMILY ASKS TO STOP</text>
+
+      <!-- nodes -->
+      <rect x="40" y="56" width="140" height="44" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="110" y="83" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Registered</text>
+      <rect x="40" y="128" width="140" height="44" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="110" y="155" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Eligible</text>
+      <rect x="40" y="200" width="140" height="44" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="110" y="227" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Contacted</text>
+      <rect x="40" y="272" width="140" height="44" rx="8" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="110" y="292" class="t-node f-accent" font-size="12" font-weight="600" text-anchor="middle">Scheduled</text>
+      <text x="110" y="306" class="t-sub f-accent" font-size="7" letter-spacing="0.98" text-anchor="middle" fill-opacity="0.85">LOCKED TO LAB</text>
+      <rect x="40" y="344" width="140" height="44" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="110" y="371" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Visited</text>
+      <rect x="40" y="416" width="140" height="44" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="110" y="443" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Completed</text>
+      <rect x="248" y="200" width="132" height="44" rx="8" class="f-surface s-muted" stroke-width="1"/>
+      <text x="314" y="227" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Auto-released</text>
+      <rect x="248" y="416" width="132" height="44" rx="8" class="f-surface s-ink" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="314" y="443" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">No more contact</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 4</span>Booking a family locks it to one lab; a completed visit releases it automatically. A family that asks to stop is never contacted again.</figcaption>
+</figure>
       </div>
     </section>
 
     <div class="wrap"><hr class="rule"></div>
 
-    <!-- ============ 5b · ETIQUETTE AS RULES ============ -->
+    <!-- ============ 6 · ETIQUETTE AS RULES ============ -->
     <section id="etiquette">
       <div class="wrap prose">
-        <p class="eyebrow">05b · Etiquette as rules</p>
+        <p class="eyebrow">06 · Etiquette as rules</p>
         <h2>Lab courtesy, written into software</h2>
         <p>Much of what DRDB enforces was already lab etiquette — the things a good recruiter does without being told. The difference is that DRDB does not rely on anyone remembering. The left column below is how the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a> teach it; the right column is what the software does.</p>
         <div class="table-scroll">
@@ -582,10 +744,12 @@
       </div>
     </section>
 
-    <!-- ============ 5c · LEARNING ============ -->
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 7 · LEARNING ============ -->
     <section id="training">
       <div class="wrap prose">
-        <p class="eyebrow">05c · Learning DRDB</p>
+        <p class="eyebrow">07 · Learning DRDB</p>
         <h2>How a new assistant starts</h2>
         <ul class="plain">
           <li>An admin or lab manager adds them to the lab and gives them a role.</li>
@@ -599,10 +763,10 @@
 
     <div class="wrap"><hr class="rule"></div>
 
-    <!-- ============ 6 · IN USE ============ -->
+    <!-- ============ 8 · IN USE ============ -->
     <section id="in-use">
       <div class="wrap">
-        <p class="eyebrow">06 · In use</p>
+        <p class="eyebrow">08 · In use</p>
         <h2>What the founding lab's numbers look like</h2>
         <div class="stats">
           <div class="stat">
@@ -626,18 +790,22 @@
             <div class="lbl">visits a month on average, since 2021</div>
           </div>
         </div>
-        <p class="caption">Founding lab, as of 2026.</p>
+        <p class="caption">Database figures are the founding lab's, as of 2026. The university count covers all known deployments.</p>
+      </div>
+      <div class="wrap">
+        <figure class="figure shot" id="shot-analytics">
+          <img src="assets/screenshots/analytics-1280.jpg" srcset="assets/screenshots/analytics-1280.jpg 1280w, assets/screenshots/analytics.jpg 2560w" sizes="(max-width: 1120px) calc(100vw - 32px), 1040px" width="1280" height="720" alt="Analytics for Lab B's motor-play study: 18 recruited, 13 completed, a 22 percent drop-off rate, an outcome chart and weekly recruitment history" loading="lazy" decoding="async">
+          <figcaption><span class="cap-key">Screen 6</span><strong>Review study progress.</strong> Recruitment, completed sessions, drop-off and weekly recruitment history for each study. <span class="cap-note">Fictional demo data.</span></figcaption>
+        </figure>
       </div>
     </section>
 
     <div class="wrap"><hr class="rule"></div>
 
-
-      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/analytics.jpg" alt="Example study analytics with recruited and completed counts and a recruitment history chart" loading="lazy"><figcaption><strong>Review study progress.</strong> Recruitment, completed runs and drop-off are visible alongside the study’s recruitment history. <span>Example data from the test database.</span></figcaption></figure></div>
-    <!-- ============ 7 · BEYOND ============ -->
+    <!-- ============ 9 · BEYOND ============ -->
     <section id="beyond">
       <div class="wrap prose">
-        <p class="eyebrow">07 · Beyond developmental research</p>
+        <p class="eyebrow">09 · Beyond developmental research</p>
         <h2>Any lab with a standing pool has these problems</h2>
         <p>A cognitive-aging lab re-inviting the same older adults each year has time-varying eligibility. Several EEG and imaging groups sharing one registry have contact coordination and non-naïve exclusions. They just don't have the word <em>developmental</em> in the title.</p>
         <p>Subject-pool systems manage course-credit participants. REDCap and Qualtrics manage data capture. DRDB manages the pool and the operations around it — eligibility, contact history, scheduling, and the people — which is the part that used to live in a spreadsheet.</p>
@@ -646,10 +814,10 @@
 
     <div class="wrap"><hr class="rule"></div>
 
-    <!-- ============ 8 · UNDER THE HOOD ============ -->
+    <!-- ============ 10 · UNDER THE HOOD ============ -->
     <section id="under-the-hood">
       <div class="wrap prose">
-        <p class="eyebrow">08 · Under the hood</p>
+        <p class="eyebrow">10 · Under the hood</p>
         <h2>For the technical reader</h2>
       </div>
       <div class="wrap">
@@ -844,16 +1012,51 @@
       </div>
       <div class="wrap prose">
         <p>The parts that get used daily: duplicate detection and merge, Excel and CSV import, per-lab email branding, Zoom links, per-lab time zones, the shared parking board, encrypted migration between deployments, Swagger API docs, and a first-run setup wizard so a new lab can start without a developer.</p>
-        <p>It deploys with <code>docker compose up</code> — see the <a href="https://github.com/naiqixiao/DRDB#docker-deployment">deployment section of the README</a>.</p>
+        <p>It deploys with Docker Compose; the next section has the steps.</p>
       </div>
     </section>
 
     <div class="wrap"><hr class="rule"></div>
 
-    <!-- ============ 9 · REFERENCES ============ -->
+    <!-- ============ 11 · GET STARTED ============ -->
+    <section id="get-started">
+      <div class="wrap prose">
+        <p class="eyebrow">11 · Get started</p>
+        <h2>Running DRDB in your lab</h2>
+        <p>If your lab already runs DRDB, ask your lab manager for its address and an account; there is nothing to install. To try it yourself, you need:</p>
+        <ul class="plain">
+          <li>A Mac or Windows computer with <a href="https://docs.docker.com/get-started/get-docker/">Docker Desktop</a>, or a Linux server with Docker Engine and Compose. Docker runs the web app and its database together.</li>
+          <li>For a lab deployment, a server your institution approves for participant data, and someone from IT for an hour or two.</li>
+          <li>A Google Cloud project with the Gmail and Calendar APIs enabled, if DRDB should send emails and calendar invitations. You can try everything else without it.</li>
+        </ul>
+        <h3>First run</h3>
+        <ol class="steps">
+          <li>Download the repository from <a href="https://github.com/naiqixiao/DRDB">GitHub</a> and open a terminal in its folder.</li>
+          <li>Copy <code>.env.example</code> to <code>.env</code> and set three long random values for <code>DB_PASS</code>, <code>DB_ROOT_PASS</code> and <code>JWT_KEY</code>.</li>
+          <li>Run <code>docker compose up --build -d</code>, then open <code>http://localhost:8080</code>.</li>
+          <li>Sign in with the default administrator account given in the README. The setup wizard then asks you to set a new password, name your lab and connect Google.</li>
+        </ol>
+        <p>Start with fictional families while you learn the system. The <a href="https://github.com/naiqixiao/DRDB#docker-deployment">deployment section of the README</a> has the full walkthrough, Google setup, backups and upgrades. For questions or bugs, <a href="https://github.com/naiqixiao/DRDB/issues">open an issue on GitHub</a>.</p>
+
+        <h3 id="cite">Cite DRDB</h3>
+        <p>If DRDB supports research you publish, please cite the software. A methods paper is in preparation; this entry will point to it once it is out.</p>
+        <pre class="cite"><code>Xiao, N. (2026). DRDB: Developmental Research Database (Version 3.2.2) [Computer software]. https://github.com/naiqixiao/DRDB</code></pre>
+        <pre class="cite"><code>@software{xiao_drdb_2026,
+  author  = {Xiao, Naiqi},
+  title   = {{DRDB}: Developmental Research Database},
+  year    = {2026},
+  version = {3.2.2},
+  url     = {https://github.com/naiqixiao/DRDB}
+}</code></pre>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 12 · REFERENCES ============ -->
     <section id="references">
       <div class="wrap prose">
-        <p class="eyebrow">09 · References</p>
+        <p class="eyebrow">12 · References</p>
         <h2>References</h2>
         <ol class="refs">
           <li id="ref-byers">Byers-Heinlein, K., Bergmann, C., Davies, C., Frank, M. C., Hamlin, J. K., Kline, M., Kominsky, J. F., Kosie, J. E., Lew-Williams, C., Liu, L., Mastroberardino, M., Singh, L., Waddell, C. P. G., Zettersten, M., &amp; Soderstrom, M. (2020). Building a collaborative psychological science: Lessons learned from ManyBabies 1. <em>Canadian Psychology, 61</em>(4), 349–363. <a href="https://doi.org/10.1037/cap0000216">https://doi.org/10.1037/cap0000216</a></li>
@@ -879,7 +1082,7 @@
         <p>A methods paper describing DRDB is in preparation.</p>
       </div>
     </div>
-    <p class="meta">DRDB · v3.2.2 · this page</p>
+    <p class="meta">DRDB v3.2.2 · page updated November 2026 · <a href="#cite">How to cite</a></p>
   </footer>
 
 </body>
