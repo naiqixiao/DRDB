@@ -1339,7 +1339,7 @@
                           <v-select v-model="group.operator" label="Participation in" :items="participationOperators" item-title="title" item-value="value" variant="outlined" density="compact" />
                         </v-col>
                         <v-col cols="10" md="7">
-                          <v-select v-model="group.studyIds" label="Studies" :items="Studies.filter(s => s.id !== editedStudy.id)" item-title="StudyName" item-value="id" multiple chips variant="outlined" density="compact" :rules="[ids => !!ids?.length || 'Select at least one study']" />
+                          <v-select v-model="group.studyIds" label="Studies" :items="ruleStudyOptions" item-title="title" item-value="id" multiple chips variant="outlined" density="compact" :rules="[ids => !!ids?.length || 'Select at least one study']" />
                         </v-col>
                         <v-col cols="2" md="1">
                           <v-btn icon="mdi-delete-outline" variant="text" color="error" :aria-label="'Remove participation group ' + (index + 1)" @click="editedStudy.ParticipationRules.splice(index, 1)" />
@@ -1727,6 +1727,10 @@ export default {
         },
       ],
       Studies: [],
+      // Studies from other labs that this lab's participation rules refer to.
+      // Studies only holds the current lab's studies, so these are looked up
+      // separately to show their names instead of a bare ID.
+      foreignRuleStudies: [],
       selectedStudies: [],
       currentStudy: {
         StudyName: null,
@@ -1775,6 +1779,16 @@ export default {
   },
 
   computed: {
+    // Options for a participation-rule group: this lab's other studies, plus any
+    // other-lab studies already referenced so their chips keep a readable name.
+    ruleStudyOptions() {
+      const own = this.Studies
+        .filter(study => study.id !== this.editedStudy?.id)
+        .map(study => ({ id: study.id, title: study.StudyName }));
+      const foreign = this.foreignRuleStudies
+        .map(study => ({ id: study.id, title: this.participationStudyName(study.id) }));
+      return [...own, ...foreign];
+    },
     participationOperators() {
       return [{ title: 'ANY (OR)', value: 'ANY' }, { title: 'ALL (AND)', value: 'ALL' }, { title: 'NONE (NOT)', value: 'NONE' }];
     },
@@ -1921,7 +1935,23 @@ export default {
       return { ANY: 'Participated in any one of:', ALL: 'Participated in all of:', NONE: 'Must not have participated in any of:' }[operator];
     },
     participationStudyName(id) {
-      return this.Studies.find(study => Number(study.id) === Number(id))?.StudyName || `Study #${id}`;
+      const own = this.Studies.find(study => Number(study.id) === Number(id));
+      if (own) return own.StudyName;
+      const foreign = this.foreignRuleStudies.find(study => Number(study.id) === Number(id));
+      if (foreign) return foreign.Lab?.LabName ? `${foreign.StudyName} · ${foreign.Lab.LabName}` : foreign.StudyName;
+      return `Study #${id}`;
+    },
+    async loadForeignRuleStudies() {
+      const known = new Set(this.Studies.map(study => Number(study.id)));
+      const referenced = new Set(this.Studies.flatMap(study =>
+        getParticipationGroups(study).flatMap(group => (group.studyIds || []).map(Number))));
+      const missing = [...referenced].filter(id => Number.isInteger(id) && id > 0 && !known.has(id));
+      if (!missing.length) { this.foreignRuleStudies = []; return; }
+      const found = await Promise.all(missing.map(id =>
+        studyApi.search({ id, includeScheules: false })
+          .then(result => (result.data || [])[0] || null)
+          .catch(() => null)));
+      this.foreignRuleStudies = found.filter(Boolean);
     },
     highlightKeywords(template, includeGreeting = true) {
       const hl = (text) => `<strong>${text}</strong>`;
@@ -2039,6 +2069,7 @@ export default {
           includeScheules: false,
         });
         this.Studies = Result.data || [];
+        await this.loadForeignRuleStudies();
 
         // Only auto-select if a study ID is in the route (deep-link)
         if (this.$route.params.id) {
