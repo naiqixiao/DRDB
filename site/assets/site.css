@@ -102,7 +102,23 @@ hr.rule {
   text-transform: uppercase;
   color: var(--ink);
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
+
+/* ---------- logo ---------- */
+
+.brand-logo,
+.hero-logo,
+.footer-logo {
+  display: block;
+  width: auto;
+}
+
+.brand-logo { height: 20px; }
+.hero-logo { height: 64px; margin: 0 0 24px; }
+.footer-logo { height: 24px; }
 .wordmark:hover { text-decoration: none; color: var(--accent); }
 
 .topbar nav {
@@ -490,6 +506,21 @@ footer.site-footer .meta {
 }
 
 footer.site-footer a { color: var(--ink); }
+
+footer.site-footer .footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(1040px + 2 * var(--gutter));
+  margin: 0 auto 32px;
+  padding: 0 var(--gutter);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
 
 /* ---------- responsive ---------- */
 
