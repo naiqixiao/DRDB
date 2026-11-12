@@ -24,6 +24,7 @@
         <a href="#history">History</a>
         <a href="#principles">Principles</a>
         <a href="#practice">In practice</a>
+        
         <a href="#training">Training</a>
         <a class="gh" href="https://github.com/naiqixiao/DRDB">GitHub</a>
       </nav>
@@ -254,6 +255,10 @@
 
     <div class="wrap"><hr class="rule"></div>
 
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/rules-age.jpg" alt="Study eligibility editor showing an age range of 48 to 84 months and a prerequisite study" loading="lazy"><figcaption><strong>Set the age window and participation rules.</strong> A study can require prior participation while excluding other studies. <span>Example data from the test database.</span></figcaption></figure></div>
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/rules-health.jpg" alt="Study eligibility editor showing a study exclusion and participant health criteria" loading="lazy"><figcaption><strong>Add exclusions and health criteria.</strong> The example excludes children with an appointment for Cadmium Study and applies the selected health criteria. <span>Example data from the test database.</span></figcaption></figure></div>
     <!-- ============ 3 · HISTORY ============ -->
     <section id="history">
       <div class="wrap prose">
@@ -412,16 +417,22 @@
 
     <div class="wrap"><hr class="rule"></div>
 
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/family.jpg" alt="Example family record with a child, contact preferences and next contact date" loading="lazy"><figcaption><strong>One family record.</strong> Researchers can find the child, contact preferences and next-contact date together; participation history is available below. <span>Example data from the test database.</span></figcaption></figure></div>
     <!-- ============ 5 · IN PRACTICE ============ -->
     <section id="practice">
       <div class="wrap prose">
         <p class="eyebrow">05 · In practice</p>
         <h2>Following one family</h2>
         <p>A family registers at a community event with a four-month-old and a three-year-old. Both children are entered under one family and linked as siblings.</p>
-        <p>When the infant enters the window for Lab A's study at six months, she appears in a randomly ordered eligible list — randomized so that the chance of being invited doesn't depend on when a family registered. An assistant opens the family, and the system warns that another researcher contacted them yesterday, so she waits. A week later Lab A books the visit: the family is now locked to Lab A, a calendar invitation goes to the family and both experimenters, the testing room is reserved, and a reminder with parking instructions goes out the day before.</p>
+        <p>When the infant enters the window for Lab A's study at six months, she appears in a randomly ordered eligible list — randomized so that the chance of being invited doesn't depend on when a family registered. When another researcher has opened the same family in the eligible list, a warning asks the assistant to pause before booking. A week later Lab A books the visit: the family is now locked to Lab A, a calendar invitation goes to the family and both experimenters, the testing room is reserved, and a reminder with parking instructions goes out the day before.</p>
         <p>After the visit the session is marked complete and the family is released. At twelve months the infant is eligible for Lab B's study but excluded from Lab C's, because she has already completed a related paradigm.</p>
         <p>The same path fits an adult cohort: an older adult re-invited each year who must be excluded from paradigms they have already seen.</p>
       </div>
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/eligible.jpg" alt="Scheduling screen showing an example study, participation rules, 72 eligible results and a family record" loading="lazy"><figcaption><strong>Find eligible participants.</strong> Select a study to apply its age and participation criteria, see the result count, and optionally hide phone-only families. The search shuffles eligible results. <span>Example data from the test database.</span></figcaption></figure></div>
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/booking.jpg" alt="Booking dialog showing a study date and two selected experimenters" loading="lazy"><figcaption><strong>Plan a visit.</strong> Choose the date, study and researchers in the scheduling flow; the later steps handle email and next contact. <span>Example data from the test database.</span></figcaption></figure></div>
       <div class="wrap">
         
       <figure class="figure" id="fig-lifecycle">
@@ -527,7 +538,7 @@
           <tbody>
             <tr>
               <td>Record every call <em>“so other researchers don't call back with the same information.”</em></td>
-              <td>A conversation log on each family, and a real-time warning when someone else has that family open.</td>
+              <td>A conversation log on each family, and a warning and disabled booking action when the same family is already open in another eligible list.</td>
               <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
             </tr>
             <tr>
@@ -621,6 +632,8 @@
 
     <div class="wrap"><hr class="rule"></div>
 
+
+      <div class="wrap"><figure class="workflow-shot"><img src="assets/screenshots/analytics.jpg" alt="Example study analytics with recruited and completed counts and a recruitment history chart" loading="lazy"><figcaption><strong>Review study progress.</strong> Recruitment, completed runs and drop-off are visible alongside the study’s recruitment history. <span>Example data from the test database.</span></figcaption></figure></div>
     <!-- ============ 7 · BEYOND ============ -->
     <section id="beyond">
       <div class="wrap prose">

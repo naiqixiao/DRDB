@@ -565,3 +565,17 @@ footer.site-footer .footer-brand {
   .figure-scroll svg { min-width: 0; }
   section { padding: 24px 0; }
 }
+
+/* App tour: screenshots anchor each research workflow. */
+.tour-list { display: grid; gap: 4rem; margin-top: 3rem; }
+.tour-item { display: grid; grid-template-columns: minmax(0, 1.8fr) minmax(220px, 1fr); gap: 2.5rem; align-items: center; margin: 0; }
+.tour-item img { display: block; width: 100%; height: auto; border: 1px solid var(--rule, #d6d6d6); border-radius: 6px; box-shadow: 0 12px 32px rgba(20, 30, 45, .12); }
+.tour-item figcaption span { font-size: .8rem; font-weight: 600; letter-spacing: .04em; }
+.tour-item h3 { margin: .65rem 0; }
+.tour-item p { line-height: 1.6; }
+@media (max-width: 760px) { .tour-item { grid-template-columns: 1fr; gap: 1.25rem; } .tour-list { gap: 3rem; } }
+.workflow-shot { margin: 2.5rem auto 4rem; max-width: 1040px; }
+.workflow-shot img { display: block; width: 100%; height: auto; border: 1px solid var(--rule, #d6d6d6); border-radius: 6px; box-shadow: 0 12px 32px rgba(20, 30, 45, .12); }
+.workflow-shot figcaption { max-width: 75ch; margin-top: 1rem; line-height: 1.6; }
+.workflow-shot figcaption strong { display: block; font-size: 1.1rem; }
+.workflow-shot figcaption span { display: block; font-size: .85rem; opacity: .75; margin-top: .35rem; }
