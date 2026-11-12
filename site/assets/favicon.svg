@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#f5f5f5" stroke="#2d3142" stroke-width="2"/>
+  <text x="32" y="41" text-anchor="middle" font-family="ui-monospace, monospace" font-size="24" font-weight="600" fill="#2d3142">DR</text>
+  <rect x="18" y="48" width="28" height="3" rx="1.5" fill="#bf4520"/>
+</svg>

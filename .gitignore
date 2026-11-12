@@ -64,7 +64,8 @@ stats/monthYearWeekN.json
 pm2_logs.txt
 .agent/
 .agents/
-.github/
+.github/*
+!.github/workflows/
 .vscode/
 backups/
 stats/

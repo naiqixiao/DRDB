@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DRDB — the operations layer of a developmental lab</title>
+  <meta name="description" content="DRDB is an open-source, self-hosted system for the participant pool, eligibility, scheduling, and coordination that behavioural research depends on.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://naiqixiao.github.io/DRDB/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DRDB — the operations layer of a developmental lab">
+  <meta property="og:description" content="Research happens in a changing world. Its infrastructure should keep the science constant.">
+  <meta property="og:url" content="https://naiqixiao.github.io/DRDB/">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="#top">DRDB</a>
+      <nav>
+        <a href="#problem">Background</a>
+        <a href="#history">History</a>
+        <a href="#principles">Principles</a>
+        <a href="#practice">In practice</a>
+        <a href="#training">Training</a>
+        <a class="gh" href="https://github.com/naiqixiao/DRDB">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ 0 · HERO ============ -->
+    <section class="hero">
+      <div class="wrap">
+        <p class="kicker">Developmental Research Database · open source · MIT</p>
+        <h1>Research happens in a changing world. Its infrastructure should keep the science constant.</h1>
+        <p class="lead">Behind every behavioral experiment sits an operations layer: a participant pool, records of who is eligible and who has been contacted, schedules, rooms, and the people who run sessions. DRDB is a self-hosted system that turns that coordination from etiquette into enforced rules.</p>
+        <p class="actions">
+          <a class="btn primary" href="https://github.com/naiqixiao/DRDB">View on GitHub</a>
+          <a class="btn" href="https://github.com/naiqixiao/DRDB#docker-deployment">Deploy with Docker</a>
+        </p>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-nested">
+  <div class="fig-eyebrow">Fig. 1 · The layers</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 620" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig1-nested-title fig1-nested-desc">
+      <title id="fig1-nested-title">Three nested layers: society, the DRDB operations layer, and the experiment.</title>
+      <desc id="fig1-nested-desc">Three nested rings: society, containing the lab operations layer provided by DRDB, containing the experiment.</desc>
+      <defs>
+        <pattern id="dots-a" width="22" height="22" patternUnits="userSpaceOnUse">
+          <circle cx="2" cy="2" r="1" class="f-ink" opacity="0.07"/>
+        </pattern>
+      </defs>
+      <rect x="0" y="0" width="1040" height="620" fill="url(#dots-a)"/>
+
+      <!-- outer ring: society -->
+      <rect x="40" y="40" width="960" height="540" rx="8" class="f-ink s-ink" fill-opacity="0.015" stroke-opacity="0.30" stroke-width="1"/>
+      <text x="64" y="70" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">SOCIETY</text>
+      <text x="64" y="94" class="t-sub f-soft" font-size="9">pandemics · new technology · privacy law · how families communicate</text>
+
+      <!-- middle ring: the operations layer (focal) -->
+      <rect x="88" y="108" width="864" height="404" rx="8" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="112" y="138" class="t-eyebrow f-accent" font-size="8" letter-spacing="1.12">LAB OPERATIONS LAYER · DRDB</text>
+      <text x="112" y="162" class="t-sub f-accent" font-size="9" fill-opacity="0.85">the participant pool · eligibility · contacts · schedules · rooms · the people</text>
+
+      <!-- inner ring: the experiment -->
+      <rect x="136" y="176" width="768" height="268" rx="8" class="f-ink s-ink" fill-opacity="0.03" stroke-opacity="0.45" stroke-width="1"/>
+      <text x="160" y="206" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">THE EXPERIMENT</text>
+      <text x="160" y="230" class="t-sub f-soft" font-size="9">the task · the data · the analysis</text>
+      <text x="520" y="330" class="t-title f-ink" font-size="14" font-style="italic" text-anchor="middle">the same procedure, the same year after year</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 1</span>The operations layer absorbs outside change so the experiment stays the same.</figcaption>
+</figure>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 1 · THE PROBLEM ============ -->
+    <section id="problem">
+      <div class="wrap prose">
+        <p class="eyebrow">01 · The problem</p>
+        <h2>The invisible operations layer</h2>
+        <p>Before a single trial is run, someone must find families who meet the inclusion criteria, confirm they have not already completed a related study, contact them without overwhelming them, book a room and an experimenter, remind them to come, and record what happened.</p>
+        <p>In most laboratories this work is carried by spreadsheets, shared drives, inboxes, and the memory of a lab coordinator. Its failures are rarely reported, but they shape the data. Each of the six questions below is a place where the layer quietly does the work — and where doing it badly changes the result.</p>
+      </div>
+      <div class="wrap">
+        <div class="qgrid">
+          <div class="qcard">
+            <span class="qnum">01</span>
+            <h3>Who is eligible?</h3>
+            <p>Age windows close, and families who have already done a related paradigm are no longer naïve. Participants who turn out to be ineligible are excluded after testing, which costs power <a href="#ref-frank">(<cite>Frank et al., 2017</cite>)</a> and turns into a protocol deviation on paper.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">02</span>
+            <h3>Who contacts whom?</h3>
+            <p>Several labs draw on one pool. Over-contacted volunteers stop responding <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>, and the order of rows in a shared spreadsheet quietly decides who gets invited at all <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">03</span>
+            <h3>Who can see what?</h3>
+            <p>Records kept on a lab machine cannot be reached from home; records shared with everyone are too open for participant data. Access and access-by-accident are the same problem viewed from two sides.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">04</span>
+            <h3>Who does the work?</h3>
+            <p>New assistants arrive every term, and procedural fidelity depends on onboarding. Which researcher a family met is a source of noise that Method sections rarely mention <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">05</span>
+            <h3>Who shares the space?</h3>
+            <p>Rooms, equipment, and parking are shared. A missed infant visit costs more than an empty hour: if the child ages out of the window before the session can be rebooked, the participant is lost entirely.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">06</span>
+            <h3>Who is in the pool?</h3>
+            <p>Samples still over-represent easily-contacted families <a href="#ref-nielsen">(<cite>Nielsen et al., 2017</cite>)</a>, and a pool whose composition is not recorded cannot be corrected <a href="#ref-sugden">(<cite>Sugden &amp; Moulson, 2015</cite>)</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 2 · THE STRESS TEST ============ -->
+    <section id="stress-test">
+      <div class="wrap prose">
+        <p class="eyebrow">02 · The stress test</p>
+        <h2>Why developmental research is the hardest case</h2>
+        <p>Developmental research takes the hardest version of every one of these problems. Eligibility is defined by age windows that are often only weeks wide, so the list of who can be invited changes daily. A single family can hold several participants, each with their own history and their own rules. And families are recruited from the community rather than from a course-credit pool, so their goodwill has to survive years of repeated invitations.</p>
+        <p>Whatever manages this has to be right every day, not most days.</p>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-age-windows">
+  <div class="fig-eyebrow">Fig. 2 · Eligibility moves</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig2-age-windows-title fig2-age-windows-desc">
+      <title id="fig2-age-windows-title">Age-window chart: studies own eligible age ranges on a shared axis; two children move along it over time.</title>
+      <desc id="fig2-age-windows-desc">Five study age windows plotted from birth to sixty months, with markers for two siblings in one family and a vertical line at today.</desc>
+      <!-- year gridlines -->
+      <line x1="220" y1="72" x2="220" y2="360" class="s-rule" stroke-width="1"/>
+      <line x1="370" y1="72" x2="370" y2="360" class="s-rule" stroke-width="1"/>
+      <line x1="520" y1="72" x2="520" y2="360" class="s-rule" stroke-width="1"/>
+      <line x1="670" y1="72" x2="670" y2="360" class="s-rule" stroke-width="1"/>
+      <line x1="820" y1="72" x2="820" y2="360" class="s-rule" stroke-width="1"/>
+      <line x1="970" y1="72" x2="970" y2="360" class="s-rule" stroke-width="1"/>
+
+      <!-- time axis -->
+      <text x="220" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">0 MO</text>
+      <text x="370" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">1 YR</text>
+      <text x="520" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">2 YR</text>
+      <text x="670" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">3 YR</text>
+      <text x="820" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">4 YR</text>
+      <text x="970" y="56" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">5 YR</text>
+      <line x1="20" y1="64" x2="1000" y2="64" class="s-rulesolid" stroke-width="1"/>
+
+      <!-- rows: studies -->
+      <text x="20" y="112" class="t-node f-ink" font-size="10" font-weight="600">Lab A · eye tracking</text>
+      <rect x="295" y="96" width="75" height="24" rx="4" class="f-accent s-accent" fill-opacity="0.9" stroke-width="1"/>
+
+      <text x="20" y="152" class="t-node f-ink" font-size="10" font-weight="600">Lab B · word learning</text>
+      <rect x="395" y="136" width="150" height="24" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+
+      <text x="20" y="192" class="t-node f-ink" font-size="10" font-weight="600">Lab C · parent report</text>
+      <rect x="570" y="176" width="150" height="24" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+
+      <text x="20" y="232" class="t-node f-ink" font-size="10" font-weight="600">Lab B · motor play</text>
+      <rect x="595" y="216" width="150" height="24" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+
+      <text x="20" y="272" class="t-node f-ink" font-size="10" font-weight="600">Lab C · school readiness</text>
+      <rect x="770" y="256" width="175" height="24" rx="4" class="f-ink s-ink" fill-opacity="0.75" stroke-opacity="0.9" stroke-width="1"/>
+
+      <!-- today guides -->
+      <line x1="270" y1="76" x2="270" y2="306" class="s-muted" stroke-width="1" stroke-dasharray="3 4"/>
+      <line x1="670" y1="76" x2="670" y2="306" class="s-muted" stroke-width="1" stroke-dasharray="3 4"/>
+
+      <!-- children row -->
+      <text x="20" y="324" class="t-node f-ink" font-size="10" font-weight="600">Children</text>
+
+      <path d="M270 320 H345" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-b)"/>
+      <path d="M670 320 H745" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-b)"/>
+      <circle cx="270" cy="320" r="5" class="f-ink"/>
+      <circle cx="670" cy="320" r="5" class="f-ink"/>
+      <circle cx="345" cy="320" r="5" class="f-paper s-muted" stroke-width="1"/>
+      <circle cx="745" cy="320" r="5" class="f-paper s-muted" stroke-width="1"/>
+
+      <text x="307" y="350" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">4 MO TODAY · IN SIX MONTHS</text>
+      <text x="707" y="350" class="t-arrow f-muted" font-size="8" text-anchor="middle" letter-spacing="0.8">36 MO TODAY · IN SIX MONTHS</text>
+
+      <text x="520" y="404" class="t-title f-ink" font-size="14" font-style="italic" text-anchor="middle">both children move right at the same rate</text>
+
+      <defs>
+        <marker id="arr-b" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 2</span>Studies own eligible age ranges on a shared axis. The accented window is the one this infant enters next; the 3-year-old sibling already sits inside two of them.</figcaption>
+</figure>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 3 · HISTORY ============ -->
+    <section id="history">
+      <div class="wrap prose">
+        <p class="eyebrow">03 · History</p>
+        <h2>Born in March 2020</h2>
+        <p>The DRDB repository was created on 29 March 2020, about two weeks after the province declared an emergency. The problem that week was narrow and practical: the participant records lived on laboratory computers that nobody could reach, and the people who knew them were scattered. The first version was a web database so that a dispersed team could work from one copy of the truth.</p>
+        <p>That emergency set the shape of everything after it. In 2020 the question was <em>can we reach families at all?</em> By 2023 it was <em>who gets which room, and when?</em> By 2026 it was <em>can a new assistant run this lab correctly on day one, and can a new lab adopt this without us?</em> Each phase came from a real change in the world outside the lab.</p>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-timeline">
+  <div class="fig-eyebrow">Fig. 3 · How DRDB got here</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 440" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig3-timeline-title fig3-timeline-desc">
+      <title id="fig3-timeline-title">Timeline from March 2020 to November 2026 in three phases: remote recruitment, return to the lab, full lab operations.</title>
+      <desc id="fig3-timeline-desc">A timeline in three phases: remote recruitment, return to the lab, and a lab operations platform, with dated milestones.</desc>
+      <!-- phase bands -->
+      <rect x="48" y="100" width="239" height="300" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <rect x="299" y="100" width="399" height="300" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <rect x="710" y="100" width="250" height="300" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="64" y="124" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PHASE 1 · REMOTE RECRUITMENT</text>
+      <text x="315" y="124" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PHASE 2 · RETURN TO THE LAB</text>
+      <text x="726" y="124" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PHASE 3 · FULL LAB OPERATIONS</text>
+
+      <!-- baseline -->
+      <line x1="48" y1="260" x2="960" y2="260" class="s-rulesolid" stroke-width="1"/>
+
+      <!-- E1 Mar 2020 (accent, above L1, anchor start) -->
+      <rect x="40" y="186" width="96" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="48" y1="230" x2="48" y2="252" class="s-accent" stroke-width="1"/>
+      <circle cx="48" cy="260" r="6" class="f-accent"/>
+      <text x="48" y="202" class="t-arrow f-accent" font-size="8" letter-spacing="1.12">MAR 2020</text>
+      <text x="48" y="218" class="t-arrow f-muted" font-size="8" letter-spacing="1.12">first commit</text>
+
+      <!-- E2 Nov 2020 (below L1) -->
+      <rect x="92" y="296" width="96" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="139" y1="268" x2="139" y2="292" class="s-muted" stroke-width="1"/>
+      <circle cx="139" cy="260" r="4" class="f-muted"/>
+      <text x="139" y="312" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">NOV 2020</text>
+      <text x="139" y="328" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">training mode</text>
+
+      <!-- E3 Jan 2021 (above L2) -->
+      <rect x="118" y="136" width="88" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="162" y1="180" x2="162" y2="252" class="s-muted" stroke-width="1"/>
+      <circle cx="162" cy="260" r="4" class="f-muted"/>
+      <text x="162" y="152" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">JAN 2021</text>
+      <text x="162" y="168" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">v1.0.0 ships</text>
+
+      <!-- E4 Feb 2021 (below L2) -->
+      <rect x="114" y="346" width="120" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="173" y1="268" x2="173" y2="342" class="s-muted" stroke-width="1"/>
+      <circle cx="173" cy="260" r="4" class="f-muted"/>
+      <text x="173" y="362" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">FEB 2021</text>
+      <text x="173" y="378" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">real-time updates</text>
+
+      <!-- E5 Jun 2023 (above L1) -->
+      <rect x="410" y="186" width="166" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="493" y1="230" x2="493" y2="252" class="s-muted" stroke-width="1"/>
+      <circle cx="493" cy="260" r="4" class="f-muted"/>
+      <text x="493" y="202" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">JUN 2023</text>
+      <text x="493" y="218" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">testing rooms · multi-lab</text>
+
+      <!-- 2025 gap annotation -->
+      <path d="M726 308 V316 H842 V308" fill="none" class="s-muted" stroke-width="1"/>
+      <text x="784" y="336" class="t-title f-ink" font-size="14" font-style="italic" text-anchor="middle">stable routine use</text>
+
+      <!-- E6 Apr 2026 (accent, above L1) -->
+      <rect x="821" y="186" width="120" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="880" y1="230" x2="880" y2="252" class="s-accent" stroke-width="1"/>
+      <circle cx="880" cy="260" r="6" class="f-accent"/>
+      <text x="880" y="202" class="t-arrow f-accent" font-size="8" letter-spacing="1.12" text-anchor="middle">APR 2026</text>
+      <text x="880" y="218" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">setup wizard · v3</text>
+
+      <!-- E7 Sep 2026 (below L1) -->
+      <rect x="852" y="296" width="172" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="937" y1="268" x2="937" y2="292" class="s-muted" stroke-width="1"/>
+      <circle cx="937" cy="260" r="4" class="f-muted"/>
+      <text x="937" y="312" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">SEP 2026</text>
+      <text x="937" y="328" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">Docker · optional local AI</text>
+
+      <!-- E8 Nov 2026 (below L2) -->
+      <rect x="896" y="346" width="130" height="40" class="f-paper" opacity="0.92"/>
+      <line x1="960" y1="268" x2="960" y2="342" class="s-muted" stroke-width="1"/>
+      <circle cx="960" cy="260" r="4" class="f-muted"/>
+      <text x="960" y="362" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">NOV 2026</text>
+      <text x="960" y="378" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">participation rules</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 3</span>Every step was a response to something that changed outside the lab. The 2025 stretch is quiet because the system had simply settled into being used.</figcaption>
+</figure>
+      </div>
+      <div class="wrap prose">
+        <table>
+          <caption>What changed outside the lab, and what DRDB grew in response</caption>
+          <thead>
+            <tr><th>External shift</th><th>What it broke</th><th>What DRDB added</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">Pandemic lockdown<br>Mar 2020</td>
+              <td>Records on lab computers became unreachable; the team was dispersed.</td>
+              <td>Web-based shared database (Mar 2020); real-time updates so remote users don't collide (Feb 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Testing moves online<br>2020–21</td>
+              <td>Sessions move to video; families are no longer expected to be local.</td>
+              <td>Zoom links for online studies (Nov 2020); time-zone support (Mar 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Remote, shifting workforce<br>2020–21</td>
+              <td>Training can't happen side by side; new assistants arrive mid-semester.</td>
+              <td>Training mode with practice families (Nov 2020); phone scripts stored per study (Jan 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Return to the lab<br>2022–23</td>
+              <td>Shared rooms and multiple labs back in one building; double-bookings return.</td>
+              <td>Testing-room management and multi-lab features (Jun 2023); lab locking and auto-release.</td>
+            </tr>
+            <tr>
+              <td class="mono">Campus logistics<br>2026</td>
+              <td>Parking and shared space create friction for families and late visits.</td>
+              <td>Shared seven-day parking board across labs (Oct 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">How families communicate<br>2021–26</td>
+              <td>Email fatigue; some families are reachable only by phone.</td>
+              <td>Next-contact dates and scheduled follow-up prompts; filters for families reachable only by phone.</td>
+            </tr>
+            <tr>
+              <td class="mono">Staff turnover over years<br>2026</td>
+              <td>Who did what is lost when people leave.</td>
+              <td>Retired experimenters stay in the record (May 2026); personnel history with role and project dates (Aug 2026); workload analytics (Aug 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">Labs beyond the founders<br>2026</td>
+              <td>Adopting institutions don't have the developers on hand.</td>
+              <td>First-run setup wizard (Apr 2026); Docker deployment (Sep 2026); per-lab email branding (Jun 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">AI and privacy expectations<br>2025–26</td>
+              <td>Pressure to use AI tools sits against participant confidentiality.</td>
+              <td>Optional AI drafting that can run on a local model, restricted to training data by default (Sep 2026).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 4 · PRINCIPLES ============ -->
+    <section id="principles">
+      <div class="wrap prose">
+        <p class="eyebrow">04 · Principles</p>
+        <h2>Design principles that emerged over six years</h2>
+        <p class="callout">Adapt the infrastructure so the science can stay constant.</p>
+        <p>The other principles are how that one is achieved. None of them was decided in a meeting; each was forced by a season where the alternative was worse.</p>
+        <ul class="plain">
+          <li class="accent"><strong>One source of truth.</strong> Every family, child, contact, and appointment lives in one place that every authorized person sees in real time.</li>
+          <li class="accent"><strong>Encode etiquette as rules.</strong> Lab locking, auto-release after fourteen days, next-contact dates and follow-up prompts, prerequisite and exclusion rules — coordination that used to depend on people remembering is enforced by the system.</li>
+          <li><strong>Automate the routine; keep humans for judgment.</strong> Reminders, calendar invitations, and closing out past sessions are automatic. Deciding whom to invite stays with researchers.</li>
+          <li class="accent"><strong>Safe to learn.</strong> A training mode with practice families, kept out of statistics and out of automated reminders, so a new assistant can click anything.</li>
+          <li><strong>Privacy by default.</strong> Self-hosted; the optional language model can run on a local deployment so drafting never leaves the institution's hardware.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 5 · IN PRACTICE ============ -->
+    <section id="practice">
+      <div class="wrap prose">
+        <p class="eyebrow">05 · In practice</p>
+        <h2>Following one family</h2>
+        <p>A family registers at a community event with a four-month-old and a three-year-old. Both children are entered under one family and linked as siblings.</p>
+        <p>When the infant enters the window for Lab A's study at six months, she appears in a randomly ordered eligible list — randomized so that the chance of being invited doesn't depend on when a family registered. An assistant opens the family, and the system warns that another researcher contacted them yesterday, so she waits. A week later Lab A books the visit: the family is now locked to Lab A, a calendar invitation goes to the family and both experimenters, the testing room is reserved, and a reminder with parking instructions goes out the day before.</p>
+        <p>After the visit the session is marked complete and the family is released. At twelve months the infant is eligible for Lab B's study but excluded from Lab C's, because she has already completed a related paradigm.</p>
+        <p>The same path fits an adult cohort: an older adult re-invited each year who must be excluded from paradigms they have already seen.</p>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-lifecycle">
+  <div class="fig-eyebrow">Fig. 4 · One family's path</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig4-lifecycle-title fig4-lifecycle-desc">
+      <title id="fig4-lifecycle-title">Lifecycle phase map from registered to completed, with an auto-released recovery state and a no-more-contact terminal state.</title>
+      <desc id="fig4-lifecycle-desc">Registered, eligible, contacted, scheduled, visited, completed, with an auto-released recovery state and a no-more-contact terminal state.</desc>
+      <defs>
+        <marker id="arr-c" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- bands -->
+      <rect x="40" y="64" width="960" height="112" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="88" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">INTERRUPTION &amp; RECOVERY</text>
+      <rect x="40" y="216" width="960" height="128" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="240" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PRIMARY PHASES</text>
+      <rect x="40" y="392" width="960" height="112" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="416" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">TERMINAL OUTCOMES</text>
+
+      <!-- transitions (drawn under the nodes) -->
+      <!-- rail -->
+      <path d="M188 288 H212" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M348 288 H372" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M508 288 H532" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M668 288 H692" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M828 288 H852" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <!-- contacted -> auto-released -->
+      <path d="M440 264 V216 Q440 208 448 208 H592 Q600 208 600 200 V156" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <!-- auto-released -> eligible (dashed re-entry) -->
+      <path d="M536 128 H288 Q280 128 280 136 V260" fill="none" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-c)"/>
+      <!-- eligible -> no more contact -->
+      <path d="M280 312 V384 Q280 392 288 392 H432 Q440 392 440 400 V428" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+
+      <!-- gap labels -->
+      <rect x="186" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="200" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">AGE</text>
+      <rect x="346" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="360" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">CALL</text>
+      <rect x="506" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="520" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">BOOK</text>
+      <rect x="665" y="282" width="30" height="12" class="f-paper" opacity="0.92"/>
+      <text x="680" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">VISIT</text>
+      <rect x="826" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="840" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">DONE</text>
+
+      <!-- transition labels -->
+      <rect x="452" y="192" width="140" height="16" class="f-paper" opacity="0.92"/>
+      <text x="522" y="204" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">NO REPLY · 14 DAYS</text>
+      <rect x="330" y="112" width="156" height="16" class="f-paper" opacity="0.92"/>
+      <text x="408" y="124" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">BACK IN THE POOL</text>
+      <rect x="296" y="368" width="176" height="16" class="f-paper" opacity="0.92"/>
+      <text x="384" y="380" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">FAMILY ASKS TO STOP</text>
+
+      <!-- nodes -->
+      <rect x="56" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="120" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Registered</text>
+
+      <rect x="216" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="280" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Eligible</text>
+
+      <rect x="376" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="440" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Contacted</text>
+
+      <rect x="536" y="264" width="128" height="48" rx="8" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="600" y="286" class="t-node f-accent" font-size="12" font-weight="600" text-anchor="middle">Scheduled</text>
+      <text x="600" y="302" class="t-sub f-accent" font-size="7" letter-spacing="0.98" text-anchor="middle" fill-opacity="0.85">LOCKED TO LAB</text>
+
+      <rect x="696" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="760" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Visited</text>
+
+      <rect x="856" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="920" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Completed</text>
+
+      <rect x="536" y="104" width="128" height="48" rx="8" class="f-surface s-muted" stroke-width="1"/>
+      <text x="600" y="132" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Auto-released</text>
+
+      <rect x="376" y="432" width="128" height="48" rx="8" class="f-surface s-ink" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="440" y="460" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">No more contact</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 4</span>Booking a family locks it to one lab; a completed visit releases it automatically. A family that asks to stop is never contacted again.</figcaption>
+</figure>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 5b · ETIQUETTE AS RULES ============ -->
+    <section id="etiquette">
+      <div class="wrap prose">
+        <p class="eyebrow">05b · Etiquette as rules</p>
+        <h2>Lab courtesy, written into software</h2>
+        <p>Much of what DRDB enforces was already lab etiquette — the things a good recruiter does without being told. The difference is that DRDB does not rely on anyone remembering. The left column below is how the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a> teach it; the right column is what the software does.</p>
+        <table>
+          <caption>The lab's practice, and the rule it became</caption>
+          <thead>
+            <tr><th>How the lab teaches it</th><th>What DRDB does</th><th>Source</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Record every call <em>“so other researchers don't call back with the same information.”</em></td>
+              <td>A conversation log on each family, and a real-time warning when someone else has that family open.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td><em>“Make the most of the participant's time”</em> — bundle studies into one visit, and ask about eligible siblings.</td>
+              <td>Additional eligible studies and eligible siblings are highlighted while booking.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBFamily">family info</a></td>
+            </tr>
+            <tr>
+              <td>Follow up <em>“in a timely manner.”</em></td>
+              <td>Every contact sets a next-contact date and feeds a follow-ups queue.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td>Mark completed studies so a family is <em>“not contacted again”</em> for that study.</td>
+              <td>Completion status feeds prerequisite and exclusion rules at booking time.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/studies">studies</a></td>
+            </tr>
+            <tr>
+              <td>Respect a family's wish to stop being contacted.</td>
+              <td>A “No More Contact” flag that holds across every lab drawing on the pool.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td>Email templates <em>“should be the same as the ones in the approved study ethics protocol.”</em></td>
+              <td>Per-study templates, generated from the study's details and proofread before sending.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBLab">lab setup</a></td>
+            </tr>
+            <tr>
+              <td>Block the times you are unavailable.</td>
+              <td>Experimenter calendars are linked; invitations go to the family and the experimenters.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a></td>
+            </tr>
+            <tr>
+              <td>Mark people inactive when they leave the lab.</td>
+              <td>Retired personnel are removed from active lists but kept in the history.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 5c · LEARNING ============ -->
+    <section id="training">
+      <div class="wrap prose">
+        <p class="eyebrow">05c · Learning DRDB</p>
+        <h2>How a new assistant starts</h2>
+        <ul class="plain">
+          <li>An admin or lab manager adds them to the lab and gives them a role.</li>
+          <li>They are assigned to a study as an experimenter.</li>
+          <li>They practise in <strong>training mode</strong>, on practice families that are kept separate from the real data and statistics.</li>
+          <li>They switch to working mode and start calling families.</li>
+        </ul>
+        <p>The full walkthrough lives in the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a>: <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBFamily">family information</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/studies">studies</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBLab">lab setup</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/FAQs">FAQs</a>. It is the founding lab's own, and other labs are expected to adapt it.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 6 · IN USE ============ -->
+    <section id="in-use">
+      <div class="wrap">
+        <p class="eyebrow">06 · In use</p>
+        <h2>What the founding lab's numbers look like</h2>
+        <div class="stats">
+          <div class="stat">
+            <div class="num">13,310</div>
+            <div class="lbl">families in the database</div>
+          </div>
+          <div class="stat">
+            <div class="num">15,295</div>
+            <div class="lbl">children, across those families</div>
+          </div>
+          <div class="stat">
+            <div class="num">2,600+</div>
+            <div class="lbl">families who have visited for a study</div>
+          </div>
+          <div class="stat">
+            <div class="num">10+</div>
+            <div class="lbl">universities running DRDB</div>
+          </div>
+          <div class="stat">
+            <div class="num">~39</div>
+            <div class="lbl">visits a month on average, since 2021</div>
+          </div>
+        </div>
+        <p class="caption">Founding lab, as of 2026.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 7 · BEYOND ============ -->
+    <section id="beyond">
+      <div class="wrap prose">
+        <p class="eyebrow">07 · Beyond developmental research</p>
+        <h2>Any lab with a standing pool has these problems</h2>
+        <p>A cognitive-aging lab re-inviting the same older adults each year has time-varying eligibility. Several EEG and imaging groups sharing one registry have contact coordination and non-naïve exclusions. They just don't have the word <em>developmental</em> in the title.</p>
+        <p>Subject-pool systems manage course-credit participants. REDCap and Qualtrics manage data capture. DRDB manages the pool and the operations around it — eligibility, contact history, scheduling, and the people — which is the part that used to live in a spreadsheet.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 8 · UNDER THE HOOD ============ -->
+    <section id="under-the-hood">
+      <div class="wrap prose">
+        <p class="eyebrow">08 · Under the hood</p>
+        <h2>For the technical reader</h2>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-er">
+  <div class="fig-eyebrow">Fig. 5 · What DRDB stores</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig5-er-title fig5-er-desc">
+      <title id="fig5-er-title">Entity relationship diagram: families and children, appointments and contact, and lab relationships, joined through the appointment record.</title>
+      <desc id="fig5-er-desc">Families and children, appointments and conversations, and labs, studies and personnel, joined through the appointment record.</desc>
+      <!-- zones -->
+      <rect x="40" y="96" width="288" height="460" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="120" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">FAMILIES &amp; CHILDREN</text>
+      <rect x="376" y="96" width="288" height="460" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="392" y="120" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">APPOINTMENTS &amp; CONTACT</text>
+      <rect x="712" y="96" width="288" height="460" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="728" y="120" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">LAB RELATIONSHIPS</text>
+
+      <!-- relationships (under nodes) -->
+      <path d="M184 258 V326" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M296 203 H404" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M296 385 H404" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M856 240 V280" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M968 194 H976 Q984 194 984 202 V474 Q984 482 976 482 H972" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M744 339 H708 Q700 339 700 347 V377 Q700 385 692 385 H636" fill="none" class="s-muted" stroke-width="1"/>
+      <path d="M744 482 H528 Q520 482 520 474 V444" fill="none" class="s-muted" stroke-width="1"/>
+
+      <!-- relationship labels -->
+      <rect x="160" y="280" width="48" height="14" class="f-paper" opacity="0.92"/>
+      <text x="184" y="290" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">HAS</text>
+      <text x="196" y="274" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="196" y="318" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="330" y="193" width="44" height="14" class="f-paper" opacity="0.92"/>
+      <text x="352" y="203" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">HAS</text>
+      <text x="304" y="197" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="392" y="197" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="326" y="375" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="352" y="385" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">ATTENDS</text>
+      <text x="304" y="379" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="392" y="379" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="832" y="252" width="48" height="14" class="f-paper" opacity="0.92"/>
+      <text x="856" y="262" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">RUNS</text>
+      <text x="868" y="248" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="868" y="276" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="956" y="330" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="984" y="340" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">EMPLOYS</text>
+      <text x="972" y="214" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="972" y="470" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="672" y="350" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="700" y="360" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">BOOKS</text>
+      <text x="726" y="333" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="648" y="379" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <rect x="600" y="472" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="628" y="482" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">STAFFS</text>
+      <text x="726" y="476" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">1</text>
+      <text x="530" y="470" class="t-arrow f-soft" font-size="8" letter-spacing="0.5">N</text>
+
+      <!-- zone A: Family, Child -->
+      <rect x="72" y="148" width="224" height="110" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="84" y="161" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="84" y="177" class="t-node f-ink" font-size="12" font-weight="600">Family</text>
+      <text x="84" y="198" class="t-sub f-soft" font-size="9"># id</text>
+      <text x="84" y="216" class="t-sub f-soft" font-size="9">contact details</text>
+      <text x="84" y="234" class="t-sub f-soft" font-size="9">languages · English %</text>
+      <text x="84" y="252" class="t-sub f-soft" font-size="9">last · next contact date</text>
+
+      <rect x="72" y="330" width="224" height="110" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="84" y="343" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="84" y="359" class="t-node f-ink" font-size="12" font-weight="600">Child</text>
+      <text x="84" y="380" class="t-sub f-soft" font-size="9"># id</text>
+      <text x="84" y="398" class="t-sub f-soft" font-size="9">→ family</text>
+      <text x="84" y="416" class="t-sub f-soft" font-size="9">date of birth</text>
+      <text x="84" y="434" class="t-sub f-soft" font-size="9">sex · gender</text>
+
+      <!-- zone C: Conversation, Appointment (focal) -->
+      <rect x="408" y="148" width="224" height="110" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="420" y="161" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="420" y="177" class="t-node f-ink" font-size="12" font-weight="600">Conversation</text>
+      <text x="420" y="198" class="t-sub f-soft" font-size="9"># id</text>
+      <text x="420" y="216" class="t-sub f-soft" font-size="9">→ family</text>
+      <text x="420" y="234" class="t-sub f-soft" font-size="9">date · who spoke</text>
+      <text x="420" y="252" class="t-sub f-soft" font-size="9">what was agreed</text>
+
+      <rect x="408" y="330" width="224" height="110" rx="4" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="420" y="343" class="t-eyebrow f-accent" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="420" y="359" class="t-node f-accent" font-size="12" font-weight="600">Appointment</text>
+      <text x="420" y="380" class="t-sub f-accent" font-size="9" fill-opacity="0.85"># id</text>
+      <text x="420" y="398" class="t-sub f-accent" font-size="9" fill-opacity="0.85">→ family · → child</text>
+      <text x="420" y="416" class="t-sub f-accent" font-size="9" fill-opacity="0.85">→ study</text>
+      <text x="420" y="434" class="t-sub f-accent" font-size="9" fill-opacity="0.85">→ experimenter</text>
+
+      <!-- zone B: Lab, Study, Personnel -->
+      <rect x="744" y="148" width="224" height="92" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="756" y="161" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="756" y="177" class="t-node f-ink" font-size="12" font-weight="600">Lab</text>
+      <text x="756" y="198" class="t-sub f-soft" font-size="9"># id · name</text>
+      <text x="756" y="216" class="t-sub f-soft" font-size="9">time zone</text>
+      <text x="756" y="234" class="t-sub f-soft" font-size="9">appearance · address</text>
+
+      <rect x="744" y="284" width="224" height="110" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="756" y="297" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="756" y="313" class="t-node f-ink" font-size="12" font-weight="600">Study</text>
+      <text x="756" y="334" class="t-sub f-soft" font-size="9"># id · → lab</text>
+      <text x="756" y="352" class="t-sub f-soft" font-size="9">age groups · windows</text>
+      <text x="756" y="370" class="t-sub f-soft" font-size="9">eligibility rules</text>
+      <text x="756" y="388" class="t-sub f-soft" font-size="9">prerequisites · exclusions</text>
+
+      <rect x="744" y="436" width="224" height="92" rx="4" class="f-surface s-ink" stroke-width="1"/>
+      <text x="756" y="449" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">ENTITY</text>
+      <text x="756" y="465" class="t-node f-ink" font-size="12" font-weight="600">Personnel</text>
+      <text x="756" y="486" class="t-sub f-soft" font-size="9"># id · → lab</text>
+      <text x="756" y="504" class="t-sub f-soft" font-size="9">role · active</text>
+      <text x="756" y="522" class="t-sub f-soft" font-size="9">workload history</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 5</span>Seven of DRDB's tables, grouped the way the lab works. The appointment is where the family, the study, and the experimenter meet.</figcaption>
+</figure>
+      </div>
+      <div class="wrap">
+        
+      <figure class="figure" id="fig-architecture">
+  <div class="fig-eyebrow">Fig. 6 · What it runs on</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fig6-architecture-title fig6-architecture-desc">
+      <title id="fig6-architecture-title">Architecture diagram: a browser talks to a Node.js API which writes to MariaDB, sends email and reads availability through Google services, and may use an optional language model.</title>
+      <desc id="fig6-architecture-desc">A browser talks to a Node.js API, which writes to MariaDB and reaches Gmail, Google Calendar, and an optional language model.</desc>
+      <defs>
+        <marker id="arr-f" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+        <marker id="arr-f-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-link" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- connections -->
+      <path d="M300 320 H416" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-f)"/>
+      <path d="M620 320 H736" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-f)"/>
+      <path d="M460 280 V236 Q460 228 452 228 H228 Q220 228 220 220 V164" fill="none" class="s-link" stroke-width="1" marker-end="url(#arr-f-link)"/>
+      <path d="M520 280 V164" fill="none" class="s-link" stroke-width="1" marker-end="url(#arr-f-link)"/>
+      <path d="M580 280 V236 Q580 228 588 228 H812 Q820 228 820 220 V164" fill="none" class="s-soft" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-f)"/>
+
+      <!-- arrow labels -->
+      <rect x="340" y="310" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="368" y="320" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">SAVES</text>
+      <rect x="656" y="310" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="684" y="320" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">WRITES</text>
+      <rect x="312" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="340" y="224" class="t-arrow f-link" font-size="8" letter-spacing="1.12" text-anchor="middle">EMAIL</text>
+      <rect x="492" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="520" y="224" class="t-arrow f-link" font-size="8" letter-spacing="1.12" text-anchor="middle">AVAILABILITY</text>
+      <rect x="676" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="704" y="224" class="t-arrow f-soft" font-size="8" letter-spacing="1.12" text-anchor="middle">OPTIONAL</text>
+
+      <!-- top row: external services -->
+      <rect x="120" y="80" width="200" height="80" rx="6" class="f-surface s-link" stroke-width="1"/>
+      <text x="220" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Gmail</text>
+      <text x="220" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">REMINDER EMAIL · OAUTH</text>
+
+      <rect x="420" y="80" width="200" height="80" rx="6" class="f-surface s-link" stroke-width="1"/>
+      <text x="520" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Google Calendar</text>
+      <text x="520" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">BLOCKED AVAILABILITY</text>
+
+      <rect x="720" y="80" width="200" height="80" rx="6" class="f-surface s-soft" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="820" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Language model</text>
+      <text x="820" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">A LOCAL MODEL WORKS</text>
+
+      <!-- bottom row: the app -->
+      <rect x="100" y="280" width="200" height="80" rx="6" class="f-surface s-ink" stroke-width="1"/>
+      <text x="200" y="316" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Browser</text>
+      <text x="200" y="334" class="t-sub f-muted" font-size="9" text-anchor="middle">VUE 3 · VUETIFY</text>
+
+      <rect x="420" y="280" width="200" height="80" rx="6" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="520" y="310" class="t-node f-accent" font-size="12" font-weight="600" text-anchor="middle">API</text>
+      <text x="520" y="328" class="t-sub f-accent" font-size="9" text-anchor="middle" fill-opacity="0.85">EXPRESS · NODE.JS</text>
+      <rect x="466" y="336" width="108" height="16" rx="4" class="f-paper2 s-rulesolid" stroke-width="1"/>
+      <text x="520" y="347" class="t-sub f-muted" font-size="7" letter-spacing="0.98" text-anchor="middle">SCHEDULED JOBS</text>
+
+      <rect x="740" y="280" width="200" height="80" rx="6" class="f-paper2 s-ink" stroke-width="1"/>
+      <text x="840" y="316" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">MariaDB</text>
+      <text x="840" y="334" class="t-sub f-muted" font-size="9" text-anchor="middle">MYSQL-COMPATIBLE</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 6</span>The parts DRDB is built from: a web app, a database, the Google services the lab already uses, and scheduled jobs that run on their own.</figcaption>
+</figure>
+      </div>
+      <div class="wrap prose">
+        <p>The parts that get used daily: duplicate detection and merge, Excel and CSV import, per-lab email branding, Zoom links, per-lab time zones, the shared parking board, encrypted migration between deployments, Swagger API docs, and a first-run setup wizard so a new lab can start without a developer.</p>
+        <p>It deploys with <code>docker compose up</code> — see the <a href="https://github.com/naiqixiao/DRDB#docker-deployment">deployment section of the README</a>.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 9 · REFERENCES ============ -->
+    <section id="references">
+      <div class="wrap prose">
+        <p class="eyebrow">09 · References</p>
+        <h2>References</h2>
+        <ol class="refs">
+          <li id="ref-byers">Byers-Heinlein, K., Bergmann, C., Davies, C., Frank, M. C., Hamlin, J. K., Kline, M., Kominsky, J. F., Kosie, J. E., Lew-Williams, C., Liu, L., Mastroberardino, M., Singh, L., Waddell, C. P. G., Zettersten, M., &amp; Soderstrom, M. (2020). Building a collaborative psychological science: Lessons learned from ManyBabies 1. <em>Canadian Psychology, 61</em>(4), 349–363. <a href="https://doi.org/10.1037/cap0000216">https://doi.org/10.1037/cap0000216</a></li>
+          <li id="ref-frank">Frank, M. C., Bergelson, E., Bergmann, C., Cristia, A., Floccia, C., Gervain, J., Hamlin, J. K., Hannon, E. E., Kline, M., Levelt, C., Lew-Williams, C., Nazzi, T., Panneton, R., Rabagliati, H., Soderstrom, M., Sullivan, J., Waxman, S., &amp; Yurovsky, D. (2017). A collaborative approach to infant research: Promoting reproducibility, best practices, and theory-building. <em>Infancy, 22</em>(4), 421–435. <a href="https://doi.org/10.1111/infa.12182">https://doi.org/10.1111/infa.12182</a></li>
+          <li id="ref-hurwitz">Hurwitz, L. B., Schmitt, K. L., &amp; Olsen, M. K. (2017). Facilitating development research: Suggestions for recruiting and re-recruiting children and families. <em>Frontiers in Psychology, 8</em>, Article 1525. <a href="https://doi.org/10.3389/fpsyg.2017.01525">https://doi.org/10.3389/fpsyg.2017.01525</a></li>
+          <li id="ref-nielsen">Nielsen, M., Haun, D., Kärtner, J., &amp; Legare, C. H. (2017). The persistent sampling bias in developmental psychology: A call to action. <em>Journal of Experimental Child Psychology, 162</em>, 31–38. <a href="https://doi.org/10.1016/j.jecp.2017.04.017">https://doi.org/10.1016/j.jecp.2017.04.017</a></li>
+          <li id="ref-peeler">Peeler, J., Kretschmer, T., Peeters, D., Baetens, J., Boets, B., &amp; Gentry, I. (2021). The Ghent university child database: A centralized registry for recruiting children and parents into academic research. <em>Journal of Child and Translational Science</em>. <a href="https://doi.org/10.1017/cts.2021.819">https://doi.org/10.1017/cts.2021.819</a></li>
+          <li id="ref-sheskin">Sheskin, M., Scott, K., Mills, C. M., Bergelson, E., Bonawitz, E., Spelke, E. S., Fei-Fei, L., Keil, F. C., Gweon, H., Tenenbaum, J. B., Jara-Ettinger, J., Adolph, K. E., Rhodes, M., Frank, M. C., Mehr, S. A., &amp; Schulz, L. (2020). Online developmental science to foster innovation, access, and impact. <em>Trends in Cognitive Sciences, 24</em>(9), 675–678. <a href="https://doi.org/10.1016/j.tics.2020.06.004">https://doi.org/10.1016/j.tics.2020.06.004</a></li>
+          <li id="ref-sugden">Sugden, N. A., &amp; Moulson, S. (2015). Reaching beyond the WEIRD samples in developmental science. <em>Frontiers in Psychology, 6</em>, Article 523. <a href="https://doi.org/10.3389/fpsyg.2015.00523">https://doi.org/10.3389/fpsyg.2015.00523</a></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="cols">
+      <div>
+        <p><a href="https://github.com/naiqixiao/DRDB">DRDB on GitHub</a> — MIT licensed.<br>
+        <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">The Baby Lab Handbook</a> — the training materials of the founding lab.</p>
+      </div>
+      <div>
+        <p>A methods paper describing DRDB is in preparation.</p>
+      </div>
+    </div>
+    <p class="meta">DRDB · v3.2.2 · this page</p>
+  </footer>
+
+</body>
+</html>

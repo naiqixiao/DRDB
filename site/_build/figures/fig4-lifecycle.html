@@ -1,0 +1,81 @@
+<figure class="figure" id="fig-lifecycle">
+  <div class="fig-eyebrow">Fig. 4 · One family's path</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lifecycle phase map from registered to completed, with an auto-released recovery state and a no-more-contact terminal state.">
+      <defs>
+        <marker id="arr-c" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- bands -->
+      <rect x="40" y="64" width="960" height="112" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="88" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">INTERRUPTION &amp; RECOVERY</text>
+      <rect x="40" y="216" width="960" height="128" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="240" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">PRIMARY PHASES</text>
+      <rect x="40" y="392" width="960" height="112" rx="6" class="f-ink s-rule" fill-opacity="0.02" stroke-width="1"/>
+      <text x="56" y="416" class="t-eyebrow f-muted" font-size="8" letter-spacing="1.12">TERMINAL OUTCOMES</text>
+
+      <!-- transitions (drawn under the nodes) -->
+      <!-- rail -->
+      <path d="M188 288 H212" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M348 288 H372" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M508 288 H532" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M668 288 H692" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <path d="M828 288 H852" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <!-- contacted -> auto-released -->
+      <path d="M440 264 V216 Q440 208 448 208 H592 Q600 208 600 200 V156" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+      <!-- auto-released -> eligible (dashed re-entry) -->
+      <path d="M536 128 H288 Q280 128 280 136 V260" fill="none" class="s-muted" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-c)"/>
+      <!-- eligible -> no more contact -->
+      <path d="M280 312 V384 Q280 392 288 392 H432 Q440 392 440 400 V428" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-c)"/>
+
+      <!-- gap labels -->
+      <rect x="186" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="200" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">AGE</text>
+      <rect x="346" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="360" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">CALL</text>
+      <rect x="506" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="520" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">BOOK</text>
+      <rect x="665" y="282" width="30" height="12" class="f-paper" opacity="0.92"/>
+      <text x="680" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">VISIT</text>
+      <rect x="826" y="282" width="28" height="12" class="f-paper" opacity="0.92"/>
+      <text x="840" y="291" class="t-arrow f-muted" font-size="7" letter-spacing="1" text-anchor="middle">DONE</text>
+
+      <!-- transition labels -->
+      <rect x="452" y="192" width="140" height="16" class="f-paper" opacity="0.92"/>
+      <text x="522" y="204" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">NO REPLY · 14 DAYS</text>
+      <rect x="330" y="112" width="156" height="16" class="f-paper" opacity="0.92"/>
+      <text x="408" y="124" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">BACK IN THE POOL</text>
+      <rect x="296" y="368" width="176" height="16" class="f-paper" opacity="0.92"/>
+      <text x="384" y="380" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">FAMILY ASKS TO STOP</text>
+
+      <!-- nodes -->
+      <rect x="56" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="120" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Registered</text>
+
+      <rect x="216" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="280" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Eligible</text>
+
+      <rect x="376" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="440" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Contacted</text>
+
+      <rect x="536" y="264" width="128" height="48" rx="8" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="600" y="286" class="t-node f-accent" font-size="12" font-weight="600" text-anchor="middle">Scheduled</text>
+      <text x="600" y="302" class="t-sub f-accent" font-size="7" letter-spacing="0.98" text-anchor="middle" fill-opacity="0.85">LOCKED TO LAB</text>
+
+      <rect x="696" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="760" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Visited</text>
+
+      <rect x="856" y="264" width="128" height="48" rx="8" class="f-surface s-ink" stroke-opacity="0.9" stroke-width="1"/>
+      <text x="920" y="292" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Completed</text>
+
+      <rect x="536" y="104" width="128" height="48" rx="8" class="f-surface s-muted" stroke-width="1"/>
+      <text x="600" y="132" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Auto-released</text>
+
+      <rect x="376" y="432" width="128" height="48" rx="8" class="f-surface s-ink" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="440" y="460" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">No more contact</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 4</span>Booking a family locks it to one lab; a completed visit releases it automatically. A family that asks to stop is never contacted again.</figcaption>
+</figure>

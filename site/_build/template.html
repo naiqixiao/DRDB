@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DRDB — the operations layer of a developmental lab</title>
+  <meta name="description" content="DRDB is an open-source, self-hosted system for the participant pool, eligibility, scheduling, and coordination that behavioural research depends on.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://naiqixiao.github.io/DRDB/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DRDB — the operations layer of a developmental lab">
+  <meta property="og:description" content="Research happens in a changing world. Its infrastructure should keep the science constant.">
+  <meta property="og:url" content="https://naiqixiao.github.io/DRDB/">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="wordmark" href="#top">DRDB</a>
+      <nav>
+        <a href="#problem">Background</a>
+        <a href="#history">History</a>
+        <a href="#principles">Principles</a>
+        <a href="#practice">In practice</a>
+        <a href="#training">Training</a>
+        <a class="gh" href="https://github.com/naiqixiao/DRDB">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ============ 0 · HERO ============ -->
+    <section class="hero">
+      <div class="wrap">
+        <p class="kicker">Developmental Research Database · open source · MIT</p>
+        <h1>Research happens in a changing world. Its infrastructure should keep the science constant.</h1>
+        <p class="lead">Behind every behavioral experiment sits an operations layer: a participant pool, records of who is eligible and who has been contacted, schedules, rooms, and the people who run sessions. DRDB is a self-hosted system that turns that coordination from etiquette into enforced rules.</p>
+        <p class="actions">
+          <a class="btn primary" href="https://github.com/naiqixiao/DRDB">View on GitHub</a>
+          <a class="btn" href="https://github.com/naiqixiao/DRDB#docker-deployment">Deploy with Docker</a>
+        </p>
+      </div>
+      <div class="wrap">
+        <!--FIG:fig1-nested-->
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 1 · THE PROBLEM ============ -->
+    <section id="problem">
+      <div class="wrap prose">
+        <p class="eyebrow">01 · The problem</p>
+        <h2>The invisible operations layer</h2>
+        <p>Before a single trial is run, someone must find families who meet the inclusion criteria, confirm they have not already completed a related study, contact them without overwhelming them, book a room and an experimenter, remind them to come, and record what happened.</p>
+        <p>In most laboratories this work is carried by spreadsheets, shared drives, inboxes, and the memory of a lab coordinator. Its failures are rarely reported, but they shape the data. Each of the six questions below is a place where the layer quietly does the work — and where doing it badly changes the result.</p>
+      </div>
+      <div class="wrap">
+        <div class="qgrid">
+          <div class="qcard">
+            <span class="qnum">01</span>
+            <h3>Who is eligible?</h3>
+            <p>Age windows close, and families who have already done a related paradigm are no longer naïve. Participants who turn out to be ineligible are excluded after testing, which costs power <a href="#ref-frank">(<cite>Frank et al., 2017</cite>)</a> and turns into a protocol deviation on paper.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">02</span>
+            <h3>Who contacts whom?</h3>
+            <p>Several labs draw on one pool. Over-contacted volunteers stop responding <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>, and the order of rows in a shared spreadsheet quietly decides who gets invited at all <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">03</span>
+            <h3>Who can see what?</h3>
+            <p>Records kept on a lab machine cannot be reached from home; records shared with everyone are too open for participant data. Access and access-by-accident are the same problem viewed from two sides.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">04</span>
+            <h3>Who does the work?</h3>
+            <p>New assistants arrive every term, and procedural fidelity depends on onboarding. Which researcher a family met is a source of noise that Method sections rarely mention <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">05</span>
+            <h3>Who shares the space?</h3>
+            <p>Rooms, equipment, and parking are shared. A missed infant visit costs more than an empty hour: if the child ages out of the window before the session can be rebooked, the participant is lost entirely.</p>
+          </div>
+          <div class="qcard">
+            <span class="qnum">06</span>
+            <h3>Who is in the pool?</h3>
+            <p>Samples still over-represent easily-contacted families <a href="#ref-nielsen">(<cite>Nielsen et al., 2017</cite>)</a>, and a pool whose composition is not recorded cannot be corrected <a href="#ref-sugden">(<cite>Sugden &amp; Moulson, 2015</cite>)</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 2 · THE STRESS TEST ============ -->
+    <section id="stress-test">
+      <div class="wrap prose">
+        <p class="eyebrow">02 · The stress test</p>
+        <h2>Why developmental research is the hardest case</h2>
+        <p>Developmental research takes the hardest version of every one of these problems. Eligibility is defined by age windows that are often only weeks wide, so the list of who can be invited changes daily. A single family can hold several participants, each with their own history and their own rules. And families are recruited from the community rather than from a course-credit pool, so their goodwill has to survive years of repeated invitations.</p>
+        <p>Whatever manages this has to be right every day, not most days.</p>
+      </div>
+      <div class="wrap">
+        <!--FIG:fig2-age-windows-->
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 3 · HISTORY ============ -->
+    <section id="history">
+      <div class="wrap prose">
+        <p class="eyebrow">03 · History</p>
+        <h2>Born in March 2020</h2>
+        <p>The DRDB repository was created on 29 March 2020, about two weeks after the province declared an emergency. The problem that week was narrow and practical: the participant records lived on laboratory computers that nobody could reach, and the people who knew them were scattered. The first version was a web database so that a dispersed team could work from one copy of the truth.</p>
+        <p>That emergency set the shape of everything after it. In 2020 the question was <em>can we reach families at all?</em> By 2023 it was <em>who gets which room, and when?</em> By 2026 it was <em>can a new assistant run this lab correctly on day one, and can a new lab adopt this without us?</em> Each phase came from a real change in the world outside the lab.</p>
+      </div>
+      <div class="wrap">
+        <!--FIG:fig3-timeline-->
+      </div>
+      <div class="wrap prose">
+        <table>
+          <caption>What changed outside the lab, and what DRDB grew in response</caption>
+          <thead>
+            <tr><th>External shift</th><th>What it broke</th><th>What DRDB added</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono">Pandemic lockdown<br>Mar 2020</td>
+              <td>Records on lab computers became unreachable; the team was dispersed.</td>
+              <td>Web-based shared database (Mar 2020); real-time updates so remote users don't collide (Feb 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Testing moves online<br>2020–21</td>
+              <td>Sessions move to video; families are no longer expected to be local.</td>
+              <td>Zoom links for online studies (Nov 2020); time-zone support (Mar 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Remote, shifting workforce<br>2020–21</td>
+              <td>Training can't happen side by side; new assistants arrive mid-semester.</td>
+              <td>Training mode with practice families (Nov 2020); phone scripts stored per study (Jan 2021).</td>
+            </tr>
+            <tr>
+              <td class="mono">Return to the lab<br>2022–23</td>
+              <td>Shared rooms and multiple labs back in one building; double-bookings return.</td>
+              <td>Testing-room management and multi-lab features (Jun 2023); lab locking and auto-release.</td>
+            </tr>
+            <tr>
+              <td class="mono">Campus logistics<br>2026</td>
+              <td>Parking and shared space create friction for families and late visits.</td>
+              <td>Shared seven-day parking board across labs (Oct 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">How families communicate<br>2021–26</td>
+              <td>Email fatigue; some families are reachable only by phone.</td>
+              <td>Next-contact dates and scheduled follow-up prompts; filters for families reachable only by phone.</td>
+            </tr>
+            <tr>
+              <td class="mono">Staff turnover over years<br>2026</td>
+              <td>Who did what is lost when people leave.</td>
+              <td>Retired experimenters stay in the record (May 2026); personnel history with role and project dates (Aug 2026); workload analytics (Aug 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">Labs beyond the founders<br>2026</td>
+              <td>Adopting institutions don't have the developers on hand.</td>
+              <td>First-run setup wizard (Apr 2026); Docker deployment (Sep 2026); per-lab email branding (Jun 2026).</td>
+            </tr>
+            <tr>
+              <td class="mono">AI and privacy expectations<br>2025–26</td>
+              <td>Pressure to use AI tools sits against participant confidentiality.</td>
+              <td>Optional AI drafting that can run on a local model, restricted to training data by default (Sep 2026).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 4 · PRINCIPLES ============ -->
+    <section id="principles">
+      <div class="wrap prose">
+        <p class="eyebrow">04 · Principles</p>
+        <h2>Design principles that emerged over six years</h2>
+        <p class="callout">Adapt the infrastructure so the science can stay constant.</p>
+        <p>The other principles are how that one is achieved. None of them was decided in a meeting; each was forced by a season where the alternative was worse.</p>
+        <ul class="plain">
+          <li class="accent"><strong>One source of truth.</strong> Every family, child, contact, and appointment lives in one place that every authorized person sees in real time.</li>
+          <li class="accent"><strong>Encode etiquette as rules.</strong> Lab locking, auto-release after fourteen days, next-contact dates and follow-up prompts, prerequisite and exclusion rules — coordination that used to depend on people remembering is enforced by the system.</li>
+          <li><strong>Automate the routine; keep humans for judgment.</strong> Reminders, calendar invitations, and closing out past sessions are automatic. Deciding whom to invite stays with researchers.</li>
+          <li class="accent"><strong>Safe to learn.</strong> A training mode with practice families, kept out of statistics and out of automated reminders, so a new assistant can click anything.</li>
+          <li><strong>Privacy by default.</strong> Self-hosted; the optional language model can run on a local deployment so drafting never leaves the institution's hardware.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 5 · IN PRACTICE ============ -->
+    <section id="practice">
+      <div class="wrap prose">
+        <p class="eyebrow">05 · In practice</p>
+        <h2>Following one family</h2>
+        <p>A family registers at a community event with a four-month-old and a three-year-old. Both children are entered under one family and linked as siblings.</p>
+        <p>When the infant enters the window for Lab A's study at six months, she appears in a randomly ordered eligible list — randomized so that the chance of being invited doesn't depend on when a family registered. An assistant opens the family, and the system warns that another researcher contacted them yesterday, so she waits. A week later Lab A books the visit: the family is now locked to Lab A, a calendar invitation goes to the family and both experimenters, the testing room is reserved, and a reminder with parking instructions goes out the day before.</p>
+        <p>After the visit the session is marked complete and the family is released. At twelve months the infant is eligible for Lab B's study but excluded from Lab C's, because she has already completed a related paradigm.</p>
+        <p>The same path fits an adult cohort: an older adult re-invited each year who must be excluded from paradigms they have already seen.</p>
+      </div>
+      <div class="wrap">
+        <!--FIG:fig4-lifecycle-->
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 5b · ETIQUETTE AS RULES ============ -->
+    <section id="etiquette">
+      <div class="wrap prose">
+        <p class="eyebrow">05b · Etiquette as rules</p>
+        <h2>Lab courtesy, written into software</h2>
+        <p>Much of what DRDB enforces was already lab etiquette — the things a good recruiter does without being told. The difference is that DRDB does not rely on anyone remembering. The left column below is how the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a> teach it; the right column is what the software does.</p>
+        <table>
+          <caption>The lab's practice, and the rule it became</caption>
+          <thead>
+            <tr><th>How the lab teaches it</th><th>What DRDB does</th><th>Source</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Record every call <em>“so other researchers don't call back with the same information.”</em></td>
+              <td>A conversation log on each family, and a real-time warning when someone else has that family open.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td><em>“Make the most of the participant's time”</em> — bundle studies into one visit, and ask about eligible siblings.</td>
+              <td>Additional eligible studies and eligible siblings are highlighted while booking.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBFamily">family info</a></td>
+            </tr>
+            <tr>
+              <td>Follow up <em>“in a timely manner.”</em></td>
+              <td>Every contact sets a next-contact date and feeds a follow-ups queue.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td>Mark completed studies so a family is <em>“not contacted again”</em> for that study.</td>
+              <td>Completion status feeds prerequisite and exclusion rules at booking time.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/studies">studies</a></td>
+            </tr>
+            <tr>
+              <td>Respect a family's wish to stop being contacted.</td>
+              <td>A “No More Contact” flag that holds across every lab drawing on the pool.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a></td>
+            </tr>
+            <tr>
+              <td>Email templates <em>“should be the same as the ones in the approved study ethics protocol.”</em></td>
+              <td>Per-study templates, generated from the study's details and proofread before sending.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBLab">lab setup</a></td>
+            </tr>
+            <tr>
+              <td>Block the times you are unavailable.</td>
+              <td>Experimenter calendars are linked; invitations go to the family and the experimenters.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a></td>
+            </tr>
+            <tr>
+              <td>Mark people inactive when they leave the lab.</td>
+              <td>Retired personnel are removed from active lists but kept in the history.</td>
+              <td class="mono"><a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 5c · LEARNING ============ -->
+    <section id="training">
+      <div class="wrap prose">
+        <p class="eyebrow">05c · Learning DRDB</p>
+        <h2>How a new assistant starts</h2>
+        <ul class="plain">
+          <li>An admin or lab manager adds them to the lab and gives them a role.</li>
+          <li>They are assigned to a study as an experimenter.</li>
+          <li>They practise in <strong>training mode</strong>, on practice families that are kept separate from the real data and statistics.</li>
+          <li>They switch to working mode and start calling families.</li>
+        </ul>
+        <p>The full walkthrough lives in the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a>: <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/recruitment">recruitment</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBFamily">family information</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/personnel">researchers</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/studies">studies</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/DRDBLab">lab setup</a> · <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB/FAQs">FAQs</a>. It is the founding lab's own, and other labs are expected to adapt it.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 6 · IN USE ============ -->
+    <section id="in-use">
+      <div class="wrap">
+        <p class="eyebrow">06 · In use</p>
+        <h2>What the founding lab's numbers look like</h2>
+        <div class="stats">
+          <div class="stat">
+            <div class="num">13,310</div>
+            <div class="lbl">families in the database</div>
+          </div>
+          <div class="stat">
+            <div class="num">15,295</div>
+            <div class="lbl">children, across those families</div>
+          </div>
+          <div class="stat">
+            <div class="num">2,600+</div>
+            <div class="lbl">families who have visited for a study</div>
+          </div>
+          <div class="stat">
+            <div class="num">10+</div>
+            <div class="lbl">universities running DRDB</div>
+          </div>
+          <div class="stat">
+            <div class="num">~39</div>
+            <div class="lbl">visits a month on average, since 2021</div>
+          </div>
+        </div>
+        <p class="caption">Founding lab, as of 2026.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 7 · BEYOND ============ -->
+    <section id="beyond">
+      <div class="wrap prose">
+        <p class="eyebrow">07 · Beyond developmental research</p>
+        <h2>Any lab with a standing pool has these problems</h2>
+        <p>A cognitive-aging lab re-inviting the same older adults each year has time-varying eligibility. Several EEG and imaging groups sharing one registry have contact coordination and non-naïve exclusions. They just don't have the word <em>developmental</em> in the title.</p>
+        <p>Subject-pool systems manage course-credit participants. REDCap and Qualtrics manage data capture. DRDB manages the pool and the operations around it — eligibility, contact history, scheduling, and the people — which is the part that used to live in a spreadsheet.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 8 · UNDER THE HOOD ============ -->
+    <section id="under-the-hood">
+      <div class="wrap prose">
+        <p class="eyebrow">08 · Under the hood</p>
+        <h2>For the technical reader</h2>
+      </div>
+      <div class="wrap">
+        <!--FIG:fig5-er-->
+      </div>
+      <div class="wrap">
+        <!--FIG:fig6-architecture-->
+      </div>
+      <div class="wrap prose">
+        <p>The parts that get used daily: duplicate detection and merge, Excel and CSV import, per-lab email branding, Zoom links, per-lab time zones, the shared parking board, encrypted migration between deployments, Swagger API docs, and a first-run setup wizard so a new lab can start without a developer.</p>
+        <p>It deploys with <code>docker compose up</code> — see the <a href="https://github.com/naiqixiao/DRDB#docker-deployment">deployment section of the README</a>.</p>
+      </div>
+    </section>
+
+    <div class="wrap"><hr class="rule"></div>
+
+    <!-- ============ 9 · REFERENCES ============ -->
+    <section id="references">
+      <div class="wrap prose">
+        <p class="eyebrow">09 · References</p>
+        <h2>References</h2>
+        <ol class="refs">
+          <li id="ref-byers">Byers-Heinlein, K., Bergmann, C., Davies, C., Frank, M. C., Hamlin, J. K., Kline, M., Kominsky, J. F., Kosie, J. E., Lew-Williams, C., Liu, L., Mastroberardino, M., Singh, L., Waddell, C. P. G., Zettersten, M., &amp; Soderstrom, M. (2020). Building a collaborative psychological science: Lessons learned from ManyBabies 1. <em>Canadian Psychology, 61</em>(4), 349–363. <a href="https://doi.org/10.1037/cap0000216">https://doi.org/10.1037/cap0000216</a></li>
+          <li id="ref-frank">Frank, M. C., Bergelson, E., Bergmann, C., Cristia, A., Floccia, C., Gervain, J., Hamlin, J. K., Hannon, E. E., Kline, M., Levelt, C., Lew-Williams, C., Nazzi, T., Panneton, R., Rabagliati, H., Soderstrom, M., Sullivan, J., Waxman, S., &amp; Yurovsky, D. (2017). A collaborative approach to infant research: Promoting reproducibility, best practices, and theory-building. <em>Infancy, 22</em>(4), 421–435. <a href="https://doi.org/10.1111/infa.12182">https://doi.org/10.1111/infa.12182</a></li>
+          <li id="ref-hurwitz">Hurwitz, L. B., Schmitt, K. L., &amp; Olsen, M. K. (2017). Facilitating development research: Suggestions for recruiting and re-recruiting children and families. <em>Frontiers in Psychology, 8</em>, Article 1525. <a href="https://doi.org/10.3389/fpsyg.2017.01525">https://doi.org/10.3389/fpsyg.2017.01525</a></li>
+          <li id="ref-nielsen">Nielsen, M., Haun, D., Kärtner, J., &amp; Legare, C. H. (2017). The persistent sampling bias in developmental psychology: A call to action. <em>Journal of Experimental Child Psychology, 162</em>, 31–38. <a href="https://doi.org/10.1016/j.jecp.2017.04.017">https://doi.org/10.1016/j.jecp.2017.04.017</a></li>
+          <li id="ref-peeler">Peeler, J., Kretschmer, T., Peeters, D., Baetens, J., Boets, B., &amp; Gentry, I. (2021). The Ghent university child database: A centralized registry for recruiting children and parents into academic research. <em>Journal of Child and Translational Science</em>. <a href="https://doi.org/10.1017/cts.2021.819">https://doi.org/10.1017/cts.2021.819</a></li>
+          <li id="ref-sheskin">Sheskin, M., Scott, K., Mills, C. M., Bergelson, E., Bonawitz, E., Spelke, E. S., Fei-Fei, L., Keil, F. C., Gweon, H., Tenenbaum, J. B., Jara-Ettinger, J., Adolph, K. E., Rhodes, M., Frank, M. C., Mehr, S. A., &amp; Schulz, L. (2020). Online developmental science to foster innovation, access, and impact. <em>Trends in Cognitive Sciences, 24</em>(9), 675–678. <a href="https://doi.org/10.1016/j.tics.2020.06.004">https://doi.org/10.1016/j.tics.2020.06.004</a></li>
+          <li id="ref-sugden">Sugden, N. A., &amp; Moulson, S. (2015). Reaching beyond the WEIRD samples in developmental science. <em>Frontiers in Psychology, 6</em>, Article 523. <a href="https://doi.org/10.3389/fpsyg.2015.00523">https://doi.org/10.3389/fpsyg.2015.00523</a></li>
+        </ol>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="cols">
+      <div>
+        <p><a href="https://github.com/naiqixiao/DRDB">DRDB on GitHub</a> — MIT licensed.<br>
+        <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">The Baby Lab Handbook</a> — the training materials of the founding lab.</p>
+      </div>
+      <div>
+        <p>A methods paper describing DRDB is in preparation.</p>
+      </div>
+    </div>
+    <p class="meta">DRDB · v3.2.2 · this page</p>
+  </footer>
+
+</body>
+</html>

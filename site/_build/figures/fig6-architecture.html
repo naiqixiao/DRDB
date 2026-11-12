@@ -1,0 +1,63 @@
+<figure class="figure" id="fig-architecture">
+  <div class="fig-eyebrow">Fig. 6 · What it runs on</div>
+  <div class="figure-scroll">
+    <svg viewBox="0 0 1040 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture diagram: a browser talks to a Node.js API which writes to MariaDB, sends email and reads availability through Google services, and may use an optional language model.">
+      <defs>
+        <marker id="arr-f" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-muted" stroke-width="1"/>
+        </marker>
+        <marker id="arr-f-link" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M1 1 L7 4 L1 7" fill="none" class="s-link" stroke-width="1"/>
+        </marker>
+      </defs>
+
+      <!-- connections -->
+      <path d="M300 320 H416" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-f)"/>
+      <path d="M620 320 H736" fill="none" class="s-muted" stroke-width="1" marker-end="url(#arr-f)"/>
+      <path d="M460 280 V236 Q460 228 452 228 H228 Q220 228 220 220 V164" fill="none" class="s-link" stroke-width="1" marker-end="url(#arr-f-link)"/>
+      <path d="M520 280 V164" fill="none" class="s-link" stroke-width="1" marker-end="url(#arr-f-link)"/>
+      <path d="M580 280 V236 Q580 228 588 228 H812 Q820 228 820 220 V164" fill="none" class="s-soft" stroke-width="1" stroke-dasharray="4 4" marker-end="url(#arr-f)"/>
+
+      <!-- arrow labels -->
+      <rect x="340" y="310" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="368" y="320" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">SAVES</text>
+      <rect x="656" y="310" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="684" y="320" class="t-arrow f-muted" font-size="8" letter-spacing="1.12" text-anchor="middle">WRITES</text>
+      <rect x="312" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="340" y="224" class="t-arrow f-link" font-size="8" letter-spacing="1.12" text-anchor="middle">EMAIL</text>
+      <rect x="492" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="520" y="224" class="t-arrow f-link" font-size="8" letter-spacing="1.12" text-anchor="middle">AVAILABILITY</text>
+      <rect x="676" y="214" width="56" height="14" class="f-paper" opacity="0.92"/>
+      <text x="704" y="224" class="t-arrow f-soft" font-size="8" letter-spacing="1.12" text-anchor="middle">OPTIONAL</text>
+
+      <!-- top row: external services -->
+      <rect x="120" y="80" width="200" height="80" rx="6" class="f-surface s-link" stroke-width="1"/>
+      <text x="220" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Gmail</text>
+      <text x="220" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">REMINDER EMAIL · OAUTH</text>
+
+      <rect x="420" y="80" width="200" height="80" rx="6" class="f-surface s-link" stroke-width="1"/>
+      <text x="520" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Google Calendar</text>
+      <text x="520" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">BLOCKED AVAILABILITY</text>
+
+      <rect x="720" y="80" width="200" height="80" rx="6" class="f-surface s-soft" stroke-width="1" stroke-dasharray="4 4"/>
+      <text x="820" y="116" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Language model</text>
+      <text x="820" y="134" class="t-sub f-muted" font-size="9" text-anchor="middle">A LOCAL MODEL WORKS</text>
+
+      <!-- bottom row: the app -->
+      <rect x="100" y="280" width="200" height="80" rx="6" class="f-surface s-ink" stroke-width="1"/>
+      <text x="200" y="316" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">Browser</text>
+      <text x="200" y="334" class="t-sub f-muted" font-size="9" text-anchor="middle">VUE 3 · VUETIFY</text>
+
+      <rect x="420" y="280" width="200" height="80" rx="6" class="f-accent s-accent" fill-opacity="0.08" stroke-width="1.2"/>
+      <text x="520" y="310" class="t-node f-accent" font-size="12" font-weight="600" text-anchor="middle">API</text>
+      <text x="520" y="328" class="t-sub f-accent" font-size="9" text-anchor="middle" fill-opacity="0.85">EXPRESS · NODE.JS</text>
+      <rect x="466" y="336" width="108" height="16" rx="4" class="f-paper2 s-rulesolid" stroke-width="1"/>
+      <text x="520" y="347" class="t-sub f-muted" font-size="7" letter-spacing="0.98" text-anchor="middle">SCHEDULED JOBS</text>
+
+      <rect x="740" y="280" width="200" height="80" rx="6" class="f-paper2 s-ink" stroke-width="1"/>
+      <text x="840" y="316" class="t-node f-ink" font-size="12" font-weight="600" text-anchor="middle">MariaDB</text>
+      <text x="840" y="334" class="t-sub f-muted" font-size="9" text-anchor="middle">MYSQL-COMPATIBLE</text>
+    </svg>
+  </div>
+  <figcaption><span class="cap-key">Fig. 6</span>The parts DRDB is built from: a web app, a database, the Google services the lab already uses, and scheduled jobs that run on their own.</figcaption>
+</figure>
