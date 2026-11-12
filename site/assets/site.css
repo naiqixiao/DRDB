@@ -66,12 +66,12 @@ a:hover { text-decoration: underline; }
 
 .prose { max-width: 720px; }
 
-section { padding: 72px 0 24px; }
+section { padding: 48px 0 24px; }
 
 hr.rule {
   border: 0;
   border-top: 1px solid var(--rule);
-  margin: 56px 0;
+  margin: 32px 0;
 }
 
 /* ---------- top bar ---------- */
@@ -260,11 +260,14 @@ figure.figure .fig-eyebrow {
   margin-bottom: 14px;
 }
 
-.figure-scroll {
+.figure-scroll,
+.table-scroll {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+.fig-phone { display: none; }
 
 .figure-scroll svg {
   width: 100%;
@@ -480,8 +483,8 @@ ol.refs li a { color: var(--link); }
 
 footer.site-footer {
   border-top: 1px solid var(--rule);
-  margin-top: 80px;
-  padding: 40px 0 72px;
+  margin-top: 48px;
+  padding: 32px 0 56px;
   font-size: 13px;
   color: var(--muted);
 }
@@ -526,6 +529,10 @@ footer.site-footer .footer-brand {
 
 @media (max-width: 760px) {
   :root { --gutter: 16px; }
+  .fig-desk { display: none; }
+  .fig-phone { display: block; }
+  .fig-phone .figure-scroll svg { min-width: 0; max-width: 440px; }
+  td.mono { white-space: normal; }
   h1 { font-size: 32px; }
   .lead { font-size: 17px; }
   h2 { font-size: 26px; }
@@ -538,6 +545,8 @@ footer.site-footer .footer-brand {
 /* ---------- print ---------- */
 
 @media print {
+  .fig-desk { display: block; }
+  .fig-phone { display: none; }
   :root {
     --paper: #ffffff;
     --paper-2: #f0f0f0;

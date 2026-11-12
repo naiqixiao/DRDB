@@ -6,7 +6,6 @@
   <title>DRDB — the operations layer of a developmental lab</title>
   <meta name="description" content="DRDB is an open-source, self-hosted system for the participant pool, eligibility, scheduling, and coordination that behavioural research depends on.">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="assets/logo.png" type="image/png">
   <link rel="canonical" href="https://naiqixiao.github.io/DRDB/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="DRDB — the operations layer of a developmental lab">
@@ -19,7 +18,7 @@
 
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="wordmark" href="#top"><img class="brand-logo" src="assets/logo.png" alt="" width="288" height="202">DRDB</a>
+      <a class="wordmark" href="#top"><img class="brand-logo" src="assets/favicon.svg" alt="" width="64" height="64">DRDB</a>
       <nav>
         <a href="#problem">Background</a>
         <a href="#history">History</a>
@@ -36,7 +35,7 @@
     <!-- ============ 0 · HERO ============ -->
     <section class="hero">
       <div class="wrap">
-        <img class="hero-logo" src="assets/logo.png" alt="The DRDB logo, an eagle hatching out of an egg" width="288" height="202">
+        <img class="hero-logo" src="assets/favicon.svg" alt="The DRDB mark" width="64" height="64">
         <p class="kicker">Developmental Research Database · open source · MIT</p>
         <h1>Research happens in a changing world. Its infrastructure should keep the science constant.</h1>
         <p class="lead">Behind every behavioral experiment sits an operations layer: a participant pool, records of who is eligible and who has been contacted, schedules, rooms, and the people who run sessions. DRDB is a self-hosted system that turns that coordination from etiquette into enforced rules.</p>
@@ -47,6 +46,7 @@
       </div>
       <div class="wrap">
         <!--FIG:fig1-nested-->
+        <!--FIG:fig1-nested-phone-->
       </div>
     </section>
 
@@ -70,7 +70,7 @@
           <div class="qcard">
             <span class="qnum">02</span>
             <h3>Who contacts whom?</h3>
-            <p>Several labs draw on one pool. Over-contacted volunteers stop responding <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>, and the order of rows in a shared spreadsheet quietly decides who gets invited at all <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>.</p>
+            <p>Several labs draw on one pool, so one lab's call is another lab's problem <a href="#ref-peeler">(<cite>Peeler et al., 2021</cite>)</a>. Over-contacted volunteers stop responding, and the order of rows in a shared spreadsheet quietly decides who gets invited at all <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
           </div>
           <div class="qcard">
             <span class="qnum">03</span>
@@ -80,7 +80,7 @@
           <div class="qcard">
             <span class="qnum">04</span>
             <h3>Who does the work?</h3>
-            <p>New assistants arrive every term, and procedural fidelity depends on onboarding. Which researcher a family met is a source of noise that Method sections rarely mention <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
+            <p>New assistants arrive every term, and procedural fidelity depends on onboarding. Detailed records of who contacted which family, and when, are what let a lab keep track of its own work <a href="#ref-hurwitz">(<cite>Hurwitz et al., 2017</cite>)</a>.</p>
           </div>
           <div class="qcard">
             <span class="qnum">05</span>
@@ -90,7 +90,7 @@
           <div class="qcard">
             <span class="qnum">06</span>
             <h3>Who is in the pool?</h3>
-            <p>Samples still over-represent easily-contacted families <a href="#ref-nielsen">(<cite>Nielsen et al., 2017</cite>)</a>, and a pool whose composition is not recorded cannot be corrected <a href="#ref-sugden">(<cite>Sugden &amp; Moulson, 2015</cite>)</a>.</p>
+            <p>Samples still over-represent easily-contacted families <a href="#ref-nielsen">(<cite>Nielsen et al., 2017</cite>)</a>, and how a lab recruits is itself a methodological choice, not an administrative detail <a href="#ref-sugden">(<cite>Sugden &amp; Moulson, 2015</cite>)</a>.</p>
           </div>
         </div>
       </div>
@@ -125,6 +125,7 @@
         <!--FIG:fig3-timeline-->
       </div>
       <div class="wrap prose">
+        <div class="table-scroll">
         <table>
           <caption>What changed outside the lab, and what DRDB grew in response</caption>
           <thead>
@@ -178,6 +179,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -225,6 +227,7 @@
         <p class="eyebrow">05b · Etiquette as rules</p>
         <h2>Lab courtesy, written into software</h2>
         <p>Much of what DRDB enforces was already lab etiquette — the things a good recruiter does without being told. The difference is that DRDB does not rely on anyone remembering. The left column below is how the founding lab's <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">training materials</a> teach it; the right column is what the software does.</p>
+        <div class="table-scroll">
         <table>
           <caption>The lab's practice, and the rule it became</caption>
           <thead>
@@ -273,6 +276,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -368,9 +372,9 @@
           <li id="ref-frank">Frank, M. C., Bergelson, E., Bergmann, C., Cristia, A., Floccia, C., Gervain, J., Hamlin, J. K., Hannon, E. E., Kline, M., Levelt, C., Lew-Williams, C., Nazzi, T., Panneton, R., Rabagliati, H., Soderstrom, M., Sullivan, J., Waxman, S., &amp; Yurovsky, D. (2017). A collaborative approach to infant research: Promoting reproducibility, best practices, and theory-building. <em>Infancy, 22</em>(4), 421–435. <a href="https://doi.org/10.1111/infa.12182">https://doi.org/10.1111/infa.12182</a></li>
           <li id="ref-hurwitz">Hurwitz, L. B., Schmitt, K. L., &amp; Olsen, M. K. (2017). Facilitating development research: Suggestions for recruiting and re-recruiting children and families. <em>Frontiers in Psychology, 8</em>, Article 1525. <a href="https://doi.org/10.3389/fpsyg.2017.01525">https://doi.org/10.3389/fpsyg.2017.01525</a></li>
           <li id="ref-nielsen">Nielsen, M., Haun, D., Kärtner, J., &amp; Legare, C. H. (2017). The persistent sampling bias in developmental psychology: A call to action. <em>Journal of Experimental Child Psychology, 162</em>, 31–38. <a href="https://doi.org/10.1016/j.jecp.2017.04.017">https://doi.org/10.1016/j.jecp.2017.04.017</a></li>
-          <li id="ref-peeler">Peeler, J., Kretschmer, T., Peeters, D., Baetens, J., Boets, B., &amp; Gentry, I. (2021). The Ghent university child database: A centralized registry for recruiting children and parents into academic research. <em>Journal of Child and Translational Science</em>. <a href="https://doi.org/10.1017/cts.2021.819">https://doi.org/10.1017/cts.2021.819</a></li>
+          <li id="ref-peeler">Peeler, A., Miller, H., Ogungbe, O., Lewis Land, C., Martinez, L., Guerrero Vazquez, M., Carey, S., Murli, S., Singleton, M., Lacanienta, C., Gleason, K., Ford, D., &amp; Himmelfarb, C. R. (2021). Centralized registry for COVID-19 research recruitment: Design, development, implementation, and preliminary results. <em>Journal of Clinical and Translational Science, 5</em>(1), e152. <a href="https://doi.org/10.1017/cts.2021.819">https://doi.org/10.1017/cts.2021.819</a></li>
           <li id="ref-sheskin">Sheskin, M., Scott, K., Mills, C. M., Bergelson, E., Bonawitz, E., Spelke, E. S., Fei-Fei, L., Keil, F. C., Gweon, H., Tenenbaum, J. B., Jara-Ettinger, J., Adolph, K. E., Rhodes, M., Frank, M. C., Mehr, S. A., &amp; Schulz, L. (2020). Online developmental science to foster innovation, access, and impact. <em>Trends in Cognitive Sciences, 24</em>(9), 675–678. <a href="https://doi.org/10.1016/j.tics.2020.06.004">https://doi.org/10.1016/j.tics.2020.06.004</a></li>
-          <li id="ref-sugden">Sugden, N. A., &amp; Moulson, S. (2015). Reaching beyond the WEIRD samples in developmental science. <em>Frontiers in Psychology, 6</em>, Article 523. <a href="https://doi.org/10.3389/fpsyg.2015.00523">https://doi.org/10.3389/fpsyg.2015.00523</a></li>
+          <li id="ref-sugden">Sugden, N. A., &amp; Moulson, M. C. (2015). Recruitment strategies should not be randomly selected: Empirically improving recruitment success and diversity in developmental psychology research. <em>Frontiers in Psychology, 6</em>, Article 523. <a href="https://doi.org/10.3389/fpsyg.2015.00523">https://doi.org/10.3389/fpsyg.2015.00523</a></li>
         </ol>
       </div>
     </section>
@@ -378,11 +382,10 @@
   </main>
 
   <footer class="site-footer">
-    <p class="footer-brand"><img class="footer-logo" src="assets/logo.png" alt="" width="288" height="202"><span>DRDB</span></p>
     <div class="cols">
       <div>
-        <p><a href="https://github.com/naiqixiao/DRDB">DRDB on GitHub</a> — MIT licensed.<br>
-        <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">The Baby Lab Handbook</a> — the training materials of the founding lab.</p>
+        <p><a href="https://github.com/naiqixiao/DRDB">DRDB on GitHub</a> — MIT licensed.</p>
+        <p>DRDB was built at the <a href="https://mcmaster-baby-lab.github.io/handbook/DRDB">Baby Lab</a> at McMaster University, whose handbook is the training materials described above.</p>
       </div>
       <div>
         <p>A methods paper describing DRDB is in preparation.</p>

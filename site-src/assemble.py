@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Assemble site/index.html from _build/template.html + _build/figures/*.html.
+"""Assemble site/index.html from site-src/template.html + site-src/figures/*.html.
+
+site/ is the publish surface: only index.html, assets/ and .nojekyll live there. The sources
+(template, figure fragments, PLAN.md) stay in site-src/ so they are not deployed.
 
 Each figure fragment gets a <title>/<desc> pair injected as the first children of
 its <svg> element (accessibility, per site/PLAN.md), and the template comment
@@ -12,6 +15,10 @@ FIGS = {
     "fig1-nested": (
         "The three layers",
         "Three nested rings: society, containing the lab operations layer provided by DRDB, containing the experiment.",
+    ),
+    "fig1-nested-phone": (
+        "The three layers, narrow",
+        "Society changes at the top, the DRDB operations layer absorbs it in the middle, and the experiment at the bottom stays the same.",
     ),
     "fig2-age-windows": (
         "Eligibility windows on a shared age axis",
@@ -57,6 +64,6 @@ for name, (title, desc) in FIGS.items():
     assert comment in template, comment
     template = template.replace(comment, "\n      " + fragment)
 
-out = BUILD.parent / "index.html"
+out = BUILD.parent / "site" / "index.html"
 out.write_text(template, encoding="utf-8")
 print(f"wrote {out} ({len(template.splitlines())} lines)")
