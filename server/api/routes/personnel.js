@@ -20,7 +20,7 @@ const ActivityReportController = require("../controllers/activityReport");
  *         schema:
  *           type: string
  *           format: date
- *         description: Monday of a completed week in America/Toronto
+ *         description: Monday of a completed week in the lab's configured timezone
  *     responses:
  *       200:
  *         description: Database-derived aggregate counts and current active personnel

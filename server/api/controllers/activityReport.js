@@ -2,6 +2,8 @@ const moment = require('moment-timezone');
 const asyncHandler = require('express-async-handler');
 const { QueryTypes } = require('sequelize');
 const model = require('../models/DRDB');
+const { getEffectiveTimezone } = require('../services/timezoneService');
+const { timeZone: storageTimezone } = require('../../config/general');
 
 // This endpoint intentionally returns only the database-derived part of the report.
 exports.weekly = asyncHandler(async (req, res) => {
@@ -11,7 +13,8 @@ exports.weekly = asyncHandler(async (req, res) => {
     return res.status(403).json({ message: 'An active lab administrator, PI, or lab manager is required.' });
   }
 
-  const zone = 'America/Toronto';
+  const zone = await getEffectiveTimezone(requester.FK_Lab);
+  if (!moment.tz.zone(zone)) throw new Error('Invalid lab timezone');
   const start = moment.tz(req.query.week_start, 'YYYY-MM-DD', true, zone);
   if (typeof req.query.week_start !== 'string' || !start.isValid() || start.isoWeekday() !== 1) {
     return res.status(400).json({ message: 'week_start must be a Monday in YYYY-MM-DD format.' });
@@ -39,8 +42,8 @@ exports.weekly = asyncHandler(async (req, res) => {
 });
 
 async function getMembers(labId, start, end) {
-  // Compare Toronto wall-time boundaries; production timestamp storage must be
-  // checked during deployment. Independent subqueries avoid multiplying counts.
+  // DRDB writes database DATETIME values using the server's configured timezone.
+  // Independent subqueries avoid multiplying counts across role joins.
   const members = await model.sequelize.query(`
     SELECT p.Name AS full_name, p.Email AS email,
       (SELECT COUNT(DISTINCT a.id) FROM Appointment a
@@ -58,7 +61,7 @@ async function getMembers(labId, start, end) {
     FROM Personnel p
     WHERE p.FK_Lab = :labId AND p.Active = 1 AND p.Retired = 0
     ORDER BY p.Name, p.id`, {
-    replacements: { labId, start: start.format('YYYY-MM-DD HH:mm:ss'), end: end.format('YYYY-MM-DD HH:mm:ss') },
+    replacements: { labId, start: start.clone().tz(storageTimezone).format('YYYY-MM-DD HH:mm:ss'), end: end.clone().tz(storageTimezone).format('YYYY-MM-DD HH:mm:ss') },
     type: QueryTypes.SELECT,
   });
   return members.map(row => ({ full_name: row.full_name, email: row.email || '', sessions_e1: Number(row.sessions_e1), sessions_e2: Number(row.sessions_e2) }));

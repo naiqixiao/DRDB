@@ -50,6 +50,8 @@ const EDITABLE_JOB_IDS = new Set([
   "auto-completion-prompt",
   "auto-rejection-prompt",
 ]);
+const LAB_SCOPED_JOB_IDS = new Set([...EDITABLE_JOB_IDS, 'weekly-activity-report']);
+const WEEKLY_ACTIVITY_CRON = '0 5 * * 1';
 
 const jobRuntimeConfig = new Map();
 const jobHandles = new Map();
@@ -80,9 +82,8 @@ const SCHEDULED_JOBS = [
     id: 'weekly-activity-report',
     name: 'Weekly Lab Activity Report',
     description: 'Sends enabled lab activity reports.',
-    cron: '0 8 * * 1',
-    timezone: 'America/Toronto',
-    task: () => weeklyActivityDelivery.runEnabled(),
+    cron: WEEKLY_ACTIVITY_CRON,
+    task: (labId) => weeklyActivityDelivery.runLab(labId),
   },
   // ─── Reminder Emails ────────────────────────────────────────────
   {
@@ -160,14 +161,14 @@ const SCHEDULED_JOBS = [
 ];
 
 function getScopedRuntimeKey(jobId, labId) {
-  if (EDITABLE_JOB_IDS.has(jobId)) {
+  if (LAB_SCOPED_JOB_IDS.has(jobId)) {
     return `lab:${labId}:${jobId}`;
   }
   return `global:${jobId}`;
 }
 
 function getScopedHandleKey(jobId, labId) {
-  if (EDITABLE_JOB_IDS.has(jobId)) {
+  if (LAB_SCOPED_JOB_IDS.has(jobId)) {
     return `lab:${labId}:${jobId}`;
   }
   return `global:${jobId}`;
@@ -321,14 +322,14 @@ async function scheduleJob(job, labId) {
   const timezone = job.timezone || await getEffectiveTimezone(labId);
   const handleKey = getScopedHandleKey(job.id, labId);
 
-  const executeTask = EDITABLE_JOB_IDS.has(job.id)
+  const executeTask = LAB_SCOPED_JOB_IDS.has(job.id)
     ? () => job.task(labId)
     : () => job.task();
 
   const handle = cron.schedule(
     runtime.cron,
     async () => {
-      const scopeText = EDITABLE_JOB_IDS.has(job.id) ? ` (Lab ${labId})` : "";
+      const scopeText = LAB_SCOPED_JOB_IDS.has(job.id) ? ` (Lab ${labId})` : "";
       console.log(`${new Date().toLocaleString()}: [CRON] Executing ${job.name}${scopeText}.`);
       try {
         await executeTask();
@@ -394,13 +395,13 @@ async function reloadLabJobs(labId) {
 
   console.log(`[Jobs] Reloading all tasks for Lab ${labId}...`);
   SCHEDULED_JOBS.forEach((job) => {
-    if (EDITABLE_JOB_IDS.has(job.id)) {
+    if (LAB_SCOPED_JOB_IDS.has(job.id)) {
       unscheduleJob(job.id, labId);
     }
   });
 
   const promises = SCHEDULED_JOBS.map((job) => {
-    if (EDITABLE_JOB_IDS.has(job.id)) {
+    if (LAB_SCOPED_JOB_IDS.has(job.id)) {
       ensureRuntimeInitialized(job, labId);
       return scheduleJob(job, labId);
     }
@@ -465,7 +466,7 @@ async function registerJobs() {
 
   await Promise.all(
     SCHEDULED_JOBS.map(async (job) => {
-      if (EDITABLE_JOB_IDS.has(job.id)) {
+      if (LAB_SCOPED_JOB_IDS.has(job.id)) {
         for (const lab of labs) {
           ensureRuntimeInitialized(job, lab.id);
           await scheduleJob(job, lab.id);
@@ -481,6 +482,7 @@ async function registerJobs() {
 }
 
 module.exports = {
+  WEEKLY_ACTIVITY_CRON,
   registerJobs,
   listScheduledJobs,
   updateScheduledJob,

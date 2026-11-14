@@ -5,9 +5,9 @@ const { getMembers } = require('../controllers/activityReport');
 const { loadLogs, analyze } = require('./activityLogReport');
 const { makeCsv } = require('./activityReportCsv');
 
-const ZONE = 'America/Toronto';
-function previousWeek(now = moment()) {
-  const end = now.clone().tz(ZONE).startOf('isoWeek');
+function previousWeek(now = moment(), zone) {
+  if (!moment.tz.zone(zone)) throw new Error('Invalid lab timezone');
+  const end = now.clone().tz(zone).startOf('isoWeek');
   return { start: end.clone().subtract(1, 'week'), end };
 }
 

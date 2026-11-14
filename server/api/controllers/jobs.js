@@ -1,5 +1,5 @@
 const model = require("../models/DRDB");
-const { listScheduledJobs, updateScheduledJob } = require("../../jobs/scheduler");
+const { listScheduledJobs, updateScheduledJob, WEEKLY_ACTIVITY_CRON } = require("../../jobs/scheduler");
 const { getEffectiveTimezone } = require("../services/timezoneService");
 
 const ALLOWED_ROLES = new Set(["Admin", "PI", "Lab manager"]);
@@ -83,7 +83,8 @@ exports.getActivityReportSettings = async (req, res) => {
     const setting = await model.systemSetting.findOne({ where: { SettingKey: activityConfigKey(personnel.FK_Lab) } });
     const legacy = setting ? null : await model.systemSetting.findOne({ where: { SettingKey: activityRecipientKey(personnel.FK_Lab) } });
     const config = setting ? JSON.parse(setting.SettingValue) : { enabled: false, recipient: legacy?.SettingValue || '' };
-    return res.json({ enabled: config.enabled === true, available: true, recipient: config.recipient || '' });
+    const timezone = await getEffectiveTimezone(personnel.FK_Lab);
+    return res.json({ enabled: config.enabled === true, available: true, recipient: config.recipient || '', cron: WEEKLY_ACTIVITY_CRON, timezone });
   } catch (error) {
     return res.status(500).json({ message: 'Could not load report settings.' });
   }

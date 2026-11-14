@@ -668,10 +668,10 @@
                   <div class="text-body-2 font-weight-bold">Weekly lab activity report</div>
                   <v-chip size="x-small" :color="activityReportEnabled ? 'success' : 'warning'" variant="tonal">{{ activityReportEnabled ? 'On' : 'Off' }}</v-chip>
                   <v-spacer></v-spacer>
-                  <v-switch v-model="activityReportEnabled" :disabled="!activityReportReady" hide-details label="Enable weekly report"></v-switch>
+                  <v-switch v-model="activityReportEnabled" :disabled="!activityReportReady || activityReportSaving" hide-details label="Enable weekly report" @update:model-value="saveActivityReportToggle"></v-switch>
                 </div>
                 <p class="text-caption text-medium-emphasis mb-3">
-                  Runs Mondays at 8:00 a.m. Toronto time. Verify the dry run before enabling delivery.
+                  Runs Mondays at 5:00 a.m. in the lab's configured timezone.
                 </p>
                 <div class="d-flex align-start flex-wrap" style="gap: 12px">
                   <v-text-field v-model="activityReportRecipient" type="email" label="Report recipient"
@@ -1307,6 +1307,7 @@ export default {
       scheduledJobsError: null,
       activityReportRecipient: '',
       activityReportEnabled: false,
+      activityReportSavedEnabled: false,
       activityReportReady: false,
       activityReportSaving: false,
       activityReportError: null,
@@ -2149,6 +2150,7 @@ export default {
         const response = await jobsService.getActivityReportSettings();
         this.activityReportRecipient = response.data.recipient || '';
         this.activityReportEnabled = response.data.enabled === true;
+        this.activityReportSavedEnabled = this.activityReportEnabled;
         this.activityReportError = null;
         this.activityReportReady = true;
       } catch (error) {
@@ -2162,9 +2164,25 @@ export default {
         const response = await jobsService.updateActivityReportSettings({ recipient: this.activityReportRecipient, enabled: this.activityReportEnabled });
         this.activityReportRecipient = response.data.recipient;
         this.activityReportEnabled = response.data.enabled;
+        this.activityReportSavedEnabled = response.data.enabled;
         this.$refs.confirmD.open('Saved', 'Report settings saved.', { color: 'success', noconfirm: true });
       } catch (error) {
         this.activityReportError = error?.response?.data?.message || 'Failed to save report settings.';
+      } finally {
+        this.activityReportSaving = false;
+      }
+    },
+    async saveActivityReportToggle(enabled) {
+      this.activityReportSaving = true;
+      this.activityReportError = null;
+      try {
+        const response = await jobsService.updateActivityReportSettings({ recipient: this.activityReportRecipient, enabled });
+        this.activityReportEnabled = response.data.enabled;
+        this.activityReportSavedEnabled = response.data.enabled;
+        this.activityReportRecipient = response.data.recipient;
+      } catch (error) {
+        this.activityReportEnabled = this.activityReportSavedEnabled;
+        this.activityReportError = error?.response?.data?.message || 'Failed to update weekly report status.';
       } finally {
         this.activityReportSaving = false;
       }

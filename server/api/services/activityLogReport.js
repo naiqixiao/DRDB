@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment-timezone');
 
-const ZONE = 'America/Toronto';
+// log.js writes filenames and wall timestamps in the server process timezone.
+const { timeZone: LOG_ZONE } = require('../../config/general');
 
 // jsonexport produces standard quoted CSV, including embedded newlines.
 function parseCsv(text) {
@@ -31,9 +32,9 @@ function parseCsv(text) {
   });
 }
 
-function timestamp(row) {
+function timestamp(row, zone = LOG_ZONE) {
   const raw = `${row.Date} ${row.Time}`;
-  const m = moment.tz(raw, ['MM/DD/YYYY H:m', 'M/D/YYYY H:m'], true, ZONE);
+  const m = moment.tz(raw, ['MM/DD/YYYY H:m', 'M/D/YYYY H:m'], true, zone);
   if (!m.isValid()) return null;
   // Reject repeated wall-clock minutes during the autumn DST transition.
   const format = 'MM/DD/YYYY HH:mm';
@@ -45,7 +46,7 @@ function timestamp(row) {
 function loadLogs(directory, start, end) {
   const files = fs.readdirSync(directory).filter(f => /^Log_\d{4}_\d{2}_\d{2}\.csv$/.test(f)).sort();
   // The logger uses Sunday-based files. Missing expected files cannot be assumed empty.
-  let sunday = start.clone().startOf('week');
+  let sunday = start.clone().tz(LOG_ZONE).startOf('week');
   const required = new Set();
   while (sunday.isBefore(end)) {
     const name = sunday.format('[Log_]YYYY_MM_DD[.csv]');
@@ -54,15 +55,8 @@ function loadLogs(directory, start, end) {
     sunday.add(1, 'week');
   }
   const rows = [];
-  rows.incompleteHistory = false;
-  const orderedFiles = [...required, ...files.filter(file => !required.has(file))];
-  for (const file of orderedFiles) {
-    try { for (const row of parseCsv(fs.readFileSync(path.join(directory, file), 'utf8'))) rows.push(row); }
-    catch (error) {
-      if (required.has(file)) throw error;
-      rows.incompleteHistory = true;
-      break;
-    }
+  for (const file of required) {
+    for (const row of parseCsv(fs.readFileSync(path.join(directory, file), 'utf8'))) rows.push(row);
   }
   return rows;
 }
@@ -79,7 +73,7 @@ function analyze(rows, members, start, end) {
   }
   const startMs = start.valueOf(), endMs = end.valueOf();
   const created = new Set(), updated = new Set(), events = new Map();
-  let excluded = 0, unattributed = 0, uncertainTime = Boolean(rows.incompleteHistory), invalidScheduleTime = false;
+  let excluded = 0, unattributed = 0, orphanTasks = 0, uncertainTime = false, invalidScheduleTime = false;
   for (const row of rows) {
     const email = (row.Email || '').trim().toLowerCase();
     const member = byEmail.get(email);
@@ -89,7 +83,7 @@ function analyze(rows, members, start, end) {
     if ((isLogin || isAction) && !time) {
       const date = moment(row.Date, ['MM/DD/YYYY', 'M/D/YYYY'], true);
       // An unreadable date cannot be placed outside the reporting week safely.
-      const nearWeek = !date.isValid() || (date.format('YYYY-MM-DD') >= start.clone().subtract(1, 'day').format('YYYY-MM-DD') && date.format('YYYY-MM-DD') <= end.format('YYYY-MM-DD'));
+      const nearWeek = !date.isValid() || (date.format('YYYY-MM-DD') >= start.clone().tz(LOG_ZONE).subtract(1, 'day').format('YYYY-MM-DD') && date.format('YYYY-MM-DD') <= end.clone().tz(LOG_ZONE).format('YYYY-MM-DD'));
       if (nearWeek) {
         uncertainTime = true;
         if (isLogin) excluded++;
@@ -124,14 +118,13 @@ function analyze(rows, members, start, end) {
         if (login !== null && event.time === login) ambiguous = true;
         close(event.time); login = event.time; last = null; ambiguous = false;
       } else if (login !== null) {
-        if (event.time === login || event.time === last) ambiguous = true;
         last = event.time;
-      }
+      } else if (event.time >= startMs && event.time < endMs) orphanTasks++;
     }
     close(Infinity);
   } } catch (error) { uncertainTime = true; }
   for (const member of members) member.estimated_drdb_hours = uncertainTime ? null : Number(member.estimated_drdb_hours.toFixed(2));
-  return { excluded_sessions: rows.incompleteHistory ? null : excluded, unattributed_schedule_events: unattributed, estimate_available: !uncertainTime, invalid_schedule_time: invalidScheduleTime };
+  return { excluded_sessions: excluded, unattributed_schedule_events: unattributed, tasks_without_observed_login: orphanTasks, estimate_available: !uncertainTime, invalid_schedule_time: invalidScheduleTime };
 }
 
 module.exports = { parseCsv, timestamp, loadLogs, analyze };

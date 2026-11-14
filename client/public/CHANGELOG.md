@@ -1,3 +1,11 @@
+### Release v3.2.3
+
+#### Weekly Lab Activity Report
+* Lab managers, PIs, and administrators can enable a weekly lab activity report in Settings and choose a recipient; leaving the address blank uses the lab email. The report runs Mondays at 5:00 a.m. in the lab's configured timezone and is off by default.
+* The email and CSV attachment summarize schedule creations and updates, E1 and E2 assignments, and estimated DRDB elapsed time for active lab members. Schedule creation is credited to the person recorded as creating it.
+* DRDB time is estimated from recorded login and task events. It can include idle time and omit work outside DRDB; it is not verified active time or a substitute for reported hours. Activity counts are not hours and must not be used to automatically judge attendance or performance.
+* Reports use the previous Monday-to-Monday week, contain no participant-identifying details, and include a failure notification if report generation fails.
+
 ### Release v3.2.2
 
 #### Improvements
