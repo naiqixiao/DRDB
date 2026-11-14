@@ -3,6 +3,33 @@ const router = express.Router();
 const checkAuth = require("../middleware/check-auth");
 
 const PersonnelController = require("../controllers/personnel");
+const ActivityReportController = require("../controllers/activityReport");
+
+/**
+ * @swagger
+ * /api/personnel/activity-report:
+ *   get:
+ *     summary: Preview weekly aggregate E1 and E2 assignments for the requester's lab
+ *     tags: [Personnel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: week_start
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date
+ *         description: Monday of a completed week in America/Toronto
+ *     responses:
+ *       200:
+ *         description: Database-derived aggregate counts and current active personnel
+ *       400:
+ *         description: Invalid or incomplete reporting week
+ *       403:
+ *         description: Active lab leadership access required
+ */
+router.get('/activity-report', checkAuth, ActivityReportController.weekly);
 
 /**
  * @swagger

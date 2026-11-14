@@ -72,3 +72,37 @@ exports.updateScheduledJob = async (req, res) => {
     return res.status(500).json({ message: "Failed to update scheduled job." });
   }
 };
+
+const activityRecipientKey = (labId) => `WeeklyActivityReportRecipient_${labId}`;
+const activityConfigKey = (labId) => `WeeklyActivityReportConfig_${labId}`;
+
+exports.getActivityReportSettings = async (req, res) => {
+  const personnel = await hasAccess(req);
+  if (!personnel || !personnel.FK_Lab) return res.status(403).json({ message: 'Access denied.' });
+  try {
+    const setting = await model.systemSetting.findOne({ where: { SettingKey: activityConfigKey(personnel.FK_Lab) } });
+    const legacy = setting ? null : await model.systemSetting.findOne({ where: { SettingKey: activityRecipientKey(personnel.FK_Lab) } });
+    const config = setting ? JSON.parse(setting.SettingValue) : { enabled: false, recipient: legacy?.SettingValue || '' };
+    return res.json({ enabled: config.enabled === true, available: true, recipient: config.recipient || '' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not load report settings.' });
+  }
+};
+
+exports.updateActivityReportSettings = async (req, res) => {
+  const personnel = await hasAccess(req);
+  if (!personnel || !personnel.FK_Lab) return res.status(403).json({ message: 'Access denied.' });
+  if (typeof req.body?.enabled !== 'boolean') return res.status(400).json({ message: 'Enabled must be true or false.' });
+  const recipient = req.body?.recipient;
+  if (typeof recipient !== 'string' || recipient.length > 254 ||
+      (recipient.trim() && !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(recipient.trim()))) {
+    return res.status(400).json({ message: 'Enter a valid email address or leave it blank.' });
+  }
+  try {
+    const config = { enabled: req.body.enabled, recipient: recipient.trim() };
+    await model.systemSetting.upsert({ SettingKey: activityConfigKey(personnel.FK_Lab), SettingValue: JSON.stringify(config) });
+    return res.json({ ...config, available: true });
+  } catch (error) {
+    return res.status(500).json({ message: 'Could not save report settings.' });
+  }
+};

@@ -15,6 +15,7 @@ const ChildController = require("../api/controllers/child");
 const autoCancelController = require("../api/controllers/autoCancellation");
 const rtuController = require("../api/controllers/RTU");
 const AppointmentController = require("../api/controllers/appointment");
+const weeklyActivityDelivery = require('../api/services/weeklyActivityDelivery');
 const {
   getEffectiveTimezone,
   getLabModel,
@@ -75,6 +76,14 @@ function toHumanSchedule(cronExpression) {
 }
 
 const SCHEDULED_JOBS = [
+  {
+    id: 'weekly-activity-report',
+    name: 'Weekly Lab Activity Report',
+    description: 'Sends enabled lab activity reports.',
+    cron: '0 8 * * 1',
+    timezone: 'America/Toronto',
+    task: () => weeklyActivityDelivery.runEnabled(),
+  },
   // ─── Reminder Emails ────────────────────────────────────────────
   {
     id: "family-reminders",
@@ -267,7 +276,7 @@ async function persistRuntimeForJob(job, labId, runtimeConfig) {
 
 async function listScheduledJobs(labId) {
   return Promise.all(
-    SCHEDULED_JOBS.map(async (job) => {
+    SCHEDULED_JOBS.filter(job => job.id !== 'weekly-activity-report').map(async (job) => {
       const runtime = getRuntimeForJob(job, labId);
       const timezone = await getEffectiveTimezone(labId);
 
@@ -309,7 +318,7 @@ async function scheduleJob(job, labId) {
   const runtime = getRuntimeForJob(job, labId);
   if (!runtime.enabled) return;
 
-  const timezone = await getEffectiveTimezone(labId);
+  const timezone = job.timezone || await getEffectiveTimezone(labId);
   const handleKey = getScopedHandleKey(job.id, labId);
 
   const executeTask = EDITABLE_JOB_IDS.has(job.id)

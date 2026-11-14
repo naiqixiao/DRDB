@@ -663,6 +663,27 @@
             </div>
 
             <template v-else>
+              <div class="pa-4 mb-4 rounded border">
+                <div class="d-flex align-center flex-wrap" style="gap: 12px">
+                  <div class="text-body-2 font-weight-bold">Weekly lab activity report</div>
+                  <v-chip size="x-small" :color="activityReportEnabled ? 'success' : 'warning'" variant="tonal">{{ activityReportEnabled ? 'On' : 'Off' }}</v-chip>
+                  <v-spacer></v-spacer>
+                  <v-switch v-model="activityReportEnabled" :disabled="!activityReportReady" hide-details label="Enable weekly report"></v-switch>
+                </div>
+                <p class="text-caption text-medium-emphasis mb-3">
+                  Runs Mondays at 8:00 a.m. Toronto time. Verify the dry run before enabling delivery.
+                </p>
+                <div class="d-flex align-start flex-wrap" style="gap: 12px">
+                  <v-text-field v-model="activityReportRecipient" type="email" label="Report recipient"
+                    :disabled="!activityReportReady"
+                    placeholder="Lab email" hint="Leave blank to use the lab email."
+                    persistent-hint density="compact" variant="outlined" style="min-width: 240px"></v-text-field>
+                  <v-btn color="primary" variant="tonal" :loading="activityReportSaving"
+                    :disabled="!activityReportReady"
+                    height="40" @click="saveActivityReportSettings">Save settings</v-btn>
+                </div>
+                <v-alert v-if="activityReportError" type="error" variant="tonal" density="compact" class="mt-3">{{ activityReportError }}</v-alert>
+              </div>
               <v-expansion-panels
                 v-model="jobsPanels"
                 multiple
@@ -1284,6 +1305,11 @@ export default {
       scheduledJobs: [],
       scheduledJobsLoading: false,
       scheduledJobsError: null,
+      activityReportRecipient: '',
+      activityReportEnabled: false,
+      activityReportReady: false,
+      activityReportSaving: false,
+      activityReportError: null,
       jobDrafts: {},
       jobActionLoading: {},
       jobsPanels: [0],
@@ -2118,6 +2144,30 @@ export default {
       }
 
       this.scheduledJobsLoading = false;
+      try {
+        this.activityReportReady = false;
+        const response = await jobsService.getActivityReportSettings();
+        this.activityReportRecipient = response.data.recipient || '';
+        this.activityReportEnabled = response.data.enabled === true;
+        this.activityReportError = null;
+        this.activityReportReady = true;
+      } catch (error) {
+        this.activityReportError = 'Failed to load weekly report settings.';
+      }
+    },
+    async saveActivityReportSettings() {
+      this.activityReportSaving = true;
+      this.activityReportError = null;
+      try {
+        const response = await jobsService.updateActivityReportSettings({ recipient: this.activityReportRecipient, enabled: this.activityReportEnabled });
+        this.activityReportRecipient = response.data.recipient;
+        this.activityReportEnabled = response.data.enabled;
+        this.$refs.confirmD.open('Saved', 'Report settings saved.', { color: 'success', noconfirm: true });
+      } catch (error) {
+        this.activityReportError = error?.response?.data?.message || 'Failed to save report settings.';
+      } finally {
+        this.activityReportSaving = false;
+      }
     },
     dailyCronToTime(cronExpression) {
       const parts = (cronExpression || "").split(" ");

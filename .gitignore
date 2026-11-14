@@ -92,3 +92,4 @@ server/env
 !docs/study-introduction-subject-plan.md
 !docs/family-reengagement-plan.md
 manuscript/*
+server/__tests__/*

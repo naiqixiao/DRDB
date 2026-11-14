@@ -4,6 +4,9 @@ const checkAuth = require("../middleware/check-auth");
 
 const JobsController = require("../controllers/jobs");
 
+router.get('/activity-report', checkAuth, JobsController.getActivityReportSettings);
+router.put('/activity-report', checkAuth, JobsController.updateActivityReportSettings);
+
 /**
  * @swagger
  * /api/jobs/scheduled:
