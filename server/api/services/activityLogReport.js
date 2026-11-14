@@ -46,12 +46,25 @@ function loadLogs(directory, start, end) {
   const files = fs.readdirSync(directory).filter(f => /^Log_\d{4}_\d{2}_\d{2}\.csv$/.test(f)).sort();
   // The logger uses Sunday-based files. Missing expected files cannot be assumed empty.
   let sunday = start.clone().startOf('week');
+  const required = new Set();
   while (sunday.isBefore(end)) {
     const name = sunday.format('[Log_]YYYY_MM_DD[.csv]');
     if (!files.includes(name)) throw new Error('Required weekly log file unavailable');
+    required.add(name);
     sunday.add(1, 'week');
   }
-  return files.flatMap(file => parseCsv(fs.readFileSync(path.join(directory, file), 'utf8')));
+  const rows = [];
+  rows.incompleteHistory = false;
+  const orderedFiles = [...required, ...files.filter(file => !required.has(file))];
+  for (const file of orderedFiles) {
+    try { for (const row of parseCsv(fs.readFileSync(path.join(directory, file), 'utf8'))) rows.push(row); }
+    catch (error) {
+      if (required.has(file)) throw error;
+      rows.incompleteHistory = true;
+      break;
+    }
+  }
+  return rows;
 }
 
 function analyze(rows, members, start, end) {
@@ -66,7 +79,7 @@ function analyze(rows, members, start, end) {
   }
   const startMs = start.valueOf(), endMs = end.valueOf();
   const created = new Set(), updated = new Set(), events = new Map();
-  let excluded = 0, unattributed = 0, uncertainTime = false, invalidScheduleTime = false;
+  let excluded = 0, unattributed = 0, uncertainTime = Boolean(rows.incompleteHistory), invalidScheduleTime = false;
   for (const row of rows) {
     const email = (row.Email || '').trim().toLowerCase();
     const member = byEmail.get(email);
@@ -118,7 +131,7 @@ function analyze(rows, members, start, end) {
     close(Infinity);
   } } catch (error) { uncertainTime = true; }
   for (const member of members) member.estimated_drdb_hours = uncertainTime ? null : Number(member.estimated_drdb_hours.toFixed(2));
-  return { excluded_sessions: excluded, unattributed_schedule_events: unattributed, estimate_available: !uncertainTime, invalid_schedule_time: invalidScheduleTime };
+  return { excluded_sessions: rows.incompleteHistory ? null : excluded, unattributed_schedule_events: unattributed, estimate_available: !uncertainTime, invalid_schedule_time: invalidScheduleTime };
 }
 
 module.exports = { parseCsv, timestamp, loadLogs, analyze };
