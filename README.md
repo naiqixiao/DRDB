@@ -534,6 +534,39 @@ trusted network until the default administrator password has been changed.
 
 ### Upgrades and database safety
 
+Activity CSV logs used by weekly reports are stored in the named volume
+`drdb_activity_logs` (prefixed with your `COMPOSE_PROJECT_NAME` if customized),
+mounted at `/app/api/logs`. They survive backend rebuilds and container recreation.
+Local `server/api/logs` files are excluded from backend images.
+
+**One-time upgrade for installations created before the activity-log volume:**
+preserve the existing container's logs before recreating it. In a Mac/Linux shell
+(or Windows WSL/Git Bash), choose a new backup directory and run:
+
+```bash
+docker compose stop backend
+mkdir drdb-activity-logs-backup
+docker compose cp backend:/app/api/logs/. ./drdb-activity-logs-backup/
+```
+
+Confirm the copy succeeded and contains the expected lab folders and CSV files
+before continuing. If Docker reports that `/app/api/logs` does not exist, that
+container has no activity logs to preserve; skip the restore command below.
+Other copy errors must be resolved before recreating the container.
+
+```bash
+docker compose build backend
+docker compose up --no-start --no-deps backend
+docker compose cp ./drdb-activity-logs-backup/. backend:/app/api/logs/
+docker compose start backend
+```
+
+The copy restores the saved logs into the new volume before the backend starts.
+Keep the backup in approved secure storage; activity logs can contain names and
+email addresses. The full system migration export currently does not include
+activity logs, so back up this volume separately when moving to another host.
+If the old container has already been removed, its logs require a prior backup.
+
 Application images and database data are separate. MariaDB uses the named
 volume `drdb_database`; it is not rebuilt or replaced when frontend/backend
 images are rebuilt. Update the application services without touching the

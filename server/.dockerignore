@@ -3,6 +3,7 @@ npm-debug.log
 .env
 api/google
 api/uploads
+api/logs
 data
 drdb.sqlite
 server.cert

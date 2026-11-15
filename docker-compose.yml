@@ -70,6 +70,7 @@ services:
       - drdb_google_general:/app/api/google/general
       - drdb_google_labs:/app/api/google/labs
       - drdb_uploads:/app/api/uploads
+      - drdb_activity_logs:/app/api/logs
       - drdb_app_data:/app/data
     depends_on:
       database:
@@ -89,6 +90,8 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME:-drdb}_database
   drdb_app_data:
     name: ${COMPOSE_PROJECT_NAME:-drdb}_app_data
+  drdb_activity_logs:
+    name: ${COMPOSE_PROJECT_NAME:-drdb}_activity_logs
   drdb_google_general:
     name: ${COMPOSE_PROJECT_NAME:-drdb}_google_general
   drdb_google_labs:
