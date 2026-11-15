@@ -6,6 +6,10 @@
 * DRDB time is estimated from recorded login and task events. It can include idle time and omit work outside DRDB; it is not verified active time or a substitute for reported hours. Activity counts are not hours and must not be used to automatically judge attendance or performance.
 * Reports use the previous Monday-to-Monday week, contain no participant-identifying details, and include a failure notification if report generation fails.
 
+#### Docker Setup
+* Activity logs used by weekly reports now persist in a dedicated Docker volume across backend rebuilds and container recreation. Local activity logs are excluded from backend images.
+* The Docker upgrade instructions include a one-time backup and restore procedure to preserve logs from existing containers before enabling the volume.
+
 ### Release v3.2.2
 
 #### Improvements
