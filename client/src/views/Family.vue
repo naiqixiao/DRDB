@@ -617,7 +617,7 @@
                         class="textfield-family mb-2"
                         :label="item.label"
                         v-model="editedItem[item.field]"
-                        :rules="item.rules ? $rules[item.rules] : []"
+                        :rules="item.field === 'EnglishPercent' ? [v => v === '' || v == null || (/^\d+$/.test(String(v)) && Number(v) <= 100) || 'Enter an integer from 0 to 100'] : (item.rules ? $rules[item.rules] : [])"
                         variant="outlined"
                         hide-details="auto"
                         density="compact"
@@ -652,7 +652,7 @@
                       class="textfield-family mb-2"
                       :label="item.label"
                       v-model="editedItem[item.field]"
-                      :rules="item.rules ? $rules[item.rules] : []"
+                      :rules="item.field === 'Email' ? [...$rules.email, v => !v || v.length <= 40 || 'Max 40 characters'] : (item.rules ? $rules[item.rules] : [])"
                       variant="outlined"
                       hide-details="auto"
                       density="compact"
@@ -2017,6 +2017,11 @@ export default {
     },
 
     async save() {
+      const { valid } = await this.$refs.form.validate();
+      if (!valid) return;
+      for (const field of ['Phone', 'CellPhone']) {
+        if (this.editedItem[field]) this.editedItem[field] = this.editedItem[field].replace(/\D/g, '');
+      }
       try {
         if (this.editedIndex > -1) {
           this.editedItem.UpdatedBy = this.store.userID;

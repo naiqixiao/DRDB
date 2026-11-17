@@ -259,11 +259,11 @@
             <div class="text-caption font-weight-bold text-uppercase text-muted mb-3 px-1">Identity & Role</div>
             <v-row dense class="mb-4">
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Name" label="Full Name *" :rules="getRules('name')"
+                <v-text-field v-model="editedPersonnel.Name" label="Full Name *" :rules="[v => !!v?.trim() || 'Required', ...getRules('name'), v => !v || v.length <= 45 || 'Max 45 characters']"
                   variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="3">
-                <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="getRules('required')"
+                <v-text-field v-model="editedPersonnel.Initial" label="Initials *" :rules="[v => !!v?.trim() || 'Required', v => !v || v.length <= 45 || 'Max 45 characters']"
                   variant="outlined" density="compact" bg-color="white" color="primary"></v-text-field>
               </v-col>
               <v-col v-if="editedIndex === -1" cols="12" md="3">
@@ -283,7 +283,7 @@
 
             <v-row dense>
               <v-col cols="12" md="6">
-                <v-text-field v-model="editedPersonnel.Email" label="Email Address *" :rules="getRules('email')"
+                <v-text-field v-model="editedPersonnel.Email" label="Email Address *" :rules="[...getRules('emailRequired'), v => !v || v.length <= 45 || 'Max 45 characters']"
                   prepend-inner-icon="mdi-email-outline" variant="outlined" density="compact" bg-color="white"
                   color="primary"></v-text-field>
               </v-col>
@@ -295,7 +295,7 @@
               <v-col cols="12" md="6">
                 <v-text-field v-model="editedPersonnel.Calendar" label="Google Calendar ID *"
                   prepend-inner-icon="mdi-calendar-blank-outline" placeholder="username@mcmaster.ca"
-                  :rules="getRules('email')" variant="outlined" density="compact" bg-color="white"
+                  :rules="[...getRules('emailRequired'), v => !v || v.length <= 100 || 'Max 100 characters']" variant="outlined" density="compact" bg-color="white"
                   color="primary"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
@@ -840,7 +840,8 @@ export default {
       if (this.editedIndex === -1) {
         // Create
         try {
-          const Result = await login.register(this.editedPersonnel);
+          const payload = { ...this.editedPersonnel, Phone: this.editedPersonnel.Phone?.replace(/\D/g, '') || null };
+          const Result = await login.register(payload);
           this.editedPersonnel.id = Result.data.id;
           this.editedPersonnel.AssignedStudies = [];
           this.editedPersonnel.StudyinCharge = [];
@@ -851,13 +852,15 @@ export default {
           this.rowSelected(this.editedPersonnel);
           this.close();
         } catch (error) {
-          await this.$refs.confirmDialog.open("Error", error.response?.data?.message || "Failed to add personnel", { color: "error", noconfirm: true });
+          const data = error.response?.data;
+          const message = data?.errors?.map(e => e.msg || e.message).join('\n') || data?.message || data?.error || "Failed to add personnel";
+          await this.$refs.confirmDialog.open("Error", message, { color: "error", noconfirm: true });
           console.error(error);
         }
       } else {
         // Update
         try {
-          await personnel.update(this.editedPersonnel);
+          await personnel.update({ ...this.editedPersonnel, Phone: this.editedPersonnel.Phone?.replace(/\D/g, '') || null });
           this.currentPersonnel = { ...this.editedPersonnel };
           Object.assign(this.Personnels[this.editedIndex], this.editedPersonnel);
 
@@ -867,6 +870,7 @@ export default {
           this.close();
         } catch (error) {
           if (error.response?.status !== 401) console.error(error);
+          await this.$refs.confirmDialog.open("Error", error.response?.data?.error || "Failed to save personnel. Please try again.", { color: "error", noconfirm: true });
         }
       }
     },

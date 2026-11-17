@@ -118,6 +118,7 @@
         <v-divider></v-divider>
 
         <v-card-text class="pt-6 pb-2" style="max-height: 70vh;">
+          <v-alert v-if="childSaveError" type="error" variant="tonal" class="mb-4" role="alert">{{ childSaveError }}</v-alert>
           <v-form ref="formChild" v-model="validChild">
           <v-container class="px-0">
             
@@ -134,7 +135,7 @@
                   <!-- Render other fields normally using their specified widths -->
                   <v-col v-else cols="12" sm="6" :md="item.width || 4">
                     <v-select v-if="item.options && item.field === 'Sex'" v-model="editedItem[item.field]" :items="$Options[item.options]"
-                      :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-select>
+                      :label="item.label" :rules="[(value) => !!value || 'Sex is required.']" variant="outlined" density="compact" hide-details="auto" class="mb-2"></v-select>
                     <v-combobox v-else-if="item.options" v-model="editedItem[item.field]" :items="$Options[item.options]"
                       :label="item.label" variant="outlined" density="compact" hide-details class="mb-2"></v-combobox>
                     <v-checkbox v-else-if="item.type == 'checkbox'" v-model="editedItem[item.field]" :label="item.label"
@@ -203,7 +204,7 @@
         <v-card-actions class="px-6 pb-6 pt-0">
           <v-spacer></v-spacer>
           <v-btn color="error" variant="text" @click="close">Cancel</v-btn>
-          <v-btn color="primary" variant="flat" @click="save" prepend-icon="mdi-content-save">Save Child</v-btn>
+          <v-btn color="primary" variant="flat" @click="save" :loading="savingChild" :disabled="savingChild" prepend-icon="mdi-content-save">Save Child</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -262,6 +263,8 @@ export default {
       Note: ""
     },
     validChild: true,
+    savingChild: false,
+    childSaveError: "",
     dobMenuEdit: false,
     dobPickerEditDate: null,
     // Mock global properties (replace with actual global properties or store if needed)
@@ -409,6 +412,7 @@ export default {
 
     addChild() {
       this.editedIndex = -1;
+      this.childSaveError = "";
       this.editedItem = Object.assign({}, this.defaultItem);
       this.dobPickerEditDate = null;
       this.dialogChild = true;
@@ -436,6 +440,7 @@ export default {
 
     close() {
       this.dialogChild = false;
+      this.childSaveError = "";
       setTimeout(() => {
         this.editedItem = Object.assign({}, this.defaultItem);
         this.editedIndex = -1;
@@ -443,6 +448,7 @@ export default {
     },
 
     async save() {
+      if (this.savingChild) return;
       // Validate form before saving
       let validationResults = true;
       if (this.$refs.formChild) {
@@ -457,30 +463,27 @@ export default {
         ? Math.floor((new Date() - new Date(this.editedItem.DoB)) / (24 * 3600 * 1000))
         : null;
 
-      if (this.editedIndex > -1) {
-        const realIndex = this.Children.findIndex(c => c.id === this.editedItem.id);
-        if (realIndex > -1) {
-          Object.assign(this.Children[realIndex], this.editedItem);
-        }
-        try {
+      this.savingChild = true;
+      this.childSaveError = "";
+      try {
+        if (this.editedIndex > -1) {
           await child.update(this.editedItem);
-        } catch (error) {
-          console.log(error);
-        }
-      } else {
-        // create new child
-        try {
+          const realIndex = this.Children.findIndex(c => c.id === this.editedItem.id);
+          if (realIndex > -1) Object.assign(this.Children[realIndex], this.editedItem);
+        } else {
           const newChildInfo = Object.assign({}, this.editedItem);
           newChildInfo.FK_Family = this.familyId;
-
           await child.create(newChildInfo);
           this.$emit('childAdded');
-        } catch (error) {
-          console.log(error);
         }
+        if (this.$refs.formChild) this.$refs.formChild.resetValidation();
+        this.close();
+      } catch (error) {
+        console.error('Failed to save child:', error);
+        this.childSaveError = 'Could not save the child. Please check your connection or contact an administrator before retrying.';
+      } finally {
+        this.savingChild = false;
       }
-      if (this.$refs.formChild) this.$refs.formChild.resetValidation();
-      this.close();
     },
 
     // Normalize DoB to strict YYYY-MM-DD with zero-padded month/day, or null if empty/invalid
