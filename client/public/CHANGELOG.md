@@ -1,5 +1,10 @@
 ### Release v3.2.3
 
+#### Form Validation and Saving
+* Adding a child requires a Sex selection on the Family and Schedule pages. If saving fails on the Family page, the form stays open and displays an error.
+* Family forms validate input before saving, including email length and English percentage. Formatted phone numbers are saved as digits.
+* Personnel forms enforce required name, email and calendar fields and show server validation errors. Formatted phone numbers are saved as digits.
+
 #### Weekly Lab Activity Report
 * Lab managers, PIs, and administrators can enable a weekly lab activity report in Settings and choose a recipient; leaving the address blank uses the lab email. The report runs Mondays at 5:00 a.m. in the lab's configured timezone and is off by default.
 * The email and CSV attachment summarize schedule creations and updates, E1 and E2 assignments, and estimated DRDB elapsed time for active lab members. Schedule creation is credited to the person recorded as creating it.
